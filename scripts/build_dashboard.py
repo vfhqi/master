@@ -724,10 +724,16 @@ window.setChartWidth=function(p){
 };
 // FIX-S4-CHART-V2: Faithful port of pullback-monitor.html drawChart
 var chartZoom="2Y";
+// PHASE-4C 2026-05-04: y-axis scale mode for price panel ("lin" or "log"). Session-only.
+var chartScaleMode="lin";
 var chartTicker="";
 // Default: 5D+10D off (except on PB tab where short MAs matter)
 var chartVis={ma5:false,ma10:false,ma20:true,ma50:true,ma100:true,ma150:true,ma200:true,obv:true,vol:true,vol20:true,vol50:true};
-function fmtVol(v){if(v>=1000000)return(v/1000000).toFixed(1)+"M";if(v>=1000)return(v/1000).toFixed(0)+"K";return v.toFixed(0)}
+// PHASE-4A 2026-05-04: nice-number tick algorithm (Heckbert 1990, {1,2,5} step set per Richard).
+function niceNum(range,round){if(range<=0)return 1;var exponent=Math.floor(Math.log10(range));var fraction=range/Math.pow(10,exponent);var nf;if(round){if(fraction<1.5)nf=1;else if(fraction<3.5)nf=2;else if(fraction<7.5)nf=5;else nf=10}else{if(fraction<=1)nf=1;else if(fraction<=2)nf=2;else if(fraction<=5)nf=5;else nf=10}return nf*Math.pow(10,exponent)}
+function niceTicks(min,max,maxTicks){if(!isFinite(min)||!isFinite(max)||max<=min)return{ticks:[min],min:min,max:max+1,step:1};var range=niceNum(max-min,false);var step=niceNum(range/(maxTicks-1),true);var nMin=Math.floor(min/step)*step;var nMax=Math.ceil(max/step)*step;var ticks=[];for(var t=nMin;t<=nMax+step/2;t+=step)ticks.push(t);return{ticks:ticks,min:nMin,max:nMax,step:step}}
+// PHASE-4A 2026-05-04: B suffix + integer M (15M, not 15.0M).
+function fmtVol(v){if(v==null)return"";var a=Math.abs(v);if(a>=1e9)return(v/1e9).toFixed(1)+"B";if(a>=1e6)return Math.round(v/1e6)+"M";if(a>=1e3)return Math.round(v/1e3)+"K";return Math.round(v).toString()}
 function getChartSlice(chart,zoom){
   var n=chart.length;
   var days={"1M":Math.min(n,22),"3M":Math.min(n,63),"6M":Math.min(n,125),"12M":Math.min(n,252),"2Y":Math.min(n,504),"3Y":Math.min(n,756),"5Y":Math.min(n,1260)};
@@ -888,7 +894,19 @@ function drawMasterChart(ticker){
   var obvMin=Math.min.apply(null,obv);var obvMax=Math.max.apply(null,obv);var obvRange=obvMax-obvMin||1;
 
   // Coordinate functions
-  function priceY(v){return pad.t+plotH*(1-(v-priceMin)/priceRange)}
+  // PHASE-4C 2026-05-04: priceY supports linear and log scales.
+  // Log path uses Math.log10; clipped at minimum positive value to avoid log(0).
+  function priceY(v){
+    if(chartScaleMode==="log"){
+      if(!(v>0))return pad.t+plotH;
+      var lv=Math.log10(v);
+      var lMin=Math.log10(priceMin>0?priceMin:0.01);
+      var lMax=Math.log10(priceMax>0?priceMax:1);
+      var lRange=lMax-lMin||1;
+      return pad.t+plotH*(1-(lv-lMin)/lRange);
+    }
+    return pad.t+plotH*(1-(v-priceMin)/priceRange);
+  }
   function volY(v){return pad.t+plotH-(v/volMax)*volZoneH}
   function volMALineY(v){return pad.t+plotH-(v/volMax)*volZoneH}
   var obvZoneTop=pad.t+plotH*0.75;var obvZoneBot=pad.t+plotH;var obvZoneH2=obvZoneBot-obvZoneTop;
@@ -905,31 +923,81 @@ function drawMasterChart(ticker){
   // Clear
   ctx.fillStyle=bgCol;ctx.fillRect(0,0,W,H);
 
-  // Price grid
-  var gridCount=H>500?10:6;
-  for(var g=0;g<=gridCount;g++){
-    var gy=pad.t+plotH*g/gridCount;
+  // PHASE-4A 2026-05-04 + 4C 2026-05-04: nice-number ticks (linear mode) OR log ticks (log mode).
+  var priceLo=Math.min.apply(null,allVals);var priceHi=Math.max.apply(null,allVals);
+  var priceTickList;
+  if(chartScaleMode==='log'){
+    // PHASE-4D 2026-05-04: log-tick generation with cascading fallbacks for tight ranges.
+    var loSafe=priceLo>0?priceLo:0.01;
+    var hiSafe=priceHi>loSafe?priceHi:loSafe*1.1;
+    // priceMin/priceMax track the ACTUAL data extents (not snapped to decades),
+    // so the chart fills the available height regardless of where ticks land.
+    priceMin=loSafe*0.97;priceMax=hiSafe*1.03;priceRange=priceMax-priceMin||1;
+    var minExp=Math.floor(Math.log10(loSafe));
+    var maxExp=Math.ceil(Math.log10(hiSafe));
+    function _logTicks(mults){var out=[];for(var ee=minExp;ee<=maxExp;ee++){var base=Math.pow(10,ee);for(var mi2=0;mi2<mults.length;mi2++){var vv=mults[mi2]*base;if(vv>=priceMin&&vv<=priceMax)out.push(vv)}}return out}
+    // Cascade: coarse {1,2,5} -> medium {1,1.5,2,3,5,7} -> dense {1..9}.
+    priceTickList=_logTicks([1,2,5]);
+    if(priceTickList.length<3)priceTickList=_logTicks([1,1.5,2,3,5,7]);
+    if(priceTickList.length<3)priceTickList=_logTicks([1,2,3,4,5,6,7,8,9]);
+    // Final fallback: if STILL no ticks (price range smaller than one decade with no integer multipliers),
+    // compute linear nice-ticks and use those even in log-render mode. Labels are the priority.
+    if(priceTickList.length<2){
+      var fbNT=niceTicks(priceLo,priceHi,H>500?9:6);
+      priceTickList=fbNT.ticks;
+    }
+  }else{
+    var priceTickTarget=H>500?9:6;
+    var priceNT=niceTicks(priceLo,priceHi,priceTickTarget);
+    priceMin=priceNT.min;priceMax=priceNT.max;priceRange=priceMax-priceMin||1;
+    priceTickList=priceNT.ticks;
+  }
+  for(var pti=0;pti<priceTickList.length;pti++){
+    var ptVal=priceTickList[pti];var ptY=priceY(ptVal);
+    if(ptY<pad.t-1||ptY>pad.t+plotH+1)continue;
     ctx.strokeStyle=gridCol;ctx.lineWidth=0.8;
-    ctx.beginPath();ctx.moveTo(pad.l,gy);ctx.lineTo(W-pad.r,gy);ctx.stroke();
-    var gv=priceMax-(priceRange*g/gridCount);
+    ctx.beginPath();ctx.moveTo(pad.l,ptY);ctx.lineTo(W-pad.r,ptY);ctx.stroke();
+    var ptLabel=ptVal>=1000?Math.round(ptVal).toString():(ptVal<10?ptVal.toFixed(2):ptVal<100?ptVal.toFixed(1):Math.round(ptVal).toString());
     ctx.fillStyle=textCol;ctx.font="13px monospace";ctx.textAlign="left";
-    ctx.fillText(gv.toFixed(gv<10?2:gv<100?1:0),W-pad.r+6,gy+4);
+    ctx.fillText(ptLabel,W-pad.r+6,ptY+4);
   }
 
-  // Monthly + weekly gridlines
-  var lastMonth2=-1;
-  for(j=0;j<dates.length;j++){
-    var x=xPos(j);var m=dates[j].getMonth();var dow=dates[j].getDay();
-    if(m!==lastMonth2&&j>0){ctx.strokeStyle=gridColMonth;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+plotH+52);ctx.stroke()}
-    lastMonth2=m;
-    if(dow===1&&j>0){ctx.strokeStyle=gridColWeek;ctx.lineWidth=0.6;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+plotH+20);ctx.stroke()}
-  }
+  // PHASE-4B 2026-05-04: tiered x-axis gridlines + labels.
+  // Determine tier from n.
+  var xt;
+  if(n<=25)      xt={major:'week',  label:'D-Mon',  minor:'day',     labelTier:'day'};
+  else if(n<=70) xt={major:'month', label:'Mon',    minor:'week',    labelTier:'week'};
+  else if(n<=140)xt={major:'month', label:'Mon',    minor:'week',    labelTier:'week'};
+  else if(n<=280)xt={major:'quarter',label:'Mon-YY',minor:'month',   labelTier:'month'};
+  else if(n<=520)xt={major:'quarter',label:'Mon-YY',minor:'month',   labelTier:'quarter'};
+  else if(n<=800)xt={major:'year',  label:'YYYY',   minor:'quarter', labelTier:'quarter'};
+  else           xt={major:'year',  label:'YYYY',   minor:'quarter', labelTier:'year'};
+  function _isMon(d){return d.getDay()===1}
+  function _isMonthStart(d,prev){return !prev||d.getMonth()!==prev.getMonth()}
+  function _isQuarterStart(d,prev){return !prev||(d.getMonth()!==prev.getMonth()&&[0,3,6,9].indexOf(d.getMonth())>=0)}
+  function _isYearStart(d,prev){return !prev||d.getFullYear()!==prev.getFullYear()}
+  function _isMajor(d,prev){if(xt.major==='week')return _isMon(d);if(xt.major==='month')return _isMonthStart(d,prev);if(xt.major==='quarter')return _isQuarterStart(d,prev);return _isYearStart(d,prev)}
+  function _isMinor(d,prev){if(xt.minor==='day')return true;if(xt.minor==='week')return _isMon(d);if(xt.minor==='month')return _isMonthStart(d,prev);return _isQuarterStart(d,prev)}
+  // Cap minor gridlines at ~30 across plot to avoid noise.
+  var minorIdx=[];for(j=1;j<dates.length;j++){if(_isMinor(dates[j],dates[j-1]))minorIdx.push(j)}
+  var minorSkip=Math.max(1,Math.ceil(minorIdx.length/30));
+  for(var mi=0;mi<minorIdx.length;mi+=minorSkip){var jx=minorIdx[mi];var mxx=xPos(jx);ctx.strokeStyle='rgba(0,0,0,0.04)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mxx,pad.t);ctx.lineTo(mxx,pad.t+plotH);ctx.stroke()}
+  // Major gridlines drawn on top of minors.
+  var majorIdx=[];for(j=1;j<dates.length;j++){if(_isMajor(dates[j],dates[j-1]))majorIdx.push(j)}
+  for(var mj=0;mj<majorIdx.length;mj++){var jx2=majorIdx[mj];var mxx2=xPos(jx2);ctx.strokeStyle='rgba(0,0,0,0.10)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mxx2,pad.t);ctx.lineTo(mxx2,pad.t+plotH+8);ctx.stroke()}
 
-  // Volume axis
-  function niceVolMax(v){if(v<=0)return 1;var mag=Math.pow(10,Math.floor(Math.log10(v)));var lead=v/mag;var nice;if(lead<=1)nice=1;else if(lead<=2)nice=2;else if(lead<=3)nice=3;else if(lead<=5)nice=5;else nice=10;return nice*mag}
-  var volTickMax=niceVolMax(volMax);
+  // PHASE-4A 2026-05-04: volume axis uses niceTicks too. Volume always anchored at zero.
+  var volNT=niceTicks(0,volMax,4);
+  var volTickMax=volNT.max;
+  // Reassign volMax so the volY/volMALineY closures (declared above) pick up the nice-tick max.
+  // This keeps bar heights and tick positions in sync (avoids bars hugging zone top).
+  volMax=volTickMax;
   ctx.fillStyle=textCol;ctx.font="12px monospace";ctx.textAlign="right";
-  for(var vg=0;vg<=3;vg++){var vVal=volTickMax*vg/3;var vy=volY(vVal);ctx.fillText(fmtVol(vVal),pad.l-8,vy+4)}
+  for(var vti=0;vti<volNT.ticks.length;vti++){
+    var vVal=volNT.ticks[vti];var vy=volY(vVal);
+    if(vy<pad.t+plotH-volZoneH-1||vy>pad.t+plotH+1)continue;
+    ctx.fillText(fmtVol(vVal),pad.l-8,vy+4);
+  }
   ctx.save();ctx.translate(14,pad.t+plotH-volZoneH/2);ctx.rotate(-Math.PI/2);
   ctx.fillStyle=textCol;ctx.font="12px sans-serif";ctx.textAlign="center";ctx.fillText("Volume",0,0);ctx.restore();
 
@@ -990,20 +1058,26 @@ function drawMasterChart(ticker){
   // Current price label (bold, RHS)
   if(chart.length>0){var lastC=chart[chart.length-1].c;var lcy2=priceY(lastC);ctx.fillStyle=textColBright;ctx.font="bold 13px monospace";ctx.textAlign="left";ctx.fillText(lastC.toFixed(lastC<100?2:1),W-pad.r+6,lcy2+4)}
 
-  // X-axis: centred month labels with overlap guard
-  var monthSpans2=[];var curMS=0,curM2=dates[0]?dates[0].getMonth():-1;
-  for(j=0;j<dates.length;j++){var m3=dates[j].getMonth();if(m3!==curM2){if(curM2>=0)monthSpans2.push({m:curM2,start:curMS,end:j-1});curMS=j;curM2=m3}}
-  if(curM2>=0)monthSpans2.push({m:curM2,start:curMS,end:n-1});
-  ctx.font="bold 12px sans-serif";ctx.fillStyle=textColBright;ctx.textAlign="center";
-  var lastMR=-999;
-  for(j=0;j<monthSpans2.length;j++){var sp=monthSpans2[j];var mcx=(xPos(sp.start)+xPos(sp.end))/2;var mw2=ctx.measureText(monthFull[sp.m]).width;
-    if((mcx-mw2/2)>(lastMR+8)){ctx.fillText(monthFull[sp.m],mcx,pad.t+plotH+48);lastMR=mcx+mw2/2}}
-
-  // Date labels (day-month format, spaced)
-  var labelEvery=1;if(n>60)labelEvery=5;else if(n>25)labelEvery=2;
-  var lastLabelX=-999;ctx.font="12px sans-serif";ctx.fillStyle=textCol;ctx.textAlign="center";
-  for(j=0;j<dates.length;j++){if(j%labelEvery===0){var x3=xPos(j);if(x3-lastLabelX>34){
-    var dateStr=dates[j].getDate()+"-"+monthShort[dates[j].getMonth()];ctx.fillText(dateStr,x3,pad.t+plotH+16);lastLabelX=x3}}}
+  // PHASE-4B 2026-05-04: single tiered x-axis label row, anchored on major gridlines.
+  // Format determined by xt.label.
+  function _fmtLabel(d){
+    if(xt.label==='D-Mon')return d.getDate()+'-'+monthShort[d.getMonth()];
+    if(xt.label==='Mon')return monthShort[d.getMonth()].toUpperCase();
+    if(xt.label==='Mon-YY')return monthShort[d.getMonth()].toUpperCase()+'-'+String(d.getFullYear()).slice(-2);
+    return String(d.getFullYear());
+  }
+  ctx.font='bold 12px sans-serif';ctx.fillStyle=textColBright;ctx.textAlign='center';
+  // Anti-overlap: estimate per-label pixel width; drop alternating labels until labels fit.
+  var sampleW=ctx.measureText(_fmtLabel(dates[majorIdx[0]||0])||'').width||30;
+  var safeMin=sampleW+12;
+  var lastLX=-9999;
+  for(var li=0;li<majorIdx.length;li++){
+    var jx3=majorIdx[li];var lxx=xPos(jx3);
+    if(lxx-lastLX<safeMin)continue;
+    var lblTxt=_fmtLabel(dates[jx3]);
+    ctx.fillText(lblTxt,lxx,pad.t+plotH+22);
+    lastLX=lxx;
+  }
 }
 
 // Clickable legend HTML with toggle
@@ -1051,6 +1125,14 @@ window.openChart=function(t){
     h+='<button class="chart-width-btn'+wAct+'" onclick="setChartWidth('+widths[w2].p+')">'+widths[w2].l+'</button>';
   }
   h+='</span>';
+  // PHASE-4C 2026-05-04: LIN/LOG y-axis scale toggle. Own group with 12px gap on each side.
+  h+='<span style="display:flex;gap:2px;margin-left:12px;margin-right:12px">';
+  var scales=[{k:"lin",l:"LIN"},{k:"log",l:"LOG"}];
+  for(var sci=0;sci<scales.length;sci++){
+    var sAct=scales[sci].k===chartScaleMode?" active":"";
+    h+='<button class="chart-width-btn'+sAct+'" onclick="setChartScaleMode(\''+scales[sci].k+'\')">'+scales[sci].l+'</button>';
+  }
+  h+='</span>';
   h+='<span style="display:flex;gap:2px">';
   var zooms=["1M","3M","6M","12M","2Y","3Y","5Y"];
   for(var z=0;z<zooms.length;z++){
@@ -1072,6 +1154,12 @@ window.openChart=function(t){
 };
 window.setChartZoom=function(z){
   chartZoom=z;
+  if(chartTicker)openChart(chartTicker);
+};
+// PHASE-4C 2026-05-04: set price-axis scale mode and re-render.
+window.setChartScaleMode=function(m){
+  if(m!=="lin"&&m!=="log")return;
+  chartScaleMode=m;
   if(chartTicker)openChart(chartTicker);
 };
 

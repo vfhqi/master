@@ -1595,6 +1595,8 @@ function buildPortfolioTile(tabId){
   var allR=baseRows();
   var posRows=[];
   for(var j=0;j<allR.length;j++){if(pt[allR[j].ticker]&&passIndSecFilter(allR[j]))posRows.push(allR[j])}
+  // FIX-INPUTSORT 2026-05-04: generic LP tile rows now respect currentSort like QS rows.
+  posRows=sortData(posRows,currentSort.col,currentSort.dir);
   if(posRows.length===0)return"";
   var totalCount=allR.length;
   // SESSION 9 Pass 1.2: D-MD-UI-9 — Live Portfolio columns mirror Qualified Stocks per tab.
@@ -1697,12 +1699,13 @@ function commonCols(){
   return th("Ticker","_display_name","col-txt col-identity","Stock ticker or company name (toggle in header)",tkrW)
     +th("Sector","_tax_sector","col-txt col-identity","Industry sector classification","width:200px;max-width:200px")
     +th("Price","price","col-num col-price","Current stock price","width:52px")
-    +th("52WH","high_52w","col-num col-price","52-week high (toggle to %)","width:52px")
-    +th("52WL","low_52w","col-num col-price","52-week low (toggle to %)","width:52px")
-    +th("20D","_ma20","col-num col-price","20-day moving average","width:46px")
-    +th("50D","_ma50","col-num col-price","50-day moving average","width:46px")
-    +th("150D","_ma150","col-num col-price","150-day moving average","width:46px")
-    +th("200D","_ma200","col-num col-price","200-day moving average","width:46px")
+    // FIX-INPUTSORT 2026-05-04: sort keys follow valueMode -- pct mode sorts by displayed % field.
+    +th("52WH",valueMode==="pct"?"pct_52wh":"high_52w","col-num col-price","52-week high (toggle to %)","width:52px")
+    +th("52WL",valueMode==="pct"?"pct_52wl":"low_52w","col-num col-price","52-week low (toggle to %)","width:52px")
+    +th("20D",valueMode==="pct"?"pct_ma20":"_ma20","col-num col-price","20-day moving average","width:46px")
+    +th("50D",valueMode==="pct"?"pct_ma50":"_ma50","col-num col-price","50-day moving average","width:46px")
+    +th("150D",valueMode==="pct"?"pct_ma150":"_ma150","col-num col-price","150-day moving average","width:46px")
+    +th("200D",valueMode==="pct"?"pct_ma200":"_ma200","col-num col-price","200-day moving average","width:46px")
     +th("RS","rs_pct","col-num col-rs","Relative Strength percentile 0-100 (IBD composite)","width:32px");
 }
 // UTR-specific common cols: Ticker+Sector always visible, rest have col-input class
@@ -1711,12 +1714,13 @@ function utrCommonCols(){
   return th("Ticker","_display_name","col-txt col-identity","Stock ticker or company name",tkrW)
     +th("Sector","_tax_sector","col-txt col-identity col-input","Sector","width:200px;max-width:200px")
     +th("Price","price","col-num col-price col-input","Price","width:52px")
-    +th("52WH","high_52w","col-num col-price col-input","52-week high","width:52px")
-    +th("52WL","low_52w","col-num col-price col-input","52-week low","width:52px")
-    +th("20D","_ma20","col-num col-price col-input","20-day MA","width:46px")
-    +th("50D","_ma50","col-num col-price col-input","50-day MA","width:46px")
-    +th("150D","_ma150","col-num col-price col-input","150-day MA","width:46px")
-    +th("200D","_ma200","col-num col-price col-input","200-day MA","width:46px")
+    // FIX-INPUTSORT 2026-05-04: sort keys follow valueMode in UTR common cols too.
+    +th("52WH",valueMode==="pct"?"pct_52wh":"high_52w","col-num col-price col-input","52-week high","width:52px")
+    +th("52WL",valueMode==="pct"?"pct_52wl":"low_52w","col-num col-price col-input","52-week low","width:52px")
+    +th("20D",valueMode==="pct"?"pct_ma20":"_ma20","col-num col-price col-input","20-day MA","width:46px")
+    +th("50D",valueMode==="pct"?"pct_ma50":"_ma50","col-num col-price col-input","50-day MA","width:46px")
+    +th("150D",valueMode==="pct"?"pct_ma150":"_ma150","col-num col-price col-input","150-day MA","width:46px")
+    +th("200D",valueMode==="pct"?"pct_ma200":"_ma200","col-num col-price col-input","200-day MA","width:46px")
     +th("RS","rs_pct","col-num col-rs col-input","RS percentile","width:32px");
 }
 function utrCommonTds(r){
@@ -1848,6 +1852,11 @@ function baseRows(){
       rs_pct:p.rs_percentile,rs_sector:p.rs_vs_sector,
       _ma20:p.mas?p.mas["20D"]:null,_ma50:p.mas?p.mas["50D"]:null,
       _ma150:p.mas?p.mas["150D"]:null,_ma200:p.mas?p.mas["200D"]:null,
+      // FIX-INPUTSORT 2026-05-04: project pct_ma fields so sort keys can use them in % mode.
+      pct_ma20:(p.mas&&p.mas["20D"])?(p.price-p.mas["20D"])/p.mas["20D"]:null,
+      pct_ma50:(p.mas&&p.mas["50D"])?(p.price-p.mas["50D"])/p.mas["50D"]:null,
+      pct_ma150:(p.mas&&p.mas["150D"])?(p.price-p.mas["150D"])/p.mas["150D"]:null,
+      pct_ma200:(p.mas&&p.mas["200D"])?(p.price-p.mas["200D"])/p.mas["200D"]:null,
       mas:p.mas,high_52w:p.high_52w,low_52w:p.low_52w,
       adv_1m:p.adv_1m,adv_3m:p.adv_3m,
       adv_1m_up:p.adv_1m_up||0,adv_1m_dn:p.adv_1m_dn||0,
@@ -2092,7 +2101,8 @@ function renderMM99(){
 
   // SESSION 10 — split Live Portfolio + Qualified Stocks into two separate tables, mirroring BP/PB/UTR pattern.
   // Each table has its own <thead> (LP non-sticky via data-table-portfolio class; QS sticky), each gets its own <h3> section heading.
-  var posRows=applyIndSecFilter(filterToPositions(allRows));
+  // FIX-INPUTSORT 2026-05-04: LP rows now respect currentSort like QS rows.
+  var posRows=sortData(applyIndSecFilter(filterToPositions(allRows)),currentSort.col,currentSort.dir);
   rows=applyIndSecFilter(rows);
   if(posRows.length>0){
     h+='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRows.length+')</h3>';
@@ -2316,7 +2326,8 @@ function renderBP(){
       +'<td class="col-num col-ref">'+valCell+'</td>'
       +ratingsColTds(r)+'</tr>';
   }
-  var posRowsBP=applyIndSecFilter(filterToPositions(allRows));
+  // FIX-INPUTSORT 2026-05-04: LP rows now respect currentSort like QS rows.
+  var posRowsBP=sortData(applyIndSecFilter(filterToPositions(allRows)),currentSort.col,currentSort.dir);
   // Enrich position rows with BP data (they may not have been enriched if filtered out)
   for(var pk=0;pk<posRowsBP.length;pk++){var pr=posRowsBP[pk];if(pr.bp_stage===undefined){var bpd=pr.f.basing_plateau;if(!bpd||!bpd.group_a){pr.bp_stage="";pr.ga=false;pr.gc=false;pr.t1=false;pr.t2=false;pr.bp_score=0;pr.bp_flat_pass=false;pr.bp_vol_pass=false;pr.bp_time_pass=false;pr.bp_loose_hist=[];pr.bp_loose_passed=0;pr.bp_loose_total=0;pr.bp_loose_streak=0;pr.bp_loose_pct=0;pr.bp_tight_streak=0;}else{pr.bp_stage=bpd.stage;pr.ga=bpd.group_a.pass;pr.gc=bpd.group_c.pass;pr.t1=bpd.group_a.tests.T1;pr.t2=bpd.group_a.tests.T2;pr.bp_score=bpd.score!=null?bpd.score:0;pr.bp_flat_pass=bpd.flat_mas_pass===true;pr.bp_vol_pass=bpd.vol_contraction_pass===true;pr.bp_time_pass=bpd.time_in_base_pass===true;pr.bp_loose_hist=bpd.group_a.history||[];pr.bp_loose_passed=bpd.group_a.days_passed||0;pr.bp_loose_total=bpd.group_a.days_total||0;pr.bp_loose_streak=bpd.group_a.streak||0;pr.bp_loose_pct=pr.bp_loose_total>0?(pr.bp_loose_passed/pr.bp_loose_total):0;pr.bp_tight_streak=bpd.group_c.streak||0;}var m200b=pr.mas?pr.mas["200D"]:null,m150b=pr.mas?pr.mas["150D"]:null,m50b=pr.mas?pr.mas["50D"]:null;pr.t1_pct=m200b?(pr.price-m200b)/m200b:null;pr.t2_pct=(m50b&&m200b)?(m50b-m200b)/m200b:null;pr.mm_stage=pr.f.mm99?pr.f.mm99.stage:"";pr.pb_stage2=pr.f.probing_bet?pr.f.probing_bet.stage:"";pr.vcp_s2=pr.f.vcp?pr.f.vcp.stage_2_uptrend:false;pr.utr_stage2=pr.f.uptrend_retest?pr.f.uptrend_retest.stage:"";pr.ssem_rating=(typeof ssemRatingMap!=="undefined"&&ssemRatingMap[pr.ticker])?ssemRatingMap[pr.ticker]:"-";var prVl=(typeof D!=="undefined"&&D&&D.valuation)?D.valuation[pr.ticker]:null;pr.pe_pctile=prVl?prVl.pe_percentile:null;pr.ma_map_price=pr.price;pr.ma_map_200=m200b;pr.ma_map_150=m150b;pr.ma_map_50=m50b;}}
   if(posRowsBP.length>0){
@@ -2472,6 +2483,8 @@ function renderPB(){
   for(var pk2=0;pk2<posRowsPB2.length;pk2++){var pr2=posRowsPB2[pk2];if(pr2.pb_stage===undefined){var pbd2=pr2.f.probing_bet;if(!pbd2||!pbd2.group_a){pr2.pb_stage="";pr2.ga=false;pr2.a_met=0;pr2.gb=false;pr2.gc=false;pr2.gd=false;pr2.ge=false;pr2.dead_cat=false;pr2.pct_below=null;pr2.t1=false;pr2.t2=false;pr2.t3=false;pr2.t4=false;pr2.t5=false;pr2.t6=false;pr2.t7=false;pr2.t8=false;pr2.t9=false;pr2.t10=false;pr2.t11=false;pr2.t12=false;}else{pr2.pb_stage=pbd2.stage;pr2.ga=pbd2.group_a.pass;pr2.a_met=pbd2.group_a.met;pr2.gb=pbd2.group_b.pass;pr2.gc=pbd2.group_c.pass;pr2.gd=pbd2.group_d.pass;pr2.ge=pbd2.group_e.pass;pr2.dead_cat=pbd2.group_c.tests.T8;pr2.pct_below=pbd2.group_c.pct_below_52wh;pr2.t1=pbd2.group_a.tests.T1;pr2.t2=pbd2.group_a.tests.T2;pr2.t3=pbd2.group_a.tests.T3;pr2.t4=pbd2.group_a.tests.T4;pr2.t5=pbd2.group_a.tests.T5;pr2.t6=pbd2.group_b.tests.T6;pr2.t7=pbd2.group_b.tests.T7;pr2.t8=pbd2.group_c.tests.T8;pr2.t9=pbd2.group_d.tests.T9;pr2.t10=pbd2.group_d.tests.T10;pr2.t11=pbd2.group_e.tests.T11;pr2.t12=pbd2.group_e.tests.T12;}pr2.t1_pct=null;pr2.t2_pct=null;pr2.t3_pct=null;pr2.t4_pct=null;pr2.t5_pct=null;pr2.t6_pct=null;pr2.t7_pct=null;pr2.t8_pct=null;pr2.t9_pct=null;pr2.t10_pct=null;pr2.t11_pct=null;pr2.t12_pct=null;pr2.mm_stage=pr2.f.mm99?pr2.f.mm99.stage:"";pr2.bp_stage2=pr2.f.basing_plateau?pr2.f.basing_plateau.stage:"";pr2.utr_stage2=pr2.f.uptrend_retest?pr2.f.uptrend_retest.stage:"";}}
   // Apply ind/sec filter to portfolio too
   var posRowsPB2f=[];for(var pf2=0;pf2<posRowsPB2.length;pf2++){if(passIndSecFilter(posRowsPB2[pf2]))posRowsPB2f.push(posRowsPB2[pf2])}
+  // FIX-INPUTSORT 2026-05-04: LP rows now respect currentSort like QS rows.
+  posRowsPB2f=sortData(posRowsPB2f,currentSort.col,currentSort.dir);
   if(posRowsPB2f.length>0){
     h+='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRowsPB2f.length+')</h3>';
     h+='<div class="data-table-wrap"><table class="data-table data-table-portfolio"><thead>'+pbHeaders()+'</thead><tbody>';

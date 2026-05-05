@@ -1694,8 +1694,8 @@ function buildIndSecTables(rows,groupDefs){
       }
     }
   }
-  var indKeys=Object.keys(indMap).sort();
-  var secKeys=Object.keys(secMap).sort();
+  var indKeys=Object.keys(indMap).filter(function(k){return /^[A-Z]\.\s/.test(k)}).sort();
+  var secKeys=Object.keys(secMap).filter(function(k){return /^[A-Z]+\.\d+\.\s/.test(k)}).sort();
 
   // FIX-10: X / Y in industry/sector counts
   var h='<div class="ind-sec-wrap" id="section-industries">';
@@ -3386,7 +3386,7 @@ function buildSsemIndSecTables(rows) {
   // Render
   var dimsLabels = [{k: "eps", l: "EPS"}, {k: "ebitda", l: "EBITDA"}, {k: "sales", l: "Sales"}, {k: "tp", l: "TP"}, {k: "buy", l: "Buy"}];
   function renderTile(map, isSector) {
-    var keys = Object.keys(map).sort();
+    var keys = Object.keys(map).filter(function(k){return isSector ? /^[A-Z]+\.\d+\.\s/.test(k) : /^[A-Z]\.\s/.test(k)}).sort();
     var titleLabelSingular = isSector ? "Sector" : "Industry";
     var titleLabelPlural = isSector ? "Sectors" : "Industries";
     var h = '<div class="half-table"><div class="half-title">' + titleLabelPlural + '</div>';
@@ -4017,9 +4017,10 @@ function renderChanges(){
   // Render tile table for a given aggregation (industry or sector)
   function renderChgAggTile(agg,title){
     var keys=Object.keys(agg);
-    // Industries: only show entries with ≥1 Capital stock
+    // Industries: only prefixed (A., B., etc.) + ≥1 Capital stock
     if(title==="Industries"){
       keys=keys.filter(function(k){
+        if(!/^[A-Z]\.\s/.test(k))return false;
         for(var fi=0;fi<FILTER_ORDER.length;fi++){
           if(agg[k].filters[FILTER_ORDER[fi]]&&agg[k].filters[FILTER_ORDER[fi]].cap>0)return true;
         }

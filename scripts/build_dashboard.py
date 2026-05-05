@@ -336,7 +336,7 @@ table.data-table.chg-table .chg-now-cell .badge{font-size:10px !important;paddin
 /* CHANGES tab badge colour overrides: Late=yellow, Early=orange, dash=grey */
 table.data-table.chg-table .badge-late{background:#fff9c4;color:#f9a825;border-color:rgba(249,168,37,0.35)}
 table.data-table.chg-table .badge-early{background:#fff3e0;color:#e65100;border-color:rgba(230,81,0,0.35)}
-table.data-table.chg-table .badge-fail{background:#f5f5f5;color:#9e9e9e;border:1px solid rgba(158,158,158,0.25)}
+table.data-table.chg-table .badge-fail{background:rgba(232,227,212,0.3);color:rgba(180,172,150,0.5);border:1px solid rgba(200,192,170,0.15)}
 
 table.data-table th.col-num,table.data-table td.col-num{text-align:right}
 table.data-table th.col-txt,table.data-table td.col-txt{text-align:left}
@@ -419,10 +419,10 @@ table.data-table td.col-identity{white-space:nowrap}
 .combo-cell{text-align:center;font-weight:600}
 
 /* Industry/Sector tiles */
-.ind-sec-wrap{display:flex;gap:12px;margin-bottom:12px}
-.ind-sec-wrap .half-table{flex:1;min-width:0;height:480px;display:flex;flex-direction:column}
+.ind-sec-wrap{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
+.ind-sec-wrap .half-table{flex:1;min-width:0;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--card)}
 .half-table .half-title{font-size:13px;font-weight:600;color:var(--text-bright);margin-bottom:6px;flex-shrink:0}
-.half-table .data-table-wrap{flex:1;overflow-y:auto;overflow-x:hidden;max-height:450px}
+.half-table .data-table-wrap{overflow-y:auto;overflow-x:hidden}
 .half-table table.data-table th{font-size:11px;text-transform:none;letter-spacing:0;white-space:normal;word-wrap:break-word}
 
 .qual-tile{padding:12px 0;margin-bottom:8px;margin-top:24px}
@@ -2194,7 +2194,7 @@ function buildHeaderControls(tabId){
       bp:[{k:"_gold",l:"GOLD"},{k:"_silver",l:"SILVER"},{k:"_bronze",l:"BRONZE"},{k:"_baseonly",l:"Base Only"},{k:"gc",l:"Deep Base"}],
       utr:[{k:"early",l:"Early+",fn:"setUtrStageFilter"},{k:"late",l:"Late+",fn:"setUtrStageFilter"},{k:"capital",l:"Capital",fn:"setUtrStageFilter"}],
       pb:[{k:"ga",l:"Early"},{k:"gb",l:"Late"},{k:"gc",l:"Dead Cat"},{k:"gd",l:"PB1"},{k:"ge",l:"PB2"}],
-      changes:[{k:"section-summarybar",l:"Summary",direct:true},{k:"section-summary",l:"Changes",direct:true},{k:"section-stocks",l:"Qualified Stocks",direct:true}]
+      changes:[{k:"section-summarybar",l:"Summary",direct:true},{k:"section-chg-industries",l:"Industries",direct:true},{k:"section-chg-sectors",l:"Sectors",direct:true},{k:"section-summary",l:"Changes",direct:true},{k:"section-stocks",l:"Qualified Stocks",direct:true}]
     };
     var links=GROUP_LINKS[tabId];
     if(links){
@@ -3795,6 +3795,7 @@ function renderChanges(){
   var FILTER_ORDER=["collapse","basing_plateau","probing_bet","vcp","mm99","uptrend_retest","s3_topping","s4_declining"];
   var FILTER_COLS={"collapse":"Collapse","basing_plateau":"Basing Plateau","probing_bet":"Probing Bet","mm99":"MM99","vcp":"VCP","uptrend_retest":"Uptrend Retest","s3_topping":"S3 Topping","s4_declining":"S4 Declining"};
   var TILE_BORDER={"collapse":"rgba(180,30,30,0.35)","basing_plateau":"rgba(39,103,73,0.35)","probing_bet":"rgba(107,70,193,0.35)","mm99":"rgba(27,61,92,0.35)","vcp":"rgba(156,66,33,0.35)","uptrend_retest":"rgba(116,66,16,0.35)","s3_topping":"rgba(200,100,0,0.35)","s4_declining":"rgba(150,20,20,0.35)"};
+  var GRP_KEY={"collapse":"col","basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr","s3_topping":"s3","s4_declining":"s4"};
   function stRank(s){return s==="Capital"?3:s==="Late"?2:s==="Early"?1:0}
 
   // Build lookup for stock metadata (needed by tiles and table)
@@ -3887,6 +3888,213 @@ function renderChanges(){
     }
   }
   h+='</div></div>';
+
+  // ── INDUSTRY & SECTOR TILES — Capital breakdown by industry/sector × 8 filters ──
+  // Build per-industry and per-sector aggregates using getTaxonomy() (canonical source, matches MM99 tiles)
+  var indAgg={};  // {industry: {total:N, filters:{filterKey:{cap:N,newCap:N,lostCap:N}}}}
+  var secAgg={};  // {sector: {total:N, filters:{filterKey:{cap:N,newCap:N,lostCap:N}}}}
+  // Build canonical industry lookup: map raw suffix to canonical (e.g. "Consumer Staples" → "A. Consumer staples")
+  var _canonIndMap={};
+  for(var ci2=0;ci2<CANONICAL_INDUSTRIES.length;ci2++){
+    var ci_full=CANONICAL_INDUSTRIES[ci2];
+    _canonIndMap[ci_full]=ci_full;  // exact match
+    // Also map the suffix without prefix (e.g. "Consumer staples" from "A. Consumer staples")
+    var ci_suffix=ci_full.replace(/^[A-Z]\.\s*/,'').toLowerCase();
+    _canonIndMap[ci_suffix]=ci_full;
+    indAgg[ci_full]={total:0,filters:{}};
+  }
+  function resolveCanonInd(raw){
+    if(_canonIndMap[raw])return _canonIndMap[raw];
+    var lc=raw.toLowerCase();
+    if(_canonIndMap[lc])return _canonIndMap[lc];
+    // Try partial match: canonical suffix contained in raw or vice versa
+    for(var ci3=0;ci3<CANONICAL_INDUSTRIES.length;ci3++){
+      var ci_s=CANONICAL_INDUSTRIES[ci3].replace(/^[A-Z]\.\s*/,'').toLowerCase();
+      if(lc.indexOf(ci_s)>=0||ci_s.indexOf(lc)>=0)return CANONICAL_INDUSTRIES[ci3];
+    }
+    return null;  // truly unknown — skip
+  }
+  // Build canonical sector map: collect all sectors from getTaxonomy(), prefer prefixed versions
+  var _rawSecSet={};
+  allRows.forEach(function(r){
+    var tax=getTaxonomy(r.ticker);
+    var sec=tax.sector||'';
+    if(sec)_rawSecSet[sec]=true;
+  });
+  // Separate prefixed (e.g. "A.1. Beverages - beer") from non-prefixed (e.g. "Beverages - beer")
+  var _prefixedSecs=[];
+  var _rawSecAll=Object.keys(_rawSecSet);
+  _rawSecAll.forEach(function(s){ if(/^[A-Z]+\.\d+\.\s/.test(s))_prefixedSecs.push(s); });
+  // Build canonical map: every raw sector → its prefixed canonical form
+  var _canonSecMap={};
+  _prefixedSecs.forEach(function(s){_canonSecMap[s]=s;});
+  // Map non-prefixed to prefixed via suffix matching; keep as-is if no prefixed match
+  _rawSecAll.forEach(function(s){
+    if(_canonSecMap[s])return; // already prefixed
+    var lc=s.toLowerCase();
+    for(var si=0;si<_prefixedSecs.length;si++){
+      var sfx=_prefixedSecs[si].replace(/^[A-Z]+\.\d+\.\s*/,'').toLowerCase();
+      if(sfx===lc){_canonSecMap[s]=_prefixedSecs[si];return;}
+    }
+    // No prefixed match — keep as-is (genuinely unprefixed sector)
+    _canonSecMap[s]=s;
+  });
+  function resolveCanonSec(raw){
+    if(_canonSecMap[raw])return _canonSecMap[raw];
+    var lc=raw.toLowerCase();
+    for(var si=0;si<_prefixedSecs.length;si++){
+      if(_prefixedSecs[si].toLowerCase()===lc)return _prefixedSecs[si];
+      var sfx=_prefixedSecs[si].replace(/^[A-Z]+\.\d+\.\s*/,'').toLowerCase();
+      if(sfx===lc)return _prefixedSecs[si];
+    }
+    return raw; // no match, use as-is
+  }
+  allRows.forEach(function(r){
+    var tax=getTaxonomy(r.ticker);
+    var rawInd=tax.industry||'Unknown';
+    var rawSec=tax.sector||'Unknown';
+    var ind=resolveCanonInd(rawInd);
+    var sec=(rawSec==='Unknown')?null:resolveCanonSec(rawSec);
+    // Aggregate industry (if canonical) and sector (if resolved) independently
+    if(ind){
+      if(!indAgg[ind])indAgg[ind]={total:0,filters:{}};
+      indAgg[ind].total++;
+    }
+    if(sec){
+      if(!secAgg[sec])secAgg[sec]={total:0,filters:{}};
+      secAgg[sec].total++;
+    }
+    if(!ind&&!sec)return; // skip stocks with no canonical industry or sector
+    FILTER_ORDER.forEach(function(f){
+      var curr=t0[r.ticker]&&t0[r.ticker][f];
+      var prev=t5[r.ticker]&&t5[r.ticker][f];
+      if(ind){
+        if(!indAgg[ind].filters[f])indAgg[ind].filters[f]={cap:0,newCap:0,lostCap:0};
+        if(curr==="Capital")indAgg[ind].filters[f].cap++;
+        if(curr==="Capital"&&prev!=="Capital")indAgg[ind].filters[f].newCap++;
+        if(prev==="Capital"&&curr!=="Capital")indAgg[ind].filters[f].lostCap++;
+      }
+      if(sec){
+        if(!secAgg[sec].filters[f])secAgg[sec].filters[f]={cap:0,newCap:0,lostCap:0};
+        if(curr==="Capital")secAgg[sec].filters[f].cap++;
+        if(curr==="Capital"&&prev!=="Capital")secAgg[sec].filters[f].newCap++;
+        if(prev==="Capital"&&curr!=="Capital")secAgg[sec].filters[f].lostCap++;
+      }
+    });
+  });
+
+  // Format helper: uses global valueMode ("pct" = %, "tick" = X/Y)
+  // col: "cap"=Capital, "new"=New, "prev"=Previous — affects % prefix/brackets
+  function chgTileFmt(x,y,col){
+    if(valueMode==="pct"){
+      if(y===0)return'&mdash;';
+      var pct=Math.round(100*x/y);
+      if(col==="new")return'+'+pct+'%';
+      if(col==="prev")return'('+pct+'%)';
+      return pct+'%';
+    }
+    return x+'/'+y;
+  }
+  // Heatmap colour: green intensity proportional to ratio
+  function chgTileHeatmap(x,y,isLost){
+    if(y===0)return'';
+    var ratio=x/y;
+    if(isLost){
+      if(ratio>=0.3)return'background:rgba(229,62,62,0.25)';
+      if(ratio>=0.15)return'background:rgba(229,62,62,0.15)';
+      if(ratio>=0.05)return'background:rgba(229,62,62,0.08)';
+      if(x>0)return'background:rgba(229,62,62,0.04)';
+      return'';
+    }
+    if(ratio>=0.5)return'background:rgba(56,161,105,0.30)';
+    if(ratio>=0.3)return'background:rgba(56,161,105,0.20)';
+    if(ratio>=0.15)return'background:rgba(56,161,105,0.12)';
+    if(ratio>=0.05)return'background:rgba(56,161,105,0.06)';
+    if(x>0)return'background:rgba(56,161,105,0.03)';
+    return'';
+  }
+
+  // Render tile table for a given aggregation (industry or sector)
+  function renderChgAggTile(agg,title){
+    var keys=Object.keys(agg);
+    // Industries: only show entries with ≥1 Capital stock
+    if(title==="Industries"){
+      keys=keys.filter(function(k){
+        for(var fi=0;fi<FILTER_ORDER.length;fi++){
+          if(agg[k].filters[FILTER_ORDER[fi]]&&agg[k].filters[FILTER_ORDER[fi]].cap>0)return true;
+        }
+        return false;
+      });
+    }
+    // Sectors: only show prefixed entries (A.1., B.7., etc.) — non-prefixed are FactSet fallback names
+    if(title==="Sectors"){
+      keys=keys.filter(function(k){return /^[A-Z]+\.\d+\.\s/.test(k);});
+    }
+    // Sort alphabetically by prefix (A., B., A.1., A.2., etc.)
+    keys.sort(function(a,b){return a.localeCompare(b)});
+
+    var out='<div class="half-title">'+title+' ('+keys.length+')</div>';
+    out+='<div class="data-table-wrap"><table class="data-table data-table-tile" style="font-size:10px;table-layout:fixed"><thead>';
+    out+='<tr class="group-header-row">';
+    out+='<th rowspan="2" style="background:rgba(100,100,100,0.06);text-align:left;width:130px;overflow:hidden;text-overflow:ellipsis">'+title.replace(/s$/,'')+'</th>';
+    out+='<th rowspan="2" style="background:rgba(100,100,100,0.06);width:22px">#</th>';
+    var TILE_SHORT={"collapse":"Col","basing_plateau":"BP","probing_bet":"PB","mm99":"MM99","vcp":"VCP","uptrend_retest":"UTR","s3_topping":"S3","s4_declining":"S4"};
+    FILTER_ORDER.forEach(function(f){
+      var lab=TILE_SHORT[f]||FILTER_COLS[f];
+      var BG_MAP2={"collapse":"rgba(180,30,30,0.08)","basing_plateau":"rgba(39,103,73,0.08)","probing_bet":"rgba(107,70,193,0.08)","mm99":"rgba(27,61,92,0.08)","vcp":"rgba(156,66,33,0.08)","uptrend_retest":"rgba(116,66,16,0.08)","s3_topping":"rgba(200,100,0,0.08)","s4_declining":"rgba(150,20,20,0.08)"};
+      var bg=BG_MAP2[f]||"rgba(100,100,100,0.08)";
+      var gk=GRP_KEY[f];
+      out+='<th colspan="3" class="grp-chg-'+gk+'-first grp-chg-'+gk+'-last" style="background:'+bg+';text-align:center;font-size:9px;white-space:nowrap;padding:2px 1px">'+lab+'</th>';
+    });
+    out+='</tr>';
+    out+='<tr>';
+    FILTER_ORDER.forEach(function(f){
+      var gk=GRP_KEY[f];
+      out+='<th class="grp-chg-'+gk+'-first" style="font-size:8px;text-align:center;color:var(--text-secondary);font-weight:400;padding:1px">Cap</th>';
+      out+='<th style="font-size:8px;text-align:center;color:#38a169;font-weight:400;padding:1px">New</th>';
+      out+='<th class="grp-chg-'+gk+'-last" style="font-size:8px;text-align:center;color:#e53e3e;font-weight:400;padding:1px">Prev</th>';
+    });
+    out+='</tr></thead><tbody>';
+
+    keys.forEach(function(k){
+      var a=agg[k];
+      var y=a.total;
+      out+='<tr style="font-size:10px">';
+      out+='<td style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+k+'">'+k+'</td>';
+      out+='<td style="text-align:center;font-weight:600;color:var(--text-secondary)">'+y+'</td>';
+      FILTER_ORDER.forEach(function(f){
+        var gk=GRP_KEY[f];
+        var fd=a.filters[f]||{cap:0,newCap:0,lostCap:0};
+        var capHeat=chgTileHeatmap(fd.cap,y,false);
+        var newHeat=chgTileHeatmap(fd.newCap,y,false);
+        var lostHeat=chgTileHeatmap(fd.lostCap,y,true);
+        out+='<td class="grp-chg-'+gk+'-first" style="text-align:center;padding:2px 1px;'+capHeat+'">'+chgTileFmt(fd.cap,y,"cap")+'</td>';
+        out+='<td style="text-align:center;padding:2px 1px;'+(fd.newCap>0?'color:#38a169;font-weight:600;':'')+newHeat+'">'+chgTileFmt(fd.newCap,y,"new")+'</td>';
+        out+='<td class="grp-chg-'+gk+'-last" style="text-align:center;padding:2px 1px;'+(fd.lostCap>0?'color:#e53e3e;font-weight:600;':'')+lostHeat+'">'+chgTileFmt(fd.lostCap,y,"prev")+'</td>';
+      });
+      out+='</tr>';
+    });
+    out+='</tbody></table></div>';
+    return out;
+  }
+
+  // Side-by-side layout matching MM99 pattern: Industries LEFT, Sectors RIGHT
+  h+='<div class="ind-sec-wrap" id="chg-ind-sec-wrap">';
+  h+='<div class="half-table" id="section-chg-industries">'+renderChgAggTile(indAgg,"Industries")+'</div>';
+  h+='<div class="half-table" id="section-chg-sectors">'+renderChgAggTile(secAgg,"Sectors")+'</div>';
+  h+='</div>';
+  // After render: sync Sectors tile height to Industries tile height (Industries determines)
+  setTimeout(function(){
+    var indTile=document.getElementById("section-chg-industries");
+    var secTile=document.getElementById("section-chg-sectors");
+    if(indTile&&secTile){
+      var indH=indTile.offsetHeight;
+      secTile.style.height=indH+"px";
+      secTile.style.overflow="hidden";
+      var secWrap=secTile.querySelector(".data-table-wrap");
+      if(secWrap){secWrap.style.maxHeight=(indH-30)+"px";secWrap.style.overflowY="auto";}
+    }
+  },50);
 
   h+='<h3 id="section-summary" style="margin:16px 0 8px;font-size:15px;font-weight:600;color:var(--text-primary)">Changes over last week &mdash; '+fmtDDM(t5D)+' to '+fmtDDM(t0D)+'</h3>';
 
@@ -3987,8 +4195,6 @@ function renderChanges(){
   var TIME_LABELS=["1M","1W","1D","Now"];
   var TIME_KEYS=["T-22","T-5","T-1","T-0"];
 
-  // CSS key map for column group borders
-  var GRP_KEY={"collapse":"col","basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr","s3_topping":"s3","s4_declining":"s4"};
   // Tab ID map for navBadge click-through on Now column
   var CHG_TAB={"basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr"};
 

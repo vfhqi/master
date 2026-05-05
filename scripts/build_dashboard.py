@@ -1294,6 +1294,34 @@ window.handleSort=function(c){if(currentSort.col===c)currentSort.dir=currentSort
 
 function tick(v){return v?'<span class="tick">&#10003;</span>':'<span class="cross">&#10007;</span>'}
 function badge(s){if(!s)return'<span class="badge badge-fail">&mdash;</span>';if(s==="Capital")return'<span class="badge badge-capital">Capital</span>';if(s==="Late")return'<span class="badge badge-late">Late</span>';if(s==="Early")return'<span class="badge badge-early">Early</span>';return'<span class="badge badge-fail">'+s+'</span>'}
+// D-MD-UI-18: Navigable badge for TIMELINESS Qualification Screens columns.
+// Uses data-nav-tab + data-nav-ticker attributes; event delegation handles click.
+function navBadge(stage,ticker,tabId){
+  if(!stage)return'<span class="badge badge-fail">&mdash;</span>';
+  var cls=stage==="Capital"?"badge-capital":stage==="Late"?"badge-late":stage==="Early"?"badge-early":"badge-fail";
+  return'<span class="badge '+cls+' nav-badge" data-nav-tab="'+tabId+'" data-nav-ticker="'+ticker+'" title="Go to '+tabId.toUpperCase()+' tab" style="cursor:pointer">'+stage+'</span>';
+}
+// D-MD-UI-18: Scroll a ticker row to the top of the visible table on the active tab.
+window.scrollToTicker=function(ticker){
+  var active=document.querySelector('.tab-content[style*="display: block"], .tab-content[style*="display:block"]');
+  if(!active)return;
+  var rows=active.querySelectorAll('tr[data-ticker="'+ticker+'"]');
+  if(rows.length===0)return;
+  var target=rows[rows.length>1?1:0]; // prefer QS row (2nd) over LP row (1st) if both exist
+  target.scrollIntoView({block:'start',behavior:'smooth'});
+  target.style.transition='background 0.3s';target.style.background='rgba(221,107,32,0.18)';
+  setTimeout(function(){target.style.background=''},2000);
+};
+// D-MD-UI-18: Event delegation for nav-badge clicks — switch tab + scroll to ticker.
+document.addEventListener('click',function(e){
+  var el=e.target.closest('.nav-badge[data-nav-tab]');
+  if(!el)return;
+  e.stopPropagation(); // prevent row-level openChart
+  var tabId=el.getAttribute('data-nav-tab');
+  var ticker=el.getAttribute('data-nav-ticker');
+  switchTab(tabId);
+  setTimeout(function(){scrollToTicker(ticker)},120);
+});
 function scorePips(s,m){var h='<div class="score-bar">';for(var j=0;j<m;j++)h+='<div class="pip '+(j<s?'pip-on':'pip-off')+'"></div>';return h+'</div>'}
 // Score pips mapped to individual test results (each pip = one test)
 function testPips(tests){var h='<div class="score-bar">';for(var j=0;j<tests.length;j++)h+='<div class="pip '+(tests[j]?'pip-on':'pip-off')+'"></div>';return h+'</div>'}
@@ -1711,6 +1739,13 @@ function buildPortfolioTile(tabId){
       if(comboGradeFilters[gKey])posRowsGF.push(posRows[jg]);
     }
     posRows=posRowsGF;
+    // TIMELINESS-GROUP-HEADER LP (D-MD-UI-17)
+    h+='</tr><tr class="group-header-row">';
+    h+='<th colspan="10" style="background:rgba(100,100,100,0.06)">Inputs</th>';
+    h+='<th colspan="1" style="background:rgba(221,107,32,0.12)">Master</th>';
+    h+='<th colspan="8" style="background:rgba(120,80,200,0.08)">Qualification Screens</th>';
+    h+=ratingsColHeaders().length>0?'<th colspan="8" class="col-ratings">Ratings</th>':'';
+    h+='</tr><tr>';
     h+=commonCols()
       +'<th class="col-txt col-filter">Timeliness</th>'
       +'<th class="col-txt col-filter combo-col-pending">Collapse</th>'
@@ -1726,16 +1761,16 @@ function buildPortfolioTile(tabId){
     var pendBadgeLP='<span class="badge badge-fail" title="Pass 2 — pending">&mdash;</span>';
     for(var k=0;k<posRows.length;k++){
       var rk=posRows[k];
-      h+='<tr onclick="openChart(\''+rk.ticker+'\')" style="cursor:pointer">'+commonTds(rk)
+      h+='<tr onclick="openChart(\''+rk.ticker+'\')" style="cursor:pointer" data-ticker="'+rk.ticker+'">'+commonTds(rk)
         +'<td class="col-txt col-filter">'+timelinessBadge(rk.tm_grade)+'</td>'
         +'<td class="col-txt col-filter combo-col-pending">'+pendBadgeLP+'</td>'
-        +'<td class="col-txt col-filter">'+badge(rk.bp_stage)+'</td>'
-        +'<td class="col-txt col-filter">'+badge(rk.pb_stage)+'</td>'
-        +'<td class="col-txt col-filter">'+badge(rk.vcp_stage)+'</td>'
+        +'<td class="col-txt col-filter">'+navBadge(rk.bp_stage,rk.ticker,"bp")+'</td>'
+        +'<td class="col-txt col-filter">'+navBadge(rk.pb_stage,rk.ticker,"pb")+'</td>'
+        +'<td class="col-txt col-filter">'+navBadge(rk.vcp_stage,rk.ticker,"vcp")+'</td>'
         +'<td class="col-txt col-filter combo-col-pending">'+pendBadgeLP+'</td>'
         +'<td class="col-txt col-filter combo-col-pending">'+pendBadgeLP+'</td>'
-        +'<td class="col-txt col-filter">'+badge(rk.mm_stage)+'</td>'
-        +'<td class="col-txt col-filter">'+badge(rk.utr_stage)+'</td>'
+        +'<td class="col-txt col-filter">'+navBadge(rk.mm_stage,rk.ticker,"mm99")+'</td>'
+        +'<td class="col-txt col-filter">'+navBadge(rk.utr_stage,rk.ticker,"utr")+'</td>'
         +ratingsColTds(rk)+'</tr>';
     }
   } else if(tabId==="ssem"){
@@ -1772,7 +1807,7 @@ function buildPortfolioTile(tabId){
     // Other tabs: keep existing behaviour (commonCols + ratings).
     h+=commonCols()+ratingsColHeaders()+'</tr></thead><tbody>';
     for(var j=0;j<posRows.length;j++){
-      h+='<tr onclick="openChart(\''+posRows[j].ticker+'\')" style="cursor:pointer">'+commonTds(posRows[j])+ratingsColTds(posRows[j])+'</tr>';
+      h+='<tr onclick="openChart(\''+posRows[j].ticker+'\')" style="cursor:pointer" data-ticker="'+posRows[j].ticker+'">'+commonTds(posRows[j])+ratingsColTds(posRows[j])+'</tr>';
     }
   }
   h+='</tbody></table></div>';
@@ -2175,7 +2210,7 @@ function renderMM99(){
     return hdr;
   }
   function mm99Row(r){
-    return'<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer">'+commonTds(r)
+    return'<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">'+commonTds(r)
       +'<td class="col-num col-filter">'+testPips([r.t1,r.t2,r.t3,r.t4,r.t5,r.t6,r.t7,r.t8,r.t9,r.t10,r.t11])+' <span style="margin-left:4px;font-weight:600">'+r.mm99_score+'/11</span></td>'
       +'<td class="col-num col-filter">'+monthsPips(r.mm99_monthly,r.mm99_months_passing)+'</td>'
       +testCell(r.t1,r.t1_pct,"col-filter grp-lt-first")+'<td class="col-num col-filter grp-lt-last '+(r.ma200_months>=6?"pass":r.ma200_months>=3?"amber":r.ma200_months>=1?"":"fail")+'">'+(r.ma200_months!=null?r.ma200_months+"/12":"&mdash;")+'</td>'
@@ -2399,7 +2434,7 @@ function renderBP(){
     var flatNum = (r.bp_slope_200!=null) ? fpc1(r.bp_slope_200) : null;  // 200D slope annualised
     var volNum = (r.bp_vol_ratio!=null) ? Math.round(r.bp_vol_ratio*100)+'%' : null;  // L3M/L12M ratio
     var timeNum = (r.bp_days_since_drop!=null) ? r.bp_days_since_drop+'d' : null;  // days since 20% drop
-    return'<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer">'+bpCommonTds(r)
+    return'<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">'+bpCommonTds(r)
       +'<td class="col-filter">'+buildMAMap(r.ma_map_price,r.ma_map_200,r.ma_map_150,r.ma_map_50)+'</td>'
       +scoreHtml
       +pctCell(basingPass, basingNum)+pctCell(flatPass, flatNum)+pctCell(volPass, volNum)+pctCell(timePass, timeNum)
@@ -2552,7 +2587,7 @@ function renderPB(){
     hdr+='</tr>';return hdr;
   }
   function pbRow(r){
-    return'<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer">'+commonTds(r)
+    return'<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">'+commonTds(r)
       +testCell(r.t1,r.t1_pct,"col-filter")+testCell(r.t2,r.t2_pct,"col-filter")+testCell(r.t3,r.t3_pct,"col-filter")+testCell(r.t4,r.t4_pct,"col-filter")+testCell(r.t5,r.t5_pct,"col-filter")
       +'<td class="col-num col-filter" style="font-weight:600">'+r.a_met+'/5</td>'
       +testCell(r.t6,r.t6_pct,"col-filter")+testCell(r.t7,r.t7_pct,"col-filter")+'<td class="col-filter">'+tick(r.gb)+'</td>'
@@ -2725,7 +2760,7 @@ function renderUTR(){
   h+='</tr></thead><tbody>';
   for(var j=0;j<rows.length;j++){
     var r=rows[j];
-    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer">'+utrCommonTds(r)
+    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">'+utrCommonTds(r)
       +'<td class="col-txt col-filter">'+utrTestMa(r.test_ma)+'</td>'
       +'<td class="col-num col-filter">'+(r.retest_num?r.retest_num:"&mdash;")+'</td>'
       +'<td class="col-num">'+utrPct(r.depth_pct)+'</td>'
@@ -2779,7 +2814,7 @@ function renderVCP(){
   for(var j=0;j<rows.length;j++){
     var r=rows[j];
     // FIX-12: testCell for VCP
-    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer">'+commonTds(r)
+    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">'+commonTds(r)
       +'<td class="col-filter" style="font-weight:700">'+(r.stage2?'<span class="pass">STAGE 2</span>':'<span class="fail">NO</span>')+'</td>'
       +testCell(r.mm_ga,r.mm_ga_pct,"col-filter")+testCell(r.mm_gb,r.mm_gb_pct,"col-filter")
       +'<td class="col-num col-filter">'+scorePips(r.mm_score,11)+' '+r.mm_score+'/11</td>'
@@ -2824,7 +2859,7 @@ function renderTech(){
   h+='</tr></thead><tbody>';
   for(var j=0;j<rows.length;j++){
     var r=rows[j];
-    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer">'+commonTds(r)
+    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">'+commonTds(r)
       +'<td class="col-num col-price">'+fp(r.ma5)+'</td><td class="col-num col-price">'+fp(r.ma10)+'</td>'
       +'<td class="col-num col-price">'+fp(r.ma20)+'</td><td class="col-num col-price">'+fp(r.ma50)+'</td>'
       +'<td class="col-num col-price">'+fp(r.ma100)+'</td><td class="col-num col-price">'+fp(r.ma150)+'</td><td class="col-num col-price">'+fp(r.ma200)+'</td>'
@@ -2957,7 +2992,14 @@ function renderCombos(){
   h+=buildPortfolioTile(currentTab);
   rows=applyIndSecFilter(rows);
   h+='<h3 class="qualified-title" id="section-stocks">Qualified Stocks ('+xyFmt(rows.length,totalCount)+')</h3>';
-  h+='<div class="data-table-wrap"><table class="data-table"><thead><tr>';
+  h+='<div class="data-table-wrap"><table class="data-table"><thead>';
+  // TIMELINESS-GROUP-HEADER (D-MD-UI-17)
+  h+='<tr class="group-header-row">';
+  h+='<th colspan="10" style="background:rgba(100,100,100,0.06)">Inputs</th>';
+  h+='<th colspan="1" style="background:rgba(221,107,32,0.12)">Master</th>';
+  h+='<th colspan="8" style="background:rgba(120,80,200,0.08)">Qualification Screens</th>';
+  h+=ratingsColHeaders().length>0?'<th colspan="8" class="col-ratings">Ratings</th>':'';
+  h+='</tr><tr>';
   // SESSION 9 Pass 1.1: Final col order per D-MD-FILTER-8: TIMELINESS | Collapse | BP | PB | VCP | S3 Top | S4 Dec | MM99 | UTR.
   // Collapse/S3/S4 are Pass 2 placeholders — render — badge with title tooltip until Pass 2 lands.
   h+=commonCols()
@@ -2975,16 +3017,16 @@ function renderCombos(){
   var pendBadge='<span class="badge badge-fail" title="Pass 2 — pending">&mdash;</span>';
   for(var j=0;j<rows.length;j++){
     var r=rows[j];
-    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer">'+commonTds(r)
+    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">'+commonTds(r)
       +'<td class="col-txt col-filter">'+timelinessBadge(r.tm_grade)+'</td>'
       +'<td class="col-txt col-filter combo-col-pending">'+pendBadge+'</td>'
-      +'<td class="col-txt col-filter">'+badge(r.bp_stage)+'</td>'
-      +'<td class="col-txt col-filter">'+badge(r.pb_stage)+'</td>'
-      +'<td class="col-txt col-filter">'+badge(r.vcp_stage)+'</td>'
+      +'<td class="col-txt col-filter">'+navBadge(r.bp_stage,r.ticker,"bp")+'</td>'
+      +'<td class="col-txt col-filter">'+navBadge(r.pb_stage,r.ticker,"pb")+'</td>'
+      +'<td class="col-txt col-filter">'+navBadge(r.vcp_stage,r.ticker,"vcp")+'</td>'
       +'<td class="col-txt col-filter combo-col-pending">'+pendBadge+'</td>'
       +'<td class="col-txt col-filter combo-col-pending">'+pendBadge+'</td>'
-      +'<td class="col-txt col-filter">'+badge(r.mm_stage)+'</td>'
-      +'<td class="col-txt col-filter">'+badge(r.utr_stage)+'</td>'
+      +'<td class="col-txt col-filter">'+navBadge(r.mm_stage,r.ticker,"mm99")+'</td>'
+      +'<td class="col-txt col-filter">'+navBadge(r.utr_stage,r.ticker,"utr")+'</td>'
       +ratingsColTds(r)+'</tr>';
   }
   h+='</tbody></table></div>';
@@ -3039,7 +3081,7 @@ function renderPositions(){
       if(f.basing_plateau.stage)stages.push("BP:"+f.basing_plateau.stage);
       fStatus=stages.length>0?stages.join(" | "):"None qualifying";
     }
-    h+='<tr onclick="openChart(\''+inv.ticker+'\')" style="cursor:pointer">'
+    h+='<tr onclick="openChart(\''+inv.ticker+'\')" style="cursor:pointer" data-ticker="'+inv.ticker+'">'
       +'<td class="col-txt" style="font-weight:600;color:var(--text-bright)">'+inv.ticker+'</td>'
       +'<td class="col-txt">'+inv.name+'</td><td class="col-txt">'+inv.currency+'</td>'
       +tradeCells
@@ -3397,7 +3439,7 @@ function ssemHeadersHTML() {
 function ssemRowHTML(r) {
   var tax = getTaxonomy(r.ticker);
   var dn = (displayMode === "company") ? (r.company || r.ticker) : r.ticker;
-  var h = '<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer">';
+  var h = '<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">';
   h += '<td class="col-txt col-identity" style="font-weight:600;color:var(--text-bright)">' + dn + '</td>';
   h += '<td class="col-txt col-identity" style="font-size:11px">' + tax.sector + '</td>';
   h += '<td class="col-num col-price">' + fp(r.price) + '</td>';
@@ -3596,7 +3638,7 @@ function renderVal(){
     var r=rows[j];
     var tax=getTaxonomy(r.ticker);
     var dn=(displayMode==="company")?(r.company||r.ticker):r.ticker;
-    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer">'
+    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">'
       +'<td class="col-txt col-identity" style="font-weight:600;color:var(--text-bright)">'+dn+'</td>'
       +'<td class="col-txt col-identity" style="font-size:11px">'+tax.sector+'</td>'
       +'<td class="col-num col-price">'+fp(r.price)+'</td>';

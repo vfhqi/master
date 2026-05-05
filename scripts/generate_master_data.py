@@ -1287,11 +1287,172 @@ def compute_all_filters(prices):
     return results
 
 
+# ── Historical Stage Computation (D-MD-DATA-6) ───────────────────────────
+
+def compute_historical_stages(universe, raw_data, benchmark_rows, t0_filter_results=None, offsets=None):
+    """Compute filter stages at historical time points by slicing OHLCV data.
+
+    For each offset (trading days back from today), truncates each stock's
+    raw OHLCV data at that point, then re-runs build_prices_json +
+    compute_all_filters to get stage assignments.
+
+    Args:
+        universe: universe dict with stocks list
+        raw_data: dict of {yf_ticker: [ohlcv_rows]} (full history)
+        benchmark_rows: benchmark OHLCV rows
+        t0_filter_results: pre-computed filter results for T-0 (avoids recomputation)
+        offsets: list of trading-day offsets, e.g. [1, 5, 22]
+                 Default: [1, 5, 22] (1D, 1W, 1M ago)
+
+    Returns:
+        dict: {
+            "T-0": {ticker: {filter: stage, ...}, ...},
+            "T-1": {ticker: {filter: stage, ...}, ...},
+            "T-5": {ticker: {filter: stage, ...}, ...},
+            "T-22": {ticker: {filter: stage, ...}, ...},
+        }
+    """
+    if offsets is None:
+        offsets = [1, 5, 22]
+
+    FILTERS = ["basing_plateau", "probing_bet", "mm99", "vcp", "uptrend_retest"]
+    history = {}
+
+    # T-0 (today) — use pre-computed results if available
+    if t0_filter_results is not None:
+        print("\n── Historical stages: T-0 (today) — using pre-computed ──")
+        t0_stages = {}
+        for r in t0_filter_results:
+            t0_stages[r["ticker"]] = {f: r[f].get("stage") for f in FILTERS}
+        history["T-0"] = t0_stages
+        print(f"  {len(t0_stages)} stocks (pre-computed)")
+    else:
+        print("\n── Historical stages: T-0 (today) ──")
+        prices_t0 = build_prices_json(universe, raw_data, benchmark_rows)
+        filters_t0 = compute_all_filters(prices_t0)
+        t0_stages = {}
+        for r in filters_t0:
+            t0_stages[r["ticker"]] = {f: r[f].get("stage") for f in FILTERS}
+        history["T-0"] = t0_stages
+        print(f"  {len(t0_stages)} stocks processed")
+
+    # T-N for each offset
+    for offset in offsets:
+        label = f"T-{offset}"
+        print(f"\n── Historical stages: {label} ({offset} trading days back) ──")
+
+        # Slice raw_data: remove the last `offset` trading days from each ticker
+        sliced_data = {}
+        skipped = 0
+        for yf_ticker, rows in raw_data.items():
+            if len(rows) > offset:
+                sliced_data[yf_ticker] = rows[:-offset]
+            else:
+                skipped += 1
+                # Not enough data — skip this ticker at this offset
+
+        # Slice benchmark too
+        sliced_bench = benchmark_rows[:-offset] if len(benchmark_rows) > offset else []
+
+        if skipped:
+            print(f"  Skipped {skipped} tickers (insufficient data for {offset}-day lookback)")
+
+        # Re-run full pipeline on sliced data
+        prices_tn = build_prices_json(universe, sliced_data, sliced_bench)
+        filters_tn = compute_all_filters(prices_tn)
+
+        tn_stages = {}
+        for r in filters_tn:
+            tn_stages[r["ticker"]] = {f: r[f].get("stage") for f in FILTERS}
+        history[label] = tn_stages
+        print(f"  {len(tn_stages)} stocks processed")
+
+    return history
+
+
+def _extract_change_summary(history, offsets=None):
+    """Build per-ticker change records comparing T-0 to each historical point.
+
+    Returns:
+        list of dicts: [{ticker, filter, current, previous, offset_label, direction}, ...]
+        where direction is 'upgrade' or 'downgrade'.
+    """
+    if offsets is None:
+        offsets = [1, 5, 22]
+
+    FILTERS = ["basing_plateau", "probing_bet", "mm99", "vcp", "uptrend_retest"]
+    STAGE_RANK = {None: 0, "Early": 1, "Late": 2, "Capital": 3}
+
+    changes = []
+    t0 = history.get("T-0", {})
+
+    for offset in offsets:
+        label = f"T-{offset}"
+        tn = history.get(label, {})
+
+        for ticker in t0:
+            if ticker not in tn:
+                continue
+            for filt in FILTERS:
+                curr = t0[ticker].get(filt)
+                prev = tn[ticker].get(filt)
+                if curr != prev:
+                    curr_rank = STAGE_RANK.get(curr, 0)
+                    prev_rank = STAGE_RANK.get(prev, 0)
+                    direction = "upgrade" if curr_rank > prev_rank else "downgrade"
+                    changes.append({
+                        "ticker": ticker,
+                        "filter": filt,
+                        "current": curr,
+                        "previous": prev,
+                        "offset": offset,
+                        "offset_label": label,
+                        "direction": direction,
+                    })
+
+    return changes
+
+
+def _save_daily_snapshot(filter_results):
+    """Append today's stage assignments to data/stage-snapshots.json.
+
+    This builds up real day-by-day history over time. Each entry is keyed
+    by date so re-running on the same day overwrites (idempotent).
+    """
+    FILTERS = ["basing_plateau", "probing_bet", "mm99", "vcp", "uptrend_retest"]
+    snapshot_path = DATA_DIR / "stage-snapshots.json"
+
+    # Load existing snapshots
+    existing = {}
+    if snapshot_path.exists():
+        try:
+            with open(snapshot_path) as f:
+                existing = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            existing = {}
+
+    # Build today's snapshot
+    today = date.today().strftime("%Y-%m-%d")
+    today_stages = {}
+    for r in filter_results:
+        today_stages[r["ticker"]] = {f: r[f].get("stage") for f in FILTERS}
+
+    existing[today] = today_stages
+
+    # Write back
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(snapshot_path, "w") as f:
+        json.dump(existing, f, separators=(",", ":"))
+
+    print(f"  Daily snapshot saved: {today} ({len(today_stages)} stocks, {len(existing)} total days)")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Master Dashboard data pipeline")
     parser.add_argument("--sample", action="store_true", help="Use sample data (no yfinance)")
     parser.add_argument("--full-refresh", action="store_true", help="Force full re-pull from yfinance")
     parser.add_argument("--full-universe", action="store_true", help="Use full 976-stock watchlist instead of alpha universe")
+    parser.add_argument("--with-history", action="store_true", help="Compute historical stages at T-1/T-5/T-22 for CHANGES tab")
     args = parser.parse_args()
 
     # Load universe — either alpha (125 stocks) or full watchlist (976 stocks)
@@ -1389,6 +1550,10 @@ def main():
         }, f, indent=2)
     print(f"  Written {len(filter_results)} stocks to data/filter-results.json")
 
+    # Daily snapshot — always save (builds up real history for CHANGES tab)
+    print("\n── Daily snapshot ──")
+    _save_daily_snapshot(filter_results)
+
     # Summary
     print("\n── Filter Summary ──")
     for filt in ["basing_plateau", "probing_bet", "mm99", "uptrend_retest"]:
@@ -1403,6 +1568,35 @@ def main():
     for r in filter_results:
         score_dist[r["mm99"]["score_8pt"]] += 1
     print(f"  MM99 8pt scores: {dict(sorted(score_dist.items()))}")
+
+    # ── Historical stages for CHANGES tab (D-MD-DATA-6) ──
+    if args.with_history:
+        print("\n══ HISTORICAL STAGES (--with-history) ══")
+        history = compute_historical_stages(universe, raw_data, benchmark_rows,
+                                            t0_filter_results=filter_results)
+        changes = _extract_change_summary(history)
+
+        # Write filter-history.json — per-ticker stages at each time point
+        with open(DATA_DIR / "filter-history.json", "w") as f:
+            json.dump({
+                "_meta": {
+                    "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "offsets": [0, 1, 5, 22],
+                    "offset_labels": ["T-0", "T-1", "T-5", "T-22"],
+                    "description": "Stage assignments at 4 time points for CHANGES tab",
+                },
+                "stages": history,
+                "changes": changes,
+            }, f, indent=2)
+        print(f"\n  Written filter-history.json — {len(history)} time points")
+        print(f"  Total changes detected: {len(changes)}")
+
+        # Quick summary of changes per offset
+        for offset_label in ["T-1", "T-5", "T-22"]:
+            offset_changes = [c for c in changes if c["offset_label"] == offset_label]
+            ups = sum(1 for c in offset_changes if c["direction"] == "upgrade")
+            downs = sum(1 for c in offset_changes if c["direction"] == "downgrade")
+            print(f"  {offset_label}: {ups} upgrades, {downs} downgrades")
 
     print("\nDone.")
 

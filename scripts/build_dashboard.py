@@ -41,6 +41,12 @@ def safe_json_load(path):
 def load_data():
     prices = safe_json_load(DATA_DIR / "prices.json")
     filters = safe_json_load(DATA_DIR / "filter-results.json")
+
+    # CHANGES tab: historical stage data (D-MD-UI-19)
+    filter_history = None
+    fh_path = DATA_DIR / "filter-history.json"
+    if fh_path.exists():
+        filter_history = safe_json_load(fh_path)
     universe = safe_json_load(DATA_DIR / "universe.json")
     ticker_mapping = safe_json_load(DATA_DIR / "ticker_mapping.json")
 
@@ -80,6 +86,8 @@ def load_data():
     if valuation:
         val_data = {k: v for k, v in valuation.items() if k != "_meta"}
         master["valuation"] = val_data
+    if filter_history:
+        master["filter_history"] = filter_history
 
     # Qualitative ratings (from IC Ratings Dashboard memos)
     qual_path = DATA_DIR / "qualitative.json"
@@ -111,11 +119,12 @@ TABS = [
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
     {"id": "combos",    "label": "TIMELINESS",       "accent": "#dd6b20"},
+    {"id": "changes",   "label": "CHANGES",          "accent": "#c53030"},  # CHANGES-TAB-MARKER
     {"id": "positions", "label": "Live Investments",  "accent": "#319795"},
 ]
 
 IMPLEMENTED_TABS = [
-    "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "positions",
+    "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
     "ssem", "val",
 ]
 
@@ -288,6 +297,46 @@ th.grp-med-first,th.grp-med-last{border-top:2px solid rgba(200,150,0,0.25)}
 .grp-tight-first{border-left:2px solid rgba(50,150,50,0.25)}
 .grp-tight-last{border-right:2px solid rgba(50,150,50,0.25)}
 th.grp-tight-first,th.grp-tight-last{border-top:2px solid rgba(50,150,50,0.25)}
+/* CHANGES-V2-MARKER: column group borders for CHANGES tab */
+.grp-chg-bp-first{border-left:2px solid rgba(39,103,73,0.25)}
+.grp-chg-bp-last{border-right:2px solid rgba(39,103,73,0.25)}
+th.grp-chg-bp-first,th.grp-chg-bp-last{border-top:2px solid rgba(39,103,73,0.25)}
+.grp-chg-pb-first{border-left:2px solid rgba(107,70,193,0.25)}
+.grp-chg-pb-last{border-right:2px solid rgba(107,70,193,0.25)}
+th.grp-chg-pb-first,th.grp-chg-pb-last{border-top:2px solid rgba(107,70,193,0.25)}
+.grp-chg-mm99-first{border-left:2px solid rgba(27,61,92,0.25)}
+.grp-chg-mm99-last{border-right:2px solid rgba(27,61,92,0.25)}
+th.grp-chg-mm99-first,th.grp-chg-mm99-last{border-top:2px solid rgba(27,61,92,0.25)}
+.grp-chg-vcp-first{border-left:2px solid rgba(156,66,33,0.25)}
+.grp-chg-vcp-last{border-right:2px solid rgba(156,66,33,0.25)}
+th.grp-chg-vcp-first,th.grp-chg-vcp-last{border-top:2px solid rgba(156,66,33,0.25)}
+.grp-chg-utr-first{border-left:2px solid rgba(116,66,16,0.25)}
+.grp-chg-utr-last{border-right:2px solid rgba(116,66,16,0.25)}
+th.grp-chg-utr-first,th.grp-chg-utr-last{border-top:2px solid rgba(116,66,16,0.25)}
+.grp-chg-col-first{border-left:2px solid rgba(180,30,30,0.25)}
+.grp-chg-col-last{border-right:2px solid rgba(180,30,30,0.25)}
+th.grp-chg-col-first,th.grp-chg-col-last{border-top:2px solid rgba(180,30,30,0.25)}
+.grp-chg-s3-first{border-left:2px solid rgba(200,100,0,0.25)}
+.grp-chg-s3-last{border-right:2px solid rgba(200,100,0,0.25)}
+th.grp-chg-s3-first,th.grp-chg-s3-last{border-top:2px solid rgba(200,100,0,0.25)}
+.grp-chg-s4-first{border-left:2px solid rgba(150,20,20,0.25)}
+.grp-chg-s4-last{border-right:2px solid rgba(150,20,20,0.25)}
+th.grp-chg-s4-first,th.grp-chg-s4-last{border-top:2px solid rgba(150,20,20,0.25)}
+/* Now-column emphasis — strong differentiation */
+.chg-now-cell{background:rgba(0,0,0,0.10);border-left:2px solid rgba(0,0,0,0.18)}
+.chg-now-cell .badge{font-weight:800;font-size:11px !important}
+th.chg-now-th{font-weight:800;background:rgba(0,0,0,0.08) !important;border-left:2px solid rgba(0,0,0,0.18);font-size:12px !important}
+/* CHANGES tab: fit all 35 cols on one screen */
+.chg-table-wrap{overflow-x:visible;overflow-y:visible;border-radius:8px;border:1px solid var(--border)}
+.chg-table-wrap thead{position:sticky;top:var(--header-height);z-index:9;background:var(--bg-primary)}
+table.data-table.chg-table{table-layout:fixed;width:100%}
+table.data-table.chg-table th,table.data-table.chg-table td{padding:3px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px}
+table.data-table.chg-table .badge{font-size:9px !important;padding:2px 3px}
+table.data-table.chg-table .chg-now-cell .badge{font-size:10px !important;padding:2px 4px}
+/* CHANGES tab badge colour overrides: Late=yellow, Early=orange, dash=grey */
+table.data-table.chg-table .badge-late{background:#fff9c4;color:#f9a825;border-color:rgba(249,168,37,0.35)}
+table.data-table.chg-table .badge-early{background:#fff3e0;color:#e65100;border-color:rgba(230,81,0,0.35)}
+table.data-table.chg-table .badge-fail{background:#f5f5f5;color:#9e9e9e;border:1px solid rgba(158,158,158,0.25)}
 
 table.data-table th.col-num,table.data-table td.col-num{text-align:right}
 table.data-table th.col-txt,table.data-table td.col-txt{text-align:left}
@@ -491,6 +540,8 @@ var utrMinCap=0;
 var utrStageFilter="";  // ""=all, "early"=Early+, "late"=Late+, "capital"=Capital only
 var utrFailedFilter="";  // ""=off, "L1W"=last 1 week, "L1M"=last 1 month
 var utrShowInputs=false;  // default hidden
+var chgSectorGrouping=false;  // CHANGES tab: sector separator rows off by default
+var chgHighestQual=false;  // CHANGES tab: show each stock only in rightmost Capital filter tile
 var displayMode="company";  /* Pass A.2: default to Company name across all tabs (was "ticker") */
 var valueMode="tick";
 var bpFirstVisit=true;  /* Pass A.2: flip to pct mode on first BP visit (only) */
@@ -681,6 +732,7 @@ function getTaxonomy(ticker){
 }
 
 window.switchTab=function(id){
+  window.scrollTo(0,0);
   var b=document.querySelectorAll(".tab-btn");
   for(var j=0;j<b.length;j++){b[j].classList.remove("tab-active");if(b[j].getAttribute("data-tab")===id)b[j].classList.add("tab-active")}
   var c=document.querySelectorAll(".tab-content");
@@ -1290,7 +1342,11 @@ function sortData(data,col,dir){
   });
 }
 function gnv(o,p){var k=p.split(".");var v=o;for(var j=0;j<k.length;j++){if(v==null)return null;v=v[k[j]]}return v}
-window.handleSort=function(c){if(currentSort.col===c)currentSort.dir=currentSort.dir==="asc"?"desc":"asc";else{currentSort.col=c;currentSort.dir="desc"}renderTab(currentTab)};
+window.handleSort=function(c){
+  if(currentSort.col===c)currentSort.dir=currentSort.dir==="asc"?"desc":"asc";
+  else{currentSort.col=c;currentSort.dir="desc"}
+  renderTab(currentTab);
+};
 
 function tick(v){return v?'<span class="tick">&#10003;</span>':'<span class="cross">&#10007;</span>'}
 function badge(s){if(!s)return'<span class="badge badge-fail">&mdash;</span>';if(s==="Capital")return'<span class="badge badge-capital">Capital</span>';if(s==="Late")return'<span class="badge badge-late">Late</span>';if(s==="Early")return'<span class="badge badge-early">Early</span>';return'<span class="badge badge-fail">'+s+'</span>'}
@@ -1324,6 +1380,31 @@ document.addEventListener('click',function(e){
   window.scrollTo(0,0);
   switchTab(tabId);
   setTimeout(function(){scrollToTicker(ticker)},150);
+});
+// D-MD-UI-19: CHANGES tab tile stock names — single-click opens chart (6M), double-click navigates to filter tab.
+// Uses timer to distinguish single from double click.
+var _chgClickTimer=null;
+document.addEventListener('dblclick',function(e){
+  var el=e.target.closest('.chg-tile-stock[data-ticker]');
+  if(!el)return;
+  if(_chgClickTimer){clearTimeout(_chgClickTimer);_chgClickTimer=null}
+  var tabId=el.getAttribute('data-tab');
+  var ticker=el.getAttribute('data-ticker');
+  if(!tabId)return; // placeholder filters (Collapse/S3/S4) have no tab
+  window.scrollTo(0,0);
+  switchTab(tabId);
+  setTimeout(function(){scrollToTicker(ticker)},150);
+});
+document.addEventListener('click',function(e){
+  var el=e.target.closest('.chg-tile-stock[data-ticker]');
+  if(!el)return;
+  var ticker=el.getAttribute('data-ticker');
+  if(_chgClickTimer){clearTimeout(_chgClickTimer);_chgClickTimer=null}
+  _chgClickTimer=setTimeout(function(){
+    _chgClickTimer=null;
+    chartZoom="6M";
+    openChart(ticker);
+  },250);
 });
 function scorePips(s,m){var h='<div class="score-bar">';for(var j=0;j<m;j++)h+='<div class="pip '+(j<s?'pip-on':'pip-off')+'"></div>';return h+'</div>'}
 // Score pips mapped to individual test results (each pip = one test)
@@ -1374,7 +1455,10 @@ function fpcRaw(v){
 }
 function pf(v){if(v==null)return"&mdash;";return fpc(v)}
 function nf(v,d){if(v==null)return"&mdash;";return addCommas(Number(v).toFixed(d||0))}
-function sa(c){if(currentSort.col===c)return'<span class="sort-arrow">'+(currentSort.dir==="asc"?"&#9650;":"&#9660;")+'</span>';return'<span class="sort-arrow">&#9650;</span>'}
+function sa(c){
+  if(currentSort.col===c)return'<span class="sort-arrow">'+(currentSort.dir==="asc"?"&#9650;":"&#9660;")+'</span>';
+  return'<span class="sort-arrow">&#9650;</span>';
+}
 function th(l,c,cls,tip,sty){
   var s=currentSort.col===c?" sorted":"";
   var tipHtml=tip?'<span class="key-tip">'+tip+'</span>':"";
@@ -2093,6 +2177,11 @@ function buildHeaderControls(tabId){
     h+='</div>';
     h+='<span style="border-left:1px solid var(--border);height:20px;margin:0 6px"></span>';
     h+='<button class="group-toggle'+(utrShowInputs?" active":"")+'" onclick="toggleUtrInputs()">'+(utrShowInputs?"Hide Inputs":"Show Inputs")+'</button>';
+  } else if(tabId==="changes"){
+    h+='<div class="group-toggles">';
+    h+='<button class="group-toggle'+(chgHighestQual?" active":"")+'" onclick="toggleChgHighestQual()">Highest qualification</button>';
+    h+='<button class="group-toggle'+(chgSectorGrouping?" active":"")+'" onclick="toggleChgSectorGrouping()">Sector grouping</button>';
+    h+='</div>';
   }
   el.innerHTML=h;
 
@@ -2104,13 +2193,16 @@ function buildHeaderControls(tabId){
       mm99:[{k:"ga",l:"Long-term"},{k:"gb",l:"Mid-term"},{k:"gc",l:"Short-term"},{k:"gd",l:"Leadership"},{k:"ge",l:"Rel. Strength"}],
       bp:[{k:"_gold",l:"GOLD"},{k:"_silver",l:"SILVER"},{k:"_bronze",l:"BRONZE"},{k:"_baseonly",l:"Base Only"},{k:"gc",l:"Deep Base"}],
       utr:[{k:"early",l:"Early+",fn:"setUtrStageFilter"},{k:"late",l:"Late+",fn:"setUtrStageFilter"},{k:"capital",l:"Capital",fn:"setUtrStageFilter"}],
-      pb:[{k:"ga",l:"Early"},{k:"gb",l:"Late"},{k:"gc",l:"Dead Cat"},{k:"gd",l:"PB1"},{k:"ge",l:"PB2"}]
+      pb:[{k:"ga",l:"Early"},{k:"gb",l:"Late"},{k:"gc",l:"Dead Cat"},{k:"gd",l:"PB1"},{k:"ge",l:"PB2"}],
+      changes:[{k:"section-summarybar",l:"Summary",direct:true},{k:"section-summary",l:"Changes",direct:true},{k:"section-stocks",l:"Qualified Stocks",direct:true}]
     };
     var links=GROUP_LINKS[tabId];
     if(links){
       for(var gl2=0;gl2<links.length;gl2++){
         var lk=links[gl2];
-        if(lk.fn){
+        if(lk.direct){
+          gh+='<a class="anchor-link" onclick="scrollToSection(\''+lk.k+'\')">'+lk.l+'</a>';
+        } else if(lk.fn){
           gh+='<a class="anchor-link" onclick="'+lk.fn+'(\''+lk.k+'\');setTimeout(function(){scrollToSection(\'section-stocks\')},50)">'+lk.l+'</a>';
         } else {
           gh+='<a class="anchor-link" onclick="scrollToSection(\'grp-'+lk.k+'\')">'+lk.l+'</a>';
@@ -2118,6 +2210,11 @@ function buildHeaderControls(tabId){
       }
     }
     gl.innerHTML=gh;
+    // Hide default JUMP TO links when tab has its own group links (to prevent overflow)
+    var defaultJumps=document.querySelectorAll('.default-jump');
+    for(var dj=0;dj<defaultJumps.length;dj++){
+      defaultJumps[dj].style.display=links?"none":"";
+    }
   }
 }
 
@@ -2254,6 +2351,8 @@ window.setUtrMinCap=function(s){utrMinCap=s;renderTab("utr")};
 window.setUtrStageFilter=function(s){utrStageFilter=(utrStageFilter===s)?"":s;renderTab("utr")};
 window.setUtrFailedFilter=function(f){utrFailedFilter=(utrFailedFilter===f)?"":f;renderTab("utr")};
 window.toggleUtrInputs=function(){utrShowInputs=!utrShowInputs;renderTab("utr")};
+window.toggleChgSectorGrouping=function(){chgSectorGrouping=!chgSectorGrouping;renderTab("changes")};
+window.toggleChgHighestQual=function(){chgHighestQual=!chgHighestQual;renderTab("changes")};
 
 // ================================================================
 // BASING PLATEAU TAB \u2014 Pass A simplified (02-May-26)
@@ -3674,6 +3773,368 @@ function updateIndSecPills(){
     else tables[t].classList.remove("ind-sec-highlight");
   }
 }
+// ══════════════════════════════════════════════════════════════
+// CHANGES TAB (D-MD-UI-19) — Stage changes over 4 time points
+// ══════════════════════════════════════════════════════════════
+function renderChanges(){
+  buildHeaderControls("changes");
+  var fh=D.filter_history;
+  if(!fh||!fh.stages){
+    document.getElementById("tab-changes").innerHTML='<div class="empty-state">No historical data. Run generate_master_data.py --with-history</div>';
+    return;
+  }
+  var stages=fh.stages;
+  var t0=stages["T-0"]||{};
+  var t1=stages["T-1"]||{};
+  var t5=stages["T-5"]||{};
+  var t22=stages["T-22"]||{};
+  var allRows=baseRows();
+  var h='';
+
+  // Shared filter definitions for both tiles and table
+  var FILTER_ORDER=["collapse","basing_plateau","probing_bet","vcp","mm99","uptrend_retest","s3_topping","s4_declining"];
+  var FILTER_COLS={"collapse":"Collapse","basing_plateau":"Basing Plateau","probing_bet":"Probing Bet","mm99":"MM99","vcp":"VCP","uptrend_retest":"Uptrend Retest","s3_topping":"S3 Topping","s4_declining":"S4 Declining"};
+  var TILE_BORDER={"collapse":"rgba(180,30,30,0.35)","basing_plateau":"rgba(39,103,73,0.35)","probing_bet":"rgba(107,70,193,0.35)","mm99":"rgba(27,61,92,0.35)","vcp":"rgba(156,66,33,0.35)","uptrend_retest":"rgba(116,66,16,0.35)","s3_topping":"rgba(200,100,0,0.35)","s4_declining":"rgba(150,20,20,0.35)"};
+  function stRank(s){return s==="Capital"?3:s==="Late"?2:s==="Early"?1:0}
+
+  // Build lookup for stock metadata (needed by tiles and table)
+  var metaLookup={};
+  allRows.forEach(function(r){metaLookup[r.ticker]=r});
+
+  // ── SECTION 1: Changes In/Out tiles ──────────────────────
+  // Section title with date range
+  var fhMeta=fh._meta||{};
+  var t0DateStr=fhMeta.generated||D.meta.generated||'';
+  var t0D=t0DateStr?new Date(t0DateStr.replace(' ','T')):new Date();
+  var t1D=new Date(t0D);t1D.setDate(t1D.getDate()-1);
+  var t5D=new Date(t0D);t5D.setDate(t5D.getDate()-7);
+  var t22D=new Date(t0D);t22D.setDate(t22D.getDate()-31);
+  var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function fmtDDM(d){return d.getDate()+"-"+MON[d.getMonth()]}
+
+  // ── SUMMARY BAR — stage counts + multi-qualification insight ──
+  // Count Capital/Late/Early per filter from T-0 data
+  var stageCounts={};
+  FILTER_ORDER.forEach(function(f){stageCounts[f]={Capital:0,Late:0,Early:0}});
+  var multiMap={};  // ticker → list of filters where Capital
+  for(var tk in t0){
+    var capFilters=[];
+    FILTER_ORDER.forEach(function(f){
+      var st=t0[tk]&&t0[tk][f];
+      if(st==="Capital"){stageCounts[f].Capital++;capFilters.push(f)}
+      else if(st==="Late")stageCounts[f].Late++;
+      else if(st==="Early")stageCounts[f].Early++;
+    });
+    if(capFilters.length>=2)multiMap[tk]=capFilters;
+  }
+  // Analyse multi-qualification combos
+  var multiTickers=Object.keys(multiMap);
+  var comboCount={};
+  multiTickers.forEach(function(tk){
+    var key=multiMap[tk].map(function(f){return FILTER_COLS[f]}).sort().join(" + ");
+    if(!comboCount[key])comboCount[key]={count:0,tickers:[]};
+    comboCount[key].count++;
+    comboCount[key].tickers.push(tk);
+  });
+  var comboPairs=[];
+  for(var ck in comboCount)comboPairs.push({combo:ck,count:comboCount[ck].count,tickers:comboCount[ck].tickers});
+  comboPairs.sort(function(a,b){return b.count-a.count});
+
+  // Build summary bar HTML
+  var BG_MAP_SB={"collapse":"rgba(180,30,30,0.08)","basing_plateau":"rgba(39,103,73,0.08)","probing_bet":"rgba(107,70,193,0.08)","mm99":"rgba(27,61,92,0.08)","vcp":"rgba(156,66,33,0.08)","uptrend_retest":"rgba(116,66,16,0.08)","s3_topping":"rgba(200,100,0,0.08)","s4_declining":"rgba(150,20,20,0.08)"};
+  h+='<div id="section-summarybar" style="display:flex;gap:12px;margin:12px 0;padding:10px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;align-items:stretch">';
+  // Left side: 8 filter columns (~65%)
+  h+='<div style="display:flex;gap:1px;flex:7">';
+  FILTER_ORDER.forEach(function(f){
+    var lab=FILTER_COLS[f];
+    var bg=BG_MAP_SB[f]||"rgba(100,100,100,0.08)";
+    var sc=stageCounts[f];
+    h+='<div style="flex:1;text-align:center;padding:6px 2px;border-radius:4px;background:'+bg+'">';
+    h+='<div style="font-size:10px;font-weight:700;color:var(--text-primary);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+lab+'</div>';
+    h+='<div style="font-size:16px;font-weight:700;color:#38a169">'+sc.Capital+'</div>';
+    h+='<div style="font-size:9px;color:var(--text-secondary);margin-bottom:3px">Capital</div>';
+    h+='<div style="display:flex;justify-content:center;gap:8px">';
+    h+='<div><span style="font-size:12px;font-weight:600;color:#d69e2e">'+sc.Late+'</span><div style="font-size:8px;color:var(--text-secondary)">Late</div></div>';
+    h+='<div><span style="font-size:12px;font-weight:600;color:#dd6b20">'+sc.Early+'</span><div style="font-size:8px;color:var(--text-secondary)">Early</div></div>';
+    h+='</div></div>';
+  });
+  h+='</div>';
+  // Right side: Multi-qualification insight (~35%)
+  h+='<div style="flex:3;padding:6px 10px;border-left:1px solid var(--border)">';
+  h+='<div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Multi-Qualification</div>';
+  if(multiTickers.length===0){
+    h+='<div style="font-size:11px;color:var(--text-secondary)">No stocks currently qualify for Capital across multiple filters.</div>';
+  }else{
+    h+='<div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px"><strong>'+multiTickers.length+'</strong> stocks qualify for Capital in 2+ filters simultaneously.</div>';
+    h+='<ul style="margin:0;padding-left:14px;font-size:10px;color:var(--text-secondary);line-height:1.5">';
+    comboPairs.forEach(function(cp){
+      if(cp.count>5){
+        h+='<li><strong>'+cp.combo+'</strong>: '+cp.count+' stocks &mdash; dominant combination</li>';
+      }else if(cp.count>1){
+        h+='<li><strong>'+cp.combo+'</strong>: '+cp.count+' stocks ('+cp.tickers.join(", ")+')</li>';
+      }else{
+        h+='<li><strong>'+cp.combo+'</strong>: '+cp.tickers[0]+'</li>';
+      }
+    });
+    h+='</ul>';
+    // Qualitative summary
+    if(comboPairs.length===1){
+      h+='<div style="font-size:10px;color:var(--text-secondary);margin-top:4px;font-style:italic">All multi-qualifications are in the same pair &mdash; highly concentrated overlap.</div>';
+    }else if(comboPairs.length<=3){
+      h+='<div style="font-size:10px;color:var(--text-secondary);margin-top:4px;font-style:italic">'+comboPairs.length+' distinct combinations &mdash; overlap is narrow and concentrated.</div>';
+    }else{
+      h+='<div style="font-size:10px;color:var(--text-secondary);margin-top:4px;font-style:italic">'+comboPairs.length+' distinct combinations &mdash; broad overlap across filters.</div>';
+    }
+  }
+  h+='</div></div>';
+
+  h+='<h3 id="section-summary" style="margin:16px 0 8px;font-size:15px;font-weight:600;color:var(--text-primary)">Changes over last week &mdash; '+fmtDDM(t5D)+' to '+fmtDDM(t0D)+'</h3>';
+
+  // Pre-compute "highest qualification" map: each ticker → its rightmost Capital filter
+  var _hqMap={};
+  if(chgHighestQual){
+    // For newCap: stock is Capital NOW — find rightmost Capital filter in t0
+    for(var tk in t0){
+      for(var fi=FILTER_ORDER.length-1;fi>=0;fi--){
+        if(t0[tk]&&t0[tk][FILTER_ORDER[fi]]==="Capital"){
+          _hqMap[tk]=FILTER_ORDER[fi];
+          break;
+        }
+      }
+    }
+    // For lostCap: stock WAS Capital at t5 but is NOT at t0
+    // These stocks need assignment based on where they WERE Capital (t5)
+    // But we must NOT override a t0 assignment — a stock still Capital in some filter
+    // should use its t0 rightmost, not its t5 rightmost
+    for(var tk in t5){
+      if(_hqMap[tk])continue;  // already has t0 assignment (still Capital somewhere)
+      for(var fi=FILTER_ORDER.length-1;fi>=0;fi--){
+        if(t5[tk]&&t5[tk][FILTER_ORDER[fi]]==="Capital"){
+          _hqMap[tk]=FILTER_ORDER[fi];
+          break;
+        }
+      }
+    }
+  }
+
+  h+='<div class="changes-tiles" style="display:flex;flex-wrap:wrap;gap:12px;margin:8px 0 16px">';
+  FILTER_ORDER.forEach(function(filt){
+    var label=FILTER_COLS[filt]||filt;
+    var borderCol=TILE_BORDER[filt]||"rgba(100,100,100,0.25)";
+    var newCap=[];var lostCap=[];
+    // Only compute for filters that exist in the data (placeholder filters will have empty lists)
+    for(var tk in t0){
+      var curr=t0[tk]&&t0[tk][filt];
+      var prev=t5[tk]&&t5[tk][filt];
+      if(curr==="Capital"&&prev!=="Capital")newCap.push(tk);
+      if(prev==="Capital"&&curr!=="Capital")lostCap.push(tk);
+    }
+    // Highest qualification: only show stock in its rightmost Capital filter tile
+    // Applies to newCap only — lostCap always shows (losing Capital is a real change regardless)
+    if(chgHighestQual){
+      newCap=newCap.filter(function(tk){return _hqMap[tk]===filt});
+    }
+    h+='<div style="background:var(--bg-secondary);border:2px solid '+borderCol+';border-radius:8px;padding:12px 14px;min-width:140px;flex:1;max-width:220px">';
+    h+='<div style="font-weight:700;font-size:13px;margin-bottom:8px;color:var(--text-primary)">'+label+'</div>';
+    h+='<div style="display:flex;gap:16px;margin-bottom:6px">';
+    h+='<div><span style="color:#38a169;font-weight:700;font-size:18px">+'+newCap.length+'</span><div style="font-size:10px;color:var(--text-secondary)">Newly qualified</div></div>';
+    h+='<div><span style="color:#e53e3e;font-weight:700;font-size:18px">-'+lostCap.length+'</span><div style="font-size:10px;color:var(--text-secondary)">Previously qualified</div></div>';
+    h+='</div>';
+    // List stocks vertically with company/ticker toggle + industry/sector + qualification duration
+    // Derive when qualification changed using T-0/T-1/T-5/T-22 data
+    function qualInfo(tk,filt,isNew){
+      // For "newly qualified": when did it become Capital?
+      // For "previously qualified": when did it lose Capital?
+      var c0=t0[tk]&&t0[tk][filt], c1=t1[tk]&&t1[tk][filt], c5=t5[tk]&&t5[tk][filt], c22=t22[tk]&&t22[tk][filt];
+      if(isNew){
+        // Stock is Capital now. When did it gain Capital?
+        if(c1!=="Capital"){return{days:"~1d",since:fmtDDM(t0D)}}
+        if(c5!=="Capital"){return{days:"~3d",since:fmtDDM(t1D)}}
+        if(c22!=="Capital"){return{days:"~2w",since:fmtDDM(t5D)}}
+        return{days:">1M",since:"before "+fmtDDM(t22D)};
+      }else{
+        // Stock lost Capital. When?
+        if(c1==="Capital"){return{days:"~1d ago",since:fmtDDM(t0D)}}
+        if(c5==="Capital"){return{days:"~3d ago",since:fmtDDM(t1D)}}
+        return{days:">1w ago",since:fmtDDM(t5D)};
+      }
+    }
+    // Map filter key → tab ID for double-click navigation
+    var FILT_TAB={"basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr"};
+    function renderStockList(tickers,color,isNew){
+      var out='';
+      tickers.forEach(function(tk){
+        var meta=metaLookup[tk]||{};
+        var dn=(displayMode==="company")?(meta.company||tk):tk;
+        var qi=qualInfo(tk,filt,isNew);
+        var tabId=FILT_TAB[filt]||'';
+        out+='<div style="margin-bottom:4px"><div class="chg-tile-stock" data-ticker="'+tk+'" data-tab="'+tabId+'" style="font-size:11px;font-weight:600;color:'+color+';cursor:pointer">'+dn+' <span style="font-weight:400;font-size:9px;color:#999">'+qi.days+' ('+qi.since+')</span></div>';
+        var sub=meta.sector||(meta.industry||'');
+        if(meta.sector&&meta.industry)sub=meta.industry+' / '+meta.sector;
+        if(sub)out+='<div style="font-size:9px;color:#999;margin-top:-1px">'+sub+'</div>';
+        out+='</div>';
+      });
+      return out;
+    }
+    if(newCap.length>0)h+=renderStockList(newCap,"#38a169",true);
+    if(lostCap.length>0){if(newCap.length>0)h+='<div style="border-top:1px solid var(--border);margin:4px 0"></div>';h+=renderStockList(lostCap,"#e53e3e",false)}
+    h+='</div>';
+  });
+  h+='</div>';
+
+  // ── SECTION 2: Changes table — all stocks with any change ──
+  // Slim inputs (3 cols) + 8 filter groups x 4 time columns
+  var TIME_LABELS=["1M","1W","1D","Now"];
+  var TIME_KEYS=["T-22","T-5","T-1","T-0"];
+
+  // CSS key map for column group borders
+  var GRP_KEY={"collapse":"col","basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr","s3_topping":"s3","s4_declining":"s4"};
+  // Tab ID map for navBadge click-through on Now column
+  var CHG_TAB={"basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr"};
+
+  // Build row objects with projected stage values for sorting
+  var TIME_SUFFIXES=["1m","1w","1d","now"];
+  var chgRows=[];
+  for(var tk in t0){
+    var changed=false;
+    for(var fi=0;fi<FILTER_ORDER.length;fi++){
+      var f=FILTER_ORDER[fi];
+      var s0=t0[tk]?t0[tk][f]:null;
+      var s1=t1[tk]?t1[tk][f]:null;
+      var s5=t5[tk]?t5[tk][f]:null;
+      var s22=t22[tk]?t22[tk][f]:null;
+      if(s0!==s22||s0!==s5||s0!==s1){changed=true;break}
+    }
+    if(!changed)continue;
+    var meta=metaLookup[tk]||{};
+    var row={ticker:tk,sector:meta.sector||'',industry:meta.industry||''};
+    // Project stage values as sortable keys: chg_{filter}_{time}
+    var chgScore=0;
+    FILTER_ORDER.forEach(function(f){
+      var gk=GRP_KEY[f];
+      var tps=[t22,t5,t1,t0];
+      var vals=new Set();
+      tps.forEach(function(tp,ti){
+        var st=(tp[tk]&&tp[tk][f])?tp[tk][f]:null;
+        row["chg_"+gk+"_"+TIME_SUFFIXES[ti]]=st;
+        if(st!=null)vals.add(st);else vals.add(null);
+      });
+      chgScore+=vals.size-1;
+    });
+    row.chg_score=chgScore;
+    chgRows.push(row);
+  }
+  // Sort: single sort
+  var _usingDefault=false;
+  if(currentSort.col&&currentSort.col.indexOf("chg_")===0){
+    chgRows=sortData(chgRows,currentSort.col,currentSort.dir);
+  }else if(currentSort.col==="ticker"||currentSort.col==="industry"){
+    chgRows=sortData(chgRows,currentSort.col,currentSort.dir);
+  }else if(currentSort.col==="sector"){
+    chgRows=sortData(chgRows,"sector",currentSort.dir);
+  }else{
+    chgRows=sortData(chgRows,"chg_score","desc");
+    _usingDefault=true;
+  }
+  // Only group by sector when using default sort (chg_score) — explicit column sorts are flat
+  if(_usingDefault){
+    chgRows.sort(function(a,b){
+      var sa3=a.sector.toLowerCase(),sb3=b.sector.toLowerCase();
+      if(sa3<sb3)return -1;if(sa3>sb3)return 1;return 0;
+    });
+  }
+
+  h+='<div id="section-stocks" style="margin-top:8px;font-size:13px;color:var(--text-secondary)">'+chgRows.length+' stocks with stage changes (vs 1M ago)</div>';
+
+  h+='<div class="chg-table-wrap"><table class="data-table chg-table">';
+  // Colgroup: 3 Inputs cols (fixed width) + 32 stage cols (equal share of remaining space)
+  h+='<colgroup><col style="width:70px"><col style="width:80px"><col style="width:80px">';
+  for(var ci=0;ci<32;ci++)h+='<col>';
+  h+='</colgroup><thead>';
+
+  // Group header row
+  h+='<tr class="group-header-row">';
+  h+='<th colspan="3" style="background:rgba(100,100,100,0.06)">Inputs</th>';
+  FILTER_ORDER.forEach(function(f){
+    var lab=FILTER_COLS[f];
+    var BG_MAP={"collapse":"rgba(180,30,30,0.08)","basing_plateau":"rgba(39,103,73,0.08)","probing_bet":"rgba(107,70,193,0.08)","mm99":"rgba(27,61,92,0.08)","vcp":"rgba(156,66,33,0.08)","uptrend_retest":"rgba(116,66,16,0.08)","s3_topping":"rgba(200,100,0,0.08)","s4_declining":"rgba(150,20,20,0.08)"};
+    var bg=BG_MAP[f]||"rgba(100,100,100,0.08)";
+    var gk=GRP_KEY[f];
+    h+='<th colspan="4" class="grp-chg-'+gk+'-first grp-chg-'+gk+'-last" style="background:'+bg+'">'+lab+'</th>';
+  });
+  h+='</tr>';
+
+  // Column header row — sortable via th() helper
+  h+='<tr>';
+  h+=th("Ticker","ticker","col-txt col-filter");
+  h+=th("Industry","industry","col-txt col-filter");
+  h+=th("Sector","sector","col-txt col-filter");
+  FILTER_ORDER.forEach(function(f){
+    var gk=GRP_KEY[f];
+    TIME_SUFFIXES.forEach(function(sf,ti){
+      var tl=TIME_LABELS[ti];
+      var sortKey="chg_"+gk+"_"+sf;
+      var isFirst=(ti===0);var isLast=(ti===3);
+      var isNow=(ti===3);
+      var cls='col-txt col-filter';
+      if(isFirst)cls+=' grp-chg-'+gk+'-first';
+      if(isLast)cls+=' grp-chg-'+gk+'-last';
+      if(isNow)cls+=' chg-now-th';
+      h+=th(tl,sortKey,cls,null,"font-size:10px");
+    });
+  });
+  h+='</tr></thead><tbody>';
+
+  // Render rows from sorted chgRows, with optional sector group separators
+  var _prevSector='';
+  chgRows.forEach(function(row){
+    if(chgSectorGrouping&&row.sector!==_prevSector){
+      var secLabel=row.sector||'Unknown';
+      var secCount=chgRows.filter(function(r){return r.sector===row.sector}).length;
+      h+='<tr class="group-header-row"><td colspan="35" style="background:rgba(100,100,100,0.06);font-weight:700;font-size:11px;padding:4px 8px;color:var(--text-primary)">'+secLabel+' <span style="font-weight:400;color:var(--text-secondary)">('+secCount+')</span></td></tr>';
+      _prevSector=row.sector;
+    }
+    h+='<tr data-ticker="'+row.ticker+'">';
+    h+='<td class="col-txt">'+row.ticker+'</td>';
+    h+='<td class="col-txt">'+row.industry+'</td>';
+    h+='<td class="col-txt">'+row.sector+'</td>';
+    FILTER_ORDER.forEach(function(f){
+      var gk=GRP_KEY[f];
+      // Read stage values from projected row keys
+      var stages_at=[row["chg_"+gk+"_1m"],row["chg_"+gk+"_1w"],row["chg_"+gk+"_1d"],row["chg_"+gk+"_now"]];
+      // Render 4 cells with change highlighting + group borders + Now emphasis
+      for(var ci=0;ci<4;ci++){
+        var st=stages_at[ci];
+        var prev_st=ci>0?stages_at[ci-1]:null;
+        var cellStyle='';
+        if(ci>0&&st!==prev_st){
+          var r0=stRank(st);var r1=stRank(prev_st);
+          if(r0>r1)cellStyle='background:rgba(56,161,105,0.15)';  // upgrade = green
+          else if(r0<r1)cellStyle='background:rgba(229,62,62,0.15)';  // downgrade = red
+        }
+        var isFirst=(ci===0);var isLast=(ci===3);var isNow=(ci===3);
+        var tdCls='col-txt';
+        if(isFirst)tdCls+=' grp-chg-'+gk+'-first';
+        if(isLast)tdCls+=' grp-chg-'+gk+'-last';
+        if(isNow)tdCls+=' chg-now-cell';
+        // Now column (ci===3): use navBadge for clickable navigation to filter tab
+        if(isNow&&st&&CHG_TAB[f]){
+          h+='<td class="'+tdCls+'" style="'+cellStyle+';text-align:center">'+navBadge(st,row.ticker,CHG_TAB[f])+'</td>';
+        }else{
+          var badge_cls=st==="Capital"?"badge-capital":st==="Late"?"badge-late":st==="Early"?"badge-early":"badge-fail";
+          var badge_txt=st||'&mdash;';
+          h+='<td class="'+tdCls+'" style="'+cellStyle+';text-align:center"><span class="badge '+badge_cls+'" style="font-size:10px">'+badge_txt+'</span></td>';
+        }
+      }
+    });
+    h+='</tr>';
+  });
+
+  h+='</tbody></table></div>';
+
+  document.getElementById("tab-changes").innerHTML=h;
+}
+
 function renderTab(id){
   try{
   if(id==="mm99")renderMM99();
@@ -3683,6 +4144,7 @@ function renderTab(id){
   else if(id==="vcp")renderVCP();
   else if(id==="tech")renderTech();
   else if(id==="combos")renderCombos();
+  else if(id==="changes")renderChanges();
   else if(id==="positions")renderPositions();
   else if(id==="ssem")renderSSEM();
   else if(id==="val")renderVal();
@@ -3742,11 +4204,11 @@ renderTab("mm99");
         '    <div class="tab-nav">' + tab_buttons + '</div>\n'
         '    <div class="anchor-links" style="margin-left:auto">\n'
         '      <span class="row-label" style="margin-right:4px">#2 Jump to</span>\n'
-        '      <a class="anchor-link" onclick="scrollToSection(\'section-summary\')">Summary</a>\n'
-        '      <a class="anchor-link" onclick="scrollToSection(\'section-industries\')">Industries</a>\n'
-        '      <a class="anchor-link" onclick="scrollToSection(\'section-sectors\')">Sectors</a>\n'
-        '      <a class="anchor-link" onclick="scrollToSection(\'section-portfolio\')">Live Portfolio</a>\n'
-        '      <a class="anchor-link" onclick="scrollToSection(\'section-stocks\')">Qualified Stocks</a>\n'
+        '      <a class="anchor-link default-jump" onclick="scrollToSection(\'section-summary\')">Summary</a>\n'
+        '      <a class="anchor-link default-jump" onclick="scrollToSection(\'section-industries\')">Industries</a>\n'
+        '      <a class="anchor-link default-jump" onclick="scrollToSection(\'section-sectors\')">Sectors</a>\n'
+        '      <a class="anchor-link default-jump" onclick="scrollToSection(\'section-portfolio\')">Live Portfolio</a>\n'
+        '      <a class="anchor-link default-jump" onclick="scrollToSection(\'section-stocks\')">Qualified Stocks</a>\n'
         '      <span id="group-links"></span>\n'
         '    </div>\n'
         '  </div>\n'

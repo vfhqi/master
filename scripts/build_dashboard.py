@@ -1321,8 +1321,9 @@ document.addEventListener('click',function(e){
   e.stopPropagation(); // prevent row-level openChart
   var tabId=el.getAttribute('data-nav-tab');
   var ticker=el.getAttribute('data-nav-ticker');
+  window.scrollTo(0,0);
   switchTab(tabId);
-  setTimeout(function(){scrollToTicker(ticker)},120);
+  setTimeout(function(){scrollToTicker(ticker)},150);
 });
 function scorePips(s,m){var h='<div class="score-bar">';for(var j=0;j<m;j++)h+='<div class="pip '+(j<s?'pip-on':'pip-off')+'"></div>';return h+'</div>'}
 // Score pips mapped to individual test results (each pip = one test)

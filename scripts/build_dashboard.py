@@ -1308,7 +1308,11 @@ window.scrollToTicker=function(ticker){
   var rows=active.querySelectorAll('tr[data-ticker="'+ticker+'"]');
   if(rows.length===0)return;
   var target=rows[rows.length>1?1:0]; // prefer QS row (2nd) over LP row (1st) if both exist
-  target.scrollIntoView({block:'start',behavior:'smooth'});
+  var hdrH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'))||145;
+  var thHdr=target.closest('table')&&target.closest('table').querySelector('thead');
+  var thH=thHdr?thHdr.offsetHeight:40;
+  var y=target.getBoundingClientRect().top+window.pageYOffset-hdrH-thH-8;
+  window.scrollTo({top:y,behavior:'smooth'});
   target.style.transition='background 0.3s';target.style.background='rgba(221,107,32,0.18)';
   setTimeout(function(){target.style.background=''},2000);
 };

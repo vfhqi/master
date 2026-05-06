@@ -48,7 +48,22 @@ def load_data():
     if fh_path.exists():
         filter_history = safe_json_load(fh_path)
     universe = safe_json_load(DATA_DIR / "universe.json")
-    ticker_mapping = safe_json_load(DATA_DIR / "ticker_mapping.json")
+    # Canonical taxonomy: prefer stock_mapping_final.json (full universe coverage).
+    # Falls back to legacy ticker_mapping.json (29-stock crosswalk) only if canonical absent.
+    sm_path = COWORK_ROOT / "stock_mapping_final.json"
+    if sm_path.exists():
+        sm_raw = safe_json_load(sm_path)
+        ticker_mapping = {"stocks": {}}
+        for tk, td in sm_raw.items():
+            if isinstance(td, dict) and td.get("new_industry"):
+                ticker_mapping["stocks"][tk] = {
+                    "industry": td["new_industry"],
+                    "sector":   td["new_sector"],
+                }
+        print(f"  Loaded canonical taxonomy: {len(ticker_mapping['stocks'])} entries from stock_mapping_final.json")
+    else:
+        ticker_mapping = safe_json_load(DATA_DIR / "ticker_mapping.json")
+        print(f"  WARNING: stock_mapping_final.json not found, using legacy ticker_mapping.json ({len(ticker_mapping.get('stocks',{}))} entries)")
 
     # SSEM
     ssem = None

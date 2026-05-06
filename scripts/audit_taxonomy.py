@@ -83,7 +83,15 @@ def main():
     print(f"Loading {WATCHLIST}")
     with open(WATCHLIST) as f:
         wl = json.load(f)
-    print(f"  Watchlist: {len(wl['stocks'])} stocks")
+    n_rows = len(wl['stocks'])
+    n_unique = len(set(s['ticker'] for s in wl['stocks']))
+    print(f"  Watchlist: {n_rows} rows, {n_unique} unique tickers")
+    if n_rows != n_unique:
+        from collections import Counter
+        dup_counts = Counter(s['ticker'] for s in wl['stocks'])
+        dups = {t: c for t, c in dup_counts.items() if c > 1}
+        print(f"  WARNING: {len(dups)} duplicate ticker(s): {dups}")
+        print(f"  Run dedupe_watchlist.py to fix.")
 
     print(f"Loading {MAPPING}")
     with open(MAPPING) as f:

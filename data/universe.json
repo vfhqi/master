@@ -31,7 +31,7 @@
       "sector": "Auto Components"
     },
     {
-      "ticker": "ASSA-SE",
+      "ticker": "ASSA.B-SE",
       "yfinance_ticker": "ASSA-B.ST",
       "company_name": "ASSA ABLOY",
       "date_added": "2026-04-15",
@@ -41,7 +41,7 @@
       "sector": "Security Systems"
     },
     {
-      "ticker": "ATCO-SE",
+      "ticker": "ATCO.A-SE",
       "yfinance_ticker": "ATCO-A.ST",
       "company_name": "Atlas Copco",
       "date_added": "2026-04-15",
@@ -71,7 +71,7 @@
       "sector": "Real Estate"
     },
     {
-      "ticker": "BEIJ-SE",
+      "ticker": "BEIJ.B-SE",
       "yfinance_ticker": "BEIJ-B.ST",
       "company_name": "Beijer Ref",
       "date_added": "2026-04-15",
@@ -91,7 +91,7 @@
       "sector": "Metals & Mining"
     },
     {
-      "ticker": "CLAS-SE",
+      "ticker": "CLAS.B-SE",
       "yfinance_ticker": "CLAS-B.ST",
       "company_name": "Clas Ohlson",
       "date_added": "2026-04-15",
@@ -121,7 +121,7 @@
       "sector": "IT Distribution"
     },
     {
-      "ticker": "EKTA-SE",
+      "ticker": "EKTA.B-SE",
       "yfinance_ticker": "EKTA-B.ST",
       "company_name": "Elekta",
       "date_added": "2026-04-15",
@@ -131,7 +131,7 @@
       "sector": "Medical Equipment"
     },
     {
-      "ticker": "ELUX-SE",
+      "ticker": "ELUX.B-SE",
       "yfinance_ticker": "ELUX-B.ST",
       "company_name": "Electrolux",
       "date_added": "2026-04-15",
@@ -161,7 +161,7 @@
       "sector": "Gaming"
     },
     {
-      "ticker": "GETI-SE",
+      "ticker": "GETI.B-SE",
       "yfinance_ticker": "GETI-B.ST",
       "company_name": "Getinge",
       "date_added": "2026-04-15",
@@ -171,7 +171,7 @@
       "sector": "Medical Equipment"
     },
     {
-      "ticker": "HEXA-SE",
+      "ticker": "HEXA.B-SE",
       "yfinance_ticker": "HEXA-B.ST",
       "company_name": "Hexagon",
       "date_added": "2026-04-15",
@@ -261,7 +261,7 @@
       "sector": "Building Products"
     },
     {
-      "ticker": "LIFCO-SE",
+      "ticker": "LIFCO.B-SE",
       "yfinance_ticker": "LIFCO-B.ST",
       "company_name": "Lifco",
       "date_added": "2026-04-15",
@@ -281,7 +281,7 @@
       "sector": "Software"
     },
     {
-      "ticker": "NIBE-SE",
+      "ticker": "NIBE.B-SE",
       "yfinance_ticker": "NIBE-B.ST",
       "company_name": "NIBE Industrier",
       "date_added": "2026-04-15",
@@ -291,7 +291,7 @@
       "sector": "Heating Systems"
     },
     {
-      "ticker": "NKT-SE",
+      "ticker": "NKT-DK",
       "yfinance_ticker": "NKT.CO",
       "dashboard_ticker": "NKT-DK",
       "company_name": "NKT",
@@ -302,7 +302,7 @@
       "sector": "Cables"
     },
     {
-      "ticker": "NOLA-SE",
+      "ticker": "NOLA.B-SE",
       "yfinance_ticker": "NOLA-B.ST",
       "company_name": "Nolato",
       "date_added": "2026-04-15",
@@ -312,7 +312,7 @@
       "sector": "Polymer Solutions"
     },
     {
-      "ticker": "NSIS-DK",
+      "ticker": "NSIS.B-DK",
       "yfinance_ticker": "NSIS-B.CO",
       "company_name": "Novonesis",
       "date_added": "2026-04-15",
@@ -322,7 +322,7 @@
       "sector": "Healthcare"
     },
     {
-      "ticker": "PEAB-SE",
+      "ticker": "PEAB.B-SE",
       "yfinance_ticker": "PEAB-B.ST",
       "company_name": "PEAB",
       "date_added": "2026-04-15",
@@ -332,7 +332,7 @@
       "sector": "Construction"
     },
     {
-      "ticker": "SAGA-SE",
+      "ticker": "SAGA.B-SE",
       "yfinance_ticker": "SAGA-B.ST",
       "company_name": "Sagax",
       "date_added": "2026-04-15",
@@ -372,7 +372,7 @@
       "sector": "Security Services"
     },
     {
-      "ticker": "SKA-SE",
+      "ticker": "SKA.B-SE",
       "yfinance_ticker": "SKA-B.ST",
       "company_name": "Skanska",
       "date_added": "2026-04-15",
@@ -382,7 +382,7 @@
       "sector": "Construction"
     },
     {
-      "ticker": "SKF-SE",
+      "ticker": "SKF.B-SE",
       "yfinance_ticker": "SKF-B.ST",
       "company_name": "SKF",
       "date_added": "2026-04-15",
@@ -412,7 +412,7 @@
       "sector": "Tobacco"
     },
     {
-      "ticker": "TEL2-SE",
+      "ticker": "TEL2.B-SE",
       "yfinance_ticker": "TEL2-B.ST",
       "company_name": "Tele2",
       "date_added": "2026-04-15",
@@ -442,7 +442,7 @@
       "sector": "Eye Tracking"
     },
     {
-      "ticker": "VOLV-SE",
+      "ticker": "VOLV.B-SE",
       "yfinance_ticker": "VOLV-B.ST",
       "company_name": "Volvo",
       "date_added": "2026-04-15",
@@ -471,16 +471,6 @@
       "target_ma": "50D",
       "industry": "Consumer Discretionary",
       "sector": "Apparel"
-    },
-    {
-      "ticker": "AIR-DE",
-      "yfinance_ticker": "AIR.DE",
-      "company_name": "Airbus",
-      "date_added": "2026-04-15",
-      "notes": "",
-      "target_ma": "50D",
-      "industry": "Industrials",
-      "sector": "Aerospace & Defence"
     },
     {
       "ticker": "ALV-DE",
@@ -764,27 +754,6 @@
       "sector": "Medical Equipment"
     },
     {
-      "ticker": "RDSA-NL",
-      "yfinance_ticker": "SHELL.AS",
-      "dashboard_ticker": "SHEL-GB",
-      "company_name": "Shell",
-      "date_added": "2026-04-15",
-      "notes": "",
-      "target_ma": "50D",
-      "industry": "Energy",
-      "sector": "Oil & Gas"
-    },
-    {
-      "ticker": "UNA-NL",
-      "yfinance_ticker": "UNA.AS",
-      "company_name": "Unilever",
-      "date_added": "2026-04-15",
-      "notes": "",
-      "target_ma": "50D",
-      "industry": "Consumer Staples",
-      "sector": "Household Products"
-    },
-    {
       "ticker": "WKL-NL",
       "yfinance_ticker": "WKL.AS",
       "company_name": "Wolters Kluwer",
@@ -836,7 +805,7 @@
       "sector": "Oil & Gas"
     },
     {
-      "ticker": "BT-GB",
+      "ticker": "BT.A-GB",
       "yfinance_ticker": "BT-A.L",
       "company_name": "BT Group",
       "date_added": "2026-04-15",
@@ -939,7 +908,7 @@
       "sector": "Cables"
     },
     {
-      "ticker": "PRY-GB",
+      "ticker": "PRY-IT",
       "yfinance_ticker": "PRY.MI",
       "dashboard_ticker": "PRY-IT",
       "company_name": "Prysmian",
@@ -1251,9 +1220,9 @@
       "sector": "Media"
     },
     {
-      "ticker": "CARLB-DK",
+      "ticker": "CARL.B-DK",
       "yfinance_ticker": "CARL-B.CO",
-      "dashboard_ticker": "CARLB-DK",
+      "dashboard_ticker": "CARL.B-DK",
       "company_name": "Carlsberg",
       "date_added": "2026-04-15",
       "notes": "ESA done, in DD",
@@ -1273,9 +1242,9 @@
       "sector": "Materials"
     },
     {
-      "ticker": "NOVO-DK",
+      "ticker": "NOVO.B-DK",
       "yfinance_ticker": "NOVO-B.CO",
-      "dashboard_ticker": "NOVO-DK",
+      "dashboard_ticker": "NOVO.B-DK",
       "company_name": "Novo Nordisk",
       "date_added": "2026-04-15",
       "notes": "",

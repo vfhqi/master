@@ -1453,7 +1453,33 @@ def main():
     parser.add_argument("--full-refresh", action="store_true", help="Force full re-pull from yfinance")
     parser.add_argument("--full-universe", action="store_true", help="Use full 976-stock watchlist instead of alpha universe")
     parser.add_argument("--with-history", action="store_true", help="Compute historical stages at T-1/T-5/T-22 for CHANGES tab")
+    parser.add_argument("--allow-unmapped", action="store_true", help="Allow watchlist stocks with no canonical taxonomy (default: abort)")
+    parser.add_argument("--strict-integrity", action="store_true", help="Abort on any system-integrity audit warning (default: warn-only)")
     args = parser.parse_args()
+
+    # ── Advisory: system-integrity audit (cross-file ticker drift) ──
+    # Soft warning by default; strict mode aborts.
+    print("\n── Pre-flight: system integrity audit ──")
+    import subprocess
+    integrity_script = SCRIPT_DIR / "audit_system_integrity.py"
+    if integrity_script.exists():
+        cmd = [sys.executable, str(integrity_script), "--quiet"]
+        if args.strict_integrity:
+            cmd.append("--strict")
+        rc = subprocess.call(cmd)
+        if rc == 2:
+            print("  System integrity audit reported errors above.")
+            if args.strict_integrity:
+                print("  --strict-integrity flag set — aborting.")
+                sys.exit(1)
+            else:
+                print("  Continuing in warn-only mode. Re-run with --strict-integrity to enforce.")
+        elif rc == 1:
+            print("  System integrity audit reported warnings above (non-blocking).")
+        else:
+            print("  System integrity audit clean.")
+    else:
+        print(f"  Skipping — audit_system_integrity.py not found at {integrity_script}")
 
     # Load universe — either alpha (125 stocks) or full watchlist (976 stocks)
     if args.full_universe:
@@ -1497,6 +1523,20 @@ def main():
         print(f"  Mapped: {mapped} / {len(universe['stocks'])}. Unmapped: {len(unmapped)}")
         if unmapped[:10]:
             print(f"  Unmapped sample: {unmapped[:10]}")
+        # ── Build-time validator: every watchlist ticker must have canonical taxonomy ──
+        if unmapped and not args.allow_unmapped:
+            print()
+            print("=" * 60)
+            print(f"ERROR: {len(unmapped)} watchlist tickers have no canonical taxonomy.")
+            print("       Run audit_taxonomy.py to see details, then either:")
+            print("         (a) add entries to stock_mapping_final.json, OR")
+            print("         (b) re-run with --allow-unmapped to bypass this check.")
+            print()
+            print("Unmapped tickers:")
+            for tk in unmapped:
+                print(f"  - {tk}")
+            print("=" * 60)
+            sys.exit(1)
     else:
         print(f"WARNING: stock_mapping_final.json not found at {sm_path} — using raw watchlist taxonomy")
 

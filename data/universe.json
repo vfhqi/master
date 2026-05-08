@@ -1222,7 +1222,7 @@
     {
       "ticker": "CARL.B-DK",
       "yfinance_ticker": "CARL-B.CO",
-      "dashboard_ticker": "CARL.B-DK",
+      "dashboard_ticker": "CARLB-DK",
       "company_name": "Carlsberg",
       "date_added": "2026-04-15",
       "notes": "ESA done, in DD",
@@ -1244,7 +1244,7 @@
     {
       "ticker": "NOVO.B-DK",
       "yfinance_ticker": "NOVO-B.CO",
-      "dashboard_ticker": "NOVO.B-DK",
+      "dashboard_ticker": "NOVO-DK",
       "company_name": "Novo Nordisk",
       "date_added": "2026-04-15",
       "notes": "",

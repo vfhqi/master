@@ -123,13 +123,20 @@ def load_data():
 # FIX-6: Each tab gets a unique accent colour
 # Tab order: Group 1 = Technical filters, Group 2 = Data/Reference
 TABS = [
-    # Group 1: Technical filter tabs
-    {"id": "bp",        "label": "Basing Plateau",   "accent": "#276749"},
-    {"id": "pb",        "label": "Probing Bet",      "accent": "#6b46c1"},
-    {"id": "mm99",      "label": "MM 99",            "accent": "#1b3d5c"},
-    {"id": "vcp",       "label": "VCP",              "accent": "#9c4221"},
-    {"id": "utr",       "label": "Uptrend Retest",   "accent": "#744210"},
-    # Group 2: Data / reference tabs
+    # STAGE-REFACTOR-V3-MARKER — 8 filter tabs grouped by Minervini-style stage
+    # Stage 1 — Basing/bottoming
+    {"id": "bp",        "label": "Basing Plateau",   "accent": "#276749", "stage": 1},
+    {"id": "pb",        "label": "Probing Bet",      "accent": "#6b46c1", "stage": 1},
+    # Stage 2 — Markup/breakout
+    {"id": "vcp",       "label": "VCP",              "accent": "#9c4221", "stage": 2},
+    {"id": "mm99",      "label": "MM 99",            "accent": "#1b3d5c", "stage": 2},
+    {"id": "utr",       "label": "Uptrend Retest",   "accent": "#744210", "stage": 2},
+    # Stage 3 — Topping (placeholder)
+    {"id": "s3_topping",   "label": "Topping",       "accent": "#b45309", "stage": 3, "placeholder": True},
+    # Stage 4 — Decline/capitulation (placeholders)
+    {"id": "s4_declining", "label": "Declining",     "accent": "#991b1b", "stage": 4, "placeholder": True},
+    {"id": "collapse",     "label": "Collapse",      "accent": "#7f1d1d", "stage": 4, "placeholder": True},
+    # Data / reference tabs
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -152,28 +159,65 @@ def build_html(data_js):
         r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
         return f"rgba({r},{g},{b},{alpha})"
 
-    # FIX-S4-HDR: Two visual groups of tabs with border grouping
-    TECHNICAL_TABS = {"bp", "pb", "vcp", "mm99", "utr"}
-    tab_buttons = '<div class="tab-group" style="border:1.5px solid rgba(200,50,50,0.25);border-radius:6px;padding:2px 4px;display:inline-flex;gap:2px">'
+    # STAGE-HEADER-FIXUP — single-row inline-flex parent containing stage groups + reference group
+    STAGE_INFO = {
+        1: {"label": "STAGE 1", "color": "rgba(39,103,73,0.55)"},
+        2: {"label": "STAGE 2", "color": "rgba(27,61,92,0.55)"},
+        3: {"label": "STAGE 3", "color": "rgba(180,83,9,0.55)"},
+        4: {"label": "STAGE 4", "color": "rgba(153,27,27,0.55)"},
+    }
+    # Outer wrapper guarantees horizontal flow regardless of .tab-nav rules
+    tab_buttons = '<div style="display:inline-flex;align-items:flex-end;gap:6px;flex-wrap:nowrap">'
+    current_stage = None
+    in_filter_section = True
     for t in TABS:
-        # Switch group when we hit the first data/reference tab (Tech Data)
-        if t["id"] not in TECHNICAL_TABS and t["id"] == "tech":
-            tab_buttons += '</div><div class="tab-group" style="border:1.5px solid rgba(120,80,200,0.25);border-radius:6px;padding:2px 4px;display:inline-flex;gap:2px;margin-left:6px">'
-        active = ' tab-active' if t["id"] == "mm99" else ''
-        # SESSION 9 Pass 1.1: TIMELINESS gets emphasis treatment (uppercase + bold)
+        stage = t.get("stage")
+        is_filter_tab = stage is not None
+        if is_filter_tab:
+            if stage != current_stage:
+                if current_stage is not None:
+                    tab_buttons += '</div></div>'  # close prior group inner+outer
+                si = STAGE_INFO[stage]
+                # Stage group: inline-flex column. STAGE label is a 9px strip above
+                # the tab buttons row. Compact — adds ~10px height not 20.
+                tab_buttons += (
+                    '<div class="tab-stage-group" style="display:inline-flex;flex-direction:column;'
+                    'border:1.5px solid ' + si["color"] + ';border-radius:5px;padding:0 3px 2px;background:rgba(255,255,255,0.4)">'
+                    '<div style="font-size:8px;font-weight:700;color:#4a4a4a;letter-spacing:.6px;'
+                    'text-align:center;padding:1px 2px 1px;line-height:1.1">' + si["label"] + '</div>'
+                    '<div style="display:inline-flex;gap:2px">'
+                )
+                current_stage = stage
+        else:
+            if in_filter_section:
+                if current_stage is not None:
+                    tab_buttons += '</div></div>'  # close last stage group
+                # Reference-tabs group — wrapped so it sits inline with the stage groups
+                tab_buttons += (
+                    '<div class="tab-group" style="display:inline-flex;align-items:flex-end;'
+                    'border:1.5px solid rgba(120,80,200,0.4);border-radius:5px;padding:0 4px 2px;'
+                    'gap:2px;margin-left:4px;align-self:flex-end">'
+                )
+                in_filter_section = False
+        active = ' tab-active' if t["id"] == "changes" else ''
         emphasis = ' tab-emphasis' if t["id"] == "combos" else ''
         bg_tint = hex_to_rgba(t["accent"], 0.1)
         border_tint = hex_to_rgba(t["accent"], 0.3)
+        is_placeholder = t.get("placeholder", False)
+        ph_class = ' tab-placeholder' if is_placeholder else ''
+        ph_style = ';opacity:0.45;cursor:default' if is_placeholder else ''
+        onclick = '' if is_placeholder else 'onclick="switchTab(\'' + t["id"] + '\')"'
         tab_buttons += (
-            '<button class="tab-btn' + active + emphasis + '" data-tab="' + t["id"] + '" '
-            'style="--tab-accent:' + t["accent"] + ';background:' + bg_tint + ';border-color:' + border_tint + '" '
-            'onclick="switchTab(\'' + t["id"] + '\')">' + t["label"] + '</button>'
+            '<button class="tab-btn' + active + emphasis + ph_class + '" data-tab="' + t["id"] + '" '
+            'style="--tab-accent:' + t["accent"] + ';background:' + bg_tint + ';border-color:' + border_tint + ph_style + '" '
+            + onclick + '>' + t["label"] + '</button>'
         )
-    tab_buttons += '</div>'
+    # Close the final open container (reference group)
+    tab_buttons += '</div></div>'  # close reference group + outer wrapper
 
     tab_containers = ""
     for t in TABS:
-        display = "block" if t["id"] == "mm99" else "none"
+        display = "block" if t["id"] == "changes" else "none"
         tab_containers += '<div id="tab-' + t["id"] + '" class="tab-content" style="display:' + display + '"></div>\n    '
 
     tab_ids_js = ",".join(['"' + t["id"] + '"' for t in TABS])
@@ -209,7 +253,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13
 /* FIX-6: Tab buttons — Group 1 colour: navy */
 .tab-btn{background:rgba(27,61,92,0.04);border:1px solid var(--border);border-left:3px solid var(--tab-accent,#1b3d5c);color:var(--text-dim);font-family:var(--font);font-size:11px;font-weight:500;padding:4px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
 .tab-btn:hover{background:var(--card-hover);color:var(--text-bright);border-color:#bbb}
-.tab-btn.tab-active{background:var(--tab-accent,#1b3d5c);color:#fff;font-weight:600;border-left-color:var(--tab-accent,#1b3d5c)}
+/* ACTIVE-TAB-SPECIFICITY-FIX-2 */.tab-btn.tab-active{background:var(--tab-accent,#1b3d5c) !important;color:#fff !important;font-weight:700;border:1px solid var(--tab-accent,#1b3d5c) !important;border-left:5px solid var(--tab-accent,#1b3d5c) !important;box-shadow:0 2px 6px rgba(0,0,0,0.18),inset 0 -2px 0 rgba(255,255,255,0.25);transform:translateY(-1px);letter-spacing:.3px;padding:5px 12px;position:relative;z-index:2}.tab-btn.tab-active:hover{background:var(--tab-accent,#1b3d5c) !important;color:#fff !important;border-color:var(--tab-accent,#1b3d5c) !important}
 .tab-btn.tab-emphasis{font-weight:700;letter-spacing:.6px;border-width:2px;text-transform:uppercase;font-size:11.5px}
 /* FIX-5 Row 3: toggles label + controls */
 .header-controls-row{display:flex;gap:6px;padding:0 16px 4px;align-items:center;flex-wrap:wrap}
@@ -437,7 +481,7 @@ table.data-table td.col-identity{white-space:nowrap}
 .ind-sec-wrap{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
 .ind-sec-wrap .half-table{flex:1;min-width:0;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--card)}
 .half-table .half-title{font-size:13px;font-weight:600;color:var(--text-bright);margin-bottom:6px;flex-shrink:0}
-.half-table .data-table-wrap{overflow-y:auto;overflow-x:hidden}
+/*HALF-TABLE-MAX-HEIGHT*/.half-table .data-table-wrap{overflow-y:auto;overflow-x:hidden;min-height:450px;max-height:600px}
 .half-table table.data-table th{font-size:11px;text-transform:none;letter-spacing:0;white-space:normal;word-wrap:break-word}
 
 .qual-tile{padding:12px 0;margin-bottom:8px;margin-top:24px}
@@ -549,7 +593,9 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 "use strict";
 var D=MASTER_DATA;
 var priceMap={},filterMap={},tmMap=D.ticker_mapping||{};
-var currentTab="mm99",currentSort={col:"mm99_score",dir:"desc"};
+var currentTab="changes",currentSort={col:"chg_qual_count",dir:"desc"}; /* Q1Q2-CLEANUP-V1 */
+/* BOOTSTRAP-DEFAULT-TAB-FIX-1 */
+if(typeof window!=="undefined"){window.__chgBootstrapDone=window.__chgBootstrapDone||false;var __chgBoot=function(){if(window.__chgBootstrapDone)return;if(typeof window.switchTab!=="function"){setTimeout(__chgBoot,30);return;}window.__chgBootstrapDone=true;try{window.switchTab(currentTab);}catch(e){console.error("bootstrap switchTab failed",e);}};if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",__chgBoot);}else{setTimeout(__chgBoot,30);}}
 var mm99MinScore=0;
 var utrMinCap=0;
 var utrStageFilter="";  // ""=all, "early"=Early+, "late"=Late+, "capital"=Capital only
@@ -3807,8 +3853,8 @@ function renderChanges(){
   var h='';
 
   // Shared filter definitions for both tiles and table
-  var FILTER_ORDER=["collapse","basing_plateau","probing_bet","vcp","mm99","uptrend_retest","s3_topping","s4_declining"];
-  var FILTER_COLS={"collapse":"Collapse","basing_plateau":"Basing Plateau","probing_bet":"Probing Bet","mm99":"MM99","vcp":"VCP","uptrend_retest":"Uptrend Retest","s3_topping":"S3 Topping","s4_declining":"S4 Declining"};
+  var FILTER_ORDER=["basing_plateau","probing_bet","vcp","mm99","uptrend_retest","s3_topping","s4_declining","collapse"]; /* STAGE-REFACTOR-V3-MARKER */
+  var FILTER_COLS={"collapse":"Collapse","basing_plateau":"Basing Plateau","probing_bet":"Probing Bet","mm99":"MM 99","vcp":"VCP","uptrend_retest":"Uptrend Retest","s3_topping":"Topping","s4_declining":"Declining"}; /* Q1Q2-CLEANUP-V1 */
   var TILE_BORDER={"collapse":"rgba(180,30,30,0.35)","basing_plateau":"rgba(39,103,73,0.35)","probing_bet":"rgba(107,70,193,0.35)","mm99":"rgba(27,61,92,0.35)","vcp":"rgba(156,66,33,0.35)","uptrend_retest":"rgba(116,66,16,0.35)","s3_topping":"rgba(200,100,0,0.35)","s4_declining":"rgba(150,20,20,0.35)"};
   var GRP_KEY={"collapse":"col","basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr","s3_topping":"s3","s4_declining":"s4"};
   function stRank(s){return s==="Capital"?3:s==="Late"?2:s==="Early"?1:0}
@@ -3856,32 +3902,67 @@ function renderChanges(){
   for(var ck in comboCount)comboPairs.push({combo:ck,count:comboCount[ck].count,tickers:comboCount[ck].tickers});
   comboPairs.sort(function(a,b){return b.count-a.count});
 
-  // Build summary bar HTML
+  // TERMINOLOGY-V1-MARKER — Build summary bar HTML (band-aggregate digest)
   var BG_MAP_SB={"collapse":"rgba(180,30,30,0.08)","basing_plateau":"rgba(39,103,73,0.08)","probing_bet":"rgba(107,70,193,0.08)","mm99":"rgba(27,61,92,0.08)","vcp":"rgba(156,66,33,0.08)","uptrend_retest":"rgba(116,66,16,0.08)","s3_topping":"rgba(200,100,0,0.08)","s4_declining":"rgba(150,20,20,0.08)"};
+  // Pre-compute band aggregates per filter (mirrors chgClassify logic in tiles)
+  var bandAgg={};
+  FILTER_ORDER.forEach(function(f){bandAgg[f]={qual:0, newW:0, newM:0, lostW:0, lostM:0};});
+  for(var tk_sb in t0){
+    FILTER_ORDER.forEach(function(f){
+      var c0  = t0[tk_sb]  && t0[tk_sb][f]  === "Capital";
+      var c5  = t5[tk_sb]  && t5[tk_sb][f]  === "Capital";
+      var c22 = t22[tk_sb] && t22[tk_sb][f] === "Capital";
+      if(c0) bandAgg[f].qual++;
+      if(c0 && !c5 && !c22) bandAgg[f].newW++;
+      else if(c0 && c5 && !c22) bandAgg[f].newM++;
+      if(!c0 && c5) bandAgg[f].lostW++;
+      else if(!c0 && !c5 && c22) bandAgg[f].lostM++;
+    });
+  }
   h+='<div id="section-summarybar" style="display:flex;gap:12px;margin:12px 0;padding:10px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;align-items:stretch">';
-  // Left side: 8 filter columns (~65%)
-  h+='<div style="display:flex;gap:1px;flex:7">';
-  FILTER_ORDER.forEach(function(f){
+  // STAGE-MAIN-SUMMARY-V1-MARKER — Left side: 4 stage groups containing 8 filter columns
+  h+='<div style="display:flex;gap:8px;flex:7;align-items:stretch">';
+  var STAGE_OF_SB = {"basing_plateau":1,"probing_bet":1,"vcp":2,"mm99":2,"uptrend_retest":2,"s3_topping":3,"s4_declining":4,"collapse":4};
+  var STAGE_BORDER_SB = {1:"rgba(39,103,73,0.5)",2:"rgba(27,61,92,0.5)",3:"rgba(180,83,9,0.5)",4:"rgba(153,27,27,0.5)"};
+  var STAGE_LBL_SB = {1:"STAGE 1",2:"STAGE 2",3:"STAGE 3",4:"STAGE 4"};
+  // Render one stage box at a time, containing its filter columns
+  function _sbRenderFilterCol(f){
     var lab=FILTER_COLS[f];
     var bg=BG_MAP_SB[f]||"rgba(100,100,100,0.08)";
-    var sc=stageCounts[f];
-    h+='<div style="flex:1;text-align:center;padding:6px 2px;border-radius:4px;background:'+bg+'">';
-    h+='<div style="font-size:10px;font-weight:700;color:var(--text-primary);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+lab+'</div>';
-    h+='<div style="font-size:16px;font-weight:700;color:#38a169">'+sc.Capital+'</div>';
-    h+='<div style="font-size:9px;color:var(--text-secondary);margin-bottom:3px">Capital</div>';
-    h+='<div style="display:flex;justify-content:center;gap:8px">';
-    h+='<div><span style="font-size:12px;font-weight:600;color:#d69e2e">'+sc.Late+'</span><div style="font-size:8px;color:var(--text-secondary)">Late</div></div>';
-    h+='<div><span style="font-size:12px;font-weight:600;color:#dd6b20">'+sc.Early+'</span><div style="font-size:8px;color:var(--text-secondary)">Early</div></div>';
+    var ba=bandAgg[f];
+    var isPh = (f==='s3_topping' || f==='s4_declining' || f==='collapse');
+    var phOp = isPh ? ';opacity:0.55' : '';
+    var s='<div style="flex:1;min-width:0;text-align:center;padding:5px 3px;border-radius:3px;background:'+bg+phOp+'">';
+    s+='<div style="font-size:9.5px;font-weight:700;color:var(--text-primary);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+lab+'</div>';
+    s+='<div style="font-size:17px;font-weight:800;color:#1b3d5c;line-height:1">'+ba.qual+'</div>';
+    s+='<div style="font-size:7.5px;color:var(--text-secondary);margin-bottom:2px;letter-spacing:.3px;text-transform:uppercase">Qualified</div>';
+    s+='<div style="font-size:9px;line-height:1.35;color:var(--text-secondary)">';
+    s+='<div><span style="color:#38a169;font-weight:700">+'+ba.newW+'</span> wk</div>';
+    s+='<div><span style="color:#68d391;font-weight:700">+'+ba.newM+'</span> mo</div>';
+    s+='<div><span style="color:#e53e3e;font-weight:700">-'+ba.lostW+'</span> recent</div>';
+    s+='<div><span style="color:#a0aec0;font-weight:700">-'+ba.lostM+'</span> &ge;1mo</div>';
+    s+='</div>';
+    s+='</div>';
+    return s;
+  }
+  [1,2,3,4].forEach(function(stageId){
+    var stageFilters = FILTER_ORDER.filter(function(f){return STAGE_OF_SB[f] === stageId});
+    if(stageFilters.length === 0) return;
+    var flexGrow = stageFilters.length;
+    h+='<div style="flex:'+flexGrow+' 1 0;min-width:0;border:1.5px solid '+STAGE_BORDER_SB[stageId]+';border-radius:6px;padding:3px 4px 5px;background:rgba(0,0,0,0.012);display:flex;flex-direction:column">';
+    h+='<div style="font-size:8px;font-weight:700;color:#4a4a4a;letter-spacing:.5px;text-align:center;padding:0 0 3px">'+STAGE_LBL_SB[stageId]+'</div>';
+    h+='<div style="display:flex;gap:2px;flex:1">';
+    stageFilters.forEach(function(f){ h += _sbRenderFilterCol(f); });
     h+='</div></div>';
   });
   h+='</div>';
-  // Right side: Multi-qualification insight (~35%)
+  // Right side: Multi-Qualified Stocks (~35%)
   h+='<div style="flex:3;padding:6px 10px;border-left:1px solid var(--border)">';
-  h+='<div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Multi-Qualification</div>';
+  h+='<div style="font-size:11px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Multi-Qualified Stocks</div>';
   if(multiTickers.length===0){
-    h+='<div style="font-size:11px;color:var(--text-secondary)">No stocks currently qualify for Capital across multiple filters.</div>';
+    h+='<div style="font-size:11px;color:var(--text-secondary)">No stocks currently qualify in multiple screens.</div>';
   }else{
-    h+='<div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px"><strong>'+multiTickers.length+'</strong> stocks qualify for Capital in 2+ filters simultaneously.</div>';
+    h+='<div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px"><strong>'+multiTickers.length+'</strong> stocks qualify in 2+ screens simultaneously.</div>';
     h+='<ul style="margin:0;padding-left:14px;font-size:10px;color:var(--text-secondary);line-height:1.5">';
     comboPairs.forEach(function(cp){
       if(cp.count>5){
@@ -4112,7 +4193,7 @@ function renderChanges(){
     }
   },50);
 
-  h+='<h3 id="section-summary" style="margin:16px 0 8px;font-size:15px;font-weight:600;color:var(--text-primary)">Changes over last week &mdash; '+fmtDDM(t5D)+' to '+fmtDDM(t0D)+'</h3>';
+  var _ageDays=Math.round((new Date()-t0D)/86400000);var _ageNote=_ageDays<=1?'':_ageDays<=3?' &middot; <span style="color:#d69e2e">data '+_ageDays+'d old</span>':' &middot; <span style="color:#c53030;font-weight:700">data '+_ageDays+'d old &mdash; re-run pipeline</span>';h+='<h3 id="section-summary" style="margin:16px 0 8px;font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:.4px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px"><span>CHANGES PER SCREEN/STAGE <span style="font-weight:500;color:var(--text-secondary);font-size:13px">&mdash; '+fmtDDM(t5D)+' to '+fmtDDM(t0D)+'</span></span><span style="font-size:11px;font-weight:400;color:var(--text-secondary);text-align:right">pipeline run '+fmtDDM(t0D)+_ageNote+'</span></h3>';
 
   // Pre-compute "highest qualification" map: each ticker → its rightmost Capital filter
   var _hqMap={};
@@ -4141,70 +4222,226 @@ function renderChanges(){
     }
   }
 
-  h+='<div class="changes-tiles" style="display:flex;flex-wrap:wrap;gap:12px;margin:8px 0 16px">';
-  FILTER_ORDER.forEach(function(filt){
-    var label=FILTER_COLS[filt]||filt;
-    var borderCol=TILE_BORDER[filt]||"rgba(100,100,100,0.25)";
-    var newCap=[];var lostCap=[];
-    // Only compute for filters that exist in the data (placeholder filters will have empty lists)
+  // STAGE-REFACTOR-V3-MARKER
+  // Tile rendering V3 (11-May-26): stage-banded, current-state-first.
+  // Each tile shows 3-col grid: Month / Week / **Now** (Now bold + primary).
+  // Sub-group bands top-to-bottom by signal strength:
+  //   1. Sustained Capital      (M+W+Now all in)
+  //   2. Newly Capital this week (in Now, not in Week — fresh gain since week-end)
+  //   3. Newly Capital this month, still in (in Now + Week, not in Month — recent + settling)
+  //   4. Recently lost           (not in Now, was in Week)
+  //   5. Long-lost               (not in Now, not in Week, but was in Month — muted)
+  // Edge cases fold into closest band.
+  // Layout: Row 1 = Stage 4 + Stage 1, Row 2 = Stage 2 + Stage 3 (4 tiles per row),
+  // with STAGE-labelled banners spanning each stage's tiles within a row.
+
+  var FILT_TAB={"basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr"};
+  var STAGE_OF={"basing_plateau":1,"probing_bet":1,"vcp":2,"mm99":2,"uptrend_retest":2,"s3_topping":3,"s4_declining":4,"collapse":4};
+  var STAGE_LABEL={1:"STAGE 1 - Basing/bottoming",2:"STAGE 2 - Markup/breakout",3:"STAGE 3 - Topping",4:"STAGE 4 - Decline"};
+  var STAGE_COLOR={1:"rgba(39,103,73,0.5)",2:"rgba(27,61,92,0.5)",3:"rgba(180,83,9,0.5)",4:"rgba(153,27,27,0.5)"};
+
+  // Classify each ticker per filter into a band.
+  // Returns band id 1-5 or null if ticker has no recent activity in this filter.
+  function chgClassify(tk, filt){
+    var c0  = t0[tk]  && t0[tk][filt]  === "Capital";
+    var c5  = t5[tk]  && t5[tk][filt]  === "Capital";
+    var c22 = t22[tk] && t22[tk][filt] === "Capital";
+    // Truth table for (M, W, Now):
+    //   T T T -> Sustained (band 1)
+    //   F F T -> Newly this week (band 2)  — fresh
+    //   F T T -> Newly this month, still in (band 3)
+    //   T T T already caught
+    //   T F T -> flicker: was, gone last week, back now -> fold into band 2 (fresh, looks like just gained)
+    //   T T F -> Recently lost (band 4)
+    //   F T F -> in last week only, gone now -> band 4 (recently lost)
+    //   T F F -> Long-lost (band 5)
+    //   F F F -> nothing
+    if(c0 && c5 && c22) return 1;
+    if(c0 && !c5 && !c22) return 2;          // pure fresh gain
+    if(c0 && c5 && !c22) return 3;            // gained within the month, still in
+    if(c0 && !c5 && c22) return 2;            // flicker back -> treat as fresh
+    if(!c0 && c5) return 4;                    // recently lost (covers TTF and FTF)
+    if(!c0 && !c5 && c22) return 5;            // long-lost
+    return null;
+  }
+
+  // Cell rendering — pill or empty. isPrimary = bolder/larger (the "Now" column).
+  function chgPill(state, isPrimary){
+    // state: 'in' (qualified), 'out' (not qualified)
+    if(state === 'out'){
+      return '<span style="display:inline-block;min-width:38px;text-align:center;font-size:9px;color:#cbd5e0">—</span>';
+    }
+    var size = isPrimary ? {pad:'2px 8px',fs:'10px',mw:'44px'} : {pad:'1px 6px',fs:'9px',mw:'38px'};
+    var bg = isPrimary ? '#1b3d5c' : '#276749';
+    var fg = '#fff';
+    var label = isPrimary ? 'NOW' : 'QUAL';
+    var weight = isPrimary ? 800 : 700;
+    return '<span style="display:inline-block;min-width:'+size.mw+';text-align:center;font-size:'+size.fs+';font-weight:'+weight+';padding:'+size.pad+';border-radius:3px;background:'+bg+';color:'+fg+';letter-spacing:.3px">'+label+'</span>';
+  }
+
+  // Band-level metadata: label, accent colour, default-visible — TERMINOLOGY-V1-MARKER
+  var BAND_META = {
+    1: {label:'Sustained qualification',  accent:'#276749', desc:'Qualified in all three periods'},
+    2: {label:'Newly qualified — this week', accent:'#48bb78', desc:'Newly qualified since last week'},
+    3: {label:'Newly qualified — this month', accent:'#68d391', desc:'Newly qualified within the month, still qualified'},
+    4: {label:'Recently un-qualified',  accent:'#e53e3e', desc:'Was qualified recently, no longer'},
+    5: {label:'Un-qualified ≥ 1 month',   accent:'#a0aec0', desc:'Was qualified a month ago, gone since'}
+  };
+
+  // Render a single tile for one filter.
+  function chgRenderTile(filt){
+    var label = FILTER_COLS[filt] || filt;
+    var borderCol = TILE_BORDER[filt] || 'rgba(100,100,100,0.25)';
+    var tabId = FILT_TAB[filt] || '';
+    var isPlaceholder = (filt === 's3_topping' || filt === 's4_declining' || filt === 'collapse');
+
+    // Classify every ticker
+    var bands = {1:[], 2:[], 3:[], 4:[], 5:[]};
     for(var tk in t0){
-      var curr=t0[tk]&&t0[tk][filt];
-      var prev=t5[tk]&&t5[tk][filt];
-      if(curr==="Capital"&&prev!=="Capital")newCap.push(tk);
-      if(prev==="Capital"&&curr!=="Capital")lostCap.push(tk);
+      var b = chgClassify(tk, filt);
+      if(b !== null) bands[b].push(tk);
     }
-    // Highest qualification: only show stock in its rightmost Capital filter tile
-    // Applies to newCap only — lostCap always shows (losing Capital is a real change regardless)
-    if(chgHighestQual){
-      newCap=newCap.filter(function(tk){return _hqMap[tk]===filt});
+    // STAGE-MAIN-SUMMARY-V1-MARKER — sort by (canonical-sector, ticker) within each band
+    function _secKey(tk){
+      var m = metaLookup[tk] || {};
+      var s = m.sector || 'zzzz_unknown';
+      return s.toLowerCase();
     }
-    h+='<div style="background:var(--bg-secondary);border:2px solid '+borderCol+';border-radius:8px;padding:12px 14px;min-width:140px;flex:1;max-width:220px">';
-    h+='<div style="font-weight:700;font-size:13px;margin-bottom:8px;color:var(--text-primary)">'+label+'</div>';
-    h+='<div style="display:flex;gap:16px;margin-bottom:6px">';
-    h+='<div><span style="color:#38a169;font-weight:700;font-size:18px">+'+newCap.length+'</span><div style="font-size:10px;color:var(--text-secondary)">Newly qualified</div></div>';
-    h+='<div><span style="color:#e53e3e;font-weight:700;font-size:18px">-'+lostCap.length+'</span><div style="font-size:10px;color:var(--text-secondary)">Previously qualified</div></div>';
-    h+='</div>';
-    // List stocks vertically with company/ticker toggle + industry/sector + qualification duration
-    // Derive when qualification changed using T-0/T-1/T-5/T-22 data
-    function qualInfo(tk,filt,isNew){
-      // For "newly qualified": when did it become Capital?
-      // For "previously qualified": when did it lose Capital?
-      var c0=t0[tk]&&t0[tk][filt], c1=t1[tk]&&t1[tk][filt], c5=t5[tk]&&t5[tk][filt], c22=t22[tk]&&t22[tk][filt];
-      if(isNew){
-        // Stock is Capital now. When did it gain Capital?
-        if(c1!=="Capital"){return{days:"~1d",since:fmtDDM(t0D)}}
-        if(c5!=="Capital"){return{days:"~3d",since:fmtDDM(t1D)}}
-        if(c22!=="Capital"){return{days:"~2w",since:fmtDDM(t5D)}}
-        return{days:">1M",since:"before "+fmtDDM(t22D)};
-      }else{
-        // Stock lost Capital. When?
-        if(c1==="Capital"){return{days:"~1d ago",since:fmtDDM(t0D)}}
-        if(c5==="Capital"){return{days:"~3d ago",since:fmtDDM(t1D)}}
-        return{days:">1w ago",since:fmtDDM(t5D)};
-      }
-    }
-    // Map filter key → tab ID for double-click navigation
-    var FILT_TAB={"basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr"};
-    function renderStockList(tickers,color,isNew){
-      var out='';
-      tickers.forEach(function(tk){
-        var meta=metaLookup[tk]||{};
-        var dn=(displayMode==="company")?(meta.company||tk):tk;
-        var qi=qualInfo(tk,filt,isNew);
-        var tabId=FILT_TAB[filt]||'';
-        out+='<div style="margin-bottom:4px"><div class="chg-tile-stock" data-ticker="'+tk+'" data-tab="'+tabId+'" style="font-size:11px;font-weight:600;color:'+color+';cursor:pointer">'+dn+' <span style="font-weight:400;font-size:9px;color:#999">'+qi.days+' ('+qi.since+')</span></div>';
-        var sub=meta.sector||(meta.industry||'');
-        if(meta.sector&&meta.industry)sub=meta.industry+' / '+meta.sector;
-        if(sub)out+='<div style="font-size:9px;color:#999;margin-top:-1px">'+sub+'</div>';
-        out+='</div>';
+    for(var bi=1; bi<=5; bi++){
+      bands[bi].sort(function(a,b){
+        var sa = _secKey(a), sb = _secKey(b);
+        if(sa !== sb) return sa < sb ? -1 : 1;
+        return a < b ? -1 : 1;
       });
+    }
+
+    // Apply highest-qualification dedup: only applies to bands 1+2+3 (current-Capital tickers)
+    if(chgHighestQual){
+      [1,2,3].forEach(function(bi){
+        bands[bi] = bands[bi].filter(function(tk){return _hqMap[tk]===filt});
+      });
+    }
+
+    var nNow = bands[1].length + bands[2].length + bands[3].length;
+    var nGone = bands[4].length + bands[5].length;
+    var totalRows = nNow + nGone;
+
+    var out = '<div style="flex:1;min-width:0;max-height:600px;background:var(--bg-secondary);border:2px solid '+borderCol+';border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;overflow:hidden' + (isPlaceholder ? ';opacity:0.55' : '') + '">';
+
+    // Header: filter label + Now/Gone counters
+    out += '<div style="font-weight:700;font-size:13px;margin-bottom:5px;color:var(--text-primary);display:flex;justify-content:space-between;align-items:baseline">';
+    out += '<span>' + label + '</span>';
+    out += '<span style="font-size:11px;font-weight:500"><span style="color:#1b3d5c">Qual ' + nNow + '</span> <span style="color:#a0aec0">/</span> <span style="color:#9b2c2c">Un-qual ' + nGone + '</span></span>';
+    out += '</div>';
+
+    if(isPlaceholder){
+      out += '<div style="font-size:11px;color:var(--text-secondary);font-style:italic;padding:6px 0">Filter logic pending (Pass 2 parked).</div>';
+      out += '</div>';
       return out;
     }
-    if(newCap.length>0)h+=renderStockList(newCap,"#38a169",true);
-    if(lostCap.length>0){if(newCap.length>0)h+='<div style="border-top:1px solid var(--border);margin:4px 0"></div>';h+=renderStockList(lostCap,"#e53e3e",false)}
-    h+='</div>';
-  });
-  h+='</div>';
+    if(totalRows === 0){
+      out += '<div style="font-size:11px;color:var(--text-secondary);font-style:italic;padding:6px 0">No qualification activity in last month.</div>';
+      out += '</div>';
+      return out;
+    }
+
+    // Column headers: Stock | Month | Week | NOW (widths match band-body grid)
+    out += '<div style="display:grid;grid-template-columns:1fr 38px 38px 48px;gap:3px 4px;align-items:center;font-size:9px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;font-weight:700;padding-bottom:3px;border-bottom:1px solid var(--border)">';
+    out += '<div>Stock</div><div style="text-align:center">Month</div><div style="text-align:center">Week</div><div style="text-align:center;color:#1b3d5c">Now</div>';
+    out += '</div>';
+
+    // Body: scrollport
+    out += '<div style="overflow-y:auto;flex:1;min-height:0;padding-top:3px">';
+
+    for(var bandId = 1; bandId <= 5; bandId++){
+      var bandTickers = bands[bandId];
+      if(bandTickers.length === 0) continue;
+      var bm = BAND_META[bandId];
+      // Band header strip
+      var bandHeaderStyle = bandId === 5
+        ? 'background:#f5f5f4;color:#737373;font-style:italic'
+        : 'background:' + bm.accent + '1a;color:' + bm.accent + ';font-weight:700';
+      out += '<div style="' + bandHeaderStyle + ';font-size:9px;letter-spacing:.3px;padding:3px 6px;margin:5px 0 2px;border-radius:3px;border-left:3px solid ' + bm.accent + '">' + bm.label + ' (' + bandTickers.length + ')</div>';
+
+      // Group tickers by canonical sector within this band
+      var _secGroups = {};
+      var _secOrder = [];
+      bandTickers.forEach(function(tk){
+        var m = metaLookup[tk] || {};
+        var sec = m.sector || 'Unknown';
+        if(!_secGroups[sec]){ _secGroups[sec] = []; _secOrder.push(sec); }
+        _secGroups[sec].push(tk);
+      });
+
+      // Render each sector subgroup with its mini-header
+      _secOrder.forEach(function(sec){
+        var secTickers = _secGroups[sec];
+        // Sector sub-header: tiny grey strip
+        out += '<div style="font-size:8.5px;color:#737373;font-weight:600;letter-spacing:.2px;padding:3px 4px 1px;margin-top:3px;border-bottom:1px dotted #d4d4d4">' + sec + ' <span style="font-weight:400;color:#a3a3a3">(' + secTickers.length + ')</span></div>';
+        // Body grid for this sector
+        out += '<div style="display:grid;grid-template-columns:1fr 38px 38px 48px;gap:2px 4px;align-items:center;padding-top:1px">';
+        secTickers.forEach(function(tk){
+          var meta = metaLookup[tk] || {};
+          var dn = (displayMode === 'company') ? (meta.company || tk) : tk;
+          var rowColor = (bandId === 5) ? '#737373' : (bandId <= 3 ? '#1a1a1a' : '#9b2c2c');
+          var rowOpacity = (bandId === 5) ? '0.7' : '1';
+          var secSuffix = sec ? ' <span style="font-weight:400;font-size:9px;color:#a3a3a3">' + sec + '</span>' : '';
+
+          // Determine cell states for this ticker
+          var c0  = t0[tk]  && t0[tk][filt]  === "Capital";
+          var c5  = t5[tk]  && t5[tk][filt]  === "Capital";
+          var c22 = t22[tk] && t22[tk][filt] === "Capital";
+          var monthCell = chgPill(c22 ? 'in' : 'out', false);
+          var weekCell  = chgPill(c5  ? 'in' : 'out', false);
+          var nowCell   = chgPill(c0  ? 'in' : 'out', true);
+
+          out += '<div class="chg-tile-stock" data-ticker="' + tk + '" data-tab="' + tabId + '" style="font-size:10.5px;font-weight:600;color:' + rowColor + ';opacity:' + rowOpacity + ';cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + (meta.company || tk) + ' - ' + sec + '">' + dn + secSuffix + '</div>';
+          out += '<div style="text-align:center">' + monthCell + '</div>';
+          out += '<div style="text-align:center">' + weekCell + '</div>';
+          out += '<div style="text-align:center">' + nowCell + '</div>';
+        });
+        out += '</div>';
+      });
+    }
+    out += '</div>'; // end scrollport
+
+    out += '</div>'; // end tile
+    return out;
+  }
+
+  // Render one stage-pair row: a flex row containing 1-2 stage groups,
+  // each group has its own STAGE banner + the tiles for that stage.
+  function chgRenderStageRow(stageList){
+    var out = '<div style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start">';
+    stageList.forEach(function(stageId){
+      // Find all filters belonging to this stage, in FILTER_ORDER order
+      var stageFilters = FILTER_ORDER.filter(function(f){return STAGE_OF[f]===stageId});
+      if(stageFilters.length === 0) return;
+      var stageLabel = STAGE_LABEL[stageId];
+      var stageColor = STAGE_COLOR[stageId];
+      // Stage group: banner above its tiles
+      // flex-grow weighted by tile count so 3-tile stages get more room
+      var flexGrow = stageFilters.length;
+      out += '<div style="flex:' + flexGrow + ' 1 0;min-width:0;border:1.5px solid ' + stageColor + ';border-radius:8px;padding:6px 8px 8px;background:rgba(0,0,0,0.015)">';
+      out += '<div style="font-size:10px;font-weight:700;color:#1a1a1a;letter-spacing:.4px;padding:1px 4px 6px;text-transform:uppercase">' + stageLabel + '</div>';
+      out += '<div style="display:flex;gap:8px;align-items:flex-start">';
+      stageFilters.forEach(function(filt){
+        out += chgRenderTile(filt);
+      });
+      out += '</div>';
+      out += '</div>';
+    });
+    out += '</div>';
+    return out;
+  }
+
+  // Two rows of stage pairs:
+  //   Row 1: Stage 4 + Stage 1
+  //   Row 2: Stage 2 + Stage 3
+  h += '<div class="changes-tiles-v3">';
+  h += chgRenderStageRow([4, 1]);
+  h += chgRenderStageRow([2, 3]);
+  h += '</div>';
 
   // ── SECTION 2: Changes table — all stocks with any change ──
   // Slim inputs (3 cols) + 8 filter groups x 4 time columns
@@ -4214,8 +4451,11 @@ function renderChanges(){
   // Tab ID map for navBadge click-through on Now column
   var CHG_TAB={"basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr"};
 
-  // Build row objects with projected stage values for sorting
+  // Q1Q2-CLEANUP-V1 — Build row objects with projected stage keys + sum-of-Capital-qualifications rank
   var TIME_SUFFIXES=["1m","1w","1d","now"];
+  // Sum-of-bits: count Capital qualifications across BP/PB/VCP/MM99/UTR.
+  // Stocks qualified in more screens rank higher regardless of WHICH screens.
+  var QUAL_FILTERS=["basing_plateau","probing_bet","vcp","mm99","uptrend_retest"];
   var chgRows=[];
   for(var tk in t0){
     var changed=false;
@@ -4244,37 +4484,59 @@ function renderChanges(){
       chgScore+=vals.size-1;
     });
     row.chg_score=chgScore;
+    // Compute sum-of-bits qualification count (0-5 inclusive)
+    var qualCount=0;
+    QUAL_FILTERS.forEach(function(f){
+      if(t0[tk] && t0[tk][f] === "Capital") qualCount++;
+    });
+    row.chg_qual_count = qualCount;
     chgRows.push(row);
   }
-  // Sort: single sort
+  // Sort: default uses chg_qual_count desc, ticker alpha as tiebreak. Explicit column sorts override.
   var _usingDefault=false;
-  if(currentSort.col&&currentSort.col.indexOf("chg_")===0){
+  if(currentSort.col === "chg_qual_count"){
+    chgRows.sort(function(a,b){
+      if(a.chg_qual_count !== b.chg_qual_count) return b.chg_qual_count - a.chg_qual_count;
+      return a.ticker < b.ticker ? -1 : 1;
+    });
+    _usingDefault=true;
+  }else if(currentSort.col && currentSort.col.indexOf("chg_") === 0){
     chgRows=sortData(chgRows,currentSort.col,currentSort.dir);
-  }else if(currentSort.col==="ticker"||currentSort.col==="industry"){
+  }else if(currentSort.col === "ticker" || currentSort.col === "industry"){
     chgRows=sortData(chgRows,currentSort.col,currentSort.dir);
-  }else if(currentSort.col==="sector"){
+  }else if(currentSort.col === "sector"){
     chgRows=sortData(chgRows,"sector",currentSort.dir);
   }else{
-    chgRows=sortData(chgRows,"chg_score","desc");
+    chgRows.sort(function(a,b){
+      if(a.chg_qual_count !== b.chg_qual_count) return b.chg_qual_count - a.chg_qual_count;
+      return a.ticker < b.ticker ? -1 : 1;
+    });
     _usingDefault=true;
   }
-  // Only group by sector when using default sort (chg_score) — explicit column sorts are flat
-  if(_usingDefault){
-    chgRows.sort(function(a,b){
-      var sa3=a.sector.toLowerCase(),sb3=b.sector.toLowerCase();
-      if(sa3<sb3)return -1;if(sa3>sb3)return 1;return 0;
-    });
-  }
+  // Sector-grouping toggle still applies — alpha-by-sector pass only when user explicitly enables it.
 
   h+='<div id="section-stocks" style="margin-top:8px;font-size:13px;color:var(--text-secondary)">'+chgRows.length+' stocks with stage changes (vs 1M ago)</div>';
 
   h+='<div class="chg-table-wrap"><table class="data-table chg-table">';
   // Colgroup: 3 Inputs cols (fixed width) + 32 stage cols (equal share of remaining space)
-  h+='<colgroup><col style="width:70px"><col style="width:80px"><col style="width:80px">';
+  h+='<colgroup><col style="width:110px"><col style="width:160px"><col style="width:160px">';
   for(var ci=0;ci<32;ci++)h+='<col>';
   h+='</colgroup><thead>';
 
-  // Group header row
+  // Stage column-group header row (STAGE 1 / 2 / 3 / 4) - STAGE-MAIN-SUMMARY-V1-MARKER
+  // Stage spans (in FILTER_ORDER): S1 = BP+PB (2 filters × 4 cols = 8), S2 = VCP+MM99+UTR (3 × 4 = 12),
+  // S3 = Topping (1 × 4 = 4), S4 = Declining+Collapse (2 × 4 = 8). Total 32 filter cols + 3 Inputs.
+  var STAGE_HDR_BG = {1:"rgba(39,103,73,0.18)",2:"rgba(27,61,92,0.18)",3:"rgba(180,83,9,0.18)",4:"rgba(153,27,27,0.18)"};
+  var STAGE_HDR_BORDER = {1:"rgba(39,103,73,0.55)",2:"rgba(27,61,92,0.55)",3:"rgba(180,83,9,0.55)",4:"rgba(153,27,27,0.55)"};
+  h+='<tr class="group-header-row">';
+  h+='<th colspan="3" style="background:rgba(100,100,100,0.04);border-bottom:1px solid var(--border)"></th>';
+  h+='<th colspan="8" style="background:'+STAGE_HDR_BG[1]+';border:2px solid '+STAGE_HDR_BORDER[1]+';border-bottom:none;font-weight:800;font-size:10px;letter-spacing:.5px;color:#1a1a1a">STAGE 1 - Basing</th>';
+  h+='<th colspan="12" style="background:'+STAGE_HDR_BG[2]+';border:2px solid '+STAGE_HDR_BORDER[2]+';border-bottom:none;font-weight:800;font-size:10px;letter-spacing:.5px;color:#1a1a1a">STAGE 2 - Markup</th>';
+  h+='<th colspan="4" style="background:'+STAGE_HDR_BG[3]+';border:2px solid '+STAGE_HDR_BORDER[3]+';border-bottom:none;font-weight:800;font-size:10px;letter-spacing:.5px;color:#1a1a1a">STAGE 3 - Topping</th>';
+  h+='<th colspan="8" style="background:'+STAGE_HDR_BG[4]+';border:2px solid '+STAGE_HDR_BORDER[4]+';border-bottom:none;font-weight:800;font-size:10px;letter-spacing:.5px;color:#1a1a1a">STAGE 4 - Decline</th>';
+  h+='</tr>';
+
+  // Filter group header row (existing)
   h+='<tr class="group-header-row">';
   h+='<th colspan="3" style="background:rgba(100,100,100,0.06)">Inputs</th>';
   FILTER_ORDER.forEach(function(f){

@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stage 1 — Master Dashboard V2 mockup v3</title>
+<style>
+  :root {
+    --bg-primary: #f7f5ef;
+    --bg-card: #fbfaf5;
+    --bg-soft: #f3efe2;
+    --text-primary: #2a2a2a;
+    --text-muted: #666;
+    --text-faint: #999;
+    --accent: #1b5e20;
+    --border: #e0dcc8;
+    --border-soft: #efece0;
+    --grp-g1: #b08a4e;
+    --grp-g2: #5a8a6a;
+    --grp-g3: #4a6a8a;
+    --grp-g4: #8a5a6a;
+    --pass: #1b5e20;
+    --pass-bg: rgba(27,94,32,0.08);
+    --fail: #999;
+    --neg: #c62828;
+    /* Eye-catching → faded continuum */
+    /* Probable Late: deepest greens, ramp 5→8 */
+    --r-pl-5: #2e7d32;
+    --r-pl-6: #1e6a25;
+    --r-pl-7: #145718;
+    --r-pl-8: #08400d;
+    /* Probable Early: clear medium green */
+    --r-pe:   #4a9658;
+    /* Plausible: cool muted teal/blue-grey (clearly NOT green) */
+    --r-pla:  #6b8a98;
+    /* Possible: pale faded grey */
+    --r-pos:  #c4c0b0;
+    /* None: very pale grey, barely visible */
+    --r-none: #e0ddd0;
+    /* Portfolio tints */
+    --tint-live:     rgba(27,94,32,0.10);
+    --tint-sector:   rgba(27,94,32,0.05);
+    --tint-industry: rgba(27,94,32,0.025);
+    --tint-peer:     rgba(74,106,138,0.05);
+    --tint-cohort:   rgba(138,90,106,0.05);
+  }
+  * { box-sizing: border-box; }
+  body { font-family: Aptos, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg-primary); color: var(--text-primary); margin: 0; padding: 18px 24px 60px 24px; font-size: 12px; line-height: 1.4; }
+
+  /* ====== NAV STRIP ====== */
+  .nav-strip { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 8px 12px; margin-bottom: 14px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 11px; }
+  .nav-group { display: flex; align-items: center; gap: 4px; padding-right: 14px; border-right: 1px solid var(--border); }
+  .nav-group:last-child { border-right: none; }
+  .nav-group-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-faint); font-weight: 600; margin-right: 4px; }
+  .nav-link { color: var(--text-muted); text-decoration: none; padding: 3px 8px; border-radius: 3px; transition: all 0.1s; font-weight: 500; }
+  .nav-link:hover { background: var(--bg-soft); color: var(--accent); }
+  .nav-link.current { background: var(--accent); color: #fff; font-weight: 700; }
+
+  /* ====== HEADER ====== */
+  h1 { font-size: 19px; font-weight: 700; margin: 0 0 4px 0; letter-spacing: -0.2px; }
+  .sub { color: var(--text-muted); font-size: 12px; margin-bottom: 16px; }
+  .mock-warn { background: #fff8e1; border: 1px solid #ffe082; padding: 6px 12px; border-radius: 3px; font-size: 11px; margin-bottom: 14px; color: #5a4400; }
+  .intro { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; margin-bottom: 14px; font-size: 12px; color: var(--text-muted); max-width: 920px; }
+  .intro b { color: var(--text-primary); }
+
+  /* ====== CONTROLS ====== */
+  .controls { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; padding: 9px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; }
+  .ctrl-grp { display: flex; align-items: center; gap: 5px; padding-right: 14px; border-right: 1px solid var(--border); }
+  .ctrl-grp:last-child { border-right: none; padding-right: 0; }
+  .ctrl-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-faint); font-weight: 600; margin-right: 4px; }
+  .toggle-btn { background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-primary); padding: 3px 9px; font-size: 11px; font-family: inherit; border-radius: 3px; cursor: pointer; transition: all 0.12s; }
+  .toggle-btn:hover:not(.disabled) { background: #ebe5d2; }
+  .toggle-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .toggle-btn.disabled { background: #f0ebd9; color: #bbb; cursor: not-allowed; border-style: dashed; }
+
+  /* ====== RATING TILES ====== */
+  .rating-tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 12px; }
+  .rating-tile { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 11px 14px; cursor: pointer; transition: all 0.12s; }
+  .rating-tile.tint-pl   { background: rgba(20, 87, 24, 0.08); }
+  .rating-tile.tint-pe   { background: rgba(74, 150, 88, 0.08); }
+  .rating-tile.tint-pla  { background: rgba(107, 138, 152, 0.08); }
+  .rating-tile.tint-pos  { background: rgba(196, 192, 176, 0.18); }
+  .rating-tile.tint-none { background: rgba(224, 221, 208, 0.30); }
+  .rating-tile:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .rating-tile.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .rating-tile.active .rt-label, .rating-tile.active .rt-count { color: #fff; }
+  .rating-tile.active .rt-sub { color: rgba(255,255,255,0.75); }
+  .rt-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.2px; }
+  .rt-count { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-top: 3px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .rt-sub { font-size: 10px; color: var(--text-faint); margin-top: 3px; }
+  .rt-strip { height: 3px; border-radius: 2px; margin-top: 7px; }
+  .rt-strip-pl  { background: var(--r-pl-7); }
+  .rt-strip-pe  { background: var(--r-pe); }
+  .rt-strip-pla { background: var(--r-pla); }
+  .rt-strip-pos { background: var(--r-pos); }
+  .rt-strip-none { background: var(--r-none); }
+
+  /* ====== GROUP CAPTIONS ====== */
+  .group-captions { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .gcap { background: var(--bg-card); border-left: 3px solid; padding: 9px 12px; font-size: 11px; color: var(--text-primary); line-height: 1.45; border-radius: 0 3px 3px 0; }
+  .gcap b { display: block; font-size: 11px; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.2px; }
+  .gcap-g1 { border-color: var(--grp-g1); } .gcap-g1 b { color: var(--grp-g1); }
+  .gcap-g2 { border-color: var(--grp-g2); } .gcap-g2 b { color: var(--grp-g2); }
+  .gcap-g3 { border-color: var(--grp-g3); } .gcap-g3 b { color: var(--grp-g3); }
+  .gcap-g4 { border-color: var(--grp-g4); } .gcap-g4 b { color: var(--grp-g4); }
+
+  /* ====== TABLE — sticky thead ====== */
+  .table-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; overflow: visible; }
+  table.data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; }
+  table.data-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+  table.data-table thead th { background: #fbfaf5 !important; }
+  table.data-table thead .group-header-row th { background: #f3efe2 !important; }
+  table.data-table thead th { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: var(--text-muted); letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+  table.data-table thead th:hover { background: #f0ebd9; }
+  table.data-table thead .group-header-row th { background: rgba(0,0,0,0.025); font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+  table.data-table thead .group-header-row th:hover { background: rgba(0,0,0,0.025); }
+  /* Sticky stacking: row 1 at top 0, row 2 at top ≈ row1 height */
+  table.data-table thead tr.group-header-row th { position: sticky; top: 0; }
+  table.data-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid var(--border); }
+
+  /* Header label + sort arrow — sit on same baseline */
+  .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+  .hd .lbl { white-space: normal; word-break: break-word; }
+  .hd .sort-arrow { font-size: 9px; color: var(--accent); flex: 0 0 auto; line-height: 1; }
+  .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }   /* keeps height consistent */
+  .hd .ast { color: var(--grp-g1); font-weight: 700; margin-left: 2px; cursor: help; }
+
+  /* Body cells */
+  table.data-table tbody td { padding: 5px 4px; border-bottom: 1px solid var(--border-soft); text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; }
+  table.data-table tbody tr { transition: background 0.1s; }
+  table.data-table tbody tr:hover { background: rgba(27,94,32,0.04); }
+
+  .gh-inputs { color: #555; }
+  .gh-rating { color: var(--accent); }
+  .gh-persist { color: var(--accent); }
+  .gh-g1 { color: var(--grp-g1); background: rgba(176,138,78,0.06)!important; border-left: 2px solid var(--grp-g1)!important; }
+  .gh-g2 { color: var(--grp-g2); background: rgba(90,138,106,0.06)!important; border-left: 2px solid var(--grp-g2)!important; }
+  .gh-g3 { color: var(--grp-g3); background: rgba(74,106,138,0.06)!important; border-left: 2px solid var(--grp-g3)!important; }
+  .gh-g4 { color: var(--grp-g4); background: rgba(138,90,106,0.06)!important; border-left: 2px solid var(--grp-g4)!important; }
+
+  td.grp-start-g1, th.grp-start-g1 { border-left: 2px solid rgba(176,138,78,0.35); }
+  td.grp-start-g2, th.grp-start-g2 { border-left: 2px solid rgba(90,138,106,0.35); }
+  td.grp-start-g3, th.grp-start-g3 { border-left: 2px solid rgba(74,106,138,0.35); }
+  td.grp-start-g4, th.grp-start-g4 { border-left: 2px solid rgba(138,90,106,0.35); }
+  td.grp-start-rating, th.grp-start-rating { border-left: 2px solid rgba(27,94,32,0.35); }
+  td.grp-start-persist, th.grp-start-persist { border-left: 2px solid rgba(27,94,32,0.35); }
+  td.grp-end-g1, th.grp-end-g1 { border-right: 2px solid rgba(176,138,78,0.35); }
+  td.grp-end-g2, th.grp-end-g2 { border-right: 2px solid rgba(90,138,106,0.35); }
+  td.grp-end-g3, th.grp-end-g3 { border-right: 2px solid rgba(74,106,138,0.35); }
+  td.grp-end-g4, th.grp-end-g4 { border-right: 2px solid rgba(138,90,106,0.35); }
+
+  /* Test cells */
+  td.test-pass { background: var(--pass-bg); color: var(--pass); font-weight: 700; }
+  td.test-fail { color: var(--text-faint); }
+  td.test-pass .tick { font-size: 13px; }
+  td.test-val { font-size: 10px; font-variant-numeric: tabular-nums; }
+  td.test-val.pass { background: var(--pass-bg); color: var(--pass); font-weight: 600; }
+
+  /* Inputs — company first (bold), ticker secondary */
+  td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+  td.name-cell .co { font-weight: 700; font-size: 11px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  td.name-cell .tk { font-size: 9px; color: var(--text-faint); font-weight: 500; margin-top: 1px; }
+  td.name-cell .live-dot { color: var(--accent); font-weight: 700; margin-right: 4px; display: inline-block; vertical-align: middle; line-height: 1; font-size: 10px; }
+  td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+  td.taxon .ind { color: var(--text-muted); font-weight: 500; }
+  td.taxon .sec { color: var(--text-faint); }
+  td.num { font-variant-numeric: tabular-nums; }
+  td.pct-pos { color: var(--pass); }
+  td.pct-neg { color: var(--neg); }
+
+  /* Industry/sector colour fill on company + taxon cells */
+  tr.tint-row td.name-cell,
+  tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+  /* Portfolio colour bands — right edge of rightmost cell */
+  tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+  /* Background tint for portfolio scope */
+  tr.portfolio-tint { background: var(--portfolio-bg); }
+  tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+
+  /* Rating pill */
+  .pill { display: inline-block; padding: 3px 9px; border-radius: 11px; font-weight: 700; font-size: 10px; color: white; letter-spacing: 0.3px; white-space: nowrap; }
+  .pill-pl-5 { background: var(--r-pl-5); color: #fff; }
+  .pill-pl-6 { background: var(--r-pl-6); color: #fff; }
+  .pill-pl-7 { background: var(--r-pl-7); color: #fff; }
+  .pill-pl-8 { background: var(--r-pl-8); color: #fff; }
+  .pill-pe   { background: var(--r-pe);   color: #fff; }
+  .pill-pla  { background: var(--r-pla);  color: #fff; }
+  .pill-pos  { background: var(--r-pos);  color: #5a5a4a; font-weight: 600; }
+  .pill-none { background: var(--r-none); color: #8a8676; font-weight: 600; }
+
+  /* Score pip dots */
+  .score-pip-row { display: inline-flex; gap: 2px; align-items: center; }
+  .pip { width: 7px; height: 7px; border-radius: 50%; background: #ddd; display: inline-block; }
+  .pip.on { background: var(--accent); }
+  .score-num { font-weight: 700; color: var(--accent); margin-left: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
+
+  /* Persistence row */
+  .persist-row { display: inline-flex; gap: 1px; align-items: center; }
+  .persist-cell { width: 7px; height: 11px; background: #ece8d8; border-radius: 1px; }
+  .persist-cell.r-pos  { background: var(--r-pos); }
+  .persist-cell.r-pla  { background: var(--r-pla); }
+  .persist-cell.r-pe   { background: var(--r-pe); }
+  .persist-cell.r-pl   { background: var(--r-pl-7); width: 8px; height: 13px; box-shadow: inset 0 0 0 1px var(--r-pl-8); }
+  .persist-cell.r-none { background: #ece8d8; }
+
+  /* Column widths */
+  col.c-name { width: 130px; }
+  col.c-taxon { width: 170px; }
+  col.c-price { width: 56px; }
+  col.c-52wh { width: 54px; }
+  col.c-52wl { width: 54px; }
+  col.c-ma150 { width: 54px; }
+  col.c-ma200 { width: 54px; }
+  col.c-rating { width: 100px; }
+  col.c-score { width: 86px; }
+  col.c-test { width: 50px; }
+  col.c-persist { width: 110px; }
+
+  .notes { margin-top: 22px; padding: 14px 22px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; }
+  .notes h2 { font-size: 14px; margin: 0 0 8px 0; color: var(--accent); }
+  .notes p { margin: 5px 0; }
+  .notes b { color: var(--text-primary); }
+</style>
+</head>
+<body>
+
+<!-- ====== NAV ====== -->
+<div class="nav-strip">
+  <span class="nav-group-label">MD V2</span>
+  <div class="nav-group">
+    <span class="nav-group-label">Stages</span>
+    <a class="nav-link current" href="stage1-tab-mockup-v3.html">Stage 1</a>
+    <a class="nav-link" href="#stage-2">Stage 2</a>
+    <a class="nav-link" href="#stage-3">Stage 3</a>
+    <a class="nav-link" href="#stage-4">Stage 4</a>
+  </div>
+  <div class="nav-group">
+    <span class="nav-group-label">Indicators</span>
+    <a class="nav-link" href="#pre-indicators">Pre-test</a>
+    <a class="nav-link" href="#post-indicators">Post-test</a>
+  </div>
+  <div class="nav-group">
+    <span class="nav-group-label">Deployment</span>
+    <a class="nav-link" href="#setups">Setups</a>
+    <a class="nav-link" href="#tests">Tests</a>
+  </div>
+  <div class="nav-group">
+    <span class="nav-group-label">Synoptic</span>
+    <a class="nav-link" href="#master-overview">Master Overview</a>
+  </div>
+</div>
+
+<h1>Stage 1 — Consolidating and/or Basing</h1>
+<div class="sub">Master Dashboard V2 · mockup v8.1 · 22 real stocks · pipeline data 12-May-26 18:02</div>
+
+<div class="mock-warn"><b>Mockup only.</b> Standalone HTML for spec sign-off — not wired into the live dashboard. Nav links to other tabs are placeholders until those tabs are built.</div>
+
+<div class="intro">
+  Stage 1 looks for stocks whose long-term trend has stopped going down and started to flatten. The aim is to spot bases <b>before</b> a Stage 2 uptrend kicks off — the earliest, highest-conviction point to consider initiating a position. Eight separate tests across four groups; the more tests a stock passes, the more likely it has genuinely entered a consolidation phase rather than a temporary pause in a downtrend.
+</div>
+
+<!-- ====== CONTROLS ====== -->
+<div class="controls">
+  <div class="ctrl-grp">
+    <span class="ctrl-label">Inputs</span>
+    <button class="toggle-btn active" data-grp="inputs" data-val="pct" onclick="setMode('inputs','pct')">show as %</button>
+    <button class="toggle-btn" data-grp="inputs" data-val="raw" onclick="setMode('inputs','raw')">show as numbers</button>
+  </div>
+  <div class="ctrl-grp">
+    <span class="ctrl-label">Tests</span>
+    <button class="toggle-btn active" data-grp="tests" data-val="tick" onclick="setMode('tests','tick')">show ticks</button>
+    <button class="toggle-btn" data-grp="tests" data-val="val" onclick="setMode('tests','val')">show test values</button>
+  </div>
+  <div class="ctrl-grp">
+    <span class="ctrl-label">Scope</span>
+    <button class="toggle-btn active" data-scope="all" onclick="setScope('all')">All <span id="cnt-all"></span></button>
+    <button class="toggle-btn" data-scope="live" onclick="setScope('live')">Live <span id="cnt-live"></span></button>
+    <button class="toggle-btn" data-scope="sector" onclick="setScope('sector')">Sectors <span id="cnt-sector"></span></button>
+    <button class="toggle-btn" data-scope="industry" onclick="setScope('industry')">Industries <span id="cnt-industry"></span></button>
+    <button class="toggle-btn disabled" title="Definition pending — placeholder">Peers</button>
+    <button class="toggle-btn disabled" title="Definition pending — placeholder">Cohorts</button>
+  </div>
+  <div class="ctrl-grp">
+    <span class="ctrl-label">Colour by</span>
+    <button class="toggle-btn active" data-tint="none" onclick="setTint('none')">Off</button>
+    <button class="toggle-btn" data-tint="industry" onclick="setTint('industry')">Industry</button>
+    <button class="toggle-btn" data-tint="sector" onclick="setTint('sector')">Sector</button>
+  </div>
+  <div class="ctrl-grp">
+    <span class="ctrl-label">Portfolio tint</span>
+    <button class="toggle-btn active" data-port="off" onclick="setPort('off')">Off</button>
+    <button class="toggle-btn" data-port="on" onclick="setPort('on')">On</button>
+  </div>
+</div>
+
+<!-- ====== RATING TILES ====== -->
+<div class="rating-tiles" id="rating-tiles"></div>
+
+<!-- ====== GROUP CAPTIONS ====== -->
+<div class="group-captions">
+  <div class="gcap gcap-g1">
+    <b>Group 1 · Slowing decline</b>
+    Is the long-term moving average still falling, but falling more slowly each month? A decelerating decline is the first hint that a downtrend is losing force. Two cells — one for the 150-day, one for the 200-day.
+  </div>
+  <div class="gcap gcap-g2">
+    <b>Group 2 · Flat moving averages</b>
+    Has the long-term trend genuinely stalled? Both 150-day and 200-day moving averages need to be within ±2% of where they were one, two, and three months ago. Flat moving averages are the clearest mechanical signature of a base.
+  </div>
+  <div class="gcap gcap-g3">
+    <b>Group 3 · Moving average stack</b>
+    Are shorter moving averages now sitting above longer ones? 50-day above 150-day (within 3%) and 150-day above 200-day (within 3%) show price has begun to lift the recent trend above the longer one — typical of a late base or early Stage 2 transition.
+  </div>
+  <div class="gcap gcap-g4">
+    <b>Group 4 · Higher lows</b>
+    Are recent pullback lows higher than earlier ones? The most recent monthly low should be above the prior three monthly lows (1-month test); the most recent three-monthly low should be above the prior three (3-month test). Higher lows are the buyer-stepping-in signal.
+  </div>
+</div>
+
+<!-- ====== TABLE ====== -->
+<div class="table-wrap">
+<table class="data-table" id="main-table">
+  <colgroup>
+    <col class="c-name"><col class="c-taxon">
+    <col class="c-price"><col class="c-52wh"><col class="c-52wl">
+    <col class="c-ma150"><col class="c-ma200">
+    <col class="c-rating"><col class="c-score">
+    <col class="c-test"><col class="c-test">
+    <col class="c-test"><col class="c-test">
+    <col class="c-test"><col class="c-test">
+    <col class="c-test"><col class="c-test">
+    <col class="c-persist">
+  </colgroup>
+  <thead>
+    <tr class="group-header-row">
+      <th class="gh-inputs" colspan="7">Inputs</th>
+      <th class="gh-rating grp-start-rating" colspan="2">Stage 1 rating · thresholds 2/8 · 3/8 · 4/8 · 5+/8</th>
+      <th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Slowing decline</th>
+      <th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 · Flat moving averages</th>
+      <th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 · Moving average stack</th>
+      <th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Group 4 · Higher lows</th>
+      <th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>
+    </tr>
+    <tr class="col-header-row" id="col-header-row"></tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+
+<div class="notes">
+  <h2>Spec recap</h2>
+  <p><b>Rating thresholds:</b> Possible 2/8 · Plausible 3/8 · Probable Early 4/8 · Probable Late 5+/8. Inside Probable Late the pill darkens 5→6→7→8.</p>
+  <p><b>Default sort:</b> Score descending then ticker ascending. Click any column to override.</p>
+  <p><b>Number formats:</b> integers with thousands separators (#,##0); negatives in parentheses (#,##0); 0 dp above 100, 1 dp above 20, 2 dp below 20. Percentages 0 dp with (0)% for negatives.</p>
+  <p><b>Sticky headers:</b> group header and column header rows both pin to the top while you scroll the table body.</p>
+  <p><b>Colour-coding:</b> "Colour by" tints the left edge by industry or sector group. "Portfolio tint" colours the right edge of every row that's in your live positions or in the same sector/industry/peer/cohort. The two are independent and visually separated (left vs right edge).</p>
+  <p><b>This pattern propagates:</b> Stage 2/3/4, Indicators, Setups, Tests, and Master Overview all use the same chrome — controls, tiles, captions, sticky headers, sort, persistence, scope, colour. Each tab swaps in its own groups + tests + threshold ladder.</p>
+</div>
+
+<script>
+let SAMPLE = {
+  "rows": [
+    {
+      "ticker": "FEVR-GB",
+      "company": "Fevertree Drinks",
+      "sector": "O.10. Capital goods - EV",
+      "industry": "O. Industrials and capital goods",
+      "price": 803.0,
+      "high_52w": 1019.9318,
+      "low_52w": 711.0,
+      "ma_50": 826.5,
+      "ma_150": 842.1867,
+      "ma_200": 852.9172,
+      "rating": "Probable Late",
+      "count": 5,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": true,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": true
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": false,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": false
+        },
+        "g2_flat_mas": {
+          "T3": true,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": true
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "-0.7%/-1.3%",
+        "T2_decel_200": "-1.1%/-1.2%",
+        "T1_exc_150": "falling",
+        "T2_exc_200": "falling",
+        "T3_flat_150": "-0.65%",
+        "T4_flat_200": "-1.11%",
+        "T5_50_150": "98.1%",
+        "T6_150_200": "98.7%",
+        "T7_HL_1m": "3",
+        "T8_HL_3m": "3"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": true,
+      "sector_in_portfolio": true,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "NESN-CH",
+      "company": "Nestle",
+      "sector": "A.6. Food production",
+      "industry": "A. Consumer staples",
+      "price": 76.1,
+      "high_52w": 85.9216,
+      "low_52w": 67.1578,
+      "ma_50": 76.6359,
+      "ma_150": 75.4947,
+      "ma_200": 74.215,
+      "rating": "Probable Late",
+      "count": 5,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": true,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": true
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": true
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": true
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "1.4%/0.9%",
+        "T2_decel_200": "0.3%/-1.1%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "1.41%",
+        "T4_flat_200": "0.29%",
+        "T5_50_150": "101.5%",
+        "T6_150_200": "101.7%",
+        "T7_HL_1m": "3",
+        "T8_HL_3m": "3"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "DKSH-CH",
+      "company": "DKSH Holding",
+      "sector": "M.1. Chemicals - Fragrances/ingredients",
+      "industry": "M. Materials",
+      "price": 59.5,
+      "high_52w": 63.7059,
+      "low_52w": 50.1983,
+      "ma_50": 58.0667,
+      "ma_150": 55.8534,
+      "ma_200": 55.4278,
+      "rating": "Probable Late",
+      "count": 5,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": true,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": true
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": true
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": true
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "1.8%/0.4%",
+        "T2_decel_200": "-0.0%/-0.8%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "1.78%",
+        "T4_flat_200": "-0.03%",
+        "T5_50_150": "104.0%",
+        "T6_150_200": "100.8%",
+        "T7_HL_1m": "3",
+        "T8_HL_3m": "3"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": false
+    },
+    {
+      "ticker": "AZA-SE",
+      "company": "Avanza",
+      "sector": "G.5. Online savings platform (D2C)",
+      "industry": "G. Financials",
+      "price": 328.0,
+      "high_52w": 409.2,
+      "low_52w": 307.8,
+      "ma_50": 349.7439,
+      "ma_150": 351.534,
+      "ma_200": 351.147,
+      "rating": "Probable Late",
+      "count": 5,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": true,
+        "T4_200D_flat": true,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": true,
+          "T4": true
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "0.6%/-0.3%",
+        "T2_decel_200": "0.4%/0.7%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "0.58%",
+        "T4_flat_200": "0.35%",
+        "T5_50_150": "99.5%",
+        "T6_150_200": "100.1%",
+        "T7_HL_1m": "2",
+        "T8_HL_3m": "2"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": true,
+      "sector_in_portfolio": true,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "XVIVO-SE",
+      "company": "XVIVO Perfusion",
+      "sector": "B.5. Medtech - consumables - mature",
+      "industry": "B. Healthcare",
+      "price": 294.4,
+      "high_52w": 338.0,
+      "low_52w": 160.0,
+      "ma_50": 236.27,
+      "ma_150": 202.2993,
+      "ma_200": 197.602,
+      "rating": "Probable Early",
+      "count": 4,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": true,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": true,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "8.3%/2.0%",
+        "T2_decel_200": "1.3%/-4.8%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "8.27%",
+        "T4_flat_200": "1.32%",
+        "T5_50_150": "116.8%",
+        "T6_150_200": "102.4%",
+        "T7_HL_1m": "2",
+        "T8_HL_3m": "2"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "ASML-NL",
+      "company": "ASML",
+      "sector": "J.9. Semiconductors",
+      "industry": "J. Technology",
+      "price": 1305.6,
+      "high_52w": 1344.4,
+      "low_52w": 585.978,
+      "ma_50": 1206.698,
+      "ma_150": 1069.2319,
+      "ma_200": 973.5967,
+      "rating": "Probable Early",
+      "count": 4,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": true
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": true
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "6.7%/8.2%",
+        "T2_decel_200": "6.8%/6.3%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "6.65%",
+        "T4_flat_200": "6.81%",
+        "T5_50_150": "112.9%",
+        "T6_150_200": "109.8%",
+        "T7_HL_1m": "3",
+        "T8_HL_3m": "3"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": false
+    },
+    {
+      "ticker": "DCC-GB",
+      "company": "DCC plc",
+      "sector": "P.1. Energy - downstream distribution",
+      "industry": "P. Energy, commodities and metals mining",
+      "price": 5755.0,
+      "high_52w": 6265.0,
+      "low_52w": 4188.0,
+      "ma_50": 5032.9891,
+      "ma_150": 4906.8053,
+      "ma_200": 4866.2072,
+      "rating": "Probable Early",
+      "count": 4,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": true
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": true
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "1.9%/-0.1%",
+        "T2_decel_200": "1.4%/0.1%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "1.86%",
+        "T4_flat_200": "1.41%",
+        "T5_50_150": "102.6%",
+        "T6_150_200": "100.8%",
+        "T7_HL_1m": "3",
+        "T8_HL_3m": "3"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": false
+    },
+    {
+      "ticker": "VOD-GB",
+      "company": "Vodafone",
+      "sector": "C.1. Telecoms - MNOs",
+      "industry": "C. Telecoms",
+      "price": 120.4,
+      "high_52w": 122.05,
+      "low_52w": 67.5316,
+      "ma_50": 113.35,
+      "ma_150": 103.0062,
+      "ma_200": 98.7566,
+      "rating": "Probable Early",
+      "count": 4,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": true
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": true
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "4.3%/3.5%",
+        "T2_decel_200": "3.9%/4.1%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "4.31%",
+        "T4_flat_200": "3.92%",
+        "T5_50_150": "110.0%",
+        "T6_150_200": "104.3%",
+        "T7_HL_1m": "9",
+        "T8_HL_3m": "9"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": false,
+      "sector_in_portfolio": true,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "OR-FR",
+      "company": "L'Oreal",
+      "sector": "A.4. Household products",
+      "industry": "A. Consumer staples",
+      "price": 353.6,
+      "high_52w": 408.35,
+      "low_52w": 337.029,
+      "ma_50": 359.0957,
+      "ma_150": 370.1619,
+      "ma_200": 373.8734,
+      "rating": "Plausible",
+      "count": 3,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": true,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": false,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": false,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": true
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": false,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "-0.8%/-1.5%",
+        "T2_decel_200": "-0.3%/-0.5%",
+        "T1_exc_150": "falling",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "-0.76%",
+        "T4_flat_200": "-0.35%",
+        "T5_50_150": "97.0%",
+        "T6_150_200": "99.0%",
+        "T7_HL_1m": "1",
+        "T8_HL_3m": "1"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "CRBN-NL",
+      "company": "Corbion",
+      "sector": "M.1. Chemicals - Fragrances/ingredients",
+      "industry": "M. Materials",
+      "price": 18.98,
+      "high_52w": 21.64,
+      "low_52w": 16.16,
+      "ma_50": 18.8508,
+      "ma_150": 18.8044,
+      "ma_200": 18.3398,
+      "rating": "Plausible",
+      "count": 3,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": true,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": false,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": true
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": false,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "1.4%/1.4%",
+        "T2_decel_200": "0.2%/-0.4%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "1.44%",
+        "T4_flat_200": "0.24%",
+        "T5_50_150": "100.2%",
+        "T6_150_200": "102.5%",
+        "T7_HL_1m": "1",
+        "T8_HL_3m": "1"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": false
+    },
+    {
+      "ticker": "NOVO.B-DK",
+      "company": "Novo Nordisk",
+      "sector": "B.7. Pharma/biotech",
+      "industry": "B. Healthcare",
+      "price": 300.0,
+      "high_52w": 509.6577,
+      "low_52w": 216.7734,
+      "ma_50": 248.1129,
+      "ma_150": 298.0355,
+      "ma_200": 308.8958,
+      "rating": "Plausible",
+      "count": 3,
+      "tests": {
+        "T1_150D_decel": true,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": false,
+        "T6_150_above_200x97": false,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": true
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": true,
+          "T1_150D_flat_or_rising_exception": false,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": false
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": false,
+          "T6": false
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": true
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "-3.7%/-3.9%",
+        "T2_decel_200": "-4.9%/-6.7%",
+        "T1_exc_150": "falling",
+        "T2_exc_200": "falling",
+        "T3_flat_150": "-3.70%",
+        "T4_flat_200": "-4.88%",
+        "T5_50_150": "83.2%",
+        "T6_150_200": "96.5%",
+        "T7_HL_1m": "3",
+        "T8_HL_3m": "3"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "CVSG-GB",
+      "company": "CVS Group",
+      "sector": "B.2. Animal healthcare",
+      "industry": "B. Healthcare",
+      "price": 1119.0,
+      "high_52w": 1647.8861,
+      "low_52w": 1062.0,
+      "ma_50": 1198.08,
+      "ma_150": 1263.4658,
+      "ma_200": 1256.218,
+      "rating": "Plausible",
+      "count": 3,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": true,
+        "T4_200D_flat": true,
+        "T5_50_above_150x97": false,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": false,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": false,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": true,
+          "T4": true
+        },
+        "g3_stack": {
+          "T5": false,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": false,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "-0.6%/-0.6%",
+        "T2_decel_200": "-0.4%/-0.7%",
+        "T1_exc_150": "falling",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "-0.62%",
+        "T4_flat_200": "-0.37%",
+        "T5_50_150": "94.8%",
+        "T6_150_200": "100.6%",
+        "T7_HL_1m": "1",
+        "T8_HL_3m": "1"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": true,
+      "sector_in_portfolio": true,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "BARC-GB",
+      "company": "Barclays",
+      "sector": "G.13. Banks",
+      "industry": "G. Financials",
+      "price": 429.1,
+      "high_52w": 507.45,
+      "low_52w": 310.1888,
+      "ma_50": 418.0435,
+      "ma_150": 433.1064,
+      "ma_200": 417.8906,
+      "rating": "Possible",
+      "count": 2,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": false,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": false,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "1.9%/0.9%",
+        "T2_decel_200": "2.5%/1.9%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "1.86%",
+        "T4_flat_200": "2.45%",
+        "T5_50_150": "96.5%",
+        "T6_150_200": "103.6%",
+        "T7_HL_1m": "2",
+        "T8_HL_3m": "2"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "HSBA-GB",
+      "company": "HSBC",
+      "sector": "G.13. Banks",
+      "industry": "G. Financials",
+      "price": 1330.4,
+      "high_52w": 1410.1012,
+      "low_52w": 15.197,
+      "ma_50": 1285.284,
+      "ma_150": 1191.3127,
+      "ma_200": 1137.8541,
+      "rating": "Possible",
+      "count": 2,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": false,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": false,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "3.9%/3.5%",
+        "T2_decel_200": "4.1%/3.5%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "3.87%",
+        "T4_flat_200": "4.09%",
+        "T5_50_150": "107.9%",
+        "T6_150_200": "104.7%",
+        "T7_HL_1m": "1",
+        "T8_HL_3m": "1"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "SHEL-GB",
+      "company": "Shell",
+      "sector": "P.2. Energy - upstream E&P",
+      "industry": "P. Energy, commodities and metals mining",
+      "price": 3127.5,
+      "high_52w": 3592.0,
+      "low_52w": 2402.8099,
+      "ma_50": 3318.7,
+      "ma_150": 2958.3917,
+      "ma_200": 2886.4349,
+      "rating": "Possible",
+      "count": 2,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": false,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": false,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "3.1%/3.8%",
+        "T2_decel_200": "2.5%/3.3%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "3.08%",
+        "T4_flat_200": "2.50%",
+        "T5_50_150": "112.2%",
+        "T6_150_200": "102.5%",
+        "T7_HL_1m": "1",
+        "T8_HL_3m": "1"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": false
+    },
+    {
+      "ticker": "HTWS-GB",
+      "company": "Helios Towers",
+      "sector": "C.2. Telecoms - towers",
+      "industry": "C. Telecoms",
+      "price": 242.4,
+      "high_52w": 242.4,
+      "low_52w": 107.0,
+      "ma_50": 193.502,
+      "ma_150": 173.6507,
+      "ma_200": 163.162,
+      "rating": "Possible",
+      "count": 2,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": false,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": false,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "5.2%/5.0%",
+        "T2_decel_200": "5.7%/4.4%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "5.23%",
+        "T4_flat_200": "5.69%",
+        "T5_50_150": "111.4%",
+        "T6_150_200": "106.4%",
+        "T7_HL_1m": "1",
+        "T8_HL_3m": "1"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "is_live": true,
+      "sector_in_portfolio": true,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "SAP-DE",
+      "company": "SAP",
+      "sector": "J.7. Software - Computer games",
+      "industry": "J. Technology",
+      "price": 144.46,
+      "high_52w": 273.55,
+      "low_52w": 135.6969,
+      "ma_50": 153.0753,
+      "ma_150": 188.4047,
+      "ma_200": 199.83,
+      "rating": "None",
+      "count": 1,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": false,
+        "T6_150_above_200x97": false,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": false,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": false
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": false,
+          "T6": false
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "-5.6%/-5.6%",
+        "T2_decel_200": "-5.6%/-5.1%",
+        "T1_exc_150": "falling",
+        "T2_exc_200": "falling",
+        "T3_flat_150": "-5.58%",
+        "T4_flat_200": "-5.62%",
+        "T5_50_150": "81.2%",
+        "T6_150_200": "94.3%",
+        "T7_HL_1m": "2",
+        "T8_HL_3m": "2"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": false
+    },
+    {
+      "ticker": "FLTR-GB",
+      "company": "Flutter Entertainment",
+      "sector": "H.6. Gambling - B2C OSB, Casino-led",
+      "industry": "H. Consumer discretionary",
+      "price": 7010.0,
+      "high_52w": 23610.0,
+      "low_52w": 6912.0,
+      "ma_50": 7971.72,
+      "ma_150": 12712.6467,
+      "ma_200": 14910.285,
+      "rating": "None",
+      "count": 1,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": false,
+        "T6_150_above_200x97": false,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": false,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": false
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": false,
+          "T6": false
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "-12.3%/-11.9%",
+        "T2_decel_200": "-8.6%/-6.8%",
+        "T1_exc_150": "falling",
+        "T2_exc_200": "falling",
+        "T3_flat_150": "-12.29%",
+        "T4_flat_200": "-8.64%",
+        "T5_50_150": "62.7%",
+        "T6_150_200": "85.3%",
+        "T7_HL_1m": "2",
+        "T8_HL_3m": "2"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "BALD-SE",
+      "company": "Balders",
+      "sector": "N.1. TBD",
+      "industry": "N. Real assets",
+      "price": 54.58,
+      "high_52w": 75.2,
+      "low_52w": 49.5223,
+      "ma_50": 58.5215,
+      "ma_150": 64.5793,
+      "ma_200": 65.3617,
+      "rating": "None",
+      "count": 1,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": false,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": false,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": false,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": false
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": false,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": false,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "-2.2%/-2.1%",
+        "T2_decel_200": "-2.0%/-1.3%",
+        "T1_exc_150": "falling",
+        "T2_exc_200": "falling",
+        "T3_flat_150": "-2.23%",
+        "T4_flat_200": "-2.03%",
+        "T5_50_150": "90.6%",
+        "T6_150_200": "98.8%",
+        "T7_HL_1m": "1",
+        "T8_HL_3m": "1"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": false
+    },
+    {
+      "ticker": "HUSQ-SE",
+      "company": "Husqvarna",
+      "sector": "H.17. Consumer products",
+      "industry": "H. Consumer discretionary",
+      "price": 44.65,
+      "high_52w": 56.9609,
+      "low_52w": 33.7774,
+      "ma_50": 39.9566,
+      "ma_150": 43.6286,
+      "ma_200": 45.731,
+      "rating": "None",
+      "count": 1,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": false,
+        "T6_150_above_200x97": false,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": false,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": false
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": false,
+          "T6": false
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "-2.2%/-5.0%",
+        "T2_decel_200": "-1.7%/-2.3%",
+        "T1_exc_150": "falling",
+        "T2_exc_200": "falling",
+        "T3_flat_150": "-2.23%",
+        "T4_flat_200": "-1.68%",
+        "T5_50_150": "91.6%",
+        "T6_150_200": "95.4%",
+        "T7_HL_1m": "2",
+        "T8_HL_3m": "2"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "is_live": false,
+      "sector_in_portfolio": false,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "CARL.B-DK",
+      "company": "Carlsberg",
+      "sector": "A.1. Beverages - beer",
+      "industry": "A. Consumer staples",
+      "price": 845.0,
+      "high_52w": 981.8151,
+      "low_52w": 713.2912,
+      "ma_50": 848.8629,
+      "ma_150": 819.2124,
+      "ma_200": 805.1735,
+      "rating": "Probable Early",
+      "count": 4,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": false,
+        "T4_200D_flat": true,
+        "T5_50_above_150x97": true,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": true,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": false,
+          "T4": true
+        },
+        "g3_stack": {
+          "T5": true,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": true,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "1.7%/1.2%",
+        "T2_decel_200": "-0.4%/-0.9%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "1.74%",
+        "T4_flat_200": "-0.41%",
+        "T5_50_150": "103.6%",
+        "T6_150_200": "101.7%",
+        "T7_HL_1m": "2",
+        "T8_HL_3m": "2"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": true,
+      "sector_in_portfolio": true,
+      "industry_in_portfolio": true
+    },
+    {
+      "ticker": "RYA-IE",
+      "company": "Ryanair",
+      "sector": "H.11. Airlines and travel",
+      "industry": "H. Consumer discretionary",
+      "price": 23.3,
+      "high_52w": 29.9447,
+      "low_52w": 21.4828,
+      "ma_50": 24.936,
+      "ma_150": 26.5972,
+      "ma_200": 26.1427,
+      "rating": "Possible",
+      "count": 2,
+      "tests": {
+        "T1_150D_decel": false,
+        "T2_200D_decel": false,
+        "T3_150D_flat": true,
+        "T4_200D_flat": false,
+        "T5_50_above_150x97": false,
+        "T6_150_above_200x97": true,
+        "T7_higher_lows_1m": false,
+        "T8_higher_lows_3m": false
+      },
+      "groups": {
+        "g1_slowing_decline": {
+          "T1_150D_decelerating": false,
+          "T1_150D_flat_or_rising_exception": true,
+          "T2_200D_decelerating": false,
+          "T2_200D_flat_or_rising_exception": true
+        },
+        "g2_flat_mas": {
+          "T3": true,
+          "T4": false
+        },
+        "g3_stack": {
+          "T5": false,
+          "T6": true
+        },
+        "g4_higher_lows": {
+          "T7": false,
+          "T8": false
+        }
+      },
+      "test_values": {
+        "T1_decel_150": "0.2%/-0.4%",
+        "T2_decel_200": "0.1%/0.7%",
+        "T1_exc_150": "flat/rising",
+        "T2_exc_200": "flat/rising",
+        "T3_flat_150": "0.24%",
+        "T4_flat_200": "0.15%",
+        "T5_50_150": "93.8%",
+        "T6_150_200": "101.7%",
+        "T7_HL_1m": "1",
+        "T8_HL_3m": "1"
+      },
+      "persistence": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "is_live": true,
+      "sector_in_portfolio": true,
+      "industry_in_portfolio": true
+    }
+  ],
+  "universe_counts": {
+    "Plausible": 266,
+    "Probable Early": 171,
+    "Possible": 269,
+    "None": 179,
+    "Probable Late": 61
+  },
+  "universe_total": 946,
+  "live_tickers": [
+    "AZA-SE",
+    "BYLOT-GR",
+    "CARL.B-DK",
+    "CVSG-GB",
+    "ENAV-IT",
+    "FEVR-GB",
+    "HTWS-GB",
+    "RYA-IE",
+    "THEON-NL"
+  ],
+  "live_sectors": [
+    "A.1. Beverages - beer",
+    "B.2. Animal healthcare",
+    "C.1. Telecoms - MNOs",
+    "C.2. Telecoms - towers",
+    "F.2. Defence - Non-primes",
+    "G.5. Online savings platform (D2C)",
+    "H.11. Airlines and travel",
+    "O.10. Capital goods - EV"
+  ],
+  "live_industries": [
+    "A. Consumer staples",
+    "B. Healthcare",
+    "C. Telecoms",
+    "F. Defence",
+    "G. Financials",
+    "H. Consumer discretionary",
+    "O. Industrials and capital goods"
+  ]
+};
+let mode = { inputs: 'pct', tests: 'tick' };
+let scope = 'all';
+let ratingFilter = null;
+let tint = 'none';      // 'none' | 'industry' | 'sector'
+let port = 'off';       // 'off' | 'on'
+let currentSort = { col: 'count', dir: 'desc' };
+
+// ===== Column definitions =====
+const COLS = [
+  { id:'name',     label:'Company · Ticker',   sortKey:'company', cls:'name-cell' },
+  { id:'taxon',    label:'Industry · Sector',  sortKey:'sector', cls:'taxon' },
+  { id:'price',    label:'Price',                       sortKey:'price', cls:'num' },
+  { id:'high_52w', label:'52 week high',                sortKey:'high_52w', cls:'num' },
+  { id:'low_52w',  label:'52 week low',                 sortKey:'low_52w', cls:'num' },
+  { id:'ma_150',   label:'150 day moving average',      sortKey:'ma_150', cls:'num' },
+  { id:'ma_200',   label:'200 day moving average',      sortKey:'ma_200', cls:'num' },
+  { id:'rating',   label:'Rating',             sortKey:'rating_rank', cls:'grp-start-rating' },
+  { id:'count',    label:'Score',              sortKey:'count', cls:'' },
+  // G1 — 2 cells (decel OR flat-rising exception)
+  { id:'g1_150', label:'150-day decelerating', sortKey:'g1_150', cls:'grp-start-g1', testGroup:'g1_combined', testKey:'T1_150D', valKey:'T1_decel_150' },
+  { id:'g1_200', label:'200-day decelerating', sortKey:'g1_200', cls:'grp-end-g1', testGroup:'g1_combined', testKey:'T2_200D', valKey:'T2_decel_200' },
+  // G2 — 2 cells
+  { id:'g2_t3', label:'150-day flat ±2%',               sortKey:'g2_t3', cls:'grp-start-g2', testGroup:'g2', testKey:'T3', valKey:'T3_flat_150' },
+  { id:'g2_t4', label:'200-day flat ±2%',               sortKey:'g2_t4', cls:'grp-end-g2', testGroup:'g2', testKey:'T4', valKey:'T4_flat_200' },
+  // G3 — 2 cells
+  { id:'g3_t5', label:'50-day above 97% × 150-day',     sortKey:'g3_t5', cls:'grp-start-g3', testGroup:'g3', testKey:'T5', valKey:'T5_50_150' },
+  { id:'g3_t6', label:'150-day above 97% × 200-day',    sortKey:'g3_t6', cls:'grp-end-g3', testGroup:'g3', testKey:'T6', valKey:'T6_150_200' },
+  // G4 — 2 cells
+  { id:'g4_t7', label:'1-month low > prior 3M low',     sortKey:'g4_t7', cls:'grp-start-g4', testGroup:'g4', testKey:'T7', valKey:'T7_HL_1m' },
+  { id:'g4_t8', label:'3-month low > prior 3M low',     sortKey:'g4_t8', cls:'grp-end-g4', testGroup:'g4', testKey:'T8', valKey:'T8_HL_3m' },
+  // Persistence
+  { id:'persistence', label:'Last 12 months', sortKey:'persistence_count', cls:'grp-start-persist' }
+];
+
+const RATING_RANK = { 'Probable Late':5, 'Probable Early':4, 'Plausible':3, 'Possible':2, 'None':1 };
+
+// ===== Formatters =====
+function fmtNum(n) {
+  if (n == null || isNaN(n)) return '—';
+  const abs = Math.abs(n);
+  let dp;
+  if (abs >= 100) dp = 0;
+  else if (abs >= 20) dp = 1;
+  else dp = 2;
+  const formatted = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  return n < 0 ? `(${formatted})` : formatted;
+}
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  const r = Math.round(n);
+  const abs = Math.abs(r);
+  return r < 0 ? `(${abs})%` : `${r}%`;
+}
+function pctVsRef(price, ref) {
+  if (price == null || ref == null || ref === 0) return '—';
+  const p = (price - ref) / ref * 100;
+  const cls = p >= 0 ? 'pct-pos' : 'pct-neg';
+  return `<span class="${cls}">${fmtPct(p)}</span>`;
+}
+
+// ===== Pill, score, persistence =====
+function pillFor(rating, count) {
+  if (rating === 'Probable Late') {
+    const c = Math.min(Math.max(count, 5), 8);
+    return `<span class="pill pill-pl-${c}">Probable Late</span>`;
+  }
+  if (rating === 'Probable Early') return `<span class="pill pill-pe">Probable Early</span>`;
+  if (rating === 'Plausible') return `<span class="pill pill-pla">Plausible</span>`;
+  if (rating === 'Possible') return `<span class="pill pill-pos">Possible</span>`;
+  return `<span class="pill pill-none">None</span>`;
+}
+function scorePips(row) {
+  // Pips reflect the raw 8 tests as the pipeline scored them — count must match the rating count.
+  // The merged-G1 display in the table cells is separate (visual convenience only).
+  const t = row.tests;
+  const passed = [t.T1_150D_decel, t.T2_200D_decel, t.T3_150D_flat, t.T4_200D_flat, t.T5_50_above_150x97, t.T6_150_above_200x97, t.T7_higher_lows_1m, t.T8_higher_lows_3m];
+  const count = passed.filter(Boolean).length;
+  let s = '';
+  for (let i=0; i<8; i++) s += `<span class="pip ${passed[i]?'on':''}"></span>`;
+  return `<div class="score-pip-row">${s}<span class="score-num">${count}/8</span></div>`;
+}
+function persistRow(arr, rating) {
+  let h = '';
+  for (let i=0; i<12; i++) {
+    if (i === 11 && arr && arr[11]) {
+      const cls = rating === 'Probable Late' ? 'r-pl' :
+                  rating === 'Probable Early' ? 'r-pe' :
+                  rating === 'Plausible' ? 'r-pla' :
+                  rating === 'Possible' ? 'r-pos' : 'r-none';
+      h += `<span class="persist-cell ${cls}" title="Current month: ${rating}"></span>`;
+    } else {
+      h += `<span class="persist-cell r-none" title="Month -${11-i}: not yet backfilled"></span>`;
+    }
+  }
+  return `<div class="persist-row">${h}</div>`;
+}
+
+// ===== Cell builders =====
+function inputCell(row, key, extraCls='') {
+  const v = row[key];
+  if (key === 'price') return `<td class="num ${extraCls}">${fmtNum(v)}</td>`;
+  if (v == null || row.price == null) return `<td class="num ${extraCls}">—</td>`;
+  const pct = (row.price - v) / v * 100;
+  let intensity = 0;
+  if (key === 'high_52w') {
+    // Close to 52w high (pct near 0) = good; far below = bad
+    intensity = Math.max(-1, Math.min(1, (pct + 20) / 20));
+  } else if (key === 'low_52w') {
+    // Far above 52w low = good; near it = bad
+    intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
+  } else if (key === 'ma_150' || key === 'ma_200') {
+    // Above MA = positive; below = negative
+    intensity = Math.max(-1, Math.min(1, pct / 10));
+  }
+  const colour = colourForIntensity(intensity);
+  const text = (mode.inputs === 'pct') ? fmtPctSigned(pct) : fmtNum(v);
+  return `<td class="num ${extraCls}" style="color:${colour}">${text}</td>`;
+}
+
+function colourForIntensity(i) {
+  if (i >= 0.6) return '#0a4012';
+  if (i >= 0.25) return '#1f6325';
+  if (i >= 0.05) return '#4a8050';
+  if (i <= -0.6) return '#8b1a1a';
+  if (i <= -0.25) return '#a83232';
+  if (i <= -0.05) return '#c66666';
+  return '#666';
+}
+
+function fmtPctSigned(p) {
+  if (p == null || isNaN(p)) return '—';
+  const r = Math.round(p);
+  const abs = Math.abs(r);
+  return r < 0 ? `(${abs})%` : `${r}%`;
+}
+function reformatTestValue(s) {
+  // Reformat percent strings to use (N)% for negatives and 0 dp. Pass through anything that isn't a percent.
+  if (s == null) return '—';
+  // Handle compound like "-0.7%/-1.3%" — reformat both parts
+  if (s.includes('/') && s.includes('%')) {
+    return s.split('/').map(p => reformatTestValue(p.trim())).join(' / ');
+  }
+  // Single percent
+  const m = s.match(/^(-?\d+(?:\.\d+)?)%$/);
+  if (m) {
+    const n = Math.round(parseFloat(m[1]));
+    return n < 0 ? `(${Math.abs(n)})%` : `${n}%`;
+  }
+  // Non-percent (e.g., "3" higher-lows count, "flat/rising") — leave as is
+  return s;
+}
+
+function testCellFor(row, col) {
+  const g = row.groups;
+  let pass = false;
+  if (col.testGroup === 'g1_combined') {
+    if (col.testKey === 'T1_150D') pass = g.g1_slowing_decline.T1_150D_decelerating;
+    else if (col.testKey === 'T2_200D') pass = g.g1_slowing_decline.T2_200D_decelerating;
+  } else if (col.testGroup === 'g2') pass = g.g2_flat_mas[col.testKey];
+  else if (col.testGroup === 'g3') pass = g.g3_stack[col.testKey];
+  else if (col.testGroup === 'g4') pass = g.g4_higher_lows[col.testKey];
+  const extra = col.cls || '';
+  if (mode.tests === 'val') {
+    const raw = row.test_values[col.valKey] || '—';
+    const v = reformatTestValue(raw);
+    const colour = pass ? colourForIntensity(0.7) : colourForIntensity(-0.4);
+    return `<td class="test-val ${extra}" style="color:${colour}">${v}</td>`;
+  }
+  if (pass) return `<td class="test-pass ${extra}"><span class="tick">✓</span></td>`;
+  return `<td class="test-fail ${extra}">·</td>`;
+}
+
+// ===== Header row =====
+function buildHeaderRow() {
+  const tr = document.getElementById('col-header-row');
+  let h = '';
+  COLS.forEach(c => {
+    const isSort = currentSort.col === c.sortKey;
+    const arrow = isSort
+      ? `<span class="sort-arrow">${currentSort.dir==='desc'?'▼':'▲'}</span>`
+      : `<span class="sort-placeholder"></span>`;
+    const ast = c.asterisk ? `<span class="ast" title="${c.asterisk}">*</span>` : '';
+    h += `<th class="${c.cls||''}" data-sort-key="${c.sortKey}" title="${c.label}">
+      <span class="hd"><span class="lbl">${c.label}${ast}</span>${arrow}</span>
+    </th>`;
+  });
+  tr.innerHTML = h;
+}
+
+// ===== Rating tiles =====
+function ratingTiles() {
+  const tiles = document.getElementById('rating-tiles');
+  const uc = SAMPLE.universe_counts;
+  const total = SAMPLE.universe_total;
+  const order = ['None','Possible','Plausible','Probable Early','Probable Late'];
+  const strip = {'Probable Late':'pl','Probable Early':'pe','Plausible':'pla','Possible':'pos','None':'none'};
+  let h = '';
+  const TINT_CLS = {'Probable Late':'tint-pl','Probable Early':'tint-pe','Plausible':'tint-pla','Possible':'tint-pos','None':'tint-none'};
+  order.forEach(r => {
+    const act = ratingFilter === r ? ' active' : '';
+    const cnt = uc[r] || 0;
+    h += `<div class="rating-tile ${TINT_CLS[r]}${act}" onclick="toggleRating('${r}')">
+      <div class="rt-label">${r}</div>
+      <div class="rt-count">${cnt.toLocaleString('en-GB')}</div>
+      <div class="rt-sub">of ${total.toLocaleString('en-GB')} · ${fmtPct(cnt/total*100)}</div>
+      <div class="rt-strip rt-strip-${strip[r]}"></div>
+    </div>`;
+  });
+  tiles.innerHTML = h;
+}
+function toggleRating(r) { ratingFilter = (ratingFilter === r) ? null : r; ratingTiles(); renderRows(); }
+
+// ===== Control handlers =====
+function setMode(kind, val) {
+  mode[kind] = val;
+  document.querySelectorAll(`button[data-grp="${kind}"]`).forEach(b => b.classList.toggle('active', b.dataset.val === val));
+  renderRows();
+  refreshDebugStripe('setMode(' + kind + ',' + val + ')');
+}
+
+function refreshDebugStripe(lastAction) {
+  const stripe = document.getElementById('debug-stripe');
+  if (!stripe) return;
+  // Read the first body row's first test cell to confirm what's actually rendered
+  const firstRow = document.querySelector('#tbody tr');
+  const firstTestCell = firstRow ? firstRow.querySelectorAll('td')[9] : null;
+  const testCellClass = firstTestCell ? firstTestCell.className : 'no row';
+  const testCellText = firstTestCell ? firstTestCell.textContent.trim().substring(0,20) : '';
+  stripe.innerHTML = `<b>DEBUG:</b> mode=${JSON.stringify(mode)} · last: ${lastAction || 'init'} · first test cell: <b>${testCellText}</b> [class: ${testCellClass}]`;
+}
+function setScope(s) {
+  scope = s;
+  document.querySelectorAll('button[data-scope]').forEach(b => b.classList.toggle('active', b.dataset.scope === s));
+  renderRows();
+}
+function setTint(t) {
+  tint = t;
+  document.querySelectorAll('button[data-tint]').forEach(b => b.classList.toggle('active', b.dataset.tint === t));
+  renderRows();
+}
+function setPort(p) {
+  port = p;
+  document.querySelectorAll('button[data-port]').forEach(b => b.classList.toggle('active', b.dataset.port === p));
+  renderRows();
+}
+function onSort(key) {
+  if (currentSort.col === key) currentSort.dir = currentSort.dir === 'desc' ? 'asc' : 'desc';
+  else currentSort = { col: key, dir: 'desc' };
+  buildHeaderRow();
+  renderRows();
+}
+function getSortVal(row, key) {
+  if (key === 'rating_rank') return RATING_RANK[row.rating] || 0;
+  if (key === 'persistence_count') return (row.persistence || []).filter(Boolean).length;
+  // test sort keys
+  if (key === 'g1_150') return row.groups.g1_slowing_decline.T1_150D_decelerating ? 1 : 0;
+  if (key === 'g1_200') return row.groups.g1_slowing_decline.T2_200D_decelerating ? 1 : 0;
+  if (key === 'g2_t3') return row.groups.g2_flat_mas.T3 ? 1 : 0;
+  if (key === 'g2_t4') return row.groups.g2_flat_mas.T4 ? 1 : 0;
+  if (key === 'g3_t5') return row.groups.g3_stack.T5 ? 1 : 0;
+  if (key === 'g3_t6') return row.groups.g3_stack.T6 ? 1 : 0;
+  if (key === 'g4_t7') return row.groups.g4_higher_lows.T7 ? 1 : 0;
+  if (key === 'g4_t8') return row.groups.g4_higher_lows.T8 ? 1 : 0;
+  // Input columns: sort by displayed value (% in pct mode, raw in raw mode)
+  const PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
+  if (PCT_KEYS.includes(key) && mode.inputs === 'pct') {
+    const ref = row[key];
+    if (ref == null || row.price == null || ref === 0) return -Infinity;
+    return (row.price - ref) / ref * 100;
+  }
+  if (key in row) return row[key];
+  return 0;
+}
+
+// ===== Industry / sector tint palette =====
+// Deterministic colour per taxonomy label
+function hashColor(label, alpha=0.10) {
+  if (!label) return null;
+  let h = 0;
+  for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff;
+  const hue = h % 360;
+  return `hsla(${hue}, 35%, 55%, ${alpha})`;
+}
+
+function portfolioInfo(row) {
+  if (row.is_live) return { color: 'var(--accent)', bg: 'rgba(27,94,32,0.10)', bgHover: 'rgba(27,94,32,0.14)' };
+  if (row.sector_in_portfolio) return { color: '#1b5e20', bg: 'rgba(27,94,32,0.05)', bgHover: 'rgba(27,94,32,0.08)' };
+  if (row.industry_in_portfolio) return { color: '#1b5e20', bg: 'rgba(27,94,32,0.025)', bgHover: 'rgba(27,94,32,0.05)' };
+  return null;
+}
+
+// ===== Main render =====
+function renderRows() {
+  // Scope counts
+  document.getElementById('cnt-all').textContent = `(${SAMPLE.rows.length})`;
+  document.getElementById('cnt-live').textContent = `(${SAMPLE.rows.filter(r=>r.is_live).length})`;
+  document.getElementById('cnt-sector').textContent = `(${SAMPLE.rows.filter(r=>r.sector_in_portfolio).length})`;
+  document.getElementById('cnt-industry').textContent = `(${SAMPLE.rows.filter(r=>r.industry_in_portfolio).length})`;
+
+  let rows = SAMPLE.rows.slice();
+  if (scope === 'live') rows = rows.filter(r => r.is_live);
+  else if (scope === 'sector') rows = rows.filter(r => r.sector_in_portfolio);
+  else if (scope === 'industry') rows = rows.filter(r => r.industry_in_portfolio);
+  if (ratingFilter) rows = rows.filter(r => r.rating === ratingFilter);
+
+  rows.sort((a,b) => {
+    const va = getSortVal(a, currentSort.col), vb = getSortVal(b, currentSort.col);
+    let cmp;
+    if (typeof va === 'string') cmp = va.localeCompare(vb);
+    else cmp = (va||0) - (vb||0);
+    if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker);
+    return currentSort.dir === 'desc' ? -cmp : cmp;
+  });
+
+  const tbody = document.getElementById('tbody');
+  let html = '';
+  rows.forEach(s => {
+    // Build inline-style for tints
+    let styles = [];
+    let cls = [];
+    if (tint === 'industry') {
+      styles.push(`--tint-bg: ${hashColor(s.industry, 0.16)}`);
+      cls.push('tint-row');
+    } else if (tint === 'sector') {
+      styles.push(`--tint-bg: ${hashColor(s.sector, 0.16)}`);
+      cls.push('tint-row');
+    }
+    if (port === 'on') {
+      const pi = portfolioInfo(s);
+      if (pi) {
+        styles.push(`--portfolio-color: ${pi.color}`);
+        styles.push(`--portfolio-bg: ${pi.bg}`);
+        styles.push(`--portfolio-bg-hover: ${pi.bgHover}`);
+        cls.push('portfolio-band');
+        cls.push('portfolio-tint');
+      }
+    }
+    const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
+    const clsAttr = cls.length ? ` class="${cls.join(' ')}"` : '';
+
+    html += `<tr${clsAttr}${styleAttr}>
+      <td class="name-cell"><div class="co">${s.is_live ? '<span class="live-dot">●</span>' : ''}${s.company || s.ticker}</div><div class="tk">${s.ticker}</div></td>
+      <td class="taxon"><div class="ind">${s.industry || ''}</div><div class="sec">${s.sector || ''}</div></td>
+      ${inputCell(s,'price')}
+      ${inputCell(s,'high_52w')}
+      ${inputCell(s,'low_52w')}
+      ${inputCell(s,'ma_150')}
+      ${inputCell(s,'ma_200')}
+      <td class="grp-start-rating">${pillFor(s.rating, s.count)}</td>
+      <td>${scorePips(s)}</td>
+      ${testCellFor(s, COLS[9])}
+      ${testCellFor(s, COLS[10])}
+      ${testCellFor(s, COLS[11])}
+      ${testCellFor(s, COLS[12])}
+      ${testCellFor(s, COLS[13])}
+      ${testCellFor(s, COLS[14])}
+      ${testCellFor(s, COLS[15])}
+      ${testCellFor(s, COLS[16])}
+      <td class="grp-start-persist">${persistRow(s.persistence, s.rating)}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+// ===== Sort delegation =====
+document.getElementById('col-header-row').addEventListener('click', function(e) {
+  const th = e.target.closest('th');
+  if (!th) return;
+  const key = th.getAttribute('data-sort-key');
+  if (!key) return;
+  onSort(key);
+});
+
+// ===== Toggle button click handlers (simple direct binding) =====
+document.querySelectorAll('.controls button[data-grp="inputs"]').forEach(b => {
+  b.addEventListener('click', () => setMode('inputs', b.dataset.val));
+});
+document.querySelectorAll('.controls button[data-grp="tests"]').forEach(b => {
+  b.addEventListener('click', () => setMode('tests', b.dataset.val));
+});
+document.querySelectorAll('.controls button[data-scope]').forEach(b => {
+  b.addEventListener('click', () => setScope(b.dataset.scope));
+});
+document.querySelectorAll('.controls button[data-tint]').forEach(b => {
+  b.addEventListener('click', () => setTint(b.dataset.tint));
+});
+document.querySelectorAll('.controls button[data-port]').forEach(b => {
+  b.addEventListener('click', () => setPort(b.dataset.port));
+});
+
+// ===== Bootstrap =====
+ratingTiles();
+buildHeaderRow();
+renderRows();
+refreshDebugStripe('initial');
+</script>
+</body>
+</html>

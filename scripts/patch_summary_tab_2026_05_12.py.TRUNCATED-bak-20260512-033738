@@ -1,0 +1,217 @@
+"""
+Patcher: SUMMARY tab — V1 (12-May-26 Session 19)
+================================================
+
+Idempotency: detects SUMMARY-TAB-MARKER. Re-running is a no-op.
+Backup: takes pre-write sidecar of build_dashboard.py.
+Verification: py_compile + size-delta sanity check before reporting success.
+
+Injects 6 changes into scripts/build_dashboard.py:
+  1. TABS list — prepends SUMMARY entry as first element (TAB 0)
+  2. IMPLEMENTED_TABS — adds "summary"
+  3. currentTab default — flips "changes" → "summary"
+  4. renderTab dispatch — adds summary branch as first conditional
+  5. JS module — injects _summary_tab_module.js content before `function renderTab(id){`
+  6. Startup call — adds `deriveMasterRatings();` after `precomputeSsemRatings();`
+
+Run via:
+  cd C:\\Users\\richb\\Documents\\COWORK\\master-dashboard
+  python scripts\\patch_summary_tab_2026_05_12.py
+
+Locked spec: PROJECTS/SA - Master Dashboard/decisions.md D-MD-UI-38..47
+"""
+import sys
+import shutil
+import py_compile
+from pathlib import Path
+from datetime import datetime
+
+SCRIPT_DIR = Path(__file__).parent.resolve()
+DASH_PY = SCRIPT_DIR / "build_dashboard.py"
+MODULE_JS = SCRIPT_DIR / "_summary_tab_module.js"
+MARKER = "SUMMARY-TAB-MARKER"
+
+# Anchor strings — exact substrings expected in unmodified Session 17 file.
+ANCHOR_TABS = '''TABS = [
+    # STAGE-REFACTOR-V3-MARKER — 8 filter tabs grouped by Minervini-style stage
+    # Stage 1 — Basing/bottoming
+    {"id": "bp",        "label": "Basing Plateau",   "accent": "#276749", "stage": 1},'''
+
+REPLACE_TABS = '''TABS = [
+    # SUMMARY-TAB-MARKER — synoptic view, default landing tab (D-MD-UI-38)
+    {"id": "summary",   "label": "SUMMARY",          "accent": "#4a5568"},
+    # STAGE-REFACTOR-V3-MARKER — 8 filter tabs grouped by Minervini-style stage
+    # Stage 1 — Basing/bottoming
+    {"id": "bp",        "label": "Basing Plateau",   "accent": "#276749", "stage": 1},'''
+
+ANCHOR_IMPL = '''IMPLEMENTED_TABS = [
+    "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
+    "ssem", "val",
+]'''
+
+REPLACE_IMPL = '''IMPLEMENTED_TABS = [
+    "summary",
+    "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
+    "ssem", "val",
+]'''
+
+ANCHOR_CURRENTTAB = 'var currentTab="changes",currentSort={col:"chg_qual_count",dir:"desc"}; /* Q1Q2-CLEANUP-V1 */'
+REPLACE_CURRENTTAB = 'var currentTab="summary",currentSort={col:"chg_qual_count",dir:"desc"}; /* SUMMARY-TAB-DEFAULT */'
+
+ANCHOR_RENDERTAB = '''function renderTab(id){
+  try{
+  if(id==="mm99")renderMM99();'''
+
+REPLACE_RENDERTAB = '''function renderTab(id){
+  try{
+  if(id==="summary")renderSummary();
+  else if(id==="mm99")renderMM99();'''
+
+ANCHOR_PRECOMPUTE = '''precomputeSsemRatings();
+
+renderTab("mm99");'''
+
+REPLACE_PRECOMPUTE = '''precomputeSsemRatings();
+deriveMasterRatings();  /* SUMMARY-TAB-MARKER — populate masterRatingsMap once at startup */
+
+renderTab("mm99");'''
+
+# Module injection point: just before `function renderTab(id){` definition at the
+# bottom of the JS r"""...""" block. The anchor is the comment immediately above it.
+ANCHOR_MODULE_INJECT = '''document.getElementById("tab-changes").innerHTML=h;
+}
+
+function renderTab(id){'''
+
+# The JS module content gets inserted between those two functions.
+
+
+def fail(msg):
+    print(f"ERROR: {msg}")
+    sys.exit(1)
+
+
+def main():
+    if not DASH_PY.exists():
+        fail(f"build_dashboard.py not found at {DASH_PY}")
+    if not MODULE_JS.exists():
+        fail(f"_summary_tab_module.js not found at {MODULE_JS}")
+
+    # Size-floor check — Session 17 baseline is 285,691 bytes. If we see less,
+    # this is likely the Cowork FUSE silent-truncation pattern (C11/C12). The
+    # patcher MUST run Windows-side to avoid writing truncated output.
+    EXPECTED_BASELINE_SIZE = 285691  # Session 17 final (D-MD-INFRA-1..4 + stage refactor)
+    SIZE_FLOOR_TOLERANCE = 5000      # allow +5kb if file evolved between sessions
+    import os
+    on_disk_size = os.path.getsize(DASH_PY)
+
+    orig = DASH_PY.read_text(encoding="utf-8")
+    orig_size = len(orig)
+
+    if on_disk_size != orig_size:
+        fail(
+            f"FUSE TRUNCATION DETECTED. os.path.getsize() reports {on_disk_size} but "
+            f"file.read() returned {orig_size}. Read-side silent truncation. "
+            f"Run this patcher Windows-side, NOT through Cowork FUSE mount."
+        )
+
+    if orig_size < EXPECTED_BASELINE_SIZE - 100:
+        fail(
+            f"File size {orig_size} below baseline {EXPECTED_BASELINE_SIZE} by more than 100 bytes. "
+            f"Likely truncation or unexpected source state. Verify on Windows: "
+            f"Get-Item scripts\\build_dashboard.py | Select Length"
+        )
+
+    if orig_size > EXPECTED_BASELINE_SIZE + SIZE_FLOOR_TOLERANCE:
+        print(f"NOTE: File size {orig_size} exceeds expected baseline {EXPECTED_BASELINE_SIZE} by "
+              f"{orig_size - EXPECTED_BASELINE_SIZE} bytes. File has evolved since Session 17 — proceeding cautiously.")
+
+    # Idempotency check
+    if MARKER in orig:
+        print(f"Idempotent no-op: {MARKER} already present in build_dashboard.py")
+        print(f"  Current size: {orig_size:,} bytes")
+        return 0
+
+    # Pre-write backup
+    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+    bak = DASH_PY.with_suffix(f".py.bak-pre-summary-tab-{ts}")
+    shutil.copy2(DASH_PY, bak)
+    print(f"Backup: {bak.name} ({orig_size:,} bytes)")
+
+    # Load the module JS to inject
+    module_js = MODULE_JS.read_text(encoding="utf-8")
+    module_size = len(module_js)
+    print(f"Module JS to inject: {module_size:,} bytes")
+
+    # Apply patches in order; each must find exactly one match
+    patches = [
+        ("TABS list",          ANCHOR_TABS,        REPLACE_TABS),
+        ("IMPLEMENTED_TABS",   ANCHOR_IMPL,        REPLACE_IMPL),
+        ("currentTab default", ANCHOR_CURRENTTAB,  REPLACE_CURRENTTAB),
+        ("renderTab dispatch", ANCHOR_RENDERTAB,   REPLACE_RENDERTAB),
+        ("Startup call",       ANCHOR_PRECOMPUTE,  REPLACE_PRECOMPUTE),
+    ]
+
+    new = orig
+    for name, anchor, replace in patches:
+        count = new.count(anchor)
+        if count == 0:
+            fail(f"Anchor not found for '{name}'. Patcher cannot continue.")
+        if count > 1:
+            fail(f"Anchor matched {count} times for '{name}' — expected exactly 1. Patcher cannot continue.")
+        new = new.replace(anchor, replace)
+        print(f"  Applied: {name}")
+
+    # Module injection
+    module_anchor_count = new.count(ANCHOR_MODULE_INJECT)
+    if module_anchor_count == 0:
+        fail("Anchor not found for module injection.")
+    if module_anchor_count > 1:
+        fail(f"Module injection anchor matched {module_anchor_count} times — expected 1.")
+    # Insert module text between the two functions in the JS template
+    module_replacement = (
+        'document.getElementById("tab-changes").innerHTML=h;\n'
+        '}\n'
+        '\n' + module_js + '\n'
+        'function renderTab(id){'
+    )
+    new = new.replace(ANCHOR_MODULE_INJECT, module_replacement)
+    print("  Applied: Module injection")
+
+    new_size = len(new)
+    delta = new_size - orig_size
+    print(f"\nSize before: {orig_size:,}")
+    print(f"Size after:  {new_size:,}")
+    print(f"Delta:       +{delta:,} bytes (expected ~{module_size + 500:,})")
+
+    # Sanity check: delta should be roughly module size + small patch sizes
+    expected_min = module_size + 200
+    expected_max = module_size + 1500
+    if delta < expected_min or delta > expected_max:
+        fail(f"Delta {delta} outside expected range [{expected_min}, {expected_max}]. Aborting.")
+
+    # Write the modified file
+    DASH_PY.write_text(new, encoding="utf-8")
+
+    # Verify py_compile clean
+    try:
+        py_compile.compile(str(DASH_PY), doraise=True)
+        print("py_compile: OK")
+    except py_compile.PyCompileError as e:
+        # Restore backup
+        shutil.copy2(bak, DASH_PY)
+        fail(f"py_compile FAILED. Backup restored. Error:\n{e}")
+
+    # Verify SUMMARY-TAB-MARKER now present
+    if MARKER not in DASH_PY.read_text(encoding="utf-8"):
+        shutil.copy2(bak, DASH_PY)
+        fail(f"{MARKER} not present after patch. Backup restored.")
+
+    print(f"\nSUCCESS: Patch applied to {DASH_PY.name}")
+    print(f"Run: python scripts\\build_dashboard.py")
+    print(f"Then push via GitHub Desktop.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

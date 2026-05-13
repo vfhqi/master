@@ -148,6 +148,8 @@ TABS = [
     {"id": "stage_4",   "label": "Stage 4",           "accent": "#991b1b"},
     # MD-V2-PRE-INDICATORS-MARKER - Pre-indicators (3 leading binary patterns)
     {"id": "pre_indicators", "label": "Pre-indicators", "accent": "#0F6E56"},
+    # MD-V2-POST-INDICATORS-MARKER - Post-indicators (5 trailing binary patterns)
+    {"id": "post_indicators", "label": "Post-indicators", "accent": "#A32D2D"},
     # Data / reference tabs
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},

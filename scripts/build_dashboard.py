@@ -1102,6 +1102,13 @@ body[data-active-tab^="stage_"] .v2-nav { display: flex; }
 #tab-stage_2 .group-captions .gcap-g5 { border-left-color: #6a5a8a; }
 #tab-stage_2 .group-captions .gcap-g5 b { color: #6a5a8a; }
 /* MD-V2-CHROME-PARITY-MARKER-CSS-END */
+
+/* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-START */
+/* Extend chrome suppression: also hide .header-controls-row (the #3 Toggles / #4 Filters row)
+   on every V2 tab. The initial patch missed this row. */
+body[data-active-tab="summary"] .header-controls-row,
+body[data-active-tab^="stage_"] .header-controls-row { display: none !important; }
+/* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
 """
 
     # ---- JavaScript ----

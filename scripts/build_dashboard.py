@@ -7979,7 +7979,7 @@ function SUM_renderQualifiedStocks() {
       + '<button class="v2-nav-btn" data-v2-tab="stage_2" onclick="switchTab(\'stage_2\')">Stage 2 (Uptrend)</button>'
       + '<button class="v2-nav-btn" data-v2-tab="stage_3" onclick="switchTab(\'stage_3\')">Stage 3 (Topping)</button>'
       + '<button class="v2-nav-btn" data-v2-tab="stage_4" onclick="switchTab(\'stage_4\')">Stage 4 (Decline)</button>'
-      + '<span class="v2-nav-placeholder" title="Coming soon">Pre-indicators</span>'
+      + '<button class="v2-nav-btn" data-v2-tab="pre_indicators" onclick="switchTab(\'pre_indicators\')">Pre-indicators</button>'
       + '<span class="v2-nav-placeholder" title="Coming soon">Post-indicators</span>'
       + '<span class="v2-nav-placeholder" title="Coming soon">Setups</span>'
       + '<span class="v2-nav-placeholder" title="Coming soon">Tests</span>'

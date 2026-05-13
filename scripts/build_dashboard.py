@@ -156,7 +156,6 @@ TABS = [
 ]
 
 IMPLEMENTED_TABS = [
-    "summary",
     "stage_1",  # MD-V2-STAGE1-MARKER
     "stage_2",  # MD-V2-STAGE2-MARKER
     "stage_3",  # MD-V2-STAGE3-MARKER
@@ -1042,12 +1041,10 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 
 /* MD-V2-CHROME-PARITY-MARKER-CSS-START */
 /* ===== Legacy chrome suppression on V2 tabs ===== */
-body[data-active-tab="summary"] .header-tabs-row,
 body[data-active-tab^="stage_"] .header-tabs-row { display: none !important; }
 
 /* V2 mini nav strip - visible only on V2 tabs */
 .v2-nav { display: none; padding: 8px 12px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 6px; align-items: center; }
-body[data-active-tab="summary"] .v2-nav,
 body[data-active-tab^="stage_"] .v2-nav { display: flex; }
 .v2-nav-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; margin-right: 8px; }
 .v2-nav-btn { display: inline-block; padding: 5px 11px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
@@ -1106,9 +1103,9 @@ body[data-active-tab^="stage_"] .v2-nav { display: flex; }
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-START */
 /* Extend chrome suppression: also hide .header-controls-row (the #3 Toggles / #4 Filters row)
    on every V2 tab. The initial patch missed this row. */
-body[data-active-tab="summary"] .header-controls-row,
 body[data-active-tab^="stage_"] .header-controls-row { display: none !important; }
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
+/* MD-V2-REMOVE-SUMMARY-MARKER applied 20260513-184203 */
 """
 
     # ---- JavaScript ----
@@ -1117,7 +1114,7 @@ body[data-active-tab^="stage_"] .header-controls-row { display: none !important;
 "use strict";
 var D=MASTER_DATA;
 var priceMap={},filterMap={},tmMap=D.ticker_mapping||{};
-var currentTab="summary",currentSort={col:"chg_qual_count",dir:"desc"}; /* SUMMARY-TAB-DEFAULT */
+var currentTab="stage_1",currentSort={col:"chg_qual_count",dir:"desc"}; /* SUMMARY-TAB-DEFAULT */
 /* BOOTSTRAP-DEFAULT-TAB-FIX-1 */
 if(typeof window!=="undefined"){window.__chgBootstrapDone=window.__chgBootstrapDone||false;var __chgBoot=function(){if(window.__chgBootstrapDone)return;if(typeof window.switchTab!=="function"){setTimeout(__chgBoot,30);return;}window.__chgBootstrapDone=true;try{window.switchTab(currentTab);}catch(e){console.error("bootstrap switchTab failed",e);}};if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",__chgBoot);}else{setTimeout(__chgBoot,30);}}
 var mm99MinScore=0;
@@ -7889,7 +7886,6 @@ function SUM_renderQualifiedStocks() {
     nav.className = 'v2-nav';
     nav.innerHTML = ''
       + '<span class="v2-nav-label">MD V2</span>'
-      + '<button class="v2-nav-btn" data-v2-tab="summary" onclick="switchTab(\'summary\')">SUMMARY</button>'
       + '<button class="v2-nav-btn" data-v2-tab="stage_1" onclick="switchTab(\'stage_1\')">Stage 1 (Basing)</button>'
       + '<button class="v2-nav-btn" data-v2-tab="stage_2" onclick="switchTab(\'stage_2\')">Stage 2 (Uptrend)</button>'
       + '<button class="v2-nav-btn" data-v2-tab="stage_3" onclick="switchTab(\'stage_3\')">Stage 3 (Topping)</button>'

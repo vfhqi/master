@@ -8007,10 +8007,10 @@ function SUM_renderQualifiedStocks() {
   };
   // Initial sync on load (currentTab is already set by bootstrap)
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ ensureV2Nav(); syncV2State(window.currentTab || 'summary'); });
+    document.addEventListener('DOMContentLoaded', function(){ ensureV2Nav(); syncV2State(window.currentTab || 'stage_1'); });
   } else {
     ensureV2Nav();
-    syncV2State(window.currentTab || 'summary');
+    syncV2State(window.currentTab || 'stage_1');
   }
 })();
 /* MD-V2-CHROME-PARITY-MARKER-JS-END */

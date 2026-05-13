@@ -136,6 +136,16 @@ TABS = [
     # Stage 4 — Decline/capitulation (placeholders)
     {"id": "s4_declining", "label": "Declining",     "accent": "#991b1b", "stage": 4, "placeholder": True},
     {"id": "collapse",     "label": "Collapse",      "accent": "#7f1d1d", "stage": 4, "placeholder": True},
+    # SUMMARY-TAB-MARKER — synoptic view, default landing tab (D-MD-UI-38)
+    {"id": "summary",   "label": "SUMMARY",          "accent": "#4a5568"},
+    # MD-V2-STAGE1-MARKER — Stage 1 (Consolidating/Basing) tab
+    {"id": "stage_1",   "label": "Stage 1",           "accent": "#1b5e20"},
+    # MD-V2-STAGE2-MARKER — Stage 2 (Confirmed uptrend) tab
+    {"id": "stage_2",   "label": "Stage 2",           "accent": "#2e7d32"},
+    # MD-V2-STAGE3-MARKER — Stage 3 (Topping / Invalidation) tab
+    {"id": "stage_3",   "label": "Stage 3",           "accent": "#b45309"},
+    # MD-V2-STAGE4-MARKER — Stage 4 (Decline / Capitulation) tab
+    {"id": "stage_4",   "label": "Stage 4",           "accent": "#991b1b"},
     # Data / reference tabs
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
@@ -146,6 +156,11 @@ TABS = [
 ]
 
 IMPLEMENTED_TABS = [
+    "summary",
+    "stage_1",  # MD-V2-STAGE1-MARKER
+    "stage_2",  # MD-V2-STAGE2-MARKER
+    "stage_3",  # MD-V2-STAGE3-MARKER
+    "stage_4",  # MD-V2-STAGE4-MARKER
     "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
     "ssem", "val",
 ]
@@ -585,6 +600,445 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 /* FEAT-5: Industry/sector filter highlight */
 .ind-sec-highlight td.col-sector,.ind-sec-highlight td.col-industry{background:rgba(46,125,50,0.08)}
 .filter-pill{transition:opacity 0.2s}.filter-pill:hover{opacity:0.8}
+
+/* MD-V2-STAGE1-MARKER-CSS-START */
+.s1-intro { background: var(--bg-card, #fbfaf5); border: 1px solid var(--border, #e0dcc8); border-radius: 4px; padding: 12px 16px; margin-bottom: 14px; font-size: 12px; color: var(--text-muted, #666); max-width: 920px; }
+.s1-intro b { color: #2a2a2a; }
+.s1-controls { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; padding: 9px 14px; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+.s1-controls .ctrl-grp { display: flex; align-items: center; gap: 5px; padding-right: 14px; border-right: 1px solid #e0dcc8; }
+.s1-controls .ctrl-grp:last-child { border-right: none; padding-right: 0; }
+.s1-controls .ctrl-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #999; font-weight: 600; margin-right: 4px; }
+.s1-controls .toggle-btn { background: #f3efe2; border: 1px solid #e0dcc8; color: #2a2a2a; padding: 3px 9px; font-size: 11px; font-family: inherit; border-radius: 3px; cursor: pointer; transition: all 0.12s; }
+.s1-controls .toggle-btn:hover:not(.disabled) { background: #ebe5d2; }
+.s1-controls .toggle-btn.active { background: #1b5e20; color: #fff; border-color: #1b5e20; }
+.s1-controls .toggle-btn.disabled { background: #f0ebd9; color: #bbb; cursor: not-allowed; border-style: dashed; }
+
+.s1-rating-tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 12px; }
+.s1-rating-tiles .rating-tile { background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; padding: 11px 14px; cursor: pointer; transition: all 0.12s; }
+.s1-rating-tiles .rating-tile:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.s1-rating-tiles .rating-tile.active { background: #1b5e20; color: #fff; border-color: #1b5e20; }
+.s1-rating-tiles .rating-tile.active .rt-label, .s1-rating-tiles .rating-tile.active .rt-count { color: #fff; }
+.s1-rating-tiles .rating-tile.active .rt-sub { color: rgba(255,255,255,0.75); }
+.s1-rating-tiles .rt-label { font-size: 11px; font-weight: 600; color: #666; letter-spacing: 0.2px; }
+.s1-rating-tiles .rt-count { font-size: 22px; font-weight: 700; color: #2a2a2a; margin-top: 3px; line-height: 1; font-variant-numeric: tabular-nums; }
+.s1-rating-tiles .rt-sub { font-size: 10px; color: #999; margin-top: 3px; }
+.s1-rating-tiles .rt-strip { height: 3px; border-radius: 2px; margin-top: 7px; }
+.s1-rating-tiles .rt-strip-pl  { background: #14501c; }
+.s1-rating-tiles .rt-strip-pe  { background: #4a9658; }
+.s1-rating-tiles .rt-strip-pla { background: #6b8a98; }
+.s1-rating-tiles .rt-strip-pos { background: #c4c0b0; }
+.s1-rating-tiles .rt-strip-none { background: #e0ddd0; }
+.s1-rating-tiles .rating-tile.tint-pl   { background: rgba(20, 87, 24, 0.08); }
+.s1-rating-tiles .rating-tile.tint-pe   { background: rgba(74, 150, 88, 0.08); }
+.s1-rating-tiles .rating-tile.tint-pla  { background: rgba(107, 138, 152, 0.08); }
+.s1-rating-tiles .rating-tile.tint-pos  { background: rgba(196, 192, 176, 0.18); }
+.s1-rating-tiles .rating-tile.tint-none { background: rgba(224, 221, 208, 0.30); }
+
+#tab-stage_1 .group-captions { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+#tab-stage_1 .gcap { background: #fbfaf5; border-left: 3px solid; padding: 9px 12px; font-size: 11px; color: #2a2a2a; line-height: 1.45; border-radius: 0 3px 3px 0; }
+#tab-stage_1 .gcap b { display: block; font-size: 11px; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.2px; }
+#tab-stage_1 .gcap-g1 { border-color: #b08a4e; } #tab-stage_1 .gcap-g1 b { color: #b08a4e; }
+#tab-stage_1 .gcap-g2 { border-color: #5a8a6a; } #tab-stage_1 .gcap-g2 b { color: #5a8a6a; }
+#tab-stage_1 .gcap-g3 { border-color: #4a6a8a; } #tab-stage_1 .gcap-g3 b { color: #4a6a8a; }
+#tab-stage_1 .gcap-g4 { border-color: #8a5a6a; } #tab-stage_1 .gcap-g4 b { color: #8a5a6a; }
+
+#s1-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#s1-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#s1-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#s1-main-table thead th:hover { background: #f0ebd9 !important; }
+#s1-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+#s1-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
+#s1-main-table thead tr.group-header-row th { position: sticky; top: 0; }
+#s1-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
+#s1-main-table thead .gh-inputs { color: #555; }
+#s1-main-table thead .gh-rating, #s1-main-table thead .gh-persist { color: #1b5e20; }
+#s1-main-table thead .gh-g1 { color: #b08a4e; }
+#s1-main-table thead .gh-g2 { color: #5a8a6a; }
+#s1-main-table thead .gh-g3 { color: #4a6a8a; }
+#s1-main-table thead .gh-g4 { color: #8a5a6a; }
+#s1-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+#s1-main-table .hd .lbl { white-space: normal; word-break: break-word; }
+#s1-main-table .hd .sort-arrow { font-size: 9px; color: #1b5e20; flex: 0 0 auto; line-height: 1; }
+#s1-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+
+#s1-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+#s1-main-table tr:hover { background: rgba(27,94,32,0.04); }
+
+#s1-main-table td.grp-start-g1, #s1-main-table th.grp-start-g1 { border-left: 2px solid rgba(176,138,78,0.35); }
+#s1-main-table td.grp-start-g2, #s1-main-table th.grp-start-g2 { border-left: 2px solid rgba(90,138,106,0.35); }
+#s1-main-table td.grp-start-g3, #s1-main-table th.grp-start-g3 { border-left: 2px solid rgba(74,106,138,0.35); }
+#s1-main-table td.grp-start-g4, #s1-main-table th.grp-start-g4 { border-left: 2px solid rgba(138,90,106,0.35); }
+#s1-main-table td.grp-start-rating, #s1-main-table th.grp-start-rating { border-left: 2px solid rgba(27,94,32,0.35); }
+#s1-main-table td.grp-start-persist, #s1-main-table th.grp-start-persist { border-left: 2px solid rgba(27,94,32,0.35); }
+#s1-main-table td.grp-end-g1, #s1-main-table th.grp-end-g1 { border-right: 2px solid rgba(176,138,78,0.35); }
+#s1-main-table td.grp-end-g2, #s1-main-table th.grp-end-g2 { border-right: 2px solid rgba(90,138,106,0.35); }
+#s1-main-table td.grp-end-g3, #s1-main-table th.grp-end-g3 { border-right: 2px solid rgba(74,106,138,0.35); }
+#s1-main-table td.grp-end-g4, #s1-main-table th.grp-end-g4 { border-right: 2px solid rgba(138,90,106,0.35); }
+#s1-main-table td.test-pass { background: rgba(27,94,32,0.08); color: #1b5e20; font-weight: 700; }
+#s1-main-table td.test-fail { color: #999; }
+#s1-main-table td.test-val  { font-size: 10px; }
+#s1-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+#s1-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#s1-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
+#s1-main-table td.name-cell .live-dot { color: #1b5e20; font-weight: 700; margin-right: 4px; display: inline-block; vertical-align: middle; line-height: 1; font-size: 10px; }
+#s1-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+#s1-main-table td.taxon .ind { color: #666; font-weight: 500; }
+#s1-main-table td.taxon .sec { color: #999; }
+
+#s1-main-table col.c-name { width: 130px; }
+#s1-main-table col.c-taxon { width: 170px; }
+#s1-main-table col.c-price { width: 56px; }
+#s1-main-table col.c-52wh { width: 54px; }
+#s1-main-table col.c-52wl { width: 54px; }
+#s1-main-table col.c-ma150 { width: 54px; }
+#s1-main-table col.c-ma200 { width: 54px; }
+#s1-main-table col.c-rating { width: 100px; }
+#s1-main-table col.c-score { width: 86px; }
+#s1-main-table col.c-test { width: 50px; }
+#s1-main-table col.c-persist { width: 110px; }
+
+#s1-main-table .pill { display: inline-block; padding: 3px 9px; border-radius: 11px; font-weight: 700; font-size: 10px; color: white; letter-spacing: 0.3px; white-space: nowrap; }
+#s1-main-table .pill-pl-5 { background: #2e7d32; color: #fff; }
+#s1-main-table .pill-pl-6 { background: #1e6a25; color: #fff; }
+#s1-main-table .pill-pl-7 { background: #145718; color: #fff; }
+#s1-main-table .pill-pl-8 { background: #08400d; color: #fff; }
+#s1-main-table .pill-pe   { background: #4a9658; color: #fff; }
+#s1-main-table .pill-pla  { background: #6b8a98; color: #fff; }
+#s1-main-table .pill-pos  { background: #c4c0b0; color: #5a5a4a; font-weight: 600; }
+#s1-main-table .pill-none { background: #e0ddd0; color: #8a8676; font-weight: 600; }
+
+#s1-main-table .score-pip-row { display: inline-flex; gap: 2px; align-items: center; }
+#s1-main-table .pip { width: 7px; height: 7px; border-radius: 50%; background: #ddd; display: inline-block; }
+#s1-main-table .pip.on { background: #1b5e20; }
+#s1-main-table .score-num { font-weight: 700; color: #1b5e20; margin-left: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
+
+#s1-main-table .persist-row { display: inline-flex; gap: 1px; align-items: center; }
+#s1-main-table .persist-cell { width: 7px; height: 11px; background: #ece8d8; border-radius: 1px; }
+#s1-main-table .persist-cell.r-pos  { background: #c4c0b0; }
+#s1-main-table .persist-cell.r-pla  { background: #6b8a98; }
+#s1-main-table .persist-cell.r-pe   { background: #4a9658; }
+#s1-main-table .persist-cell.r-pl   { background: #145718; width: 8px; height: 13px; box-shadow: inset 0 0 0 1px #08400d; }
+#s1-main-table .persist-cell.r-none { background: #ece8d8; }
+
+#s1-main-table tr.tint-row td.name-cell, #s1-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+#s1-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+#s1-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
+#s1-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+/* MD-V2-STAGE1-MARKER-CSS-END */
+
+/* MD-V2-STAGE2-MARKER-CSS-START */
+/* Reuse #s1-* class names - Stage 2 uses the SAME chrome classes.
+   Add only: Group 5 purple band; Probable pill ramp 7 to 10; 4-rating tile tints;
+   Stage 2 table selectors mirroring #s1-main-table. */
+#tab-stage_2 .group-captions .gcap-g5 { border-color: #6a5a8a; }
+#tab-stage_2 .group-captions .gcap-g5 b { color: #6a5a8a; }
+#tab-stage_2 .s1-rating-tiles .rating-tile.tint-prob { background: rgba(20, 87, 24, 0.08); }
+#tab-stage_2 .s1-rating-tiles .rating-tile.tint-pla  { background: rgba(107, 138, 152, 0.08); }
+#tab-stage_2 .s1-rating-tiles .rating-tile.tint-pos  { background: rgba(196, 192, 176, 0.18); }
+#tab-stage_2 .s1-rating-tiles .rating-tile.tint-none { background: rgba(224, 221, 208, 0.30); }
+#tab-stage_2 .s1-rating-tiles .rt-strip-prob { background: #145718; }
+#tab-stage_2 .s1-rating-tiles .rt-strip-pla  { background: #6b8a98; }
+#tab-stage_2 .s1-rating-tiles .rt-strip-pos  { background: #c4c0b0; }
+#tab-stage_2 .s1-rating-tiles .rt-strip-none { background: #e0ddd0; }
+
+/* Stage 2 main table - mirror all #s1-main-table styles via duplicate selectors */
+#s2-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#s2-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#s2-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#s2-main-table thead th:hover { background: #f0ebd9 !important; }
+#s2-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+#s2-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
+#s2-main-table thead tr.group-header-row th { position: sticky; top: 0; }
+#s2-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
+#s2-main-table thead .gh-inputs { color: #555; }
+#s2-main-table thead .gh-rating, #s2-main-table thead .gh-persist { color: #2e7d32; }
+#s2-main-table thead .gh-g1 { color: #b08a4e; }
+#s2-main-table thead .gh-g2 { color: #5a8a6a; }
+#s2-main-table thead .gh-g3 { color: #4a6a8a; }
+#s2-main-table thead .gh-g4 { color: #8a5a6a; }
+#s2-main-table thead .gh-g5 { color: #6a5a8a; }
+#s2-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+#s2-main-table .hd .lbl { white-space: normal; word-break: break-word; }
+#s2-main-table .hd .sort-arrow { font-size: 9px; color: #2e7d32; flex: 0 0 auto; line-height: 1; }
+#s2-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+#s2-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+#s2-main-table tr:hover { background: rgba(27,94,32,0.04); }
+#s2-main-table td.grp-start-g1, #s2-main-table th.grp-start-g1 { border-left: 2px solid rgba(176,138,78,0.35); }
+#s2-main-table td.grp-start-g2, #s2-main-table th.grp-start-g2 { border-left: 2px solid rgba(90,138,106,0.35); }
+#s2-main-table td.grp-start-g3, #s2-main-table th.grp-start-g3 { border-left: 2px solid rgba(74,106,138,0.35); }
+#s2-main-table td.grp-start-g4, #s2-main-table th.grp-start-g4 { border-left: 2px solid rgba(138,90,106,0.35); }
+#s2-main-table td.grp-start-g5, #s2-main-table th.grp-start-g5 { border-left: 2px solid rgba(106,90,138,0.35); }
+#s2-main-table td.grp-start-rating, #s2-main-table th.grp-start-rating { border-left: 2px solid rgba(27,94,32,0.35); }
+#s2-main-table td.grp-start-persist, #s2-main-table th.grp-start-persist { border-left: 2px solid rgba(27,94,32,0.35); }
+#s2-main-table td.grp-end-g1, #s2-main-table th.grp-end-g1 { border-right: 2px solid rgba(176,138,78,0.35); }
+#s2-main-table td.grp-end-g2, #s2-main-table th.grp-end-g2 { border-right: 2px solid rgba(90,138,106,0.35); }
+#s2-main-table td.grp-end-g3, #s2-main-table th.grp-end-g3 { border-right: 2px solid rgba(74,106,138,0.35); }
+#s2-main-table td.grp-end-g4, #s2-main-table th.grp-end-g4 { border-right: 2px solid rgba(138,90,106,0.35); }
+#s2-main-table td.grp-end-g5, #s2-main-table th.grp-end-g5 { border-right: 2px solid rgba(106,90,138,0.35); }
+#s2-main-table td.test-pass { background: rgba(27,94,32,0.08); color: #1b5e20; font-weight: 700; }
+#s2-main-table td.test-fail { color: #999; }
+#s2-main-table td.test-val  { font-size: 10px; }
+#s2-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+#s2-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#s2-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
+#s2-main-table td.name-cell .live-dot { color: #2e7d32; font-weight: 700; margin-right: 4px; display: inline-block; vertical-align: middle; line-height: 1; font-size: 10px; }
+#s2-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+#s2-main-table td.taxon .ind { color: #666; font-weight: 500; }
+#s2-main-table td.taxon .sec { color: #999; }
+#s2-main-table col.c-name { width: 130px; }
+#s2-main-table col.c-taxon { width: 170px; }
+#s2-main-table col.c-price { width: 56px; }
+#s2-main-table col.c-52wh { width: 54px; }
+#s2-main-table col.c-52wl { width: 54px; }
+#s2-main-table col.c-ma150 { width: 54px; }
+#s2-main-table col.c-ma200 { width: 54px; }
+#s2-main-table col.c-rating { width: 100px; }
+#s2-main-table col.c-score { width: 96px; }
+#s2-main-table col.c-test { width: 44px; }
+#s2-main-table col.c-persist { width: 110px; }
+#s2-main-table .pill { display: inline-block; padding: 3px 9px; border-radius: 11px; font-weight: 700; font-size: 10px; color: white; letter-spacing: 0.3px; white-space: nowrap; }
+#s2-main-table .pill-prob-7  { background: #2e7d32; color: #fff; }
+#s2-main-table .pill-prob-8  { background: #1e6a25; color: #fff; }
+#s2-main-table .pill-prob-9  { background: #145718; color: #fff; }
+#s2-main-table .pill-prob-10 { background: #08400d; color: #fff; }
+#s2-main-table .pill-pla     { background: #6b8a98; color: #fff; }
+#s2-main-table .pill-pos     { background: #c4c0b0; color: #5a5a4a; font-weight: 600; }
+#s2-main-table .pill-none    { background: #e0ddd0; color: #8a8676; font-weight: 600; }
+#s2-main-table .score-pip-row { display: inline-flex; gap: 2px; align-items: center; }
+#s2-main-table .pip { width: 6px; height: 6px; border-radius: 50%; background: #ddd; display: inline-block; }
+#s2-main-table .pip.on { background: #2e7d32; }
+#s2-main-table .score-num { font-weight: 700; color: #2e7d32; margin-left: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
+#s2-main-table .persist-row { display: inline-flex; gap: 1px; align-items: center; }
+#s2-main-table .persist-cell { width: 7px; height: 11px; background: #ece8d8; border-radius: 1px; }
+#s2-main-table .persist-cell.r-prob { background: #145718; width: 8px; height: 13px; box-shadow: inset 0 0 0 1px #08400d; }
+#s2-main-table .persist-cell.r-pla  { background: #6b8a98; }
+#s2-main-table .persist-cell.r-pos  { background: #c4c0b0; }
+#s2-main-table .persist-cell.r-none { background: #ece8d8; }
+#s2-main-table tr.tint-row td.name-cell, #s2-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+#s2-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+#s2-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
+#s2-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+/* MD-V2-STAGE2-MARKER-CSS-END */
+
+/* MD-V2-STAGE3-MARKER-CSS-START */
+/* Stage 3 (Topping / Invalidation) - bearish palette: amber to deep red. */
+#tab-stage_3 .group-captions .gcap-g1 { border-color: #d97706; }
+#tab-stage_3 .group-captions .gcap-g1 b { color: #b45309; }
+#tab-stage_3 .group-captions .gcap-g2 { border-color: #c2410c; }
+#tab-stage_3 .group-captions .gcap-g2 b { color: #9a3412; }
+#tab-stage_3 .group-captions .gcap-g3 { border-color: #b91c1c; }
+#tab-stage_3 .group-captions .gcap-g3 b { color: #991b1b; }
+#tab-stage_3 .group-captions .gcap-g4 { border-color: #7c2d12; }
+#tab-stage_3 .group-captions .gcap-g4 b { color: #7c2d12; }
+#tab-stage_3 .group-captions .gcap-g5 { border-color: #6a5a8a; }
+#tab-stage_3 .group-captions .gcap-g5 b { color: #6a5a8a; }
+
+/* Rating tile tints - bearish */
+#tab-stage_3 .s1-rating-tiles .rating-tile.tint-prob { background: rgba(153, 27, 27, 0.10); }
+#tab-stage_3 .s1-rating-tiles .rating-tile.tint-pla  { background: rgba(180, 83, 9, 0.10); }
+#tab-stage_3 .s1-rating-tiles .rating-tile.tint-pos  { background: rgba(217, 119, 6, 0.10); }
+#tab-stage_3 .s1-rating-tiles .rating-tile.tint-none { background: rgba(224, 221, 208, 0.30); }
+#tab-stage_3 .s1-rating-tiles .rt-strip-prob-inv { background: #7f1d1d; }
+#tab-stage_3 .s1-rating-tiles .rt-strip-pla-inv  { background: #b45309; }
+#tab-stage_3 .s1-rating-tiles .rt-strip-pos-top  { background: #d97706; }
+#tab-stage_3 .s1-rating-tiles .rt-strip-none     { background: #e0ddd0; }
+
+/* Stage 3 main table - mirror all #s1-main-table styles via duplicate selectors */
+#s3-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#s3-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#s3-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#s3-main-table thead th:hover { background: #f0ebd9 !important; }
+#s3-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+#s3-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
+#s3-main-table thead tr.group-header-row th { position: sticky; top: 0; }
+#s3-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
+#s3-main-table thead .gh-inputs { color: #555; }
+#s3-main-table thead .gh-rating, #s3-main-table thead .gh-persist { color: #b45309; }
+#s3-main-table thead .gh-g1 { color: #b45309; }
+#s3-main-table thead .gh-g2 { color: #9a3412; }
+#s3-main-table thead .gh-g3 { color: #991b1b; }
+#s3-main-table thead .gh-g4 { color: #7c2d12; }
+#s3-main-table thead .gh-g5 { color: #6a5a8a; }
+#s3-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+#s3-main-table .hd .lbl { white-space: normal; word-break: break-word; }
+#s3-main-table .hd .sort-arrow { font-size: 9px; color: #b45309; flex: 0 0 auto; line-height: 1; }
+#s3-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+#s3-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+#s3-main-table tr:hover { background: rgba(180,83,9,0.05); }
+
+/* Group borders - bearish palette */
+#s3-main-table td.grp-start-g1, #s3-main-table th.grp-start-g1 { border-left: 2px solid rgba(180,83,9,0.35); }
+#s3-main-table td.grp-start-g2, #s3-main-table th.grp-start-g2 { border-left: 2px solid rgba(154,52,18,0.35); }
+#s3-main-table td.grp-start-g3, #s3-main-table th.grp-start-g3 { border-left: 2px solid rgba(153,27,27,0.35); }
+#s3-main-table td.grp-start-g4, #s3-main-table th.grp-start-g4 { border-left: 2px solid rgba(124,45,18,0.35); }
+#s3-main-table td.grp-start-g5, #s3-main-table th.grp-start-g5 { border-left: 2px solid rgba(106,90,138,0.35); }
+#s3-main-table td.grp-start-rating, #s3-main-table th.grp-start-rating { border-left: 2px solid rgba(180,83,9,0.35); }
+#s3-main-table td.grp-start-persist, #s3-main-table th.grp-start-persist { border-left: 2px solid rgba(180,83,9,0.35); }
+#s3-main-table td.grp-end-g1, #s3-main-table th.grp-end-g1 { border-right: 2px solid rgba(180,83,9,0.35); }
+#s3-main-table td.grp-end-g2, #s3-main-table th.grp-end-g2 { border-right: 2px solid rgba(154,52,18,0.35); }
+#s3-main-table td.grp-end-g3, #s3-main-table th.grp-end-g3 { border-right: 2px solid rgba(153,27,27,0.35); }
+#s3-main-table td.grp-end-g4, #s3-main-table th.grp-end-g4 { border-right: 2px solid rgba(124,45,18,0.35); }
+#s3-main-table td.grp-end-g5, #s3-main-table th.grp-end-g5 { border-right: 2px solid rgba(106,90,138,0.35); }
+
+/* Test cells - bearish: pass = red-tinted (because passing a topping test is bad news) */
+#s3-main-table td.test-pass-bear { background: rgba(153,27,27,0.08); color: #991b1b; font-weight: 700; }
+#s3-main-table td.test-fail { color: #999; }
+#s3-main-table td.test-val  { font-size: 10px; }
+
+#s3-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+#s3-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#s3-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
+#s3-main-table td.name-cell .live-dot { color: #2e7d32; font-weight: 700; margin-right: 4px; display: inline-block; vertical-align: middle; line-height: 1; font-size: 10px; }
+#s3-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+#s3-main-table td.taxon .ind { color: #666; font-weight: 500; }
+#s3-main-table td.taxon .sec { color: #999; }
+#s3-main-table col.c-name { width: 130px; }
+#s3-main-table col.c-taxon { width: 170px; }
+#s3-main-table col.c-price { width: 56px; }
+#s3-main-table col.c-52wh { width: 54px; }
+#s3-main-table col.c-52wl { width: 54px; }
+#s3-main-table col.c-ma150 { width: 54px; }
+#s3-main-table col.c-ma200 { width: 54px; }
+#s3-main-table col.c-rating { width: 110px; }
+#s3-main-table col.c-score { width: 96px; }
+#s3-main-table col.c-test { width: 44px; }
+#s3-main-table col.c-persist { width: 110px; }
+
+/* Pills - bearish ramp. Probable Inv. ramps deep red 6-10 tests passed. */
+#s3-main-table .pill { display: inline-block; padding: 3px 9px; border-radius: 11px; font-weight: 700; font-size: 10px; color: white; letter-spacing: 0.3px; white-space: nowrap; }
+#s3-main-table .pill-prob-inv-6  { background: #991b1b; color: #fff; }
+#s3-main-table .pill-prob-inv-7  { background: #8b1414; color: #fff; }
+#s3-main-table .pill-prob-inv-8  { background: #7f1d1d; color: #fff; }
+#s3-main-table .pill-prob-inv-9  { background: #6e0f0f; color: #fff; }
+#s3-main-table .pill-prob-inv-10 { background: #5a0808; color: #fff; }
+#s3-main-table .pill-pla-inv     { background: #b45309; color: #fff; }
+#s3-main-table .pill-pos-top     { background: #d97706; color: #fff; font-weight: 600; }
+#s3-main-table .pill-none        { background: #e0ddd0; color: #8a8676; font-weight: 600; }
+
+/* Score pips - bearish red */
+#s3-main-table .score-pip-row { display: inline-flex; gap: 2px; align-items: center; }
+#s3-main-table .pip.pip-bear { width: 6px; height: 6px; border-radius: 50%; background: #ddd; display: inline-block; }
+#s3-main-table .pip.pip-bear.on { background: #991b1b; }
+#s3-main-table .score-num { font-weight: 700; color: #991b1b; margin-left: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
+
+/* Persistence cells - bearish */
+#s3-main-table .persist-row { display: inline-flex; gap: 1px; align-items: center; }
+#s3-main-table .persist-cell { width: 7px; height: 11px; background: #ece8d8; border-radius: 1px; }
+#s3-main-table .persist-cell.r-prob-inv { background: #7f1d1d; width: 8px; height: 13px; box-shadow: inset 0 0 0 1px #5a0808; }
+#s3-main-table .persist-cell.r-pla-inv  { background: #b45309; }
+#s3-main-table .persist-cell.r-pos-top  { background: #d97706; }
+#s3-main-table .persist-cell.r-none     { background: #ece8d8; }
+
+#s3-main-table tr.tint-row td.name-cell, #s3-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+#s3-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+#s3-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
+#s3-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+/* MD-V2-STAGE3-MARKER-CSS-END */
+
+/* MD-V2-STAGE4-MARKER-CSS-START */
+/* Stage 4 (Decline / Capitulation) - deep-red palette across all 3 groups. */
+#tab-stage_4 .group-captions .gcap-g1 { border-color: #991b1b; }
+#tab-stage_4 .group-captions .gcap-g1 b { color: #991b1b; }
+#tab-stage_4 .group-captions .gcap-g2 { border-color: #7f1d1d; }
+#tab-stage_4 .group-captions .gcap-g2 b { color: #7f1d1d; }
+#tab-stage_4 .group-captions .gcap-g3 { border-color: #6a5a8a; }
+#tab-stage_4 .group-captions .gcap-g3 b { color: #6a5a8a; }
+
+/* Rating tile tints - deep red */
+#tab-stage_4 .s1-rating-tiles .rating-tile.tint-prob { background: rgba(127, 29, 29, 0.12); }
+#tab-stage_4 .s1-rating-tiles .rating-tile.tint-pla  { background: rgba(153, 27, 27, 0.10); }
+#tab-stage_4 .s1-rating-tiles .rating-tile.tint-pos  { background: rgba(180, 83, 9, 0.10); }
+#tab-stage_4 .s1-rating-tiles .rating-tile.tint-none { background: rgba(224, 221, 208, 0.30); }
+#tab-stage_4 .s1-rating-tiles .rt-strip-prob { background: #5a0808; }
+#tab-stage_4 .s1-rating-tiles .rt-strip-pla  { background: #991b1b; }
+#tab-stage_4 .s1-rating-tiles .rt-strip-pos  { background: #b45309; }
+#tab-stage_4 .s1-rating-tiles .rt-strip-none { background: #e0ddd0; }
+
+/* Stage 4 main table - mirror all #s1-main-table styles via duplicate selectors */
+#s4-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#s4-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#s4-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#s4-main-table thead th:hover { background: #f0ebd9 !important; }
+#s4-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+#s4-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
+#s4-main-table thead tr.group-header-row th { position: sticky; top: 0; }
+#s4-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
+#s4-main-table thead .gh-inputs { color: #555; }
+#s4-main-table thead .gh-rating, #s4-main-table thead .gh-persist { color: #991b1b; }
+#s4-main-table thead .gh-g1 { color: #991b1b; }
+#s4-main-table thead .gh-g2 { color: #7f1d1d; }
+#s4-main-table thead .gh-g3 { color: #6a5a8a; }
+#s4-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+#s4-main-table .hd .lbl { white-space: normal; word-break: break-word; }
+#s4-main-table .hd .sort-arrow { font-size: 9px; color: #991b1b; flex: 0 0 auto; line-height: 1; }
+#s4-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+#s4-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+#s4-main-table tr:hover { background: rgba(153,27,27,0.05); }
+
+/* Group borders - deep red palette */
+#s4-main-table td.grp-start-g1, #s4-main-table th.grp-start-g1 { border-left: 2px solid rgba(153,27,27,0.40); }
+#s4-main-table td.grp-start-g2, #s4-main-table th.grp-start-g2 { border-left: 2px solid rgba(127,29,29,0.40); }
+#s4-main-table td.grp-start-g3, #s4-main-table th.grp-start-g3 { border-left: 2px solid rgba(106,90,138,0.35); }
+#s4-main-table td.grp-start-rating, #s4-main-table th.grp-start-rating { border-left: 2px solid rgba(153,27,27,0.35); }
+#s4-main-table td.grp-start-persist, #s4-main-table th.grp-start-persist { border-left: 2px solid rgba(153,27,27,0.35); }
+#s4-main-table td.grp-end-g1, #s4-main-table th.grp-end-g1 { border-right: 2px solid rgba(153,27,27,0.40); }
+#s4-main-table td.grp-end-g2, #s4-main-table th.grp-end-g2 { border-right: 2px solid rgba(127,29,29,0.40); }
+#s4-main-table td.grp-end-g3, #s4-main-table th.grp-end-g3 { border-right: 2px solid rgba(106,90,138,0.35); }
+
+/* Test cells - bearish: pass = deep-red-tinted */
+#s4-main-table td.test-pass-bear { background: rgba(127,29,29,0.10); color: #7f1d1d; font-weight: 700; }
+#s4-main-table td.test-fail { color: #999; }
+#s4-main-table td.test-val  { font-size: 10px; }
+
+#s4-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+#s4-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#s4-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
+#s4-main-table td.name-cell .live-dot { color: #2e7d32; font-weight: 700; margin-right: 4px; display: inline-block; vertical-align: middle; line-height: 1; font-size: 10px; }
+#s4-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+#s4-main-table td.taxon .ind { color: #666; font-weight: 500; }
+#s4-main-table td.taxon .sec { color: #999; }
+#s4-main-table col.c-name { width: 130px; }
+#s4-main-table col.c-taxon { width: 170px; }
+#s4-main-table col.c-price { width: 56px; }
+#s4-main-table col.c-52wh { width: 54px; }
+#s4-main-table col.c-52wl { width: 54px; }
+#s4-main-table col.c-ma150 { width: 54px; }
+#s4-main-table col.c-ma200 { width: 54px; }
+#s4-main-table col.c-rating { width: 100px; }
+#s4-main-table col.c-score { width: 84px; }
+#s4-main-table col.c-test { width: 48px; }
+#s4-main-table col.c-persist { width: 110px; }
+
+/* Pills - deep red ramp. Probable ramps 3-7 tests passed. */
+#s4-main-table .pill { display: inline-block; padding: 3px 9px; border-radius: 11px; font-weight: 700; font-size: 10px; color: white; letter-spacing: 0.3px; white-space: nowrap; }
+#s4-main-table .pill-prob-3 { background: #991b1b; color: #fff; }
+#s4-main-table .pill-prob-4 { background: #8b1414; color: #fff; }
+#s4-main-table .pill-prob-5 { background: #7f1d1d; color: #fff; }
+#s4-main-table .pill-prob-6 { background: #6e0f0f; color: #fff; }
+#s4-main-table .pill-prob-7 { background: #5a0808; color: #fff; }
+#s4-main-table .pill-pla    { background: #b45309; color: #fff; }
+#s4-main-table .pill-pos    { background: #d97706; color: #fff; font-weight: 600; }
+#s4-main-table .pill-none   { background: #e0ddd0; color: #8a8676; font-weight: 600; }
+
+/* Score pips - deep red */
+#s4-main-table .score-pip-row { display: inline-flex; gap: 2px; align-items: center; }
+#s4-main-table .pip.pip-bear { width: 6px; height: 6px; border-radius: 50%; background: #ddd; display: inline-block; }
+#s4-main-table .pip.pip-bear.on { background: #7f1d1d; }
+#s4-main-table .score-num { font-weight: 700; color: #7f1d1d; margin-left: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
+
+/* Persistence cells - deep red */
+#s4-main-table .persist-row { display: inline-flex; gap: 1px; align-items: center; }
+#s4-main-table .persist-cell { width: 7px; height: 11px; background: #ece8d8; border-radius: 1px; }
+#s4-main-table .persist-cell.r-prob { background: #5a0808; width: 8px; height: 13px; box-shadow: inset 0 0 0 1px #3a0202; }
+#s4-main-table .persist-cell.r-pla  { background: #991b1b; }
+#s4-main-table .persist-cell.r-pos  { background: #b45309; }
+#s4-main-table .persist-cell.r-none { background: #ece8d8; }
+
+#s4-main-table tr.tint-row td.name-cell, #s4-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+#s4-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+#s4-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
+#s4-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+/* MD-V2-STAGE4-MARKER-CSS-END */
 """
 
     # ---- JavaScript ----
@@ -593,7 +1047,7 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 "use strict";
 var D=MASTER_DATA;
 var priceMap={},filterMap={},tmMap=D.ticker_mapping||{};
-var currentTab="changes",currentSort={col:"chg_qual_count",dir:"desc"}; /* Q1Q2-CLEANUP-V1 */
+var currentTab="summary",currentSort={col:"chg_qual_count",dir:"desc"}; /* SUMMARY-TAB-DEFAULT */
 /* BOOTSTRAP-DEFAULT-TAB-FIX-1 */
 if(typeof window!=="undefined"){window.__chgBootstrapDone=window.__chgBootstrapDone||false;var __chgBoot=function(){if(window.__chgBootstrapDone)return;if(typeof window.switchTab!=="function"){setTimeout(__chgBoot,30);return;}window.__chgBootstrapDone=true;try{window.switchTab(currentTab);}catch(e){console.error("bootstrap switchTab failed",e);}};if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",__chgBoot);}else{setTimeout(__chgBoot,30);}}
 var mm99MinScore=0;
@@ -4619,9 +5073,2747 @@ function renderChanges(){
   document.getElementById("tab-changes").innerHTML=h;
 }
 
+// =============================================================================
+// SUMMARY TAB MODULE — V1.2 (12-May-26)
+// =============================================================================
+// SUMMARY-TAB-MARKER — idempotency marker for patcher detection
+//
+// V1.2 changes vs V1.1:
+//   - Qualified Stocks table built to FULL spec: 29 columns
+//     * Inputs (4): Ticker, Company, Industry, Sector
+//     * TM Stage 1 (2): BP, PB stage pills
+//     * TM Stage 2 (3): VCP, MM99, UTR stage pills
+//     * TM Stage 3 (1): Topping pill
+//     * TM Stage 4 (2): Declining, Collapse pills
+//     * TM RS (4): rs_percentile, rs_vs_sector, rs_vs_industry, rs_excess_market
+//     * SSEM (5): 1M / 3M / 6M / 12M timeframe scores + Total
+//     * Valuation (2): pe_percentile + buildRangeBar sparkline
+//     * Master Ratings (6): TM, Them, Fund, ICBB, SSEM, Val
+//   - 3-row header: Group / Sub-group / Column name
+//   - Conditional colour on all pill, RS, SSEM, Valuation cells
+//   - No internal scroll on Qualified Stocks (per Richard Q14)
+//
+// V1 spec: decisions.md D-MD-UI-38..47
+// =============================================================================
+
+/* SUMMARY-TAB-MARKER-START */
+
+var masterRatingsMap = {};
+var summaryFilters = {tm:"",thematic:"",fund_chg:"",icbb:"",ssem:"",val:""};
+var summarySectorGrouping = false;
+
+var SUM_RATINGS = ["tm","thematic","fund_chg","icbb","ssem","val"];
+var SUM_RATING_LABELS = {tm:"Technical Momentum",thematic:"Thematic Fit",fund_chg:"Fundamental Change",icbb:"ICBB",ssem:"SSEM",val:"Valuation"};
+var SUM_RATING_SHORT = {tm:"TM",thematic:"Them",fund_chg:"Fund",icbb:"ICBB",ssem:"SSEM",val:"Val"};
+var SUM_PLACEHOLDER_TOOLTIP = "Placeholder pending REPOSITORY A&J memo rollout";
+
+// TM stage column order
+var SUM_STAGE_COLS = [
+  {id:"basing_plateau",  label:"BP",   stage:1},
+  {id:"probing_bet",     label:"PB",   stage:1},
+  {id:"vcp",             label:"VCP",  stage:2},
+  {id:"mm99",            label:"MM99", stage:2},
+  {id:"uptrend_retest",  label:"UTR",  stage:2},
+  {id:"s3_topping",      label:"Top",  stage:3},
+  {id:"s4_declining",    label:"Dec",  stage:4},
+  {id:"collapse",        label:"Col",  stage:4}
+];
+var SUM_RS_COLS = [
+  {key:"rs_percentile",     label:"RS%",     format:"pct100"},
+  {key:"rs_vs_sector",      label:"vs Sec",  format:"pct100"},
+  {key:"rs_vs_industry",    label:"vs Ind",  format:"pct100"},
+  {key:"rs_excess_market",  label:"vs Mkt",  format:"signedPct"}
+];
+var SUM_SSEM_TIMEFRAMES = ["1m","3m","6m","12m"];
+var SUM_SSEM_DIMS = ["eps","ebitda","sales","tp","buy"];
+
+// V1 TM rating logic per Richard 12-May-26
+function SUM_v1TmRating(tk) {
+  var fm = (typeof filterMap !== "undefined") ? filterMap[tk] : null;
+  if (!fm) return "-";
+  var s = function(k) { return (fm[k] && fm[k].stage) ? fm[k].stage : null; };
+  if (s("s4_declining") === "Capital" || s("collapse") === "Capital") return "F";
+  if (s("s3_topping") === "Capital") return "D";
+  if (s("mm99") === "Capital" || s("vcp") === "Capital" || s("uptrend_retest") === "Capital") return "A";
+  if (s("probing_bet") === "Capital") return "B";
+  if (s("basing_plateau") === "Capital") return "C";
+  if (s("mm99") === "Late" || s("vcp") === "Late" || s("uptrend_retest") === "Late") return "C";
+  return "-";
+}
+
+// SSEM per-timeframe total: sum signed scores across 5 dimensions for ONE timeframe
+// Mirrors the existing ssemDimScore logic but for a single lookback.
+function SUM_ssemTimeframeTotal(ss, tf) {
+  if (!ss) return null;
+  // tf = "1m" | "3m" | "6m" | "12m"
+  // ss.eps_rev.L1M / L3M / L6M / L12M structure
+  var keyMap = {"1m":"L1M","3m":"L3M","6m":"L6M","12m":"L12M"};
+  var lookbackKey = keyMap[tf];
+  if (!lookbackKey) return null;
+  var total = 0;
+  var hasAny = false;
+  for (var di = 0; di < SUM_SSEM_DIMS.length; di++) {
+    var dim = SUM_SSEM_DIMS[di];
+    var revKey = dim + "_rev";
+    var data = ss[revKey];
+    if (!data) continue;
+    var v = data[lookbackKey];
+    if (v == null) continue;
+    hasAny = true;
+    // Sign-based scoring: positive = +1, negative = -1, zero = 0
+    if (v > 0.001) total += 1;
+    else if (v < -0.001) total -= 1;
+  }
+  return hasAny ? total : null;
+}
+
+function deriveMasterRatings() {
+  if (!D || !D.prices) return;
+  var valElig = [];
+  if (D.valuation) {
+    for (var tk in D.valuation) {
+      if (!D.valuation.hasOwnProperty(tk)) continue;
+      if (tk === "_meta") continue;
+      var v = D.valuation[tk];
+      if (v && v.pe_percentile != null) valElig.push({ticker: tk, pct: v.pe_percentile});
+    }
+  }
+  valElig.sort(function(a,b){
+    if (a.pct !== b.pct) return a.pct - b.pct;
+    return (a.ticker || "").localeCompare(b.ticker || "");
+  });
+  var nVal = valElig.length;
+  var vA = Math.ceil(nVal*0.10), vB = vA+Math.ceil(nVal*0.15), vC = vB+Math.ceil(nVal*0.25), vD = vC+Math.ceil(nVal*0.25);
+  var valBuckets = {};
+  for (var vi = 0; vi < nVal; vi++) {
+    var vr;
+    if (vi < vA) vr = "A";
+    else if (vi < vB) vr = "B";
+    else if (vi < vC) vr = "C";
+    else if (vi < vD) vr = "D";
+    else vr = "F";
+    valBuckets[valElig[vi].ticker] = vr;
+  }
+  masterRatingsMap = {};
+  for (var pi = 0; pi < D.prices.length; pi++) {
+    var p = D.prices[pi];
+    var tkr = p.ticker;
+    masterRatingsMap[tkr] = {
+      tm:       SUM_v1TmRating(tkr),
+      thematic: "C",
+      fund_chg: "C",
+      icbb:     "C",
+      ssem:     (typeof ssemRatingMap !== "undefined" && ssemRatingMap[tkr]) ? ssemRatingMap[tkr] : "-",
+      val:      valBuckets[tkr] != null ? valBuckets[tkr] : "-"
+    };
+  }
+}
+
+function SUM_ratingSortKey(g) {
+  var order = {A:5,B:4,C:3,D:2,F:1,"-":0};
+  return order[g] != null ? order[g] : -1;
+}
+
+function SUM_passesFilter(rating, filterState) {
+  if (filterState === "") return true;
+  if (filterState === "A") return rating === "A";
+  if (filterState === "AB") return rating === "A" || rating === "B";
+  return true;
+}
+
+function SUM_ratingPill(grade, isPlaceholder) {
+  var key = (grade === "-") ? "N" : grade;
+  var label = (grade === "-") ? "&mdash;" : grade;
+  var ttl = isPlaceholder ? ' title="' + SUM_PLACEHOLDER_TOOLTIP + '"' : "";
+  return '<span class="ssem-rating-pill ssem-rating-' + key + '"' + ttl + '>' + label + '</span>';
+}
+
+// Stage status pill (Cap green / Late amber / Early pink / dash)
+function SUM_stagePill(stage) {
+  if (!stage || stage === "None") return '<span style="color:#888">&mdash;</span>';
+  if (stage === "Capital") return '<span style="display:inline-block;padding:2px 6px;background:#E1F5EE;color:#085041;border-radius:10px;font-size:9px;font-weight:600">Cap</span>';
+  if (stage === "Late")    return '<span style="display:inline-block;padding:2px 6px;background:#FAEEDA;color:#633806;border-radius:10px;font-size:9px;font-weight:600">Late</span>';
+  if (stage === "Early")   return '<span style="display:inline-block;padding:2px 6px;background:#FBEAF0;color:#4B1528;border-radius:10px;font-size:9px;font-weight:600">Early</span>';
+  return '<span style="color:#888">&mdash;</span>';
+}
+
+// 5-step conditional colour helper for percentile-like values (0-100; higher = better)
+function SUM_pctileBucketStyle(v) {
+  if (v == null) return "";
+  if (v >= 85) return "background:#97C459;color:#173404;";
+  if (v >= 70) return "background:#C0DD97;color:#173404;";
+  if (v >= 50) return "background:#EAF3DE;color:#173404;";
+  if (v >= 30) return "background:#FAEEDA;color:#412402;";
+  return "background:#FCEBEB;color:#501313;";
+}
+
+// Conditional colour for inverted percentile (lower = better, e.g. PE percentile)
+function SUM_invPctileBucketStyle(v) {
+  if (v == null) return "";
+  if (v <= 15) return "background:#97C459;color:#173404;";
+  if (v <= 30) return "background:#C0DD97;color:#173404;";
+  if (v <= 60) return "background:#EAF3DE;color:#173404;";
+  if (v <= 80) return "background:#FAEEDA;color:#412402;";
+  return "background:#FCEBEB;color:#501313;";
+}
+
+// Conditional colour for signed integer scores (e.g. SSEM scores -5 to +5)
+function SUM_signedBucketStyle(v) {
+  if (v == null) return "";
+  if (v >= 4) return "background:#97C459;color:#173404;";
+  if (v >= 2) return "background:#C0DD97;color:#173404;";
+  if (v >= 1) return "background:#EAF3DE;color:#173404;";
+  if (v === 0) return "";
+  if (v >= -1) return "background:#FAEEDA;color:#412402;";
+  return "background:#FCEBEB;color:#501313;";
+}
+
+// Conditional colour for excess-return decimals (e.g. rs_excess_market)
+function SUM_excessBucketStyle(v) {
+  if (v == null) return "";
+  if (v >= 0.30) return "background:#97C459;color:#173404;";
+  if (v >= 0.15) return "background:#C0DD97;color:#173404;";
+  if (v >= 0.05) return "background:#EAF3DE;color:#173404;";
+  if (v > -0.05) return "";
+  if (v > -0.15) return "background:#FAEEDA;color:#412402;";
+  return "background:#FCEBEB;color:#501313;";
+}
+
+// Format a signed percentile as +X% or -X%
+function SUM_fmtSignedPct(v) {
+  if (v == null) return "&mdash;";
+  var pct = Math.round(v * 100);
+  return (pct >= 0 ? "+" : "") + pct + "%";
+}
+
+// Format a signed integer score
+function SUM_fmtSignedInt(v) {
+  if (v == null) return "&mdash;";
+  return (v > 0 ? "+" : "") + v;
+}
+
+
+window.cycleSummaryFilter = function(ratingId) {
+  var cur = summaryFilters[ratingId];
+  summaryFilters[ratingId] = cur === "" ? "A" : (cur === "A" ? "AB" : "");
+  renderSummary();
+};
+
+window.toggleSummarySectorGrouping = function() {
+  summarySectorGrouping = !summarySectorGrouping;
+  renderSummary();
+};
+
+window.resetSummaryFilters = function() {
+  summaryFilters = {tm:"",thematic:"",fund_chg:"",icbb:"",ssem:"",val:""};
+  summarySectorGrouping = false;
+  renderSummary();
+};
+
+function SUM_getTaxonomy(tkr) {
+  if (typeof getTaxonomy === "function") return getTaxonomy(tkr);
+  var tm = (D && D.ticker_mapping) ? D.ticker_mapping[tkr] : null;
+  return {industry: tm ? tm.industry : "", sector: tm ? tm.sector : ""};
+}
+
+function SUM_filterToggleHTML(ratingId) {
+  var state = summaryFilters[ratingId];
+  var label = SUM_RATING_SHORT[ratingId];
+  var stateLabel = state === "" ? "all" : (state === "A" ? "A" : "A|B");
+  var activeClass = state === "" ? "" : "sum-tog-active";
+  var bgStyle = state === "A" ? "background:#EAF3DE;border-color:#639922" :
+                state === "AB" ? "background:#C0DD97;border-color:#639922" : "";
+  return '<button class="tog sum-tog ' + activeClass + '" onclick="cycleSummaryFilter(\'' + ratingId + '\')" ' +
+         'title="' + SUM_RATING_LABELS[ratingId] + ' filter: No filter -> A only -> A or B" ' +
+         'style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;font-size:11px;' + bgStyle + '">' +
+         '<span style="font-weight:700">' + label + '</span>' +
+         '<span style="font-weight:600;font-size:10px">' + stateLabel + '</span></button>';
+}
+
+function renderSummary() {
+  buildHeaderControls("summary");
+  var container = document.getElementById("tab-summary");
+  if (!container) return;
+  if (Object.keys(masterRatingsMap).length === 0) deriveMasterRatings();
+  var h = "";
+
+  // Section 1: Header controls
+  h += '<div class="summary-controls" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:rgba(100,100,100,0.04);border-bottom:1px solid var(--border);margin-bottom:8px">';
+  h += '<div style="font-size:11px;color:var(--text-secondary);font-weight:600;letter-spacing:.3px">MASTER RATING FILTERS:</div>';
+  for (var ri = 0; ri < SUM_RATINGS.length; ri++) h += SUM_filterToggleHTML(SUM_RATINGS[ri]);
+  var sgActive = summarySectorGrouping ? "sum-tog-active" : "";
+  var sgLabel = summarySectorGrouping ? "ON" : "OFF";
+  h += '<span style="color:var(--text-secondary);font-size:11px">|</span>';
+  h += '<button class="tog sum-tog ' + sgActive + '" onclick="toggleSummarySectorGrouping()" style="padding:3px 8px;font-size:11px"><span style="font-weight:700">Sector grouping</span> <span style="color:#666;font-size:10px">' + sgLabel + '</span></button>';
+  h += '<button class="tog" onclick="resetSummaryFilters()" style="padding:3px 8px;font-size:11px;margin-left:auto">Reset filters</button>';
+  h += '</div>';
+
+  // V1 watermark
+  h += '<div style="padding:4px 12px;font-size:10px;color:var(--text-secondary);font-style:italic;background:rgba(180,120,30,0.06);border-bottom:1px solid rgba(180,120,30,0.15)">';
+  h += 'V1: Technical Momentum uses placeholder dichotomy. Thematic Fit / Fundamental Change / ICBB use placeholder "C" (uniform). Bell-curve methodology and REPOSITORY rating sources are in development.';
+  h += '</div>';
+
+  h += SUM_renderWaterfall();
+  h += SUM_renderIndustriesFlow();
+  h += SUM_renderSectorsFlow();
+  h += SUM_renderQualifiedStocks();
+  container.innerHTML = h;
+}
+
+function SUM_renderWaterfall() {
+  var tickers = [];
+  for (var pi = 0; pi < D.prices.length; pi++) tickers.push(D.prices[pi].ticker);
+  var Y = (D.meta && D.meta.stock_count) ? D.meta.stock_count : tickers.length;
+  var THR = [
+    {key:"A",   label:"A only",      passSet:{A:1}},
+    {key:"AB",  label:"A or B",      passSet:{A:1,B:1}},
+    {key:"ABC", label:"A or B or C", passSet:{A:1,B:1,C:1}}
+  ];
+  var rows = [];
+  for (var ti = 0; ti < THR.length; ti++) {
+    var thr = THR[ti], surv = tickers.slice(), cells = [];
+    for (var ci = 0; ci < SUM_RATINGS.length; ci++) {
+      var rid = SUM_RATINGS[ci], next = [], folded = 0;
+      for (var si = 0; si < surv.length; si++) {
+        var tkr = surv[si], mr = masterRatingsMap[tkr], rg = mr ? mr[rid] : "-";
+        if (rg === "-") { next.push(tkr); folded++; }
+        else if (thr.passSet[rg]) next.push(tkr);
+      }
+      cells.push({count:next.length, foldForwarded:folded});
+      surv = next;
+    }
+    rows.push({key:thr.key, label:thr.label, cells:cells, muted:(thr.key==="ABC")});
+  }
+  var h = '<div class="summary-section" style="margin:8px 12px 16px 12px">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Funnel - multi-rating pass-through</div>';
+  h += '<div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;font-style:italic">Stocks without a rating in a column are folded forward (counted as passing). Row 3 (A/B/C) is greyed as cross-reference only.</div>';
+  h += '<table class="data-table" style="width:100%;table-layout:fixed">';
+  h += '<colgroup><col style="width:90px">';
+  for (var cj = 0; cj < 6; cj++) h += '<col>';
+  h += '</colgroup>';
+  h += '<thead><tr><th style="background:rgba(100,100,100,0.06);text-align:left;padding:6px 8px">Threshold</th>';
+  for (var rii = 0; rii < SUM_RATINGS.length; rii++) h += '<th style="background:rgba(100,100,100,0.06);font-size:11px;font-weight:700;text-align:center;padding:6px 8px">' + SUM_RATING_LABELS[SUM_RATINGS[rii]] + '</th>';
+  h += '</tr></thead><tbody>';
+  var ROW_BG = ["rgba(39,103,73,0.18)","rgba(56,161,105,0.10)","rgba(180,180,180,0.18)"];
+  var ROW_TEXT = ["#1a4731","#22543d","#777"];
+  for (var rri = 0; rri < rows.length; rri++) {
+    var row = rows[rri];
+    h += '<tr><td style="font-weight:700;padding:6px 8px;background:' + ROW_BG[rri] + ';color:' + ROW_TEXT[rri] + ';text-align:center;font-size:11px;letter-spacing:.3px">' + row.label + '</td>';
+    for (var cn = 0; cn < row.cells.length; cn++) {
+      var c = row.cells[cn];
+      var cs = 'text-align:center;padding:8px;font-family:Menlo,monospace;font-size:13px;font-weight:600;';
+      if (row.muted) cs += 'color:#777;background:rgba(200,200,200,0.06);';
+      else cs += 'color:#1a4731;background:' + ROW_BG[rri] + ';';
+      var ttl = c.foldForwarded > 0 ? c.foldForwarded + ' of these ' + c.count + ' stocks passed via missing-rating fold-forward' : 'No fold-forward in this cell';
+      h += '<td style="' + cs + '" title="' + ttl + '">' + c.count + ' / ' + Y + '</td>';
+    }
+    h += '</tr>';
+  }
+  h += '</tbody></table></div>';
+  return h;
+}
+
+function SUM_buildGroupAggregates(groupKey) {
+  var groups = {};
+  for (var pi = 0; pi < D.prices.length; pi++) {
+    var p = D.prices[pi], tax = SUM_getTaxonomy(p.ticker), gn = tax[groupKey];
+    if (!gn) continue;
+    if (!groups[gn]) {
+      groups[gn] = {groupName:gn, total:0, perRating:{}};
+      for (var ri = 0; ri < SUM_RATINGS.length; ri++) groups[gn].perRating[SUM_RATINGS[ri]] = {A:0,B:0,C:0,D:0,F:0,dash:0};
+    }
+    groups[gn].total++;
+    var mr = masterRatingsMap[p.ticker];
+    if (!mr) continue;
+    for (var rj = 0; rj < SUM_RATINGS.length; rj++) {
+      var rid = SUM_RATINGS[rj], g = mr[rid];
+      if (g === "-") groups[gn].perRating[rid].dash++;
+      else if (g === "A" || g === "B" || g === "C" || g === "D" || g === "F") groups[gn].perRating[rid][g]++;
+    }
+  }
+  var out = [];
+  for (var gn2 in groups) {
+    if (!groups.hasOwnProperty(gn2)) continue;
+    var g2 = groups[gn2];
+    for (var rk = 0; rk < SUM_RATINGS.length; rk++) {
+      var pr = g2.perRating[SUM_RATINGS[rk]];
+      pr.pct_AB = g2.total > 0 ? (pr.A + pr.B) / g2.total : 0;
+    }
+    out.push(g2);
+  }
+  out.sort(function(a,b){
+    var ka = a.perRating.tm.pct_AB, kb = b.perRating.tm.pct_AB;
+    if (ka !== kb) return kb - ka;
+    var k2a = a.perRating.thematic.pct_AB, k2b = b.perRating.thematic.pct_AB;
+    if (k2a !== k2b) return k2b - k2a;
+    var k3a = a.perRating.fund_chg.pct_AB, k3b = b.perRating.fund_chg.pct_AB;
+    if (k3a !== k3b) return k3b - k3a;
+    return (a.groupName || "").localeCompare(b.groupName || "");
+  });
+  return out;
+}
+
+function SUM_heatmapCellColor(pct) {
+  if (pct <= 0) return "background:#fafafa";
+  var t = Math.min(pct, 1), alpha = 0.05 + t * 0.60;
+  return "background:rgba(56,161,105," + alpha.toFixed(2) + ")";
+}
+
+function SUM_renderHeatmapMatrix(rows, title, maxVisibleRows, anchorId) {
+  var h = '<div class="summary-section" style="margin:16px 12px" id="' + anchorId + '">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">' + title + '</div>';
+  var wrapStyle = '';
+  if (maxVisibleRows) wrapStyle = 'style="max-height:' + (maxVisibleRows*28+60) + 'px;overflow-y:auto;border:1px solid var(--border)"';
+  h += '<div class="ind-sec-wrap" ' + wrapStyle + '>';
+  h += '<table class="data-table" style="width:100%;table-layout:fixed">';
+  h += '<colgroup><col style="width:30%">';
+  for (var c = 0; c < 6; c++) h += '<col style="width:11.66%">';
+  h += '</colgroup>';
+  h += '<thead style="position:sticky;top:0;background:var(--bg-primary);z-index:2"><tr>';
+  h += '<th style="background:rgba(100,100,100,0.06);text-align:left;padding:6px 8px;font-size:11px">' + title.replace(" flow","").replace(/s$/,"") + '</th>';
+  for (var ri = 0; ri < SUM_RATINGS.length; ri++) h += '<th style="background:rgba(100,100,100,0.06);font-size:10px;font-weight:700;text-align:center;padding:6px 4px">' + SUM_RATING_SHORT[SUM_RATINGS[ri]] + '</th>';
+  h += '</tr></thead><tbody>';
+  for (var rr = 0; rr < rows.length; rr++) {
+    var row = rows[rr];
+    h += '<tr>';
+    var nameAttr = row.groupName.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+    h += '<td style="padding:4px 8px;font-size:11px;font-weight:600;color:var(--text-primary);cursor:default" title="' + nameAttr + ' (' + row.total + ' stocks)">' + row.groupName + ' <span style="color:var(--text-secondary);font-weight:400">(' + row.total + ')</span></td>';
+    for (var rj = 0; rj < SUM_RATINGS.length; rj++) {
+      var rid = SUM_RATINGS[rj], pr = row.perRating[rid], pct = pr.pct_AB;
+      var color = SUM_heatmapCellColor(pct);
+      var pctStr = pct > 0 ? Math.round(pct*100) + "%" : "-";
+      var ttl = SUM_RATING_LABELS[rid] + ": A=" + pr.A + " B=" + pr.B + " C=" + pr.C + " D=" + pr.D + " F=" + pr.F + " of " + row.total;
+      h += '<td style="text-align:center;padding:4px;font-family:Menlo,monospace;font-size:11px;font-weight:600;' + color + '" title="' + ttl + '">' + pctStr + '</td>';
+    }
+    h += '</tr>';
+  }
+  h += '</tbody></table></div></div>';
+  return h;
+}
+
+function SUM_renderIndustriesFlow() { return SUM_renderHeatmapMatrix(SUM_buildGroupAggregates("industry"), "Industries flow", null, "sum-industries"); }
+function SUM_renderSectorsFlow()    { return SUM_renderHeatmapMatrix(SUM_buildGroupAggregates("sector"),   "Sectors flow",    15,   "sum-sectors"); }
+
+
+function SUM_renderQualifiedStocks() {
+  // Build rows with all fields per stock
+  var rows = [];
+  for (var pi = 0; pi < D.prices.length; pi++) {
+    var p = D.prices[pi];
+    var mr = masterRatingsMap[p.ticker];
+    if (!mr) continue;
+    // Apply 6 master rating filters AND-combined
+    var keep = true;
+    for (var ri = 0; ri < SUM_RATINGS.length; ri++) {
+      if (!SUM_passesFilter(mr[SUM_RATINGS[ri]], summaryFilters[SUM_RATINGS[ri]])) { keep = false; break; }
+    }
+    if (!keep) continue;
+
+    var tax = SUM_getTaxonomy(p.ticker);
+    var fm = (typeof filterMap !== "undefined") ? filterMap[p.ticker] : null;
+
+    // TM stage statuses
+    var stages = {};
+    for (var sc = 0; sc < SUM_STAGE_COLS.length; sc++) {
+      var sid = SUM_STAGE_COLS[sc].id;
+      stages[sid] = (fm && fm[sid] && fm[sid].stage) ? fm[sid].stage : null;
+    }
+
+    // RS values
+    var rsVals = {
+      rs_percentile:    (p.rs_percentile != null) ? p.rs_percentile : null,
+      rs_vs_sector:     (p.rs_vs_sector != null) ? p.rs_vs_sector : null,
+      rs_vs_industry:   (p.rs_vs_industry != null) ? p.rs_vs_industry : null,
+      rs_excess_market: (p.rs_excess_market != null) ? p.rs_excess_market : null
+    };
+
+    // SSEM per-timeframe totals
+    var ssemTotals = {};
+    var ssData = (D.ssem && D.ssem[p.ticker]) ? D.ssem[p.ticker] : null;
+    var ssemGrand = 0, ssemHasAny = false;
+    for (var ti = 0; ti < SUM_SSEM_TIMEFRAMES.length; ti++) {
+      var tf = SUM_SSEM_TIMEFRAMES[ti];
+      var t = SUM_ssemTimeframeTotal(ssData, tf);
+      ssemTotals[tf] = t;
+      if (t != null) { ssemGrand += t; ssemHasAny = true; }
+    }
+    ssemTotals.total = ssemHasAny ? ssemGrand : null;
+
+    // Valuation
+    var vl = (D.valuation && D.valuation[p.ticker]) ? D.valuation[p.ticker] : null;
+    var valData = {
+      pctile:   (vl && vl.pe_percentile != null) ? vl.pe_percentile : null,
+      cur:      (vl && vl.pe_current != null) ? vl.pe_current : null,
+      lo:       (vl && vl.pe_10y_low != null) ? vl.pe_10y_low : null,
+      hi:       (vl && vl.pe_10y_high != null) ? vl.pe_10y_high : null
+    };
+
+    rows.push({
+      ticker: p.ticker,
+      company: p.company_name || p.ticker,
+      industry: tax.industry || "",
+      sector: tax.sector || "",
+      mr: mr,
+      stages: stages,
+      rs: rsVals,
+      ssem: ssemTotals,
+      val: valData
+    });
+  }
+
+  // Default 6-key cascade sort
+  rows.sort(function(a,b){
+    for (var k = 0; k < SUM_RATINGS.length; k++) {
+      var rid = SUM_RATINGS[k];
+      var ka = SUM_ratingSortKey(a.mr[rid]), kb = SUM_ratingSortKey(b.mr[rid]);
+      if (ka !== kb) return kb - ka;
+    }
+    return (a.ticker || "").localeCompare(b.ticker || "");
+  });
+
+  // Optional sector grouping
+  if (summarySectorGrouping) {
+    rows.sort(function(a,b){
+      var sa = a.sector || "zz_no_sector", sb = b.sector || "zz_no_sector";
+      if (sa !== sb) return sa.localeCompare(sb);
+      for (var k = 0; k < SUM_RATINGS.length; k++) {
+        var rid = SUM_RATINGS[k];
+        var ka = SUM_ratingSortKey(a.mr[rid]), kb = SUM_ratingSortKey(b.mr[rid]);
+        if (ka !== kb) return kb - ka;
+      }
+      return (a.ticker || "").localeCompare(b.ticker || "");
+    });
+  }
+
+  var h = '<div class="summary-section" style="margin:16px 12px" id="sum-qualified">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--text-primary)">Qualified Stocks</div>';
+  h += '<div style="font-size:11px;color:var(--text-secondary)">' + rows.length + ' stocks pass all active filters</div>';
+  h += '</div>';
+
+  h += '<div style="max-height:700px;overflow-y:auto;overflow-x:auto;border:1px solid var(--border);border-radius:4px">';
+  h += '<table class="data-table" style="font-size:10px;min-width:2400px">';
+
+  // ROW 1 — Group header
+  h += '<thead style="position:sticky;top:0;z-index:5;background:var(--bg-primary)"><tr>';
+  h += '<th colspan="4" style="padding:6px 8px;background:#F1EFE8;color:#444441;text-align:left;font-weight:600;font-size:11px;letter-spacing:.3px;border-right:1px solid var(--border)">Inputs</th>';
+  h += '<th colspan="12" style="padding:6px 8px;background:#EEEDFE;color:#3C3489;text-align:center;font-weight:600;font-size:11px;letter-spacing:.3px;border-right:1px solid var(--border)">Technical Momentum</th>';
+  h += '<th colspan="5" style="padding:6px 8px;background:#E6F1FB;color:#0C447C;text-align:center;font-weight:600;font-size:11px;letter-spacing:.3px;border-right:1px solid var(--border)">SSEM</th>';
+  h += '<th colspan="2" style="padding:6px 8px;background:#EAF3DE;color:#27500A;text-align:center;font-weight:600;font-size:11px;letter-spacing:.3px;border-right:1px solid var(--border)">Valuation</th>';
+  h += '<th colspan="6" style="padding:6px 8px;background:#FAEEDA;color:#633806;text-align:center;font-weight:600;font-size:11px;letter-spacing:.3px">Master Ratings</th>';
+  h += '</tr>';
+
+  // ROW 2 — Sub-group header
+  h += '<tr style="border-top:1px solid var(--border)">';
+  h += '<th colspan="4" style="background:var(--bg-primary);border-right:1px solid var(--border)"></th>';
+  h += '<th colspan="2" style="padding:4px;background:rgba(238,237,254,0.4);color:#3C3489;text-align:center;font-size:10px;font-weight:600;border-right:1px dashed var(--border)">Stage 1</th>';
+  h += '<th colspan="3" style="padding:4px;background:rgba(238,237,254,0.4);color:#3C3489;text-align:center;font-size:10px;font-weight:600;border-right:1px dashed var(--border)">Stage 2</th>';
+  h += '<th colspan="1" style="padding:4px;background:rgba(238,237,254,0.4);color:#3C3489;text-align:center;font-size:10px;font-weight:600;border-right:1px dashed var(--border)">Stage 3</th>';
+  h += '<th colspan="2" style="padding:4px;background:rgba(238,237,254,0.4);color:#3C3489;text-align:center;font-size:10px;font-weight:600;border-right:1px dashed var(--border)">Stage 4</th>';
+  h += '<th colspan="4" style="padding:4px;background:rgba(238,237,254,0.4);color:#3C3489;text-align:center;font-size:10px;font-weight:600;border-right:1px solid var(--border)">Relative Strength</th>';
+  h += '<th colspan="5" style="background:var(--bg-primary);border-right:1px solid var(--border)"></th>';
+  h += '<th colspan="2" style="background:var(--bg-primary);border-right:1px solid var(--border)"></th>';
+  h += '<th colspan="6" style="background:var(--bg-primary)"></th>';
+  h += '</tr>';
+
+  // ROW 3 — Column header
+  h += '<tr style="border-top:1px solid var(--border);background:rgba(100,100,100,0.04)">';
+  h += '<th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:600">Tkr</th>';
+  h += '<th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:600">Company</th>';
+  h += '<th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:600">Industry</th>';
+  h += '<th style="padding:5px 8px;text-align:left;font-size:10px;font-weight:600;border-right:1px solid var(--border)">Sector</th>';
+  for (var sc = 0; sc < SUM_STAGE_COLS.length; sc++) {
+    var col = SUM_STAGE_COLS[sc];
+    var rborder = (col.id === "probing_bet" || col.id === "uptrend_retest" || col.id === "s3_topping") ? "border-right:1px dashed var(--border);" : "";
+    if (col.id === "collapse") rborder = "border-right:1px dashed var(--border);";
+    h += '<th style="padding:5px 4px;text-align:center;font-size:10px;font-weight:600;' + rborder + '">' + col.label + '</th>';
+  }
+  for (var rs = 0; rs < SUM_RS_COLS.length; rs++) {
+    var rsCol = SUM_RS_COLS[rs];
+    var rb = (rs === SUM_RS_COLS.length - 1) ? "border-right:1px solid var(--border);" : "";
+    h += '<th style="padding:5px 4px;text-align:center;font-size:10px;font-weight:600;' + rb + '">' + rsCol.label + '</th>';
+  }
+  for (var tf = 0; tf < SUM_SSEM_TIMEFRAMES.length; tf++) {
+    h += '<th style="padding:5px 4px;text-align:center;font-size:10px;font-weight:600">' + SUM_SSEM_TIMEFRAMES[tf].toUpperCase() + '</th>';
+  }
+  h += '<th style="padding:5px 4px;text-align:center;font-size:10px;font-weight:600;border-right:1px solid var(--border)">Total</th>';
+  h += '<th style="padding:5px 4px;text-align:center;font-size:10px;font-weight:600">Pctile</th>';
+  h += '<th style="padding:5px 4px;text-align:center;font-size:10px;font-weight:600;border-right:1px solid var(--border)">P/E 10Y Range</th>';
+  for (var rr = 0; rr < SUM_RATINGS.length; rr++) {
+    h += '<th style="padding:5px 4px;text-align:center;font-size:10px;font-weight:600">' + SUM_RATING_SHORT[SUM_RATINGS[rr]] + '</th>';
+  }
+  h += '</tr></thead><tbody>';
+
+  // Data rows
+  var _prevSector = null;
+  var colTotal = 4 + 12 + 5 + 2 + 6;
+  for (var rwi = 0; rwi < rows.length; rwi++) {
+    var row = rows[rwi];
+    if (summarySectorGrouping && row.sector !== _prevSector) {
+      var secCount = rows.filter(function(r){return r.sector === row.sector}).length;
+      h += '<tr class="group-header-row"><td colspan="' + colTotal + '" style="background:rgba(100,100,100,0.06);font-weight:700;font-size:11px;padding:4px 8px;color:var(--text-primary)">' + (row.sector || "Unknown") + ' <span style="font-weight:400;color:var(--text-secondary)">(' + secCount + ')</span></td></tr>';
+      _prevSector = row.sector;
+    }
+    h += '<tr>';
+    h += '<td style="padding:4px 8px;font-size:10px;font-family:Menlo,monospace;font-weight:500">' + row.ticker + '</td>';
+    h += '<td style="padding:4px 8px;font-size:10px">' + row.company + '</td>';
+    h += '<td style="padding:4px 8px;font-size:9px;color:var(--text-secondary)">' + row.industry + '</td>';
+    h += '<td style="padding:4px 8px;font-size:9px;color:var(--text-secondary);border-right:1px solid var(--border)">' + row.sector + '</td>';
+    // Stage pills
+    for (var sci = 0; sci < SUM_STAGE_COLS.length; sci++) {
+      var col2 = SUM_STAGE_COLS[sci];
+      var rb2 = (col2.id === "probing_bet" || col2.id === "uptrend_retest" || col2.id === "s3_topping" || col2.id === "collapse") ? "border-right:1px dashed var(--border);" : "";
+      h += '<td style="padding:4px;text-align:center;' + rb2 + '">' + SUM_stagePill(row.stages[col2.id]) + '</td>';
+    }
+    // RS columns
+    for (var rsi = 0; rsi < SUM_RS_COLS.length; rsi++) {
+      var rsCol2 = SUM_RS_COLS[rsi];
+      var v = row.rs[rsCol2.key];
+      var style, content;
+      if (rsCol2.format === "signedPct") {
+        style = SUM_excessBucketStyle(v);
+        content = SUM_fmtSignedPct(v);
+      } else {
+        style = SUM_pctileBucketStyle(v);
+        content = (v != null) ? v : "&mdash;";
+      }
+      var rb3 = (rsi === SUM_RS_COLS.length - 1) ? "border-right:1px solid var(--border);" : "";
+      h += '<td style="padding:4px;text-align:center;font-family:Menlo,monospace;font-size:10px;font-weight:600;' + style + rb3 + '">' + content + '</td>';
+    }
+    // SSEM timeframe cells
+    for (var ti2 = 0; ti2 < SUM_SSEM_TIMEFRAMES.length; ti2++) {
+      var tfv = row.ssem[SUM_SSEM_TIMEFRAMES[ti2]];
+      var st = SUM_signedBucketStyle(tfv);
+      h += '<td style="padding:4px;text-align:center;font-family:Menlo,monospace;font-size:10px;font-weight:600;' + st + '">' + SUM_fmtSignedInt(tfv) + '</td>';
+    }
+    // SSEM Total
+    var totSt = SUM_signedBucketStyle(row.ssem.total);
+    h += '<td style="padding:4px;text-align:center;font-family:Menlo,monospace;font-size:10px;font-weight:700;border-right:1px solid var(--border);' + totSt + '">' + SUM_fmtSignedInt(row.ssem.total) + '</td>';
+    // Valuation percentile
+    var valSt = SUM_invPctileBucketStyle(row.val.pctile);
+    var valStr = row.val.pctile != null ? Math.round(row.val.pctile) + "%" : "&mdash;";
+    h += '<td style="padding:4px;text-align:center;font-family:Menlo,monospace;font-size:10px;font-weight:600;' + valSt + '">' + valStr + '</td>';
+    // Valuation sparkline (P/E 10Y range bar) — reuse buildRangeBar
+    var sparkContent;
+    if (row.val.lo != null && row.val.hi != null && row.val.cur != null && typeof buildRangeBar === "function") {
+      sparkContent = buildRangeBar(row.val.lo, row.val.hi, row.val.cur);
+    } else {
+      sparkContent = '<span style="color:var(--text-tertiary)">&mdash;</span>';
+    }
+    h += '<td style="padding:4px;text-align:center;border-right:1px solid var(--border)">' + sparkContent + '</td>';
+    // Master Ratings
+    for (var mri = 0; mri < SUM_RATINGS.length; mri++) {
+      var ridM = SUM_RATINGS[mri];
+      var isPh = (ridM === "thematic" || ridM === "fund_chg" || ridM === "icbb");
+      h += '<td style="padding:4px;text-align:center">' + SUM_ratingPill(row.mr[ridM], isPh) + '</td>';
+    }
+    h += '</tr>';
+  }
+  h += '</tbody></table></div></div>';
+  return h;
+}
+
+/* SUMMARY-TAB-MARKER-END-V12 */
+
+
+/* MD-V2-STAGE1-MARKER-MODULE-START */
+// =============================================================================
+// STAGE 1 TAB MODULE — Master Dashboard V2
+// =============================================================================
+// MD-V2-STAGE1-MARKER — idempotency marker for patcher detection
+//
+// Locked spec: handoff-2026-05-13-stage1-mockup-signed-off.md
+// Mockup source of truth: PROJECTS/SA - Master Dashboard/mockups/stage1-tab-mockup-v8.html
+//
+// Reads from MASTER_DATA at render time:
+//   - MASTER_DATA.stocks[i].md_v2.stage_1 — pre-computed by _md_v2_screens.py
+//   - MASTER_DATA.stocks[i].md_v2.persistence.stage_1_persistence — 12-month bar array
+//   - MASTER_DATA.prices[ticker] — price, MAs, high/low, MoM rates, higher_lows count
+//   - MASTER_DATA.positions.investments — live position list
+//
+// Rating thresholds (per D-MD-V2-13, no double-weight bonus):
+//   Possible = 2/8, Plausible = 3/8, Probable Early = 4/8, Probable Late = 5+/8
+//
+// Universal MD V2 tab pattern (D-MD-V2-15):
+//   nav strip · controls (Inputs/Tests/Scope/Colour by/Portfolio tint) ·
+//   5 rating tiles (faded→bold L→R) · 4 group captions · sticky thead table ·
+//   sortable cols (mode-aware) · positional pips · qualification persistence ·
+//   conditional colour-coding · portfolio tint right-edge
+// =============================================================================
+
+/* MD-V2-STAGE1-MARKER-START */
+
+(function() {
+  'use strict';
+
+  // ===== State =====
+  var s1State = {
+    mode: { inputs: 'pct', tests: 'tick' },
+    scope: 'all',
+    ratingFilter: null,
+    tint: 'none',     // none | industry | sector
+    port: 'off',      // off | on
+    sort: { col: 'count', dir: 'desc' }
+  };
+
+  // ===== Column definitions =====
+  var S1_COLS = [
+    { id:'name',     label:'Company · Ticker',          sortKey:'company', cls:'name-cell' },
+    { id:'taxon',    label:'Industry · Sector',         sortKey:'sector', cls:'taxon' },
+    { id:'price',    label:'Price',                     sortKey:'price', cls:'num' },
+    { id:'high_52w', label:'52 week high',              sortKey:'high_52w', cls:'num' },
+    { id:'low_52w',  label:'52 week low',               sortKey:'low_52w', cls:'num' },
+    { id:'ma_150',   label:'150 day moving average',    sortKey:'ma_150', cls:'num' },
+    { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200', cls:'num' },
+    { id:'rating',   label:'Rating',                    sortKey:'rating_rank', cls:'grp-start-rating' },
+    { id:'count',    label:'Score',                     sortKey:'count', cls:'' },
+    { id:'g1_150',   label:'150-day decelerating',      sortKey:'g1_150', cls:'grp-start-g1', testGroup:'g1', testKey:'T1_150D' },
+    { id:'g1_200',   label:'200-day decelerating',      sortKey:'g1_200', cls:'grp-end-g1', testGroup:'g1', testKey:'T2_200D' },
+    { id:'g2_t3',    label:'150-day flat ±2%',          sortKey:'g2_t3', cls:'grp-start-g2', testGroup:'g2', testKey:'T3' },
+    { id:'g2_t4',    label:'200-day flat ±2%',          sortKey:'g2_t4', cls:'grp-end-g2', testGroup:'g2', testKey:'T4' },
+    { id:'g3_t5',    label:'50-day above 97% × 150-day', sortKey:'g3_t5', cls:'grp-start-g3', testGroup:'g3', testKey:'T5' },
+    { id:'g3_t6',    label:'150-day above 97% × 200-day', sortKey:'g3_t6', cls:'grp-end-g3', testGroup:'g3', testKey:'T6' },
+    { id:'g4_t7',    label:'1-month low > prior 3M low', sortKey:'g4_t7', cls:'grp-start-g4', testGroup:'g4', testKey:'T7' },
+    { id:'g4_t8',    label:'3-month low > prior 3M low', sortKey:'g4_t8', cls:'grp-end-g4', testGroup:'g4', testKey:'T8' },
+    { id:'persist',  label:'Last 12 months',            sortKey:'persistence_count', cls:'grp-start-persist' }
+  ];
+
+  var S1_RATING_RANK = { 'Probable Late':5, 'Probable Early':4, 'Plausible':3, 'Possible':2, 'None':1 };
+  var S1_TINT_CLS = { 'Probable Late':'tint-pl','Probable Early':'tint-pe','Plausible':'tint-pla','Possible':'tint-pos','None':'tint-none' };
+
+  // ===== Data accessors =====
+  function s1PricesLookup() {
+    // MASTER_DATA.prices is an array; build ticker → price record map (cached)
+    if (window._s1PricesByTicker) return window._s1PricesByTicker;
+    var out = {};
+    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    }
+    window._s1PricesByTicker = out;
+    return out;
+  }
+  function s1GetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = s1PricesLookup();
+    var liveTickers = s1LiveTickers();
+    var liveSectors = s1LiveSectors();
+    var liveIndustries = s1LiveIndustries();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2 || !s.md_v2.stage_1) continue;
+      var p = prices[s.ticker] || {};
+      var s1 = s.md_v2.stage_1;
+      var pers = (s.md_v2.persistence && s.md_v2.persistence.stage_1_persistence) || [];
+      var mas = p.mas || {};
+      rows.push({
+        ticker: s.ticker,
+        company: p.company_name || s.ticker,
+        sector: p.sector || '',
+        industry: p.industry || '',
+        price: p.price,
+        high_52w: p.high_52w,
+        low_52w: p.low_52w,
+        ma_150: mas['150D'],
+        ma_200: mas['200D'],
+        ma_50:  mas['50D'],
+        rating: s1.rating,
+        count: s1.count,
+        tests: s1.tests || {},
+        groups: s1.groups || {},
+        persistence: pers,
+        is_live: liveTickers[s.ticker] || false,
+        sector_in_portfolio: !!liveSectors[p.sector],
+        industry_in_portfolio: !!liveIndustries[p.industry],
+        // For test-value mode, compute on demand
+        _ma150_mom: p.ma150_mom_rates || [],
+        _ma200_mom: p.ma200_mom_rates || [],
+        _higher_lows: p.higher_lows_count || 0
+      });
+    }
+    return rows;
+  }
+
+  function s1LiveTickers() {
+    var out = {};
+    var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
+    for (var i = 0; i < inv.length; i++) {
+      if (inv[i].ticker) out[inv[i].ticker] = true;
+    }
+    return out;
+  }
+  function s1LiveSectors() {
+    var out = {};
+    var tickers = s1LiveTickers();
+    var prices = s1PricesLookup();
+    for (var t in tickers) {
+      var p = prices[t];
+      if (p && p.sector) out[p.sector] = true;
+    }
+    return out;
+  }
+  function s1LiveIndustries() {
+    var out = {};
+    var tickers = s1LiveTickers();
+    var prices = s1PricesLookup();
+    for (var t in tickers) {
+      var p = prices[t];
+      if (p && p.industry) out[p.industry] = true;
+    }
+    return out;
+  }
+  function s1UniverseCounts(rows) {
+    var c = {'Probable Late':0,'Probable Early':0,'Plausible':0,'Possible':0,'None':0};
+    for (var i = 0; i < rows.length; i++) {
+      if (c[rows[i].rating] !== undefined) c[rows[i].rating]++;
+    }
+    return c;
+  }
+
+  // ===== Formatters =====
+  function s1FmtNum(n) {
+    if (n == null || isNaN(n)) return '—';
+    var abs = Math.abs(n);
+    var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    var formatted = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+    return n < 0 ? '(' + formatted + ')' : formatted;
+  }
+  function s1FmtPct(p) {
+    if (p == null || isNaN(p)) return '—';
+    var r = Math.round(p);
+    var abs = Math.abs(r);
+    return r < 0 ? '(' + abs + ')%' : r + '%';
+  }
+  function s1ReformatPctString(s) {
+    if (s == null) return '—';
+    if (s.indexOf('/') > -1 && s.indexOf('%') > -1) {
+      return s.split('/').map(function(p) { return s1ReformatPctString(p.trim()); }).join(' / ');
+    }
+    var m = s.match(/^(-?\d+(?:\.\d+)?)%$/);
+    if (m) {
+      var n = Math.round(parseFloat(m[1]));
+      return n < 0 ? '(' + Math.abs(n) + ')%' : n + '%';
+    }
+    return s;
+  }
+
+  function s1ColourForIntensity(i) {
+    if (i >= 0.6) return '#0a4012';
+    if (i >= 0.25) return '#1f6325';
+    if (i >= 0.05) return '#4a8050';
+    if (i <= -0.6) return '#8b1a1a';
+    if (i <= -0.25) return '#a83232';
+    if (i <= -0.05) return '#c66666';
+    return '#666';
+  }
+
+  // ===== Cell builders =====
+  function s1InputCell(row, key, extraCls) {
+    extraCls = extraCls || '';
+    var v = row[key];
+    if (key === 'price') return '<td class="num ' + extraCls + '">' + s1FmtNum(v) + '</td>';
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">—</td>';
+    var pct = (row.price - v) / v * 100;
+    var intensity = 0;
+    if (key === 'high_52w') {
+      intensity = Math.max(-1, Math.min(1, (pct + 20) / 20));
+    } else if (key === 'low_52w') {
+      intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
+    } else if (key === 'ma_150' || key === 'ma_200') {
+      intensity = Math.max(-1, Math.min(1, pct / 10));
+    }
+    var colour = s1ColourForIntensity(intensity);
+    var text = (s1State.mode.inputs === 'pct') ? s1FmtPct(pct) : s1FmtNum(v);
+    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+  }
+
+  function s1TestValueFor(row, col) {
+    // Compute the actual value to display for this test cell in val mode
+    var rates150 = row._ma150_mom || [];
+    var rates200 = row._ma200_mom || [];
+    var lastRate = function(arr, idx) {
+      if (!arr || arr.length < Math.abs(idx)) return null;
+      return arr[arr.length + idx];
+    };
+    if (col.testKey === 'T1_150D') {
+      var a = lastRate(rates150, -1), b = lastRate(rates150, -2);
+      if (a == null || b == null) return '—';
+      return s1FmtPct(a*100) + ' / ' + s1FmtPct(b*100);
+    }
+    if (col.testKey === 'T2_200D') {
+      var a2 = lastRate(rates200, -1), b2 = lastRate(rates200, -2);
+      if (a2 == null || b2 == null) return '—';
+      return s1FmtPct(a2*100) + ' / ' + s1FmtPct(b2*100);
+    }
+    if (col.testKey === 'T3') {
+      var r = lastRate(rates150, -1);
+      return r == null ? '—' : s1FmtPct(r*100);
+    }
+    if (col.testKey === 'T4') {
+      var r2 = lastRate(rates200, -1);
+      return r2 == null ? '—' : s1FmtPct(r2*100);
+    }
+    if (col.testKey === 'T5') {
+      if (row.ma_50 == null || row.ma_150 == null) return '—';
+      return s1FmtPct(row.ma_50 / row.ma_150 * 100);
+    }
+    if (col.testKey === 'T6') {
+      if (row.ma_150 == null || row.ma_200 == null) return '—';
+      return s1FmtPct(row.ma_150 / row.ma_200 * 100);
+    }
+    if (col.testKey === 'T7' || col.testKey === 'T8') {
+      return String(row._higher_lows);
+    }
+    return '—';
+  }
+
+  function s1TestPasses(row, col) {
+    var g = row.groups;
+    if (col.testGroup === 'g1') {
+      if (col.testKey === 'T1_150D') return !!(g.g1_slowing_decline && g.g1_slowing_decline.T1_150D_decelerating);
+      if (col.testKey === 'T2_200D') return !!(g.g1_slowing_decline && g.g1_slowing_decline.T2_200D_decelerating);
+    } else if (col.testGroup === 'g2') return !!(g.g2_flat_mas && g.g2_flat_mas[col.testKey]);
+    else if (col.testGroup === 'g3') return !!(g.g3_stack && g.g3_stack[col.testKey]);
+    else if (col.testGroup === 'g4') return !!(g.g4_higher_lows && g.g4_higher_lows[col.testKey]);
+    return false;
+  }
+
+  function s1TestCell(row, col) {
+    var pass = s1TestPasses(row, col);
+    var extra = col.cls || '';
+    if (s1State.mode.tests === 'val') {
+      var v = s1ReformatPctString(s1TestValueFor(row, col));
+      var colour = pass ? s1ColourForIntensity(0.7) : s1ColourForIntensity(-0.4);
+      return '<td class="test-val ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+    }
+    if (pass) return '<td class="test-pass ' + extra + '"><span class="tick">✓</span></td>';
+    return '<td class="test-fail ' + extra + '">·</td>';
+  }
+
+  function s1PillFor(rating, count) {
+    if (rating === 'Probable Late') {
+      var c = Math.min(Math.max(count, 5), 8);
+      return '<span class="pill pill-pl-' + c + '">Probable Late</span>';
+    }
+    if (rating === 'Probable Early') return '<span class="pill pill-pe">Probable Early</span>';
+    if (rating === 'Plausible') return '<span class="pill pill-pla">Plausible</span>';
+    if (rating === 'Possible') return '<span class="pill pill-pos">Possible</span>';
+    return '<span class="pill pill-none">None</span>';
+  }
+
+  function s1ScorePips(row) {
+    var t = row.tests;
+    var passed = [
+      !!t.T1_150D_decel, !!t.T2_200D_decel,
+      !!t.T3_150D_flat,  !!t.T4_200D_flat,
+      !!t.T5_50_above_150x97, !!t.T6_150_above_200x97,
+      !!t.T7_higher_lows_1m,  !!t.T8_higher_lows_3m
+    ];
+    var count = passed.filter(Boolean).length;
+    var s = '';
+    for (var i = 0; i < 8; i++) s += '<span class="pip ' + (passed[i] ? 'on' : '') + '"></span>';
+    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/8</span></div>';
+  }
+
+  function s1PersistCells(arr, rating) {
+    var h = '';
+    for (var i = 0; i < 12; i++) {
+      if (i === 11 && arr && arr[11]) {
+        var cls = rating === 'Probable Late' ? 'r-pl' :
+                  rating === 'Probable Early' ? 'r-pe' :
+                  rating === 'Plausible' ? 'r-pla' :
+                  rating === 'Possible' ? 'r-pos' : 'r-none';
+        h += '<span class="persist-cell ' + cls + '" title="Current month: ' + rating + '"></span>';
+      } else {
+        h += '<span class="persist-cell r-none" title="Month -' + (11 - i) + ': not yet backfilled"></span>';
+      }
+    }
+    return '<div class="persist-row">' + h + '</div>';
+  }
+
+  // ===== Industry/sector tint palette =====
+  function s1HashColor(label, alpha) {
+    if (!label) return null;
+    var h = 0;
+    for (var i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff;
+    var hue = h % 360;
+    return 'hsla(' + hue + ', 35%, 55%, ' + alpha + ')';
+  }
+  function s1PortfolioInfo(row) {
+    if (row.is_live) return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)', bgHover:'rgba(27,94,32,0.14)' };
+    if (row.sector_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)', bgHover:'rgba(27,94,32,0.08)' };
+    if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' };
+    return null;
+  }
+
+  // ===== Sort =====
+  function s1GetSortVal(row, key) {
+    if (key === 'rating_rank') return S1_RATING_RANK[row.rating] || 0;
+    if (key === 'persistence_count') return (row.persistence || []).filter(Boolean).length;
+    if (key === 'g1_150') return row.groups.g1_slowing_decline && row.groups.g1_slowing_decline.T1_150D_decelerating ? 1 : 0;
+    if (key === 'g1_200') return row.groups.g1_slowing_decline && row.groups.g1_slowing_decline.T2_200D_decelerating ? 1 : 0;
+    if (key === 'g2_t3') return row.groups.g2_flat_mas && row.groups.g2_flat_mas.T3 ? 1 : 0;
+    if (key === 'g2_t4') return row.groups.g2_flat_mas && row.groups.g2_flat_mas.T4 ? 1 : 0;
+    if (key === 'g3_t5') return row.groups.g3_stack && row.groups.g3_stack.T5 ? 1 : 0;
+    if (key === 'g3_t6') return row.groups.g3_stack && row.groups.g3_stack.T6 ? 1 : 0;
+    if (key === 'g4_t7') return row.groups.g4_higher_lows && row.groups.g4_higher_lows.T7 ? 1 : 0;
+    if (key === 'g4_t8') return row.groups.g4_higher_lows && row.groups.g4_higher_lows.T8 ? 1 : 0;
+    var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
+    if (PCT_KEYS.indexOf(key) > -1 && s1State.mode.inputs === 'pct') {
+      var ref = row[key];
+      if (ref == null || row.price == null || ref === 0) return -Infinity;
+      return (row.price - ref) / ref * 100;
+    }
+    if (key in row) return row[key];
+    return 0;
+  }
+
+  function s1OnSort(key) {
+    if (s1State.sort.col === key) s1State.sort.dir = s1State.sort.dir === 'desc' ? 'asc' : 'desc';
+    else s1State.sort = { col: key, dir: 'desc' };
+    s1BuildHeaderRow();
+    s1RenderRows();
+  }
+
+  // ===== Render: header row =====
+  function s1BuildHeaderRow() {
+    var tr = document.getElementById('s1-col-header-row');
+    if (!tr) return;
+    var h = '';
+    for (var i = 0; i < S1_COLS.length; i++) {
+      var c = S1_COLS[i];
+      var isSort = s1State.sort.col === c.sortKey;
+      var arrow = isSort
+        ? '<span class="sort-arrow">' + (s1State.sort.dir === 'desc' ? '▼' : '▲') + '</span>'
+        : '<span class="sort-placeholder"></span>';
+      h += '<th class="' + (c.cls || '') + '" data-sort-key="' + c.sortKey + '" title="' + c.label + '">' +
+           '<span class="hd"><span class="lbl">' + c.label + '</span>' + arrow + '</span></th>';
+    }
+    tr.innerHTML = h;
+  }
+
+  // ===== Render: rating tiles =====
+  function s1RatingTiles(rows) {
+    var tiles = document.getElementById('s1-rating-tiles');
+    if (!tiles) return;
+    var uc = s1UniverseCounts(rows);
+    var total = rows.length;
+    var order = ['None','Possible','Plausible','Probable Early','Probable Late'];
+    var strip = {'Probable Late':'pl','Probable Early':'pe','Plausible':'pla','Possible':'pos','None':'none'};
+    var h = '';
+    for (var i = 0; i < order.length; i++) {
+      var r = order[i];
+      var cnt = uc[r] || 0;
+      var act = s1State.ratingFilter === r ? ' active' : '';
+      var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+      h += '<div class="rating-tile ' + S1_TINT_CLS[r] + act + '" data-rating="' + r + '">' +
+           '<div class="rt-label">' + r + '</div>' +
+           '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
+           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-strip rt-strip-' + strip[r] + '"></div>' +
+           '</div>';
+    }
+    tiles.innerHTML = h;
+  }
+
+  // ===== Render: scope counts in toggle buttons =====
+  function s1UpdateScopeCounts(rows) {
+    function setCnt(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
+    setCnt('s1-cnt-all',      rows.length);
+    setCnt('s1-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
+    setCnt('s1-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
+    setCnt('s1-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
+  }
+
+  // ===== Render: rows =====
+  function s1RenderRows() {
+    var tbody = document.getElementById('s1-tbody');
+    if (!tbody) return;
+    var allRows = s1GetRows();
+    s1UpdateScopeCounts(allRows);
+    s1RatingTiles(allRows);
+
+    var rows = allRows.slice();
+    if (s1State.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
+    else if (s1State.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
+    else if (s1State.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
+    if (s1State.ratingFilter) rows = rows.filter(function(r){ return r.rating === s1State.ratingFilter; });
+
+    rows.sort(function(a, b) {
+      var va = s1GetSortVal(a, s1State.sort.col), vb = s1GetSortVal(b, s1State.sort.col);
+      var cmp;
+      if (typeof va === 'string') cmp = va.localeCompare(vb);
+      else cmp = (va || 0) - (vb || 0);
+      if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker);
+      return s1State.sort.dir === 'desc' ? -cmp : cmp;
+    });
+
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i];
+      var styles = [];
+      var cls = [];
+      if (s1State.tint === 'industry') {
+        styles.push('--tint-bg: ' + s1HashColor(s.industry, 0.16));
+        cls.push('tint-row');
+      } else if (s1State.tint === 'sector') {
+        styles.push('--tint-bg: ' + s1HashColor(s.sector, 0.16));
+        cls.push('tint-row');
+      }
+      if (s1State.port === 'on') {
+        var pi = s1PortfolioInfo(s);
+        if (pi) {
+          styles.push('--portfolio-color: ' + pi.color);
+          styles.push('--portfolio-bg: ' + pi.bg);
+          styles.push('--portfolio-bg-hover: ' + pi.bgHover);
+          cls.push('portfolio-band');
+          cls.push('portfolio-tint');
+        }
+      }
+      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">●</span>' : '';
+
+      html += '<tr' + clsAttr + styleAttr + '>' +
+        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
+        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
+        s1InputCell(s, 'price') +
+        s1InputCell(s, 'high_52w') +
+        s1InputCell(s, 'low_52w') +
+        s1InputCell(s, 'ma_150') +
+        s1InputCell(s, 'ma_200') +
+        '<td class="grp-start-rating">' + s1PillFor(s.rating, s.count) + '</td>' +
+        '<td>' + s1ScorePips(s) + '</td>' +
+        s1TestCell(s, S1_COLS[9])  + s1TestCell(s, S1_COLS[10]) +
+        s1TestCell(s, S1_COLS[11]) + s1TestCell(s, S1_COLS[12]) +
+        s1TestCell(s, S1_COLS[13]) + s1TestCell(s, S1_COLS[14]) +
+        s1TestCell(s, S1_COLS[15]) + s1TestCell(s, S1_COLS[16]) +
+        '<td class="grp-start-persist">' + s1PersistCells(s.persistence, s.rating) + '</td>' +
+        '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  // ===== Controls =====
+  function s1SetMode(kind, val) {
+    s1State.mode[kind] = val;
+    var btns = document.querySelectorAll('button[data-s1-grp="' + kind + '"]');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('active', btns[i].getAttribute('data-s1-val') === val);
+    }
+    s1RenderRows();
+  }
+  function s1SetScope(s) {
+    s1State.scope = s;
+    var btns = document.querySelectorAll('button[data-s1-scope]');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('active', btns[i].getAttribute('data-s1-scope') === s);
+    }
+    s1RenderRows();
+  }
+  function s1SetTint(t) {
+    s1State.tint = t;
+    var btns = document.querySelectorAll('button[data-s1-tint]');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('active', btns[i].getAttribute('data-s1-tint') === t);
+    }
+    s1RenderRows();
+  }
+  function s1SetPort(p) {
+    s1State.port = p;
+    var btns = document.querySelectorAll('button[data-s1-port]');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('active', btns[i].getAttribute('data-s1-port') === p);
+    }
+    s1RenderRows();
+  }
+  function s1ToggleRating(r) {
+    s1State.ratingFilter = (s1State.ratingFilter === r) ? null : r;
+    s1RenderRows();
+  }
+
+  // Expose for inline onclick fallback
+  window.s1SetMode = s1SetMode;
+  window.s1SetScope = s1SetScope;
+  window.s1SetTint = s1SetTint;
+  window.s1SetPort = s1SetPort;
+  window.s1ToggleRating = s1ToggleRating;
+  window.s1OnSort = s1OnSort;
+
+  // ===== Tab HTML scaffold (injected once on first render) =====
+  function s1BuildScaffold() {
+    var host = document.getElementById('tab-stage_1');
+    if (!host) return false;
+    if (host.querySelector('#s1-main-table')) return true;  // already built
+
+    var html = '' +
+      '<div class="s1-intro">Stage 1 looks for stocks whose long-term trend has stopped going down and started to flatten. The aim is to spot bases <b>before</b> a Stage 2 uptrend kicks off — the earliest, highest-conviction point to consider initiating a position. Eight separate tests across four groups; the more tests a stock passes, the more likely it has genuinely entered a consolidation phase rather than a temporary pause in a downtrend.</div>' +
+      '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
+          '<button class="toggle-btn active" data-s1-grp="inputs" data-s1-val="pct" onclick="s1SetMode(\'inputs\',\'pct\')">show as %</button>' +
+          '<button class="toggle-btn" data-s1-grp="inputs" data-s1-val="raw" onclick="s1SetMode(\'inputs\',\'raw\')">show as numbers</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +
+          '<button class="toggle-btn active" data-s1-grp="tests" data-s1-val="tick" onclick="s1SetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-s1-grp="tests" data-s1-val="val" onclick="s1SetMode(\'tests\',\'val\')">show test values</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
+          '<button class="toggle-btn active" data-s1-scope="all" onclick="s1SetScope(\'all\')">All <span id="s1-cnt-all"></span></button>' +
+          '<button class="toggle-btn" data-s1-scope="live" onclick="s1SetScope(\'live\')">Live <span id="s1-cnt-live"></span></button>' +
+          '<button class="toggle-btn" data-s1-scope="sector" onclick="s1SetScope(\'sector\')">Sectors <span id="s1-cnt-sector"></span></button>' +
+          '<button class="toggle-btn" data-s1-scope="industry" onclick="s1SetScope(\'industry\')">Industries <span id="s1-cnt-industry"></span></button>' +
+          '<button class="toggle-btn disabled" title="Definition pending — placeholder">Peers</button>' +
+          '<button class="toggle-btn disabled" title="Definition pending — placeholder">Cohorts</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span>' +
+          '<button class="toggle-btn active" data-s1-tint="none" onclick="s1SetTint(\'none\')">Off</button>' +
+          '<button class="toggle-btn" data-s1-tint="industry" onclick="s1SetTint(\'industry\')">Industry</button>' +
+          '<button class="toggle-btn" data-s1-tint="sector" onclick="s1SetTint(\'sector\')">Sector</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+          '<button class="toggle-btn active" data-s1-port="off" onclick="s1SetPort(\'off\')">Off</button>' +
+          '<button class="toggle-btn" data-s1-port="on" onclick="s1SetPort(\'on\')">On</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="s1-rating-tiles"></div>' +
+      '<div class="group-captions">' +
+        '<div class="gcap gcap-g1"><b>Group 1 · Slowing decline</b>Is the long-term moving average still falling, but falling more slowly each month? A decelerating decline is the first hint that a downtrend is losing force. Two cells — one for the 150-day, one for the 200-day.</div>' +
+        '<div class="gcap gcap-g2"><b>Group 2 · Flat moving averages</b>Has the long-term trend genuinely stalled? Both 150-day and 200-day moving averages need to be within ±2% of where they were one, two, and three months ago. Flat moving averages are the clearest mechanical signature of a base.</div>' +
+        '<div class="gcap gcap-g3"><b>Group 3 · Moving average stack</b>Are shorter moving averages now sitting above longer ones? 50-day above 150-day (within 3%) and 150-day above 200-day (within 3%) show price has begun to lift the recent trend above the longer one — typical of a late base or early Stage 2 transition.</div>' +
+        '<div class="gcap gcap-g4"><b>Group 4 · Higher lows</b>Are recent pullback lows higher than earlier ones? The most recent monthly low should be above the prior three monthly lows (1-month test); the most recent three-monthly low should be above the prior three (3-month test). Higher lows are the buyer-stepping-in signal.</div>' +
+      '</div>' +
+      '<div class="table-wrap">' +
+        '<table class="data-table" id="s1-main-table">' +
+          '<colgroup>' +
+            '<col class="c-name"><col class="c-taxon">' +
+            '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
+            '<col class="c-ma150"><col class="c-ma200">' +
+            '<col class="c-rating"><col class="c-score">' +
+            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+            '<col class="c-persist">' +
+          '</colgroup>' +
+          '<thead>' +
+            '<tr class="group-header-row">' +
+              '<th class="gh-inputs" colspan="7">Inputs</th>' +
+              '<th class="gh-rating grp-start-rating" colspan="2">Stage 1 rating · thresholds 2/8 · 3/8 · 4/8 · 5+/8</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Slowing decline</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 · Flat moving averages</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 · Moving average stack</th>' +
+              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Group 4 · Higher lows</th>' +
+              '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
+            '</tr>' +
+            '<tr class="col-header-row" id="s1-col-header-row"></tr>' +
+          '</thead>' +
+          '<tbody id="s1-tbody"></tbody>' +
+        '</table>' +
+      '</div>';
+
+    host.innerHTML = html;
+
+    // Wire up rating tile click delegation
+    var tiles = document.getElementById('s1-rating-tiles');
+    if (tiles) {
+      tiles.addEventListener('click', function(e) {
+        var tile = e.target.closest('.rating-tile');
+        if (!tile) return;
+        var r = tile.getAttribute('data-rating');
+        if (r) s1ToggleRating(r);
+      });
+    }
+    // Wire up sort header click delegation
+    var hdr = document.getElementById('s1-col-header-row');
+    if (hdr) {
+      hdr.addEventListener('click', function(e) {
+        var th = e.target.closest('th');
+        if (!th) return;
+        var key = th.getAttribute('data-sort-key');
+        if (key) s1OnSort(key);
+      });
+    }
+    return true;
+  }
+
+  // ===== Public entry point =====
+  function renderStage1() {
+    if (!s1BuildScaffold()) return;
+    s1BuildHeaderRow();
+    s1RenderRows();
+  }
+  window.renderStage1 = renderStage1;
+
+})();
+
+/* MD-V2-STAGE1-MARKER-END */
+
+/* MD-V2-STAGE1-MARKER-MODULE-END */
+
+
+/* MD-V2-STAGE2-MARKER-MODULE-START */
+// =============================================================================
+// STAGE 2 TAB MODULE — Master Dashboard V2
+// =============================================================================
+// MD-V2-STAGE2-MARKER — idempotency marker for patcher detection
+//
+// Stage 2 = Confirmed uptrend. 10 tests across 5 groups.
+// Ratings: None (<5) / Possible (5) / Plausible (6) / Probable (7+).
+// =============================================================================
+
+/* MD-V2-STAGE2-MARKER-START */
+
+(function() {
+  'use strict';
+
+  var s2State = {
+    mode: { inputs: 'pct', tests: 'tick' },
+    scope: 'all', ratingFilter: null, tint: 'none', port: 'off',
+    sort: { col: 'count', dir: 'desc' }
+  };
+
+  var S2_COLS = [
+    { id:'name',     label:'Company · Ticker',          sortKey:'company', cls:'name-cell' },
+    { id:'taxon',    label:'Industry · Sector',         sortKey:'sector', cls:'taxon' },
+    { id:'price',    label:'Price',                     sortKey:'price', cls:'num' },
+    { id:'high_52w', label:'52 week high',              sortKey:'high_52w', cls:'num' },
+    { id:'low_52w',  label:'52 week low',               sortKey:'low_52w', cls:'num' },
+    { id:'ma_150',   label:'150 day moving average',    sortKey:'ma_150', cls:'num' },
+    { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200', cls:'num' },
+    { id:'rating',   label:'Rating',                    sortKey:'rating_rank', cls:'grp-start-rating' },
+    { id:'count',    label:'Score',                     sortKey:'count', cls:'' },
+    { id:'g1_t1',    label:'Price above 200-day',                sortKey:'g1_t1', cls:'grp-start-g1', testGroup:'g1_lt_trend', testKey:'T1' },
+    { id:'g1_t2',    label:'200-day rising month-on-month',      sortKey:'g1_t2', cls:'grp-end-g1', testGroup:'g1_lt_trend', testKey:'T2' },
+    { id:'g2_t3',    label:'Price above 150-day',                sortKey:'g2_t3', cls:'grp-start-g2', testGroup:'g2_mt_trend', testKey:'T3' },
+    { id:'g2_t4',    label:'150-day above 200-day',              sortKey:'g2_t4', cls:'grp-end-g2', testGroup:'g2_mt_trend', testKey:'T4' },
+    { id:'g3_t5',    label:'50-day above 150-day',               sortKey:'g3_t5', cls:'grp-start-g3 grp-end-g3', testGroup:'g3_st_trend', testKey:'T5' },
+    { id:'g4_t6',    label:'Within 25% of 52w high',             sortKey:'g4_t6', cls:'grp-start-g4', testGroup:'g4_price_leadership', testKey:'T6' },
+    { id:'g4_t7',    label:'More than 25% above 52w low',        sortKey:'g4_t7', cls:'grp-end-g4', testGroup:'g4_price_leadership', testKey:'T7' },
+    { id:'g5_t8',    label:'RS vs sector > 70',                  sortKey:'g5_t8', cls:'grp-start-g5', testGroup:'g5_rs', testKey:'T8' },
+    { id:'g5_t9',    label:'RS vs industry > 70',                sortKey:'g5_t9', cls:'', testGroup:'g5_rs', testKey:'T9' },
+    { id:'g5_t10',   label:'RS vs market > 70',                  sortKey:'g5_t10', cls:'grp-end-g5', testGroup:'g5_rs', testKey:'T10' },
+    { id:'persist',  label:'Last 12 months',            sortKey:'persistence_count', cls:'grp-start-persist' }
+  ];
+  var S2_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
+  var S2_TINT_CLS = { 'Probable':'tint-prob','Plausible':'tint-pla','Possible':'tint-pos','None':'tint-none' };
+
+  function s2PricesLookup() {
+    if (window._s2PricesByTicker) return window._s2PricesByTicker;
+    var out = {};
+    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    window._s2PricesByTicker = out;
+    return out;
+  }
+  function s2LiveTickers() {
+    var out = {};
+    var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
+    for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
+    return out;
+  }
+  function s2LiveSectors() {
+    var out = {}, t, prices = s2PricesLookup(), tickers = s2LiveTickers();
+    for (t in tickers) { var p = prices[t]; if (p && p.sector) out[p.sector] = true; }
+    return out;
+  }
+  function s2LiveIndustries() {
+    var out = {}, t, prices = s2PricesLookup(), tickers = s2LiveTickers();
+    for (t in tickers) { var p = prices[t]; if (p && p.industry) out[p.industry] = true; }
+    return out;
+  }
+  function s2GetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = s2PricesLookup();
+    var live = s2LiveTickers(), liveS = s2LiveSectors(), liveI = s2LiveIndustries();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2 || !s.md_v2.stage_2) continue;
+      var p = prices[s.ticker] || {};
+      var s2 = s.md_v2.stage_2;
+      var pers = (s.md_v2.persistence && s.md_v2.persistence.stage_2_persistence) || [];
+      var mas = p.mas || {};
+      rows.push({
+        ticker: s.ticker, company: p.company_name || s.ticker,
+        sector: p.sector || '', industry: p.industry || '',
+        price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
+        ma_50: mas['50D'], ma_150: mas['150D'], ma_200: mas['200D'],
+        rating: s2.rating, count: s2.count,
+        tests: s2.tests || {}, groups: s2.groups || {}, persistence: pers,
+        rs_sector: p.rs_vs_sector_pct, rs_industry: p.rs_vs_industry_pct, rs_market: p.rs_market_pct,
+        is_live: !!live[s.ticker],
+        sector_in_portfolio: !!liveS[p.sector],
+        industry_in_portfolio: !!liveI[p.industry]
+      });
+    }
+    return rows;
+  }
+  function s2UniverseCounts(rows) {
+    var c = {'Probable':0,'Plausible':0,'Possible':0,'None':0};
+    for (var i = 0; i < rows.length; i++) if (c[rows[i].rating] !== undefined) c[rows[i].rating]++;
+    return c;
+  }
+
+  function s2FmtNum(n) {
+    if (n == null || isNaN(n)) return '—';
+    var abs = Math.abs(n);
+    var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+    return n < 0 ? '(' + f + ')' : f;
+  }
+  function s2FmtPct(p) {
+    if (p == null || isNaN(p)) return '—';
+    var r = Math.round(p), abs = Math.abs(r);
+    return r < 0 ? '(' + abs + ')%' : r + '%';
+  }
+  function s2ColourForIntensity(i) {
+    if (i >= 0.6) return '#0a4012';
+    if (i >= 0.25) return '#1f6325';
+    if (i >= 0.05) return '#4a8050';
+    if (i <= -0.6) return '#8b1a1a';
+    if (i <= -0.25) return '#a83232';
+    if (i <= -0.05) return '#c66666';
+    return '#666';
+  }
+  function s2InputCell(row, key, extraCls) {
+    extraCls = extraCls || '';
+    var v = row[key];
+    if (key === 'price') return '<td class="num ' + extraCls + '">' + s2FmtNum(v) + '</td>';
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">—</td>';
+    var pct = (row.price - v) / v * 100;
+    var intensity = 0;
+    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (pct + 20) / 20));
+    else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
+    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
+    var colour = s2ColourForIntensity(intensity);
+    var text = (s2State.mode.inputs === 'pct') ? s2FmtPct(pct) : s2FmtNum(v);
+    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+  }
+
+  function s2TestValueFor(row, col) {
+    var k = col.testKey;
+    if (k === 'T1') return row.price != null && row.ma_200 != null ? s2FmtPct((row.price - row.ma_200) / row.ma_200 * 100) : '—';
+    if (k === 'T3') return row.price != null && row.ma_150 != null ? s2FmtPct((row.price - row.ma_150) / row.ma_150 * 100) : '—';
+    if (k === 'T4') return row.ma_150 != null && row.ma_200 != null ? s2FmtPct((row.ma_150 - row.ma_200) / row.ma_200 * 100) : '—';
+    if (k === 'T5') return row.ma_50 != null && row.ma_150 != null ? s2FmtPct((row.ma_50 - row.ma_150) / row.ma_150 * 100) : '—';
+    if (k === 'T6') return row.price != null && row.high_52w != null ? s2FmtPct((row.price - row.high_52w) / row.high_52w * 100) : '—';
+    if (k === 'T7') return row.price != null && row.low_52w != null ? s2FmtPct((row.price - row.low_52w) / row.low_52w * 100) : '—';
+    if (k === 'T8' && row.rs_sector != null) return Math.round(row.rs_sector) + '';
+    if (k === 'T9' && row.rs_industry != null) return Math.round(row.rs_industry) + '';
+    if (k === 'T10' && row.rs_market != null) return Math.round(row.rs_market) + '';
+    return '—';
+  }
+  function s2TestCell(row, col) {
+    var grp = (row.groups || {})[col.testGroup] || {};
+    var pass = !!grp[col.testKey];
+    var extra = col.cls || '';
+    if (s2State.mode.tests === 'val') {
+      var v = s2TestValueFor(row, col);
+      var colour = pass ? s2ColourForIntensity(0.7) : s2ColourForIntensity(-0.4);
+      return '<td class="test-val ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+    }
+    if (pass) return '<td class="test-pass ' + extra + '"><span class="tick">✓</span></td>';
+    return '<td class="test-fail ' + extra + '">·</td>';
+  }
+
+  function s2PillFor(rating, count) {
+    if (rating === 'Probable') {
+      var c = Math.min(Math.max(count, 7), 10);
+      return '<span class="pill pill-prob-' + c + '">Probable</span>';
+    }
+    if (rating === 'Plausible') return '<span class="pill pill-pla">Plausible</span>';
+    if (rating === 'Possible') return '<span class="pill pill-pos">Possible</span>';
+    return '<span class="pill pill-none">None</span>';
+  }
+  function s2ScorePips(row) {
+    var t = row.tests;
+    var passed = [
+      !!t.T1_P_above_200D, !!t.T2_200D_rising_MoM,
+      !!t.T3_P_above_150D, !!t.T4_150_above_200,
+      !!t.T5_50_above_150,
+      !!t.T6_within_25pct_52WH, !!t.T7_above_25pct_52WL,
+      !!t.T8_RS_vs_sector_70, !!t.T9_RS_vs_industry_70, !!t.T10_RS_vs_market_70
+    ];
+    var count = passed.filter(Boolean).length;
+    var s = '';
+    for (var i = 0; i < 10; i++) s += '<span class="pip ' + (passed[i] ? 'on' : '') + '"></span>';
+    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/10</span></div>';
+  }
+  function s2PersistCells(arr, rating) {
+    var h = '';
+    for (var i = 0; i < 12; i++) {
+      if (i === 11 && arr && arr[11]) {
+        var cls = rating === 'Probable' ? 'r-prob' :
+                  rating === 'Plausible' ? 'r-pla' :
+                  rating === 'Possible' ? 'r-pos' : 'r-none';
+        h += '<span class="persist-cell ' + cls + '" title="Current month: ' + rating + '"></span>';
+      } else {
+        h += '<span class="persist-cell r-none" title="Month -' + (11 - i) + ': not yet backfilled"></span>';
+      }
+    }
+    return '<div class="persist-row">' + h + '</div>';
+  }
+
+  function s2HashColor(label, alpha) {
+    if (!label) return null;
+    var h = 0;
+    for (var i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff;
+    return 'hsla(' + (h % 360) + ', 35%, 55%, ' + alpha + ')';
+  }
+  function s2PortfolioInfo(row) {
+    if (row.is_live) return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)', bgHover:'rgba(27,94,32,0.14)' };
+    if (row.sector_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)', bgHover:'rgba(27,94,32,0.08)' };
+    if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' };
+    return null;
+  }
+
+  function s2GetSortVal(row, key) {
+    if (key === 'rating_rank') return S2_RATING_RANK[row.rating] || 0;
+    if (key === 'persistence_count') return (row.persistence || []).filter(Boolean).length;
+    if (key.indexOf('g') === 0 && key.indexOf('_t') > 0) {
+      var col = S2_COLS.find(function(c) { return c.sortKey === key; });
+      if (col) {
+        var grp = (row.groups || {})[col.testGroup] || {};
+        return grp[col.testKey] ? 1 : 0;
+      }
+    }
+    var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
+    if (PCT_KEYS.indexOf(key) > -1 && s2State.mode.inputs === 'pct') {
+      var ref = row[key];
+      if (ref == null || row.price == null || ref === 0) return -Infinity;
+      return (row.price - ref) / ref * 100;
+    }
+    if (key in row) return row[key];
+    return 0;
+  }
+  function s2OnSort(key) {
+    if (s2State.sort.col === key) s2State.sort.dir = s2State.sort.dir === 'desc' ? 'asc' : 'desc';
+    else s2State.sort = { col: key, dir: 'desc' };
+    s2BuildHeaderRow();
+    s2RenderRows();
+  }
+
+  function s2BuildHeaderRow() {
+    var tr = document.getElementById('s2-col-header-row');
+    if (!tr) return;
+    var h = '';
+    for (var i = 0; i < S2_COLS.length; i++) {
+      var c = S2_COLS[i];
+      var isSort = s2State.sort.col === c.sortKey;
+      var arrow = isSort
+        ? '<span class="sort-arrow">' + (s2State.sort.dir === 'desc' ? '▼' : '▲') + '</span>'
+        : '<span class="sort-placeholder"></span>';
+      h += '<th class="' + (c.cls || '') + '" data-sort-key="' + c.sortKey + '" title="' + c.label + '">' +
+           '<span class="hd"><span class="lbl">' + c.label + '</span>' + arrow + '</span></th>';
+    }
+    tr.innerHTML = h;
+  }
+  function s2RatingTiles(rows) {
+    var tiles = document.getElementById('s2-rating-tiles');
+    if (!tiles) return;
+    var uc = s2UniverseCounts(rows);
+    var total = rows.length;
+    var order = ['None','Possible','Plausible','Probable'];
+    var strip = {'Probable':'prob','Plausible':'pla','Possible':'pos','None':'none'};
+    var h = '';
+    for (var i = 0; i < order.length; i++) {
+      var r = order[i], cnt = uc[r] || 0;
+      var act = s2State.ratingFilter === r ? ' active' : '';
+      var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+      h += '<div class="rating-tile ' + S2_TINT_CLS[r] + act + '" data-rating="' + r + '">' +
+           '<div class="rt-label">' + r + '</div>' +
+           '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
+           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-strip rt-strip-' + strip[r] + '"></div>' +
+           '</div>';
+    }
+    tiles.innerHTML = h;
+  }
+  function s2UpdateScopeCounts(rows) {
+    function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
+    set('s2-cnt-all',      rows.length);
+    set('s2-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
+    set('s2-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
+    set('s2-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
+  }
+
+  function s2RenderRows() {
+    var tbody = document.getElementById('s2-tbody');
+    if (!tbody) return;
+    var all = s2GetRows();
+    s2UpdateScopeCounts(all);
+    s2RatingTiles(all);
+    var rows = all.slice();
+    if (s2State.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
+    else if (s2State.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
+    else if (s2State.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
+    if (s2State.ratingFilter) rows = rows.filter(function(r){ return r.rating === s2State.ratingFilter; });
+    rows.sort(function(a,b) {
+      var va = s2GetSortVal(a, s2State.sort.col), vb = s2GetSortVal(b, s2State.sort.col);
+      var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
+      if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker);
+      return s2State.sort.dir === 'desc' ? -cmp : cmp;
+    });
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i];
+      var styles = [], cls = [];
+      if (s2State.tint === 'industry') { styles.push('--tint-bg: ' + s2HashColor(s.industry, 0.16)); cls.push('tint-row'); }
+      else if (s2State.tint === 'sector') { styles.push('--tint-bg: ' + s2HashColor(s.sector, 0.16)); cls.push('tint-row'); }
+      if (s2State.port === 'on') {
+        var pi = s2PortfolioInfo(s);
+        if (pi) {
+          styles.push('--portfolio-color: ' + pi.color);
+          styles.push('--portfolio-bg: ' + pi.bg);
+          styles.push('--portfolio-bg-hover: ' + pi.bgHover);
+          cls.push('portfolio-band'); cls.push('portfolio-tint');
+        }
+      }
+      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">●</span>' : '';
+      html += '<tr' + clsAttr + styleAttr + '>' +
+        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
+        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
+        s2InputCell(s, 'price') + s2InputCell(s, 'high_52w') + s2InputCell(s, 'low_52w') +
+        s2InputCell(s, 'ma_150') + s2InputCell(s, 'ma_200') +
+        '<td class="grp-start-rating">' + s2PillFor(s.rating, s.count) + '</td>' +
+        '<td>' + s2ScorePips(s) + '</td>';
+      for (var j = 9; j <= 18; j++) html += s2TestCell(s, S2_COLS[j]);
+      html += '<td class="grp-start-persist">' + s2PersistCells(s.persistence, s.rating) + '</td>' +
+        '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function s2SetMode(kind, val) {
+    s2State.mode[kind] = val;
+    var btns = document.querySelectorAll('button[data-s2-grp="' + kind + '"]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s2-val') === val);
+    s2RenderRows();
+  }
+  function s2SetScope(s) {
+    s2State.scope = s;
+    var btns = document.querySelectorAll('button[data-s2-scope]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s2-scope') === s);
+    s2RenderRows();
+  }
+  function s2SetTint(t) {
+    s2State.tint = t;
+    var btns = document.querySelectorAll('button[data-s2-tint]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s2-tint') === t);
+    s2RenderRows();
+  }
+  function s2SetPort(p) {
+    s2State.port = p;
+    var btns = document.querySelectorAll('button[data-s2-port]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s2-port') === p);
+    s2RenderRows();
+  }
+  function s2ToggleRating(r) {
+    s2State.ratingFilter = (s2State.ratingFilter === r) ? null : r;
+    s2RenderRows();
+  }
+  window.s2SetMode = s2SetMode;
+  window.s2SetScope = s2SetScope;
+  window.s2SetTint = s2SetTint;
+  window.s2SetPort = s2SetPort;
+  window.s2ToggleRating = s2ToggleRating;
+  window.s2OnSort = s2OnSort;
+
+  function s2BuildScaffold() {
+    var host = document.getElementById('tab-stage_2');
+    if (!host) return false;
+    if (host.querySelector('#s2-main-table')) return true;
+    var html = '' +
+      '<div class="s1-intro">Stage 2 looks for stocks already in a clear uptrend across long, medium, and short-term moving averages, with price near recent highs, and showing relative strength against sector, industry, and the broader market. The aim is to identify quality holdings to add to or hold core positions in. Ten tests across five groups: the more tests passing, the more confirmed the uptrend.</div>' +
+      '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
+          '<button class="toggle-btn active" data-s2-grp="inputs" data-s2-val="pct" onclick="s2SetMode(\'inputs\',\'pct\')">show as %</button>' +
+          '<button class="toggle-btn" data-s2-grp="inputs" data-s2-val="raw" onclick="s2SetMode(\'inputs\',\'raw\')">show as numbers</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +
+          '<button class="toggle-btn active" data-s2-grp="tests" data-s2-val="tick" onclick="s2SetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-s2-grp="tests" data-s2-val="val" onclick="s2SetMode(\'tests\',\'val\')">show test values</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
+          '<button class="toggle-btn active" data-s2-scope="all" onclick="s2SetScope(\'all\')">All <span id="s2-cnt-all"></span></button>' +
+          '<button class="toggle-btn" data-s2-scope="live" onclick="s2SetScope(\'live\')">Live <span id="s2-cnt-live"></span></button>' +
+          '<button class="toggle-btn" data-s2-scope="sector" onclick="s2SetScope(\'sector\')">Sectors <span id="s2-cnt-sector"></span></button>' +
+          '<button class="toggle-btn" data-s2-scope="industry" onclick="s2SetScope(\'industry\')">Industries <span id="s2-cnt-industry"></span></button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Peers</button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Cohorts</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span>' +
+          '<button class="toggle-btn active" data-s2-tint="none" onclick="s2SetTint(\'none\')">Off</button>' +
+          '<button class="toggle-btn" data-s2-tint="industry" onclick="s2SetTint(\'industry\')">Industry</button>' +
+          '<button class="toggle-btn" data-s2-tint="sector" onclick="s2SetTint(\'sector\')">Sector</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+          '<button class="toggle-btn active" data-s2-port="off" onclick="s2SetPort(\'off\')">Off</button>' +
+          '<button class="toggle-btn" data-s2-port="on" onclick="s2SetPort(\'on\')">On</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="s2-rating-tiles" style="grid-template-columns: repeat(4, 1fr);"></div>' +
+      '<div class="group-captions" style="grid-template-columns: repeat(5, 1fr);">' +
+        '<div class="gcap gcap-g1"><b>Group 1 · Long-term trend</b>Is the long-term trend up? Price above the 200-day moving average, and the 200-day rising month-on-month. The two foundational uptrend signals.</div>' +
+        '<div class="gcap gcap-g2"><b>Group 2 · Medium-term trend</b>Is the medium-term trend up? Price above the 150-day moving average, and the 150-day above the 200-day. Confirms the long-term trend is supported by a healthy medium-term picture.</div>' +
+        '<div class="gcap gcap-g3"><b>Group 3 · Short-term trend</b>Is the short-term trend up? 50-day moving average above the 150-day. The fastest of the trend signals; turns positive at the inflection from base to breakout.</div>' +
+        '<div class="gcap gcap-g4"><b>Group 4 · Price leadership</b>Is the stock leading on price? Within 25% of its 52-week high, and at least 25% above its 52-week low. Together: strength near highs, well off the bottom.</div>' +
+        '<div class="gcap gcap-g5" style="border-left-color:#6a5a8a"><b style="color:#6a5a8a">Group 5 · Relative strength</b>Is the stock outperforming peers? Relative strength above 70th percentile vs sector, industry, and market. Three independent strength signals across different peer groups.</div>' +
+      '</div>' +
+      '<div class="table-wrap">' +
+        '<table class="data-table" id="s2-main-table">' +
+          '<colgroup>' +
+            '<col class="c-name"><col class="c-taxon">' +
+            '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
+            '<col class="c-ma150"><col class="c-ma200">' +
+            '<col class="c-rating"><col class="c-score">' +
+            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+            '<col class="c-persist">' +
+          '</colgroup>' +
+          '<thead>' +
+            '<tr class="group-header-row">' +
+              '<th class="gh-inputs" colspan="7">Inputs</th>' +
+              '<th class="gh-rating grp-start-rating" colspan="2">Stage 2 rating · thresholds 5/10 · 6/10 · 7+/10</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Long-term trend</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 · Medium-term trend</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="1">Group 3 · Short-term trend</th>' +
+              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Group 4 · Price leadership</th>' +
+              '<th class="gh-g5 grp-start-g5 grp-end-g5" colspan="3" style="color:#6a5a8a; background:rgba(106,90,138,0.06)!important; border-left:2px solid #6a5a8a!important">Group 5 · Relative strength</th>' +
+              '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
+            '</tr>' +
+            '<tr class="col-header-row" id="s2-col-header-row"></tr>' +
+          '</thead>' +
+          '<tbody id="s2-tbody"></tbody>' +
+        '</table>' +
+      '</div>';
+    host.innerHTML = html;
+    var tiles = document.getElementById('s2-rating-tiles');
+    if (tiles) {
+      tiles.addEventListener('click', function(e) {
+        var tile = e.target.closest('.rating-tile');
+        if (!tile) return;
+        var r = tile.getAttribute('data-rating');
+        if (r) s2ToggleRating(r);
+      });
+    }
+    var hdr = document.getElementById('s2-col-header-row');
+    if (hdr) {
+      hdr.addEventListener('click', function(e) {
+        var th = e.target.closest('th');
+        if (!th) return;
+        var key = th.getAttribute('data-sort-key');
+        if (key) s2OnSort(key);
+      });
+    }
+    return true;
+  }
+
+  function renderStage2() {
+    if (!s2BuildScaffold()) return;
+    s2BuildHeaderRow();
+    s2RenderRows();
+  }
+  window.renderStage2 = renderStage2;
+
+})();
+
+/* MD-V2-STAGE2-MARKER-END */
+
+/* MD-V2-STAGE2-MARKER-MODULE-END */
+
+
+/* MD-V2-STAGE3-MARKER-MODULE-START */
+// =============================================================================
+// STAGE 3 TAB MODULE — Master Dashboard V2
+// =============================================================================
+// MD-V2-STAGE3-MARKER — idempotency marker for patcher detection
+//
+// Stage 3 = Topping / Invalidation. 10 tests across 5 groups.
+// Ratings:
+//   None                     (<2)
+//   Possible Topping         (2-3)
+//   Plausible Invalidation   (4-5)
+//   Probable Invalidation    (6+)
+// =============================================================================
+
+/* MD-V2-STAGE3-MARKER-START */
+
+(function() {
+  'use strict';
+
+  var s3State = {
+    mode: { inputs: 'pct', tests: 'tick' },
+    scope: 'all', ratingFilter: null, tint: 'none', port: 'off',
+    sort: { col: 'count', dir: 'desc' }
+  };
+
+  var S3_COLS = [
+    { id:'name',     label:'Company · Ticker',          sortKey:'company', cls:'name-cell' },
+    { id:'taxon',    label:'Industry · Sector',         sortKey:'sector', cls:'taxon' },
+    { id:'price',    label:'Price',                     sortKey:'price', cls:'num' },
+    { id:'high_52w', label:'52 week high',              sortKey:'high_52w', cls:'num' },
+    { id:'low_52w',  label:'52 week low',               sortKey:'low_52w', cls:'num' },
+    { id:'ma_150',   label:'150 day moving average',    sortKey:'ma_150', cls:'num' },
+    { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200', cls:'num' },
+    { id:'rating',   label:'Rating',                    sortKey:'rating_rank', cls:'grp-start-rating' },
+    { id:'count',    label:'Score',                     sortKey:'count', cls:'' },
+    { id:'g1_t1',    label:'3 or more bases since 52w low',           sortKey:'g1_t1', cls:'grp-start-g1', testGroup:'g1_base_count', testKey:'T1' },
+    { id:'g1_t2',    label:'4 or more bases since 52w low',           sortKey:'g1_t2', cls:'grp-end-g1', testGroup:'g1_base_count', testKey:'T2' },
+    { id:'g2_t3',    label:'200-day flattening',                       sortKey:'g2_t3', cls:'grp-start-g2', testGroup:'g2_price_trend', testKey:'T3' },
+    { id:'g2_t4',    label:'50-day below 150-day',                     sortKey:'g2_t4', cls:'grp-end-g2', testGroup:'g2_price_trend', testKey:'T4' },
+    { id:'g3_t5',    label:'Down volume exceeds up volume',            sortKey:'g3_t5', cls:'grp-start-g3', testGroup:'g3_debate', testKey:'T5' },
+    { id:'g3_t6',    label:'Volatility increasing',                    sortKey:'g3_t6', cls:'', testGroup:'g3_debate', testKey:'T6' },
+    { id:'g3_t7',    label:'No breakout (price near 50-day)',          sortKey:'g3_t7', cls:'grp-end-g3', testGroup:'g3_debate', testKey:'T7' },
+    { id:'g4_t8',    label:'2+ lower lows in last month',              sortKey:'g4_t8', cls:'grp-start-g4', testGroup:'g4_lower_lows', testKey:'T8' },
+    { id:'g4_t9',    label:'3+ lower lows in last 3 months',           sortKey:'g4_t9', cls:'grp-end-g4', testGroup:'g4_lower_lows', testKey:'T9' },
+    { id:'g5_t10',   label:'RS trend weakening (3m < -5%)',            sortKey:'g5_t10', cls:'grp-start-g5 grp-end-g5', testGroup:'g5_rs_trend', testKey:'T10' },
+    { id:'persist',  label:'Last 12 months',            sortKey:'persistence_count', cls:'grp-start-persist' }
+  ];
+  var S3_RATING_RANK = { 'Probable Invalidation':4, 'Plausible Invalidation':3, 'Possible Topping':2, 'None':1 };
+  var S3_TINT_CLS = {
+    'Probable Invalidation':'tint-prob',
+    'Plausible Invalidation':'tint-pla',
+    'Possible Topping':'tint-pos',
+    'None':'tint-none'
+  };
+
+  function s3PricesLookup() {
+    if (window._s3PricesByTicker) return window._s3PricesByTicker;
+    var out = {};
+    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    window._s3PricesByTicker = out;
+    return out;
+  }
+  function s3LiveTickers() {
+    var out = {};
+    var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
+    for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
+    return out;
+  }
+  function s3LiveSectors() {
+    var out = {}, t, prices = s3PricesLookup(), tickers = s3LiveTickers();
+    for (t in tickers) { var p = prices[t]; if (p && p.sector) out[p.sector] = true; }
+    return out;
+  }
+  function s3LiveIndustries() {
+    var out = {}, t, prices = s3PricesLookup(), tickers = s3LiveTickers();
+    for (t in tickers) { var p = prices[t]; if (p && p.industry) out[p.industry] = true; }
+    return out;
+  }
+  function s3GetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = s3PricesLookup();
+    var live = s3LiveTickers(), liveS = s3LiveSectors(), liveI = s3LiveIndustries();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2 || !s.md_v2.stage_3) continue;
+      var p = prices[s.ticker] || {};
+      var s3 = s.md_v2.stage_3;
+      var pers = (s.md_v2.persistence && s.md_v2.persistence.stage_3_persistence) || [];
+      var mas = p.mas || {};
+      rows.push({
+        ticker: s.ticker, company: p.company_name || s.ticker,
+        sector: p.sector || '', industry: p.industry || '',
+        price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
+        ma_50: mas['50D'], ma_150: mas['150D'], ma_200: mas['200D'],
+        rating: s3.rating, count: s3.count,
+        tests: s3.tests || {}, groups: s3.groups || {}, persistence: pers,
+        rs_sector: p.rs_vs_sector_pct, rs_industry: p.rs_vs_industry_pct, rs_market: p.rs_market_pct,
+        is_live: !!live[s.ticker],
+        sector_in_portfolio: !!liveS[p.sector],
+        industry_in_portfolio: !!liveI[p.industry]
+      });
+    }
+    return rows;
+  }
+  function s3UniverseCounts(rows) {
+    var c = {'Probable Invalidation':0,'Plausible Invalidation':0,'Possible Topping':0,'None':0};
+    for (var i = 0; i < rows.length; i++) if (c[rows[i].rating] !== undefined) c[rows[i].rating]++;
+    return c;
+  }
+
+  function s3FmtNum(n) {
+    if (n == null || isNaN(n)) return '—';
+    var abs = Math.abs(n);
+    var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+    return n < 0 ? '(' + f + ')' : f;
+  }
+  function s3FmtPct(p) {
+    if (p == null || isNaN(p)) return '—';
+    var r = Math.round(p), abs = Math.abs(r);
+    return r < 0 ? '(' + abs + ')%' : r + '%';
+  }
+  // Stage 3 intensity scale — INVERTED relative to Stage 1/2.
+  // Bearish/topping signals are bad → use red colour scale for "passed".
+  // Pass colour ramps red; fail stays neutral grey.
+  function s3ColourForIntensity(i) {
+    if (i >= 0.6) return '#8b1a1a';
+    if (i >= 0.25) return '#a83232';
+    if (i >= 0.05) return '#c66666';
+    if (i <= -0.6) return '#0a4012';
+    if (i <= -0.25) return '#1f6325';
+    if (i <= -0.05) return '#4a8050';
+    return '#666';
+  }
+  function s3InputCell(row, key, extraCls) {
+    extraCls = extraCls || '';
+    var v = row[key];
+    if (key === 'price') return '<td class="num ' + extraCls + '">' + s3FmtNum(v) + '</td>';
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">—</td>';
+    var pct = (row.price - v) / v * 100;
+    // For Stage 3 (topping/invalidation), the bearish interpretation:
+    // - Price below 52w high (negative pct vs high) is bearish
+    // - Price near 52w low is bearish
+    // - Price below 150D / 200D is bearish
+    // Intensity: positive = "looks bearish" → red colour via inverted scale.
+    var intensity = 0;
+    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 10) / 20));   // below 52w high = bearish
+    else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (20 - pct) / 30)); // near 52w low = bearish
+    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, -pct / 10));
+    var colour = s3ColourForIntensity(intensity);
+    var text = (s3State.mode.inputs === 'pct') ? s3FmtPct(pct) : s3FmtNum(v);
+    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+  }
+
+  function s3TestValueFor(row, col) {
+    var k = col.testKey;
+    var t = row.tests || {};
+    // G1: base counts (binary thresholds — no continuous value, show ✓/✗ only)
+    if (k === 'T1' || k === 'T2') return t[k === 'T1' ? 'T1_3_plus_bases' : 'T2_4_plus_bases'] ? 'pass' : 'fail';
+    // G2 T3: 200D flattening (binary derived) — no continuous % to show
+    if (k === 'T3') return t.T3_200D_flattening ? 'flat' : '—';
+    // G2 T4: 50D < 150D — show pct gap
+    if (k === 'T4') return row.ma_50 != null && row.ma_150 != null ? s3FmtPct((row.ma_50 - row.ma_150) / row.ma_150 * 100) : '—';
+    // G3 T5: volume down/up ratio (binary)
+    if (k === 'T5') return t.T5_volume_down_up_ratio ? '≥1.1x' : '—';
+    // G3 T6: volatility increase (binary)
+    if (k === 'T6') return t.T6_volatility_increase ? '≥1.1x' : '—';
+    // G3 T7: no breakout — price within 5% of 50D
+    if (k === 'T7') return row.price != null && row.ma_50 != null ? s3FmtPct((row.price - row.ma_50) / row.ma_50 * 100) : '—';
+    // G4 T8/T9: lower lows counts (binary)
+    if (k === 'T8') return t.T8_lower_lows_1m ? '≥2' : '—';
+    if (k === 'T9') return t.T9_lower_lows_3m ? '≥3' : '—';
+    // G5 T10: RS trend weakening
+    if (k === 'T10') return t.T10_RS_trend_weakening ? '< -5%' : '—';
+    return '—';
+  }
+  function s3TestCell(row, col) {
+    var grp = (row.groups || {})[col.testGroup] || {};
+    var pass = !!grp[col.testKey];
+    var extra = col.cls || '';
+    if (s3State.mode.tests === 'val') {
+      var v = s3TestValueFor(row, col);
+      // Stage 3 passes are BEARISH — colour pass red, fail neutral grey
+      var colour = pass ? s3ColourForIntensity(0.7) : '#999';
+      return '<td class="test-val ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+    }
+    if (pass) return '<td class="test-pass-bear ' + extra + '"><span class="tick">✓</span></td>';
+    return '<td class="test-fail ' + extra + '">·</td>';
+  }
+
+  function s3PillFor(rating, count) {
+    if (rating === 'Probable Invalidation') {
+      var c = Math.min(Math.max(count, 6), 10);
+      return '<span class="pill pill-prob-inv-' + c + '">Probable Inv.</span>';
+    }
+    if (rating === 'Plausible Invalidation') return '<span class="pill pill-pla-inv">Plausible Inv.</span>';
+    if (rating === 'Possible Topping') return '<span class="pill pill-pos-top">Possible Top.</span>';
+    return '<span class="pill pill-none">None</span>';
+  }
+  function s3ScorePips(row) {
+    var t = row.tests;
+    var passed = [
+      !!t.T1_3_plus_bases, !!t.T2_4_plus_bases,
+      !!t.T3_200D_flattening, !!t.T4_50_below_150,
+      !!t.T5_volume_down_up_ratio, !!t.T6_volatility_increase, !!t.T7_no_breakout,
+      !!t.T8_lower_lows_1m, !!t.T9_lower_lows_3m,
+      !!t.T10_RS_trend_weakening
+    ];
+    var count = passed.filter(Boolean).length;
+    var s = '';
+    for (var i = 0; i < 10; i++) s += '<span class="pip pip-bear ' + (passed[i] ? 'on' : '') + '"></span>';
+    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/10</span></div>';
+  }
+  function s3PersistCells(arr, rating) {
+    var h = '';
+    for (var i = 0; i < 12; i++) {
+      if (i === 11 && arr && arr[11]) {
+        var cls = rating === 'Probable Invalidation' ? 'r-prob-inv' :
+                  rating === 'Plausible Invalidation' ? 'r-pla-inv' :
+                  rating === 'Possible Topping' ? 'r-pos-top' : 'r-none';
+        h += '<span class="persist-cell ' + cls + '" title="Current month: ' + rating + '"></span>';
+      } else {
+        h += '<span class="persist-cell r-none" title="Month -' + (11 - i) + ': not yet backfilled"></span>';
+      }
+    }
+    return '<div class="persist-row">' + h + '</div>';
+  }
+
+  function s3HashColor(label, alpha) {
+    if (!label) return null;
+    var h = 0;
+    for (var i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff;
+    return 'hsla(' + (h % 360) + ', 35%, 55%, ' + alpha + ')';
+  }
+  function s3PortfolioInfo(row) {
+    if (row.is_live) return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)', bgHover:'rgba(27,94,32,0.14)' };
+    if (row.sector_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)', bgHover:'rgba(27,94,32,0.08)' };
+    if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' };
+    return null;
+  }
+
+  function s3GetSortVal(row, key) {
+    if (key === 'rating_rank') return S3_RATING_RANK[row.rating] || 0;
+    if (key === 'persistence_count') return (row.persistence || []).filter(Boolean).length;
+    if (key.indexOf('g') === 0 && key.indexOf('_t') > 0) {
+      var col = S3_COLS.find(function(c) { return c.sortKey === key; });
+      if (col) {
+        var grp = (row.groups || {})[col.testGroup] || {};
+        return grp[col.testKey] ? 1 : 0;
+      }
+    }
+    var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
+    if (PCT_KEYS.indexOf(key) > -1 && s3State.mode.inputs === 'pct') {
+      var ref = row[key];
+      if (ref == null || row.price == null || ref === 0) return -Infinity;
+      return (row.price - ref) / ref * 100;
+    }
+    if (key in row) return row[key];
+    return 0;
+  }
+  function s3OnSort(key) {
+    if (s3State.sort.col === key) s3State.sort.dir = s3State.sort.dir === 'desc' ? 'asc' : 'desc';
+    else s3State.sort = { col: key, dir: 'desc' };
+    s3BuildHeaderRow();
+    s3RenderRows();
+  }
+
+  function s3BuildHeaderRow() {
+    var tr = document.getElementById('s3-col-header-row');
+    if (!tr) return;
+    var h = '';
+    for (var i = 0; i < S3_COLS.length; i++) {
+      var c = S3_COLS[i];
+      var isSort = s3State.sort.col === c.sortKey;
+      var arrow = isSort
+        ? '<span class="sort-arrow">' + (s3State.sort.dir === 'desc' ? '▼' : '▲') + '</span>'
+        : '<span class="sort-placeholder"></span>';
+      h += '<th class="' + (c.cls || '') + '" data-sort-key="' + c.sortKey + '" title="' + c.label + '">' +
+           '<span class="hd"><span class="lbl">' + c.label + '</span>' + arrow + '</span></th>';
+    }
+    tr.innerHTML = h;
+  }
+  function s3RatingTiles(rows) {
+    var tiles = document.getElementById('s3-rating-tiles');
+    if (!tiles) return;
+    var uc = s3UniverseCounts(rows);
+    var total = rows.length;
+    var order = ['None','Possible Topping','Plausible Invalidation','Probable Invalidation'];
+    var strip = {
+      'Probable Invalidation':'prob-inv',
+      'Plausible Invalidation':'pla-inv',
+      'Possible Topping':'pos-top',
+      'None':'none'
+    };
+    var h = '';
+    for (var i = 0; i < order.length; i++) {
+      var r = order[i], cnt = uc[r] || 0;
+      var act = s3State.ratingFilter === r ? ' active' : '';
+      var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+      h += '<div class="rating-tile ' + S3_TINT_CLS[r] + act + '" data-rating="' + r + '">' +
+           '<div class="rt-label">' + r + '</div>' +
+           '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
+           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-strip rt-strip-' + strip[r] + '"></div>' +
+           '</div>';
+    }
+    tiles.innerHTML = h;
+  }
+  function s3UpdateScopeCounts(rows) {
+    function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
+    set('s3-cnt-all',      rows.length);
+    set('s3-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
+    set('s3-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
+    set('s3-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
+  }
+
+  function s3RenderRows() {
+    var tbody = document.getElementById('s3-tbody');
+    if (!tbody) return;
+    var all = s3GetRows();
+    s3UpdateScopeCounts(all);
+    s3RatingTiles(all);
+    var rows = all.slice();
+    if (s3State.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
+    else if (s3State.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
+    else if (s3State.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
+    if (s3State.ratingFilter) rows = rows.filter(function(r){ return r.rating === s3State.ratingFilter; });
+    rows.sort(function(a,b) {
+      var va = s3GetSortVal(a, s3State.sort.col), vb = s3GetSortVal(b, s3State.sort.col);
+      var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
+      if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker);
+      return s3State.sort.dir === 'desc' ? -cmp : cmp;
+    });
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i];
+      var styles = [], cls = [];
+      if (s3State.tint === 'industry') { styles.push('--tint-bg: ' + s3HashColor(s.industry, 0.16)); cls.push('tint-row'); }
+      else if (s3State.tint === 'sector') { styles.push('--tint-bg: ' + s3HashColor(s.sector, 0.16)); cls.push('tint-row'); }
+      if (s3State.port === 'on') {
+        var pi = s3PortfolioInfo(s);
+        if (pi) {
+          styles.push('--portfolio-color: ' + pi.color);
+          styles.push('--portfolio-bg: ' + pi.bg);
+          styles.push('--portfolio-bg-hover: ' + pi.bg);
+          cls.push('portfolio-band'); cls.push('portfolio-tint');
+        }
+      }
+      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">●</span>' : '';
+      html += '<tr' + clsAttr + styleAttr + '>' +
+        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
+        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
+        s3InputCell(s, 'price') + s3InputCell(s, 'high_52w') + s3InputCell(s, 'low_52w') +
+        s3InputCell(s, 'ma_150') + s3InputCell(s, 'ma_200') +
+        '<td class="grp-start-rating">' + s3PillFor(s.rating, s.count) + '</td>' +
+        '<td>' + s3ScorePips(s) + '</td>';
+      for (var j = 9; j <= 18; j++) html += s3TestCell(s, S3_COLS[j]);
+      html += '<td class="grp-start-persist">' + s3PersistCells(s.persistence, s.rating) + '</td>' +
+        '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function s3SetMode(kind, val) {
+    s3State.mode[kind] = val;
+    var btns = document.querySelectorAll('button[data-s3-grp="' + kind + '"]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s3-val') === val);
+    s3RenderRows();
+  }
+  function s3SetScope(s) {
+    s3State.scope = s;
+    var btns = document.querySelectorAll('button[data-s3-scope]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s3-scope') === s);
+    s3RenderRows();
+  }
+  function s3SetTint(t) {
+    s3State.tint = t;
+    var btns = document.querySelectorAll('button[data-s3-tint]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s3-tint') === t);
+    s3RenderRows();
+  }
+  function s3SetPort(p) {
+    s3State.port = p;
+    var btns = document.querySelectorAll('button[data-s3-port]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s3-port') === p);
+    s3RenderRows();
+  }
+  function s3ToggleRating(r) {
+    s3State.ratingFilter = (s3State.ratingFilter === r) ? null : r;
+    s3RenderRows();
+  }
+  window.s3SetMode = s3SetMode;
+  window.s3SetScope = s3SetScope;
+  window.s3SetTint = s3SetTint;
+  window.s3SetPort = s3SetPort;
+  window.s3ToggleRating = s3ToggleRating;
+  window.s3OnSort = s3OnSort;
+
+  function s3BuildScaffold() {
+    var host = document.getElementById('tab-stage_3');
+    if (!host) return false;
+    if (host.querySelector('#s3-main-table')) return true;
+    var html = '' +
+      '<div class="s1-intro">Stage 3 looks for stocks where the prior uptrend is rolling over: multiple bases stacked since the 52-week low, the 200-day moving average flattening, distribution showing up in down-volume and volatility, lower lows accumulating, and relative strength weakening. The aim is to spot positions to lighten or candidates approaching invalidation. Ten tests across five groups: more tests passing means the topping case is firmer.</div>' +
+      '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
+          '<button class="toggle-btn active" data-s3-grp="inputs" data-s3-val="pct" onclick="s3SetMode(\'inputs\',\'pct\')">show as %</button>' +
+          '<button class="toggle-btn" data-s3-grp="inputs" data-s3-val="raw" onclick="s3SetMode(\'inputs\',\'raw\')">show as numbers</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +
+          '<button class="toggle-btn active" data-s3-grp="tests" data-s3-val="tick" onclick="s3SetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-s3-grp="tests" data-s3-val="val" onclick="s3SetMode(\'tests\',\'val\')">show test values</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
+          '<button class="toggle-btn active" data-s3-scope="all" onclick="s3SetScope(\'all\')">All <span id="s3-cnt-all"></span></button>' +
+          '<button class="toggle-btn" data-s3-scope="live" onclick="s3SetScope(\'live\')">Live <span id="s3-cnt-live"></span></button>' +
+          '<button class="toggle-btn" data-s3-scope="sector" onclick="s3SetScope(\'sector\')">Sectors <span id="s3-cnt-sector"></span></button>' +
+          '<button class="toggle-btn" data-s3-scope="industry" onclick="s3SetScope(\'industry\')">Industries <span id="s3-cnt-industry"></span></button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Peers</button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Cohorts</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span>' +
+          '<button class="toggle-btn active" data-s3-tint="none" onclick="s3SetTint(\'none\')">Off</button>' +
+          '<button class="toggle-btn" data-s3-tint="industry" onclick="s3SetTint(\'industry\')">Industry</button>' +
+          '<button class="toggle-btn" data-s3-tint="sector" onclick="s3SetTint(\'sector\')">Sector</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+          '<button class="toggle-btn active" data-s3-port="off" onclick="s3SetPort(\'off\')">Off</button>' +
+          '<button class="toggle-btn" data-s3-port="on" onclick="s3SetPort(\'on\')">On</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="s3-rating-tiles" style="grid-template-columns: repeat(4, 1fr);"></div>' +
+      '<div class="group-captions" style="grid-template-columns: repeat(5, 1fr);">' +
+        '<div class="gcap gcap-g1"><b>Group 1 · Base count</b>How many bases has the stock built since its 52-week low? Three or more (T1) signals a maturing run; four or more (T2) is the classic "late-stage base" warning.</div>' +
+        '<div class="gcap gcap-g2"><b>Group 2 · Price trend rolling over</b>Is the price trend losing momentum? The 200-day moving average is flattening (recent month-on-month change near zero and decelerating), and the 50-day has crossed below the 150-day.</div>' +
+        '<div class="gcap gcap-g3"><b>Group 3 · The debate</b>Three confirming distribution signals: down-volume now exceeds up-volume on a 10-day window, recent volatility is rising versus a year-ago baseline, and the price is still within 5% of the 50-day (no decisive breakout up or down).</div>' +
+        '<div class="gcap gcap-g4"><b>Group 4 · Lower lows</b>Lower lows count: two or more lower lows in the last month (T8), or three or more in the last three months (T9). Confirms downside structure is forming.</div>' +
+        '<div class="gcap gcap-g5"><b>Group 5 · RS trend</b>Has relative strength turned down? Three-month RS change worse than minus five percent. A single test, but on a leading indicator that often turns ahead of price.</div>' +
+      '</div>' +
+      '<div class="table-wrap">' +
+        '<table class="data-table" id="s3-main-table">' +
+          '<colgroup>' +
+            '<col class="c-name"><col class="c-taxon">' +
+            '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
+            '<col class="c-ma150"><col class="c-ma200">' +
+            '<col class="c-rating"><col class="c-score">' +
+            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+            '<col class="c-persist">' +
+          '</colgroup>' +
+          '<thead>' +
+            '<tr class="group-header-row">' +
+              '<th class="gh-inputs" colspan="7">Inputs</th>' +
+              '<th class="gh-rating grp-start-rating" colspan="2">Stage 3 rating · thresholds 2/10 · 4/10 · 6+/10</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Base count</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 · Price trend rolling over</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="3">Group 3 · The debate</th>' +
+              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Group 4 · Lower lows</th>' +
+              '<th class="gh-g5 grp-start-g5 grp-end-g5" colspan="1">Group 5 · RS trend</th>' +
+              '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
+            '</tr>' +
+            '<tr class="col-header-row" id="s3-col-header-row"></tr>' +
+          '</thead>' +
+          '<tbody id="s3-tbody"></tbody>' +
+        '</table>' +
+      '</div>';
+    host.innerHTML = html;
+    var tiles = document.getElementById('s3-rating-tiles');
+    if (tiles) {
+      tiles.addEventListener('click', function(e) {
+        var tile = e.target.closest('.rating-tile');
+        if (!tile) return;
+        var r = tile.getAttribute('data-rating');
+        if (r) s3ToggleRating(r);
+      });
+    }
+    var hdr = document.getElementById('s3-col-header-row');
+    if (hdr) {
+      hdr.addEventListener('click', function(e) {
+        var th = e.target.closest('th');
+        if (!th) return;
+        var key = th.getAttribute('data-sort-key');
+        if (key) s3OnSort(key);
+      });
+    }
+    return true;
+  }
+
+  function renderStage3() {
+    if (!s3BuildScaffold()) return;
+    s3BuildHeaderRow();
+    s3RenderRows();
+  }
+  window.renderStage3 = renderStage3;
+
+})();
+
+/* MD-V2-STAGE3-MARKER-END */
+
+/* MD-V2-STAGE3-MARKER-MODULE-END */
+
+
+/* MD-V2-STAGE4-MARKER-MODULE-START */
+// =============================================================================
+// STAGE 4 TAB MODULE — Master Dashboard V2
+// =============================================================================
+// MD-V2-STAGE4-MARKER — idempotency marker for patcher detection
+//
+// Stage 4 = Decline / Capitulation. 7 tests across 3 groups.
+// Ratings:
+//   None       (0)
+//   Possible   (1)
+//   Plausible  (2)
+//   Probable   (3+)
+// =============================================================================
+
+/* MD-V2-STAGE4-MARKER-START */
+
+(function() {
+  'use strict';
+
+  var s4State = {
+    mode: { inputs: 'pct', tests: 'tick' },
+    scope: 'all', ratingFilter: null, tint: 'none', port: 'off',
+    sort: { col: 'count', dir: 'desc' }
+  };
+
+  var S4_COLS = [
+    { id:'name',     label:'Company · Ticker',          sortKey:'company', cls:'name-cell' },
+    { id:'taxon',    label:'Industry · Sector',         sortKey:'sector', cls:'taxon' },
+    { id:'price',    label:'Price',                     sortKey:'price', cls:'num' },
+    { id:'high_52w', label:'52 week high',              sortKey:'high_52w', cls:'num' },
+    { id:'low_52w',  label:'52 week low',               sortKey:'low_52w', cls:'num' },
+    { id:'ma_150',   label:'150 day moving average',    sortKey:'ma_150', cls:'num' },
+    { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200', cls:'num' },
+    { id:'rating',   label:'Rating',                    sortKey:'rating_rank', cls:'grp-start-rating' },
+    { id:'count',    label:'Score',                     sortKey:'count', cls:'' },
+    { id:'g1_t1',    label:'200-day declining',                       sortKey:'g1_t1', cls:'grp-start-g1', testGroup:'g1_price_trends', testKey:'T1' },
+    { id:'g1_t2',    label:'200-day decline accelerating',            sortKey:'g1_t2', cls:'grp-end-g1', testGroup:'g1_price_trends', testKey:'T2' },
+    { id:'g2_t3',    label:'Full MA stack inverted (P<50<150<200)',   sortKey:'g2_t3', cls:'grp-start-g2', testGroup:'g2_ma_stack', testKey:'T3' },
+    { id:'g2_t4',    label:'150-day below 200-day',                   sortKey:'g2_t4', cls:'', testGroup:'g2_ma_stack', testKey:'T4' },
+    { id:'g2_t5',    label:'50-day below 150-day',                    sortKey:'g2_t5', cls:'grp-end-g2', testGroup:'g2_ma_stack', testKey:'T5' },
+    { id:'g3_t6',    label:'RS absolute weak (vs ind or pctile < 50)', sortKey:'g3_t6', cls:'grp-start-g3', testGroup:'g3_rs', testKey:'T6' },
+    { id:'g3_t7',    label:'RS trend weak (3m < -5%)',                 sortKey:'g3_t7', cls:'grp-end-g3', testGroup:'g3_rs', testKey:'T7' },
+    { id:'persist',  label:'Last 12 months',            sortKey:'persistence_count', cls:'grp-start-persist' }
+  ];
+  var S4_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
+  var S4_TINT_CLS = { 'Probable':'tint-prob','Plausible':'tint-pla','Possible':'tint-pos','None':'tint-none' };
+
+  function s4PricesLookup() {
+    if (window._s4PricesByTicker) return window._s4PricesByTicker;
+    var out = {};
+    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    window._s4PricesByTicker = out;
+    return out;
+  }
+  function s4LiveTickers() {
+    var out = {};
+    var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
+    for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
+    return out;
+  }
+  function s4LiveSectors() {
+    var out = {}, t, prices = s4PricesLookup(), tickers = s4LiveTickers();
+    for (t in tickers) { var p = prices[t]; if (p && p.sector) out[p.sector] = true; }
+    return out;
+  }
+  function s4LiveIndustries() {
+    var out = {}, t, prices = s4PricesLookup(), tickers = s4LiveTickers();
+    for (t in tickers) { var p = prices[t]; if (p && p.industry) out[p.industry] = true; }
+    return out;
+  }
+  function s4GetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = s4PricesLookup();
+    var live = s4LiveTickers(), liveS = s4LiveSectors(), liveI = s4LiveIndustries();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2 || !s.md_v2.stage_4) continue;
+      var p = prices[s.ticker] || {};
+      var s4 = s.md_v2.stage_4;
+      var pers = (s.md_v2.persistence && s.md_v2.persistence.stage_4_persistence) || [];
+      var mas = p.mas || {};
+      rows.push({
+        ticker: s.ticker, company: p.company_name || s.ticker,
+        sector: p.sector || '', industry: p.industry || '',
+        price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
+        ma_50: mas['50D'], ma_150: mas['150D'], ma_200: mas['200D'],
+        rating: s4.rating, count: s4.count,
+        tests: s4.tests || {}, groups: s4.groups || {}, persistence: pers,
+        rs_sector: p.rs_vs_sector_pct, rs_industry: p.rs_vs_industry_pct, rs_market: p.rs_market_pct,
+        is_live: !!live[s.ticker],
+        sector_in_portfolio: !!liveS[p.sector],
+        industry_in_portfolio: !!liveI[p.industry]
+      });
+    }
+    return rows;
+  }
+  function s4UniverseCounts(rows) {
+    var c = {'Probable':0,'Plausible':0,'Possible':0,'None':0};
+    for (var i = 0; i < rows.length; i++) if (c[rows[i].rating] !== undefined) c[rows[i].rating]++;
+    return c;
+  }
+
+  function s4FmtNum(n) {
+    if (n == null || isNaN(n)) return '—';
+    var abs = Math.abs(n);
+    var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+    return n < 0 ? '(' + f + ')' : f;
+  }
+  function s4FmtPct(p) {
+    if (p == null || isNaN(p)) return '—';
+    var r = Math.round(p), abs = Math.abs(r);
+    return r < 0 ? '(' + abs + ')%' : r + '%';
+  }
+  // Stage 4 INVERTED scale (same logic as Stage 3 — bearish passes coloured red)
+  function s4ColourForIntensity(i) {
+    if (i >= 0.6) return '#8b1a1a';
+    if (i >= 0.25) return '#a83232';
+    if (i >= 0.05) return '#c66666';
+    if (i <= -0.6) return '#0a4012';
+    if (i <= -0.25) return '#1f6325';
+    if (i <= -0.05) return '#4a8050';
+    return '#666';
+  }
+  function s4InputCell(row, key, extraCls) {
+    extraCls = extraCls || '';
+    var v = row[key];
+    if (key === 'price') return '<td class="num ' + extraCls + '">' + s4FmtNum(v) + '</td>';
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">—</td>';
+    var pct = (row.price - v) / v * 100;
+    var intensity = 0;
+    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 10) / 20));   // far below high = bearish
+    else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (20 - pct) / 30)); // near low = bearish
+    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, -pct / 10));
+    var colour = s4ColourForIntensity(intensity);
+    var text = (s4State.mode.inputs === 'pct') ? s4FmtPct(pct) : s4FmtNum(v);
+    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+  }
+
+  function s4TestValueFor(row, col) {
+    var k = col.testKey;
+    var t = row.tests || {};
+    // G1: 200D declining + accelerating (binary derived)
+    if (k === 'T1') return t.T1_200D_declining ? 'declining' : 'rising/flat';
+    if (k === 'T2') return t.T2_200D_decline_accelerating ? 'accel.' : '—';
+    // G2: MA stack — show pct gaps
+    if (k === 'T3') return t.T3_total_stack_down ? 'P<50<150<200' : '—';
+    if (k === 'T4') return row.ma_150 != null && row.ma_200 != null ? s4FmtPct((row.ma_150 - row.ma_200) / row.ma_200 * 100) : '—';
+    if (k === 'T5') return row.ma_50 != null && row.ma_150 != null ? s4FmtPct((row.ma_50 - row.ma_150) / row.ma_150 * 100) : '—';
+    // G3: RS values
+    if (k === 'T6') {
+      var bits = [];
+      if (row.rs_industry != null) bits.push('ind ' + Math.round(row.rs_industry));
+      if (row.rs_sector  != null) bits.push('sec ' + Math.round(row.rs_sector));
+      return bits.length ? bits.join(' · ') : '—';
+    }
+    if (k === 'T7') return t.T7_RS_trend_weak ? '< -5%' : '—';
+    return '—';
+  }
+  function s4TestCell(row, col) {
+    var grp = (row.groups || {})[col.testGroup] || {};
+    var pass = !!grp[col.testKey];
+    var extra = col.cls || '';
+    if (s4State.mode.tests === 'val') {
+      var v = s4TestValueFor(row, col);
+      // Stage 4 passes are BEARISH — colour pass red, fail neutral grey
+      var colour = pass ? s4ColourForIntensity(0.7) : '#999';
+      return '<td class="test-val ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+    }
+    if (pass) return '<td class="test-pass-bear ' + extra + '"><span class="tick">✓</span></td>';
+    return '<td class="test-fail ' + extra + '">·</td>';
+  }
+
+  function s4PillFor(rating, count) {
+    if (rating === 'Probable') {
+      var c = Math.min(Math.max(count, 3), 7);
+      return '<span class="pill pill-prob-' + c + '">Probable</span>';
+    }
+    if (rating === 'Plausible') return '<span class="pill pill-pla">Plausible</span>';
+    if (rating === 'Possible') return '<span class="pill pill-pos">Possible</span>';
+    return '<span class="pill pill-none">None</span>';
+  }
+  function s4ScorePips(row) {
+    var t = row.tests;
+    var passed = [
+      !!t.T1_200D_declining, !!t.T2_200D_decline_accelerating,
+      !!t.T3_total_stack_down, !!t.T4_150_below_200, !!t.T5_50_below_150,
+      !!t.T6_RS_absolute_weak, !!t.T7_RS_trend_weak
+    ];
+    var count = passed.filter(Boolean).length;
+    var s = '';
+    for (var i = 0; i < 7; i++) s += '<span class="pip pip-bear ' + (passed[i] ? 'on' : '') + '"></span>';
+    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/7</span></div>';
+  }
+  function s4PersistCells(arr, rating) {
+    var h = '';
+    for (var i = 0; i < 12; i++) {
+      if (i === 11 && arr && arr[11]) {
+        var cls = rating === 'Probable' ? 'r-prob' :
+                  rating === 'Plausible' ? 'r-pla' :
+                  rating === 'Possible' ? 'r-pos' : 'r-none';
+        h += '<span class="persist-cell ' + cls + '" title="Current month: ' + rating + '"></span>';
+      } else {
+        h += '<span class="persist-cell r-none" title="Month -' + (11 - i) + ': not yet backfilled"></span>';
+      }
+    }
+    return '<div class="persist-row">' + h + '</div>';
+  }
+
+  function s4HashColor(label, alpha) {
+    if (!label) return null;
+    var h = 0;
+    for (var i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff;
+    return 'hsla(' + (h % 360) + ', 35%, 55%, ' + alpha + ')';
+  }
+  function s4PortfolioInfo(row) {
+    if (row.is_live) return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)', bgHover:'rgba(27,94,32,0.14)' };
+    if (row.sector_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)', bgHover:'rgba(27,94,32,0.08)' };
+    if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' };
+    return null;
+  }
+
+  function s4GetSortVal(row, key) {
+    if (key === 'rating_rank') return S4_RATING_RANK[row.rating] || 0;
+    if (key === 'persistence_count') return (row.persistence || []).filter(Boolean).length;
+    if (key.indexOf('g') === 0 && key.indexOf('_t') > 0) {
+      var col = S4_COLS.find(function(c) { return c.sortKey === key; });
+      if (col) {
+        var grp = (row.groups || {})[col.testGroup] || {};
+        return grp[col.testKey] ? 1 : 0;
+      }
+    }
+    var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
+    if (PCT_KEYS.indexOf(key) > -1 && s4State.mode.inputs === 'pct') {
+      var ref = row[key];
+      if (ref == null || row.price == null || ref === 0) return -Infinity;
+      return (row.price - ref) / ref * 100;
+    }
+    if (key in row) return row[key];
+    return 0;
+  }
+  function s4OnSort(key) {
+    if (s4State.sort.col === key) s4State.sort.dir = s4State.sort.dir === 'desc' ? 'asc' : 'desc';
+    else s4State.sort = { col: key, dir: 'desc' };
+    s4BuildHeaderRow();
+    s4RenderRows();
+  }
+
+  function s4BuildHeaderRow() {
+    var tr = document.getElementById('s4-col-header-row');
+    if (!tr) return;
+    var h = '';
+    for (var i = 0; i < S4_COLS.length; i++) {
+      var c = S4_COLS[i];
+      var isSort = s4State.sort.col === c.sortKey;
+      var arrow = isSort
+        ? '<span class="sort-arrow">' + (s4State.sort.dir === 'desc' ? '▼' : '▲') + '</span>'
+        : '<span class="sort-placeholder"></span>';
+      h += '<th class="' + (c.cls || '') + '" data-sort-key="' + c.sortKey + '" title="' + c.label + '">' +
+           '<span class="hd"><span class="lbl">' + c.label + '</span>' + arrow + '</span></th>';
+    }
+    tr.innerHTML = h;
+  }
+  function s4RatingTiles(rows) {
+    var tiles = document.getElementById('s4-rating-tiles');
+    if (!tiles) return;
+    var uc = s4UniverseCounts(rows);
+    var total = rows.length;
+    var order = ['None','Possible','Plausible','Probable'];
+    var strip = {'Probable':'prob','Plausible':'pla','Possible':'pos','None':'none'};
+    var h = '';
+    for (var i = 0; i < order.length; i++) {
+      var r = order[i], cnt = uc[r] || 0;
+      var act = s4State.ratingFilter === r ? ' active' : '';
+      var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+      h += '<div class="rating-tile ' + S4_TINT_CLS[r] + act + '" data-rating="' + r + '">' +
+           '<div class="rt-label">' + r + '</div>' +
+           '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
+           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-strip rt-strip-' + strip[r] + '"></div>' +
+           '</div>';
+    }
+    tiles.innerHTML = h;
+  }
+  function s4UpdateScopeCounts(rows) {
+    function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
+    set('s4-cnt-all',      rows.length);
+    set('s4-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
+    set('s4-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
+    set('s4-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
+  }
+
+  function s4RenderRows() {
+    var tbody = document.getElementById('s4-tbody');
+    if (!tbody) return;
+    var all = s4GetRows();
+    s4UpdateScopeCounts(all);
+    s4RatingTiles(all);
+    var rows = all.slice();
+    if (s4State.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
+    else if (s4State.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
+    else if (s4State.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
+    if (s4State.ratingFilter) rows = rows.filter(function(r){ return r.rating === s4State.ratingFilter; });
+    rows.sort(function(a,b) {
+      var va = s4GetSortVal(a, s4State.sort.col), vb = s4GetSortVal(b, s4State.sort.col);
+      var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
+      if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker);
+      return s4State.sort.dir === 'desc' ? -cmp : cmp;
+    });
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i];
+      var styles = [], cls = [];
+      if (s4State.tint === 'industry') { styles.push('--tint-bg: ' + s4HashColor(s.industry, 0.16)); cls.push('tint-row'); }
+      else if (s4State.tint === 'sector') { styles.push('--tint-bg: ' + s4HashColor(s.sector, 0.16)); cls.push('tint-row'); }
+      if (s4State.port === 'on') {
+        var pi = s4PortfolioInfo(s);
+        if (pi) {
+          styles.push('--portfolio-color: ' + pi.color);
+          styles.push('--portfolio-bg: ' + pi.bg);
+          styles.push('--portfolio-bg-hover: ' + pi.bgHover);
+          cls.push('portfolio-band'); cls.push('portfolio-tint');
+        }
+      }
+      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">●</span>' : '';
+      html += '<tr' + clsAttr + styleAttr + '>' +
+        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
+        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
+        s4InputCell(s, 'price') + s4InputCell(s, 'high_52w') + s4InputCell(s, 'low_52w') +
+        s4InputCell(s, 'ma_150') + s4InputCell(s, 'ma_200') +
+        '<td class="grp-start-rating">' + s4PillFor(s.rating, s.count) + '</td>' +
+        '<td>' + s4ScorePips(s) + '</td>';
+      for (var j = 9; j <= 15; j++) html += s4TestCell(s, S4_COLS[j]);
+      html += '<td class="grp-start-persist">' + s4PersistCells(s.persistence, s.rating) + '</td>' +
+        '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function s4SetMode(kind, val) {
+    s4State.mode[kind] = val;
+    var btns = document.querySelectorAll('button[data-s4-grp="' + kind + '"]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s4-val') === val);
+    s4RenderRows();
+  }
+  function s4SetScope(s) {
+    s4State.scope = s;
+    var btns = document.querySelectorAll('button[data-s4-scope]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s4-scope') === s);
+    s4RenderRows();
+  }
+  function s4SetTint(t) {
+    s4State.tint = t;
+    var btns = document.querySelectorAll('button[data-s4-tint]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s4-tint') === t);
+    s4RenderRows();
+  }
+  function s4SetPort(p) {
+    s4State.port = p;
+    var btns = document.querySelectorAll('button[data-s4-port]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-s4-port') === p);
+    s4RenderRows();
+  }
+  function s4ToggleRating(r) {
+    s4State.ratingFilter = (s4State.ratingFilter === r) ? null : r;
+    s4RenderRows();
+  }
+  window.s4SetMode = s4SetMode;
+  window.s4SetScope = s4SetScope;
+  window.s4SetTint = s4SetTint;
+  window.s4SetPort = s4SetPort;
+  window.s4ToggleRating = s4ToggleRating;
+  window.s4OnSort = s4OnSort;
+
+  function s4BuildScaffold() {
+    var host = document.getElementById('tab-stage_4');
+    if (!host) return false;
+    if (host.querySelector('#s4-main-table')) return true;
+    var html = '' +
+      '<div class="s1-intro">Stage 4 looks for stocks in confirmed decline: the 200-day moving average is falling and (often) accelerating downward, the full moving-average stack is inverted (price below 50-day below 150-day below 200-day), and relative strength is weak both in absolute level and trend. The aim is to identify capitulation candidates eligible for the pullback-tranche playbook on rebound, and to flag positions that should be exited if held. Seven tests across three groups: more tests passing means the decline is more entrenched.</div>' +
+      '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
+          '<button class="toggle-btn active" data-s4-grp="inputs" data-s4-val="pct" onclick="s4SetMode(\'inputs\',\'pct\')">show as %</button>' +
+          '<button class="toggle-btn" data-s4-grp="inputs" data-s4-val="raw" onclick="s4SetMode(\'inputs\',\'raw\')">show as numbers</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +
+          '<button class="toggle-btn active" data-s4-grp="tests" data-s4-val="tick" onclick="s4SetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-s4-grp="tests" data-s4-val="val" onclick="s4SetMode(\'tests\',\'val\')">show test values</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
+          '<button class="toggle-btn active" data-s4-scope="all" onclick="s4SetScope(\'all\')">All <span id="s4-cnt-all"></span></button>' +
+          '<button class="toggle-btn" data-s4-scope="live" onclick="s4SetScope(\'live\')">Live <span id="s4-cnt-live"></span></button>' +
+          '<button class="toggle-btn" data-s4-scope="sector" onclick="s4SetScope(\'sector\')">Sectors <span id="s4-cnt-sector"></span></button>' +
+          '<button class="toggle-btn" data-s4-scope="industry" onclick="s4SetScope(\'industry\')">Industries <span id="s4-cnt-industry"></span></button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Peers</button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Cohorts</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span>' +
+          '<button class="toggle-btn active" data-s4-tint="none" onclick="s4SetTint(\'none\')">Off</button>' +
+          '<button class="toggle-btn" data-s4-tint="industry" onclick="s4SetTint(\'industry\')">Industry</button>' +
+          '<button class="toggle-btn" data-s4-tint="sector" onclick="s4SetTint(\'sector\')">Sector</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+          '<button class="toggle-btn active" data-s4-port="off" onclick="s4SetPort(\'off\')">Off</button>' +
+          '<button class="toggle-btn" data-s4-port="on" onclick="s4SetPort(\'on\')">On</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="s4-rating-tiles" style="grid-template-columns: repeat(4, 1fr);"></div>' +
+      '<div class="group-captions" style="grid-template-columns: repeat(3, 1fr);">' +
+        '<div class="gcap gcap-g1"><b>Group 1 · Price trend down</b>Is the long-term trend confirmed down? The 200-day moving average is now lower month-on-month (T1), and the rate of decline is accelerating (T2). Two foundational decline signals.</div>' +
+        '<div class="gcap gcap-g2"><b>Group 2 · Moving-average stack inverted</b>Three structural tests of an inverted MA stack: full inversion P&lt;50&lt;150&lt;200 (T3), 150-day below 200-day (T4), and 50-day below 150-day (T5). Together: the stock has rolled over across all three time-horizon trends.</div>' +
+        '<div class="gcap gcap-g3"><b>Group 3 · Relative strength weak</b>Is relative strength weak both in absolute level and trend? RS percentile or vs-industry below 50 (T6), and three-month RS change worse than minus five percent (T7).</div>' +
+      '</div>' +
+      '<div class="table-wrap">' +
+        '<table class="data-table" id="s4-main-table">' +
+          '<colgroup>' +
+            '<col class="c-name"><col class="c-taxon">' +
+            '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
+            '<col class="c-ma150"><col class="c-ma200">' +
+            '<col class="c-rating"><col class="c-score">' +
+            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+            '<col class="c-persist">' +
+          '</colgroup>' +
+          '<thead>' +
+            '<tr class="group-header-row">' +
+              '<th class="gh-inputs" colspan="7">Inputs</th>' +
+              '<th class="gh-rating grp-start-rating" colspan="2">Stage 4 rating · thresholds 1/7 · 2/7 · 3+/7</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Price trend down</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="3">Group 2 · MA stack inverted</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 · RS weak</th>' +
+              '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
+            '</tr>' +
+            '<tr class="col-header-row" id="s4-col-header-row"></tr>' +
+          '</thead>' +
+          '<tbody id="s4-tbody"></tbody>' +
+        '</table>' +
+      '</div>';
+    host.innerHTML = html;
+    var tiles = document.getElementById('s4-rating-tiles');
+    if (tiles) {
+      tiles.addEventListener('click', function(e) {
+        var tile = e.target.closest('.rating-tile');
+        if (!tile) return;
+        var r = tile.getAttribute('data-rating');
+        if (r) s4ToggleRating(r);
+      });
+    }
+    var hdr = document.getElementById('s4-col-header-row');
+    if (hdr) {
+      hdr.addEventListener('click', function(e) {
+        var th = e.target.closest('th');
+        if (!th) return;
+        var key = th.getAttribute('data-sort-key');
+        if (key) s4OnSort(key);
+      });
+    }
+    return true;
+  }
+
+  function renderStage4() {
+    if (!s4BuildScaffold()) return;
+    s4BuildHeaderRow();
+    s4RenderRows();
+  }
+  window.renderStage4 = renderStage4;
+
+})();
+
+/* MD-V2-STAGE4-MARKER-END */
+
+/* MD-V2-STAGE4-MARKER-MODULE-END */
+
 function renderTab(id){
   try{
-  if(id==="mm99")renderMM99();
+  if(id==="summary")renderSummary();
+  else if(id==="stage_1")renderStage1();  /* MD-V2-STAGE1-MARKER */
+  else if(id==="stage_2")renderStage2();  /* MD-V2-STAGE2-MARKER */
+  else if(id==="stage_3")renderStage3();  /* MD-V2-STAGE3-MARKER */
+  else if(id==="stage_4")renderStage4();  /* MD-V2-STAGE4-MARKER */
+  else if(id==="mm99")renderMM99();
   else if(id==="bp")renderBP();
   else if(id==="pb")renderPB();
   else if(id==="utr")renderUTR();
@@ -4651,6 +7843,7 @@ if(mainEl && displayMode==="company") mainEl.classList.add("company-mode");
 // (e.g. BP tab cross-filter SSEM column) populate on first visit, not only after
 // SSEM tab has rendered. Was a known gap in Pass A.1.
 precomputeSsemRatings();
+deriveMasterRatings();  /* SUMMARY-TAB-MARKER */
 
 renderTab("mm99");
 })();

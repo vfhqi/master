@@ -1,18 +1,19 @@
 // =============================================================================
-// PRE-INDICATORS TAB MODULE — Master Dashboard V2
+// PRE-INDICATORS TAB MODULE - Master Dashboard V2
 // =============================================================================
-// MD-V2-PRE-INDICATORS-MARKER — idempotency marker for patcher detection
+// MD-V2-PRE-INDICATORS-MARKER - idempotency marker for patcher detection
 //
 // Pre-indicators = 3 leading binary patterns from _md_v2_screens.py:
 //   1. Pullback to retest         (pullback_to_retest)
 //   2. Basing below recent high   (basing_below_high)
 //   3. Collapsing                 (collapsing)
 //
-// Tab uses Option B (Richard's choice, 13-May-26):
+// Option B layout (Richard's choice, 13-May-26):
 //   - Top row = 3 tiles, one per pattern, with count + plain-English caption
-//   - Click a tile → table filters to stocks with that pattern
-//   - Click again → clear filter
-//   - Table shows 3 tick columns + 0/3 score column
+//   - Click a tile -> table filters to stocks with that pattern
+//   - Click again -> clear filter
+//   - Table shows ONE COLUMN PER PATTERN with tick/no-tick (no aggregate score column)
+//   - Default sort: Company name ascending
 // =============================================================================
 
 /* MD-V2-PRE-INDICATORS-MARKER-START */
@@ -23,31 +24,29 @@
   var piState = {
     mode: { inputs: 'pct' },
     scope: 'all',
-    patternFilter: null,  // null | 'pullback_to_retest' | 'basing_below_high' | 'collapsing'
+    patternFilter: null,
     tint: 'none',
     port: 'off',
-    sort: { col: 'count', dir: 'desc' }
+    sort: { col: 'company', dir: 'asc' }
   };
 
-  // The 3 patterns. Order = pullback, basing, collapsing (per _md_v2_screens.py order).
   var PI_PATTERNS = [
-    { key: 'pullback_to_retest',  label: 'Pullback',   tooltip: 'Stock in S2 uptrend, pulled back 5-25% from swing high, still above 200D MA' },
-    { key: 'basing_below_high',   label: 'Basing',     tooltip: 'Stock in S2 uptrend, ≥15% below recent high, still in plausible/probable S2' },
-    { key: 'collapsing',          label: 'Collapsing', tooltip: 'Price ≥30% below 52W high AND ≥20% off recent 3M high (irrespective of stage)' }
+    { key: 'pullback_to_retest',  label: 'Pullback',   tooltip: 'Stock in plausible/probable Stage 2 uptrend, recently pulled back 5-25% from swing high, still above 200-day moving average' },
+    { key: 'basing_below_high',   label: 'Basing',     tooltip: 'Stock in plausible/probable Stage 2 uptrend, 15%+ below recent high' },
+    { key: 'collapsing',          label: 'Collapsing', tooltip: 'Price 30%+ below 52-week high AND stock 20%+ off recent three-month high' }
   ];
 
   var PI_COLS = [
-    { id:'name',     label:'Company · Ticker',          sortKey:'company',   cls:'name-cell' },
-    { id:'taxon',    label:'Industry · Sector',         sortKey:'sector',    cls:'taxon' },
-    { id:'price',    label:'Price',                     sortKey:'price',     cls:'num' },
-    { id:'high_52w', label:'52 week high',              sortKey:'high_52w',  cls:'num' },
-    { id:'pullback', label:'Recent pullback',           sortKey:'recent_pullback', cls:'num' },
-    { id:'ma_150',   label:'150 day moving average',    sortKey:'ma_150',    cls:'num' },
-    { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200',    cls:'num' },
-    { id:'count',    label:'Patterns 0/3',              sortKey:'count',     cls:'grp-start-rating' },
-    { id:'p1',       label:'Pullback',                  sortKey:'p1',        cls:'grp-start-g1 grp-end-g1', patternKey:'pullback_to_retest' },
-    { id:'p2',       label:'Basing',                    sortKey:'p2',        cls:'grp-start-g2 grp-end-g2', patternKey:'basing_below_high' },
-    { id:'p3',       label:'Collapsing',                sortKey:'p3',        cls:'grp-start-g3 grp-end-g3', patternKey:'collapsing' }
+    { id:'name',     label:'Company - Ticker',          sortKey:'company',          cls:'name-cell' },
+    { id:'taxon',    label:'Industry - Sector',         sortKey:'sector',           cls:'taxon' },
+    { id:'price',    label:'Price',                     sortKey:'price',            cls:'num' },
+    { id:'high_52w', label:'52 week high',              sortKey:'high_52w',         cls:'num' },
+    { id:'pullback', label:'Recent pullback',           sortKey:'recent_pullback',  cls:'num' },
+    { id:'ma_150',   label:'150 day moving average',    sortKey:'ma_150',           cls:'num' },
+    { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200',           cls:'num' },
+    { id:'p1',       label:'Pullback',                  sortKey:'p1',               cls:'grp-start-g1', patternKey:'pullback_to_retest' },
+    { id:'p2',       label:'Basing',                    sortKey:'p2',               cls:'grp-start-g2', patternKey:'basing_below_high' },
+    { id:'p3',       label:'Collapsing',                sortKey:'p3',               cls:'grp-start-g3', patternKey:'collapsing' }
   ];
 
   function piPricesLookup() {
@@ -85,15 +84,13 @@
       var p = prices[s.ticker] || {};
       var ind = s.md_v2.indicators || {};
       var mas = p.mas || {};
-      var count = 0;
-      for (var k = 0; k < PI_PATTERNS.length; k++) if (ind[PI_PATTERNS[k].key]) count++;
       rows.push({
         ticker: s.ticker, company: p.company_name || s.ticker,
         sector: p.sector || '', industry: p.industry || '',
         price: p.price, high_52w: p.high_52w,
         recent_pullback: p.recent_pullback_pct,
         ma_150: mas['150D'], ma_200: mas['200D'],
-        indicators: ind, count: count,
+        indicators: ind,
         p1: ind.pullback_to_retest ? 1 : 0,
         p2: ind.basing_below_high  ? 1 : 0,
         p3: ind.collapsing          ? 1 : 0,
@@ -114,18 +111,17 @@
   }
 
   function piFmtNum(n) {
-    if (n == null || isNaN(n)) return '—';
+    if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
   function piFmtPct(p) {
-    if (p == null || isNaN(p)) return '—';
+    if (p == null || isNaN(p)) return '-';
     var r = Math.round(p), abs = Math.abs(r);
     return r < 0 ? '(' + abs + ')%' : r + '%';
   }
-  // Teal colour ramp (Pre-indicators)
   function piColourForIntensity(i) {
     if (i >= 0.6) return '#0F6E56';
     if (i >= 0.25) return '#1D9E75';
@@ -140,17 +136,17 @@
     var v = row[key];
     if (key === 'price') return '<td class="num ' + extraCls + '">' + piFmtNum(v) + '</td>';
     if (key === 'recent_pullback') {
-      if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">—</td>';
+      if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">-</td>';
       var pctVal = v * 100;
       var pi_intensity = Math.max(-1, Math.min(1, (pctVal - 5) / 20));
-      var col = piColourForIntensity(-pi_intensity);  // larger pullback = warmer
+      var col = piColourForIntensity(-pi_intensity);
       return '<td class="num ' + extraCls + '" style="color:' + col + '">' + Math.round(pctVal) + '%</td>';
     }
-    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">—</td>';
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">-</td>';
     var pct = (row.price - v) / v * 100;
     var intensity = 0;
-    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 5) / 20));   // below high — slight bearish tilt
-    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));  // above MA = bullish
+    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 5) / 20));
+    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
     var colour = piColourForIntensity(intensity);
     var text = (piState.mode.inputs === 'pct') ? piFmtPct(pct) : piFmtNum(v);
     return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
@@ -159,17 +155,8 @@
   function piPatternCell(row, col) {
     var pass = !!(row.indicators || {})[col.patternKey];
     var extra = col.cls || '';
-    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">✓</span></td>';
-    return '<td class="pi-fail ' + extra + '">·</td>';
-  }
-
-  function piScorePips(row) {
-    var passed = [row.p1, row.p2, row.p3];
-    var count = passed.filter(Boolean).length;
-    var s = '';
-    for (var i = 0; i < 3; i++) s += '<span class="pip pip-pi ' + (passed[i] ? 'on' : '') + '"></span>';
-    var pillCls = count === 0 ? 'pi-count-0' : (count === 1 ? 'pi-count-1' : (count === 2 ? 'pi-count-2' : 'pi-count-3'));
-    return '<div class="score-pip-row"><span class="pi-count-pill ' + pillCls + '">' + count + '/3</span>' + s + '</div>';
+    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
+    return '<td class="pi-fail ' + extra + '">.</td>';
   }
 
   function piHashColor(label, alpha) {
@@ -186,7 +173,6 @@
   }
 
   function piGetSortVal(row, key) {
-    if (key === 'count') return row.count || 0;
     if (key === 'p1' || key === 'p2' || key === 'p3') return row[key] || 0;
     if (key === 'recent_pullback') {
       return row.recent_pullback == null ? -Infinity : row.recent_pullback;
@@ -202,7 +188,7 @@
   }
   function piOnSort(key) {
     if (piState.sort.col === key) piState.sort.dir = piState.sort.dir === 'desc' ? 'asc' : 'desc';
-    else piState.sort = { col: key, dir: 'desc' };
+    else piState.sort = { col: key, dir: key === 'company' ? 'asc' : 'desc' };
     piBuildHeaderRow();
     piRenderRows();
   }
@@ -215,7 +201,7 @@
       var c = PI_COLS[i];
       var isSort = piState.sort.col === c.sortKey;
       var arrow = isSort
-        ? '<span class="sort-arrow">' + (piState.sort.dir === 'desc' ? '▼' : '▲') + '</span>'
+        ? '<span class="sort-arrow">' + (piState.sort.dir === 'desc' ? String.fromCharCode(9660) : String.fromCharCode(9650)) + '</span>'
         : '<span class="sort-placeholder"></span>';
       h += '<th class="' + (c.cls || '') + '" data-sort-key="' + c.sortKey + '" title="' + c.label + '">' +
            '<span class="hd"><span class="lbl">' + c.label + '</span>' + arrow + '</span></th>';
@@ -239,7 +225,7 @@
       h += '<div class="rating-tile ' + tintCls[pat.key] + act + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
            '<div class="rt-label">' + pat.label + '</div>' +
            '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
-           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' . ' + pct + '%</div>' +
            '<div class="rt-strip ' + stripCls[pat.key] + '"></div>' +
            '</div>';
     }
@@ -291,14 +277,13 @@
       }
       var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
       var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
-      var liveDot = s.is_live ? '<span class="live-dot">●</span>' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">' + String.fromCharCode(9679) + '</span>' : '';
       html += '<tr' + clsAttr + styleAttr + '>' +
         '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
         '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
         piInputCell(s, 'price') + piInputCell(s, 'high_52w') + piInputCell(s, 'recent_pullback') +
-        piInputCell(s, 'ma_150') + piInputCell(s, 'ma_200') +
-        '<td class="grp-start-rating">' + piScorePips(s) + '</td>';
-      for (var j = 8; j <= 10; j++) html += piPatternCell(s, PI_COLS[j]);
+        piInputCell(s, 'ma_150') + piInputCell(s, 'ma_200');
+      for (var j = 7; j <= 9; j++) html += piPatternCell(s, PI_COLS[j]);
       html += '</tr>';
     }
     tbody.innerHTML = html;
@@ -344,7 +329,7 @@
     if (!host) return false;
     if (host.querySelector('#pi-main-table')) return true;
     var html = '' +
-      '<div class="s1-intro">Pre-indicators are three leading binary patterns drawn directly from price and stage data: Pullback (stock in an established uptrend, pulled back 5-25% from its swing high, still above its 200-day moving average), Basing (stock in an uptrend but ≥15% below its recent high, still in a plausible/probable Stage 2), and Collapsing (price ≥30% below its 52-week high AND ≥20% off its recent three-month high). Each tile below shows the count of stocks with that pattern. Click a tile to filter the table to just those stocks; click again to clear.</div>' +
+      '<div class="s1-intro">Pre-indicators are three leading binary patterns drawn directly from price and stage data: Pullback (stock in an established uptrend, pulled back 5-25% from its swing high, still above its 200-day moving average), Basing (stock in an uptrend but 15%+ below its recent high, still in a plausible/probable Stage 2), and Collapsing (price 30%+ below its 52-week high AND 20%+ off its recent three-month high). Each tile below shows the count of stocks with that pattern. Click a tile to filter the table; click again to clear.</div>' +
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-pi-grp="inputs" data-pi-val="pct" onclick="piSetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -368,11 +353,11 @@
           '<button class="toggle-btn" data-pi-port="on" onclick="piSetPort(\'on\')">On</button>' +
         '</div>' +
       '</div>' +
-      '<div class="rating-tiles s1-rating-tiles" id="pi-pattern-tiles" style="grid-template-columns: repeat(3, 1fr);"></div>' +
-      '<div class="group-captions" style="grid-template-columns: repeat(3, 1fr);">' +
+      '<div class="rating-tiles s1-rating-tiles" id="pi-pattern-tiles"></div>' +
+      '<div class="group-captions">' +
         '<div class="gcap gcap-g1"><b>Pullback to retest</b>Stock in plausible/probable Stage 2 uptrend, recently pulled back 5-25% from its swing high, still above its 200-day moving average. Pattern points to a healthy correction inside an established uptrend - the classic buy-the-dip setup.</div>' +
-        '<div class="gcap gcap-g2"><b>Basing below recent high</b>Stock in plausible/probable Stage 2 uptrend but ≥15% below its recent swing high. Pattern points to a deeper consolidation while the broader uptrend remains intact - watch for a base completing.</div>' +
-        '<div class="gcap gcap-g3"><b>Collapsing</b>Price ≥30% below its 52-week high AND the stock has fallen ≥20% from its recent three-month high. Pattern points to capitulation - irrespective of stage. Of interest as a potential probing-bet rebound candidate.</div>' +
+        '<div class="gcap gcap-g2"><b>Basing below recent high</b>Stock in plausible/probable Stage 2 uptrend but 15%+ below its recent swing high. Pattern points to a deeper consolidation while the broader uptrend remains intact - watch for a base completing.</div>' +
+        '<div class="gcap gcap-g3"><b>Collapsing</b>Price 30%+ below its 52-week high AND the stock has fallen 20%+ from its recent three-month high. Pattern points to capitulation - irrespective of stage. Of interest as a potential probing-bet rebound candidate.</div>' +
       '</div>' +
       '<div class="table-wrap">' +
         '<table class="data-table" id="pi-main-table">' +
@@ -380,16 +365,14 @@
             '<col class="c-name"><col class="c-taxon">' +
             '<col class="c-price"><col class="c-52wh"><col class="c-pullback">' +
             '<col class="c-ma150"><col class="c-ma200">' +
-            '<col class="c-score">' +
             '<col class="c-pattern"><col class="c-pattern"><col class="c-pattern">' +
           '</colgroup>' +
           '<thead>' +
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
-              '<th class="gh-rating grp-start-rating" colspan="1">Patterns 0/3</th>' +
-              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Pullback to retest</th>' +
-              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="1">Basing below high</th>' +
-              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="1">Collapsing</th>' +
+              '<th class="gh-g1 grp-start-g1" colspan="1">Pullback to retest</th>' +
+              '<th class="gh-g2 grp-start-g2" colspan="1">Basing below high</th>' +
+              '<th class="gh-g3 grp-start-g3" colspan="1">Collapsing</th>' +
             '</tr>' +
             '<tr class="col-header-row" id="pi-col-header-row"></tr>' +
           '</thead>' +

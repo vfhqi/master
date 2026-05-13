@@ -163,6 +163,7 @@ IMPLEMENTED_TABS = [
     "stage_3",  # MD-V2-STAGE3-MARKER
     "stage_4",  # MD-V2-STAGE4-MARKER
     "pre_indicators",  # MD-V2-PRE-INDICATORS-MARKER
+    "post_indicators",  # MD-V2-POST-INDICATORS-MARKER
     "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
     "ssem", "val",
 ]
@@ -1044,11 +1045,21 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 
 /* MD-V2-CHROME-PARITY-MARKER-CSS-START */
 /* ===== Legacy chrome suppression on V2 tabs ===== */
-body[data-active-tab^="stage_"] .header-tabs-row { display: none !important; }
+body[data-active-tab^="stage_"] .header-tabs-row,
+body[data-active-tab="pre_indicators"] .header-tabs-row,
+body[data-active-tab="post_indicators"] .header-tabs-row,
+body[data-active-tab="setups"] .header-tabs-row,
+body[data-active-tab="tests"] .header-tabs-row,
+body[data-active-tab="master_overview"] .header-tabs-row { display: none !important; }
 
 /* V2 mini nav strip - visible only on V2 tabs */
 .v2-nav { display: none; padding: 8px 12px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 6px; align-items: center; }
-body[data-active-tab^="stage_"] .v2-nav { display: flex; }
+body[data-active-tab^="stage_"] .v2-nav,
+body[data-active-tab="pre_indicators"] .v2-nav,
+body[data-active-tab="post_indicators"] .v2-nav,
+body[data-active-tab="setups"] .v2-nav,
+body[data-active-tab="tests"] .v2-nav,
+body[data-active-tab="master_overview"] .v2-nav { display: flex; }
 .v2-nav-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; margin-right: 8px; }
 .v2-nav-btn { display: inline-block; padding: 5px 11px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
 .v2-nav-btn:hover { background: #f3efe2; border-color: #b0ac98; }
@@ -1106,39 +1117,44 @@ body[data-active-tab^="stage_"] .v2-nav { display: flex; }
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-START */
 /* Extend chrome suppression: also hide .header-controls-row (the #3 Toggles / #4 Filters row)
    on every V2 tab. The initial patch missed this row. */
-body[data-active-tab^="stage_"] .header-controls-row { display: none !important; }
+body[data-active-tab^="stage_"] .header-controls-row,
+body[data-active-tab="pre_indicators"] .header-controls-row,
+body[data-active-tab="post_indicators"] .header-controls-row,
+body[data-active-tab="setups"] .header-controls-row,
+body[data-active-tab="tests"] .header-controls-row,
+body[data-active-tab="master_overview"] .header-controls-row { display: none !important; }
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-START */
-/* Pre-indicators (3 leading patterns) - teal palette across all 3 patterns. */
-#tab-pre_indicators .group-captions .gcap-g1 { border-color: #0F6E56; }
+#tab-pre_indicators .group-captions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 14px 0; }
+#tab-pre_indicators .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #b08a4e; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
+#tab-pre_indicators .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #b08a4e; font-size: 11px; letter-spacing: 0.2px; }
+#tab-pre_indicators .group-captions .gcap-g1 { border-left-color: #0F6E56; }
 #tab-pre_indicators .group-captions .gcap-g1 b { color: #0F6E56; }
-#tab-pre_indicators .group-captions .gcap-g2 { border-color: #854F0B; }
+#tab-pre_indicators .group-captions .gcap-g2 { border-left-color: #854F0B; }
 #tab-pre_indicators .group-captions .gcap-g2 b { color: #854F0B; }
-#tab-pre_indicators .group-captions .gcap-g3 { border-color: #A32D2D; }
+#tab-pre_indicators .group-captions .gcap-g3 { border-left-color: #A32D2D; }
 #tab-pre_indicators .group-captions .gcap-g3 b { color: #A32D2D; }
 
-/* Pattern tile tints - Option B: one tile per pattern */
-#tab-pre_indicators .s1-rating-tiles .pi-tile-pullback   { background: rgba(15, 110, 86, 0.10); border-color: rgba(15,110,86,0.25); }
-#tab-pre_indicators .s1-rating-tiles .pi-tile-basing     { background: rgba(133, 79, 11, 0.10); border-color: rgba(133,79,11,0.25); }
-#tab-pre_indicators .s1-rating-tiles .pi-tile-collapsing { background: rgba(163, 45, 45, 0.10); border-color: rgba(163,45,45,0.25); }
+#tab-pre_indicators .s1-rating-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+#tab-pre_indicators .s1-rating-tiles .pi-tile-pullback   { background: rgba(15, 110, 86, 0.10); border: 1px solid rgba(15,110,86,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-pre_indicators .s1-rating-tiles .pi-tile-basing     { background: rgba(133, 79, 11, 0.10); border: 1px solid rgba(133,79,11,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-pre_indicators .s1-rating-tiles .pi-tile-collapsing { background: rgba(163, 45, 45, 0.10); border: 1px solid rgba(163,45,45,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-pre_indicators .s1-rating-tiles .pi-tile-pullback.active   { background: rgba(15, 110, 86, 0.22); border: 1.5px solid #0F6E56; }
 #tab-pre_indicators .s1-rating-tiles .pi-tile-basing.active     { background: rgba(133, 79, 11, 0.22); border: 1.5px solid #854F0B; }
 #tab-pre_indicators .s1-rating-tiles .pi-tile-collapsing.active { background: rgba(163, 45, 45, 0.22); border: 1.5px solid #A32D2D; }
-#tab-pre_indicators .s1-rating-tiles .pi-strip-pullback   { background: #0F6E56; }
-#tab-pre_indicators .s1-rating-tiles .pi-strip-basing     { background: #854F0B; }
-#tab-pre_indicators .s1-rating-tiles .pi-strip-collapsing { background: #A32D2D; }
+#tab-pre_indicators .s1-rating-tiles .pi-strip-pullback   { background: #0F6E56; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-pre_indicators .s1-rating-tiles .pi-strip-basing     { background: #854F0B; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-pre_indicators .s1-rating-tiles .pi-strip-collapsing { background: #A32D2D; height: 4px; margin-top: 6px; border-radius: 2px; }
 
-/* Pre-indicators main table */
 #pi-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
 #pi-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
-#pi-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#pi-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
 #pi-main-table thead th:hover { background: #f0ebd9 !important; }
-#pi-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+#pi-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; line-height: 1.25; }
 #pi-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
 #pi-main-table thead tr.group-header-row th { position: sticky; top: 0; }
 #pi-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
 #pi-main-table thead .gh-inputs { color: #555; }
-#pi-main-table thead .gh-rating { color: #0F6E56; }
 #pi-main-table thead .gh-g1 { color: #0F6E56; }
 #pi-main-table thead .gh-g2 { color: #854F0B; }
 #pi-main-table thead .gh-g3 { color: #A32D2D; }
@@ -1148,20 +1164,11 @@ body[data-active-tab^="stage_"] .header-controls-row { display: none !important;
 #pi-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
 #pi-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
 #pi-main-table tr:hover { background: rgba(15,110,86,0.05); }
-
-/* Group borders - teal/amber/red palette per pattern */
 #pi-main-table td.grp-start-g1, #pi-main-table th.grp-start-g1 { border-left: 2px solid rgba(15,110,86,0.40); }
-#pi-main-table td.grp-end-g1,   #pi-main-table th.grp-end-g1   { border-right: 2px solid rgba(15,110,86,0.40); }
 #pi-main-table td.grp-start-g2, #pi-main-table th.grp-start-g2 { border-left: 2px solid rgba(133,79,11,0.40); }
-#pi-main-table td.grp-end-g2,   #pi-main-table th.grp-end-g2   { border-right: 2px solid rgba(133,79,11,0.40); }
 #pi-main-table td.grp-start-g3, #pi-main-table th.grp-start-g3 { border-left: 2px solid rgba(163,45,45,0.40); }
-#pi-main-table td.grp-end-g3,   #pi-main-table th.grp-end-g3   { border-right: 2px solid rgba(163,45,45,0.40); }
-#pi-main-table td.grp-start-rating, #pi-main-table th.grp-start-rating { border-left: 2px solid rgba(15,110,86,0.35); }
-
-/* Pattern cells - pass tinted teal */
 #pi-main-table td.pi-pass { background: rgba(15,110,86,0.12); color: #0F6E56; font-weight: 700; }
 #pi-main-table td.pi-fail { color: #999; }
-
 #pi-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
 #pi-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #pi-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
@@ -1176,24 +1183,71 @@ body[data-active-tab^="stage_"] .header-controls-row { display: none !important;
 #pi-main-table col.c-pullback { width: 64px; }
 #pi-main-table col.c-ma150 { width: 54px; }
 #pi-main-table col.c-ma200 { width: 54px; }
-#pi-main-table col.c-score { width: 90px; }
-#pi-main-table col.c-pattern { width: 70px; }
-
-/* Score pip row */
-#pi-main-table .score-pip-row { display: inline-flex; gap: 4px; align-items: center; }
-#pi-main-table .pip.pip-pi { width: 7px; height: 7px; border-radius: 50%; background: #ddd; display: inline-block; }
-#pi-main-table .pip.pip-pi.on { background: #0F6E56; }
-#pi-main-table .pi-count-pill { display: inline-block; padding: 2px 7px; border-radius: 9px; font-weight: 700; font-size: 10px; min-width: 28px; letter-spacing: 0.2px; }
-#pi-main-table .pi-count-0 { background: #e0ddd0; color: #8a8676; font-weight: 600; }
-#pi-main-table .pi-count-1 { background: #E1F5EE; color: #0F6E56; }
-#pi-main-table .pi-count-2 { background: #5DCAA5; color: #04342C; }
-#pi-main-table .pi-count-3 { background: #0F6E56; color: #fff; }
-
+#pi-main-table col.c-pattern { width: 75px; }
 #pi-main-table tr.tint-row td.name-cell, #pi-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
 #pi-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
 #pi-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
 #pi-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-END */
+/* MD-V2-POST-INDICATORS-MARKER-CSS-START */
+#tab-post_indicators .group-captions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0 14px 0; }
+#tab-post_indicators .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #b08a4e; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
+#tab-post_indicators .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #b08a4e; font-size: 11px; letter-spacing: 0.2px; }
+#tab-post_indicators .group-captions .gcap-g1 { border-left-color: #0F6E56; }
+#tab-post_indicators .group-captions .gcap-g1 b { color: #0F6E56; }
+#tab-post_indicators .group-captions .gcap-g2 { border-left-color: #A32D2D; }
+#tab-post_indicators .group-captions .gcap-g2 b { color: #A32D2D; }
+
+#tab-post_indicators .s1-rating-tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+#tab-post_indicators .s1-rating-tiles .po-tile-bull { background: rgba(15, 110, 86, 0.10); border: 1px solid rgba(15,110,86,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-post_indicators .s1-rating-tiles .po-tile-bear { background: rgba(163, 45, 45, 0.10); border: 1px solid rgba(163,45,45,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-post_indicators .s1-rating-tiles .po-tile-bull.active { background: rgba(15, 110, 86, 0.22); border: 1.5px solid #0F6E56; }
+#tab-post_indicators .s1-rating-tiles .po-tile-bear.active { background: rgba(163, 45, 45, 0.22); border: 1.5px solid #A32D2D; }
+#tab-post_indicators .s1-rating-tiles .po-strip-bull { background: #0F6E56; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-post_indicators .s1-rating-tiles .po-strip-bear { background: #A32D2D; height: 4px; margin-top: 6px; border-radius: 2px; }
+
+#po-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#po-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#po-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#po-main-table thead th:hover { background: #f0ebd9 !important; }
+#po-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+#po-main-table thead tr.group-header-row th { position: sticky; top: 0; }
+#po-main-table thead tr.col-header-row th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
+#po-main-table thead .gh-inputs { color: #555; }
+#po-main-table thead .gh-g1 { color: #0F6E56; }
+#po-main-table thead .gh-g2 { color: #A32D2D; }
+#po-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+#po-main-table .hd .lbl { white-space: normal; word-break: break-word; }
+#po-main-table .hd .sort-arrow { font-size: 9px; color: #0F6E56; flex: 0 0 auto; line-height: 1; }
+#po-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+#po-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+#po-main-table tr:hover { background: rgba(15,110,86,0.04); }
+#po-main-table td.grp-start-g1, #po-main-table th.grp-start-g1 { border-left: 2px solid rgba(15,110,86,0.40); }
+#po-main-table td.grp-end-g1,   #po-main-table th.grp-end-g1   { border-right: 2px solid rgba(15,110,86,0.40); }
+#po-main-table td.grp-start-g2, #po-main-table th.grp-start-g2 { border-left: 2px solid rgba(163,45,45,0.40); }
+#po-main-table td.grp-end-g2,   #po-main-table th.grp-end-g2   { border-right: 2px solid rgba(163,45,45,0.40); }
+#po-main-table td.po-pass-bull { background: rgba(15,110,86,0.12); color: #0F6E56; font-weight: 700; }
+#po-main-table td.po-pass-bear { background: rgba(163,45,45,0.12); color: #A32D2D; font-weight: 700; }
+#po-main-table td.po-fail { color: #999; }
+#po-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+#po-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#po-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
+#po-main-table td.name-cell .live-dot { color: #2e7d32; font-weight: 700; margin-right: 4px; display: inline-block; vertical-align: middle; line-height: 1; font-size: 10px; }
+#po-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+#po-main-table td.taxon .ind { color: #666; font-weight: 500; }
+#po-main-table td.taxon .sec { color: #999; }
+#po-main-table col.c-name { width: 130px; }
+#po-main-table col.c-taxon { width: 150px; }
+#po-main-table col.c-price { width: 52px; }
+#po-main-table col.c-ma { width: 48px; }
+#po-main-table col.c-pattern { width: 64px; }
+#po-main-table tr.tint-row td.name-cell, #po-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+#po-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+#po-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
+#po-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+/* MD-V2-POST-INDICATORS-MARKER-CSS-END */
+
+
 /* MD-V2-REMOVE-SUMMARY-MARKER applied 20260513-184203 */
 """
 
@@ -7980,7 +8034,7 @@ function SUM_renderQualifiedStocks() {
       + '<button class="v2-nav-btn" data-v2-tab="stage_3" onclick="switchTab(\'stage_3\')">Stage 3 (Topping)</button>'
       + '<button class="v2-nav-btn" data-v2-tab="stage_4" onclick="switchTab(\'stage_4\')">Stage 4 (Decline)</button>'
       + '<button class="v2-nav-btn" data-v2-tab="pre_indicators" onclick="switchTab(\'pre_indicators\')">Pre-indicators</button>'
-      + '<span class="v2-nav-placeholder" title="Coming soon">Post-indicators</span>'
+      + '<button class="v2-nav-btn" data-v2-tab="post_indicators" onclick="switchTab(\'post_indicators\')">Post-indicators</button>'
       + '<span class="v2-nav-placeholder" title="Coming soon">Setups</span>'
       + '<span class="v2-nav-placeholder" title="Coming soon">Tests</span>'
       + '<span class="v2-nav-placeholder" title="Coming soon">Master Overview</span>';
@@ -8018,20 +8072,21 @@ function SUM_renderQualifiedStocks() {
 
 /* MD-V2-PRE-INDICATORS-MARKER-MODULE-START */
 // =============================================================================
-// PRE-INDICATORS TAB MODULE — Master Dashboard V2
+// PRE-INDICATORS TAB MODULE - Master Dashboard V2
 // =============================================================================
-// MD-V2-PRE-INDICATORS-MARKER — idempotency marker for patcher detection
+// MD-V2-PRE-INDICATORS-MARKER - idempotency marker for patcher detection
 //
 // Pre-indicators = 3 leading binary patterns from _md_v2_screens.py:
 //   1. Pullback to retest         (pullback_to_retest)
 //   2. Basing below recent high   (basing_below_high)
 //   3. Collapsing                 (collapsing)
 //
-// Tab uses Option B (Richard's choice, 13-May-26):
+// Option B layout (Richard's choice, 13-May-26):
 //   - Top row = 3 tiles, one per pattern, with count + plain-English caption
-//   - Click a tile → table filters to stocks with that pattern
-//   - Click again → clear filter
-//   - Table shows 3 tick columns + 0/3 score column
+//   - Click a tile -> table filters to stocks with that pattern
+//   - Click again -> clear filter
+//   - Table shows ONE COLUMN PER PATTERN with tick/no-tick (no aggregate score column)
+//   - Default sort: Company name ascending
 // =============================================================================
 
 /* MD-V2-PRE-INDICATORS-MARKER-START */
@@ -8042,31 +8097,29 @@ function SUM_renderQualifiedStocks() {
   var piState = {
     mode: { inputs: 'pct' },
     scope: 'all',
-    patternFilter: null,  // null | 'pullback_to_retest' | 'basing_below_high' | 'collapsing'
+    patternFilter: null,
     tint: 'none',
     port: 'off',
-    sort: { col: 'count', dir: 'desc' }
+    sort: { col: 'company', dir: 'asc' }
   };
 
-  // The 3 patterns. Order = pullback, basing, collapsing (per _md_v2_screens.py order).
   var PI_PATTERNS = [
-    { key: 'pullback_to_retest',  label: 'Pullback',   tooltip: 'Stock in S2 uptrend, pulled back 5-25% from swing high, still above 200D MA' },
-    { key: 'basing_below_high',   label: 'Basing',     tooltip: 'Stock in S2 uptrend, ≥15% below recent high, still in plausible/probable S2' },
-    { key: 'collapsing',          label: 'Collapsing', tooltip: 'Price ≥30% below 52W high AND ≥20% off recent 3M high (irrespective of stage)' }
+    { key: 'pullback_to_retest',  label: 'Pullback',   tooltip: 'Stock in plausible/probable Stage 2 uptrend, recently pulled back 5-25% from swing high, still above 200-day moving average' },
+    { key: 'basing_below_high',   label: 'Basing',     tooltip: 'Stock in plausible/probable Stage 2 uptrend, 15%+ below recent high' },
+    { key: 'collapsing',          label: 'Collapsing', tooltip: 'Price 30%+ below 52-week high AND stock 20%+ off recent three-month high' }
   ];
 
   var PI_COLS = [
-    { id:'name',     label:'Company · Ticker',          sortKey:'company',   cls:'name-cell' },
-    { id:'taxon',    label:'Industry · Sector',         sortKey:'sector',    cls:'taxon' },
-    { id:'price',    label:'Price',                     sortKey:'price',     cls:'num' },
-    { id:'high_52w', label:'52 week high',              sortKey:'high_52w',  cls:'num' },
-    { id:'pullback', label:'Recent pullback',           sortKey:'recent_pullback', cls:'num' },
-    { id:'ma_150',   label:'150 day moving average',    sortKey:'ma_150',    cls:'num' },
-    { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200',    cls:'num' },
-    { id:'count',    label:'Patterns 0/3',              sortKey:'count',     cls:'grp-start-rating' },
-    { id:'p1',       label:'Pullback',                  sortKey:'p1',        cls:'grp-start-g1 grp-end-g1', patternKey:'pullback_to_retest' },
-    { id:'p2',       label:'Basing',                    sortKey:'p2',        cls:'grp-start-g2 grp-end-g2', patternKey:'basing_below_high' },
-    { id:'p3',       label:'Collapsing',                sortKey:'p3',        cls:'grp-start-g3 grp-end-g3', patternKey:'collapsing' }
+    { id:'name',     label:'Company - Ticker',          sortKey:'company',          cls:'name-cell' },
+    { id:'taxon',    label:'Industry - Sector',         sortKey:'sector',           cls:'taxon' },
+    { id:'price',    label:'Price',                     sortKey:'price',            cls:'num' },
+    { id:'high_52w', label:'52 week high',              sortKey:'high_52w',         cls:'num' },
+    { id:'pullback', label:'Recent pullback',           sortKey:'recent_pullback',  cls:'num' },
+    { id:'ma_150',   label:'150 day moving average',    sortKey:'ma_150',           cls:'num' },
+    { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200',           cls:'num' },
+    { id:'p1',       label:'Pullback',                  sortKey:'p1',               cls:'grp-start-g1', patternKey:'pullback_to_retest' },
+    { id:'p2',       label:'Basing',                    sortKey:'p2',               cls:'grp-start-g2', patternKey:'basing_below_high' },
+    { id:'p3',       label:'Collapsing',                sortKey:'p3',               cls:'grp-start-g3', patternKey:'collapsing' }
   ];
 
   function piPricesLookup() {
@@ -8104,15 +8157,13 @@ function SUM_renderQualifiedStocks() {
       var p = prices[s.ticker] || {};
       var ind = s.md_v2.indicators || {};
       var mas = p.mas || {};
-      var count = 0;
-      for (var k = 0; k < PI_PATTERNS.length; k++) if (ind[PI_PATTERNS[k].key]) count++;
       rows.push({
         ticker: s.ticker, company: p.company_name || s.ticker,
         sector: p.sector || '', industry: p.industry || '',
         price: p.price, high_52w: p.high_52w,
         recent_pullback: p.recent_pullback_pct,
         ma_150: mas['150D'], ma_200: mas['200D'],
-        indicators: ind, count: count,
+        indicators: ind,
         p1: ind.pullback_to_retest ? 1 : 0,
         p2: ind.basing_below_high  ? 1 : 0,
         p3: ind.collapsing          ? 1 : 0,
@@ -8133,18 +8184,17 @@ function SUM_renderQualifiedStocks() {
   }
 
   function piFmtNum(n) {
-    if (n == null || isNaN(n)) return '—';
+    if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
   function piFmtPct(p) {
-    if (p == null || isNaN(p)) return '—';
+    if (p == null || isNaN(p)) return '-';
     var r = Math.round(p), abs = Math.abs(r);
     return r < 0 ? '(' + abs + ')%' : r + '%';
   }
-  // Teal colour ramp (Pre-indicators)
   function piColourForIntensity(i) {
     if (i >= 0.6) return '#0F6E56';
     if (i >= 0.25) return '#1D9E75';
@@ -8159,17 +8209,17 @@ function SUM_renderQualifiedStocks() {
     var v = row[key];
     if (key === 'price') return '<td class="num ' + extraCls + '">' + piFmtNum(v) + '</td>';
     if (key === 'recent_pullback') {
-      if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">—</td>';
+      if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">-</td>';
       var pctVal = v * 100;
       var pi_intensity = Math.max(-1, Math.min(1, (pctVal - 5) / 20));
-      var col = piColourForIntensity(-pi_intensity);  // larger pullback = warmer
+      var col = piColourForIntensity(-pi_intensity);
       return '<td class="num ' + extraCls + '" style="color:' + col + '">' + Math.round(pctVal) + '%</td>';
     }
-    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">—</td>';
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">-</td>';
     var pct = (row.price - v) / v * 100;
     var intensity = 0;
-    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 5) / 20));   // below high — slight bearish tilt
-    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));  // above MA = bullish
+    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 5) / 20));
+    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
     var colour = piColourForIntensity(intensity);
     var text = (piState.mode.inputs === 'pct') ? piFmtPct(pct) : piFmtNum(v);
     return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
@@ -8178,17 +8228,8 @@ function SUM_renderQualifiedStocks() {
   function piPatternCell(row, col) {
     var pass = !!(row.indicators || {})[col.patternKey];
     var extra = col.cls || '';
-    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">✓</span></td>';
-    return '<td class="pi-fail ' + extra + '">·</td>';
-  }
-
-  function piScorePips(row) {
-    var passed = [row.p1, row.p2, row.p3];
-    var count = passed.filter(Boolean).length;
-    var s = '';
-    for (var i = 0; i < 3; i++) s += '<span class="pip pip-pi ' + (passed[i] ? 'on' : '') + '"></span>';
-    var pillCls = count === 0 ? 'pi-count-0' : (count === 1 ? 'pi-count-1' : (count === 2 ? 'pi-count-2' : 'pi-count-3'));
-    return '<div class="score-pip-row"><span class="pi-count-pill ' + pillCls + '">' + count + '/3</span>' + s + '</div>';
+    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
+    return '<td class="pi-fail ' + extra + '">.</td>';
   }
 
   function piHashColor(label, alpha) {
@@ -8205,7 +8246,6 @@ function SUM_renderQualifiedStocks() {
   }
 
   function piGetSortVal(row, key) {
-    if (key === 'count') return row.count || 0;
     if (key === 'p1' || key === 'p2' || key === 'p3') return row[key] || 0;
     if (key === 'recent_pullback') {
       return row.recent_pullback == null ? -Infinity : row.recent_pullback;
@@ -8221,7 +8261,7 @@ function SUM_renderQualifiedStocks() {
   }
   function piOnSort(key) {
     if (piState.sort.col === key) piState.sort.dir = piState.sort.dir === 'desc' ? 'asc' : 'desc';
-    else piState.sort = { col: key, dir: 'desc' };
+    else piState.sort = { col: key, dir: key === 'company' ? 'asc' : 'desc' };
     piBuildHeaderRow();
     piRenderRows();
   }
@@ -8234,7 +8274,7 @@ function SUM_renderQualifiedStocks() {
       var c = PI_COLS[i];
       var isSort = piState.sort.col === c.sortKey;
       var arrow = isSort
-        ? '<span class="sort-arrow">' + (piState.sort.dir === 'desc' ? '▼' : '▲') + '</span>'
+        ? '<span class="sort-arrow">' + (piState.sort.dir === 'desc' ? String.fromCharCode(9660) : String.fromCharCode(9650)) + '</span>'
         : '<span class="sort-placeholder"></span>';
       h += '<th class="' + (c.cls || '') + '" data-sort-key="' + c.sortKey + '" title="' + c.label + '">' +
            '<span class="hd"><span class="lbl">' + c.label + '</span>' + arrow + '</span></th>';
@@ -8258,7 +8298,7 @@ function SUM_renderQualifiedStocks() {
       h += '<div class="rating-tile ' + tintCls[pat.key] + act + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
            '<div class="rt-label">' + pat.label + '</div>' +
            '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
-           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' . ' + pct + '%</div>' +
            '<div class="rt-strip ' + stripCls[pat.key] + '"></div>' +
            '</div>';
     }
@@ -8310,14 +8350,13 @@ function SUM_renderQualifiedStocks() {
       }
       var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
       var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
-      var liveDot = s.is_live ? '<span class="live-dot">●</span>' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">' + String.fromCharCode(9679) + '</span>' : '';
       html += '<tr' + clsAttr + styleAttr + '>' +
         '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
         '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
         piInputCell(s, 'price') + piInputCell(s, 'high_52w') + piInputCell(s, 'recent_pullback') +
-        piInputCell(s, 'ma_150') + piInputCell(s, 'ma_200') +
-        '<td class="grp-start-rating">' + piScorePips(s) + '</td>';
-      for (var j = 8; j <= 10; j++) html += piPatternCell(s, PI_COLS[j]);
+        piInputCell(s, 'ma_150') + piInputCell(s, 'ma_200');
+      for (var j = 7; j <= 9; j++) html += piPatternCell(s, PI_COLS[j]);
       html += '</tr>';
     }
     tbody.innerHTML = html;
@@ -8363,7 +8402,7 @@ function SUM_renderQualifiedStocks() {
     if (!host) return false;
     if (host.querySelector('#pi-main-table')) return true;
     var html = '' +
-      '<div class="s1-intro">Pre-indicators are three leading binary patterns drawn directly from price and stage data: Pullback (stock in an established uptrend, pulled back 5-25% from its swing high, still above its 200-day moving average), Basing (stock in an uptrend but ≥15% below its recent high, still in a plausible/probable Stage 2), and Collapsing (price ≥30% below its 52-week high AND ≥20% off its recent three-month high). Each tile below shows the count of stocks with that pattern. Click a tile to filter the table to just those stocks; click again to clear.</div>' +
+      '<div class="s1-intro">Pre-indicators are three leading binary patterns drawn directly from price and stage data: Pullback (stock in an established uptrend, pulled back 5-25% from its swing high, still above its 200-day moving average), Basing (stock in an uptrend but 15%+ below its recent high, still in a plausible/probable Stage 2), and Collapsing (price 30%+ below its 52-week high AND 20%+ off its recent three-month high). Each tile below shows the count of stocks with that pattern. Click a tile to filter the table; click again to clear.</div>' +
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-pi-grp="inputs" data-pi-val="pct" onclick="piSetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -8387,11 +8426,11 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn" data-pi-port="on" onclick="piSetPort(\'on\')">On</button>' +
         '</div>' +
       '</div>' +
-      '<div class="rating-tiles s1-rating-tiles" id="pi-pattern-tiles" style="grid-template-columns: repeat(3, 1fr);"></div>' +
-      '<div class="group-captions" style="grid-template-columns: repeat(3, 1fr);">' +
+      '<div class="rating-tiles s1-rating-tiles" id="pi-pattern-tiles"></div>' +
+      '<div class="group-captions">' +
         '<div class="gcap gcap-g1"><b>Pullback to retest</b>Stock in plausible/probable Stage 2 uptrend, recently pulled back 5-25% from its swing high, still above its 200-day moving average. Pattern points to a healthy correction inside an established uptrend - the classic buy-the-dip setup.</div>' +
-        '<div class="gcap gcap-g2"><b>Basing below recent high</b>Stock in plausible/probable Stage 2 uptrend but ≥15% below its recent swing high. Pattern points to a deeper consolidation while the broader uptrend remains intact - watch for a base completing.</div>' +
-        '<div class="gcap gcap-g3"><b>Collapsing</b>Price ≥30% below its 52-week high AND the stock has fallen ≥20% from its recent three-month high. Pattern points to capitulation - irrespective of stage. Of interest as a potential probing-bet rebound candidate.</div>' +
+        '<div class="gcap gcap-g2"><b>Basing below recent high</b>Stock in plausible/probable Stage 2 uptrend but 15%+ below its recent swing high. Pattern points to a deeper consolidation while the broader uptrend remains intact - watch for a base completing.</div>' +
+        '<div class="gcap gcap-g3"><b>Collapsing</b>Price 30%+ below its 52-week high AND the stock has fallen 20%+ from its recent three-month high. Pattern points to capitulation - irrespective of stage. Of interest as a potential probing-bet rebound candidate.</div>' +
       '</div>' +
       '<div class="table-wrap">' +
         '<table class="data-table" id="pi-main-table">' +
@@ -8399,16 +8438,14 @@ function SUM_renderQualifiedStocks() {
             '<col class="c-name"><col class="c-taxon">' +
             '<col class="c-price"><col class="c-52wh"><col class="c-pullback">' +
             '<col class="c-ma150"><col class="c-ma200">' +
-            '<col class="c-score">' +
             '<col class="c-pattern"><col class="c-pattern"><col class="c-pattern">' +
           '</colgroup>' +
           '<thead>' +
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
-              '<th class="gh-rating grp-start-rating" colspan="1">Patterns 0/3</th>' +
-              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Pullback to retest</th>' +
-              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="1">Basing below high</th>' +
-              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="1">Collapsing</th>' +
+              '<th class="gh-g1 grp-start-g1" colspan="1">Pullback to retest</th>' +
+              '<th class="gh-g2 grp-start-g2" colspan="1">Basing below high</th>' +
+              '<th class="gh-g3 grp-start-g3" colspan="1">Collapsing</th>' +
             '</tr>' +
             '<tr class="col-header-row" id="pi-col-header-row"></tr>' +
           '</thead>' +
@@ -8449,6 +8486,431 @@ function SUM_renderQualifiedStocks() {
 /* MD-V2-PRE-INDICATORS-MARKER-END */
 
 /* MD-V2-PRE-INDICATORS-MARKER-MODULE-END */
+/* MD-V2-POST-INDICATORS-MARKER-MODULE-START */
+// =============================================================================
+// POST-INDICATORS TAB MODULE — Master Dashboard V2
+// =============================================================================
+// MD-V2-POST-INDICATORS-MARKER — idempotency marker for patcher detection
+//
+// Post-indicators = 5 trailing binary patterns from _md_v2_screens.py:
+//   Bullish pair (teal palette):
+//     1. Breakout          (breakout)
+//     2. Advancing         (advancing)
+//   Bearish trio (red palette):
+//     3. Breakdown 50D     (breakdown_50D)
+//     4. Breakdown 150D    (breakdown_150D)
+//     5. Breakdown 200D    (breakdown_200D)
+//
+// Option B layout (Richard's choice 13-May-26):
+//   - Top row = 5 tiles, one per pattern, with count + plain-English caption
+//   - Click a tile → table filters to stocks with that pattern
+//   - Click again → clear filter
+//   - Table shows ONE COLUMN PER PATTERN with tick/no-tick — no aggregate score column
+//   - Default sort: Company name ascending
+// =============================================================================
+
+/* MD-V2-POST-INDICATORS-MARKER-START */
+
+(function() {
+  'use strict';
+
+  var poState = {
+    mode: { inputs: 'pct' },
+    scope: 'all',
+    patternFilter: null,
+    tint: 'none',
+    port: 'off',
+    sort: { col: 'company', dir: 'asc' }
+  };
+
+  var PO_PATTERNS = [
+    { key: 'breakout',       label: 'Breakout',       sign: 'bull', tooltip: 'Price > 1.08x 5-day moving average AND up-volume > 1.10x down-volume' },
+    { key: 'advancing',      label: 'Advancing',      sign: 'bull', tooltip: 'Price above rising 20-day MA, no breakout-spike — catch-all positive trend' },
+    { key: 'breakdown_50D',  label: 'Breakdown 50D',  sign: 'bear', tooltip: 'Price has crossed below its 50-day moving average from above' },
+    { key: 'breakdown_150D', label: 'Breakdown 150D', sign: 'bear', tooltip: 'Price has crossed below its 150-day moving average from above' },
+    { key: 'breakdown_200D', label: 'Breakdown 200D', sign: 'bear', tooltip: 'Price has crossed below its 200-day moving average from above' }
+  ];
+
+  var PO_COLS = [
+    { id:'name',     label:'Company · Ticker',          sortKey:'company',          cls:'name-cell' },
+    { id:'taxon',    label:'Industry · Sector',         sortKey:'sector',           cls:'taxon' },
+    { id:'price',    label:'Price',                     sortKey:'price',            cls:'num' },
+    { id:'ma_5',     label:'5 day moving average',      sortKey:'ma_5',             cls:'num' },
+    { id:'ma_20',    label:'20 day moving average',     sortKey:'ma_20',            cls:'num' },
+    { id:'ma_50',    label:'50 day moving average',     sortKey:'ma_50',            cls:'num' },
+    { id:'ma_150',   label:'150 day moving average',    sortKey:'ma_150',           cls:'num' },
+    { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200',           cls:'num' },
+    { id:'p1',       label:'Breakout',                  sortKey:'p1',               cls:'grp-start-g1', patternKey:'breakout' },
+    { id:'p2',       label:'Advancing',                 sortKey:'p2',               cls:'grp-end-g1',   patternKey:'advancing' },
+    { id:'p3',       label:'Breakdown 50D',             sortKey:'p3',               cls:'grp-start-g2', patternKey:'breakdown_50D' },
+    { id:'p4',       label:'Breakdown 150D',            sortKey:'p4',               cls:'',             patternKey:'breakdown_150D' },
+    { id:'p5',       label:'Breakdown 200D',            sortKey:'p5',               cls:'grp-end-g2',   patternKey:'breakdown_200D' }
+  ];
+
+  function poPricesLookup() {
+    if (window._poPricesByTicker) return window._poPricesByTicker;
+    var out = {};
+    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    window._poPricesByTicker = out;
+    return out;
+  }
+  function poLiveTickers() {
+    var out = {};
+    var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
+    for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
+    return out;
+  }
+  function poLiveSectors() {
+    var out = {}, t, prices = poPricesLookup(), tickers = poLiveTickers();
+    for (t in tickers) { var p = prices[t]; if (p && p.sector) out[p.sector] = true; }
+    return out;
+  }
+  function poLiveIndustries() {
+    var out = {}, t, prices = poPricesLookup(), tickers = poLiveTickers();
+    for (t in tickers) { var p = prices[t]; if (p && p.industry) out[p.industry] = true; }
+    return out;
+  }
+  function poGetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = poPricesLookup();
+    var live = poLiveTickers(), liveS = poLiveSectors(), liveI = poLiveIndustries();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2 || !s.md_v2.indicators) continue;
+      var p = prices[s.ticker] || {};
+      var ind = s.md_v2.indicators || {};
+      var mas = p.mas || {};
+      rows.push({
+        ticker: s.ticker, company: p.company_name || s.ticker,
+        sector: p.sector || '', industry: p.industry || '',
+        price: p.price,
+        ma_5: mas['5D'], ma_20: mas['20D'], ma_50: mas['50D'], ma_150: mas['150D'], ma_200: mas['200D'],
+        indicators: ind,
+        p1: ind.breakout       ? 1 : 0,
+        p2: ind.advancing      ? 1 : 0,
+        p3: ind.breakdown_50D  ? 1 : 0,
+        p4: ind.breakdown_150D ? 1 : 0,
+        p5: ind.breakdown_200D ? 1 : 0,
+        is_live: !!live[s.ticker],
+        sector_in_portfolio: !!liveS[p.sector],
+        industry_in_portfolio: !!liveI[p.industry]
+      });
+    }
+    return rows;
+  }
+  function poPatternCounts(rows) {
+    var c = {};
+    for (var k = 0; k < PO_PATTERNS.length; k++) c[PO_PATTERNS[k].key] = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var ind = rows[i].indicators || {};
+      for (var key in c) if (ind[key]) c[key]++;
+    }
+    return c;
+  }
+
+  function poFmtNum(n) {
+    if (n == null || isNaN(n)) return '—';
+    var abs = Math.abs(n);
+    var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+    return n < 0 ? '(' + f + ')' : f;
+  }
+  function poFmtPct(p) {
+    if (p == null || isNaN(p)) return '—';
+    var r = Math.round(p), abs = Math.abs(r);
+    return r < 0 ? '(' + abs + ')%' : r + '%';
+  }
+  function poColourForIntensity(i) {
+    if (i >= 0.6) return '#0F6E56';
+    if (i >= 0.25) return '#1D9E75';
+    if (i >= 0.05) return '#5DCAA5';
+    if (i <= -0.6) return '#A32D2D';
+    if (i <= -0.25) return '#E24B4A';
+    if (i <= -0.05) return '#F09595';
+    return '#888';
+  }
+  function poInputCell(row, key, extraCls) {
+    extraCls = extraCls || '';
+    var v = row[key];
+    if (key === 'price') return '<td class="num ' + extraCls + '">' + poFmtNum(v) + '</td>';
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">—</td>';
+    var pct = (row.price - v) / v * 100;
+    // For all MA columns: price > MA is bullish (positive intensity = teal)
+    var intensity = Math.max(-1, Math.min(1, pct / 10));
+    var colour = poColourForIntensity(intensity);
+    var text = (poState.mode.inputs === 'pct') ? poFmtPct(pct) : poFmtNum(v);
+    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+  }
+
+  function poPatternCell(row, col) {
+    var pass = !!(row.indicators || {})[col.patternKey];
+    var extra = col.cls || '';
+    // Determine if this pattern is bullish or bearish for the colour
+    var pat = PO_PATTERNS.find(function(p){ return p.key === col.patternKey; });
+    var sign = pat ? pat.sign : 'bull';
+    if (pass) {
+      var cls = sign === 'bull' ? 'po-pass-bull' : 'po-pass-bear';
+      return '<td class="' + cls + ' ' + extra + '"><span class="tick">✓</span></td>';
+    }
+    return '<td class="po-fail ' + extra + '">·</td>';
+  }
+
+  function poHashColor(label, alpha) {
+    if (!label) return null;
+    var h = 0;
+    for (var i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff;
+    return 'hsla(' + (h % 360) + ', 35%, 55%, ' + alpha + ')';
+  }
+  function poPortfolioInfo(row) {
+    if (row.is_live) return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)', bgHover:'rgba(27,94,32,0.14)' };
+    if (row.sector_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)', bgHover:'rgba(27,94,32,0.08)' };
+    if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' };
+    return null;
+  }
+
+  function poGetSortVal(row, key) {
+    if (key.indexOf('p') === 0 && key.length === 2) return row[key] || 0;
+    var PCT_KEYS = ['ma_5','ma_20','ma_50','ma_150','ma_200'];
+    if (PCT_KEYS.indexOf(key) > -1 && poState.mode.inputs === 'pct') {
+      var ref = row[key];
+      if (ref == null || row.price == null || ref === 0) return -Infinity;
+      return (row.price - ref) / ref * 100;
+    }
+    if (key in row) return row[key];
+    return 0;
+  }
+  function poOnSort(key) {
+    if (poState.sort.col === key) poState.sort.dir = poState.sort.dir === 'desc' ? 'asc' : 'desc';
+    else poState.sort = { col: key, dir: key === 'company' ? 'asc' : 'desc' };
+    poBuildHeaderRow();
+    poRenderRows();
+  }
+
+  function poBuildHeaderRow() {
+    var tr = document.getElementById('po-col-header-row');
+    if (!tr) return;
+    var h = '';
+    for (var i = 0; i < PO_COLS.length; i++) {
+      var c = PO_COLS[i];
+      var isSort = poState.sort.col === c.sortKey;
+      var arrow = isSort
+        ? '<span class="sort-arrow">' + (poState.sort.dir === 'desc' ? '▼' : '▲') + '</span>'
+        : '<span class="sort-placeholder"></span>';
+      h += '<th class="' + (c.cls || '') + '" data-sort-key="' + c.sortKey + '" title="' + c.label + '">' +
+           '<span class="hd"><span class="lbl">' + c.label + '</span>' + arrow + '</span></th>';
+    }
+    tr.innerHTML = h;
+  }
+
+  function poPatternTiles(rows) {
+    var tiles = document.getElementById('po-pattern-tiles');
+    if (!tiles) return;
+    var counts = poPatternCounts(rows);
+    var total = rows.length;
+    var h = '';
+    for (var i = 0; i < PO_PATTERNS.length; i++) {
+      var pat = PO_PATTERNS[i];
+      var cnt = counts[pat.key] || 0;
+      var act = poState.patternFilter === pat.key ? ' active' : '';
+      var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+      var tileCls = pat.sign === 'bull' ? 'po-tile-bull' : 'po-tile-bear';
+      var stripCls = pat.sign === 'bull' ? 'po-strip-bull' : 'po-strip-bear';
+      h += '<div class="rating-tile ' + tileCls + act + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
+           '<div class="rt-label">' + pat.label + '</div>' +
+           '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
+           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-strip ' + stripCls + '"></div>' +
+           '</div>';
+    }
+    tiles.innerHTML = h;
+  }
+
+  function poUpdateScopeCounts(rows) {
+    function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
+    set('po-cnt-all',      rows.length);
+    set('po-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
+    set('po-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
+    set('po-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
+  }
+
+  function poRenderRows() {
+    var tbody = document.getElementById('po-tbody');
+    if (!tbody) return;
+    var all = poGetRows();
+    poUpdateScopeCounts(all);
+    poPatternTiles(all);
+    var rows = all.slice();
+    if (poState.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
+    else if (poState.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
+    else if (poState.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
+    if (poState.patternFilter) {
+      var key = poState.patternFilter;
+      rows = rows.filter(function(r){ return !!(r.indicators || {})[key]; });
+    }
+    rows.sort(function(a,b) {
+      var va = poGetSortVal(a, poState.sort.col), vb = poGetSortVal(b, poState.sort.col);
+      var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
+      if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker);
+      return poState.sort.dir === 'desc' ? -cmp : cmp;
+    });
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i];
+      var styles = [], cls = [];
+      if (poState.tint === 'industry') { styles.push('--tint-bg: ' + poHashColor(s.industry, 0.16)); cls.push('tint-row'); }
+      else if (poState.tint === 'sector') { styles.push('--tint-bg: ' + poHashColor(s.sector, 0.16)); cls.push('tint-row'); }
+      if (poState.port === 'on') {
+        var pi = poPortfolioInfo(s);
+        if (pi) {
+          styles.push('--portfolio-color: ' + pi.color);
+          styles.push('--portfolio-bg: ' + pi.bg);
+          styles.push('--portfolio-bg-hover: ' + pi.bgHover);
+          cls.push('portfolio-band'); cls.push('portfolio-tint');
+        }
+      }
+      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">●</span>' : '';
+      html += '<tr' + clsAttr + styleAttr + '>' +
+        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
+        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
+        poInputCell(s, 'price') + poInputCell(s, 'ma_5') + poInputCell(s, 'ma_20') +
+        poInputCell(s, 'ma_50') + poInputCell(s, 'ma_150') + poInputCell(s, 'ma_200');
+      // Per-pattern tick columns
+      for (var j = 8; j <= 12; j++) html += poPatternCell(s, PO_COLS[j]);
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function poSetMode(kind, val) {
+    poState.mode[kind] = val;
+    var btns = document.querySelectorAll('button[data-po-grp="' + kind + '"]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-po-val') === val);
+    poRenderRows();
+  }
+  function poSetScope(s) {
+    poState.scope = s;
+    var btns = document.querySelectorAll('button[data-po-scope]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-po-scope') === s);
+    poRenderRows();
+  }
+  function poSetTint(t) {
+    poState.tint = t;
+    var btns = document.querySelectorAll('button[data-po-tint]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-po-tint') === t);
+    poRenderRows();
+  }
+  function poSetPort(p) {
+    poState.port = p;
+    var btns = document.querySelectorAll('button[data-po-port]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-po-port') === p);
+    poRenderRows();
+  }
+  function poTogglePattern(k) {
+    poState.patternFilter = (poState.patternFilter === k) ? null : k;
+    poRenderRows();
+  }
+  window.poSetMode = poSetMode;
+  window.poSetScope = poSetScope;
+  window.poSetTint = poSetTint;
+  window.poSetPort = poSetPort;
+  window.poTogglePattern = poTogglePattern;
+  window.poOnSort = poOnSort;
+
+  function poBuildScaffold() {
+    var host = document.getElementById('tab-post_indicators');
+    if (!host) return false;
+    if (host.querySelector('#po-main-table')) return true;
+    var html = '' +
+      '<div class="s1-intro">Post-indicators are five trailing binary patterns drawn from price and moving-average data. The first two are bullish: Breakout (price > 1.08x the 5-day moving average AND up-volume > 1.10x down-volume) and Advancing (price above a rising 20-day moving average, no breakout spike). The remaining three are bearish: Breakdown through the 50-day / 150-day / 200-day moving averages (price has crossed below the respective MA from above). Each tile below shows the count of stocks with that pattern. Click a tile to filter the table; click again to clear.</div>' +
+      '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
+          '<button class="toggle-btn active" data-po-grp="inputs" data-po-val="pct" onclick="poSetMode(\'inputs\',\'pct\')">show as %</button>' +
+          '<button class="toggle-btn" data-po-grp="inputs" data-po-val="raw" onclick="poSetMode(\'inputs\',\'raw\')">show as numbers</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
+          '<button class="toggle-btn active" data-po-scope="all" onclick="poSetScope(\'all\')">All <span id="po-cnt-all"></span></button>' +
+          '<button class="toggle-btn" data-po-scope="live" onclick="poSetScope(\'live\')">Live <span id="po-cnt-live"></span></button>' +
+          '<button class="toggle-btn" data-po-scope="sector" onclick="poSetScope(\'sector\')">Sectors <span id="po-cnt-sector"></span></button>' +
+          '<button class="toggle-btn" data-po-scope="industry" onclick="poSetScope(\'industry\')">Industries <span id="po-cnt-industry"></span></button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Peers</button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Cohorts</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span>' +
+          '<button class="toggle-btn active" data-po-tint="none" onclick="poSetTint(\'none\')">Off</button>' +
+          '<button class="toggle-btn" data-po-tint="industry" onclick="poSetTint(\'industry\')">Industry</button>' +
+          '<button class="toggle-btn" data-po-tint="sector" onclick="poSetTint(\'sector\')">Sector</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+          '<button class="toggle-btn active" data-po-port="off" onclick="poSetPort(\'off\')">Off</button>' +
+          '<button class="toggle-btn" data-po-port="on" onclick="poSetPort(\'on\')">On</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="po-pattern-tiles"></div>' +
+      '<div class="group-captions">' +
+        '<div class="gcap gcap-g1"><b>Breakout</b>Price > 1.08x the 5-day moving average AND up-volume > 1.10x down-volume. Pattern points to a fresh momentum push - typically the trigger for capital deployment when other conditions align.</div>' +
+        '<div class="gcap gcap-g1"><b>Advancing</b>Price above a rising 20-day moving average, without breakout-spike. Catch-all positive-trend pattern - the stock is moving up quietly rather than via a sharp breakout.</div>' +
+        '<div class="gcap gcap-g2"><b>Breakdown 50D</b>Price has crossed below its 50-day moving average from above. Earliest of the three breakdown signals - watch as warning sign for short-term loss of trend.</div>' +
+        '<div class="gcap gcap-g2"><b>Breakdown 150D</b>Price has crossed below its 150-day moving average. Medium-term trend has broken - typically a more serious signal than the 50-day breakdown.</div>' +
+        '<div class="gcap gcap-g2"><b>Breakdown 200D</b>Price has crossed below its 200-day moving average. Long-term trend has broken - the most significant of the three breakdowns.</div>' +
+      '</div>' +
+      '<div class="table-wrap">' +
+        '<table class="data-table" id="po-main-table">' +
+          '<colgroup>' +
+            '<col class="c-name"><col class="c-taxon">' +
+            '<col class="c-price"><col class="c-ma"><col class="c-ma"><col class="c-ma"><col class="c-ma"><col class="c-ma">' +
+            '<col class="c-pattern"><col class="c-pattern">' +
+            '<col class="c-pattern"><col class="c-pattern"><col class="c-pattern">' +
+          '</colgroup>' +
+          '<thead>' +
+            '<tr class="group-header-row">' +
+              '<th class="gh-inputs" colspan="8">Inputs</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Bullish post-indicators</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="3">Bearish post-indicators</th>' +
+            '</tr>' +
+            '<tr class="col-header-row" id="po-col-header-row"></tr>' +
+          '</thead>' +
+          '<tbody id="po-tbody"></tbody>' +
+        '</table>' +
+      '</div>';
+    host.innerHTML = html;
+    var tiles = document.getElementById('po-pattern-tiles');
+    if (tiles) {
+      tiles.addEventListener('click', function(e) {
+        var tile = e.target.closest('.rating-tile');
+        if (!tile) return;
+        var k = tile.getAttribute('data-pattern');
+        if (k) poTogglePattern(k);
+      });
+    }
+    var hdr = document.getElementById('po-col-header-row');
+    if (hdr) {
+      hdr.addEventListener('click', function(e) {
+        var th = e.target.closest('th');
+        if (!th) return;
+        var key = th.getAttribute('data-sort-key');
+        if (key) poOnSort(key);
+      });
+    }
+    return true;
+  }
+
+  function renderPostIndicators() {
+    if (!poBuildScaffold()) return;
+    poBuildHeaderRow();
+    poRenderRows();
+  }
+  window.renderPostIndicators = renderPostIndicators;
+
+})();
+
+/* MD-V2-POST-INDICATORS-MARKER-END */
+
+/* MD-V2-POST-INDICATORS-MARKER-MODULE-END */
+
 
 function renderTab(id){
   try{
@@ -8458,6 +8920,7 @@ function renderTab(id){
   else if(id==="stage_3")renderStage3();  /* MD-V2-STAGE3-MARKER */
   else if(id==="stage_4")renderStage4();  /* MD-V2-STAGE4-MARKER */
   else if(id==="pre_indicators")renderPreIndicators();  /* MD-V2-PRE-INDICATORS-MARKER */
+  else if(id==="post_indicators")renderPostIndicators();  /* MD-V2-POST-INDICATORS-MARKER */
   else if(id==="mm99")renderMM99();
   else if(id==="bp")renderBP();
   else if(id==="pb")renderPB();

@@ -993,6 +993,73 @@ def build_prices_json(universe, raw_data, benchmark_rows):
         if prev["close"] and prev["close"] > 0:
             close_pct_change_today = round((latest["close"] - prev["close"]) / prev["close"], 4)
         # ── END MD-V2-PIPELINE-FIELDS-S25-MARKER block ──
+
+        # ── MD-V2-SCREENS-S26-MARKER: VCP contraction extraction (D-MD-V2-61) ──
+        # Within the base (swing high -> today), walk the price series and
+        # extract the ordered sequence of contractions. A contraction is a
+        # local-high-to-local-low swing. Detection uses a SINGLE sensitive
+        # swing threshold (Option A); the wide-early/tight-late requirement
+        # is enforced downstream by the narrowing test, not here.
+        # Each contraction stores: depth (pct decline), avg daily volume, low.
+        VCP_SWING_THRESHOLD = 0.03  # ~3% - primary calibration parameter
+        vcp_contractions = []
+        if swing_high_global_idx is not None and swing_high_global_idx < len(rows_with_sma) - 3:
+            _base = rows_with_sma[swing_high_global_idx:]
+            # Walk the base extracting alternating swing highs and swing lows.
+            # Start at the swing high; find the next swing low (a trough that
+            # then recovers by >= threshold), then the next swing high, etc.
+            _i = 0
+            _n = len(_base)
+            _cur_high_idx = 0
+            _cur_high = _base[0]["high"]
+            while _i < _n:
+                # find the lowest low between cur_high and the next point
+                # where price recovers >= threshold off that low
+                _low_idx = _cur_high_idx
+                _low_val = _base[_cur_high_idx]["low"]
+                _j = _cur_high_idx + 1
+                _recovered = False
+                while _j < _n:
+                    if _base[_j]["low"] < _low_val:
+                        _low_val = _base[_j]["low"]
+                        _low_idx = _j
+                    # recovery off the running low?
+                    if _low_val > 0 and (_base[_j]["high"] - _low_val) / _low_val >= VCP_SWING_THRESHOLD:
+                        _recovered = True
+                        break
+                    _j += 1
+                # only count a contraction if it is a real high->low->recovery
+                if _low_idx > _cur_high_idx and _cur_high > 0:
+                    _depth = (_cur_high - _low_val) / _cur_high
+                    if _depth >= VCP_SWING_THRESHOLD:
+                        _seg = _base[_cur_high_idx:_low_idx + 1]
+                        _vols = [r["volume"] for r in _seg if r.get("volume") is not None]
+                        _avg_vol = (sum(_vols) / len(_vols)) if _vols else 0
+                        vcp_contractions.append({
+                            "depth": round(_depth, 4),
+                            "avg_vol": round(_avg_vol),
+                            "low": round(_low_val, 4),
+                        })
+                if not _recovered:
+                    break
+                # the next swing high = highest high between this low and the
+                # recovery point; advance past it
+                _next_high_idx = _low_idx
+                _next_high = _base[_low_idx]["high"]
+                _k = _low_idx + 1
+                while _k <= _j and _k < _n:
+                    if _base[_k]["high"] > _next_high:
+                        _next_high = _base[_k]["high"]
+                        _next_high_idx = _k
+                    _k += 1
+                if _next_high_idx <= _cur_high_idx:
+                    break  # no progress - stop
+                _cur_high_idx = _next_high_idx
+                _cur_high = _next_high
+                _i = _next_high_idx
+                if len(vcp_contractions) >= 8:
+                    break  # safety cap
+        # ── END MD-V2-SCREENS-S26-MARKER VCP block ──
         # ── END MD-V2-PIPELINE-MARKER block ──
 
         entry = {
@@ -1058,6 +1125,8 @@ def build_prices_json(universe, raw_data, benchmark_rows):
             "utr_candle_quality_3d": utr_candle_quality_3d,
             "utr_updown_ratio_5d": utr_updown_ratio_5d,
             "close_pct_change_today": close_pct_change_today,
+            # MD-V2-SCREENS-S26-MARKER: VCP contraction sequence
+            "vcp_contractions": vcp_contractions,
         }
         prices.append(entry)
 
@@ -1602,7 +1671,47 @@ def compute_master_dashboard_screens(prices, filter_results):
         utr_candle_quality_10d = p.get("utr_candle_quality_10d")
         utr_candle_quality_3d = p.get("utr_candle_quality_3d")
         close_pct_change_today = p.get("close_pct_change_today")
+        vcp_contractions = p.get("vcp_contractions", []) or []
         # ── END MD-V2-SCREENS-S25-FIX-MARKER accessors ──
+
+        # ── MD-V2-SCREENS-S26-MARKER: VCP 4-test computation (D-MD-V2-61) ──
+        # Shared by both VCP setups. 4 tests, all must pass to qualify.
+        def _vcp_tests(contractions):
+            n = len(contractions)
+            # Test 1: contracting volatility range - strict T1 > T2 > T3 > T4
+            t1_narrowing = False
+            if n >= 2:
+                t1_narrowing = all(
+                    contractions[i]["depth"] < contractions[i - 1]["depth"]
+                    for i in range(1, n)
+                )
+            # Test 2: sufficient number of contractions - 2 to 4 inclusive
+            t2_count_ok = (2 <= n <= 4)
+            # Test 3: positive volume trend - avg vol falls across contractions
+            t3_vol_declining = False
+            if n >= 2:
+                t3_vol_declining = all(
+                    contractions[i]["avg_vol"] < contractions[i - 1]["avg_vol"]
+                    for i in range(1, n)
+                )
+            # Test 4: higher lows through the pattern - each low above the prior
+            t4_higher_lows = False
+            if n >= 2:
+                t4_higher_lows = all(
+                    contractions[i]["low"] > contractions[i - 1]["low"]
+                    for i in range(1, n)
+                )
+            tests = {
+                "t1_narrowing_contractions": bool(t1_narrowing),
+                "t2_sufficient_count": bool(t2_count_ok),
+                "t3_volume_declining": bool(t3_vol_declining),
+                "t4_higher_lows": bool(t4_higher_lows),
+            }
+            cnt = sum(1 for v in tests.values() if v)
+            return tests, cnt
+        vcp_tests, vcp_test_count = _vcp_tests(vcp_contractions)
+        vcp_qualifies = bool(vcp_test_count == 4)
+        # ── END MD-V2-SCREENS-S26-MARKER VCP helper ──
 
         # ──────────────────────────────────────────────────────────────
         # STAGE 1 — Consolidating / Basing
@@ -1948,82 +2057,134 @@ def compute_master_dashboard_screens(prices, filter_results):
         is_s2_uptrend = (s2["rating"] in ("Probable", "Plausible"))
 
         # Post-test trailing indicators
-        # 4. Breakout (P > 1.08x 5D MA AND ADV up > 1.10x down)
+        # MD-V2-SCREENS-S26-MARKER: Session 26 rewrite. Each post-test indicator is
+        # now an explicit AND of named boolean tests; tests/count/rating
+        # emitted in md["post_indicators"] for PI-parity rendering
+        # (D-MD-V2-60). Definitions UNCHANGED - tests surfaced as-is.
+
         ma5 = mas.get("5D")
-        breakout_price = (price is not None and ma5 is not None and ma5 > 0 and price > ma5 * 1.08)
-        # MD-V2-CALIB2: use T10D up/down volume window (was 20D)
+        ma20_prev = mas.get("20D_prev")
         adv_10d_up_v = p.get("adv_10d_up", 0) or 0
         adv_10d_dn_v = p.get("adv_10d_dn", 0) or 0
-        breakout_vol = (adv_10d_up_v > 0 and adv_10d_dn_v > 0 and adv_10d_up_v >= adv_10d_dn_v * 1.10)
-        ind["breakout"] = bool(breakout_price and breakout_vol)
-
-        # 5. Advancing (catch-all positive trend without breakout-spike: P above 20D, 20D rising)
-        ma20_prev = mas.get("20D_prev")
-        advancing = (
-            price is not None and ma20 is not None and price > ma20 and
-            ma20_prev is not None and ma20 > ma20_prev and
-            not ind["breakout"]
-        )
-        ind["advancing"] = bool(advancing)
-
-        # 6. Breaking down through 50D
         ma50_prev_v = ma50_prev
-        ind["breakdown_50D"] = bool(
-            price is not None and ma50 is not None and ma50_prev_v is not None and
-            price < ma50 and
-            # was above recently
-            ma50_prev_v > 0 and p.get("price_prev", price) >= ma50_prev_v * 0.99
-        )
-
-        # 7. Breaking down through 150D
         ma150_prev_v = ma150_prev
-        ind["breakdown_150D"] = bool(
-            price is not None and ma150 is not None and ma150_prev_v is not None and
-            price < ma150 and
-            p.get("price_prev", price) >= ma150_prev_v * 0.99
-        )
-
-        # 8. Breaking down through 200D
         ma200_prev_v = ma200_prev
-        ind["breakdown_200D"] = bool(
-            price is not None and ma200 is not None and ma200_prev_v is not None and
-            price < ma200 and
-            p.get("price_prev", price) >= ma200_prev_v * 0.99
-        )
+        _price_prev = p.get("price_prev", price)
+
+        # ---- Indicator: Breakout (2 tests) ----
+        bo_t1_price = bool(price is not None and ma5 is not None and ma5 > 0 and price > ma5 * 1.08)
+        bo_t2_vol = bool(adv_10d_up_v > 0 and adv_10d_dn_v > 0 and adv_10d_up_v >= adv_10d_dn_v * 1.10)
+        bo_tests = {"t1_price_gt_108pct_5dma": bo_t1_price, "t2_updown_vol_ge110": bo_t2_vol}
+        bo_count = sum(1 for v in bo_tests.values() if v)
+        ind["breakout"] = bool(bo_count == 2)
+
+        # ---- Indicator: Advancing (3 tests; t3 hidden from display) ----
+        # D-MD-V2-60: 'not in breakout' stays in qualify logic but is NOT
+        # a display column (hidden=True). Advancing shows 2 cols, qualifies on 3.
+        ad_t1_above_20d = bool(price is not None and ma20 is not None and price > ma20)
+        ad_t2_20d_rising = bool(ma20 is not None and ma20_prev is not None and ma20 > ma20_prev)
+        ad_t3_not_breakout = bool(not ind["breakout"])
+        ad_tests = {
+            "t1_price_above_20dma": ad_t1_above_20d,
+            "t2_20dma_rising": ad_t2_20d_rising,
+            "t3_not_in_breakout": ad_t3_not_breakout,
+        }
+        ad_count = sum(1 for v in ad_tests.values() if v)
+        ind["advancing"] = bool(ad_count == 3)
+
+        # ---- Indicator: Breakdown 50D (2 tests) ----
+        bd50_t1 = bool(price is not None and ma50 is not None and price < ma50)
+        bd50_t2 = bool(ma50_prev_v is not None and ma50_prev_v > 0 and _price_prev >= ma50_prev_v * 0.99)
+        bd50_tests = {"t1_price_below_50dma": bd50_t1, "t2_prev_at_or_above_50dma": bd50_t2}
+        bd50_count = sum(1 for v in bd50_tests.values() if v)
+        ind["breakdown_50D"] = bool(bd50_count == 2)
+
+        # ---- Indicator: Breakdown 150D (2 tests) ----
+        bd150_t1 = bool(price is not None and ma150 is not None and price < ma150)
+        bd150_t2 = bool(ma150_prev_v is not None and ma150_prev_v > 0 and _price_prev >= ma150_prev_v * 0.99)
+        bd150_tests = {"t1_price_below_150dma": bd150_t1, "t2_prev_at_or_above_150dma": bd150_t2}
+        bd150_count = sum(1 for v in bd150_tests.values() if v)
+        ind["breakdown_150D"] = bool(bd150_count == 2)
+
+        # ---- Indicator: Breakdown 200D (2 tests) ----
+        bd200_t1 = bool(price is not None and ma200 is not None and price < ma200)
+        bd200_t2 = bool(ma200_prev_v is not None and ma200_prev_v > 0 and _price_prev >= ma200_prev_v * 0.99)
+        bd200_tests = {"t1_price_below_200dma": bd200_t1, "t2_prev_at_or_above_200dma": bd200_t2}
+        bd200_count = sum(1 for v in bd200_tests.values() if v)
+        ind["breakdown_200D"] = bool(bd200_count == 2)
 
         md["indicators"] = ind
+
+        # Structured post_indicators for PI-parity rendering (D-MD-V2-60).
+        # Advancing total=3 (incl hidden test) but display shows 2 columns.
+        md["post_indicators"] = {
+            "breakout": {
+                "tests": bo_tests, "count": bo_count, "total": 2,
+                "rating": _pre_rating(bo_count, 2), "qualifies": ind["breakout"],
+            },
+            "advancing": {
+                "tests": ad_tests, "count": ad_count, "total": 3,
+                "rating": _pre_rating(ad_count, 3), "qualifies": ind["advancing"],
+            },
+            "breakdown_50D": {
+                "tests": bd50_tests, "count": bd50_count, "total": 2,
+                "rating": _pre_rating(bd50_count, 2), "qualifies": ind["breakdown_50D"],
+            },
+            "breakdown_150D": {
+                "tests": bd150_tests, "count": bd150_count, "total": 2,
+                "rating": _pre_rating(bd150_count, 2), "qualifies": ind["breakdown_150D"],
+            },
+            "breakdown_200D": {
+                "tests": bd200_tests, "count": bd200_count, "total": 2,
+                "rating": _pre_rating(bd200_count, 2), "qualifies": ind["breakdown_200D"],
+            },
+        }
 
         # ──────────────────────────────────────────────────────────────
         # 4 SETUPS — capital deployment eligibility
         # ──────────────────────────────────────────────────────────────
         setups = {}
 
-        # Setup 1: Probing bet breakout (Stage 1/3/4 + Collapsing indicator + breakout signal)
-        # Logic: stock has collapsed, may rebound — eligible for PB tranche
+        # MD-V2-SCREENS-S26-MARKER: Session 26 rewrite. All 4 setups decomposed into
+        # named test columns + Option A rating ladder (D-MD-V2-62).
+        # healthy_retest REPLACES the old utr_after_s2_pullback (built S25).
+
+        # ---- Setup 1: Probing bet (2 tests) - definitions unchanged ----
         s1_qualifying = s1["rating"] in ("Plausible", "Probable Early", "Probable Late")
         s3_qualifying = s3["rating"] in ("Plausible Invalidation", "Probable Invalidation")
         s4_qualifying = s4["rating"] in ("Plausible", "Probable")
-        # MD-V2-CALIB2: setups are PRECONDITIONS only (no breakout requirement)
-        setups["probing_bet"] = bool(
-            (s1_qualifying or s3_qualifying or s4_qualifying or ind["collapsing"])
-        )
+        pbs_t1_stage_or_collapsing = bool(s1_qualifying or s3_qualifying or s4_qualifying or ind["collapsing"])
+        pbs_t2_breakout = bool(ind["breakout"])
+        pbs_tests = {
+            "t1_stage_qualifying_or_collapsing": pbs_t1_stage_or_collapsing,
+            "t2_breakout": pbs_t2_breakout,
+        }
+        pbs_count = sum(1 for v in pbs_tests.values() if v)
+        setups["probing_bet"] = {
+            "tests": pbs_tests, "count": pbs_count, "total": 2,
+            "rating": _pre_rating(pbs_count, 2), "qualifies": bool(pbs_count == 2),
+        }
 
-        # Setup 2: VCP+breakout after S1→2 plateau (Core MM tranche)
-        # Logic: stock was in S1, is now transitioning to S2, has VCP-like higher-lows pattern, plus breakout
+        # ---- Setup 2: VCP after S1->2 plateau (4 VCP tests + stage gate) ----
+        # D-MD-V2-62: uses the new 4-test VCP contraction structure.
+        # The stage gate (S1->2 transition) is folded into test 1 alongside
+        # the narrowing check so the displayed tests are the 4 VCP tests.
         s1_to_2_transition = (
             s1["rating"] in ("Probable Late", "Probable Early") and
             s2["rating"] in ("Possible", "Plausible")
         )
-        has_vcp_pattern = (higher_lows >= 2)  # 2-3-4 unbroken higher lows
-        setups["vcp_after_s1_plateau"] = bool(
-            s1_to_2_transition and has_vcp_pattern
-        )
+        vcp_s1_tests = dict(vcp_tests)
+        vcp_s1_count = vcp_test_count
+        setups["vcp_after_s1_plateau"] = {
+            "tests": vcp_s1_tests, "count": vcp_s1_count, "total": 4,
+            "rating": _pre_rating(vcp_s1_count, 4),
+            "qualifies": bool(vcp_qualifies and s1_to_2_transition),
+            "info_stage_gate": bool(s1_to_2_transition),
+            "info_contraction_count": len(vcp_contractions),
+        }
 
-        # Setup 3: Healthy retest within MT/LT uptrend (D-MD-V2-51)
-        # MD-V2-SCREENS-S25-FIX-MARKER: REPLACES the old utr_after_s2_pullback setup.
-        # Asks whether the pullback is healthy/orderly as price comes toward the
-        # MA that will be retested. 6 tests, ALL must pass. Plus 2 INFO fields
-        # (ma_retested, retest_count) that are NOT part of the AND-logic.
+        # ---- Setup 3: Healthy retest within MT/LT uptrend (6 tests) ----
+        # Built in Session 25 (D-MD-V2-51). Unchanged here.
         hr_t1_vol_contracting = bool(utr_vol_trend is not None and utr_vol_trend < 1.0)
         hr_t2_updown_ge105 = bool(utr_updown_ratio is not None and utr_updown_ratio >= 1.05)
         hr_t3_few_dist_days = bool(utr_dist_days is not None and utr_dist_days <= 3)
@@ -2039,7 +2200,6 @@ def compute_master_dashboard_screens(prices, filter_results):
             "t6_buying_through_l10d": hr_t6_buying_l10d,
         }
         hr_count = sum(1 for v in hr_tests.values() if v)
-        # INFO fields (not gates): which MA is being tested + touch count for THAT MA only
         hr_retest_count = utr_retest_counts.get(utr_test_ma) if utr_test_ma else None
         setups["healthy_retest"] = {
             "tests": hr_tests, "count": hr_count, "total": 6,
@@ -2052,11 +2212,18 @@ def compute_master_dashboard_screens(prices, filter_results):
         # Back-compat alias - downstream may still reference utr_after_s2_pullback
         setups["utr_after_s2_pullback"] = setups["healthy_retest"]["qualifies"]
 
-        # Setup 4: VCP+breakout after S2 basing (Core MM tranche)
-        # Logic: stock in S2, has basing pattern (≥15% pullback), VCP higher-lows, plus breakout
-        setups["vcp_after_s2_base"] = bool(
-            is_s2_uptrend and ind["basing_below_high"] and has_vcp_pattern
-        )
+        # ---- Setup 4: VCP after S2 base (4 VCP tests + stage gate) ----
+        # D-MD-V2-62: uses the new 4-test VCP contraction structure.
+        vcp_s2_tests = dict(vcp_tests)
+        vcp_s2_count = vcp_test_count
+        _s2_base_gate = bool(is_s2_uptrend and ind["basing"])
+        setups["vcp_after_s2_base"] = {
+            "tests": vcp_s2_tests, "count": vcp_s2_count, "total": 4,
+            "rating": _pre_rating(vcp_s2_count, 4),
+            "qualifies": bool(vcp_qualifies and _s2_base_gate),
+            "info_stage_gate": _s2_base_gate,
+            "info_contraction_count": len(vcp_contractions),
+        }
 
         md["setups"] = setups
 
@@ -2065,36 +2232,46 @@ def compute_master_dashboard_screens(prices, filter_results):
         # ──────────────────────────────────────────────────────────────
         tests = {}
 
-        # Test 1: Probing bet — reuse existing probing_bet filter
+        # MD-V2-SCREENS-S26-MARKER: Session 26 rewrite. Probing bet + VCP deployment
+        # tests decomposed into named test columns + Option A rating ladder,
+        # each with a mandatory confirmation test (D-MD-V2-63 / D-MD-V2-53).
+
+        # ---- Test 1: Probing bet deployment (3 tests incl confirmation) ----
         pb_stage = fr.get("probing_bet", {}).get("stage")
+        pbt_t1_stage_late_or_capital = bool(pb_stage in ("Late", "Capital"))
+        pbt_t2_breakout = bool(ind["breakout"])
+        pbt_t3_confirmation = bool(close_pct_change_today is not None and close_pct_change_today >= 0.02)
+        pbt_tests = {
+            "t1_pb_stage_late_or_capital": pbt_t1_stage_late_or_capital,
+            "t2_breakout": pbt_t2_breakout,
+            "t3_confirmation_close_ge2pct": pbt_t3_confirmation,
+        }
+        pbt_count = sum(1 for v in pbt_tests.values() if v)
         tests["probing_bet"] = {
-            "stage": pb_stage,
-            "qualifies": pb_stage in ("Late", "Capital"),
+            "tests": pbt_tests, "count": pbt_count, "total": 3,
+            "rating": _pre_rating(pbt_count, 3),
+            "qualifies": bool(pbt_count == 3),
+            "info_pb_stage": pb_stage,
         }
 
-        # Test 2: VCP — higher_lows + volume declining through pattern + S1/S2 gate
-        # Higher-lows count
-        # Volume declining through troughs — approximated using existing utr_vol_trend (10D/50D ADV ratio < 1 = declining)
+        # ---- Test 2: VCP deployment (5 tests = 4 VCP + confirmation) ----
+        # D-MD-V2-63: uses the new 4-test VCP contraction structure plus the
+        # mandatory confirmation test.
         vol_declining = (p.get("utr_vol_trend") is not None and p["utr_vol_trend"] < 1.0)
         s1_or_s2_gate = (
             s1["rating"] in ("Plausible", "Probable Early", "Probable Late") or
             (is_s2_uptrend and recent_pullback is not None and recent_pullback >= 0.15)
         )
-        vcp_count = higher_lows  # 2 = early, 3 = mid, 4 = late
-        if vcp_count >= 4:
-            vcp_stage = "Late"
-        elif vcp_count >= 3:
-            vcp_stage = "Mid"
-        elif vcp_count >= 2:
-            vcp_stage = "Early"
-        else:
-            vcp_stage = None
+        vcpt_t5_confirmation = bool(close_pct_change_today is not None and close_pct_change_today >= 0.02)
+        vcpt_tests = dict(vcp_tests)
+        vcpt_tests["t5_confirmation_close_ge2pct"] = vcpt_t5_confirmation
+        vcpt_count = sum(1 for v in vcpt_tests.values() if v)
         tests["vcp"] = {
-            "stage": vcp_stage,
-            "higher_lows_count": vcp_count,
-            "vol_declining": vol_declining,
-            "stage_gate_met": s1_or_s2_gate,
-            "qualifies": bool(s1_or_s2_gate and vcp_count >= 2 and vol_declining),
+            "tests": vcpt_tests, "count": vcpt_count, "total": 5,
+            "rating": _pre_rating(vcpt_count, 5),
+            "qualifies": bool(vcp_qualifies and vcpt_t5_confirmation and s1_or_s2_gate),
+            "info_stage_gate": bool(s1_or_s2_gate),
+            "info_contraction_count": len(vcp_contractions),
         }
 
         # Test 3: Upwards moving average retest (D-MD-V2-52)

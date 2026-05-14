@@ -154,6 +154,8 @@ TABS = [
     {"id": "setups", "label": "Setups", "accent": "#BA7517"},
     # MD-V2-TESTS-MARKER - Capital qualification tests (3 tests)
     {"id": "tests", "label": "Tests", "accent": "#0F6E56"},
+    # MD-V2-MASTER-OVERVIEW-S27-MARKER - synoptic rating matrix, default landing tab
+    {"id": "master_overview", "label": "Master Overview", "accent": "#1b3d5c"},
     # Data / reference tabs
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
@@ -172,6 +174,7 @@ IMPLEMENTED_TABS = [
     "post_indicators",  # MD-V2-POST-INDICATORS-MARKER
     "setups",  # MD-V2-SETUPS-MARKER
     "tests",  # MD-V2-TESTS-MARKER
+    "master_overview",  # MD-V2-MASTER-OVERVIEW-S27-MARKER
     "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
     "ssem", "val",
 ]
@@ -1490,62 +1493,67 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #tab-setups .s1-rating-tiles .pi-strip-navy { background: #185FA5; height: 4px; margin-top: 6px; border-radius: 2px; }
 /* MD-V2-SETUPS-MARKER-CSS-END */
 /* MD-V2-TESTS-MARKER-CSS-START */
-/* Session 26 - generated from PI v3 CSS template, namespaced to #tab-tests */
-/* Session 25 rebuild (D-MD-V2-49,-50,-55,-56,-57,-58) */
-#tab-tests .group-captions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 14px 0; }
+/* MD-V2-TESTS-S27-MARKER: Session 27 rebuild - 4 deployment tests, in
+   totality, 4-stage info block, Collapsing-rating info column, L5D/L20D
+   recent-trigger windows. Base structure from the S26 ct CSS; this block
+   adds the 4th pattern colour family + the new column kinds. */
+#tab-tests .group-captions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0 14px 0; }
 #tab-tests .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #b08a4e; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
 #tab-tests .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #b08a4e; font-size: 11px; letter-spacing: 0.2px; }
 #tab-tests .group-captions .gcap-g1 { border-left-color: #0F6E56; }
 #tab-tests .group-captions .gcap-g1 b { color: #0F6E56; }
 #tab-tests .group-captions .gcap-g2 { border-left-color: #1D7A4E; }
 #tab-tests .group-captions .gcap-g2 b { color: #1D7A4E; }
-#tab-tests .group-captions .gcap-g3 { border-left-color: #A32D2D; }
-#tab-tests .group-captions .gcap-g3 b { color: #A32D2D; }
+#tab-tests .group-captions .gcap-g3 { border-left-color: #185FA5; }
+#tab-tests .group-captions .gcap-g3 b { color: #185FA5; }
+#tab-tests .group-captions .gcap-g4 { border-left-color: #BA7517; }
+#tab-tests .group-captions .gcap-g4 b { color: #BA7517; }
 
-#tab-tests .s1-rating-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+#tab-tests .s1-rating-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 #tab-tests .s1-rating-tiles .pi-tile-pullback   { background: rgba(15, 110, 86, 0.10); border: 1px solid rgba(15,110,86,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-tests .s1-rating-tiles .pi-tile-basing     { background: rgba(29, 122, 78, 0.10); border: 1px solid rgba(29,122,78,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
-#tab-tests .s1-rating-tiles .pi-tile-collapsing { background: rgba(163, 45, 45, 0.10); border: 1px solid rgba(163,45,45,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-tests .s1-rating-tiles .pi-tile-pullback.active   { background: rgba(15, 110, 86, 0.22); border: 1.5px solid #0F6E56; }
 #tab-tests .s1-rating-tiles .pi-tile-basing.active     { background: rgba(29, 122, 78, 0.22); border: 1.5px solid #1D7A4E; }
-#tab-tests .s1-rating-tiles .pi-tile-collapsing.active { background: rgba(163, 45, 45, 0.22); border: 1.5px solid #A32D2D; }
 #tab-tests .s1-rating-tiles .pi-strip-pullback   { background: #0F6E56; height: 4px; margin-top: 6px; border-radius: 2px; }
 #tab-tests .s1-rating-tiles .pi-strip-basing     { background: #1D7A4E; height: 4px; margin-top: 6px; border-radius: 2px; }
-#tab-tests .s1-rating-tiles .pi-strip-collapsing { background: #A32D2D; height: 4px; margin-top: 6px; border-radius: 2px; }
-/* D-MD-V2-57: pass-count breakdown line - smaller text than the master count */
+/* D-MD-V2-57: pass-count breakdown line */
 #tab-tests .s1-rating-tiles .rt-breakdown { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.35; }
 
 #ct-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
 #ct-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
 #ct-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
 #ct-main-table thead th:hover { background: #f0ebd9 !important; }
-/* Super-group banner row (D-MD-V2-56) */
-#ct-main-table thead .super-group-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; padding: 5px 3px; cursor: default; line-height: 1.25; }
-#ct-main-table thead .super-group-row th:hover { background: #f3efe2 !important; }
-#ct-main-table thead .super-group-row th.sg-spacer { background: #fbfaf5 !important; }
-#ct-main-table thead .super-group-row th.sg-positive { color: #0F6E56; border-bottom: 2px solid rgba(15,110,86,0.45); }
-#ct-main-table thead .super-group-row th.sg-negative { color: #A32D2D; border-bottom: 2px solid rgba(163,45,45,0.45); }
 #ct-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; line-height: 1.25; }
 #ct-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
-#ct-main-table thead tr.super-group-row  th { position: sticky; top: 0; }
-#ct-main-table thead tr.group-header-row th { position: sticky; top: 24px; }
-#ct-main-table thead tr.col-header-row   th { position: sticky; top: 48px; border-top: 1px solid #e0dcc8; }
+/* S27: two header rows only (no super-group row). group at top:0, cols at top:24px. */
+#ct-main-table thead tr.group-header-row th { position: sticky; top: 0; }
+#ct-main-table thead tr.col-header-row   th { position: sticky; top: 24px; border-top: 1px solid #e0dcc8; }
 #ct-main-table thead .gh-inputs { color: #555; }
+#ct-main-table thead .gh-stageinfo { color: #7a6a3a; }
 #ct-main-table thead .gh-g1 { color: #0F6E56; }
 #ct-main-table thead .gh-g2 { color: #1D7A4E; }
-#ct-main-table thead .gh-g3 { color: #A32D2D; }
+#ct-main-table thead .gh-g3 { color: #185FA5; }
+#ct-main-table thead .gh-g4 { color: #BA7517; }
 #ct-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
 #ct-main-table .hd .lbl { white-space: normal; word-break: break-word; }
 #ct-main-table .hd .sort-arrow { font-size: 9px; color: #0F6E56; flex: 0 0 auto; line-height: 1; }
 #ct-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
 #ct-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
 #ct-main-table tr:hover { background: rgba(15,110,86,0.05); }
+/* group-start borders - 4 pattern families + stage-info block */
+#ct-main-table td.grp-start-stageinfo, #ct-main-table th.grp-start-stageinfo { border-left: 2px solid rgba(122,106,58,0.40); }
 #ct-main-table td.grp-start-g1, #ct-main-table th.grp-start-g1 { border-left: 2px solid rgba(15,110,86,0.40); }
 #ct-main-table td.grp-start-g2, #ct-main-table th.grp-start-g2 { border-left: 2px solid rgba(29,122,78,0.40); }
-#ct-main-table td.grp-start-g3, #ct-main-table th.grp-start-g3 { border-left: 2px solid rgba(163,45,45,0.40); }
+#ct-main-table td.grp-start-g3, #ct-main-table th.grp-start-g3 { border-left: 2px solid rgba(24,95,165,0.40); }
+#ct-main-table td.grp-start-g4, #ct-main-table th.grp-start-g4 { border-left: 2px solid rgba(186,117,23,0.40); }
 #ct-main-table td.pi-pass { background: rgba(15,110,86,0.12); color: #0F6E56; font-weight: 700; }
 #ct-main-table td.pi-fail { color: #999; }
-/* Rating + score column group per pattern (D-MD-V2-55) */
+/* test-column kind tints: setup / gate / vcp / trigger get a faint top accent */
+#ct-main-table td.ct-test-gate.pi-fail    { background: rgba(122,106,58,0.04); }
+#ct-main-table td.ct-test-setup.pi-fail   { background: rgba(60,90,120,0.03); }
+#ct-main-table td.ct-test-vcp.pi-fail     { background: rgba(29,122,78,0.03); }
+#ct-main-table td.ct-test-trigger.pi-fail { background: rgba(186,117,23,0.04); }
+/* Rating + score column group (D-MD-V2-55) */
 #ct-main-table td.pi-rating-cell { padding: 3px 4px; }
 #ct-main-table .pi-pill { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
 #ct-main-table .pi-pill-tint-prob { background: #0F6E56; color: #fff; }
@@ -1557,6 +1565,22 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #ct-main-table .pi-pip-row .pip { width: 6px; height: 6px; border-radius: 50%; background: #d8d4c4; display: inline-block; }
 #ct-main-table .pi-pip-row .pip.on { background: #0F6E56; }
 #ct-main-table .pi-pip-row .pi-score-num { font-size: 9px; color: #777; margin-left: 3px; font-weight: 600; }
+/* 4-stage info block + Collapsing-rating info column - muted, info-only */
+#ct-main-table td.ct-stage-info-cell, #ct-main-table td.ct-info-cell { padding: 3px 4px; }
+#ct-main-table .ct-info-label { display: inline-block; padding: 2px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
+#ct-main-table td.ct-stage-info-cell.tint-prob .ct-info-label, #ct-main-table td.ct-info-cell.tint-prob .ct-info-label { background: rgba(15,110,86,0.22); color: #0a4a3a; }
+#ct-main-table td.ct-stage-info-cell.tint-pla  .ct-info-label, #ct-main-table td.ct-info-cell.tint-pla  .ct-info-label { background: rgba(15,110,86,0.13); color: #3a6a5a; }
+#ct-main-table td.ct-stage-info-cell.tint-pos  .ct-info-label, #ct-main-table td.ct-info-cell.tint-pos  .ct-info-label { background: rgba(15,110,86,0.07); color: #6a7a72; }
+#ct-main-table td.ct-stage-info-cell.tint-none .ct-info-label, #ct-main-table td.ct-info-cell.tint-none .ct-info-label { background: #f0ede1; color: #aaa; }
+/* L5D / L20D recent-trigger window cells (D-MD-V2-67) */
+#ct-main-table td.ct-window-col { padding: 3px 4px; font-size: 10px; }
+#ct-main-table td.ct-window-fired-recent { background: rgba(15,110,86,0.16); }
+#ct-main-table td.ct-window-fired-recent .ct-window-label { color: #0a4a3a; font-weight: 700; }
+#ct-main-table td.ct-window-fired-older { background: rgba(186,117,23,0.14); }
+#ct-main-table td.ct-window-fired-older .ct-window-label { color: #7a4e0a; font-weight: 600; }
+#ct-main-table td.ct-window-none { color: #bbb; }
+#ct-main-table td.ct-window-building { color: #b59a5a; font-style: italic; font-size: 9px; }
+#ct-main-table td.ct-window-na { color: #ccc; }
 #ct-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
 #ct-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #ct-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
@@ -1572,9 +1596,12 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #ct-main-table col.c-ma150 { width: 48px; }
 #ct-main-table col.c-ma200 { width: 48px; }
 #ct-main-table col.c-pullback { width: 58px; }
+#ct-main-table col.c-stageinfo { width: 56px; }
 #ct-main-table col.c-rating { width: 64px; }
 #ct-main-table col.c-score { width: 52px; }
 #ct-main-table col.c-test { width: 64px; }
+#ct-main-table col.c-info { width: 60px; }
+#ct-main-table col.c-window { width: 52px; }
 #ct-main-table tr.tint-row td.name-cell, #ct-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
 #ct-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
 #ct-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
@@ -1586,8 +1613,6 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #tab-tests .pi-chip-pullback.on { background: #0F6E56; color: #fff; border-color: #0F6E56; font-weight: 500; }
 #tab-tests .pi-chip-basing { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; }
 #tab-tests .pi-chip-basing.on { background: #1D7A4E; color: #fff; border-color: #1D7A4E; font-weight: 500; }
-#tab-tests .pi-chip-collapsing { background: #FCEBEB; color: #A32D2D; border-color: #F7C1C1; }
-#tab-tests .pi-chip-collapsing.on { background: #A32D2D; color: #fff; border-color: #A32D2D; font-weight: 500; }
 #tab-tests .pi-tier-chip:hover { filter: brightness(0.96); }
 #tab-tests .s1-rating-tiles .rating-tile.active { box-shadow: inset 0 0 0 1.5px currentColor; }
 #tab-tests .pi-chip-amber { background: #FAEEDA; color: #854F0B; border-color: #FAC775; }
@@ -1601,6 +1626,37 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #tab-tests .s1-rating-tiles .pi-tile-navy.active { background: rgba(24,95,165,0.22); border: 1.5px solid #185FA5; }
 #tab-tests .s1-rating-tiles .pi-strip-navy { background: #185FA5; height: 4px; margin-top: 6px; border-radius: 2px; }
 /* MD-V2-TESTS-MARKER-CSS-END */
+
+/* MD-V2-MASTER-OVERVIEW-MARKER-CSS-START */
+/* MD-V2-MASTER-OVERVIEW-S27-MARKER: Master Overview tab - synoptic rating
+   matrix. Basic table; funnel banner + other visualisations parked. */
+#mo-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#mo-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#mo-main-table thead th { background: #f3efe2 !important; border-bottom: 1px solid #e0dcc8; padding: 9px 10px; text-align: center; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: #555; }
+#mo-main-table thead th.mo-screen-col { text-align: left; width: 320px; }
+#mo-main-table thead th.mo-tier-col { width: 110px; }
+#mo-main-table thead th.mo-total-col { width: 110px; color: #888; }
+#mo-main-table td { padding: 7px 10px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; font-variant-numeric: tabular-nums; }
+/* section banner rows */
+#mo-main-table tr.mo-section-row td.mo-section-cell { text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 7px 10px; background: #f3efe2; }
+#mo-main-table tr.mo-sec-stages   td.mo-section-cell { color: #1b5e20; border-left: 3px solid #1b5e20; }
+#mo-main-table tr.mo-sec-pretest  td.mo-section-cell { color: #0F6E56; border-left: 3px solid #0F6E56; }
+#mo-main-table tr.mo-sec-posttest td.mo-section-cell { color: #A32D2D; border-left: 3px solid #A32D2D; }
+#mo-main-table tr.mo-sec-setups   td.mo-section-cell { color: #BA7517; border-left: 3px solid #BA7517; }
+#mo-main-table tr.mo-sec-tests    td.mo-section-cell { color: #185FA5; border-left: 3px solid #185FA5; }
+/* data rows */
+#mo-main-table tr.mo-data-row:hover { background: rgba(15,110,86,0.05); }
+#mo-main-table td.mo-screen-cell { text-align: left; font-weight: 600; color: #2a2a2a; }
+#mo-main-table td.mo-cell { cursor: pointer; font-weight: 600; transition: filter 0.12s; }
+#mo-main-table td.mo-cell:hover { filter: brightness(0.94); outline: 1.5px solid rgba(15,110,86,0.4); outline-offset: -1.5px; }
+#mo-main-table td.mo-cell.mo-zero { color: #c4c0b0; cursor: default; font-weight: 400; }
+#mo-main-table td.mo-cell.mo-zero:hover { filter: none; outline: none; }
+#mo-main-table td.mo-t-none.mo-has  { background: #f0ede1; color: #999; }
+#mo-main-table td.mo-t-pos.mo-has   { background: rgba(15,110,86,0.10); color: #3a6a5a; }
+#mo-main-table td.mo-t-pla.mo-has   { background: rgba(15,110,86,0.20); color: #1a5446; }
+#mo-main-table td.mo-t-prob.mo-has  { background: rgba(15,110,86,0.34); color: #0a3a2e; }
+#mo-main-table td.mo-total-cell { color: #777; font-weight: 700; background: #faf8f0; }
+/* MD-V2-MASTER-OVERVIEW-MARKER-CSS-END */
 
 
 
@@ -8405,7 +8461,9 @@ function SUM_renderQualifiedStocks() {
       + '<span class="v2-nav-grp-label">Capital deployment</span>'
       + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests" onclick="switchTab(\'tests\')">Capital deployment tests</button>'
       + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-placeholder" title="Coming soon">Master Overview</span>';
+      + '<span class="v2-nav-sep"></span>'
+      + '<span class="v2-nav-grp-label">Overview</span>'
+      + '<button class="v2-nav-btn v2-grp-overview" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Master Overview</button>';  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
     hdr.appendChild(nav);
   }
   function syncV2State(id) {
@@ -8429,10 +8487,10 @@ function SUM_renderQualifiedStocks() {
   };
   // Initial sync on load (currentTab is already set by bootstrap)
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ ensureV2Nav(); syncV2State(window.currentTab || 'stage_1'); });
+    document.addEventListener('DOMContentLoaded', function(){ ensureV2Nav(); syncV2State(window.currentTab || 'master_overview'); });
   } else {
     ensureV2Nav();
-    syncV2State(window.currentTab || 'stage_1');
+    syncV2State(window.currentTab || 'master_overview');
   }
 })();
 /* MD-V2-CHROME-PARITY-MARKER-JS-END */
@@ -9085,6 +9143,19 @@ function SUM_renderQualifiedStocks() {
   }
 
   function renderPreIndicators() {
+    // MD-V2-MDJUMP-CONSUMER-S27-MARKER: Master Overview cell-click handoff. Read
+    // window._mdJump once; if it targets this tab, arm the chip filter
+    // for the named pattern, then clear it so it fires exactly once.
+    (function(){
+      var j = window._mdJump;
+      if (j && j.tab === 'pre_indicators') {
+        if (j.patternKey && j.tier && piState.tierFilter &&
+            piState.tierFilter.hasOwnProperty(j.patternKey)) {
+          piState.tierFilter[j.patternKey] = [j.tier];
+        }
+        window._mdJump = null;
+      }
+    })();
     if (!piBuildScaffold()) return;
     piBuildHeaderRow();
     piRenderRows();
@@ -9802,6 +9873,19 @@ function SUM_renderQualifiedStocks() {
   }
 
   function renderPostIndicators() {
+    // MD-V2-MDJUMP-CONSUMER-S27-MARKER: Master Overview cell-click handoff. Read
+    // window._mdJump once; if it targets this tab, arm the chip filter
+    // for the named pattern, then clear it so it fires exactly once.
+    (function(){
+      var j = window._mdJump;
+      if (j && j.tab === 'post_indicators') {
+        if (j.patternKey && j.tier && poState.tierFilter &&
+            poState.tierFilter.hasOwnProperty(j.patternKey)) {
+          poState.tierFilter[j.patternKey] = [j.tier];
+        }
+        window._mdJump = null;
+      }
+    })();
     if (!poBuildScaffold()) return;
     poBuildHeaderRow();
     poRenderRows();
@@ -10537,6 +10621,19 @@ function SUM_renderQualifiedStocks() {
   }
 
   function renderSetups() {
+    // MD-V2-MDJUMP-CONSUMER-S27-MARKER: Master Overview cell-click handoff. Read
+    // window._mdJump once; if it targets this tab, arm the chip filter
+    // for the named pattern, then clear it so it fires exactly once.
+    (function(){
+      var j = window._mdJump;
+      if (j && j.tab === 'setups') {
+        if (j.patternKey && j.tier && stState.tierFilter &&
+            stState.tierFilter.hasOwnProperty(j.patternKey)) {
+          stState.tierFilter[j.patternKey] = [j.tier];
+        }
+        window._mdJump = null;
+      }
+    })();
     if (!stBuildScaffold()) return;
     stBuildHeaderRow();
     stRenderRows();
@@ -10567,9 +10664,15 @@ function SUM_renderQualifiedStocks() {
 (function() {
   'use strict';
 
-  // MD-V2-S26-CHIPS-MARKER: ct tab module - rating-tier multi-select chip
-  // filter + per-pattern rating/score/test columns, structured identically to
-  // the proven Pre-test indicators module. Reads md_v2.tests.
+  // MD-V2-TESTS-S27-MARKER: Capital deployment tests tab - Session 27 rebuild.
+  // 4 tests (D-MD-V2-64): ma_retest_upwards / vcp_deploy_s1 / vcp_deploy_s2 /
+  // probing_bet. Each test shown "in totality" (D-MD-V2-65): its related
+  // setup's test columns + trigger columns side by side. Plus a 4-stage info
+  // block (D-MD-V2-66), the Collapsing-rating info column on Probing bet, and
+  // L5D/L20D recent-trigger columns (D-MD-V2-67, persist-and-append history).
+  // Structure (chip filter, rating/score, pass-count breakdown, sortable
+  // headers, scope/tint/portfolio controls) carried from the proven S26 ct
+  // module unchanged.
 
   var ctState = {
     mode: { inputs: 'pct' },
@@ -10580,134 +10683,103 @@ function SUM_renderQualifiedStocks() {
     sort: { col: 'company', dir: 'asc' }
   };
 
+  // Each pattern: key (matches md_v2.tests key), labels, tierLadder, total
+  // (number of constituent tests), and the ordered `tests` list. Test keys
+  // are prefixed by kind in the pipeline: g* = gate, s* = setup column,
+  // v* = VCP contraction column, x* = trigger column. The module does not
+  // care about the prefix beyond grouping/labelling.
   var CT_PATTERNS = [
-  {
-    "key": "probing_bet",
-    "label": "Probing bet deployment",
-    "shortLabel": "Probing bet",
-    "supergroup": null,
-    "tierLadder": [
-      "Possible",
-      "Plausible",
-      "Probable"
-    ],
-    "total": 3,
-    "tooltip": "The probing-bet trigger - a qualifying probing-bet stage, a breakout, and a confirming up-day.",
-    "caption": "The probing-bet go / no-go trigger. Three tests, all must pass: the probing-bet stage is late or capital, a breakout fires, and today's close confirms with a 2%+ gain over yesterday.",
-    "tests": [
-      {
-        "key": "t1_pb_stage_late_or_capital",
-        "label": "Probing-bet stage late/capital",
-        "tooltip": "The existing probing-bet filter rates this stock Late or Capital"
-      },
-      {
-        "key": "t2_breakout",
-        "label": "Breakout",
-        "tooltip": "The Breakout post-test indicator fires"
-      },
-      {
-        "key": "t3_confirmation_close_ge2pct",
-        "label": "Confirmation: close 2%+ up",
-        "tooltip": "Today's close is at least 2% above yesterday's close - the confirmation test that avoids false starts"
-      }
-    ]
-  },
-  {
-    "key": "vcp",
-    "label": "VCP deployment",
-    "shortLabel": "VCP",
-    "supergroup": null,
-    "tierLadder": [
-      "Possible",
-      "Plausible",
-      "Probable"
-    ],
-    "total": 5,
-    "tooltip": "The VCP trigger - a genuine volatility-contraction pattern plus a confirming up-day.",
-    "caption": "The VCP go / no-go trigger. Five tests, all must pass: the four volatility-contraction tests plus today's close confirming with a 2%+ gain over yesterday.",
-    "tests": [
-      {
-        "key": "t1_narrowing_contractions",
-        "label": "Narrowing contractions",
-        "tooltip": "Each price contraction is strictly shallower than the one before it"
-      },
-      {
-        "key": "t2_sufficient_count",
-        "label": "2-4 contractions",
-        "tooltip": "Between two and four contractions in the base"
-      },
-      {
-        "key": "t3_volume_declining",
-        "label": "Volume declining",
-        "tooltip": "Average volume falls across successive contractions"
-      },
-      {
-        "key": "t4_higher_lows",
-        "label": "Higher lows",
-        "tooltip": "Each contraction low sits above the previous contraction low"
-      },
-      {
-        "key": "t5_confirmation_close_ge2pct",
-        "label": "Confirmation: close 2%+ up",
-        "tooltip": "Today's close is at least 2% above yesterday's close - the confirmation test that avoids false starts"
-      }
-    ]
-  },
-  {
-    "key": "ma_retest_upwards",
-    "label": "Upwards moving average retest",
-    "shortLabel": "MA retest",
-    "supergroup": null,
-    "tierLadder": [
-      "Possible",
-      "Plausible",
-      "Probable"
-    ],
-    "total": 5,
-    "tooltip": "The moving-average retest trigger - price reclaims a test MA on healthy volume with a confirming up-day.",
-    "caption": "The moving-average retest go / no-go trigger. Pass logic: near a test MA AND closed back above it AND (closes near highs over 3 days OR strong 5-day up-volume) AND today's close confirms with a 2%+ gain. Five tests.",
-    "tests": [
-      {
-        "key": "t1_near_test_ma",
-        "label": "Near a test MA",
-        "tooltip": "Price has come down to within range of a 50/100/150/200-day moving average"
-      },
-      {
-        "key": "t2_close_above_test_ma",
-        "label": "Closed above the test MA",
-        "tooltip": "Current price is back above the moving average being tested"
-      },
-      {
-        "key": "t3_closes_near_highs_l3d",
-        "label": "Closes near highs (3 days)",
-        "tooltip": "At least half of the last 3 days closed in the upper 40% of their daily range"
-      },
-      {
-        "key": "t4_updown_vol_l5d",
-        "label": "Strong 5-day up-volume",
-        "tooltip": "Over the last 5 days, up-day volume is at least 10% above down-day volume"
-      },
-      {
-        "key": "t5_confirmation_close_ge2pct",
-        "label": "Confirmation: close 2%+ up",
-        "tooltip": "Today's close is at least 2% above yesterday's close - the confirmation test that avoids false starts"
-      }
-    ]
-  }
-];
-  var CT_SUPERGROUPS = [];
-  var CT_TONE = {"probing_bet": "pi-tile-pullback", "vcp": "pi-tile-basing", "ma_retest_upwards": "pi-tile-collapsing"};
-  var CT_STRIP = {"probing_bet": "pi-strip-pullback", "vcp": "pi-strip-basing", "ma_retest_upwards": "pi-strip-collapsing"};
-  var CT_CHIP = {"probing_bet": "pullback", "vcp": "basing", "ma_retest_upwards": "collapsing"};
+    {
+      "key": "ma_retest_upwards",
+      "label": "Upwards moving average retest",
+      "shortLabel": "MA retest",
+      "tone": "teal",
+      "tierLadder": ["Possible", "Plausible", "Probable"],
+      "total": 8,
+      "tooltip": "Price reclaims a test moving average on a healthy retest, with a confirming up-day.",
+      "caption": "Pairs with the Healthy retest setup. Six setup columns describe how orderly the pullback into the moving average was; two trigger columns confirm the reclaim. Pass: testing a meaningful MA AND closed back above it AND confirmed, with the pullback healthy on volume or candles.",
+      "tests": [
+        { "key": "s1_volume_contracting",      "label": "Volume contracting",        "group": "setup",   "tooltip": "10-day average volume below the 50-day - selling is drying up through the pullback" },
+        { "key": "s2_updown_vol_ge105",        "label": "Up-vol ≥ down-vol",     "group": "setup",   "tooltip": "Up-day volume at least 5% above down-day volume over the last month" },
+        { "key": "s3_few_distribution_days",   "label": "Few distribution days",      "group": "setup",   "tooltip": "Three or fewer distribution days over the last 25 sessions" },
+        { "key": "s4_volatility_contracting",  "label": "Volatility contracting",     "group": "setup",   "tooltip": "10-day ATR below the 20-day - the pullback is orderly, not violent" },
+        { "key": "s5_testing_meaningful_ma",   "label": "Testing a meaningful MA",    "group": "setup",   "tooltip": "Price has come down to within range of a 50/100/150/200-day moving average" },
+        { "key": "s6_buying_through_l10d",     "label": "Buying through 10 days",     "group": "setup",   "tooltip": "At least half of the last 10 days closed in the upper 40% of their daily range" },
+        { "key": "x1_reclaim_close_above_ma",  "label": "Reclaimed the MA",           "group": "trigger", "tooltip": "Current price is back above the moving average being tested" },
+        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
+      ]
+    },
+    {
+      "key": "vcp_deploy_s1",
+      "label": "VCP after Stage 1→2",
+      "shortLabel": "VCP after S1→2",
+      "tone": "green",
+      "tierLadder": ["Possible", "Plausible", "Probable"],
+      "total": 7,
+      "tooltip": "A volatility-contraction pattern firing out of a Stage 1 base that is rated Probable.",
+      "caption": "Pairs with the VCP-after-Stage-1→2 setup. A gate column requires Stage 1 to be rated Probable (Early or Late); four contraction columns describe the VCP; two trigger columns confirm the breakout. Pass: gate AND all four contraction tests AND breakout AND confirmation.",
+      "tests": [
+        { "key": "g1_stage1_probable",          "label": "Stage 1 = Probable",        "group": "gate",    "tooltip": "Stage 1 rating is Probable Early or Probable Late - either qualifies" },
+        { "key": "v1_narrowing_contractions",   "label": "Narrowing contractions",    "group": "vcp",     "tooltip": "Each price contraction is strictly shallower than the one before it" },
+        { "key": "v2_sufficient_count",         "label": "2-4 contractions",          "group": "vcp",     "tooltip": "Between two and four contractions in the base" },
+        { "key": "v3_volume_declining",         "label": "Volume declining",          "group": "vcp",     "tooltip": "Average volume falls across successive contractions" },
+        { "key": "v4_higher_lows",              "label": "Higher lows",               "group": "vcp",     "tooltip": "Each contraction low sits above the previous contraction low" },
+        { "key": "x1_breakout",                 "label": "Breakout",                  "group": "trigger", "tooltip": "The Breakout post-test indicator fires" },
+        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
+      ]
+    },
+    {
+      "key": "vcp_deploy_s2",
+      "label": "VCP after Stage 2 base",
+      "shortLabel": "VCP after S2 base",
+      "tone": "navy",
+      "tierLadder": ["Possible", "Plausible", "Probable"],
+      "total": 7,
+      "tooltip": "A volatility-contraction pattern firing out of a Stage 2 base that is consolidating.",
+      "caption": "Pairs with the VCP-after-Stage-2-base setup. A gate column requires a Stage 2 uptrend with the Basing pre-test indicator qualifying; four contraction columns describe the VCP; two trigger columns confirm the breakout. Pass: gate AND all four contraction tests AND breakout AND confirmation.",
+      "tests": [
+        { "key": "g1_stage2_basing",            "label": "Stage 2 basing",            "group": "gate",    "tooltip": "Stage 2 uptrend AND the Basing pre-test indicator qualifies" },
+        { "key": "v1_narrowing_contractions",   "label": "Narrowing contractions",    "group": "vcp",     "tooltip": "Each price contraction is strictly shallower than the one before it" },
+        { "key": "v2_sufficient_count",         "label": "2-4 contractions",          "group": "vcp",     "tooltip": "Between two and four contractions in the base" },
+        { "key": "v3_volume_declining",         "label": "Volume declining",          "group": "vcp",     "tooltip": "Average volume falls across successive contractions" },
+        { "key": "v4_higher_lows",              "label": "Higher lows",               "group": "vcp",     "tooltip": "Each contraction low sits above the previous contraction low" },
+        { "key": "x1_breakout",                 "label": "Breakout",                  "group": "trigger", "tooltip": "The Breakout post-test indicator fires" },
+        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
+      ]
+    },
+    {
+      "key": "probing_bet",
+      "label": "Probing bet",
+      "shortLabel": "Probing bet",
+      "tone": "amber",
+      "tierLadder": ["Possible", "Plausible", "Probable"],
+      "total": 3,
+      "tooltip": "The probing-bet trigger - a qualifying probing-bet stage that breaks out with a confirming up-day.",
+      "caption": "Pairs with the Probing bet setup. One setup column requires the probing-bet stage to be Late or Capital; two trigger columns confirm the breakout. The Collapsing pre-test indicator rating is shown as an info column - context only, not part of the pass logic.",
+      "tests": [
+        { "key": "s1_pb_stage_late_or_capital", "label": "PB stage late/capital",     "group": "setup",   "tooltip": "The probing-bet filter rates this stock Late or Capital" },
+        { "key": "x1_breakout",                 "label": "Breakout",                  "group": "trigger", "tooltip": "The Breakout post-test indicator fires" },
+        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
+      ]
+    }
+  ];
 
-  // init tierFilter keyed by pattern
+  // Tone -> CSS class fragments (reuses the PI tile/chip/strip families).
+  var CT_TONE_TILE  = { teal:'pi-tile-pullback', green:'pi-tile-basing', navy:'pi-tile-navy', amber:'pi-tile-amber' };
+  var CT_TONE_STRIP = { teal:'pi-strip-pullback', green:'pi-strip-basing', navy:'pi-strip-navy', amber:'pi-strip-amber' };
+  var CT_TONE_CHIP  = { teal:'pullback', green:'basing', navy:'navy', amber:'amber' };
+
   for (var _ip = 0; _ip < CT_PATTERNS.length; _ip++) {
     ctState.tierFilter[CT_PATTERNS[_ip].key] = [];
   }
 
-  var CT_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
+  var CT_RATING_RANK = { 'Probable':5, 'Probable Late':5, 'Probable Early':4, 'Plausible':3, 'Possible':2, 'None':1 };
   var CT_RATING_CLS  = { 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
 
+  // --- column model ---
+  // Input columns (8) + 4-stage info block (4) + per-pattern blocks.
+  // Each pattern block = [rating][score][...test columns...][L5D][L20D].
+  // probing_bet additionally carries an info column for the Collapsing rating.
   function ctBuildCols() {
     var cols = [
       { id:'name',     label:'Company - Ticker',       sortKey:'company',         cls:'name-cell', kind:'input' },
@@ -10719,6 +10791,19 @@ function SUM_renderQualifiedStocks() {
       { id:'ma_200',   label:'200 day moving average', sortKey:'ma_200',          cls:'num',       kind:'input' },
       { id:'pullback', label:'Recent pullback',        sortKey:'recent_pullback', cls:'num',       kind:'input' }
     ];
+    // 4-stage info block (D-MD-V2-66) - info only, not in any qualify logic.
+    var STAGES = [
+      { id:'stage_1', label:'Stage 1' }, { id:'stage_2', label:'Stage 2' },
+      { id:'stage_3', label:'Stage 3' }, { id:'stage_4', label:'Stage 4' }
+    ];
+    for (var si = 0; si < STAGES.length; si++) {
+      cols.push({
+        id:'info_'+STAGES[si].id, label:STAGES[si].label, sortKey:'stageinfo__'+STAGES[si].id,
+        cls:(si===0?'grp-start-stageinfo ':'')+'ct-stage-info-col', kind:'stageinfo', stageKey:STAGES[si].id,
+        tooltip:STAGES[si].label+' rating for this stock - context only, not part of any test'
+      });
+    }
+    // per-pattern blocks
     for (var p = 0; p < CT_PATTERNS.length; p++) {
       var pat = CT_PATTERNS[p];
       var gi = p + 1;
@@ -10727,15 +10812,38 @@ function SUM_renderQualifiedStocks() {
       for (var t = 0; t < pat.tests.length; t++) {
         var test = pat.tests[t];
         cols.push({
-          id: 'p'+gi+'t'+(t+1), label: test.label, sortKey: pat.key + '__' + test.key,
-          cls: '', tooltip: test.tooltip, kind: 'test', patternKey: pat.key, testKey: test.key
+          id:'p'+gi+'t'+(t+1), label:test.label, sortKey:pat.key+'__'+test.key,
+          cls:'ct-test-'+test.group, tooltip:test.tooltip, kind:'test',
+          patternKey:pat.key, testKey:test.key, testGroup:test.group
         });
       }
+      // probing_bet: Collapsing-rating info column (D-MD-V2-65)
+      if (pat.key === 'probing_bet') {
+        cols.push({
+          id:'p'+gi+'_collapsing', label:'Collapsing rating', sortKey:pat.key+'__info_collapsing',
+          cls:'ct-info-col', kind:'infocollapsing', patternKey:pat.key,
+          tooltip:'The Collapsing pre-test indicator rating - context only, not part of the probing-bet pass logic'
+        });
+      }
+      // L5D / L20D recent-trigger windows (D-MD-V2-67)
+      cols.push({
+        id:'p'+gi+'_l5d', label:'Fired 5d', sortKey:pat.key+'__l5d',
+        cls:'ct-window-col', kind:'window', patternKey:pat.key, windowKey:'l5d',
+        tooltip:'Did this test fire in the last 5 trading days - shows days since the most recent fire'
+      });
+      cols.push({
+        id:'p'+gi+'_l20d', label:'Fired 20d', sortKey:pat.key+'__l20d',
+        cls:'ct-window-col', kind:'window', patternKey:pat.key, windowKey:'l20d',
+        tooltip:'Did this test fire in the last 20 trading days - shows days since the most recent fire'
+      });
     }
     return cols;
   }
   var CT_COLS = ctBuildCols();
+  var CT_INPUT_COUNT = 8;
+  var CT_STAGEINFO_COUNT = 4;
 
+  // --- data lookups ---
   function ctPricesLookup() {
     if (window._ctPricesByTicker) return window._ctPricesByTicker;
     var out = {};
@@ -10760,7 +10868,6 @@ function SUM_renderQualifiedStocks() {
     for (t in tickers) { var p = prices[t]; if (p && p.industry) out[p.industry] = true; }
     return out;
   }
-
   function ctPatternRec(row, patternKey) {
     var dk = row.md_v2 && row.md_v2.tests;
     return (dk && dk[patternKey]) || null;
@@ -10774,7 +10881,11 @@ function SUM_renderQualifiedStocks() {
     var rec = ctPatternRec(row, patternKey);
     return rec ? (rec.rating || 'None') : 'None';
   }
-
+  function ctStageRating(row, stageKey) {
+    var md = row.md_v2 || {};
+    var st = md[stageKey];
+    return (st && st.rating) || 'None';
+  }
   function ctGetRows() {
     var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
     var prices = ctPricesLookup();
@@ -10800,6 +10911,7 @@ function SUM_renderQualifiedStocks() {
     return rows;
   }
 
+  // --- counts / histograms / tier counts ---
   function ctPatternCounts(rows) {
     var c = {};
     for (var pi = 0; pi < CT_PATTERNS.length; pi++) c[CT_PATTERNS[pi].key] = 0;
@@ -10830,6 +10942,7 @@ function SUM_renderQualifiedStocks() {
     return c;
   }
 
+  // --- formatting helpers ---
   function ctFmtNum(n) {
     if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
@@ -10872,6 +10985,23 @@ function SUM_renderQualifiedStocks() {
     var text = (ctState.mode.inputs === 'pct') ? ctFmtPct(pct) : ctFmtNum(v);
     return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
   }
+  // 4-stage info block cell - shows the stage rating label, muted styling.
+  function ctStageInfoCell(row, col) {
+    var rating = ctStageRating(row, col.stageKey);
+    var rcls = CT_RATING_CLS[rating] || (rating.indexOf('Probable') === 0 ? 'tint-prob'
+              : rating.indexOf('Plausible') === 0 ? 'tint-pla'
+              : rating.indexOf('Possible') === 0 ? 'tint-pos' : 'tint-none');
+    return '<td class="' + (col.cls || '') + ' ct-stage-info-cell ' + rcls + '">' +
+           '<span class="ct-info-label">' + rating + '</span></td>';
+  }
+  // Collapsing-rating info column on Probing bet.
+  function ctInfoCollapsingCell(row, col) {
+    var rec = ctPatternRec(row, col.patternKey);
+    var rating = (rec && rec.info_collapsing_rating) || 'None';
+    var rcls = CT_RATING_CLS[rating] || 'tint-none';
+    return '<td class="' + (col.cls || '') + ' ct-info-cell ' + rcls + '">' +
+           '<span class="ct-info-label">' + rating + '</span></td>';
+  }
   function ctTestCell(row, col) {
     var pass = ctEvalTest(row, col.patternKey, col.testKey);
     var extra = col.cls || '';
@@ -10892,6 +11022,38 @@ function SUM_renderQualifiedStocks() {
     return '<td class="' + (col.cls || '') + ' pi-score-cell"><div class="pi-pip-row">' + s +
            '<span class="pi-score-num">' + cnt + '/' + tot + '</span></div></td>';
   }
+  // L5D / L20D recent-trigger window cell (D-MD-V2-67).
+  // Reads fired_l5d / fired_l20d / days_since_fired / history_depth, all
+  // stamped onto the test record by the pipeline's apply_test_history().
+  // Graceful degradation: if history_depth is too thin for this window,
+  // the cell shows "building" rather than a misleading blank.
+  function ctWindowCell(row, col) {
+    var rec = ctPatternRec(row, col.patternKey);
+    var extra = col.cls || '';
+    if (!rec) return '<td class="' + extra + ' ct-window-na">-</td>';
+    var depth = rec.history_depth || 0;
+    var windowDays = (col.windowKey === 'l5d') ? 5 : 20;
+    // Not enough accumulated history to make this window meaningful yet.
+    if (depth < windowDays) {
+      return '<td class="' + extra + ' ct-window-building" title="' + depth +
+             ' of ' + windowDays + ' days of history accumulated">building</td>';
+    }
+    var fired = (col.windowKey === 'l5d') ? !!rec.fired_l5d : !!rec.fired_l20d;
+    if (!fired) {
+      return '<td class="' + extra + ' ct-window-none">-</td>';
+    }
+    var ds = rec.days_since_fired;
+    var label, shadeCls;
+    if (ds === 0) { label = 'today'; }
+    else if (ds === 1) { label = '1d ago'; }
+    else if (ds != null) { label = ds + 'd ago'; }
+    else { label = 'fired'; }
+    // shading: green within 5 days, amber within 20 (D-MD-V2-67)
+    if (ds != null && ds <= 5) shadeCls = 'ct-window-fired-recent';
+    else shadeCls = 'ct-window-fired-older';
+    return '<td class="' + extra + ' ' + shadeCls + '" title="most recent fire ' + label + '">' +
+           '<span class="ct-window-label">' + label + '</span></td>';
+  }
   function ctHashColor(label, alpha) {
     if (!label) return null;
     var h = 0;
@@ -10904,13 +11066,32 @@ function SUM_renderQualifiedStocks() {
     if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' };
     return null;
   }
+
+  // --- sorting ---
   function ctGetSortVal(row, key) {
+    if (key.indexOf('stageinfo__') === 0) {
+      var sk = key.split('__')[1];
+      return CT_RATING_RANK[ctStageRating(row, sk)] || 0;
+    }
     if (key.indexOf('__') > 0) {
       var parts = key.split('__');
       var patternKey = parts[0], sub = parts[1];
       var rec = ctPatternRec(row, patternKey);
       if (sub === 'rating') return rec ? (CT_RATING_RANK[rec.rating] || 0) : 0;
       if (sub === 'score')  return rec ? (rec.count || 0) : 0;
+      if (sub === 'info_collapsing') return rec ? (CT_RATING_RANK[rec.info_collapsing_rating] || 0) : 0;
+      if (sub === 'l5d' || sub === 'l20d') {
+        // sort: fired-recently first (smaller days-since = higher), then
+        // fired-older, then not-fired, then building/no-data last.
+        if (!rec) return -1;
+        var windowDays = (sub === 'l5d') ? 5 : 20;
+        var depth = rec.history_depth || 0;
+        if (depth < windowDays) return -2;  // building - sort to the bottom
+        var fired = (sub === 'l5d') ? rec.fired_l5d : rec.fired_l20d;
+        if (!fired) return -1;
+        var ds = rec.days_since_fired;
+        return (ds == null) ? 0 : (1000 - ds);  // smaller days-since ranks higher
+      }
       return ctEvalTest(row, patternKey, sub) ? 1 : 0;
     }
     if (key === 'recent_pullback') return row.recent_pullback == null ? -Infinity : row.recent_pullback;
@@ -10945,6 +11126,7 @@ function SUM_renderQualifiedStocks() {
     }
     tr.innerHTML = h;
   }
+  // --- tiles (chip filter unchanged from S26 ct module) ---
   function ctPatternTiles(scopeRows) {
     var tiles = document.getElementById('ct-pattern-tiles');
     if (!tiles) return;
@@ -10976,18 +11158,18 @@ function SUM_renderQualifiedStocks() {
         var tier = pat.tierLadder[c];
         var on = sel.indexOf(tier) > -1;
         var tc = tierCounts[tier] || 0;
-        chips += '<span class="pi-tier-chip pi-chip-' + CT_CHIP[pat.key] +
+        chips += '<span class="pi-tier-chip pi-chip-' + CT_TONE_CHIP[pat.tone] +
                  (on ? ' on' : '') + '" data-pattern="' + pat.key + '" data-tier="' + tier + '">' +
                  tier + ' ' + tc.toLocaleString('en-GB') + (on ? ' ' + String.fromCharCode(10003) : '') + '</span>';
       }
       var activeCls = anySel ? ' active' : '';
-      h += '<div class="rating-tile ' + CT_TONE[pat.key] + activeCls + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
+      h += '<div class="rating-tile ' + CT_TONE_TILE[pat.tone] + activeCls + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
            '<div class="rt-label">' + pat.shortLabel + '</div>' +
            '<div class="rt-count">' + headline.toLocaleString('en-GB') + '</div>' +
            '<div class="rt-sub">' + headSub + '</div>' +
            '<div class="rt-breakdown">' + breakdown + '</div>' +
            '<div class="pi-tier-chips" data-pattern="' + pat.key + '">' + chips + '</div>' +
-           '<div class="rt-strip ' + CT_STRIP[pat.key] + '"></div>' +
+           '<div class="rt-strip ' + CT_TONE_STRIP[pat.tone] + '"></div>' +
            '</div>';
     }
     tiles.innerHTML = h;
@@ -11022,6 +11204,8 @@ function SUM_renderQualifiedStocks() {
       return true;
     });
   }
+
+  // --- main render ---
   function ctRenderRows() {
     var tbody = document.getElementById('ct-tbody');
     if (!tbody) return;
@@ -11059,16 +11243,21 @@ function SUM_renderQualifiedStocks() {
         '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
         ctInputCell(s, 'price') + ctInputCell(s, 'high_52w') + ctInputCell(s, 'low_52w') +
         ctInputCell(s, 'ma_150') + ctInputCell(s, 'ma_200') + ctInputCell(s, 'recent_pullback');
-      for (var j = 8; j < CT_COLS.length; j++) {
+      // remaining columns: 4-stage info block + per-pattern blocks
+      for (var j = CT_INPUT_COUNT; j < CT_COLS.length; j++) {
         var col = CT_COLS[j];
-        if (col.kind === 'rating') html += ctRatingCell(s, col);
+        if (col.kind === 'stageinfo') html += ctStageInfoCell(s, col);
+        else if (col.kind === 'rating') html += ctRatingCell(s, col);
         else if (col.kind === 'score') html += ctScoreCell(s, col);
+        else if (col.kind === 'infocollapsing') html += ctInfoCollapsingCell(s, col);
+        else if (col.kind === 'window') html += ctWindowCell(s, col);
         else html += ctTestCell(s, col);
       }
       html += '</tr>';
     }
     tbody.innerHTML = html;
   }
+  // --- control setters ---
   function ctSetMode(kind, val) {
     ctState.mode[kind] = val;
     var btns = document.querySelectorAll('button[data-ct-grp="' + kind + '"]');
@@ -11118,39 +11307,38 @@ function SUM_renderQualifiedStocks() {
   window.ctSelectAllTiers = ctSelectAllTiers;
   window.ctOnSort = ctOnSort;
 
+  // --- scaffold ---
+  // Per-pattern block width = 2 (rating+score) + N tests + 2 (L5D+L20D)
+  //   + 1 extra for probing_bet's Collapsing-rating info column.
+  function ctPatternBlockSpan(pat) {
+    var span = 2 + pat.tests.length + 2;
+    if (pat.key === 'probing_bet') span += 1;
+    return span;
+  }
   function ctBuildScaffold() {
     var host = document.getElementById('tab-tests');
     if (!host) return false;
     if (host.querySelector('#ct-main-table')) return true;
 
+    // colgroup: inputs (8) + stage info (4) + per-pattern blocks
     var colgroupHtml = '<col class="c-name"><col class="c-taxon">' +
                        '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
                        '<col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
-    var inputsColspan = 8;
-    var hasSuper = CT_SUPERGROUPS.length > 0;
-    var superHtml = '<th class="gh-inputs sg-spacer" colspan="' + inputsColspan + '"></th>';
-    var groupHtml = '<th class="gh-inputs" colspan="' + inputsColspan + '">Inputs</th>';
+    for (var sgc = 0; sgc < CT_STAGEINFO_COUNT; sgc++) colgroupHtml += '<col class="c-stageinfo">';
 
-    if (hasSuper) {
-      var sgCols = {};
-      for (var sgi = 0; sgi < CT_SUPERGROUPS.length; sgi++) sgCols[CT_SUPERGROUPS[sgi].key] = 0;
-      for (var sp = 0; sp < CT_PATTERNS.length; sp++) {
-        var cspan = 2 + CT_PATTERNS[sp].tests.length;
-        sgCols[CT_PATTERNS[sp].supergroup] += cspan;
-      }
-      for (var sgj = 0; sgj < CT_SUPERGROUPS.length; sgj++) {
-        var sg = CT_SUPERGROUPS[sgj];
-        superHtml += '<th class="' + sg.cls + '" colspan="' + sgCols[sg.key] + '">' + sg.label + '</th>';
-      }
-    }
+    // group-header row: Inputs span, Stage ratings span, then per-pattern
+    var groupHtml = '<th class="gh-inputs" colspan="' + CT_INPUT_COUNT + '">Inputs</th>' +
+                    '<th class="gh-stageinfo grp-start-stageinfo" colspan="' + CT_STAGEINFO_COUNT + '">Stage ratings</th>';
 
     for (var p = 0; p < CT_PATTERNS.length; p++) {
       var pat = CT_PATTERNS[p];
       var gi = p + 1;
-      var n = pat.tests.length;
+      var span = ctPatternBlockSpan(pat);
       colgroupHtml += '<col class="c-rating"><col class="c-score">';
-      for (var t = 0; t < n; t++) colgroupHtml += '<col class="c-test">';
-      groupHtml += '<th class="gh-g' + gi + ' grp-start-g' + gi + '" colspan="' + (n + 2) + '">' + pat.label + '</th>';
+      for (var t = 0; t < pat.tests.length; t++) colgroupHtml += '<col class="c-test">';
+      if (pat.key === 'probing_bet') colgroupHtml += '<col class="c-info">';
+      colgroupHtml += '<col class="c-window"><col class="c-window">';
+      groupHtml += '<th class="gh-g' + gi + ' grp-start-g' + gi + '" colspan="' + span + '">' + pat.label + '</th>';
     }
 
     var captionsHtml = '';
@@ -11160,12 +11348,11 @@ function SUM_renderQualifiedStocks() {
     }
 
     var theadRows = '';
-    if (hasSuper) theadRows += '<tr class="super-group-row">' + superHtml + '</tr>';
     theadRows += '<tr class="group-header-row">' + groupHtml + '</tr>';
     theadRows += '<tr class="col-header-row" id="ct-col-header-row"></tr>';
 
     var html = '' +
-      '<div class="s1-intro">Capital deployment tests are the binary go / no-go triggers - the point at which a setup either passes its test (deploy capital) or fails it (wait or skip). Each test is the AND of its named constituent tests, shown as individual tick columns alongside a per-pattern rating and score. Each carries a mandatory confirmation test to avoid false starts. Each tile has a rating-tier filter row: click a tier chip to show only stocks at that tier, or click the tile body to select all tiers. Tier selections within a test combine as OR; selections across tests combine as AND.</div>' +
+      '<div class="s1-intro">Capital deployment tests are the binary go / no-go triggers - the point at which a setup either passes its test (deploy capital) or fails it (wait or skip). Each test is shown in totality: its related setup&apos;s test columns and the trigger columns side by side, so you can see whether a stock is set up AND has just triggered in one row. The four stage ratings are carried as an info block for context. Each test also shows whether it fired in the last 5 and last 20 trading days - those windows build up day by day from saved history, so a window reads &quot;building&quot; until enough days have accumulated. Each tile has a rating-tier filter row: click a tier chip to show only stocks at that tier, or click the tile body to select all tiers. Tier selections within a test combine as OR; selections across tests combine as AND.</div>' +
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-ct-grp="inputs" data-ct-val="pct" onclick="ctSetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -11228,17 +11415,256 @@ function SUM_renderQualifiedStocks() {
   }
 
   function renderTests() {
+    // MD-V2-MDJUMP-CONSUMER-S27-MARKER: Master Overview cell-click handoff. Read
+    // window._mdJump once; if it targets this tab, arm the chip filter
+    // for the named pattern, then clear it so it fires exactly once.
+    (function(){
+      var j = window._mdJump;
+      if (j && j.tab === 'tests') {
+        if (j.patternKey && j.tier && ctState.tierFilter &&
+            ctState.tierFilter.hasOwnProperty(j.patternKey)) {
+          ctState.tierFilter[j.patternKey] = [j.tier];
+        }
+        window._mdJump = null;
+      }
+    })();
     if (!ctBuildScaffold()) return;
     ctBuildHeaderRow();
     ctRenderRows();
   }
+  // MD-V2-TESTS-S27-MARKER: dispatch calls renderCapTests(); the pre-S27
+  // module exported only renderTests, so renderCapTests was undefined - a
+  // latent ReferenceError on the Tests tab. Export BOTH names so the
+  // dispatch works whichever name it uses (and the S27 dashboard patcher
+  // also corrects the dispatch line to renderTests for cleanliness).
   window.renderTests = renderTests;
+  window.renderCapTests = renderTests;
 
 })();
 
 /* MD-V2-TESTS-MARKER-END */
 
 /* MD-V2-TESTS-MARKER-MODULE-END */
+
+
+/* MD-V2-MASTER-OVERVIEW-MARKER-MODULE-START */
+/* MD-V2-MASTER-OVERVIEW-MARKER-START */
+
+(function() {
+  'use strict';
+
+  // MD-V2-MASTER-OVERVIEW-S27-MARKER: Master Overview tab - Session 27.
+  // A synoptic rating matrix: every screen across the MD V2 system as a row,
+  // the 4 rating tiers as columns, count of stocks per cell. The default
+  // landing tab. Cells are clickable - they jump to the underlying tab and
+  // stash the (pattern, tier) intent in window._mdJump so the target tab can
+  // pre-apply the chip filter once its _mdJump consumer wiring lands (a small
+  // separate follow-up; the jump itself works now). Per Richard, the funnel
+  // banner and other visualisations are PARKED - this is the basic table.
+
+  var moState = { scope: 'all' };
+
+  // Row model: { section, key, label, ratingPath, tabId, patternKey }
+  //   ratingPath - how to read this screen's rating from a stock's md_v2:
+  //     'stage:<k>'    -> md_v2[k].rating
+  //     'group:<g>:<k>'-> md_v2[<g>][<k>].rating  (pre_indicators/indicators/setups/tests)
+  //   tabId / patternKey - where a cell click jumps to, and which chip to arm.
+  var MO_ROWS = [
+    // -- Stages --
+    { section:'Stages', key:'stage_1', label:'Stage 1 - Basing', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
+    { section:'Stages', key:'stage_2', label:'Stage 2 - Uptrend', ratingPath:'stage:stage_2', tabId:'stage_2', patternKey:null },
+    { section:'Stages', key:'stage_3', label:'Stage 3 - Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
+    { section:'Stages', key:'stage_4', label:'Stage 4 - Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
+    // -- Pre-test indicators --
+    { section:'Pre-test indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pre_indicators', patternKey:'pulling_back_uptrend' },
+    { section:'Pre-test indicators', key:'basing', label:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pre_indicators', patternKey:'basing' },
+    { section:'Pre-test indicators', key:'collapsing', label:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'pre_indicators', patternKey:'collapsing' },
+    // -- Post-test indicators --
+    { section:'Post-test indicators', key:'breakout', label:'Breakout', ratingPath:'group:indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
+    { section:'Post-test indicators', key:'advancing', label:'Advancing', ratingPath:'group:indicators:advancing', tabId:'post_indicators', patternKey:'advancing' },
+    { section:'Post-test indicators', key:'breakdown_50D', label:'Breakdown 50D', ratingPath:'group:indicators:breakdown_50D', tabId:'post_indicators', patternKey:'breakdown_50D' },
+    { section:'Post-test indicators', key:'breakdown_150D', label:'Breakdown 150D', ratingPath:'group:indicators:breakdown_150D', tabId:'post_indicators', patternKey:'breakdown_150D' },
+    { section:'Post-test indicators', key:'breakdown_200D', label:'Breakdown 200D', ratingPath:'group:indicators:breakdown_200D', tabId:'post_indicators', patternKey:'breakdown_200D' },
+    // -- Capital qualification setups --
+    { section:'Capital qualification setups', key:'probing_bet', label:'Probing bet', ratingPath:'group:setups:probing_bet', tabId:'setups', patternKey:'probing_bet' },
+    { section:'Capital qualification setups', key:'vcp_after_s1_plateau', label:'VCP after Stage 1->2 plateau', ratingPath:'group:setups:vcp_after_s1_plateau', tabId:'setups', patternKey:'vcp_after_s1_plateau' },
+    { section:'Capital qualification setups', key:'healthy_retest', label:'Healthy retest within MT/LT uptrend', ratingPath:'group:setups:healthy_retest', tabId:'setups', patternKey:'healthy_retest' },
+    { section:'Capital qualification setups', key:'vcp_after_s2_base', label:'VCP after Stage 2 base', ratingPath:'group:setups:vcp_after_s2_base', tabId:'setups', patternKey:'vcp_after_s2_base' },
+    // -- Capital deployment tests (S27 4-test structure) --
+    { section:'Capital deployment tests', key:'ma_retest_upwards', label:'Upwards moving average retest', ratingPath:'group:tests:ma_retest_upwards', tabId:'tests', patternKey:'ma_retest_upwards' },
+    { section:'Capital deployment tests', key:'vcp_deploy_s1', label:'VCP after Stage 1->2', ratingPath:'group:tests:vcp_deploy_s1', tabId:'tests', patternKey:'vcp_deploy_s1' },
+    { section:'Capital deployment tests', key:'vcp_deploy_s2', label:'VCP after Stage 2 base', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests', patternKey:'vcp_deploy_s2' },
+    { section:'Capital deployment tests', key:'probing_bet_test', label:'Probing bet', ratingPath:'group:tests:probing_bet', tabId:'tests', patternKey:'probing_bet' }
+  ];
+
+  // The 4 rating-tier columns. Stage 1 alone splits Probable into Early/Late
+  // in the pipeline; for the matrix we fold both into the Probable column
+  // (the count helper normalises that).
+  var MO_TIERS = ['None', 'Possible', 'Plausible', 'Probable'];
+
+  var MO_SECTION_TONE = {
+    'Stages': 'mo-sec-stages',
+    'Pre-test indicators': 'mo-sec-pretest',
+    'Post-test indicators': 'mo-sec-posttest',
+    'Capital qualification setups': 'mo-sec-setups',
+    'Capital deployment tests': 'mo-sec-tests'
+  };
+
+  function moPricesLookup() {
+    if (window._moPricesByTicker) return window._moPricesByTicker;
+    var out = {};
+    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    window._moPricesByTicker = out;
+    return out;
+  }
+  function moLiveTickers() {
+    var out = {};
+    var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
+    for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
+    return out;
+  }
+  // Normalise any raw rating string to one of the 4 matrix tiers.
+  function moNormaliseTier(raw) {
+    if (!raw) return 'None';
+    if (raw.indexOf('Probable') === 0) return 'Probable';
+    if (raw.indexOf('Plausible') === 0) return 'Plausible';
+    if (raw.indexOf('Possible') === 0) return 'Possible';
+    return 'None';
+  }
+  function moReadRating(md, ratingPath) {
+    if (!md) return 'None';
+    var parts = ratingPath.split(':');
+    if (parts[0] === 'stage') {
+      var st = md[parts[1]];
+      return (st && st.rating) || 'None';
+    }
+    if (parts[0] === 'group') {
+      var grp = md[parts[1]];
+      var rec = grp && grp[parts[2]];
+      return (rec && rec.rating) || 'None';
+    }
+    return 'None';
+  }
+  function moGetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = moPricesLookup();
+    var live = moLiveTickers();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2) continue;
+      var p = prices[s.ticker] || {};
+      rows.push({ ticker: s.ticker, md_v2: s.md_v2, is_live: !!live[s.ticker] });
+    }
+    return rows;
+  }
+  // Build the count matrix: { rowKey: { tier: count } } for the scoped rows.
+  function moBuildMatrix(rows) {
+    var m = {};
+    for (var r = 0; r < MO_ROWS.length; r++) {
+      m[MO_ROWS[r].key] = { 'None':0, 'Possible':0, 'Plausible':0, 'Probable':0 };
+    }
+    for (var i = 0; i < rows.length; i++) {
+      var md = rows[i].md_v2;
+      for (var k = 0; k < MO_ROWS.length; k++) {
+        var row = MO_ROWS[k];
+        var tier = moNormaliseTier(moReadRating(md, row.ratingPath));
+        m[row.key][tier]++;
+      }
+    }
+    return m;
+  }
+  function moApplyScope(all) {
+    if (moState.scope === 'live') return all.filter(function(r){ return r.is_live; });
+    return all;
+  }
+
+  // Cell click: stash the jump intent and switch tab. The target tab's
+  // _mdJump consumer (small follow-up wiring) reads window._mdJump on render
+  // and pre-applies the chip filter. Until that lands, the jump still works -
+  // it just lands on the unfiltered tab.
+  function moCellClick(rowKey, tier) {
+    var row = null;
+    for (var i = 0; i < MO_ROWS.length; i++) if (MO_ROWS[i].key === rowKey) row = MO_ROWS[i];
+    if (!row) return;
+    if (row.patternKey && tier !== 'None') {
+      window._mdJump = { tab: row.tabId, patternKey: row.patternKey, tier: tier };
+    } else {
+      window._mdJump = { tab: row.tabId };
+    }
+    if (typeof window.switchTab === 'function') window.switchTab(row.tabId);
+  }
+  window.moCellClick = moCellClick;
+
+  function moSetScope(s) {
+    moState.scope = s;
+    var btns = document.querySelectorAll('button[data-mo-scope]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-mo-scope') === s);
+    moRenderTable();
+  }
+  window.moSetScope = moSetScope;
+
+  var MO_TIER_CLS = { 'None':'mo-t-none', 'Possible':'mo-t-pos', 'Plausible':'mo-t-pla', 'Probable':'mo-t-prob' };
+
+  function moRenderTable() {
+    var host = document.getElementById('tab-master_overview');
+    if (!host) return;
+    if (!host.querySelector('#mo-main-table')) {
+      var intro = '<div class="s1-intro">Master Overview is the synoptic view of the whole MD V2 system: every screen - the four stages, the pre-test and post-test indicators, the capital qualification setups and the capital deployment tests - as a row, with the count of stocks at each rating tier. Click any count to jump to that screen&apos;s tab. The funnel banner and other visualisations are deferred; this is the rating matrix.</div>';
+      var controls = '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
+          '<button class="toggle-btn active" data-mo-scope="all" onclick="moSetScope(\'all\')">All</button>' +
+          '<button class="toggle-btn" data-mo-scope="live" onclick="moSetScope(\'live\')">Live investments</button>' +
+        '</div></div>';
+      var table = '<div class="table-wrap"><table class="data-table" id="mo-main-table">' +
+        '<thead><tr class="mo-head-row"><th class="mo-screen-col">Screen</th>';
+      for (var t = 0; t < MO_TIERS.length; t++) table += '<th class="mo-tier-col">' + MO_TIERS[t] + '</th>';
+      table += '<th class="mo-total-col">Total rated</th></tr></thead><tbody id="mo-tbody"></tbody></table></div>';
+      host.innerHTML = intro + controls + table;
+    }
+    var all = moGetRows();
+    var rows = moApplyScope(all);
+    var matrix = moBuildMatrix(rows);
+    var tbody = document.getElementById('mo-tbody');
+    if (!tbody) return;
+    var html = '';
+    var lastSection = null;
+    for (var r = 0; r < MO_ROWS.length; r++) {
+      var row = MO_ROWS[r];
+      if (row.section !== lastSection) {
+        html += '<tr class="mo-section-row ' + (MO_SECTION_TONE[row.section] || '') + '">' +
+                '<td class="mo-section-cell" colspan="' + (MO_TIERS.length + 2) + '">' + row.section + '</td></tr>';
+        lastSection = row.section;
+      }
+      var counts = matrix[row.key];
+      var ratedTotal = counts['Possible'] + counts['Plausible'] + counts['Probable'];
+      html += '<tr class="mo-data-row">' +
+              '<td class="mo-screen-cell">' + row.label + '</td>';
+      for (var t2 = 0; t2 < MO_TIERS.length; t2++) {
+        var tier = MO_TIERS[t2];
+        var c = counts[tier];
+        var clickable = (row.patternKey || tier === 'None') ? '' : '';
+        var cls = 'mo-cell ' + MO_TIER_CLS[tier] + (c > 0 ? ' mo-has' : ' mo-zero');
+        html += '<td class="' + cls + '" onclick="moCellClick(\'' + row.key + '\',\'' + tier + '\')" ' +
+                'title="' + c + ' stock(s) - ' + row.label + ' / ' + tier + ' (click to open)">' +
+                (c > 0 ? c.toLocaleString('en-GB') : '-') + '</td>';
+      }
+      html += '<td class="mo-total-cell">' + ratedTotal.toLocaleString('en-GB') + '</td>';
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function renderMasterOverview() {
+    moRenderTable();
+  }
+  window.renderMasterOverview = renderMasterOverview;
+
+})();
+
+/* MD-V2-MASTER-OVERVIEW-MARKER-END */
+/* MD-V2-MASTER-OVERVIEW-MARKER-MODULE-END */
 
 
 
@@ -11253,7 +11679,8 @@ function renderTab(id){
   else if(id==="pre_indicators")renderPreIndicators();  /* MD-V2-PRE-INDICATORS-MARKER */
   else if(id==="post_indicators")renderPostIndicators();  /* MD-V2-POST-INDICATORS-MARKER */
   else if(id==="setups")renderSetups();  /* MD-V2-SETUPS-MARKER */
-  else if(id==="tests")renderCapTests();  /* MD-V2-TESTS-MARKER */
+  else if(id==="master_overview")renderMasterOverview();  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
+  else if(id==="tests")renderTests();  /* MD-V2-TESTS-MARKER MD-V2-TESTS-S27-MARKER: was renderCapTests (undefined) */
   else if(id==="mm99")renderMM99();
   else if(id==="bp")renderBP();
   else if(id==="pb")renderPB();

@@ -1670,7 +1670,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 "use strict";
 var D=MASTER_DATA;
 var priceMap={},filterMap={},tmMap=D.ticker_mapping||{};
-var currentTab="stage_1",currentSort={col:"chg_qual_count",dir:"desc"}; /* SUMMARY-TAB-DEFAULT */
+var currentTab="master_overview",currentSort={col:"chg_qual_count",dir:"desc"}; /* SUMMARY-TAB-DEFAULT MD-V2-DEFAULT-TAB-FIX-S27-MARKER: was stage_1, Master Overview is the default landing tab */
 /* BOOTSTRAP-DEFAULT-TAB-FIX-1 */
 if(typeof window!=="undefined"){window.__chgBootstrapDone=window.__chgBootstrapDone||false;var __chgBoot=function(){if(window.__chgBootstrapDone)return;if(typeof window.switchTab!=="function"){setTimeout(__chgBoot,30);return;}window.__chgBootstrapDone=true;try{window.switchTab(currentTab);}catch(e){console.error("bootstrap switchTab failed",e);}};if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",__chgBoot);}else{setTimeout(__chgBoot,30);}}
 var mm99MinScore=0;

@@ -1167,6 +1167,98 @@ body[data-active-tab="setups"] .v2-nav,
 body[data-active-tab="tests"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; padding-bottom: 4px !important; }
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
+/* MD-V2-WAVE1-FROZEN-HEADERS-MARKER-CSS-START */
+/* Wave 1 (14-May-26): sticky ribbon + corrected frozen-header offsets.
+   --header-height is 70px on V2 tabs. --v2-ribbon-h is measured at render
+   time by the JS helper below (the ribbon wraps at narrow widths so a
+   fixed guess is fragile); it falls back to 46px before first measure. */
+body[data-active-tab^="stage_"],
+body[data-active-tab="pre_indicators"],
+body[data-active-tab="post_indicators"],
+body[data-active-tab="setups"],
+body[data-active-tab="tests"],
+body[data-active-tab="master_overview"] { --v2-ribbon-h: 46px; }
+
+/* The ribbon: sticky directly under the fixed MD V2 nav header. */
+body[data-active-tab^="stage_"] .controls.s1-controls,
+body[data-active-tab="pre_indicators"] .controls.s1-controls,
+body[data-active-tab="post_indicators"] .controls.s1-controls,
+body[data-active-tab="setups"] .controls.s1-controls,
+body[data-active-tab="tests"] .controls.s1-controls,
+body[data-active-tab="master_overview"] .controls.s1-controls {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 60;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+}
+
+/* Frozen table headers: re-anchor every V2 table's sticky rows below the
+   fixed header AND the sticky ribbon. Stage 1-4 tables have 2 header rows
+   (group-header + col-header); PI/PO/ST have 3 (super-group + group +
+   col); CT has 2. Each row stacks on the one above it. z-index lifted
+   above the ribbon's 60. The thead's own sticky/top is neutralised so the
+   per-ROW offsets are what take effect. */
+#s1-main-table thead, #s2-main-table thead, #s3-main-table thead,
+#s4-main-table thead, #pi-main-table thead, #po-main-table thead,
+#st-main-table thead, #ct-main-table thead {
+  position: static !important;
+  z-index: auto !important;
+  box-shadow: none !important;
+}
+/* Stage 1-4: group-header row height ~28px (matches old col-header top). */
+#s1-main-table thead tr.group-header-row th,
+#s2-main-table thead tr.group-header-row th,
+#s3-main-table thead tr.group-header-row th,
+#s4-main-table thead tr.group-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h));
+  z-index: 70;
+}
+#s1-main-table thead tr.col-header-row th,
+#s2-main-table thead tr.col-header-row th,
+#s3-main-table thead tr.col-header-row th,
+#s4-main-table thead tr.col-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 28px);
+  z-index: 70;
+}
+/* PI / PO / ST: 3 header rows. Row heights 24px (super-group) + 24px
+   (group-header) measured from the existing 0/24/48 ladder. */
+#pi-main-table thead tr.super-group-row th,
+#po-main-table thead tr.super-group-row th,
+#st-main-table thead tr.super-group-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h));
+  z-index: 72;
+}
+#pi-main-table thead tr.group-header-row th,
+#po-main-table thead tr.group-header-row th,
+#st-main-table thead tr.group-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 24px);
+  z-index: 71;
+}
+#pi-main-table thead tr.col-header-row th,
+#po-main-table thead tr.col-header-row th,
+#st-main-table thead tr.col-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 48px);
+  z-index: 70;
+}
+/* CT (Capital deployment tests): 2 header rows today. Wave 2 adds a 3rd
+   (sub-group) row and will re-stack these — this is the 2-row state. */
+#ct-main-table thead tr.group-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h));
+  z-index: 71;
+}
+#ct-main-table thead tr.col-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 24px);
+  z-index: 70;
+}
+/* MD-V2-WAVE1-FROZEN-HEADERS-MARKER-CSS-END */
+
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-START */
 /* Session 25 rebuild (D-MD-V2-49,-50,-55,-56,-57,-58) */
 #tab-pre_indicators .group-captions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 14px 0; }
@@ -8433,6 +8525,35 @@ function SUM_renderQualifiedStocks() {
 /* MD-V2-CHROME-PARITY-MARKER-JS-START */
 (function() {
   'use strict';
+  // MD-V2-WAVE1-FROZEN-HEADERS-MARKER: measure the sticky ribbon's rendered height and publish it
+  // as the --v2-ribbon-h custom property so the frozen-header `top:`
+  // offsets are exact even when the ribbon wraps at narrow widths.
+  function measureV2Ribbon() {
+    var active = document.body.getAttribute('data-active-tab') || '';
+    var v2 = (active.indexOf('stage_') === 0 || active === 'pre_indicators' ||
+              active === 'post_indicators' || active === 'setups' ||
+              active === 'tests' || active === 'master_overview');
+    if (!v2) return;
+    var pane = document.getElementById('tab-' + active);
+    var ribbon = pane && pane.querySelector('.controls.s1-controls');
+    if (!ribbon) return;
+    var h = ribbon.getBoundingClientRect().height;
+    if (h && h > 0) {
+      document.body.style.setProperty('--v2-ribbon-h', Math.round(h) + 'px');
+    }
+  }
+  window.measureV2Ribbon = measureV2Ribbon;
+  if (!window._v2RibbonResizeWired) {
+    window._v2RibbonResizeWired = true;
+    window.addEventListener('resize', function() {
+      // rAF-debounced so a drag-resize does not thrash layout.
+      if (window._v2RibbonRaf) return;
+      window._v2RibbonRaf = requestAnimationFrame(function() {
+        window._v2RibbonRaf = 0;
+        measureV2Ribbon();
+      });
+    });
+  }
   function ensureV2Nav() {
     if (document.getElementById('v2-nav-strip')) return;
     var hdr = document.querySelector('.header');
@@ -8469,6 +8590,8 @@ function SUM_renderQualifiedStocks() {
   function syncV2State(id) {
     document.body.setAttribute('data-active-tab', id);
     ensureV2Nav();
+    // MD-V2-WAVE1-FROZEN-HEADERS-MARKER: re-measure the sticky ribbon once this tab's layout settles.
+    requestAnimationFrame(function(){ requestAnimationFrame(measureV2Ribbon); });
     var ACCENT = { 'stage_1':'v2-active-s1', 'stage_2':'v2-active-s2', 'stage_3':'v2-active-s3', 'stage_4':'v2-active-s4' };
     var btns = document.querySelectorAll('.v2-nav-btn');
     for (var i = 0; i < btns.length; i++) {
@@ -9020,12 +9143,17 @@ function SUM_renderQualifiedStocks() {
   // MD-V2-PI-CHIPS-S25-MARKER: tile-body click selects ALL tiers for a pattern
   // (D-MD-V2-59 Option A). If all are already selected, clear them (toggle off).
   function piSelectAllTiers(patternKey) {
+    // MD-V2-WAVE1-FROZEN-HEADERS-MARKER: tile-body click selects ONLY the Probable tier
+    // (D-MD-V2-74). If exactly ['Probable'] is already selected,
+    // clear it (toggle off). Tier chips remain direct multi-select.
     var pat = null;
     for (var p = 0; p < PI_PATTERNS.length; p++) if (PI_PATTERNS[p].key === patternKey) pat = PI_PATTERNS[p];
     if (!pat) return;
     var sel = piState.tierFilter[patternKey] || [];
-    var allOn = sel.length === pat.tierLadder.length;
-    piState.tierFilter[patternKey] = allOn ? [] : pat.tierLadder.slice();
+    var probable = (pat.tierLadder.indexOf('Probable') > -1) ? 'Probable'
+                   : pat.tierLadder[pat.tierLadder.length - 1];
+    var onlyProbable = (sel.length === 1 && sel[0] === probable);
+    piState.tierFilter[patternKey] = onlyProbable ? [] : [probable];
     piRenderRows();
   }
   window.piSetMode = piSetMode;
@@ -9747,12 +9875,17 @@ function SUM_renderQualifiedStocks() {
     poRenderRows();
   }
   function poSelectAllTiers(patternKey) {
+    // MD-V2-WAVE1-FROZEN-HEADERS-MARKER: tile-body click selects ONLY the Probable tier
+    // (D-MD-V2-74). If exactly ['Probable'] is already selected,
+    // clear it (toggle off). Tier chips remain direct multi-select.
     var pat = null;
     for (var p = 0; p < PO_PATTERNS.length; p++) if (PO_PATTERNS[p].key === patternKey) pat = PO_PATTERNS[p];
     if (!pat) return;
     var sel = poState.tierFilter[patternKey] || [];
-    var allOn = sel.length === pat.tierLadder.length;
-    poState.tierFilter[patternKey] = allOn ? [] : pat.tierLadder.slice();
+    var probable = (pat.tierLadder.indexOf('Probable') > -1) ? 'Probable'
+                   : pat.tierLadder[pat.tierLadder.length - 1];
+    var onlyProbable = (sel.length === 1 && sel[0] === probable);
+    poState.tierFilter[patternKey] = onlyProbable ? [] : [probable];
     poRenderRows();
   }
   window.poSetMode = poSetMode;
@@ -10495,12 +10628,17 @@ function SUM_renderQualifiedStocks() {
     stRenderRows();
   }
   function stSelectAllTiers(patternKey) {
+    // MD-V2-WAVE1-FROZEN-HEADERS-MARKER: tile-body click selects ONLY the Probable tier
+    // (D-MD-V2-74). If exactly ['Probable'] is already selected,
+    // clear it (toggle off). Tier chips remain direct multi-select.
     var pat = null;
     for (var p = 0; p < ST_PATTERNS.length; p++) if (ST_PATTERNS[p].key === patternKey) pat = ST_PATTERNS[p];
     if (!pat) return;
     var sel = stState.tierFilter[patternKey] || [];
-    var allOn = sel.length === pat.tierLadder.length;
-    stState.tierFilter[patternKey] = allOn ? [] : pat.tierLadder.slice();
+    var probable = (pat.tierLadder.indexOf('Probable') > -1) ? 'Probable'
+                   : pat.tierLadder[pat.tierLadder.length - 1];
+    var onlyProbable = (sel.length === 1 && sel[0] === probable);
+    stState.tierFilter[patternKey] = onlyProbable ? [] : [probable];
     stRenderRows();
   }
   window.stSetMode = stSetMode;
@@ -11291,12 +11429,17 @@ function SUM_renderQualifiedStocks() {
     ctRenderRows();
   }
   function ctSelectAllTiers(patternKey) {
+    // MD-V2-WAVE1-FROZEN-HEADERS-MARKER: tile-body click selects ONLY the Probable tier
+    // (D-MD-V2-74). If exactly ['Probable'] is already selected,
+    // clear it (toggle off). Tier chips remain direct multi-select.
     var pat = null;
     for (var p = 0; p < CT_PATTERNS.length; p++) if (CT_PATTERNS[p].key === patternKey) pat = CT_PATTERNS[p];
     if (!pat) return;
     var sel = ctState.tierFilter[patternKey] || [];
-    var allOn = sel.length === pat.tierLadder.length;
-    ctState.tierFilter[patternKey] = allOn ? [] : pat.tierLadder.slice();
+    var probable = (pat.tierLadder.indexOf('Probable') > -1) ? 'Probable'
+                   : pat.tierLadder[pat.tierLadder.length - 1];
+    var onlyProbable = (sel.length === 1 && sel[0] === probable);
+    ctState.tierFilter[patternKey] = onlyProbable ? [] : [probable];
     ctRenderRows();
   }
   window.ctSetMode = ctSetMode;

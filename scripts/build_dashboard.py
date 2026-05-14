@@ -1706,17 +1706,52 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
   top: calc(var(--header-height) + var(--v2-ribbon-h) + 48px);
   z-index: 70;
 }
-/* CT (Capital deployment tests): 2 header rows today. Wave 2 adds a 3rd
-   (sub-group) row and will re-stack these — this is the 2-row state. */
+/* MD-V2-WAVE2-TESTS-SUBGROUP-MARKER: CT now has 3 header rows -
+   group-header -> sub-group -> col-header. Re-stacked from the Wave 1
+   2-row state. Row heights: group ~24px, sub-group ~22px. */
 #ct-main-table thead tr.group-header-row th {
   position: sticky;
   top: calc(var(--header-height) + var(--v2-ribbon-h));
-  z-index: 71;
+  z-index: 72;
 }
-#ct-main-table thead tr.col-header-row th {
+#ct-main-table thead tr.sub-group-row th {
   position: sticky;
   top: calc(var(--header-height) + var(--v2-ribbon-h) + 24px);
+  z-index: 71;
+  background: #f7f3e6 !important;
+  font-size: 8.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 3px;
+  cursor: default;
+  line-height: 1.2;
+  color: #7a7560;
+}
+#ct-main-table thead tr.sub-group-row th:hover { background: #f7f3e6 !important; }
+#ct-main-table thead tr.sub-group-row th.sg-spacer { background: #fbfaf5 !important; }
+#ct-main-table thead tr.sub-group-row th.sub-g-rating  { color: #555; }
+#ct-main-table thead tr.sub-group-row th.sub-g-setup   { color: #4a6a8a; border-bottom: 2px solid rgba(74,106,138,0.40); }
+#ct-main-table thead tr.sub-group-row th.sub-g-trigger { color: #9a5a2a; border-bottom: 2px solid rgba(154,90,42,0.45); }
+#ct-main-table thead tr.sub-group-row th.sub-g-context { color: #8a8674; }
+#ct-main-table thead tr.col-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 46px);
   z-index: 70;
+}
+/* MD-V2-WAVE2-TESTS-SUBGROUP-MARKER: horizontal scroll on the table wrap for every V2
+   tab. The CT table is ~3340px wide; .table-wrap had overflow:visible
+   so the right-hand columns spilled off-screen unreachable. overflow-x
+   auto gives a horizontal scrollbar; overflow-y stays visible so the
+   viewport-anchored sticky header `top:` offsets are unaffected. */
+body[data-active-tab^="stage_"] .table-wrap,
+body[data-active-tab="pre_indicators"] .table-wrap,
+body[data-active-tab="post_indicators"] .table-wrap,
+body[data-active-tab="setups"] .table-wrap,
+body[data-active-tab="tests"] .table-wrap,
+body[data-active-tab="master_overview"] .table-wrap {
+  overflow-x: auto;
+  overflow-y: visible;
 }
 /* MD-V2-WAVE1-FROZEN-HEADERS-MARKER-CSS-END */
 
@@ -11499,7 +11534,28 @@ function SUM_renderQualifiedStocks() {
     }
 
     var theadRows = '';
+    // MD-V2-WAVE2-TESTS-SUBGROUP-MARKER: build the sub-group row. Each pattern block
+    // splits into Rating | Setup | Trigger | Context sub-groups.
+    // group in {setup,gate,vcp} -> Setup; group=trigger -> Trigger.
+    var subGroupHtml = '<th class="sg-spacer" colspan="' + CT_INPUT_COUNT + '"></th>' +
+                       '<th class="sg-spacer" colspan="' + CT_STAGEINFO_COUNT + '"></th>';
+    for (var sp = 0; sp < CT_PATTERNS.length; sp++) {
+      var spat = CT_PATTERNS[sp];
+      var sgi = sp + 1;
+      var setupCount = 0, triggerCount = 0;
+      for (var st = 0; st < spat.tests.length; st++) {
+        var grp = spat.tests[st].group;
+        if (grp === 'trigger') triggerCount++;
+        else setupCount++;
+      }
+      var contextCount = 2 + (spat.key === 'probing_bet' ? 1 : 0);
+      subGroupHtml += '<th class="sub-g sub-g-rating sub-g' + sgi + '" colspan="2">Rating</th>';
+      if (setupCount > 0) subGroupHtml += '<th class="sub-g sub-g-setup sub-g' + sgi + '" colspan="' + setupCount + '">Setup</th>';
+      if (triggerCount > 0) subGroupHtml += '<th class="sub-g sub-g-trigger sub-g' + sgi + '" colspan="' + triggerCount + '">Trigger</th>';
+      subGroupHtml += '<th class="sub-g sub-g-context sub-g' + sgi + '" colspan="' + contextCount + '">Context</th>';
+    }
     theadRows += '<tr class="group-header-row">' + groupHtml + '</tr>';
+    theadRows += '<tr class="sub-group-row">' + subGroupHtml + '</tr>';
     theadRows += '<tr class="col-header-row" id="ct-col-header-row"></tr>';
 
     var html = '' +

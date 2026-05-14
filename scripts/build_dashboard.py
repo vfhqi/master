@@ -1253,6 +1253,17 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #pi-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
 #pi-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
 #pi-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+/* MD-V2-PI-CHIPS-S25-MARKER: rating-tier multi-select chip filter (D-MD-V2-59) */
+#tab-pre_indicators .s1-rating-tiles .pi-tier-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+#tab-pre_indicators .pi-tier-chip { font-size: 10px; padding: 2px 6px; border-radius: var(--border-radius-md, 4px); cursor: pointer; user-select: none; border: 0.5px solid; line-height: 1.4; white-space: nowrap; transition: background 0.12s, color 0.12s; }
+#tab-pre_indicators .pi-chip-pullback { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; }
+#tab-pre_indicators .pi-chip-pullback.on { background: #0F6E56; color: #fff; border-color: #0F6E56; font-weight: 500; }
+#tab-pre_indicators .pi-chip-basing { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; }
+#tab-pre_indicators .pi-chip-basing.on { background: #1D7A4E; color: #fff; border-color: #1D7A4E; font-weight: 500; }
+#tab-pre_indicators .pi-chip-collapsing { background: #FCEBEB; color: #A32D2D; border-color: #F7C1C1; }
+#tab-pre_indicators .pi-chip-collapsing.on { background: #A32D2D; color: #fff; border-color: #A32D2D; font-weight: 500; }
+#tab-pre_indicators .pi-tier-chip:hover { filter: brightness(0.96); }
+#tab-pre_indicators .s1-rating-tiles .rating-tile.active { box-shadow: inset 0 0 0 1.5px currentColor; }
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-END */
 /* MD-V2-POST-INDICATORS-MARKER-CSS-START */
 #tab-post_indicators .group-captions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0 14px 0; }
@@ -8315,10 +8326,14 @@ function SUM_renderQualifiedStocks() {
 (function() {
   'use strict';
 
+  // MD-V2-PI-CHIPS-S25-MARKER: rating-tier multi-select chip filter (D-MD-V2-59).
+  // piState.tierFilter holds, per pattern, an array of selected rating tiers.
+  // Empty array = no tier filter for that pattern (shows all). Intra-pattern
+  // selections OR-combine; cross-pattern selections AND-combine.
   var piState = {
     mode: { inputs: 'pct' },
     scope: 'all',
-    patternFilter: null,
+    tierFilter: { pulling_back_uptrend: [], basing: [], collapsing: [] },
     tint: 'none',
     port: 'off',
     sort: { col: 'company', dir: 'asc' }
@@ -8326,13 +8341,15 @@ function SUM_renderQualifiedStocks() {
 
   // The 3 pre-test indicator patterns. testKey values must match the keys in
   // md_v2.pre_indicators[patternKey].tests emitted by _md_v2_screens.py.
-  // supergroup: 'positive' | 'negative' (D-MD-V2-56 banding).
+  // tierLadder: the Option A rating tiers this pattern can take (D-MD-V2-55).
+  // 2-test patterns (Collapsing) have no Plausible tier.
   var PI_PATTERNS = [
     {
       key: 'pulling_back_uptrend',
       label: 'Pulling back within MT/LT uptrend',
       shortLabel: 'Pulling back',
       supergroup: 'positive',
+      tierLadder: ['Possible', 'Plausible', 'Probable'],
       tooltip: 'Stock in a real medium/long-term uptrend (50-day and 150-day moving averages still rising) that is currently pulling back (5-day and 10-day moving averages rolling over).',
       caption: 'In a genuine medium/long-term uptrend AND currently inside a pullback. Four tests, all must pass: 50-day MA still rising AND 150-day MA still rising AND 5-day MA rolling over AND 10-day MA rolling over.',
       total: 4,
@@ -8348,6 +8365,7 @@ function SUM_renderQualifiedStocks() {
       label: 'Basing',
       shortLabel: 'Basing',
       supergroup: 'positive',
+      tierLadder: ['Possible', 'Plausible', 'Probable'],
       tooltip: 'Price fell at least 15% from a recent swing high to a recent low (even if partly reclawed since), has stayed below that high for at least 20 trading days, sits above its 200-day MA, and the 200-day MA is still rising.',
       caption: 'A genuine base forming within a long-term uptrend. Four tests, all must pass: price fell at least 15% from recent swing high AND price below that high for at least 20 trading days AND price above the 200-day MA AND the 200-day MA still rising month-on-month.',
       total: 4,
@@ -8363,6 +8381,7 @@ function SUM_renderQualifiedStocks() {
       label: 'Collapsing',
       shortLabel: 'Collapsing',
       supergroup: 'negative',
+      tierLadder: ['Possible', 'Probable'],
       tooltip: 'Price is 30% or more below its 52-week high AND has fallen at least 20% from its recent high.',
       caption: 'A stock in genuine breakdown. Two tests, both must pass: price 30%+ below the 52-week high AND price fallen at least 20% from its recent high.',
       total: 2,
@@ -8376,7 +8395,6 @@ function SUM_renderQualifiedStocks() {
   var PI_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
   var PI_RATING_CLS  = { 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
 
-  // Build the full column list: 8 inputs, then per-pattern [rating, score, ...tests].
   function buildCols() {
     var cols = [
       { id:'name',     label:'Company - Ticker',       sortKey:'company',         cls:'name-cell', kind:'input' },
@@ -8436,16 +8454,18 @@ function SUM_renderQualifiedStocks() {
     return out;
   }
 
-  // Read a pattern's pre_indicators record for a row.
   function piPatternRec(row, patternKey) {
     var pi = row.md_v2 && row.md_v2.pre_indicators;
     return (pi && pi[patternKey]) || null;
   }
-  // Evaluate a single named test against a row via the pre_indicators structure.
   function piEvalTest(row, patternKey, testKey) {
     var rec = piPatternRec(row, patternKey);
     if (!rec || !rec.tests) return false;
     return !!rec.tests[testKey];
+  }
+  function piRowRating(row, patternKey) {
+    var rec = piPatternRec(row, patternKey);
+    return rec ? (rec.rating || 'None') : 'None';
   }
 
   function piGetRows() {
@@ -8474,7 +8494,7 @@ function SUM_renderQualifiedStocks() {
     return rows;
   }
 
-  // Per-pattern: how many stocks qualify (all tests pass).
+  // Per-pattern qualifying count (all tests pass).
   function piPatternCounts(rows) {
     var c = {};
     for (var pi = 0; pi < PI_PATTERNS.length; pi++) c[PI_PATTERNS[pi].key] = 0;
@@ -8486,7 +8506,7 @@ function SUM_renderQualifiedStocks() {
     }
     return c;
   }
-  // Per-pattern: histogram of how many stocks pass exactly k tests (D-MD-V2-57).
+  // Per-pattern histogram of how many stocks pass exactly k tests (D-MD-V2-57).
   function piPassHistogram(rows, patternKey, total) {
     var h = [];
     for (var k = 0; k <= total; k++) h[k] = 0;
@@ -8496,6 +8516,17 @@ function SUM_renderQualifiedStocks() {
       if (cnt >= 0 && cnt <= total) h[cnt]++;
     }
     return h;
+  }
+  // MD-V2-PI-CHIPS-S25-MARKER: per-pattern, per-tier live counts (D-MD-V2-59).
+  // Counted against the SCOPE-filtered row set (passed in) so chip counts
+  // reflect what is currently in play, not the whole universe.
+  function piTierCounts(rows, patternKey) {
+    var c = { 'Possible':0, 'Plausible':0, 'Probable':0, 'None':0 };
+    for (var i = 0; i < rows.length; i++) {
+      var r = piRowRating(rows[i], patternKey);
+      if (c[r] != null) c[r]++;
+    }
+    return c;
   }
 
   function piFmtNum(n) {
@@ -8548,8 +8579,7 @@ function SUM_renderQualifiedStocks() {
     return '<td class="pi-fail ' + extra + '">.</td>';
   }
   function piRatingCell(row, col) {
-    var rec = piPatternRec(row, col.patternKey);
-    var rating = rec ? (rec.rating || 'None') : 'None';
+    var rating = piRowRating(row, col.patternKey);
     var rcls = PI_RATING_CLS[rating] || 'tint-none';
     return '<td class="' + (col.cls || '') + ' pi-rating-cell ' + rcls + '"><span class="pi-pill pi-pill-' + rcls + '">' + rating + '</span></td>';
   }
@@ -8621,31 +8651,56 @@ function SUM_renderQualifiedStocks() {
     tr.innerHTML = h;
   }
 
-  function piPatternTiles(rows) {
+  // MD-V2-PI-CHIPS-S25-MARKER: render pattern tiles + the rating-tier chip row.
+  // The `scopeRows` argument is the SCOPE-filtered set (so chip counts and the
+  // pass-count breakdown reflect the active scope), NOT the tier-filtered set.
+  function piPatternTiles(scopeRows) {
     var tiles = document.getElementById('pi-pattern-tiles');
     if (!tiles) return;
-    var counts = piPatternCounts(rows);
-    var total = rows.length;
+    var counts = piPatternCounts(scopeRows);
+    var total = scopeRows.length;
     var tintCls = { 'pulling_back_uptrend':'pi-tile-pullback', 'basing':'pi-tile-basing', 'collapsing':'pi-tile-collapsing' };
     var stripCls = { 'pulling_back_uptrend':'pi-strip-pullback', 'basing':'pi-strip-basing', 'collapsing':'pi-strip-collapsing' };
     var h = '';
     for (var i = 0; i < PI_PATTERNS.length; i++) {
       var pat = PI_PATTERNS[i];
       var cnt = counts[pat.key] || 0;
-      var act = piState.patternFilter === pat.key ? ' active' : '';
       var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
-      // D-MD-V2-57: pass-count breakdown line, smaller text than the master count.
-      var hist = piPassHistogram(rows, pat.key, pat.total);
+      var sel = piState.tierFilter[pat.key] || [];
+      var anySel = sel.length > 0;
+      // headline = filtered total when a tier filter is active, else the qualifying count
+      var tierCounts = piTierCounts(scopeRows, pat.key);
+      var headline = cnt, headSub = 'of ' + total.toLocaleString('en-GB') + ' &middot; ' + pct + '%';
+      if (anySel) {
+        var ft = 0;
+        for (var z = 0; z < sel.length; z++) ft += (tierCounts[sel[z]] || 0);
+        headline = ft;
+        headSub = sel.join(' + ') + ' &middot; filtered';
+      }
+      // pass-count breakdown line (D-MD-V2-57)
+      var hist = piPassHistogram(scopeRows, pat.key, pat.total);
       var breakdown = '';
       for (var k = 1; k <= pat.total; k++) {
         if (k > 1) breakdown += ' &middot; ';
         breakdown += k + ' of ' + pat.total + ': ' + (hist[k] || 0).toLocaleString('en-GB');
       }
-      h += '<div class="rating-tile ' + tintCls[pat.key] + act + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
+      // rating-tier chip row (D-MD-V2-59)
+      var chips = '';
+      for (var c = 0; c < pat.tierLadder.length; c++) {
+        var tier = pat.tierLadder[c];
+        var on = sel.indexOf(tier) > -1;
+        var tc = tierCounts[tier] || 0;
+        chips += '<span class="pi-tier-chip pi-chip-' + tintCls[pat.key].replace('pi-tile-','') +
+                 (on ? ' on' : '') + '" data-pattern="' + pat.key + '" data-tier="' + tier + '">' +
+                 tier + ' ' + tc.toLocaleString('en-GB') + (on ? ' ' + String.fromCharCode(10003) : '') + '</span>';
+      }
+      var activeCls = anySel ? ' active' : '';
+      h += '<div class="rating-tile ' + tintCls[pat.key] + activeCls + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
            '<div class="rt-label">' + pat.shortLabel + '</div>' +
-           '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
-           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' &middot; ' + pct + '%</div>' +
+           '<div class="rt-count">' + headline.toLocaleString('en-GB') + '</div>' +
+           '<div class="rt-sub">' + headSub + '</div>' +
            '<div class="rt-breakdown">' + breakdown + '</div>' +
+           '<div class="pi-tier-chips" data-pattern="' + pat.key + '">' + chips + '</div>' +
            '<div class="rt-strip ' + stripCls[pat.key] + '"></div>' +
            '</div>';
     }
@@ -8660,20 +8715,42 @@ function SUM_renderQualifiedStocks() {
     set('pi-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
   }
 
-  function piRenderRows() {
-    var tbody = document.getElementById('pi-tbody');
-    if (!tbody) return;
-    var all = piGetRows();
-    piUpdateScopeCounts(all);
-    piPatternTiles(all);
+  // MD-V2-PI-CHIPS-S25-MARKER: apply scope, then the rating-tier filter.
+  // Tier filter: for each pattern with a non-empty selected-tier list, the
+  // row's rating for that pattern must be in the list (intra-pattern OR).
+  // Patterns with non-empty lists AND-combine. Empty list = pattern ignored.
+  function piApplyScope(all) {
     var rows = all.slice();
     if (piState.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
     else if (piState.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
     else if (piState.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
-    if (piState.patternFilter) {
-      var key = piState.patternFilter;
-      rows = rows.filter(function(r){ var rec = piPatternRec(r, key); return rec && rec.qualifies; });
+    return rows;
+  }
+  function piApplyTierFilter(rows) {
+    var active = [];
+    for (var p = 0; p < PI_PATTERNS.length; p++) {
+      var k = PI_PATTERNS[p].key;
+      var sel = piState.tierFilter[k] || [];
+      if (sel.length > 0) active.push({ key: k, tiers: sel });
     }
+    if (active.length === 0) return rows;
+    return rows.filter(function(r) {
+      for (var a = 0; a < active.length; a++) {
+        var rating = piRowRating(r, active[a].key);
+        if (active[a].tiers.indexOf(rating) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function piRenderRows() {
+    var tbody = document.getElementById('pi-tbody');
+    if (!tbody) return;
+    var all = piGetRows();
+    var scopeRows = piApplyScope(all);
+    piUpdateScopeCounts(all);
+    piPatternTiles(scopeRows);
+    var rows = piApplyTierFilter(scopeRows);
     rows.sort(function(a,b) {
       var va = piGetSortVal(a, piState.sort.col), vb = piGetSortVal(b, piState.sort.col);
       var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
@@ -8703,7 +8780,6 @@ function SUM_renderQualifiedStocks() {
         '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
         piInputCell(s, 'price') + piInputCell(s, 'high_52w') + piInputCell(s, 'low_52w') +
         piInputCell(s, 'ma_150') + piInputCell(s, 'ma_200') + piInputCell(s, 'recent_pullback');
-      // Per-pattern: rating, score, then test columns
       for (var j = 8; j < PI_COLS.length; j++) {
         var col = PI_COLS[j];
         if (col.kind === 'rating') html += piRatingCell(s, col);
@@ -8739,15 +8815,32 @@ function SUM_renderQualifiedStocks() {
     for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-pi-port') === p);
     piRenderRows();
   }
-  function piTogglePattern(k) {
-    piState.patternFilter = (piState.patternFilter === k) ? null : k;
+  // MD-V2-PI-CHIPS-S25-MARKER: toggle a single rating tier for a pattern.
+  function piToggleTier(patternKey, tier) {
+    var sel = piState.tierFilter[patternKey] || [];
+    var idx = sel.indexOf(tier);
+    if (idx > -1) sel.splice(idx, 1);
+    else sel.push(tier);
+    piState.tierFilter[patternKey] = sel;
+    piRenderRows();
+  }
+  // MD-V2-PI-CHIPS-S25-MARKER: tile-body click selects ALL tiers for a pattern
+  // (D-MD-V2-59 Option A). If all are already selected, clear them (toggle off).
+  function piSelectAllTiers(patternKey) {
+    var pat = null;
+    for (var p = 0; p < PI_PATTERNS.length; p++) if (PI_PATTERNS[p].key === patternKey) pat = PI_PATTERNS[p];
+    if (!pat) return;
+    var sel = piState.tierFilter[patternKey] || [];
+    var allOn = sel.length === pat.tierLadder.length;
+    piState.tierFilter[patternKey] = allOn ? [] : pat.tierLadder.slice();
     piRenderRows();
   }
   window.piSetMode = piSetMode;
   window.piSetScope = piSetScope;
   window.piSetTint = piSetTint;
   window.piSetPort = piSetPort;
-  window.piTogglePattern = piTogglePattern;
+  window.piToggleTier = piToggleTier;
+  window.piSelectAllTiers = piSelectAllTiers;
   window.piOnSort = piOnSort;
 
   function piBuildScaffold() {
@@ -8755,22 +8848,17 @@ function SUM_renderQualifiedStocks() {
     if (!host) return false;
     if (host.querySelector('#pi-main-table')) return true;
 
-    // colgroup: 8 inputs, then per-pattern [rating, score, ...tests]
     var colgroupHtml = '<col class="c-name"><col class="c-taxon">' +
                        '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
                        '<col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
     var inputsColspan = 8;
 
-    // Two header rows above the col-header row:
-    //   row 1 = super-group banners (D-MD-V2-56)
-    //   row 2 = per-pattern group headers
     var superHtml = '<th class="gh-inputs sg-spacer" colspan="' + inputsColspan + '"></th>';
     var groupHtml = '<th class="gh-inputs" colspan="' + inputsColspan + '">Inputs</th>';
 
-    // Count colspans per supergroup
     var posCols = 0, negCols = 0;
     for (var sp = 0; sp < PI_PATTERNS.length; sp++) {
-      var cspan = 2 + PI_PATTERNS[sp].tests.length; // rating + score + tests
+      var cspan = 2 + PI_PATTERNS[sp].tests.length;
       if (PI_PATTERNS[sp].supergroup === 'positive') posCols += cspan;
       else negCols += cspan;
     }
@@ -8793,7 +8881,7 @@ function SUM_renderQualifiedStocks() {
     }
 
     var html = '' +
-      '<div class="s1-intro">Pre-test indicators are three leading price-action patterns drawn directly from price and moving-average data. Each pattern is the AND of its named constituent tests, shown below as individual tick columns alongside a per-pattern rating and score. The two positive patterns (Pulling back within a medium/long-term uptrend, and Basing) sit under one super-group; Collapsing sits under the negative super-group. Click a tile to filter the table to the parent pattern; click again to clear.</div>' +
+      '<div class="s1-intro">Pre-test indicators are three leading price-action patterns drawn directly from price and moving-average data. Each pattern is the AND of its named constituent tests, shown below as individual tick columns alongside a per-pattern rating and score. The two positive patterns (Pulling back within a medium/long-term uptrend, and Basing) sit under one super-group; Collapsing sits under the negative super-group. Each tile has a rating-tier filter row: click a tier chip to show only stocks at that tier, or click the tile body to select all tiers. Tier selections within a pattern combine as OR; selections across patterns combine as AND.</div>' +
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-pi-grp="inputs" data-pi-val="pct" onclick="piSetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -8831,13 +8919,22 @@ function SUM_renderQualifiedStocks() {
         '</table>' +
       '</div>';
     host.innerHTML = html;
+    // MD-V2-PI-CHIPS-S25-MARKER: tile click delegation - a chip click toggles
+    // that tier; a click anywhere else on the tile selects all tiers (Option A).
     var tiles = document.getElementById('pi-pattern-tiles');
     if (tiles) {
       tiles.addEventListener('click', function(e) {
+        var chip = e.target.closest('.pi-tier-chip');
+        if (chip) {
+          var cp = chip.getAttribute('data-pattern');
+          var ct = chip.getAttribute('data-tier');
+          if (cp && ct) piToggleTier(cp, ct);
+          return;
+        }
         var tile = e.target.closest('.rating-tile');
         if (!tile) return;
         var k = tile.getAttribute('data-pattern');
-        if (k) piTogglePattern(k);
+        if (k) piSelectAllTiers(k);
       });
     }
     var hdr = document.getElementById('pi-col-header-row');

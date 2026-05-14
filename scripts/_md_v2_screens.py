@@ -61,6 +61,26 @@ def compute_master_dashboard_screens(prices, filter_results):
         recent_pullback = p.get("recent_pullback_pct", 0)
         rs_returns = p.get("rs_returns", {}) or {}
 
+        # ── MD-V2-SCREENS-S25-MARKER: Session 25 accessors ──
+        max_pullback_ssh = p.get("max_pullback_since_swing_high")
+        days_below_sh = p.get("days_below_swing_high")
+        utr_50d_rising = p.get("utr_50d_rising", False)
+        utr_150d_rising = p.get("utr_150d_rising", False)
+        utr_5d_declining = p.get("utr_5d_declining", False)
+        utr_10d_declining = p.get("utr_10d_declining", False)
+        utr_vol_trend = p.get("utr_vol_trend")
+        utr_updown_ratio = p.get("utr_updown_ratio")
+        utr_updown_ratio_5d = p.get("utr_updown_ratio_5d")
+        utr_dist_days = p.get("utr_dist_days")
+        utr_pullback_contraction = p.get("utr_pullback_contraction")
+        utr_test_ma = p.get("utr_test_ma")
+        utr_test_ma_dist = p.get("utr_test_ma_dist")
+        utr_retest_counts = p.get("utr_retest_counts", {}) or {}
+        utr_candle_quality_10d = p.get("utr_candle_quality_10d")
+        utr_candle_quality_3d = p.get("utr_candle_quality_3d")
+        close_pct_change_today = p.get("close_pct_change_today")
+        # ── END MD-V2-SCREENS-S25-MARKER accessors ──
+
         # ──────────────────────────────────────────────────────────────
         # STAGE 1 — Consolidating / Basing
         # ──────────────────────────────────────────────────────────────
@@ -315,27 +335,88 @@ def compute_master_dashboard_screens(prices, filter_results):
         ind = {}
 
         # Pre-test leading indicators
-        # 1. Pullback to retest S2 uptrend (only meaningful in S2)
-        # Stock has fallen 5-25% from swing high recently, but stays above MAs (uptrend intact)
+        # MD-V2-SCREENS-S25-MARKER: Session 25 rewrite. Each pre-test indicator is now an
+        # explicit AND of named boolean tests; tests/count/rating emitted in
+        # md["pre_indicators"] so the dashboard can render per-pattern
+        # rating + score columns (D-MD-V2-55, Option A 3-tier ladder).
+
+        # ---- Indicator 1: Pulling back within MT/LT uptrend (D-MD-V2-50) ----
+        # In a real MT/LT uptrend (50D + 150D MAs still rising) AND currently
+        # inside a pullback (5D + 10D MAs rolling over). No Stage 2 rating gate.
+        pb_t1_50d_rising = bool(utr_50d_rising)
+        pb_t2_150d_rising = bool(utr_150d_rising)
+        pb_t3_5d_rolling = bool(utr_5d_declining)
+        pb_t4_10d_rolling = bool(utr_10d_declining)
+        pb_tests = {
+            "t1_50d_rising": pb_t1_50d_rising,
+            "t2_150d_rising": pb_t2_150d_rising,
+            "t3_5d_rolling_over": pb_t3_5d_rolling,
+            "t4_10d_rolling_over": pb_t4_10d_rolling,
+        }
+        pb_count = sum(1 for v in pb_tests.values() if v)
+        ind["pulling_back_uptrend"] = bool(pb_count == 4)
+
+        # ---- Indicator 2: Basing (D-MD-V2-49) ----
+        # 4 tests: price pullback >=15% (max drawdown since swing high, even if
+        # partly reclawed) AND price below swing high >=20 trading days AND
+        # price > 200D MA AND 200D MA still rising MoM.
+        ba_t1_pullback = bool(max_pullback_ssh is not None and max_pullback_ssh >= 0.15)
+        ba_t2_time = bool(days_below_sh is not None and days_below_sh >= 20)
+        ba_t3_above_200d = bool(price is not None and ma200 is not None and price > ma200)
+        ba_t4_200d_rising = bool(ma200 is not None and ma200_prev is not None and ma200 > ma200_prev)
+        ba_tests = {
+            "t1_price_pullback_ge15": ba_t1_pullback,
+            "t2_time_below_high_ge20d": ba_t2_time,
+            "t3_price_above_200d": ba_t3_above_200d,
+            "t4_200d_rising": ba_t4_200d_rising,
+        }
+        ba_count = sum(1 for v in ba_tests.values() if v)
+        ind["basing"] = bool(ba_count == 4)
+        # Back-compat alias - some downstream code still references basing_below_high
+        ind["basing_below_high"] = ind["basing"]
+
+        # ---- Indicator 3: Collapsing (logic unchanged) ----
+        # Both: SP 30% below 52WH AND SP fall >=20% from recent high.
+        co_t1_30_below_52wh = bool(price is not None and h52 is not None and h52 > 0 and price <= h52 * 0.70)
+        co_t2_pullback_ge20 = bool(recent_pullback is not None and recent_pullback >= 0.20)
+        co_tests = {
+            "t1_price_le_70pct_52wh": co_t1_30_below_52wh,
+            "t2_pullback_ge20": co_t2_pullback_ge20,
+        }
+        co_count = sum(1 for v in co_tests.values() if v)
+        ind["collapsing"] = bool(co_count == 2)
+
+        # ---- Per-pattern rating ladder (D-MD-V2-55, Option A 3-tier) ----
+        def _pre_rating(count, total):
+            """Option A 3-tier ladder scaled to test count.
+            0 -> None ; ~1/3 -> Possible ; ~2/3 -> Plausible ; all -> Probable."""
+            if count <= 0:
+                return "None"
+            if count >= total:
+                return "Probable"
+            frac = count / total
+            if frac >= (2.0 / 3.0):
+                return "Plausible"
+            return "Possible"
+
+        md["pre_indicators"] = {
+            "pulling_back_uptrend": {
+                "tests": pb_tests, "count": pb_count, "total": 4,
+                "rating": _pre_rating(pb_count, 4), "qualifies": ind["pulling_back_uptrend"],
+            },
+            "basing": {
+                "tests": ba_tests, "count": ba_count, "total": 4,
+                "rating": _pre_rating(ba_count, 4), "qualifies": ind["basing"],
+            },
+            "collapsing": {
+                "tests": co_tests, "count": co_count, "total": 2,
+                "rating": _pre_rating(co_count, 2), "qualifies": ind["collapsing"],
+            },
+        }
+
+        # Back-compat: keep is_s2_uptrend defined for downstream setup/test logic
+        # that still references it (probing_bet, vcp setups, etc).
         is_s2_uptrend = (s2["rating"] in ("Probable", "Plausible"))
-        in_pullback_range = (recent_pullback is not None and 0.05 <= recent_pullback <= 0.25)
-        above_ma200 = (price is not None and ma200 is not None and price > ma200)
-        ind["pullback_to_retest"] = bool(is_s2_uptrend and in_pullback_range and above_ma200)
-
-        # 2. Basing below recent high in S2 (≥15% fall + 20 days below high + still in S2)
-        # Approximation: recent pullback ≥15%, currently below swing high, and S2 plausible
-        ind["basing_below_high"] = bool(
-            is_s2_uptrend and
-            recent_pullback is not None and recent_pullback >= 0.15 and
-            price is not None and swing_high is not None and price < swing_high
-        )
-
-        # 3. Collapsing (irrespective of stage)
-        # Both: SP 30% below 52WH AND SP fall ≥20% from L3M high
-        sp_30_below_52wh = (price is not None and h52 is not None and h52 > 0 and price <= h52 * 0.70)
-        # Approximation for "L3M high" — use swing_high (most recent peak in 6M); take stricter test of 20% off
-        sp_20_off_l3m_high = (recent_pullback is not None and recent_pullback >= 0.20)
-        ind["collapsing"] = bool(sp_30_below_52wh and sp_20_off_l3m_high)
 
         # Post-test trailing indicators
         # 4. Breakout (P > 1.08x 5D MA AND ADV up > 1.10x down)
@@ -406,12 +487,38 @@ def compute_master_dashboard_screens(prices, filter_results):
             s1_to_2_transition and has_vcp_pattern and ind["breakout"]
         )
 
-        # Setup 3: UTR breakout after S2 pullback (Core MM tranche)
-        # Logic: stock in S2, has pulled back to retest MA, now breaking back up
-        utr_capital = fr.get("uptrend_retest", {}).get("stage") == "Capital"
-        setups["utr_after_s2_pullback"] = bool(
-            is_s2_uptrend and ind["pullback_to_retest"] and (utr_capital or ind["breakout"])
-        )
+        # Setup 3: Healthy retest within MT/LT uptrend (D-MD-V2-51)
+        # MD-V2-SCREENS-S25-MARKER: REPLACES the old utr_after_s2_pullback setup.
+        # Asks whether the pullback is healthy/orderly as price comes toward the
+        # MA that will be retested. 6 tests, ALL must pass. Plus 2 INFO fields
+        # (ma_retested, retest_count) that are NOT part of the AND-logic.
+        hr_t1_vol_contracting = bool(utr_vol_trend is not None and utr_vol_trend < 1.0)
+        hr_t2_updown_ge105 = bool(utr_updown_ratio is not None and utr_updown_ratio >= 1.05)
+        hr_t3_few_dist_days = bool(utr_dist_days is not None and utr_dist_days <= 3)
+        hr_t4_volatility_contracting = bool(utr_pullback_contraction is not None and utr_pullback_contraction < 1.0)
+        hr_t5_testing_ma = bool(utr_test_ma is not None)
+        hr_t6_buying_l10d = bool(utr_candle_quality_10d is not None and utr_candle_quality_10d >= 0.5)
+        hr_tests = {
+            "t1_volume_contracting": hr_t1_vol_contracting,
+            "t2_updown_vol_ge105": hr_t2_updown_ge105,
+            "t3_few_distribution_days": hr_t3_few_dist_days,
+            "t4_volatility_contracting": hr_t4_volatility_contracting,
+            "t5_testing_meaningful_ma": hr_t5_testing_ma,
+            "t6_buying_through_l10d": hr_t6_buying_l10d,
+        }
+        hr_count = sum(1 for v in hr_tests.values() if v)
+        # INFO fields (not gates): which MA is being tested + touch count for THAT MA only
+        hr_retest_count = utr_retest_counts.get(utr_test_ma) if utr_test_ma else None
+        setups["healthy_retest"] = {
+            "tests": hr_tests, "count": hr_count, "total": 6,
+            "rating": _pre_rating(hr_count, 6),
+            "qualifies": bool(hr_count == 6),
+            "info_ma_retested": utr_test_ma,
+            "info_ma_dist_pct": utr_test_ma_dist,
+            "info_retest_count": hr_retest_count,
+        }
+        # Back-compat alias - downstream may still reference utr_after_s2_pullback
+        setups["utr_after_s2_pullback"] = setups["healthy_retest"]["qualifies"]
 
         # Setup 4: VCP+breakout after S2 basing (Core MM tranche)
         # Logic: stock in S2, has basing pattern (≥15% pullback), VCP higher-lows, plus breakout
@@ -458,11 +565,51 @@ def compute_master_dashboard_screens(prices, filter_results):
             "qualifies": bool(s1_or_s2_gate and vcp_count >= 2 and vol_declining),
         }
 
-        # Test 3: UTR — reuse existing uptrend_retest filter
+        # Test 3: Upwards moving average retest (D-MD-V2-52)
+        # MD-V2-SCREENS-S25-MARKER: REPLACES the old uptrend_retest stage passthrough.
+        # The binary go/no-go capital deployment trigger. 5 tests; pass logic =
+        # (1) AND (2) AND (3 OR 4) AND (5). Current-day pass/fail only - the
+        # L5D/L20D action-oriented trigger windows (D-MD-V2-54) are deferred to
+        # a dedicated follow-up build (Option 2, confirmed 14-May-26).
+        # test MA value: read the SMA of whichever MA is being tested
+        _test_ma_period = {"50D": "50D", "100D": "100D", "150D": "150D", "200D": "200D"}.get(utr_test_ma)
+        _test_ma_val = mas.get(_test_ma_period) if _test_ma_period else None
+        mr_t1_near_test_ma = bool(utr_test_ma is not None)  # MANDATORY
+        mr_t2_close_above_ma = bool(
+            price is not None and _test_ma_val is not None and price > _test_ma_val
+        )  # MANDATORY
+        mr_t3_candle_l3d = bool(
+            utr_candle_quality_3d is not None and utr_candle_quality_3d >= 0.5
+        )  # ONE OF {3,4}
+        mr_t4_updown_l5d = bool(
+            utr_updown_ratio_5d is not None and utr_updown_ratio_5d >= 1.10
+        )  # ONE OF {3,4}
+        mr_t5_confirmation = bool(
+            close_pct_change_today is not None and close_pct_change_today >= 0.02
+        )  # MANDATORY confirmation (D-MD-V2-53)
+        mr_tests = {
+            "t1_near_test_ma": mr_t1_near_test_ma,
+            "t2_close_above_test_ma": mr_t2_close_above_ma,
+            "t3_closes_near_highs_l3d": mr_t3_candle_l3d,
+            "t4_updown_vol_l5d": mr_t4_updown_l5d,
+            "t5_confirmation_close_ge2pct": mr_t5_confirmation,
+        }
+        mr_count = sum(1 for v in mr_tests.values() if v)
+        mr_qualifies = bool(
+            mr_t1_near_test_ma and mr_t2_close_above_ma and
+            (mr_t3_candle_l3d or mr_t4_updown_l5d) and mr_t5_confirmation
+        )
+        tests["ma_retest_upwards"] = {
+            "tests": mr_tests, "count": mr_count, "total": 5,
+            "rating": _pre_rating(mr_count, 5),
+            "qualifies": mr_qualifies,
+            "info_ma_retested": utr_test_ma,
+        }
+        # Back-compat alias - downstream may still reference uptrend_retest test
         utr_stage = fr.get("uptrend_retest", {}).get("stage")
         tests["uptrend_retest"] = {
             "stage": utr_stage,
-            "qualifies": utr_stage in ("Late", "Capital"),
+            "qualifies": mr_qualifies,
         }
 
         md["tests"] = tests

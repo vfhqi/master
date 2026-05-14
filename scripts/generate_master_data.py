@@ -337,6 +337,7 @@ def build_prices_json(universe, raw_data, benchmark_rows):
         swing_high = high_52w  # fallback to 52W high
         lookback_for_swing = rows_with_sma[-126:] if len(rows_with_sma) >= 126 else rows_with_sma  # 6 months
         swing_window = 5  # days on each side
+        swing_high_global_idx = None  # MD-V2-PIPELINE-FIELDS-S25-MARKER: index into rows_with_sma of the swing high
         for si in range(len(lookback_for_swing) - 1, swing_window - 1, -1):
             candidate = lookback_for_swing[si]["high"]
             is_peak = True
@@ -346,6 +347,8 @@ def build_prices_json(universe, raw_data, benchmark_rows):
                     break
             if is_peak:
                 swing_high = candidate
+                # map local swing index -> global index into rows_with_sma
+                swing_high_global_idx = len(rows_with_sma) - len(lookback_for_swing) + si
                 break
 
         # Volume averages
@@ -935,6 +938,61 @@ def build_prices_json(universe, raw_data, benchmark_rows):
         recent_pullback_pct = None
         if swing_high and swing_high > 0:
             recent_pullback_pct = round((swing_high - latest["close"]) / swing_high, 4)
+
+        # ── MD-V2-PIPELINE-FIELDS-S25-MARKER: Session 25 pipeline fields ──
+        # max_pullback_since_swing_high (D-MD-V2-49 test 1): the DEEPEST drawdown
+        # from the swing high reached on/after the swing-high day - even if price
+        # has since reclawed some of the loss. recent_pullback_pct measures only
+        # the CURRENT distance, which is insufficient for the Basing test.
+        max_pullback_since_swing_high = None
+        days_below_swing_high = None
+        if swing_high and swing_high > 0 and swing_high_global_idx is not None:
+            _post_rows = rows_with_sma[swing_high_global_idx:]
+            if _post_rows:
+                _min_low = min(r["low"] for r in _post_rows)
+                max_pullback_since_swing_high = round((swing_high - _min_low) / swing_high, 4)
+            # days_below_swing_high (D-MD-V2-49 test 2): count trailing trading days
+            # where the close has been below the swing high. Counts back from the
+            # latest row until a day closes at/above the swing high.
+            _dbsh = 0
+            for _r in reversed(rows_with_sma):
+                if _r["close"] < swing_high:
+                    _dbsh += 1
+                else:
+                    break
+            days_below_swing_high = _dbsh
+
+        # utr_candle_quality_10d / _3d (D-MD-V2-51 t6 / D-MD-V2-52 t3):
+        # same logic as the existing 20-day utr_candle_quality - proportion of
+        # days whose close sits in the UPPER 40% of the daily range
+        # (close >= low + 0.6 * range). Windowed to 10 and 3 trading days.
+        def _candle_quality(window):
+            _uc = 0
+            _vd = 0
+            for _cr in window:
+                _rng = _cr["high"] - _cr["low"]
+                if _rng > 0:
+                    _vd += 1
+                    if _cr["close"] >= _cr["low"] + 0.6 * _rng:
+                        _uc += 1
+            return round(_uc / _vd, 4) if _vd > 0 else None
+        _cq10_window = rows_with_sma[-10:] if len(rows_with_sma) >= 10 else rows_with_sma
+        _cq3_window = rows_with_sma[-3:] if len(rows_with_sma) >= 3 else rows_with_sma
+        utr_candle_quality_10d = _candle_quality(_cq10_window)
+        utr_candle_quality_3d = _candle_quality(_cq3_window)
+
+        # utr_updown_ratio_5d (D-MD-V2-52 t4): up-day vol / down-day vol over the
+        # last 5 trading days only. Reuses the existing _split_vol helper.
+        _recent_5 = rows_with_sma[-5:] if len(rows_with_sma) >= 5 else rows_with_sma
+        _adv_5d_up, _adv_5d_dn = _split_vol(_recent_5)
+        utr_updown_ratio_5d = round(_adv_5d_up / _adv_5d_dn, 4) if _adv_5d_dn > 0 else None
+
+        # close_pct_change_today (D-MD-V2-52 t5 confirmation): today's close vs
+        # yesterday's close as a fraction. >= 0.02 satisfies the confirmation test.
+        close_pct_change_today = None
+        if prev["close"] and prev["close"] > 0:
+            close_pct_change_today = round((latest["close"] - prev["close"]) / prev["close"], 4)
+        # ── END MD-V2-PIPELINE-FIELDS-S25-MARKER block ──
         # ── END MD-V2-PIPELINE-MARKER block ──
 
         entry = {
@@ -993,6 +1051,13 @@ def build_prices_json(universe, raw_data, benchmark_rows):
             "lower_lows_count": lower_lows_count,
             "rs_at_m3": rs_at_m3,
             "recent_pullback_pct": recent_pullback_pct,
+            # MD-V2-PIPELINE-FIELDS-S25-MARKER: Session 25 fields
+            "max_pullback_since_swing_high": max_pullback_since_swing_high,
+            "days_below_swing_high": days_below_swing_high,
+            "utr_candle_quality_10d": utr_candle_quality_10d,
+            "utr_candle_quality_3d": utr_candle_quality_3d,
+            "utr_updown_ratio_5d": utr_updown_ratio_5d,
+            "close_pct_change_today": close_pct_change_today,
         }
         prices.append(entry)
 

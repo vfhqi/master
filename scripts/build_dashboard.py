@@ -1167,97 +1167,6 @@ body[data-active-tab="setups"] .v2-nav,
 body[data-active-tab="tests"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; padding-bottom: 4px !important; }
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
-/* MD-V2-WAVE1-FROZEN-HEADERS-MARKER-CSS-START */
-/* Wave 1 (14-May-26): sticky ribbon + corrected frozen-header offsets.
-   --header-height is 70px on V2 tabs. --v2-ribbon-h is measured at render
-   time by the JS helper below (the ribbon wraps at narrow widths so a
-   fixed guess is fragile); it falls back to 46px before first measure. */
-body[data-active-tab^="stage_"],
-body[data-active-tab="pre_indicators"],
-body[data-active-tab="post_indicators"],
-body[data-active-tab="setups"],
-body[data-active-tab="tests"],
-body[data-active-tab="master_overview"] { --v2-ribbon-h: 46px; }
-
-/* The ribbon: sticky directly under the fixed MD V2 nav header. */
-body[data-active-tab^="stage_"] .controls.s1-controls,
-body[data-active-tab="pre_indicators"] .controls.s1-controls,
-body[data-active-tab="post_indicators"] .controls.s1-controls,
-body[data-active-tab="setups"] .controls.s1-controls,
-body[data-active-tab="tests"] .controls.s1-controls,
-body[data-active-tab="master_overview"] .controls.s1-controls {
-  position: sticky;
-  top: var(--header-height);
-  z-index: 60;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
-}
-
-/* Frozen table headers: re-anchor every V2 table's sticky rows below the
-   fixed header AND the sticky ribbon. Stage 1-4 tables have 2 header rows
-   (group-header + col-header); PI/PO/ST have 3 (super-group + group +
-   col); CT has 2. Each row stacks on the one above it. z-index lifted
-   above the ribbon's 60. The thead's own sticky/top is neutralised so the
-   per-ROW offsets are what take effect. */
-#s1-main-table thead, #s2-main-table thead, #s3-main-table thead,
-#s4-main-table thead, #pi-main-table thead, #po-main-table thead,
-#st-main-table thead, #ct-main-table thead {
-  position: static !important;
-  z-index: auto !important;
-  box-shadow: none !important;
-}
-/* Stage 1-4: group-header row height ~28px (matches old col-header top). */
-#s1-main-table thead tr.group-header-row th,
-#s2-main-table thead tr.group-header-row th,
-#s3-main-table thead tr.group-header-row th,
-#s4-main-table thead tr.group-header-row th {
-  position: sticky;
-  top: calc(var(--header-height) + var(--v2-ribbon-h));
-  z-index: 70;
-}
-#s1-main-table thead tr.col-header-row th,
-#s2-main-table thead tr.col-header-row th,
-#s3-main-table thead tr.col-header-row th,
-#s4-main-table thead tr.col-header-row th {
-  position: sticky;
-  top: calc(var(--header-height) + var(--v2-ribbon-h) + 28px);
-  z-index: 70;
-}
-/* PI / PO / ST: 3 header rows. Row heights 24px (super-group) + 24px
-   (group-header) measured from the existing 0/24/48 ladder. */
-#pi-main-table thead tr.super-group-row th,
-#po-main-table thead tr.super-group-row th,
-#st-main-table thead tr.super-group-row th {
-  position: sticky;
-  top: calc(var(--header-height) + var(--v2-ribbon-h));
-  z-index: 72;
-}
-#pi-main-table thead tr.group-header-row th,
-#po-main-table thead tr.group-header-row th,
-#st-main-table thead tr.group-header-row th {
-  position: sticky;
-  top: calc(var(--header-height) + var(--v2-ribbon-h) + 24px);
-  z-index: 71;
-}
-#pi-main-table thead tr.col-header-row th,
-#po-main-table thead tr.col-header-row th,
-#st-main-table thead tr.col-header-row th {
-  position: sticky;
-  top: calc(var(--header-height) + var(--v2-ribbon-h) + 48px);
-  z-index: 70;
-}
-/* CT (Capital deployment tests): 2 header rows today. Wave 2 adds a 3rd
-   (sub-group) row and will re-stack these — this is the 2-row state. */
-#ct-main-table thead tr.group-header-row th {
-  position: sticky;
-  top: calc(var(--header-height) + var(--v2-ribbon-h));
-  z-index: 71;
-}
-#ct-main-table thead tr.col-header-row th {
-  position: sticky;
-  top: calc(var(--header-height) + var(--v2-ribbon-h) + 24px);
-  z-index: 70;
-}
-/* MD-V2-WAVE1-FROZEN-HEADERS-MARKER-CSS-END */
 
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-START */
 /* Session 25 rebuild (D-MD-V2-49,-50,-55,-56,-57,-58) */
@@ -1718,6 +1627,98 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
 #tab-tests .s1-rating-tiles .pi-tile-navy.active { background: rgba(24,95,165,0.22); border: 1.5px solid #185FA5; }
 #tab-tests .s1-rating-tiles .pi-strip-navy { background: #185FA5; height: 4px; margin-top: 6px; border-radius: 2px; }
 /* MD-V2-TESTS-MARKER-CSS-END */
+/* MD-V2-WAVE1-FROZEN-HEADERS-MARKER-CSS-START */
+/* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER: relocated after TESTS CSS so it wins the cascade */
+/* Wave 1 (14-May-26): sticky ribbon + corrected frozen-header offsets.
+   --header-height is 70px on V2 tabs. --v2-ribbon-h is measured at render
+   time by the JS helper below (the ribbon wraps at narrow widths so a
+   fixed guess is fragile); it falls back to 46px before first measure. */
+body[data-active-tab^="stage_"],
+body[data-active-tab="pre_indicators"],
+body[data-active-tab="post_indicators"],
+body[data-active-tab="setups"],
+body[data-active-tab="tests"],
+body[data-active-tab="master_overview"] { --v2-ribbon-h: 46px; }
+
+/* The ribbon: sticky directly under the fixed MD V2 nav header. */
+body[data-active-tab^="stage_"] .controls.s1-controls,
+body[data-active-tab="pre_indicators"] .controls.s1-controls,
+body[data-active-tab="post_indicators"] .controls.s1-controls,
+body[data-active-tab="setups"] .controls.s1-controls,
+body[data-active-tab="tests"] .controls.s1-controls,
+body[data-active-tab="master_overview"] .controls.s1-controls {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 60;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+}
+
+/* Frozen table headers: re-anchor every V2 table's sticky rows below the
+   fixed header AND the sticky ribbon. Stage 1-4 tables have 2 header rows
+   (group-header + col-header); PI/PO/ST have 3 (super-group + group +
+   col); CT has 2. Each row stacks on the one above it. z-index lifted
+   above the ribbon's 60. The thead's own sticky/top is neutralised so the
+   per-ROW offsets are what take effect. */
+#s1-main-table thead, #s2-main-table thead, #s3-main-table thead,
+#s4-main-table thead, #pi-main-table thead, #po-main-table thead,
+#st-main-table thead, #ct-main-table thead {
+  position: static !important;
+  z-index: auto !important;
+  box-shadow: none !important;
+}
+/* Stage 1-4: group-header row height ~28px (matches old col-header top). */
+#s1-main-table thead tr.group-header-row th,
+#s2-main-table thead tr.group-header-row th,
+#s3-main-table thead tr.group-header-row th,
+#s4-main-table thead tr.group-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h));
+  z-index: 70;
+}
+#s1-main-table thead tr.col-header-row th,
+#s2-main-table thead tr.col-header-row th,
+#s3-main-table thead tr.col-header-row th,
+#s4-main-table thead tr.col-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 28px);
+  z-index: 70;
+}
+/* PI / PO / ST: 3 header rows. Row heights 24px (super-group) + 24px
+   (group-header) measured from the existing 0/24/48 ladder. */
+#pi-main-table thead tr.super-group-row th,
+#po-main-table thead tr.super-group-row th,
+#st-main-table thead tr.super-group-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h));
+  z-index: 72;
+}
+#pi-main-table thead tr.group-header-row th,
+#po-main-table thead tr.group-header-row th,
+#st-main-table thead tr.group-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 24px);
+  z-index: 71;
+}
+#pi-main-table thead tr.col-header-row th,
+#po-main-table thead tr.col-header-row th,
+#st-main-table thead tr.col-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 48px);
+  z-index: 70;
+}
+/* CT (Capital deployment tests): 2 header rows today. Wave 2 adds a 3rd
+   (sub-group) row and will re-stack these — this is the 2-row state. */
+#ct-main-table thead tr.group-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h));
+  z-index: 71;
+}
+#ct-main-table thead tr.col-header-row th {
+  position: sticky;
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 24px);
+  z-index: 70;
+}
+/* MD-V2-WAVE1-FROZEN-HEADERS-MARKER-CSS-END */
 
 /* MD-V2-MASTER-OVERVIEW-MARKER-CSS-START */
 /* MD-V2-MASTER-OVERVIEW-S27-MARKER: Master Overview tab - synoptic rating
@@ -7055,6 +7056,7 @@ function SUM_renderQualifiedStocks() {
     if (!s1BuildScaffold()) return;
     s1BuildHeaderRow();
     s1RenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
   }
   window.renderStage1 = renderStage1;
 
@@ -7529,6 +7531,7 @@ function SUM_renderQualifiedStocks() {
     if (!s2BuildScaffold()) return;
     s2BuildHeaderRow();
     s2RenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
   }
   window.renderStage2 = renderStage2;
 
@@ -8035,6 +8038,7 @@ function SUM_renderQualifiedStocks() {
     if (!s3BuildScaffold()) return;
     s3BuildHeaderRow();
     s3RenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
   }
   window.renderStage3 = renderStage3;
 
@@ -8512,6 +8516,7 @@ function SUM_renderQualifiedStocks() {
     if (!s4BuildScaffold()) return;
     s4BuildHeaderRow();
     s4RenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
   }
   window.renderStage4 = renderStage4;
 
@@ -9287,6 +9292,7 @@ function SUM_renderQualifiedStocks() {
     if (!piBuildScaffold()) return;
     piBuildHeaderRow();
     piRenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
   }
   window.renderPreIndicators = renderPreIndicators;
 
@@ -10022,6 +10028,7 @@ function SUM_renderQualifiedStocks() {
     if (!poBuildScaffold()) return;
     poBuildHeaderRow();
     poRenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
   }
   window.renderPostIndicators = renderPostIndicators;
 
@@ -10775,6 +10782,7 @@ function SUM_renderQualifiedStocks() {
     if (!stBuildScaffold()) return;
     stBuildHeaderRow();
     stRenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
   }
   window.renderSetups = renderSetups;
 
@@ -11574,6 +11582,7 @@ function SUM_renderQualifiedStocks() {
     if (!ctBuildScaffold()) return;
     ctBuildHeaderRow();
     ctRenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
   }
   // MD-V2-TESTS-S27-MARKER: dispatch calls renderCapTests(); the pre-S27
   // module exported only renderTests, so renderCapTests was undefined - a

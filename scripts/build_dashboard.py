@@ -153,8 +153,7 @@ TABS = [
     # MD-V2-SETUPS-MARKER - Setups (4 capital-deployment-eligibility patterns)
     {"id": "setups", "label": "Setups", "accent": "#BA7517"},
     # MD-V2-TESTS-MARKER - Capital qualification tests (3 tests)
-    {"id": "tests_s1pb",  "label": "Stage 1 & N PBs",   "accent": "#BA7517"},  # MD-V2-TESTS-SPLIT-MARKER
-    {"id": "tests_s2vcp", "label": "S2 VCPs & Retests", "accent": "#185FA5"},  # MD-V2-TESTS-SPLIT-MARKER
+    {"id": "tests", "label": "Tests", "accent": "#0F6E56"},
     # MD-V2-MASTER-OVERVIEW-S27-MARKER - synoptic rating matrix, default landing tab
     {"id": "master_overview", "label": "Master Overview", "accent": "#1b3d5c"},
     # Data / reference tabs
@@ -524,7 +523,7 @@ table.data-table td.col-identity{white-space:nowrap}
 body.chart-from-left .chart-panel{left:0;right:auto;border-left:none;border-right:1px solid var(--border);transform:translateX(-100%)}
 body.chart-from-left .chart-panel.open{transform:translateX(0)}
 #s1-main-table td.name-cell,#s2-main-table td.name-cell,#s3-main-table td.name-cell,#s4-main-table td.name-cell,#pi-main-table td.name-cell,#po-main-table td.name-cell,#st-main-table td.name-cell,#ct-main-table td.name-cell,#mo-matrix-table td.mo-mx-name-cell{cursor:pointer}
-body[data-active-tab^="stage_"] #hdr-chart-btn,body[data-active-tab="pre_indicators"] #hdr-chart-btn,body[data-active-tab="post_indicators"] #hdr-chart-btn,body[data-active-tab="setups"] #hdr-chart-btn,body[data-active-tab^="tests_"] #hdr-chart-btn,body[data-active-tab="master_overview"] #hdr-chart-btn{display:none!important}
+body[data-active-tab^="stage_"] #hdr-chart-btn,body[data-active-tab="pre_indicators"] #hdr-chart-btn,body[data-active-tab="post_indicators"] #hdr-chart-btn,body[data-active-tab="setups"] #hdr-chart-btn,body[data-active-tab="tests"] #hdr-chart-btn,body[data-active-tab="master_overview"] #hdr-chart-btn{display:none!important}
 body.chart-from-left .s1-controls{left:var(--chart-panel-w,0)!important;transition:left .3s ease}
 body.chart-from-left #mo-matrix-table tbody td.mo-mx-name-cell,body.chart-from-left #mo-matrix-table thead th.mo-mx-screen-col{left:var(--chart-panel-w,0)!important;transition:left .3s ease}
 /* MD-V2-GROUP-CAPTIONS-MARKER: signposting + emphasis for the rewritten group-test captions */
@@ -1079,7 +1078,7 @@ body[data-active-tab^="stage_"] .header-tabs-row,
 body[data-active-tab="pre_indicators"] .header-tabs-row,
 body[data-active-tab="post_indicators"] .header-tabs-row,
 body[data-active-tab="setups"] .header-tabs-row,
-body[data-active-tab^="tests_"] .header-tabs-row,
+body[data-active-tab="tests"] .header-tabs-row,
 body[data-active-tab="master_overview"] .header-tabs-row { display: none !important; }
 
 /* V2 mini nav strip - visible only on V2 tabs */
@@ -1088,7 +1087,7 @@ body[data-active-tab^="stage_"] .v2-nav,
 body[data-active-tab="pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
 body[data-active-tab="setups"] .v2-nav,
-body[data-active-tab^="tests_"] .v2-nav,
+body[data-active-tab="tests"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav { display: flex; }
 .v2-nav-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; margin-right: 8px; }
 .v2-nav-btn { display: inline-block; padding: 5px 11px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
@@ -1161,7 +1160,7 @@ body[data-active-tab^="stage_"] .header-controls-row,
 body[data-active-tab="pre_indicators"] .header-controls-row,
 body[data-active-tab="post_indicators"] .header-controls-row,
 body[data-active-tab="setups"] .header-controls-row,
-body[data-active-tab^="tests_"] .header-controls-row,
+body[data-active-tab="tests"] .header-controls-row,
 body[data-active-tab="master_overview"] .header-controls-row { display: none !important; }
 /* MD-V2-PI-V2-S25-MARKER: EDIT 1 - Block A header chrome shrink on V2 tabs (D-MD-V2-47).
    Legacy header is sized for 3 rows; V2 tabs show only header-top + v2-nav.
@@ -1171,19 +1170,19 @@ body[data-active-tab^="stage_"] .header,
 body[data-active-tab="pre_indicators"] .header,
 body[data-active-tab="post_indicators"] .header,
 body[data-active-tab="setups"] .header,
-body[data-active-tab^="tests_"] .header,
+body[data-active-tab="tests"] .header,
 body[data-active-tab="master_overview"] .header { padding-bottom: 0 !important; }
 body[data-active-tab^="stage_"],
 body[data-active-tab="pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab="setups"],
-body[data-active-tab^="tests_"],
+body[data-active-tab="tests"],
 body[data-active-tab="master_overview"] { --header-height: 70px; }
 body[data-active-tab^="stage_"] .v2-nav,
 body[data-active-tab="pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
 body[data-active-tab="setups"] .v2-nav,
-body[data-active-tab^="tests_"] .v2-nav,
+body[data-active-tab="tests"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; padding-bottom: 4px !important; }
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
 
@@ -1656,7 +1655,7 @@ body[data-active-tab^="stage_"],
 body[data-active-tab="pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab="setups"],
-body[data-active-tab^="tests_"],
+body[data-active-tab="tests"],
 body[data-active-tab="master_overview"] { --v2-ribbon-h: 46px; }
 
 /* The ribbon: sticky directly under the fixed MD V2 nav header. */
@@ -1664,7 +1663,7 @@ body[data-active-tab^="stage_"] .controls.s1-controls,
 body[data-active-tab="pre_indicators"] .controls.s1-controls,
 body[data-active-tab="post_indicators"] .controls.s1-controls,
 body[data-active-tab="setups"] .controls.s1-controls,
-body[data-active-tab^="tests_"] .controls.s1-controls,
+body[data-active-tab="tests"] .controls.s1-controls,
 body[data-active-tab="master_overview"] .controls.s1-controls {
   position: sticky;
   top: var(--header-height);
@@ -1778,7 +1777,7 @@ body[data-active-tab^="stage_"] .table-wrap,
 body[data-active-tab="pre_indicators"] .table-wrap,
 body[data-active-tab="post_indicators"] .table-wrap,
 body[data-active-tab="setups"] .table-wrap,
-body[data-active-tab^="tests_"] .table-wrap,
+body[data-active-tab="tests"] .table-wrap,
 body[data-active-tab="master_overview"] .table-wrap {
   overflow: visible;
 }
@@ -1793,7 +1792,7 @@ body[data-active-tab^="stage_"] .v2-hscroll,
 body[data-active-tab="pre_indicators"] .v2-hscroll,
 body[data-active-tab="post_indicators"] .v2-hscroll,
 body[data-active-tab="setups"] .v2-hscroll,
-body[data-active-tab^="tests_"] .v2-hscroll,
+body[data-active-tab="tests"] .v2-hscroll,
 body[data-active-tab="master_overview"] .v2-hscroll {
   overflow: visible;
 }
@@ -1803,7 +1802,7 @@ body[data-active-tab^="stage_"],
 body[data-active-tab="pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab="setups"],
-body[data-active-tab^="tests_"],
+body[data-active-tab="tests"],
 body[data-active-tab="master_overview"] {
   overflow-x: auto;
 }
@@ -2587,7 +2586,7 @@ window.openChart=function(t){
   chartTicker=t;
   var p=document.getElementById("chart-panel");
   // MD-CHART-V2-WIRING-MARKER: V2 tabs slide the chart panel in from the LEFT; legacy keeps the right.
-  var _v2chartTabs={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups:1,tests_s1pb:1,tests_s2vcp:1,master_overview:1};  /* MD-V2-TESTS-SPLIT-MARKER */
+  var _v2chartTabs={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups:1,tests:1,master_overview:1};
   var _isV2chart=!!_v2chartTabs[currentTab];
   var _isStageChart=/^stage_[1-4]$/.test(currentTab);
   var _wasChartOpen=p.classList.contains("open");
@@ -2671,7 +2670,7 @@ window.setChartScaleMode=function(m){
 // MD-CHART-V2-WIRING-MARKER: V2 tabs - clicking a company/ticker name-cell opens that stock's chart.
 // This is the only chart entry point on V2 tabs (the header "Chart" button is hidden there via CSS).
 document.addEventListener("click",function(e){
-  var _v2ct={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups:1,tests_s1pb:1,tests_s2vcp:1,master_overview:1};  /* MD-V2-TESTS-SPLIT-MARKER */
+  var _v2ct={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups:1,tests:1,master_overview:1};
   if(!_v2ct[document.body.getAttribute("data-active-tab")])return;
   var _nameCell=e.target.closest("td.name-cell, td.mo-mx-name-cell");
   if(!_nameCell)return;
@@ -8819,8 +8818,7 @@ function SUM_renderQualifiedStocks() {
       + '<button class="v2-nav-btn v2-grp-setups" data-v2-tab="setups" onclick="switchTab(\'setups\')">Capital qualification setups</button>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Capital deployment</span>'
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_s1pb" onclick="switchTab(\'tests_s1pb\')">Stage 1 &amp; N PBs</button>'  /* MD-V2-TESTS-SPLIT-MARKER */
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_s2vcp" onclick="switchTab(\'tests_s2vcp\')">S2 VCPs &amp; Retests</button>'
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests" onclick="switchTab(\'tests\')">Capital deployment tests</button>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Overview</span>'
@@ -11114,7 +11112,7 @@ function SUM_renderQualifiedStocks() {
 
 /* MD-V2-TESTS-MARKER-START */
 
-function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
+(function() {
   'use strict';
 
   // MD-V2-TESTS-S27-MARKER: Capital deployment tests tab - Session 27 rebuild.
@@ -11141,7 +11139,81 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
   // are prefixed by kind in the pipeline: g* = gate, s* = setup column,
   // v* = VCP contraction column, x* = trigger column. The module does not
   // care about the prefix beyond grouping/labelling.
-  var CT_PATTERNS = initPatterns;  /* MD-V2-TESTS-SPLIT-MARKER: populated by factory caller */
+  var CT_PATTERNS = [
+    {
+      "key": "ma_retest_upwards",
+      "label": "Upwards moving average retest",
+      "shortLabel": "MA retest",
+      "tone": "teal",
+      "tierLadder": ["Possible", "Plausible", "Probable"],
+      "total": 8,
+      "tooltip": "Price reclaims a test moving average on a healthy retest, with a confirming up-day.",
+      "caption": "<span class='db'>The trigger that pairs with the Healthy retest setup</span> &mdash; price reclaiming the moving average it pulled back to.<span class='intro'>Six setup columns + two trigger columns. To qualify:</span><span class='tline'><span class='tnum'>(1)</span> Is price <u>testing a meaningful MA</u> and has it <u>closed back above it</u>?</span><span class='tline'><span class='tnum'>(2)</span> Is the reclaim <u>confirmed by a close at least 2% above yesterday</u>?</span><span class='tline'><span class='tnum'>(3)</span> Was the pullback itself <u>healthy</u> &mdash; orderly on volume, distribution, volatility and candles (the six setup columns)?</span>",
+      "tests": [
+        { "key": "s1_volume_contracting",      "label": "Volume contracting",        "group": "setup",   "tooltip": "10-day average volume below the 50-day - selling is drying up through the pullback" },
+        { "key": "s2_updown_vol_ge105",        "label": "Up-vol ≥ down-vol",     "group": "setup",   "tooltip": "Up-day volume at least 5% above down-day volume over the last month" },
+        { "key": "s3_few_distribution_days",   "label": "Few distribution days",      "group": "setup",   "tooltip": "Three or fewer distribution days over the last 25 sessions" },
+        { "key": "s4_volatility_contracting",  "label": "Volatility contracting",     "group": "setup",   "tooltip": "10-day ATR below the 20-day - the pullback is orderly, not violent" },
+        { "key": "s5_testing_meaningful_ma",   "label": "Testing a meaningful MA",    "group": "setup",   "tooltip": "Price has come down to within range of a 50/100/150/200-day moving average" },
+        { "key": "s6_buying_through_l10d",     "label": "Buying through 10 days",     "group": "setup",   "tooltip": "At least half of the last 10 days closed in the upper 40% of their daily range" },
+        { "key": "x1_reclaim_close_above_ma",  "label": "Reclaimed the MA",           "group": "trigger", "tooltip": "Current price is back above the moving average being tested" },
+        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
+      ]
+    },
+    {
+      "key": "vcp_deploy_s1",
+      "label": "VCP after Stage 1→2",
+      "shortLabel": "VCP after S1→2",
+      "tone": "green",
+      "tierLadder": ["Possible", "Plausible", "Probable"],
+      "total": 7,
+      "tooltip": "A volatility-contraction pattern firing out of a Stage 1 base that is rated Probable.",
+      "caption": "<span class='db'>The deployment trigger for a VCP breaking out of a Stage 1 base</span>.<span class='intro'>One gate + four contraction + two trigger columns. To pass &mdash; gate AND all four contractions AND breakout AND confirmation:</span><span class='tline'><span class='tnum'>(1)</span> Gate: is <u>Stage 1 rated Probable</u> (Early or Late)?</span><span class='tline'><span class='tnum'>(2)</span> Do the four VCP tests pass &mdash; <u>narrowing contractions, 2-4 of them, declining volume, higher lows</u>?</span><span class='tline'><span class='tnum'>(3)</span> Trigger: is the <u>Breakout indicator firing</u>, <u>confirmed by a close at least 2% above yesterday</u>?</span>",
+      "tests": [
+        { "key": "g1_stage1_probable",          "label": "Stage 1 = Probable",        "group": "gate",    "tooltip": "Stage 1 rating is Probable Early or Probable Late - either qualifies" },
+        { "key": "v1_narrowing_contractions",   "label": "Narrowing contractions",    "group": "vcp",     "tooltip": "Each price contraction is strictly shallower than the one before it" },
+        { "key": "v2_sufficient_count",         "label": "2-4 contractions",          "group": "vcp",     "tooltip": "Between two and four contractions in the base" },
+        { "key": "v3_volume_declining",         "label": "Volume declining",          "group": "vcp",     "tooltip": "Average volume falls across successive contractions" },
+        { "key": "v4_higher_lows",              "label": "Higher lows",               "group": "vcp",     "tooltip": "Each contraction low sits above the previous contraction low" },
+        { "key": "x1_breakout",                 "label": "Breakout",                  "group": "trigger", "tooltip": "The Breakout post-test indicator fires" },
+        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
+      ]
+    },
+    {
+      "key": "vcp_deploy_s2",
+      "label": "VCP after Stage 2 base",
+      "shortLabel": "VCP after S2 base",
+      "tone": "navy",
+      "tierLadder": ["Possible", "Plausible", "Probable"],
+      "total": 7,
+      "tooltip": "A volatility-contraction pattern firing out of a Stage 2 base that is consolidating.",
+      "caption": "<span class='db'>The deployment trigger for a VCP breaking out of a fresh Stage 2 base</span>.<span class='intro'>One gate + four contraction + two trigger columns. To pass &mdash; gate AND all four contractions AND breakout AND confirmation:</span><span class='tline'><span class='tnum'>(1)</span> Gate: is the stock in a <u>Stage 2 uptrend with the Basing indicator qualifying</u>?</span><span class='tline'><span class='tnum'>(2)</span> Do the four VCP tests pass &mdash; <u>narrowing contractions, 2-4 of them, declining volume, higher lows</u>?</span><span class='tline'><span class='tnum'>(3)</span> Trigger: is the <u>Breakout indicator firing</u>, <u>confirmed by a close at least 2% above yesterday</u>?</span>",
+      "tests": [
+        { "key": "g1_stage2_basing",            "label": "Stage 2 basing",            "group": "gate",    "tooltip": "Stage 2 uptrend AND the Basing pre-test indicator qualifies" },
+        { "key": "v1_narrowing_contractions",   "label": "Narrowing contractions",    "group": "vcp",     "tooltip": "Each price contraction is strictly shallower than the one before it" },
+        { "key": "v2_sufficient_count",         "label": "2-4 contractions",          "group": "vcp",     "tooltip": "Between two and four contractions in the base" },
+        { "key": "v3_volume_declining",         "label": "Volume declining",          "group": "vcp",     "tooltip": "Average volume falls across successive contractions" },
+        { "key": "v4_higher_lows",              "label": "Higher lows",               "group": "vcp",     "tooltip": "Each contraction low sits above the previous contraction low" },
+        { "key": "x1_breakout",                 "label": "Breakout",                  "group": "trigger", "tooltip": "The Breakout post-test indicator fires" },
+        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
+      ]
+    },
+    {
+      "key": "probing_bet",
+      "label": "Probing bet",
+      "shortLabel": "Probing bet",
+      "tone": "amber",
+      "tierLadder": ["Possible", "Plausible", "Probable"],
+      "total": 3,
+      "tooltip": "The probing-bet trigger - a qualifying probing-bet stage that breaks out with a confirming up-day.",
+      "caption": "<span class='db'>The deployment trigger for the Probing bet setup</span> &mdash; a fresh breakout on a stock worth a small starter position.<span class='intro'>One setup + two trigger columns (Collapsing shown as context only). To pass:</span><span class='tline'><span class='tnum'>(1)</span> Setup: does the <u>Probing bet filter rate the stock Late or Capital</u>?</span><span class='tline'><span class='tnum'>(2)</span> Trigger: is the <u>Breakout indicator firing</u>?</span><span class='tline'><span class='tnum'>(3)</span> Trigger: is it <u>confirmed by a close at least 2% above yesterday</u>?</span>",
+      "tests": [
+        { "key": "s1_pb_stage_late_or_capital", "label": "PB stage late/capital",     "group": "setup",   "tooltip": "The probing-bet filter rates this stock Late or Capital" },
+        { "key": "x1_breakout",                 "label": "Breakout",                  "group": "trigger", "tooltip": "The Breakout post-test indicator fires" },
+        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
+      ]
+    }
+  ];
 
   // Tone -> CSS class fragments (reuses the PI tile/chip/strip families).
   var CT_TONE_TILE  = { teal:'pi-tile-pullback', green:'pi-tile-basing', navy:'pi-tile-navy', amber:'pi-tile-amber' };
@@ -11152,7 +11224,6 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
     ctState.tierFilter[CT_PATTERNS[_ip].key] = [];
   }
 
-  var _host = null;  /* MD-V2-TESTS-SPLIT-MARKER: scoped host-element reference */
   var CT_RATING_RANK = { 'Probable':5, 'Probable Late':5, 'Probable Early':4, 'Plausible':3, 'Possible':2, 'None':1 };
   var CT_RATING_CLS  = { 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
 
@@ -11511,7 +11582,7 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
     ctRenderRows();
   }
   function ctBuildHeaderRow() {
-    var tr = _host ? _host.querySelector('#ct-col-header-row') : null;  /* MD-V2-TESTS-SPLIT-MARKER */
+    var tr = document.getElementById('ct-col-header-row');
     if (!tr) return;
     var h = '';
     for (var i = 0; i < CT_COLS.length; i++) {
@@ -11528,7 +11599,7 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
   }
   // --- tiles (chip filter unchanged from S26 ct module) ---
   function ctPatternTiles(scopeRows) {
-    var tiles = _host ? _host.querySelector('#ct-pattern-tiles') : null;  /* MD-V2-TESTS-SPLIT-MARKER */
+    var tiles = document.getElementById('ct-pattern-tiles');
     if (!tiles) return;
     var counts = ctPatternCounts(scopeRows);
     var total = scopeRows.length;
@@ -11575,7 +11646,7 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
     tiles.innerHTML = h;
   }
   function ctUpdateScopeCounts(rows) {
-    function set(id, n) { var el = _host ? _host.querySelector('#' + id) : null; if (el) el.textContent = '(' + n + ')'; }  /* MD-V2-TESTS-SPLIT-MARKER */
+    function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
     set('ct-cnt-all',      rows.length);
     set('ct-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
     set('ct-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
@@ -11607,7 +11678,7 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
 
   // --- main render ---
   function ctRenderRows() {
-    var tbody = _host ? _host.querySelector('#ct-tbody') : null;  /* MD-V2-TESTS-SPLIT-MARKER */
+    var tbody = document.getElementById('ct-tbody');
     if (!tbody) return;
     var all = ctGetRows();
     var scopeRows = ctApplyScope(all);
@@ -11660,25 +11731,25 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
   // --- control setters ---
   function ctSetMode(kind, val) {
     ctState.mode[kind] = val;
-    var btns = _host ? _host.querySelectorAll('button[data-ct-grp="' + kind + '"]') : [];  /* MD-V2-TESTS-SPLIT-MARKER */
+    var btns = document.querySelectorAll('button[data-ct-grp="' + kind + '"]');
     for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-ct-val') === val);
     ctRenderRows();
   }
   function ctSetScope(s) {
     ctState.scope = s;
-    var btns = _host ? _host.querySelectorAll('button[data-ct-scope]') : [];  /* MD-V2-TESTS-SPLIT-MARKER */
+    var btns = document.querySelectorAll('button[data-ct-scope]');
     for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-ct-scope') === s);
     ctRenderRows();
   }
   function ctSetTint(t) {
     ctState.tint = t;
-    var btns = _host ? _host.querySelectorAll('button[data-ct-tint]') : [];  /* MD-V2-TESTS-SPLIT-MARKER */
+    var btns = document.querySelectorAll('button[data-ct-tint]');
     for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-ct-tint') === t);
     ctRenderRows();
   }
   function ctSetPort(p) {
     ctState.port = p;
-    var btns = _host ? _host.querySelectorAll('button[data-ct-port]') : [];  /* MD-V2-TESTS-SPLIT-MARKER */
+    var btns = document.querySelectorAll('button[data-ct-port]');
     for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-ct-port') === p);
     ctRenderRows();
   }
@@ -11704,7 +11775,13 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
     ctState.tierFilter[patternKey] = onlyProbable ? [] : [probable];
     ctRenderRows();
   }
-  /* MD-V2-TESTS-SPLIT-MARKER: window.ct* dispatchers moved outside factory — see end of module */
+  window.ctSetMode = ctSetMode;
+  window.ctSetScope = ctSetScope;
+  window.ctSetTint = ctSetTint;
+  window.ctSetPort = ctSetPort;
+  window.ctToggleTier = ctToggleTier;
+  window.ctSelectAllTiers = ctSelectAllTiers;
+  window.ctOnSort = ctOnSort;
 
   // --- scaffold ---
   // Per-pattern block width = 2 (rating+score) + N tests + 2 (L5D+L20D)
@@ -11715,9 +11792,8 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
     return span;
   }
   function ctBuildScaffold() {
-    var host = document.getElementById('tab-' + tabId);  /* MD-V2-TESTS-SPLIT-MARKER */
+    var host = document.getElementById('tab-tests');
     if (!host) return false;
-    _host = host;
     if (host.querySelector('#ct-main-table')) return true;
 
     // colgroup: inputs (8) + stage info (4) + per-pattern blocks
@@ -11811,7 +11887,7 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
         '</table>' +
       '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
     host.innerHTML = html;
-    var tiles = host.querySelector('#ct-pattern-tiles');  /* MD-V2-TESTS-SPLIT-MARKER */
+    var tiles = document.getElementById('ct-pattern-tiles');
     if (tiles) {
       tiles.addEventListener('click', function(e) {
         var chip = e.target.closest('.pi-tier-chip');
@@ -11827,7 +11903,7 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
         if (k) ctSelectAllTiers(k);
       });
     }
-    var hdr = host.querySelector('#ct-col-header-row');  /* MD-V2-TESTS-SPLIT-MARKER */
+    var hdr = document.getElementById('ct-col-header-row');
     if (hdr) {
       hdr.addEventListener('click', function(e) {
         var th = e.target.closest('th');
@@ -11845,7 +11921,7 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
     // for the named pattern, then clear it so it fires exactly once.
     (function(){
       var j = window._mdJump;
-      if (j && j.tab === tabId) {  /* MD-V2-TESTS-SPLIT-MARKER */
+      if (j && j.tab === 'tests') {
         if (j.patternKey && j.tier && ctState.tierFilter &&
             ctState.tierFilter.hasOwnProperty(j.patternKey)) {
           ctState.tierFilter[j.patternKey] = [j.tier];
@@ -11863,114 +11939,10 @@ function _buildCTModule(tabId, initPatterns) {  /* MD-V2-TESTS-SPLIT-MARKER */
   // latent ReferenceError on the Tests tab. Export BOTH names so the
   // dispatch works whichever name it uses (and the S27 dashboard patcher
   // also corrects the dispatch line to renderTests for cleanliness).
-  return {
-    render: renderTests,
-    setMode: ctSetMode, setScope: ctSetScope, setTint: ctSetTint, setPort: ctSetPort,
-    toggleTier: ctToggleTier, selectAllTiers: ctSelectAllTiers, onSort: ctOnSort
-  };
-}  /* end _buildCTModule  MD-V2-TESTS-SPLIT-MARKER */
+  window.renderTests = renderTests;
+  window.renderCapTests = renderTests;
 
-/* MD-V2-TESTS-SPLIT-MARKER: Two-tab split — factory instantiations */
-var _ctMods = {};
-
-/* Tab 1: Stage 1 & N PBs — Probing bet (G1) + VCP after S1->2 (G2) */
-var _ctModS1pb = _buildCTModule('tests_s1pb', [
-    {
-      "key": "probing_bet",
-      "label": "Probing bet",
-      "shortLabel": "Probing bet",
-      "tone": "amber",
-      "tierLadder": ["Possible", "Plausible", "Probable"],
-      "total": 3,
-      "tooltip": "The probing-bet trigger - a qualifying probing-bet stage that breaks out with a confirming up-day.",
-      "caption": "<span class='db'>The deployment trigger for the Probing bet setup</span> &mdash; a fresh breakout on a stock worth a small starter position.<span class='intro'>One setup + two trigger columns (Collapsing shown as context only). To pass:</span><span class='tline'><span class='tnum'>(1)</span> Setup: does the <u>Probing bet filter rate the stock Late or Capital</u>?</span><span class='tline'><span class='tnum'>(2)</span> Trigger: is the <u>Breakout indicator firing</u>?</span><span class='tline'><span class='tnum'>(3)</span> Trigger: is it <u>confirmed by a close at least 2% above yesterday</u>?</span>",
-      "tests": [
-        { "key": "s1_pb_stage_late_or_capital", "label": "PB stage late/capital",     "group": "setup",   "tooltip": "The probing-bet filter rates this stock Late or Capital" },
-        { "key": "x1_breakout",                 "label": "Breakout",                  "group": "trigger", "tooltip": "The Breakout post-test indicator fires" },
-        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
-      ]
-    },
-    {
-      "key": "vcp_deploy_s1",
-      "label": "VCP after Stage 1→2",
-      "shortLabel": "VCP after S1→2",
-      "tone": "green",
-      "tierLadder": ["Possible", "Plausible", "Probable"],
-      "total": 7,
-      "tooltip": "A volatility-contraction pattern firing out of a Stage 1 base that is rated Probable.",
-      "caption": "<span class='db'>The deployment trigger for a VCP breaking out of a Stage 1 base</span>.<span class='intro'>One gate + four contraction + two trigger columns. To pass &mdash; gate AND all four contractions AND breakout AND confirmation:</span><span class='tline'><span class='tnum'>(1)</span> Gate: is <u>Stage 1 rated Probable</u> (Early or Late)?</span><span class='tline'><span class='tnum'>(2)</span> Do the four VCP tests pass &mdash; <u>narrowing contractions, 2-4 of them, declining volume, higher lows</u>?</span><span class='tline'><span class='tnum'>(3)</span> Trigger: is the <u>Breakout indicator firing</u>, <u>confirmed by a close at least 2% above yesterday</u>?</span>",
-      "tests": [
-        { "key": "g1_stage1_probable",          "label": "Stage 1 = Probable",        "group": "gate",    "tooltip": "Stage 1 rating is Probable Early or Probable Late - either qualifies" },
-        { "key": "v1_narrowing_contractions",   "label": "Narrowing contractions",    "group": "vcp",     "tooltip": "Each price contraction is strictly shallower than the one before it" },
-        { "key": "v2_sufficient_count",         "label": "2-4 contractions",          "group": "vcp",     "tooltip": "Between two and four contractions in the base" },
-        { "key": "v3_volume_declining",         "label": "Volume declining",          "group": "vcp",     "tooltip": "Average volume falls across successive contractions" },
-        { "key": "v4_higher_lows",              "label": "Higher lows",               "group": "vcp",     "tooltip": "Each contraction low sits above the previous contraction low" },
-        { "key": "x1_breakout",                 "label": "Breakout",                  "group": "trigger", "tooltip": "The Breakout post-test indicator fires" },
-        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
-      ]
-    }
-]);
-
-/* Tab 2: S2 VCPs & Retests — VCP after S2 base (G1) + MA retest (G2) */
-var _ctModS2vcp = _buildCTModule('tests_s2vcp', [
-    {
-      "key": "vcp_deploy_s2",
-      "label": "VCP after Stage 2 base",
-      "shortLabel": "VCP after S2 base",
-      "tone": "navy",
-      "tierLadder": ["Possible", "Plausible", "Probable"],
-      "total": 7,
-      "tooltip": "A volatility-contraction pattern firing out of a Stage 2 base that is consolidating.",
-      "caption": "<span class='db'>The deployment trigger for a VCP breaking out of a fresh Stage 2 base</span>.<span class='intro'>One gate + four contraction + two trigger columns. To pass &mdash; gate AND all four contractions AND breakout AND confirmation:</span><span class='tline'><span class='tnum'>(1)</span> Gate: is the stock in a <u>Stage 2 uptrend with the Basing indicator qualifying</u>?</span><span class='tline'><span class='tnum'>(2)</span> Do the four VCP tests pass &mdash; <u>narrowing contractions, 2-4 of them, declining volume, higher lows</u>?</span><span class='tline'><span class='tnum'>(3)</span> Trigger: is the <u>Breakout indicator firing</u>, <u>confirmed by a close at least 2% above yesterday</u>?</span>",
-      "tests": [
-        { "key": "g1_stage2_basing",            "label": "Stage 2 basing",            "group": "gate",    "tooltip": "Stage 2 uptrend AND the Basing pre-test indicator qualifies" },
-        { "key": "v1_narrowing_contractions",   "label": "Narrowing contractions",    "group": "vcp",     "tooltip": "Each price contraction is strictly shallower than the one before it" },
-        { "key": "v2_sufficient_count",         "label": "2-4 contractions",          "group": "vcp",     "tooltip": "Between two and four contractions in the base" },
-        { "key": "v3_volume_declining",         "label": "Volume declining",          "group": "vcp",     "tooltip": "Average volume falls across successive contractions" },
-        { "key": "v4_higher_lows",              "label": "Higher lows",               "group": "vcp",     "tooltip": "Each contraction low sits above the previous contraction low" },
-        { "key": "x1_breakout",                 "label": "Breakout",                  "group": "trigger", "tooltip": "The Breakout post-test indicator fires" },
-        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
-      ]
-    },
-    {
-      "key": "ma_retest_upwards",
-      "label": "Upwards moving average retest",
-      "shortLabel": "MA retest",
-      "tone": "teal",
-      "tierLadder": ["Possible", "Plausible", "Probable"],
-      "total": 8,
-      "tooltip": "Price reclaims a test moving average on a healthy retest, with a confirming up-day.",
-      "caption": "<span class='db'>The trigger that pairs with the Healthy retest setup</span> &mdash; price reclaiming the moving average it pulled back to.<span class='intro'>Six setup columns + two trigger columns. To qualify:</span><span class='tline'><span class='tnum'>(1)</span> Is price <u>testing a meaningful MA</u> and has it <u>closed back above it</u>?</span><span class='tline'><span class='tnum'>(2)</span> Is the reclaim <u>confirmed by a close at least 2% above yesterday</u>?</span><span class='tline'><span class='tnum'>(3)</span> Was the pullback itself <u>healthy</u> &mdash; orderly on volume, distribution, volatility and candles (the six setup columns)?</span>",
-      "tests": [
-        { "key": "s1_volume_contracting",      "label": "Volume contracting",        "group": "setup",   "tooltip": "10-day average volume below the 50-day - selling is drying up through the pullback" },
-        { "key": "s2_updown_vol_ge105",        "label": "Up-vol ≥ down-vol",     "group": "setup",   "tooltip": "Up-day volume at least 5% above down-day volume over the last month" },
-        { "key": "s3_few_distribution_days",   "label": "Few distribution days",      "group": "setup",   "tooltip": "Three or fewer distribution days over the last 25 sessions" },
-        { "key": "s4_volatility_contracting",  "label": "Volatility contracting",     "group": "setup",   "tooltip": "10-day ATR below the 20-day - the pullback is orderly, not violent" },
-        { "key": "s5_testing_meaningful_ma",   "label": "Testing a meaningful MA",    "group": "setup",   "tooltip": "Price has come down to within range of a 50/100/150/200-day moving average" },
-        { "key": "s6_buying_through_l10d",     "label": "Buying through 10 days",     "group": "setup",   "tooltip": "At least half of the last 10 days closed in the upper 40% of their daily range" },
-        { "key": "x1_reclaim_close_above_ma",  "label": "Reclaimed the MA",           "group": "trigger", "tooltip": "Current price is back above the moving average being tested" },
-        { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
-      ]
-    }
-]);
-
-_ctMods['tests_s1pb']  = _ctModS1pb;
-_ctMods['tests_s2vcp'] = _ctModS2vcp;
-
-/* Global render exports */
-window.renderTestsS1pb  = _ctModS1pb.render;
-window.renderTestsS2vcp = _ctModS2vcp.render;
-window.renderTests      = _ctModS1pb.render;  /* backward compat */
-window.renderCapTests   = _ctModS1pb.render;  /* backward compat */
-
-/* Global control dispatchers — route to whichever CT module is active */
-window.ctSetMode        = function(k,v){ var m=_ctMods[currentTab]; if(m) m.setMode(k,v); };
-window.ctSetScope       = function(s){ var m=_ctMods[currentTab]; if(m) m.setScope(s); };
-window.ctSetTint        = function(t){ var m=_ctMods[currentTab]; if(m) m.setTint(t); };
-window.ctSetPort        = function(p){ var m=_ctMods[currentTab]; if(m) m.setPort(p); };
-window.ctToggleTier     = function(pk,t){ var m=_ctMods[currentTab]; if(m) m.toggleTier(pk,t); };
-window.ctSelectAllTiers = function(pk){ var m=_ctMods[currentTab]; if(m) m.selectAllTiers(pk); };
-window.ctOnSort         = function(k){ var m=_ctMods[currentTab]; if(m) m.onSort(k); };
+})();
 
 /* MD-V2-TESTS-MARKER-END */
 
@@ -12021,10 +11993,10 @@ window.ctOnSort         = function(k){ var m=_ctMods[currentTab]; if(m) m.onSort
     { section:'Capital qualification setups', key:'healthy_retest', label:'Healthy retest within MT/LT uptrend', ratingPath:'group:setups:healthy_retest', tabId:'setups', patternKey:'healthy_retest' },
     { section:'Capital qualification setups', key:'vcp_after_s2_base', label:'VCP after Stage 2 base', ratingPath:'group:setups:vcp_after_s2_base', tabId:'setups', patternKey:'vcp_after_s2_base' },
     // -- Capital deployment tests (S27 4-test structure) --
-    { section:'Capital deployment tests', key:'ma_retest_upwards', label:'Upwards moving average retest', ratingPath:'group:tests:ma_retest_upwards', tabId:'tests_s2vcp', patternKey:'ma_retest_upwards'  /* MD-V2-TESTS-SPLIT-MARKER */ },
-    { section:'Capital deployment tests', key:'vcp_deploy_s1', label:'VCP after Stage 1->2', ratingPath:'group:tests:vcp_deploy_s1', tabId:'tests_s1pb', patternKey:'vcp_deploy_s1'  /* MD-V2-TESTS-SPLIT-MARKER */ },
-    { section:'Capital deployment tests', key:'vcp_deploy_s2', label:'VCP after Stage 2 base', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests_s2vcp', patternKey:'vcp_deploy_s2'  /* MD-V2-TESTS-SPLIT-MARKER */ },
-    { section:'Capital deployment tests', key:'probing_bet_test', label:'Probing bet', ratingPath:'group:tests:probing_bet', tabId:'tests_s1pb', patternKey:'probing_bet'  /* MD-V2-TESTS-SPLIT-MARKER */ }
+    { section:'Capital deployment tests', key:'ma_retest_upwards', label:'Upwards moving average retest', ratingPath:'group:tests:ma_retest_upwards', tabId:'tests', patternKey:'ma_retest_upwards' },
+    { section:'Capital deployment tests', key:'vcp_deploy_s1', label:'VCP after Stage 1->2', ratingPath:'group:tests:vcp_deploy_s1', tabId:'tests', patternKey:'vcp_deploy_s1' },
+    { section:'Capital deployment tests', key:'vcp_deploy_s2', label:'VCP after Stage 2 base', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests', patternKey:'vcp_deploy_s2' },
+    { section:'Capital deployment tests', key:'probing_bet_test', label:'Probing bet', ratingPath:'group:tests:probing_bet', tabId:'tests', patternKey:'probing_bet' }
   ];
 
   // The 4 rating-tier columns. Stage 1 alone splits Probable into Early/Late
@@ -12428,8 +12400,7 @@ function renderTab(id){
   else if(id==="post_indicators")renderPostIndicators();  /* MD-V2-POST-INDICATORS-MARKER */
   else if(id==="setups")renderSetups();  /* MD-V2-SETUPS-MARKER */
   else if(id==="master_overview")renderMasterOverview();  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
-  else if(id==="tests_s1pb")renderTestsS1pb();  /* MD-V2-TESTS-SPLIT-MARKER */
-  else if(id==="tests_s2vcp")renderTestsS2vcp();  /* MD-V2-TESTS-SPLIT-MARKER */
+  else if(id==="tests")renderTests();  /* MD-V2-TESTS-MARKER MD-V2-TESTS-S27-MARKER: was renderCapTests (undefined) */
   else if(id==="mm99")renderMM99();
   else if(id==="bp")renderBP();
   else if(id==="pb")renderPB();

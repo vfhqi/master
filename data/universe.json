@@ -9742,6 +9742,16 @@
       "target_ma": "50D",
       "industry": "Professional, business and consumer services",
       "sector": "Information services"
+    },
+    {
+      "ticker": "S92-DE",
+      "yfinance_ticker": "S92.DE",
+      "company_name": "SMA Solar Technology AG",
+      "date_added": "2026-05-15",
+      "notes": "Cohort: Energy Transition Equipment Recovery",
+      "target_ma": "50D",
+      "industry": "Industrials and capital goods",
+      "sector": "Capital goods - grid"
     }
   ]
 }

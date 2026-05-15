@@ -1839,7 +1839,7 @@ body[data-active-tab="master_overview"] {
 /* section-group row */
 #mo-matrix-table thead tr.mo-mx-group-row th {
   position: sticky;
-  top: calc(var(--header-height) + var(--v2-ribbon-h));
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 56px);
   z-index: 71;
   background: #f3efe2;
   font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
@@ -1857,7 +1857,7 @@ body[data-active-tab="master_overview"] {
 /* column-title row - labels WRAP (no rotation), columns stay pill-width */
 #mo-matrix-table thead tr.mo-mx-col-row th {
   position: sticky;
-  top: calc(var(--header-height) + var(--v2-ribbon-h) + 22px);
+  top: calc(var(--header-height) + var(--v2-ribbon-h) + 78px);
   z-index: 70;
   background: #f3efe2;
   font-size: 9.5px; font-weight: 700; color: #555;
@@ -1914,50 +1914,34 @@ body[data-active-tab="master_overview"] {
 /* MD-V2-WAVE1-FROZEN-HEADERS-MARKER-CSS-END */
 
 /* MD-V2-MASTER-OVERVIEW-MARKER-CSS-START */
-/* MD-V2-OVERVIEW-COOCCURRENCE-S35-MARKER: Master Overview summary table -
-   transposed (the four rating tiers + a Total rated row run DOWN, the 20
-   screens run ACROSS) and sized to the matrix's exact column widths
-   (190px + 20x64px) so the two tables line up under the shared page-body
-   horizontal scroll. The summary table is now a co-occurrence selector:
-   clicking a count cell selects that screen-and-tier criterion; every cell
-   then shows the count of stocks meeting all selected criteria AND its own;
-   the matrix below filters to that set. Replaces the Wave 3 per-column chip
-   filter (chips removed; the chip CSS above is now inert/dead). */
-#mo-main-table { border-collapse: separate; border-spacing: 0; font-size: 12px; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
-#mo-main-table thead { position: static; }
-#mo-main-table thead th { background: #f3efe2; border-bottom: 1px solid #e0dcc8; }
-/* section-group band - reuses the matrix mo-mx-g-* colour hooks */
-#mo-main-table thead tr.mo-group-row th { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 5px 6px; text-align: center; border-left: 1px solid #e0dcc8; }
-#mo-main-table thead tr.mo-group-row th.mo-mx-g-stages   { color: #1b5e20; }
-#mo-main-table thead tr.mo-group-row th.mo-mx-g-pretest  { color: #0F6E56; }
-#mo-main-table thead tr.mo-group-row th.mo-mx-g-posttest { color: #A32D2D; }
-#mo-main-table thead tr.mo-group-row th.mo-mx-g-setups   { color: #BA7517; }
-#mo-main-table thead tr.mo-group-row th.mo-mx-g-tests    { color: #185FA5; }
-/* column-title row - one cell per screen, labels WRAP, click to open the tab */
-#mo-main-table thead tr.mo-col-row th { width: 64px; min-width: 64px; max-width: 64px; font-size: 9.5px; font-weight: 700; color: #555; padding: 5px 4px; text-align: center; vertical-align: bottom; line-height: 1.2; white-space: normal; word-break: normal; overflow-wrap: break-word; cursor: pointer; }
-#mo-main-table thead tr.mo-col-row th:hover { color: #0F6E56; text-decoration: underline; }
-/* sticky-left first column - aligns with the matrix 190px Stock column */
-#mo-main-table thead th.mo-corner { position: sticky; left: 0; z-index: 6; width: 190px; min-width: 190px; max-width: 190px; text-align: left; vertical-align: bottom; padding: 5px 10px; border-right: 1px solid #e0dcc8; font-size: 9px; color: #9a9582; text-transform: uppercase; letter-spacing: 0.4px; }
-#mo-main-table tbody td { padding: 7px 6px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; font-variant-numeric: tabular-nums; }
-#mo-main-table tbody td.mo-tier-label { position: sticky; left: 0; z-index: 5; background: #fbfaf5; text-align: left; font-weight: 600; color: #2a2a2a; padding: 7px 10px; border-right: 1px solid #e0dcc8; }
-#mo-main-table tbody tr:hover td.mo-tier-label { background: #f4f1e6; }
-#mo-main-table tbody tr.mo-data-row:hover { background: rgba(15,110,86,0.05); }
+/* MD-V2-MASTER-OVERVIEW-S27-MARKER: Master Overview tab - synoptic rating
+   matrix. Basic table; funnel banner + other visualisations parked. */
+#mo-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#mo-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#mo-main-table thead th { background: #f3efe2 !important; border-bottom: 1px solid #e0dcc8; padding: 9px 10px; text-align: center; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: #555; }
+#mo-main-table thead th.mo-screen-col { text-align: left; width: 320px; }
+#mo-main-table thead th.mo-tier-col { width: 110px; }
+#mo-main-table thead th.mo-total-col { width: 110px; color: #888; }
+#mo-main-table td { padding: 7px 10px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; font-variant-numeric: tabular-nums; }
+/* section banner rows */
+#mo-main-table tr.mo-section-row td.mo-section-cell { text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 7px 10px; background: #f3efe2; }
+#mo-main-table tr.mo-sec-stages   td.mo-section-cell { color: #1b5e20; border-left: 3px solid #1b5e20; }
+#mo-main-table tr.mo-sec-pretest  td.mo-section-cell { color: #0F6E56; border-left: 3px solid #0F6E56; }
+#mo-main-table tr.mo-sec-posttest td.mo-section-cell { color: #A32D2D; border-left: 3px solid #A32D2D; }
+#mo-main-table tr.mo-sec-setups   td.mo-section-cell { color: #BA7517; border-left: 3px solid #BA7517; }
+#mo-main-table tr.mo-sec-tests    td.mo-section-cell { color: #185FA5; border-left: 3px solid #185FA5; }
+/* data rows */
+#mo-main-table tr.mo-data-row:hover { background: rgba(15,110,86,0.05); }
+#mo-main-table td.mo-screen-cell { text-align: left; font-weight: 600; color: #2a2a2a; }
 #mo-main-table td.mo-cell { cursor: pointer; font-weight: 600; transition: filter 0.12s; }
 #mo-main-table td.mo-cell:hover { filter: brightness(0.94); outline: 1.5px solid rgba(15,110,86,0.4); outline-offset: -1.5px; }
-#mo-main-table td.mo-cell.mo-zero { color: #c4c0b0; font-weight: 400; }
+#mo-main-table td.mo-cell.mo-zero { color: #c4c0b0; cursor: default; font-weight: 400; }
+#mo-main-table td.mo-cell.mo-zero:hover { filter: none; outline: none; }
 #mo-main-table td.mo-t-none.mo-has  { background: #f0ede1; color: #999; }
 #mo-main-table td.mo-t-pos.mo-has   { background: rgba(15,110,86,0.10); color: #3a6a5a; }
 #mo-main-table td.mo-t-pla.mo-has   { background: rgba(15,110,86,0.20); color: #1a5446; }
 #mo-main-table td.mo-t-prob.mo-has  { background: rgba(15,110,86,0.34); color: #0a3a2e; }
-/* a selected co-occurrence cell */
-#mo-main-table td.mo-cell.mo-cell-sel { outline: 2.5px solid #BA7517; outline-offset: -2.5px; box-shadow: inset 0 0 0 2px rgba(186,117,23,0.20); font-weight: 700; color: #6e4310; }
-#mo-main-table td.mo-cell.mo-cell-sel:hover { filter: none; outline: 2.5px solid #BA7517; }
-/* Total rated row */
-#mo-main-table tr.mo-total-row td { border-top: 2px solid #e0dcc8; }
-#mo-main-table tr.mo-total-row td.mo-total-cell { color: #777; font-weight: 700; background: #faf8f0; }
-#mo-main-table tr.mo-total-row td.mo-tier-label { color: #777; }
-/* the Clear-all button shows armed when a selection is active */
-#mo-clear-btn.active { background: #BA7517; border-color: #BA7517; color: #fff; }
+#mo-main-table td.mo-total-cell { color: #777; font-weight: 700; background: #faf8f0; }
 /* MD-V2-MASTER-OVERVIEW-MARKER-CSS-END */
 
 
@@ -12058,31 +12042,26 @@ function SUM_renderQualifiedStocks() {
 
 /* MD-V2-MASTER-OVERVIEW-MARKER-MODULE-START */
 /* MD-V2-MASTER-OVERVIEW-MARKER-START */
+
 (function() {
   'use strict';
 
-  // MD-V2-OVERVIEW-COOCCURRENCE-S35-MARKER: Master Overview ("Overview") tab.
-  // Two stacked, column-aligned tables:
-  //  - the summary table (transposed): the four rating tiers + a Total rated
-  //    row run down; the 20 screens run across. It is a co-occurrence selector
-  //    - click a count cell to select that screen-and-tier as a criterion;
-  //    every cell then shows the count of stocks meeting ALL selected criteria
-  //    AND its own; tiers within one screen OR, screens AND. Click a screen
-  //    name to open that screen's own tab. "Clear all" resets the selection.
-  //  - the full rating matrix: every md_v2 stock down the Y-axis, the 20
-  //    screens across, a rating pill per cell. It filters to the stocks that
-  //    match the summary table's selection.
-  // The Wave 3 per-column filter chips are removed - the summary table is the
-  // single shared filter for both tables.
+  // MD-V2-MASTER-OVERVIEW-S27-MARKER: Master Overview tab - Session 27.
+  // A synoptic rating matrix: every screen across the MD V2 system as a row,
+  // the 4 rating tiers as columns, count of stocks per cell. The default
+  // landing tab. Cells are clickable - they jump to the underlying tab and
+  // stash the (pattern, tier) intent in window._mdJump so the target tab can
+  // pre-apply the chip filter once its _mdJump consumer wiring lands (a small
+  // separate follow-up; the jump itself works now). Per Richard, the funnel
+  // banner and other visualisations are PARKED - this is the basic table.
 
   var moState = { scope: 'all' };
 
   // Row model: { section, key, label, ratingPath, tabId, patternKey }
   //   ratingPath - how to read this screen's rating from a stock's md_v2:
-  //     'stage:<k>'     -> md_v2[k].rating
-  //     'group:<g>:<k>' -> md_v2[<g>][<k>].rating
-  //       (pre_indicators / post_indicators / setups / tests)
-  //   tabId - the tab a screen-name click opens.
+  //     'stage:<k>'    -> md_v2[k].rating
+  //     'group:<g>:<k>'-> md_v2[<g>][<k>].rating  (pre_indicators/indicators/setups/tests)
+  //   tabId / patternKey - where a cell click jumps to, and which chip to arm.
   var MO_ROWS = [
     // -- Stages --
     { section:'Stages', key:'stage_1', label:'Stage 1 - Basing', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
@@ -12093,8 +12072,7 @@ function SUM_renderQualifiedStocks() {
     { section:'Pre-test indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pre_indicators', patternKey:'pulling_back_uptrend' },
     { section:'Pre-test indicators', key:'basing', label:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pre_indicators', patternKey:'basing' },
     { section:'Pre-test indicators', key:'collapsing', label:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'pre_indicators', patternKey:'collapsing' },
-    // -- Post-test indicators (ratingPath -> md_v2.post_indicators.<k>.rating;
-    //    md_v2.indicators.<k> is a bare boolean and has no .rating - Request 1) --
+    // -- Post-test indicators --
     { section:'Post-test indicators', key:'breakout', label:'Breakout', ratingPath:'group:post_indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
     { section:'Post-test indicators', key:'advancing', label:'Advancing', ratingPath:'group:post_indicators:advancing', tabId:'post_indicators', patternKey:'advancing' },
     { section:'Post-test indicators', key:'breakdown_50D', label:'Breakdown 50D', ratingPath:'group:post_indicators:breakdown_50D', tabId:'post_indicators', patternKey:'breakdown_50D' },
@@ -12105,40 +12083,26 @@ function SUM_renderQualifiedStocks() {
     { section:'Capital qualification setups', key:'vcp_after_s1_plateau', label:'VCP after Stage 1->2 plateau', ratingPath:'group:setups:vcp_after_s1_plateau', tabId:'setups_s1pb', patternKey:'vcp_after_s1_plateau' },
     { section:'Capital qualification setups', key:'healthy_retest', label:'Healthy retest within MT/LT uptrend', ratingPath:'group:setups:healthy_retest', tabId:'setups_s2vcp', patternKey:'healthy_retest' },
     { section:'Capital qualification setups', key:'vcp_after_s2_base', label:'VCP after Stage 2 base', ratingPath:'group:setups:vcp_after_s2_base', tabId:'setups_s2vcp', patternKey:'vcp_after_s2_base' },
-    // -- Capital deployment tests --
+    // -- Capital deployment tests (S27 4-test structure) --
     { section:'Capital deployment tests', key:'ma_retest_upwards', label:'Upwards moving average retest', ratingPath:'group:tests:ma_retest_upwards', tabId:'tests', patternKey:'ma_retest_upwards' },
     { section:'Capital deployment tests', key:'vcp_deploy_s1', label:'VCP after Stage 1->2', ratingPath:'group:tests:vcp_deploy_s1', tabId:'tests', patternKey:'vcp_deploy_s1' },
     { section:'Capital deployment tests', key:'vcp_deploy_s2', label:'VCP after Stage 2 base', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests', patternKey:'vcp_deploy_s2' },
     { section:'Capital deployment tests', key:'probing_bet_test', label:'Probing bet', ratingPath:'group:tests:probing_bet', tabId:'tests', patternKey:'probing_bet' }
   ];
 
-  // The 4 rating tiers (Stage 1 splits Probable into Early/Late upstream; the
-  // normaliser folds both into Probable).
+  // The 4 rating-tier columns. Stage 1 alone splits Probable into Early/Late
+  // in the pipeline; for the matrix we fold both into the Probable column
+  // (the count helper normalises that).
   var MO_TIERS = ['None', 'Possible', 'Plausible', 'Probable'];
-  var MO_TIER_CLS = { 'None':'mo-t-none', 'Possible':'mo-t-pos', 'Plausible':'mo-t-pla', 'Probable':'mo-t-prob' };
 
-  // section -> group-band colour-hook class (shared by both tables)
-  var MO_GROUP_CLS = {
-    'Stages': 'mo-mx-g-stages',
-    'Pre-test indicators': 'mo-mx-g-pretest',
-    'Post-test indicators': 'mo-mx-g-posttest',
-    'Capital qualification setups': 'mo-mx-g-setups',
-    'Capital deployment tests': 'mo-mx-g-tests'
-  };
-  // short section labels for the group band - the full names are long.
-  var MO_GROUP_LABEL = {
-    'Stages': 'Stages',
-    'Pre-test indicators': 'Pre-test',
-    'Post-test indicators': 'Post-test',
-    'Capital qualification setups': 'Qualification setups',
-    'Capital deployment tests': 'Deployment tests'
-  };
-  var MO_MX_TIER_PILL = {
-    'None': 'mo-mx-p-none', 'Possible': 'mo-mx-p-pos',
-    'Plausible': 'mo-mx-p-pla', 'Probable': 'mo-mx-p-prob'
+  var MO_SECTION_TONE = {
+    'Stages': 'mo-sec-stages',
+    'Pre-test indicators': 'mo-sec-pretest',
+    'Post-test indicators': 'mo-sec-posttest',
+    'Capital qualification setups': 'mo-sec-setups',
+    'Capital deployment tests': 'mo-sec-tests'
   };
 
-  // ----- shared helpers (unchanged from S27 / Wave 3) -----
   function moPricesLookup() {
     if (window._moPricesByTicker) return window._moPricesByTicker;
     var out = {};
@@ -12153,6 +12117,7 @@ function SUM_renderQualifiedStocks() {
     for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
     return out;
   }
+  // Normalise any raw rating string to one of the 4 matrix tiers.
   function moNormaliseTier(raw) {
     if (!raw) return 'None';
     if (raw.indexOf('Probable') === 0) return 'Probable';
@@ -12183,14 +12148,148 @@ function SUM_renderQualifiedStocks() {
       var s = raw[i];
       if (!s || !s.md_v2) continue;
       var p = prices[s.ticker] || {};
+      /* MD-V2-WAVE3-MASTER-OVERVIEW-MATRIX-MARKER: carry company name for the matrix Y-axis labels. */
       rows.push({ ticker: s.ticker, company: p.company_name || s.ticker, md_v2: s.md_v2, is_live: !!live[s.ticker] });
     }
     return rows;
+  }
+  // Build the count matrix: { rowKey: { tier: count } } for the scoped rows.
+  function moBuildMatrix(rows) {
+    var m = {};
+    for (var r = 0; r < MO_ROWS.length; r++) {
+      m[MO_ROWS[r].key] = { 'None':0, 'Possible':0, 'Plausible':0, 'Probable':0 };
+    }
+    for (var i = 0; i < rows.length; i++) {
+      var md = rows[i].md_v2;
+      for (var k = 0; k < MO_ROWS.length; k++) {
+        var row = MO_ROWS[k];
+        var tier = moNormaliseTier(moReadRating(md, row.ratingPath));
+        m[row.key][tier]++;
+      }
+    }
+    return m;
   }
   function moApplyScope(all) {
     if (moState.scope === 'live') return all.filter(function(r){ return r.is_live; });
     return all;
   }
+
+  // Cell click: stash the jump intent and switch tab. The target tab's
+  // _mdJump consumer (small follow-up wiring) reads window._mdJump on render
+  // and pre-applies the chip filter. Until that lands, the jump still works -
+  // it just lands on the unfiltered tab.
+  function moCellClick(rowKey, tier) {
+    var row = null;
+    for (var i = 0; i < MO_ROWS.length; i++) if (MO_ROWS[i].key === rowKey) row = MO_ROWS[i];
+    if (!row) return;
+    if (row.patternKey && tier !== 'None') {
+      window._mdJump = { tab: row.tabId, patternKey: row.patternKey, tier: tier };
+    } else {
+      window._mdJump = { tab: row.tabId };
+    }
+    if (typeof window.switchTab === 'function') window.switchTab(row.tabId);
+  }
+  window.moCellClick = moCellClick;
+
+  function moSetScope(s) {
+    moState.scope = s;
+    var btns = document.querySelectorAll('button[data-mo-scope]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-mo-scope') === s);
+    moRenderTable();
+  }
+  window.moSetScope = moSetScope;
+
+  var MO_TIER_CLS = { 'None':'mo-t-none', 'Possible':'mo-t-pos', 'Plausible':'mo-t-pla', 'Probable':'mo-t-prob' };
+
+  function moRenderTable() {
+    var host = document.getElementById('tab-master_overview');
+    if (!host) return;
+    if (!host.querySelector('#mo-main-table')) {
+      var intro = '<div class="s1-intro">Master Overview is the synoptic view of the whole MD V2 system: every screen - the four stages, the pre-test and post-test indicators, the capital qualification setups and the capital deployment tests - as a row, with the count of stocks at each rating tier. Click any count to jump to that screen&apos;s tab. The funnel banner and other visualisations are deferred; this is the rating matrix.</div>';
+      var controls = '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
+          '<button class="toggle-btn active" data-mo-scope="all" onclick="moSetScope(\'all\')">All</button>' +
+          '<button class="toggle-btn" data-mo-scope="live" onclick="moSetScope(\'live\')">Live investments</button>' +
+        '</div></div>';
+      var table = '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="mo-main-table">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
+        '<thead><tr class="mo-head-row"><th class="mo-screen-col">Screen</th>';
+      for (var t = 0; t < MO_TIERS.length; t++) table += '<th class="mo-tier-col">' + MO_TIERS[t] + '</th>';
+      table += '<th class="mo-total-col">Total rated</th></tr></thead><tbody id="mo-tbody"></tbody></table></div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
+      host.innerHTML = intro + controls + table;
+    }
+    var all = moGetRows();
+    var rows = moApplyScope(all);
+    var matrix = moBuildMatrix(rows);
+    var tbody = document.getElementById('mo-tbody');
+    if (!tbody) return;
+    var html = '';
+    var lastSection = null;
+    for (var r = 0; r < MO_ROWS.length; r++) {
+      var row = MO_ROWS[r];
+      if (row.section !== lastSection) {
+        html += '<tr class="mo-section-row ' + (MO_SECTION_TONE[row.section] || '') + '">' +
+                '<td class="mo-section-cell" colspan="' + (MO_TIERS.length + 2) + '">' + row.section + '</td></tr>';
+        lastSection = row.section;
+      }
+      var counts = matrix[row.key];
+      var ratedTotal = counts['Possible'] + counts['Plausible'] + counts['Probable'];
+      html += '<tr class="mo-data-row">' +
+              '<td class="mo-screen-cell">' + row.label + '</td>';
+      for (var t2 = 0; t2 < MO_TIERS.length; t2++) {
+        var tier = MO_TIERS[t2];
+        var c = counts[tier];
+        var clickable = (row.patternKey || tier === 'None') ? '' : '';
+        var cls = 'mo-cell ' + MO_TIER_CLS[tier] + (c > 0 ? ' mo-has' : ' mo-zero');
+        html += '<td class="' + cls + '" onclick="moCellClick(\'' + row.key + '\',\'' + tier + '\')" ' +
+                'title="' + c + ' stock(s) - ' + row.label + ' / ' + tier + ' (click to open)">' +
+                (c > 0 ? c.toLocaleString('en-GB') : '-') + '</td>';
+      }
+      html += '<td class="mo-total-cell">' + ratedTotal.toLocaleString('en-GB') + '</td>';
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  /* MD-V2-WAVE3-MASTER-OVERVIEW-MATRIX-MARKER: Wave 3 (14-May-26) - the full rating matrix.
+     A second table below the distribution table: every md_v2 stock down the
+     Y-axis, the 20 MO_ROWS screens across the X-axis grouped by section, a
+     coloured rating pill per cell. Each screen column carries three small
+     vertically-stacked filter chips (Prob/Pla/Pos) above the section-group
+     band; clicking restricts that column. Chips within one column OR
+     together; columns AND together; nothing selected = all rows. Renders
+     all md_v2 stocks (Richard chose "All" - no narrowed default). */
+
+  /* moMxFilters[rowKey] = { Possible:true, Plausible:true, ... } - only the
+     keys that are present are active. Empty/absent = column unconstrained. */
+  var moMxFilters = {};
+
+  var MO_MX_TIER_PILL = {
+    'None': 'mo-mx-p-none', 'Possible': 'mo-mx-p-pos',
+    'Plausible': 'mo-mx-p-pla', 'Probable': 'mo-mx-p-prob'
+  };
+  /* chip render order: Probable at the top of the vertical stack, then
+     Plausible, then Possible. */
+  var MO_MX_CHIPS = [
+    { tier: 'Probable',  short: 'Prob', cls: 'mo-mx-chip-prob' },
+    { tier: 'Plausible', short: 'Pla',  cls: 'mo-mx-chip-pla'  },
+    { tier: 'Possible',  short: 'Pos',  cls: 'mo-mx-chip-pos'  }
+  ];
+  var MO_MX_GROUP_CLS = {
+    'Stages': 'mo-mx-g-stages',
+    'Pre-test indicators': 'mo-mx-g-pretest',
+    'Post-test indicators': 'mo-mx-g-posttest',
+    'Capital qualification setups': 'mo-mx-g-setups',
+    'Capital deployment tests': 'mo-mx-g-tests'
+  };
+  /* short section labels for the group band - the full names are long. */
+  var MO_MX_GROUP_LABEL = {
+    'Stages': 'Stages',
+    'Pre-test indicators': 'Pre-test',
+    'Post-test indicators': 'Post-test',
+    'Capital qualification setups': 'Qualification setups',
+    'Capital deployment tests': 'Deployment tests'
+  };
+
   function moMxAttr(s) {
     return String(s).replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
   }
@@ -12198,26 +12297,23 @@ function SUM_renderQualifiedStocks() {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  // ----- co-occurrence selection state (replaces the Wave 3 chip filter) -----
-  // moSel[rowKey] = { tier: true, ... } - only present tier keys are active; a
-  // screen with no entry is unconstrained.
-  var moSel = {};
-
-  function moSelActive() {
-    for (var k in moSel) {
-      if (!moSel.hasOwnProperty(k)) continue;
-      var f = moSel[k];
-      for (var t in f) { if (f.hasOwnProperty(t) && f[t]) return true; }
-    }
-    return false;
+  /* toggle one chip in one column's filter set, then re-render. */
+  function moMxToggleChip(rowKey, tier) {
+    var f = moMxFilters[rowKey];
+    if (!f) { f = {}; moMxFilters[rowKey] = f; }
+    if (f[tier]) { delete f[tier]; } else { f[tier] = true; }
+    moRenderMatrix();
   }
-  // A stock passes if, for every screen with >=1 selected tier, the stock's
-  // normalised tier for that screen is one of the selected tiers (OR within a
-  // screen). Screens with no selection pass freely (AND across screens).
-  function moSelRowPasses(md) {
+  window.moMxToggleChip = moMxToggleChip;
+
+  /* a stock row passes if, for every screen column that has an active
+     filter set, the stock's tier for that column is one of the selected
+     tiers (OR within a column). Columns with no active filter pass freely
+     (AND across columns). */
+  function moMxRowPasses(md) {
     for (var r = 0; r < MO_ROWS.length; r++) {
       var row = MO_ROWS[r];
-      var f = moSel[row.key];
+      var f = moMxFilters[row.key];
       if (!f) continue;
       var keys = [];
       for (var kk in f) { if (f.hasOwnProperty(kk) && f[kk]) keys.push(kk); }
@@ -12229,172 +12325,71 @@ function SUM_renderQualifiedStocks() {
     }
     return true;
   }
-  function moSelIsOn(rowKey, tier) {
-    var f = moSel[rowKey];
-    return !!(f && f[tier]);
-  }
-  // Toggle one screen x tier cell in the selection, then re-render both tables.
-  function moCellClick(rowKey, tier) {
-    var f = moSel[rowKey];
-    if (!f) { f = {}; moSel[rowKey] = f; }
-    if (f[tier]) {
-      delete f[tier];
-      var anyLeft = false;
-      for (var t in f) { if (f.hasOwnProperty(t) && f[t]) anyLeft = true; }
-      if (!anyLeft) delete moSel[rowKey];
-    } else {
-      f[tier] = true;
+
+  function moMxAnyFilterActive() {
+    for (var k in moMxFilters) {
+      if (!moMxFilters.hasOwnProperty(k)) continue;
+      var f = moMxFilters[k];
+      for (var t in f) { if (f.hasOwnProperty(t) && f[t]) return true; }
     }
-    moRenderTable();
-    moRenderMatrix();
-  }
-  window.moCellClick = moCellClick;
-
-  function moClearSel() {
-    moSel = {};
-    moRenderTable();
-    moRenderMatrix();
-  }
-  window.moClearSel = moClearSel;
-
-  // Screen-name click: open that screen's own tab (the relocated jump - the
-  // cell click is now the co-occurrence selector). _mdJump carries the tab
-  // only; there is no tier context from a label click.
-  function moJumpToTab(rowKey) {
-    var row = null;
-    for (var i = 0; i < MO_ROWS.length; i++) if (MO_ROWS[i].key === rowKey) row = MO_ROWS[i];
-    if (!row) return;
-    window._mdJump = { tab: row.tabId };
-    if (typeof window.switchTab === 'function') window.switchTab(row.tabId);
-  }
-  window.moJumpToTab = moJumpToTab;
-
-  function moSetScope(s) {
-    moState.scope = s;
-    var btns = document.querySelectorAll('button[data-mo-scope]');
-    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-mo-scope') === s);
-    moRenderTable();
-  }
-  window.moSetScope = moSetScope;
-
-  // ----- transposed summary table -----
-  function moRenderTable() {
-    var host = document.getElementById('tab-master_overview');
-    if (!host) return;
-    if (!host.querySelector('#mo-main-table')) {
-      var intro = '<div class="s1-intro">Master Overview is the synoptic view of the whole MD V2 system. The summary table below is the control surface: every rating tier as a row, every screen - the four stages, the pre-test and post-test indicators, the capital qualification setups and the capital deployment tests - as a column, lined up with the full matrix beneath it. Click any count cell to select that screen-and-tier as a criterion; every cell then shows how many stocks meet all the criteria you have selected AND its own (the &quot;patterns&quot; you are looking for), and the matrix below filters to that set. Click multiple cells to build a pattern - tiers within one screen combine as OR, screens combine as AND. Click a screen name to open that screen&apos;s own tab. Use &quot;Clear all&quot; to reset.</div>';
-      var controls = '<div class="controls s1-controls">' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
-          '<button class="toggle-btn active" data-mo-scope="all" onclick="moSetScope(\'all\')">All</button>' +
-          '<button class="toggle-btn" data-mo-scope="live" onclick="moSetScope(\'live\')">Live investments</button>' +
-        '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Pattern selection</span>' +
-          '<button class="toggle-btn" id="mo-clear-btn" onclick="moClearSel()">Clear all</button>' +
-        '</div></div>';
-      // transposed thead: section-group band + column-title row.
-      var groupTr = '<tr class="mo-group-row"><th class="mo-corner" rowspan="2">Rated tier</th>';
-      var gi = 0;
-      while (gi < MO_ROWS.length) {
-        var sec = MO_ROWS[gi].section;
-        var span = 0;
-        while (gi + span < MO_ROWS.length && MO_ROWS[gi + span].section === sec) span++;
-        groupTr += '<th colspan="' + span + '" class="' + (MO_GROUP_CLS[sec] || '') + '">' +
-          moMxText(MO_GROUP_LABEL[sec] || sec) + '</th>';
-        gi += span;
-      }
-      groupTr += '</tr>';
-      var colTr = '<tr class="mo-col-row">';
-      for (var t = 0; t < MO_ROWS.length; t++) {
-        colTr += '<th title="' + moMxAttr(MO_ROWS[t].label + ' - open this screen\'s tab') + '" ' +
-          'onclick="moJumpToTab(\'' + moMxAttr(MO_ROWS[t].key) + '\')">' +
-          moMxText(MO_ROWS[t].label) + '</th>';
-      }
-      colTr += '</tr>';
-      var table = '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="mo-main-table">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
-        '<thead>' + groupTr + colTr + '</thead><tbody id="mo-tbody"></tbody></table></div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
-      host.innerHTML = intro + controls + table;
-    }
-
-    var rows = moApplyScope(moGetRows());
-    // tally co-occurrence counts: only stocks passing the selection filter are
-    // counted, so each cell shows stocks meeting ALL selected criteria AND its
-    // own. With nothing selected every stock passes -> plain counts.
-    var counts = {};
-    for (var r0 = 0; r0 < MO_ROWS.length; r0++) {
-      counts[MO_ROWS[r0].key] = { 'None':0, 'Possible':0, 'Plausible':0, 'Probable':0 };
-    }
-    for (var i = 0; i < rows.length; i++) {
-      var md = rows[i].md_v2;
-      if (!moSelRowPasses(md)) continue;
-      for (var k = 0; k < MO_ROWS.length; k++) {
-        var rw = MO_ROWS[k];
-        var tr = moNormaliseTier(moReadRating(md, rw.ratingPath));
-        counts[rw.key][tr]++;
-      }
-    }
-
-    var tbody = document.getElementById('mo-tbody');
-    if (!tbody) return;
-    var html = '';
-    var anySel = moSelActive();
-    for (var ti = 0; ti < MO_TIERS.length; ti++) {
-      var tier = MO_TIERS[ti];
-      html += '<tr class="mo-data-row"><td class="mo-tier-label">' + tier + '</td>';
-      for (var c = 0; c < MO_ROWS.length; c++) {
-        var rowDef = MO_ROWS[c];
-        var n = counts[rowDef.key][tier];
-        var sel = moSelIsOn(rowDef.key, tier);
-        var cls = 'mo-cell ' + MO_TIER_CLS[tier] + (n > 0 ? ' mo-has' : ' mo-zero') + (sel ? ' mo-cell-sel' : '');
-        var tip = rowDef.label + ' / ' + tier + ' - ' + n + ' stock(s)' +
-          (anySel ? ' meeting the selected pattern' : '') +
-          (sel ? '; selected (click to remove)' : '; click to add to the pattern');
-        html += '<td class="' + cls + '" onclick="moCellClick(\'' + rowDef.key + '\',\'' + tier + '\')" ' +
-          'title="' + moMxAttr(tip) + '">' + n.toLocaleString('en-GB') + '</td>';
-      }
-      html += '</tr>';
-    }
-    // Total rated row = Possible + Plausible + Probable per screen (tracks the
-    // active selection automatically). Not selectable - it is a derived total.
-    html += '<tr class="mo-total-row"><td class="mo-tier-label mo-total-label">Total rated</td>';
-    for (var c2 = 0; c2 < MO_ROWS.length; c2++) {
-      var ck = MO_ROWS[c2].key;
-      var tot = counts[ck]['Possible'] + counts[ck]['Plausible'] + counts[ck]['Probable'];
-      html += '<td class="mo-total-cell" title="' + moMxAttr(MO_ROWS[c2].label + ' - ' + tot + ' rated' + (anySel ? ' within the selected pattern' : '')) + '">' +
-        tot.toLocaleString('en-GB') + '</td>';
-    }
-    html += '</tr>';
-    tbody.innerHTML = html;
-
-    var clr = document.getElementById('mo-clear-btn');
-    if (clr) clr.classList.toggle('active', anySel);
+    return false;
   }
 
-  // ----- the full rating matrix (Wave 3; chip row removed in S35) -----
-  // Build the two sticky header rows once: section-group row, column-title row.
+  /* build the three sticky header rows once (chip row, section-group row,
+     column-title row). Called on first render; chip on/off state is
+     repainted every render by moMxPaintChips(). */
   function moMxBuildHead(thead) {
-    // section-group row: one cell per contiguous section run.
+    /* --- chip row --- */
+    var chipTr = '<tr class="mo-mx-chip-row">' +
+      '<th class="mo-mx-corner mo-mx-screen-col"><span class="mo-mx-corner-lbl">Filters &#8595;</span></th>';
+    for (var c = 0; c < MO_ROWS.length; c++) {
+      var rk = MO_ROWS[c].key;
+      chipTr += '<th><div class="mo-mx-chip-stack">';
+      for (var ci = 0; ci < MO_MX_CHIPS.length; ci++) {
+        var ch = MO_MX_CHIPS[ci];
+        chipTr += '<button type="button" class="mo-mx-chip ' + ch.cls + '" ' +
+          'data-mx-col="' + moMxAttr(rk) + '" data-mx-tier="' + ch.tier + '" ' +
+          'onclick="moMxToggleChip(\'' + moMxAttr(rk) + '\',\'' + ch.tier + '\')" ' +
+          'title="' + moMxAttr(MO_ROWS[c].label + ' - ' + ch.tier) + '">' + ch.short + '</button>';
+      }
+      chipTr += '</div></th>';
+    }
+    chipTr += '</tr>';
+
+    /* --- section-group row: one cell per contiguous section run --- */
     var groupTr = '<tr class="mo-mx-group-row"><th class="mo-mx-corner mo-mx-screen-col"></th>';
     var gi = 0;
     while (gi < MO_ROWS.length) {
       var sec = MO_ROWS[gi].section;
       var span = 0;
       while (gi + span < MO_ROWS.length && MO_ROWS[gi + span].section === sec) span++;
-      groupTr += '<th colspan="' + span + '" class="' + (MO_GROUP_CLS[sec] || '') + '">' +
-        moMxText(MO_GROUP_LABEL[sec] || sec) + '</th>';
+      groupTr += '<th colspan="' + span + '" class="' + (MO_MX_GROUP_CLS[sec] || '') + '">' +
+        moMxText(MO_MX_GROUP_LABEL[sec] || sec) + '</th>';
       gi += span;
     }
     groupTr += '</tr>';
 
-    // column-title row: one cell per screen, labels WRAP; click opens the tab.
+    /* --- column-title row: one cell per screen, labels WRAP --- */
     var colTr = '<tr class="mo-mx-col-row"><th class="mo-mx-screen-col">Stock</th>';
     for (var t = 0; t < MO_ROWS.length; t++) {
-      colTr += '<th title="' + moMxAttr(MO_ROWS[t].label + ' - open this screen\'s tab') + '" ' +
-        'onclick="moJumpToTab(\'' + moMxAttr(MO_ROWS[t].key) + '\')" style="cursor:pointer">' +
-        moMxText(MO_ROWS[t].label) + '</th>';
+      colTr += '<th title="' + moMxAttr(MO_ROWS[t].label) + '">' + moMxText(MO_ROWS[t].label) + '</th>';
     }
     colTr += '</tr>';
 
-    thead.innerHTML = groupTr + colTr;
+    thead.innerHTML = chipTr + groupTr + colTr;
+  }
+
+  /* repaint chip on/off classes from moMxFilters (state survives re-render). */
+  function moMxPaintChips(thead) {
+    var chips = thead.querySelectorAll('button.mo-mx-chip');
+    for (var i = 0; i < chips.length; i++) {
+      var btn = chips[i];
+      var col = btn.getAttribute('data-mx-col');
+      var tier = btn.getAttribute('data-mx-tier');
+      var f = moMxFilters[col];
+      var on = !!(f && f[tier]);
+      btn.classList.toggle('mo-mx-chip-on', on);
+    }
   }
 
   function moRenderMatrix() {
@@ -12402,13 +12397,15 @@ function SUM_renderQualifiedStocks() {
     if (!host) return;
     var wrap = host.querySelector('#mo-matrix-wrap');
     if (!wrap) {
+      /* append the matrix scaffold AFTER the existing distribution table's
+         .table-wrap. The existing scaffold is intro + controls + table. */
       wrap = document.createElement('div');
       wrap.id = 'mo-matrix-wrap';
       wrap.innerHTML =
         '<div id="mo-matrix-caption">Full rating matrix: every stock against every screen. ' +
         'Each cell is the stock\'s rating for that screen; &#8211; where it does not qualify. ' +
-        'Filtered by the pattern you select in the summary table above; click a screen ' +
-        'name to open that screen\'s own tab.</div>' +
+        'Use the chips above any column to filter - multiple chips in a column widen it, ' +
+        'columns combine.</div>' +
         '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="mo-matrix-table">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<thead></thead><tbody id="mo-matrix-tbody"></tbody></table></div></div>' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<div id="mo-matrix-foot"></div>';
@@ -12418,10 +12415,11 @@ function SUM_renderQualifiedStocks() {
     var thead = table ? table.querySelector('thead') : null;
     var tbody = wrap.querySelector('#mo-matrix-tbody');
     if (!thead || !tbody) return;
-    if (!thead.querySelector('tr.mo-mx-col-row')) moMxBuildHead(thead);
+    if (!thead.querySelector('tr.mo-mx-chip-row')) moMxBuildHead(thead);
+    moMxPaintChips(thead);
 
-    // the matrix renders ALL md_v2 stocks; the summary-table selection filters
-    // which rows are shown.
+    /* the matrix renders ALL md_v2 stocks - scope toggle drives the
+       distribution table only, per the Wave 3 spec. */
     var all = moGetRows();
     all.sort(function(a, b) {
       var an = (a.company || a.ticker).toLowerCase();
@@ -12435,7 +12433,7 @@ function SUM_renderQualifiedStocks() {
     for (var i = 0; i < all.length; i++) {
       var rec = all[i];
       var md = rec.md_v2;
-      if (!moSelRowPasses(md)) continue;
+      if (!moMxRowPasses(md)) continue;
       shown++;
       html += '<tr><td class="mo-mx-name-cell">' +
         '<span class="mo-mx-co">' + moMxText(rec.company || rec.ticker) + '</span>' +
@@ -12452,20 +12450,17 @@ function SUM_renderQualifiedStocks() {
     }
     if (shown === 0) {
       html = '<tr class="mo-mx-empty"><td colspan="' + colCount + '">' +
-        'No stocks match the selected pattern.</td></tr>';
+        'No stocks match the active column filters.</td></tr>';
     }
     tbody.innerHTML = html;
 
     var foot = wrap.querySelector('#mo-matrix-foot');
     if (foot) {
-      if (moSelActive()) {
+      if (moMxAnyFilterActive()) {
         foot.textContent = shown.toLocaleString('en-GB') + ' of ' +
-          all.length.toLocaleString('en-GB') + ' stocks match the selected pattern.';
-        foot.className = 'mo-foot-active';
+          all.length.toLocaleString('en-GB') + ' stocks match the active column filters.';
       } else {
-        foot.textContent = 'Showing all ' + all.length.toLocaleString('en-GB') +
-          ' stocks. Select cells in the summary table above to filter.';
-        foot.className = '';
+        foot.textContent = 'Showing all ' + all.length.toLocaleString('en-GB') + ' stocks.';
       }
     }
   }
@@ -12478,6 +12473,7 @@ function SUM_renderQualifiedStocks() {
   window.renderMasterOverview = renderMasterOverview;
 
 })();
+
 /* MD-V2-MASTER-OVERVIEW-MARKER-END */
 /* MD-V2-MASTER-OVERVIEW-MARKER-MODULE-END */
 

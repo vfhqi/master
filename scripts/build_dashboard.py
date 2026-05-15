@@ -1649,6 +1649,7 @@ body[data-active-tab="tests"] .controls.s1-controls,
 body[data-active-tab="master_overview"] .controls.s1-controls {
   position: sticky;
   top: var(--header-height);
+  left: 0;  /* MD-V2-WAVE3C-REAL-STICKY-FIX-MARKER: pin horizontally so the ribbon does not drift on horizontal page scroll */
   z-index: 60;
   box-shadow: 0 2px 5px rgba(0,0,0,0.07);
 }
@@ -1762,14 +1763,30 @@ body[data-active-tab="tests"] .table-wrap,
 body[data-active-tab="master_overview"] .table-wrap {
   overflow: visible;
 }
+/* MD-V2-WAVE3C-REAL-STICKY-FIX-MARKER: Wave 3c (14-May-26). Wave 3b's theory was wrong - CSS
+   coerces overflow-x:auto + overflow-y:visible to overflow:auto/auto, so
+   .v2-hscroll became a full scroll container and trapped sticky just like
+   .table-wrap did. Neutralise .v2-hscroll to overflow:visible (inert
+   pass-through wrapper) and move the horizontal scroll to `body` itself -
+   the only non-trapping option, since any intermediate overflow-x:auto
+   ancestor also gets overflow-y:auto and steals the sticky anchor. */
 body[data-active-tab^="stage_"] .v2-hscroll,
 body[data-active-tab="pre_indicators"] .v2-hscroll,
 body[data-active-tab="post_indicators"] .v2-hscroll,
 body[data-active-tab="setups"] .v2-hscroll,
 body[data-active-tab="tests"] .v2-hscroll,
 body[data-active-tab="master_overview"] .v2-hscroll {
+  overflow: visible;
+}
+/* MD-V2-WAVE3C-REAL-STICKY-FIX-MARKER: the page itself is the horizontal scroller on V2 tabs.
+   Scoped to the 6 V2 tab-states so legacy tabs keep body overflow-x:hidden. */
+body[data-active-tab^="stage_"],
+body[data-active-tab="pre_indicators"],
+body[data-active-tab="post_indicators"],
+body[data-active-tab="setups"],
+body[data-active-tab="tests"],
+body[data-active-tab="master_overview"] {
   overflow-x: auto;
-  overflow-y: visible;
 }
 /* MD-V2-WAVE3-MASTER-OVERVIEW-MATRIX-MARKER: Wave 3 (14-May-26) - Master Overview full rating
    matrix. A second table appended below the existing distribution table.

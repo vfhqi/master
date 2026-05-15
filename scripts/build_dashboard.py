@@ -518,7 +518,14 @@ table.data-table td.col-identity{white-space:nowrap}
 .qualified-title{margin-top:20px}
 .chart-panel{position:fixed;top:var(--header-height);right:0;bottom:0;width:25%;background:var(--card);border-left:1px solid var(--border);z-index:90;transform:translateX(100%);transition:transform .3s ease,width .3s ease;overflow-y:auto;padding:16px 24px 16px 16px}
 .chart-panel.open{transform:translateX(0)}
-.chart-open .main{margin-right:25%;transition:margin-right .3s ease}
+.chart-open .main{margin-right:25%;transition:margin-right .3s ease,margin-left .3s ease}
+/* MD-CHART-V2-WIRING-MARKER: chart panel slides in from the LEFT on V2 tabs (legacy keeps the right). */
+body.chart-from-left .chart-panel{left:0;right:auto;border-left:none;border-right:1px solid var(--border);transform:translateX(-100%)}
+body.chart-from-left .chart-panel.open{transform:translateX(0)}
+#s1-main-table td.name-cell,#s2-main-table td.name-cell,#s3-main-table td.name-cell,#s4-main-table td.name-cell,#pi-main-table td.name-cell,#po-main-table td.name-cell,#st-main-table td.name-cell,#ct-main-table td.name-cell,#mo-matrix-table td.mo-mx-name-cell{cursor:pointer}
+body[data-active-tab^="stage_"] #hdr-chart-btn,body[data-active-tab="pre_indicators"] #hdr-chart-btn,body[data-active-tab="post_indicators"] #hdr-chart-btn,body[data-active-tab="setups"] #hdr-chart-btn,body[data-active-tab="tests"] #hdr-chart-btn,body[data-active-tab="master_overview"] #hdr-chart-btn{display:none!important}
+body.chart-from-left .s1-controls{left:var(--chart-panel-w,0)!important;transition:left .3s ease}
+body.chart-from-left #mo-matrix-table tbody td.mo-mx-name-cell,body.chart-from-left #mo-matrix-table thead th.mo-mx-screen-col{left:var(--chart-panel-w,0)!important;transition:left .3s ease}
 .chart-panel .close-btn{position:absolute;top:8px;right:8px;background:var(--card-hover);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:4px;cursor:pointer;font-size:16px}
 .chart-width-btns{display:flex;gap:4px;margin-bottom:12px}
 .chart-width-btn{background:var(--card);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font);font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer}
@@ -2172,12 +2179,18 @@ window.switchTab=function(id){
 window.closeChart=function(){
   document.getElementById("chart-panel").classList.remove("open");
   document.body.classList.remove("chart-open");
-  document.querySelector(".main").style.marginRight="0";
+  var _ccMain=document.querySelector(".main");
+  _ccMain.style.marginRight="0";
+  _ccMain.style.marginLeft="0";
+  document.documentElement.style.setProperty("--chart-panel-w","0px");
 };
 window.setChartWidth=function(p){
   var pn=document.getElementById("chart-panel");
   pn.style.width=p+"%";
-  document.querySelector(".main").style.marginRight=p+"%";
+  document.documentElement.style.setProperty("--chart-panel-w",p+"vw");
+  var _cwMain=document.querySelector(".main");
+  if(document.body.classList.contains("chart-from-left")){_cwMain.style.marginLeft=p+"%";_cwMain.style.marginRight="0";}
+  else{_cwMain.style.marginRight=p+"%";_cwMain.style.marginLeft="0";}
   var b=document.querySelectorAll(".chart-width-btn");
   for(var j=0;j<b.length;j++)b[j].classList.remove("active");
   if(event&&event.target)event.target.classList.add("active");
@@ -2563,16 +2576,40 @@ function chartLegendHTML(){
 }
 
 window.openChart=function(t){
+  var _prevChartTicker=chartTicker;
   chartTicker=t;
   var p=document.getElementById("chart-panel");
+  // MD-CHART-V2-WIRING-MARKER: V2 tabs slide the chart panel in from the LEFT; legacy keeps the right.
+  var _v2chartTabs={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups:1,tests:1,master_overview:1};
+  var _isV2chart=!!_v2chartTabs[currentTab];
+  var _isStageChart=/^stage_[1-4]$/.test(currentTab);
+  var _wasChartOpen=p.classList.contains("open");
+  var _freshChart=(_prevChartTicker!==t)||!_wasChartOpen;
+  var _bodyCl=document.body.classList;
+  if(!_wasChartOpen||(_bodyCl.contains("chart-from-left")!==_isV2chart)){
+    p.style.transition="none";
+    if(_isV2chart)_bodyCl.add("chart-from-left");else _bodyCl.remove("chart-from-left");
+    void p.offsetWidth;
+    p.style.transition="";
+  }
   // Default chart width: 50%
   p.style.width="50%";
+  document.documentElement.style.setProperty("--chart-panel-w","50vw");
   p.classList.add("open");
   document.body.classList.add("chart-open");
-  document.querySelector(".main").style.marginRight="50%";
+  var _chartMain=document.querySelector(".main");
+  if(_isV2chart){_chartMain.style.marginRight="0";_chartMain.style.marginLeft="50%";}
+  else{_chartMain.style.marginLeft="0";_chartMain.style.marginRight="50%";}
   // FIX-S4-CHARTLAYOUT: Compact layout — one row for width+zoom, smaller legend, ticker inline
   // On PB tab, enable 5D+10D MAs by default
-  if(currentTab==="pb"){chartVis.ma5=true;chartVis.ma10=true}else{chartVis.ma5=false;chartVis.ma10=false}
+  // MD-CHART-V2-WIRING-MARKER: 5D+10D MAs on for PB (legacy) + non-Stage V2 tabs; off elsewhere.
+  if(currentTab==="pb"||(_isV2chart&&!_isStageChart)){chartVis.ma5=true;chartVis.ma10=true}else{chartVis.ma5=false;chartVis.ma10=false}
+  // Fresh open from a V2 tab resets zoom + the always-on series to the per-tab defaults.
+  if(_freshChart&&_isV2chart){
+    chartZoom=_isStageChart?"2Y":"6M";
+    chartVis.ma20=true;chartVis.ma50=true;chartVis.ma100=true;chartVis.ma150=true;chartVis.ma200=true;
+    chartVis.obv=true;chartVis.vol=true;chartVis.vol20=true;chartVis.vol50=true;
+  }
   var cont=document.getElementById("chart-container");
   var company="";
   for(var j=0;j<D.universe.length;j++){if(D.universe[j].ticker===t){company=D.universe[j].company_name||"";break}}
@@ -2624,6 +2661,17 @@ window.setChartScaleMode=function(m){
   chartScaleMode=m;
   if(chartTicker)openChart(chartTicker);
 };
+// MD-CHART-V2-WIRING-MARKER: V2 tabs - clicking a company/ticker name-cell opens that stock's chart.
+// This is the only chart entry point on V2 tabs (the header "Chart" button is hidden there via CSS).
+document.addEventListener("click",function(e){
+  var _v2ct={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups:1,tests:1,master_overview:1};
+  if(!_v2ct[document.body.getAttribute("data-active-tab")])return;
+  var _nameCell=e.target.closest("td.name-cell, td.mo-mx-name-cell");
+  if(!_nameCell)return;
+  var _tkEl=_nameCell.querySelector(".tk, .mo-mx-tk");
+  var _tk=_tkEl?(_tkEl.textContent||"").trim():"";
+  if(_tk)openChart(_tk);
+});
 
 // Key: toggle description rows built from .key-tip content in column headers
 var keysVisible=false;
@@ -12406,7 +12454,7 @@ renderTab("mm99");
         '    </div>\n'
         '    <div class="header-right-btns">\n'
         '      <button class="ctrl-btn" onclick="openKey()">Key</button>\n'
-        '      <button class="ctrl-btn" onclick="openChart(\'Overview\')">Chart</button>\n'
+        '      <button class="ctrl-btn" id="hdr-chart-btn" onclick="openChart(\'Overview\')">Chart</button>\n'
         '    </div>\n'
         '  </div>\n'
         '  <!-- Row 2: #1 TABS (left) + #2 JUMP TO (right) -->\n'

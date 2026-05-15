@@ -12073,11 +12073,11 @@ function SUM_renderQualifiedStocks() {
     { section:'Pre-test indicators', key:'basing', label:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pre_indicators', patternKey:'basing' },
     { section:'Pre-test indicators', key:'collapsing', label:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'pre_indicators', patternKey:'collapsing' },
     // -- Post-test indicators --
-    { section:'Post-test indicators', key:'breakout', label:'Breakout', ratingPath:'group:indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
-    { section:'Post-test indicators', key:'advancing', label:'Advancing', ratingPath:'group:indicators:advancing', tabId:'post_indicators', patternKey:'advancing' },
-    { section:'Post-test indicators', key:'breakdown_50D', label:'Breakdown 50D', ratingPath:'group:indicators:breakdown_50D', tabId:'post_indicators', patternKey:'breakdown_50D' },
-    { section:'Post-test indicators', key:'breakdown_150D', label:'Breakdown 150D', ratingPath:'group:indicators:breakdown_150D', tabId:'post_indicators', patternKey:'breakdown_150D' },
-    { section:'Post-test indicators', key:'breakdown_200D', label:'Breakdown 200D', ratingPath:'group:indicators:breakdown_200D', tabId:'post_indicators', patternKey:'breakdown_200D' },
+    { section:'Post-test indicators', key:'breakout', label:'Breakout', ratingPath:'group:post_indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
+    { section:'Post-test indicators', key:'advancing', label:'Advancing', ratingPath:'group:post_indicators:advancing', tabId:'post_indicators', patternKey:'advancing' },
+    { section:'Post-test indicators', key:'breakdown_50D', label:'Breakdown 50D', ratingPath:'group:post_indicators:breakdown_50D', tabId:'post_indicators', patternKey:'breakdown_50D' },
+    { section:'Post-test indicators', key:'breakdown_150D', label:'Breakdown 150D', ratingPath:'group:post_indicators:breakdown_150D', tabId:'post_indicators', patternKey:'breakdown_150D' },
+    { section:'Post-test indicators', key:'breakdown_200D', label:'Breakdown 200D', ratingPath:'group:post_indicators:breakdown_200D', tabId:'post_indicators', patternKey:'breakdown_200D' },
     // -- Capital qualification setups --
     { section:'Capital qualification setups', key:'probing_bet', label:'Probing bet', ratingPath:'group:setups:probing_bet', tabId:'setups_s1pb', patternKey:'probing_bet' },
     { section:'Capital qualification setups', key:'vcp_after_s1_plateau', label:'VCP after Stage 1->2 plateau', ratingPath:'group:setups:vcp_after_s1_plateau', tabId:'setups_s1pb', patternKey:'vcp_after_s1_plateau' },

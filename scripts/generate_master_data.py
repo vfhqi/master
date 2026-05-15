@@ -1713,6 +1713,41 @@ def compute_master_dashboard_screens(prices, filter_results):
         vcp_qualifies = bool(vcp_test_count == 4)
         # ── END MD-V2-SCREENS-S26-MARKER VCP helper ──
 
+        # ── MD-V2-WAVE4-TEST-VALUES-MARKER: per-pattern numeric test values (D-MD-V2 Wave 4) ──
+        # For each md_v2 pattern, build a parallel dict keyed by the SAME
+        # test keys as `tests`, carrying the underlying number where one
+        # exists or a short label where the test is inherently binary.
+        # Computed here, in the same pass, from the same locals that
+        # produced the booleans, so value and boolean cannot drift apart.
+        def _md_v2_round(x, nd=4):
+            try:
+                if x is None:
+                    return None
+                return round(float(x), nd)
+            except (TypeError, ValueError):
+                return None
+
+        def _md_v2_pct_gap(a, b):
+            try:
+                if a is None or b is None or b == 0:
+                    return None
+                return round((float(a) - float(b)) / float(b), 4)
+            except (TypeError, ValueError):
+                return None
+
+        def _md_v2_vcp_values(vt, contractions):
+            n = len(contractions)
+            return {
+                "t1_narrowing_contractions": (
+                    "narrowing" if vt.get("t1_narrowing_contractions") else "not narrowing"),
+                "t2_sufficient_count": n,
+                "t3_volume_declining": (
+                    "declining" if vt.get("t3_volume_declining") else "not declining"),
+                "t4_higher_lows": (
+                    "higher lows" if vt.get("t4_higher_lows") else "not higher"),
+            }
+        # ── END MD-V2-WAVE4-TEST-VALUES-MARKER helper ──
+
         # ──────────────────────────────────────────────────────────────
         # STAGE 1 — Consolidating / Basing
         # ──────────────────────────────────────────────────────────────
@@ -2041,14 +2076,30 @@ def compute_master_dashboard_screens(prices, filter_results):
             "pulling_back_uptrend": {
                 "tests": pb_tests, "count": pb_count, "total": 4,
                 "rating": _pre_rating(pb_count, 4), "qualifies": ind["pulling_back_uptrend"],
+                "test_values": {
+                    "t1_50d_rising": "rising" if pb_t1_50d_rising else "not rising",
+                    "t2_150d_rising": "rising" if pb_t2_150d_rising else "not rising",
+                    "t3_5d_rolling_over": "rolling over" if pb_t3_5d_rolling else "not rolling",
+                    "t4_10d_rolling_over": "rolling over" if pb_t4_10d_rolling else "not rolling",
+                },
             },
             "basing": {
                 "tests": ba_tests, "count": ba_count, "total": 4,
                 "rating": _pre_rating(ba_count, 4), "qualifies": ind["basing"],
+                "test_values": {
+                    "t1_price_pullback_ge15": _md_v2_round(max_pullback_ssh),
+                    "t2_time_below_high_ge20d": days_below_sh,
+                    "t3_price_above_200d": _md_v2_pct_gap(price, ma200),
+                    "t4_200d_rising": _md_v2_pct_gap(ma200, ma200_prev),
+                },
             },
             "collapsing": {
                 "tests": co_tests, "count": co_count, "total": 2,
                 "rating": _pre_rating(co_count, 2), "qualifies": ind["collapsing"],
+                "test_values": {
+                    "t1_price_le_70pct_52wh": _md_v2_pct_gap(price, h52),
+                    "t2_pullback_ge20": _md_v2_round(recent_pullback),
+                },
             },
         }
 
@@ -2121,22 +2172,44 @@ def compute_master_dashboard_screens(prices, filter_results):
             "breakout": {
                 "tests": bo_tests, "count": bo_count, "total": 2,
                 "rating": _pre_rating(bo_count, 2), "qualifies": ind["breakout"],
+                "test_values": {
+                    "t1_price_gt_108pct_5dma": _md_v2_pct_gap(price, ma5),
+                    "t2_updown_vol_ge110": (_md_v2_round(adv_10d_up_v / adv_10d_dn_v, 3)
+                                            if adv_10d_dn_v else None),
+                },
             },
             "advancing": {
                 "tests": ad_tests, "count": ad_count, "total": 3,
                 "rating": _pre_rating(ad_count, 3), "qualifies": ind["advancing"],
+                "test_values": {
+                    "t1_price_above_20dma": _md_v2_pct_gap(price, ma20),
+                    "t2_20dma_rising": _md_v2_pct_gap(ma20, ma20_prev),
+                    "t3_not_in_breakout": "not in breakout" if ad_t3_not_breakout else "in breakout",
+                },
             },
             "breakdown_50D": {
                 "tests": bd50_tests, "count": bd50_count, "total": 2,
                 "rating": _pre_rating(bd50_count, 2), "qualifies": ind["breakdown_50D"],
+                "test_values": {
+                    "t1_price_below_50dma": _md_v2_pct_gap(price, ma50),
+                    "t2_prev_at_or_above_50dma": _md_v2_pct_gap(_price_prev, ma50_prev_v),
+                },
             },
             "breakdown_150D": {
                 "tests": bd150_tests, "count": bd150_count, "total": 2,
                 "rating": _pre_rating(bd150_count, 2), "qualifies": ind["breakdown_150D"],
+                "test_values": {
+                    "t1_price_below_150dma": _md_v2_pct_gap(price, ma150),
+                    "t2_prev_at_or_above_150dma": _md_v2_pct_gap(_price_prev, ma150_prev_v),
+                },
             },
             "breakdown_200D": {
                 "tests": bd200_tests, "count": bd200_count, "total": 2,
                 "rating": _pre_rating(bd200_count, 2), "qualifies": ind["breakdown_200D"],
+                "test_values": {
+                    "t1_price_below_200dma": _md_v2_pct_gap(price, ma200),
+                    "t2_prev_at_or_above_200dma": _md_v2_pct_gap(_price_prev, ma200_prev_v),
+                },
             },
         }
 
@@ -2163,6 +2236,11 @@ def compute_master_dashboard_screens(prices, filter_results):
         setups["probing_bet"] = {
             "tests": pbs_tests, "count": pbs_count, "total": 2,
             "rating": _pre_rating(pbs_count, 2), "qualifies": bool(pbs_count == 2),
+            "test_values": {
+                "t1_stage_qualifying_or_collapsing": (
+                    "qualifying" if pbs_t1_stage_or_collapsing else "not qualifying"),
+                "t2_breakout": "breakout" if pbs_t2_breakout else "no breakout",
+            },
         }
 
         # ---- Setup 2: VCP after S1->2 plateau (4 VCP tests + stage gate) ----
@@ -2181,6 +2259,7 @@ def compute_master_dashboard_screens(prices, filter_results):
             "qualifies": bool(vcp_qualifies and s1_to_2_transition),
             "info_stage_gate": bool(s1_to_2_transition),
             "info_contraction_count": len(vcp_contractions),
+            "test_values": _md_v2_vcp_values(vcp_tests, vcp_contractions),
         }
 
         # ---- Setup 3: Healthy retest within MT/LT uptrend (6 tests) ----
@@ -2208,6 +2287,14 @@ def compute_master_dashboard_screens(prices, filter_results):
             "info_ma_retested": utr_test_ma,
             "info_ma_dist_pct": utr_test_ma_dist,
             "info_retest_count": hr_retest_count,
+            "test_values": {
+                "t1_volume_contracting": _md_v2_round(utr_vol_trend, 3),
+                "t2_updown_vol_ge105": _md_v2_round(utr_updown_ratio, 3),
+                "t3_few_distribution_days": utr_dist_days,
+                "t4_volatility_contracting": _md_v2_round(utr_pullback_contraction, 3),
+                "t5_testing_meaningful_ma": (utr_test_ma if utr_test_ma else "none"),
+                "t6_buying_through_l10d": _md_v2_round(utr_candle_quality_10d, 3),
+            },
         }
         # Back-compat alias - downstream may still reference utr_after_s2_pullback
         setups["utr_after_s2_pullback"] = setups["healthy_retest"]["qualifies"]
@@ -2223,6 +2310,7 @@ def compute_master_dashboard_screens(prices, filter_results):
             "qualifies": bool(vcp_qualifies and _s2_base_gate),
             "info_stage_gate": _s2_base_gate,
             "info_contraction_count": len(vcp_contractions),
+            "test_values": _md_v2_vcp_values(vcp_tests, vcp_contractions),
         }
 
         md["setups"] = setups
@@ -2284,6 +2372,16 @@ def compute_master_dashboard_screens(prices, filter_results):
             "qualifies": mr_qualifies,
             "info_ma_retested": utr_test_ma,
             "info_retest_count": (utr_retest_counts.get(utr_test_ma) if utr_test_ma else None),
+            "test_values": {
+                "s1_volume_contracting": _md_v2_round(utr_vol_trend, 3),
+                "s2_updown_vol_ge105": _md_v2_round(utr_updown_ratio, 3),
+                "s3_few_distribution_days": utr_dist_days,
+                "s4_volatility_contracting": _md_v2_round(utr_pullback_contraction, 3),
+                "s5_testing_meaningful_ma": (utr_test_ma if utr_test_ma else "none"),
+                "s6_buying_through_l10d": _md_v2_round(utr_candle_quality_10d, 3),
+                "x1_reclaim_close_above_ma": _md_v2_pct_gap(price, _test_ma_val),
+                "x2_confirmation_close_ge2pct": _md_v2_round(close_pct_change_today),
+            },
         }
 
         # ---- Test: VCP after Stage 1->2 (vcp_deploy_s1) ----  D-MD-V2-64/65
@@ -2309,6 +2407,12 @@ def compute_master_dashboard_screens(prices, filter_results):
             "rating": _pre_rating(vd1_count, 7),
             "qualifies": vd1_qualifies,
             "info_contraction_count": len(vcp_contractions),
+            "test_values": dict({
+                "g1_stage1_probable": (s1["rating"] if vd1_gate_s1_probable else "not probable"),
+                "x1_breakout": "breakout" if vd1_trig_breakout else "no breakout",
+                "x2_confirmation_close_ge2pct": _md_v2_round(close_pct_change_today),
+            }, **{("v" + k[1:]): v for k, v in
+                  _md_v2_vcp_values(vcp_tests, vcp_contractions).items()}),
         }
 
         # ---- Test: VCP after Stage 2 base (vcp_deploy_s2) ----  D-MD-V2-64/65
@@ -2335,6 +2439,12 @@ def compute_master_dashboard_screens(prices, filter_results):
             "rating": _pre_rating(vd2_count, 7),
             "qualifies": vd2_qualifies,
             "info_contraction_count": len(vcp_contractions),
+            "test_values": dict({
+                "g1_stage2_basing": ("S2 + basing" if vd2_gate_s2_basing else "gate not met"),
+                "x1_breakout": "breakout" if vd2_trig_breakout else "no breakout",
+                "x2_confirmation_close_ge2pct": _md_v2_round(close_pct_change_today),
+            }, **{("v" + k[1:]): v for k, v in
+                  _md_v2_vcp_values(vcp_tests, vcp_contractions).items()}),
         }
 
         # ---- Test: Probing bet (probing_bet) ----  D-MD-V2-64/65
@@ -2362,6 +2472,11 @@ def compute_master_dashboard_screens(prices, filter_results):
             "qualifies": pbt_qualifies,
             "info_pb_stage": pb_stage,
             "info_collapsing_rating": _collapsing_rec.get("rating", "None"),
+            "test_values": {
+                "s1_pb_stage_late_or_capital": (pb_stage if pb_stage else "none"),
+                "x1_breakout": "breakout" if pbt_trig_breakout else "no breakout",
+                "x2_confirmation_close_ge2pct": _md_v2_round(close_pct_change_today),
+            },
         }
 
         # Back-compat aliases - downstream / historical readers may still

@@ -1003,6 +1003,11 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 #s4-main-table td.test-pass-bear { background: rgba(127,29,29,0.10); color: #7f1d1d; font-weight: 700; }
 #s4-main-table td.test-fail { color: #999; }
 #s4-main-table td.test-val  { font-size: 10px; }
+/* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
+#pi-main-table td.test-val { font-size: 10px; }
+#po-main-table td.test-val { font-size: 10px; }
+#st-main-table td.test-val { font-size: 10px; }
+#ct-main-table td.test-val { font-size: 10px; }
 
 #s4-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
 #s4-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -8826,7 +8831,7 @@ function SUM_renderQualifiedStocks() {
   // Empty array = no tier filter for that pattern (shows all). Intra-pattern
   // selections OR-combine; cross-pattern selections AND-combine.
   var piState = {
-    mode: { inputs: 'pct' },
+    mode: { inputs: 'pct', tests: 'tick' },
     scope: 'all',
     tierFilter: { pulling_back_uptrend: [], basing: [], collapsing: [] },
     tint: 'none',
@@ -9067,9 +9072,29 @@ function SUM_renderQualifiedStocks() {
     return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
   }
 
+  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
+  function piTestValueFor(row, col) {
+    var rec = piPatternRec(row, col.patternKey);
+    var tv = rec && rec.test_values;
+    if (!tv || !(col.testKey in tv)) return '\u2014';
+    var v = tv[col.testKey];
+    if (v === null || v === undefined) return '\u2014';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number') {
+      if (isNaN(v)) return '\u2014';
+      if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return piFmtPct(v * 100);
+      return piFmtNum(v);
+    }
+    return String(v);
+  }
   function piTestCell(row, col) {
     var pass = piEvalTest(row, col.patternKey, col.testKey);
     var extra = col.cls || '';
+    if (piState.mode.tests === 'val') {
+      var v = piTestValueFor(row, col);
+      var colour = pass ? piColourForIntensity(0.7) : piColourForIntensity(-0.4);
+      return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+    }
     if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
     return '<td class="pi-fail ' + extra + '">.</td>';
   }
@@ -9387,6 +9412,10 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn active" data-pi-grp="inputs" data-pi-val="pct" onclick="piSetMode(\'inputs\',\'pct\')">show as %</button>' +
           '<button class="toggle-btn" data-pi-grp="inputs" data-pi-val="raw" onclick="piSetMode(\'inputs\',\'raw\')">show as numbers</button>' +
         '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
+          '<button class="toggle-btn active" data-pi-grp="tests" data-pi-val="tick" onclick="piSetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-pi-grp="tests" data-pi-val="val" onclick="piSetMode(\'tests\',\'val\')">show test values</button>' +
+        '</div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
           '<button class="toggle-btn active" data-pi-scope="all" onclick="piSetScope(\'all\')">All <span id="pi-cnt-all"></span></button>' +
           '<button class="toggle-btn" data-pi-scope="live" onclick="piSetScope(\'live\')">Live <span id="pi-cnt-live"></span></button>' +
@@ -9512,7 +9541,7 @@ function SUM_renderQualifiedStocks() {
   // the proven Pre-test indicators module. Reads md_v2.post_indicators.
 
   var poState = {
-    mode: { inputs: 'pct' },
+    mode: { inputs: 'pct', tests: 'tick' },
     scope: 'all',
     tierFilter: {},
     tint: 'none',
@@ -9825,9 +9854,29 @@ function SUM_renderQualifiedStocks() {
     var text = (poState.mode.inputs === 'pct') ? poFmtPct(pct) : poFmtNum(v);
     return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
   }
+  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
+  function poTestValueFor(row, col) {
+    var rec = poPatternRec(row, col.patternKey);
+    var tv = rec && rec.test_values;
+    if (!tv || !(col.testKey in tv)) return '\u2014';
+    var v = tv[col.testKey];
+    if (v === null || v === undefined) return '\u2014';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number') {
+      if (isNaN(v)) return '\u2014';
+      if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return poFmtPct(v * 100);
+      return poFmtNum(v);
+    }
+    return String(v);
+  }
   function poTestCell(row, col) {
     var pass = poEvalTest(row, col.patternKey, col.testKey);
     var extra = col.cls || '';
+    if (poState.mode.tests === 'val') {
+      var v = poTestValueFor(row, col);
+      var colour = pass ? poColourForIntensity(0.7) : poColourForIntensity(-0.4);
+      return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+    }
     if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
     return '<td class="pi-fail ' + extra + '">.</td>';
   }
@@ -10129,6 +10178,10 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn active" data-po-grp="inputs" data-po-val="pct" onclick="poSetMode(\'inputs\',\'pct\')">show as %</button>' +
           '<button class="toggle-btn" data-po-grp="inputs" data-po-val="raw" onclick="poSetMode(\'inputs\',\'raw\')">show as numbers</button>' +
         '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
+          '<button class="toggle-btn active" data-po-grp="tests" data-po-val="tick" onclick="poSetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-po-grp="tests" data-po-val="val" onclick="poSetMode(\'tests\',\'val\')">show test values</button>' +
+        '</div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
           '<button class="toggle-btn active" data-po-scope="all" onclick="poSetScope(\'all\')">All <span id="po-cnt-all"></span></button>' +
           '<button class="toggle-btn" data-po-scope="live" onclick="poSetScope(\'live\')">Live <span id="po-cnt-live"></span></button>' +
@@ -10249,7 +10302,7 @@ function SUM_renderQualifiedStocks() {
   // the proven Pre-test indicators module. Reads md_v2.setups.
 
   var stState = {
-    mode: { inputs: 'pct' },
+    mode: { inputs: 'pct', tests: 'tick' },
     scope: 'all',
     tierFilter: {},
     tint: 'none',
@@ -10579,9 +10632,29 @@ function SUM_renderQualifiedStocks() {
     var text = (stState.mode.inputs === 'pct') ? stFmtPct(pct) : stFmtNum(v);
     return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
   }
+  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
+  function stTestValueFor(row, col) {
+    var rec = stPatternRec(row, col.patternKey);
+    var tv = rec && rec.test_values;
+    if (!tv || !(col.testKey in tv)) return '\u2014';
+    var v = tv[col.testKey];
+    if (v === null || v === undefined) return '\u2014';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number') {
+      if (isNaN(v)) return '\u2014';
+      if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return stFmtPct(v * 100);
+      return stFmtNum(v);
+    }
+    return String(v);
+  }
   function stTestCell(row, col) {
     var pass = stEvalTest(row, col.patternKey, col.testKey);
     var extra = col.cls || '';
+    if (stState.mode.tests === 'val') {
+      var v = stTestValueFor(row, col);
+      var colour = pass ? stColourForIntensity(0.7) : stColourForIntensity(-0.4);
+      return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+    }
     if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
     return '<td class="pi-fail ' + extra + '">.</td>';
   }
@@ -10883,6 +10956,10 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn active" data-st-grp="inputs" data-st-val="pct" onclick="stSetMode(\'inputs\',\'pct\')">show as %</button>' +
           '<button class="toggle-btn" data-st-grp="inputs" data-st-val="raw" onclick="stSetMode(\'inputs\',\'raw\')">show as numbers</button>' +
         '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
+          '<button class="toggle-btn active" data-st-grp="tests" data-st-val="tick" onclick="stSetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-st-grp="tests" data-st-val="val" onclick="stSetMode(\'tests\',\'val\')">show test values</button>' +
+        '</div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
           '<button class="toggle-btn active" data-st-scope="all" onclick="stSetScope(\'all\')">All <span id="st-cnt-all"></span></button>' +
           '<button class="toggle-btn" data-st-scope="live" onclick="stSetScope(\'live\')">Live <span id="st-cnt-live"></span></button>' +
@@ -10995,7 +11072,7 @@ function SUM_renderQualifiedStocks() {
   // module unchanged.
 
   var ctState = {
-    mode: { inputs: 'pct' },
+    mode: { inputs: 'pct', tests: 'tick' },
     scope: 'all',
     tierFilter: {},
     tint: 'none',
@@ -11322,9 +11399,29 @@ function SUM_renderQualifiedStocks() {
     return '<td class="' + (col.cls || '') + ' ct-info-cell ' + rcls + '">' +
            '<span class="ct-info-label">' + rating + '</span></td>';
   }
+  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
+  function ctTestValueFor(row, col) {
+    var rec = ctPatternRec(row, col.patternKey);
+    var tv = rec && rec.test_values;
+    if (!tv || !(col.testKey in tv)) return '\u2014';
+    var v = tv[col.testKey];
+    if (v === null || v === undefined) return '\u2014';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number') {
+      if (isNaN(v)) return '\u2014';
+      if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return ctFmtPct(v * 100);
+      return ctFmtNum(v);
+    }
+    return String(v);
+  }
   function ctTestCell(row, col) {
     var pass = ctEvalTest(row, col.patternKey, col.testKey);
     var extra = col.cls || '';
+    if (ctState.mode.tests === 'val') {
+      var v = ctTestValueFor(row, col);
+      var colour = pass ? ctColourForIntensity(0.7) : ctColourForIntensity(-0.4);
+      return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+    }
     if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
     return '<td class="pi-fail ' + extra + '">.</td>';
   }
@@ -11703,6 +11800,10 @@ function SUM_renderQualifiedStocks() {
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-ct-grp="inputs" data-ct-val="pct" onclick="ctSetMode(\'inputs\',\'pct\')">show as %</button>' +
           '<button class="toggle-btn" data-ct-grp="inputs" data-ct-val="raw" onclick="ctSetMode(\'inputs\',\'raw\')">show as numbers</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
+          '<button class="toggle-btn active" data-ct-grp="tests" data-ct-val="tick" onclick="ctSetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-ct-grp="tests" data-ct-val="val" onclick="ctSetMode(\'tests\',\'val\')">show test values</button>' +
         '</div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
           '<button class="toggle-btn active" data-ct-scope="all" onclick="ctSetScope(\'all\')">All <span id="ct-cnt-all"></span></button>' +

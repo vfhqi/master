@@ -1744,12 +1744,30 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
    so the right-hand columns spilled off-screen unreachable. overflow-x
    auto gives a horizontal scrollbar; overflow-y stays visible so the
    viewport-anchored sticky header `top:` offsets are unaffected. */
+/* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER: Wave 3b (14-May-26) corrective. The Wave 2 rule put
+   overflow-x:auto on .table-wrap; CSS then coerces overflow-y to auto,
+   making .table-wrap a scroll container that TRAPS the Wave 1 sticky
+   thead rows so they never pin to the viewport. Fix: .table-wrap goes
+   back to overflow:visible (not a scroll container -> sticky anchors to
+   the viewport and freezes), and the horizontal scroll moves to a new
+   inner wrapper .v2-hscroll. .v2-hscroll IS a scroll container but it
+   scrolls HORIZONTALLY only; a horizontal-only scroll container does
+   not become the containing block for VERTICAL sticky positioning, so
+   the frozen headers keep working AND wide tables still scroll sideways. */
 body[data-active-tab^="stage_"] .table-wrap,
 body[data-active-tab="pre_indicators"] .table-wrap,
 body[data-active-tab="post_indicators"] .table-wrap,
 body[data-active-tab="setups"] .table-wrap,
 body[data-active-tab="tests"] .table-wrap,
 body[data-active-tab="master_overview"] .table-wrap {
+  overflow: visible;
+}
+body[data-active-tab^="stage_"] .v2-hscroll,
+body[data-active-tab="pre_indicators"] .v2-hscroll,
+body[data-active-tab="post_indicators"] .v2-hscroll,
+body[data-active-tab="setups"] .v2-hscroll,
+body[data-active-tab="tests"] .v2-hscroll,
+body[data-active-tab="master_overview"] .v2-hscroll {
   overflow-x: auto;
   overflow-y: visible;
 }
@@ -7138,7 +7156,7 @@ function SUM_renderQualifiedStocks() {
         '<div class="gcap gcap-g3"><b>Group 3 · Moving average stack</b>Are shorter moving averages now sitting above longer ones? 50-day above 150-day (within 3%) and 150-day above 200-day (within 3%) show price has begun to lift the recent trend above the longer one — typical of a late base or early Stage 2 transition.</div>' +
         '<div class="gcap gcap-g4"><b>Group 4 · Higher lows</b>Are recent pullback lows higher than earlier ones? The most recent monthly low should be above the prior three monthly lows (1-month test); the most recent three-monthly low should be above the prior three (3-month test). Higher lows are the buyer-stepping-in signal.</div>' +
       '</div>' +
-      '<div class="table-wrap">' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s1-main-table">' +
           '<colgroup>' +
             '<col class="c-name"><col class="c-taxon">' +
@@ -7163,7 +7181,7 @@ function SUM_renderQualifiedStocks() {
           '</thead>' +
           '<tbody id="s1-tbody"></tbody>' +
         '</table>' +
-      '</div>';
+      '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
 
     host.innerHTML = html;
 
@@ -7617,7 +7635,7 @@ function SUM_renderQualifiedStocks() {
         '<div class="gcap gcap-g4"><b>Group 4 · Price leadership</b>Is the stock leading on price? Within 25% of its 52-week high, and at least 25% above its 52-week low. Together: strength near highs, well off the bottom.</div>' +
         '<div class="gcap gcap-g5" style="border-left-color:#6a5a8a"><b style="color:#6a5a8a">Group 5 · Relative strength</b>Is the stock outperforming peers? Relative strength above 70th percentile vs sector, industry, and market. Three independent strength signals across different peer groups.</div>' +
       '</div>' +
-      '<div class="table-wrap">' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s2-main-table">' +
           '<colgroup>' +
             '<col class="c-name"><col class="c-taxon">' +
@@ -7643,7 +7661,7 @@ function SUM_renderQualifiedStocks() {
           '</thead>' +
           '<tbody id="s2-tbody"></tbody>' +
         '</table>' +
-      '</div>';
+      '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
     host.innerHTML = html;
     var tiles = document.getElementById('s2-rating-tiles');
     if (tiles) {
@@ -8124,7 +8142,7 @@ function SUM_renderQualifiedStocks() {
         '<div class="gcap gcap-g4"><b>Group 4 · Lower lows</b>Lower lows count: two or more lower lows in the last month (T8), or three or more in the last three months (T9). Confirms downside structure is forming.</div>' +
         '<div class="gcap gcap-g5"><b>Group 5 · RS trend</b>Has relative strength turned down? Three-month RS change worse than minus five percent. A single test, but on a leading indicator that often turns ahead of price.</div>' +
       '</div>' +
-      '<div class="table-wrap">' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s3-main-table">' +
           '<colgroup>' +
             '<col class="c-name"><col class="c-taxon">' +
@@ -8150,7 +8168,7 @@ function SUM_renderQualifiedStocks() {
           '</thead>' +
           '<tbody id="s3-tbody"></tbody>' +
         '</table>' +
-      '</div>';
+      '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
     host.innerHTML = html;
     var tiles = document.getElementById('s3-rating-tiles');
     if (tiles) {
@@ -8605,7 +8623,7 @@ function SUM_renderQualifiedStocks() {
         '<div class="gcap gcap-g2"><b>Group 2 · Moving-average stack inverted</b>Three structural tests of an inverted MA stack: full inversion P&lt;50&lt;150&lt;200 (T3), 150-day below 200-day (T4), and 50-day below 150-day (T5). Together: the stock has rolled over across all three time-horizon trends.</div>' +
         '<div class="gcap gcap-g3"><b>Group 3 · Relative strength weak</b>Is relative strength weak both in absolute level and trend? RS percentile or vs-industry below 50 (T6), and three-month RS change worse than minus five percent (T7).</div>' +
       '</div>' +
-      '<div class="table-wrap">' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s4-main-table">' +
           '<colgroup>' +
             '<col class="c-name"><col class="c-taxon">' +
@@ -8628,7 +8646,7 @@ function SUM_renderQualifiedStocks() {
           '</thead>' +
           '<tbody id="s4-tbody"></tbody>' +
         '</table>' +
-      '</div>';
+      '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
     host.innerHTML = html;
     var tiles = document.getElementById('s4-rating-tiles');
     if (tiles) {
@@ -9372,7 +9390,7 @@ function SUM_renderQualifiedStocks() {
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="pi-pattern-tiles"></div>' +
       '<div class="group-captions">' + captionsHtml + '</div>' +
-      '<div class="table-wrap">' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="pi-main-table">' +
           '<colgroup>' + colgroupHtml + '</colgroup>' +
           '<thead>' +
@@ -9382,7 +9400,7 @@ function SUM_renderQualifiedStocks() {
           '</thead>' +
           '<tbody id="pi-tbody"></tbody>' +
         '</table>' +
-      '</div>';
+      '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
     host.innerHTML = html;
     // MD-V2-PI-CHIPS-S25-MARKER: tile click delegation - a chip click toggles
     // that tier; a click anywhere else on the tile selects all tiers (Option A).
@@ -10114,13 +10132,13 @@ function SUM_renderQualifiedStocks() {
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="po-pattern-tiles"></div>' +
       '<div class="group-captions">' + captionsHtml + '</div>' +
-      '<div class="table-wrap">' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="po-main-table">' +
           '<colgroup>' + colgroupHtml + '</colgroup>' +
           '<thead>' + theadRows + '</thead>' +
           '<tbody id="po-tbody"></tbody>' +
         '</table>' +
-      '</div>';
+      '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
     host.innerHTML = html;
     var tiles = document.getElementById('po-pattern-tiles');
     if (tiles) {
@@ -10868,13 +10886,13 @@ function SUM_renderQualifiedStocks() {
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="st-pattern-tiles"></div>' +
       '<div class="group-captions">' + captionsHtml + '</div>' +
-      '<div class="table-wrap">' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="st-main-table">' +
           '<colgroup>' + colgroupHtml + '</colgroup>' +
           '<thead>' + theadRows + '</thead>' +
           '<tbody id="st-tbody"></tbody>' +
         '</table>' +
-      '</div>';
+      '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
     host.innerHTML = html;
     var tiles = document.getElementById('st-pattern-tiles');
     if (tiles) {
@@ -11689,13 +11707,13 @@ function SUM_renderQualifiedStocks() {
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="ct-pattern-tiles"></div>' +
       '<div class="group-captions">' + captionsHtml + '</div>' +
-      '<div class="table-wrap">' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="ct-main-table">' +
           '<colgroup>' + colgroupHtml + '</colgroup>' +
           '<thead>' + theadRows + '</thead>' +
           '<tbody id="ct-tbody"></tbody>' +
         '</table>' +
-      '</div>';
+      '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
     host.innerHTML = html;
     var tiles = document.getElementById('ct-pattern-tiles');
     if (tiles) {
@@ -11930,10 +11948,10 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn active" data-mo-scope="all" onclick="moSetScope(\'all\')">All</button>' +
           '<button class="toggle-btn" data-mo-scope="live" onclick="moSetScope(\'live\')">Live investments</button>' +
         '</div></div>';
-      var table = '<div class="table-wrap"><table class="data-table" id="mo-main-table">' +
+      var table = '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="mo-main-table">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<thead><tr class="mo-head-row"><th class="mo-screen-col">Screen</th>';
       for (var t = 0; t < MO_TIERS.length; t++) table += '<th class="mo-tier-col">' + MO_TIERS[t] + '</th>';
-      table += '<th class="mo-total-col">Total rated</th></tr></thead><tbody id="mo-tbody"></tbody></table></div>';
+      table += '<th class="mo-total-col">Total rated</th></tr></thead><tbody id="mo-tbody"></tbody></table></div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
       host.innerHTML = intro + controls + table;
     }
     var all = moGetRows();
@@ -12125,8 +12143,8 @@ function SUM_renderQualifiedStocks() {
         'Each cell is the stock\'s rating for that screen; &#8211; where it does not qualify. ' +
         'Use the chips above any column to filter - multiple chips in a column widen it, ' +
         'columns combine.</div>' +
-        '<div class="table-wrap"><table class="data-table" id="mo-matrix-table">' +
-        '<thead></thead><tbody id="mo-matrix-tbody"></tbody></table></div>' +
+        '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="mo-matrix-table">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
+        '<thead></thead><tbody id="mo-matrix-tbody"></tbody></table></div></div>' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<div id="mo-matrix-foot"></div>';
       host.appendChild(wrap);
     }

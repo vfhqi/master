@@ -82,11 +82,19 @@ def load_data():
     if POSITIONS_PATH.exists():
         positions = safe_json_load(POSITIONS_PATH)
 
+    # MD-V2-S36-BRIEF-MARKER: universe_updated = mtime of data/universe.json,
+    # formatted as 'YYYY-MM-DD HH:MM'. The file has no _meta field, so we use mtime.
+    try:
+        _u_mtime = (DATA_DIR / "universe.json").stat().st_mtime
+        _universe_updated = datetime.fromtimestamp(_u_mtime).strftime("%Y-%m-%d %H:%M")
+    except Exception:
+        _universe_updated = "—"
     master = {
         "meta": {
             "generated": prices["_meta"]["generated"],
             "source": prices["_meta"]["source"],
             "stock_count": prices["_meta"]["count"],
+            "universe_updated": _universe_updated,
         },
         "universe": universe["stocks"],
         "prices": prices["stocks"],
@@ -147,16 +155,16 @@ TABS = [
     # MD-V2-STAGE4-MARKER — Stage 4 (Decline / Capitulation) tab
     {"id": "stage_4",   "label": "Stage 4",           "accent": "#991b1b"},
     # MD-V2-PRE-INDICATORS-MARKER - Pre-indicators (3 leading binary patterns)
-    {"id": "pre_indicators", "label": "Pre-indicators", "accent": "#0F6E56"},
+    {"id": "pre_indicators", "label": "Pre-farfalle", "accent": "#0F6E56"},
     # MD-V2-POST-INDICATORS-MARKER - Post-indicators (5 trailing binary patterns)
-    {"id": "post_indicators", "label": "Post-indicators", "accent": "#A32D2D"},
+    {"id": "post_indicators", "label": "Post-farfalle", "accent": "#A32D2D"},
     # MD-V2-SETUPS-MARKER - Setups (4 capital-deployment-eligibility patterns)
     {"id": "setups_s1pb", "label": "Stage 1 and Stage N PBs", "accent": "#BA7517"},
     {"id": "setups_s2vcp", "label": "Stage 2 VCPs and retests", "accent": "#BA7517"},
     # MD-V2-TESTS-MARKER - Capital qualification tests (3 tests)
     {"id": "tests", "label": "Tests", "accent": "#0F6E56"},
     # MD-V2-MASTER-OVERVIEW-S27-MARKER - synoptic rating matrix, default landing tab
-    {"id": "master_overview", "label": "Master Overview", "accent": "#1b3d5c"},
+    {"id": "master_overview", "label": "Overview", "accent": "#1b3d5c"},
     # Data / reference tabs
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
@@ -674,7 +682,7 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 #s1-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
 #s1-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
 #s1-main-table thead th:hover { background: #f0ebd9 !important; }
-#s1-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+#s1-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
 #s1-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
 #s1-main-table thead tr.group-header-row th { position: sticky; top: 0; }
 #s1-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
@@ -774,7 +782,7 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 #s2-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
 #s2-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
 #s2-main-table thead th:hover { background: #f0ebd9 !important; }
-#s2-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+#s2-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
 #s2-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
 #s2-main-table thead tr.group-header-row th { position: sticky; top: 0; }
 #s2-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
@@ -876,7 +884,7 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 #s3-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
 #s3-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
 #s3-main-table thead th:hover { background: #f0ebd9 !important; }
-#s3-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+#s3-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
 #s3-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
 #s3-main-table thead tr.group-header-row th { position: sticky; top: 0; }
 #s3-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
@@ -987,7 +995,7 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 #s4-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
 #s4-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; letter-spacing: 0.2px; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
 #s4-main-table thead th:hover { background: #f0ebd9 !important; }
-#s4-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
+#s4-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; white-space: normal; line-height: 1.25; }
 #s4-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
 #s4-main-table thead tr.group-header-row th { position: sticky; top: 0; }
 #s4-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
@@ -1101,7 +1109,8 @@ body[data-active-tab="master_overview"] .v2-nav { display: flex; }
 .v2-nav-placeholder { display: inline-block; padding: 5px 11px; font-size: 11px; color: #aaa; background: #f0ece0; border: 1px dashed #d0ccb8; border-radius: 4px; cursor: default; }
 /* MD-V2-PI-V2-S25-MARKER: EDIT 3 - Block B nav tier-grouping CSS (D-MD-V2-48). */
 .v2-nav-grp-label { font-size: 9px; color: #8a8674; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin: 0 4px 0 0; }
-.v2-nav-sep { display: inline-block; width: 1px; height: 18px; background: #d8d4c2; margin: 0 8px; }
+.v2-nav-sep { display: inline-block; width: auto; height: auto; background: none; margin: 0 6px; color: #8a8674; font-size: 13px; font-weight: 600; line-height: 1; vertical-align: middle; }
+.v2-nav-sep::before { content: "\2192"; }  /* MD-V2-S36-BRIEF-MARKER right-arrow */
 .v2-nav-btn.v2-grp-stages { border-bottom: 2px solid rgba(27,61,92,0.30); }
 .v2-nav-btn.v2-grp-indicators { border-bottom: 2px solid rgba(15,110,86,0.45); }
 .v2-nav-btn.v2-grp-setups { border-bottom: 2px solid rgba(123,104,174,0.55); }
@@ -1189,7 +1198,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-START */
 /* Session 25 rebuild (D-MD-V2-49,-50,-55,-56,-57,-58) */
-#tab-pre_indicators .group-captions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 14px 0; }
+#tab-pre_indicators .group-captions { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin: 16px 0 14px 0; }
 #tab-pre_indicators .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #b08a4e; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
 #tab-pre_indicators .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #b08a4e; font-size: 11px; letter-spacing: 0.2px; }
 #tab-pre_indicators .group-captions .gcap-g1 { border-left-color: #0F6E56; }
@@ -1199,7 +1208,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #tab-pre_indicators .group-captions .gcap-g3 { border-left-color: #A32D2D; }
 #tab-pre_indicators .group-captions .gcap-g3 b { color: #A32D2D; }
 
-#tab-pre_indicators .s1-rating-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+#tab-pre_indicators .s1-rating-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
 #tab-pre_indicators .s1-rating-tiles .pi-tile-pullback   { background: rgba(15, 110, 86, 0.10); border: 1px solid rgba(15,110,86,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-pre_indicators .s1-rating-tiles .pi-tile-basing     { background: rgba(29, 122, 78, 0.10); border: 1px solid rgba(29,122,78,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-pre_indicators .s1-rating-tiles .pi-tile-collapsing { background: rgba(163, 45, 45, 0.10); border: 1px solid rgba(163,45,45,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
@@ -1222,7 +1231,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #pi-main-table thead .super-group-row th.sg-spacer { background: #fbfaf5 !important; }
 #pi-main-table thead .super-group-row th.sg-positive { color: #0F6E56; border-bottom: 2px solid rgba(15,110,86,0.45); }
 #pi-main-table thead .super-group-row th.sg-negative { color: #A32D2D; border-bottom: 2px solid rgba(163,45,45,0.45); }
-#pi-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+#pi-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; line-height: 1.25; }
 #pi-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
 #pi-main-table thead tr.super-group-row  th { position: sticky; top: 0; }
 #pi-main-table thead tr.group-header-row th { position: sticky; top: 24px; }
@@ -1291,7 +1300,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 /* MD-V2-POST-INDICATORS-MARKER-CSS-START */
 /* Session 26 - generated from PI v3 CSS template, namespaced to #tab-post_indicators */
 /* Session 25 rebuild (D-MD-V2-49,-50,-55,-56,-57,-58) */
-#tab-post_indicators .group-captions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 14px 0; }
+#tab-post_indicators .group-captions { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin: 16px 0 14px 0; }
 #tab-post_indicators .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #b08a4e; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
 #tab-post_indicators .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #b08a4e; font-size: 11px; letter-spacing: 0.2px; }
 #tab-post_indicators .group-captions .gcap-g1 { border-left-color: #0F6E56; }
@@ -1301,7 +1310,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #tab-post_indicators .group-captions .gcap-g3 { border-left-color: #A32D2D; }
 #tab-post_indicators .group-captions .gcap-g3 b { color: #A32D2D; }
 
-#tab-post_indicators .s1-rating-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+#tab-post_indicators .s1-rating-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
 #tab-post_indicators .s1-rating-tiles .pi-tile-pullback   { background: rgba(15, 110, 86, 0.10); border: 1px solid rgba(15,110,86,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-post_indicators .s1-rating-tiles .pi-tile-basing     { background: rgba(29, 122, 78, 0.10); border: 1px solid rgba(29,122,78,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-post_indicators .s1-rating-tiles .pi-tile-collapsing { background: rgba(163, 45, 45, 0.10); border: 1px solid rgba(163,45,45,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
@@ -1324,7 +1333,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #po-main-table thead .super-group-row th.sg-spacer { background: #fbfaf5 !important; }
 #po-main-table thead .super-group-row th.sg-positive { color: #0F6E56; border-bottom: 2px solid rgba(15,110,86,0.45); }
 #po-main-table thead .super-group-row th.sg-negative { color: #A32D2D; border-bottom: 2px solid rgba(163,45,45,0.45); }
-#po-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+#po-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; line-height: 1.25; }
 #po-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
 #po-main-table thead tr.super-group-row  th { position: sticky; top: 0; }
 #po-main-table thead tr.group-header-row th { position: sticky; top: 24px; }
@@ -1436,7 +1445,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 .st-main-table thead .super-group-row th.sg-spacer { background: #fbfaf5 !important; }
 .st-main-table thead .super-group-row th.sg-positive { color: #0F6E56; border-bottom: 2px solid rgba(15,110,86,0.45); }
 .st-main-table thead .super-group-row th.sg-negative { color: #A32D2D; border-bottom: 2px solid rgba(163,45,45,0.45); }
-.st-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+.st-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; line-height: 1.25; }
 .st-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
 .st-main-table thead tr.super-group-row  th { position: sticky; top: 0; }
 .st-main-table thead tr.group-header-row th { position: sticky; top: 24px; }
@@ -1543,7 +1552,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #ct-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
 #ct-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
 #ct-main-table thead th:hover { background: #f0ebd9 !important; }
-#ct-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.4px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+#ct-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; line-height: 1.25; }
 #ct-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
 /* S27: two header rows only (no super-group row). group at top:0, cols at top:24px. */
 #ct-main-table thead tr.group-header-row th { position: sticky; top: 0; }
@@ -1959,6 +1968,19 @@ body[data-active-tab="master_overview"] {
 #mo-main-table tr.mo-total-row td.mo-tier-label { color: #777; }
 /* the Clear-all button shows armed when a selection is active */
 #mo-clear-btn.active { background: #BA7517; border-color: #BA7517; color: #fff; }
+/* MD-V2-S36-BRIEF-MARKER: Overview matrix visual supergroup grouping - a coloured
+   left border on the first body cell of each section bands the section all the
+   way down through the matrix, matching the thead group-band colours. */
+#mo-matrix-table tbody td.mo-sec-start-stages   { border-left: 3px solid #1b5e20; }
+#mo-matrix-table tbody td.mo-sec-start-pretest  { border-left: 3px solid #0F6E56; }
+#mo-matrix-table tbody td.mo-sec-start-posttest { border-left: 3px solid #A32D2D; }
+#mo-matrix-table tbody td.mo-sec-start-setups   { border-left: 3px solid #BA7517; }
+#mo-matrix-table tbody td.mo-sec-start-tests    { border-left: 3px solid #185FA5; }
+#mo-main-table   tbody td.mo-sec-start-stages   { border-left: 3px solid #1b5e20; }
+#mo-main-table   tbody td.mo-sec-start-pretest  { border-left: 3px solid #0F6E56; }
+#mo-main-table   tbody td.mo-sec-start-posttest { border-left: 3px solid #A32D2D; }
+#mo-main-table   tbody td.mo-sec-start-setups   { border-left: 3px solid #BA7517; }
+#mo-main-table   tbody td.mo-sec-start-tests    { border-left: 3px solid #185FA5; }
 /* MD-V2-OVERVIEW-COLALIGN-S35B-MARKER: shared colgroup widths -
    240px first column + 20x76px screen columns; combined with
    table-layout:fixed on both tables, this is what makes the
@@ -2119,6 +2141,7 @@ if(D.positions&&D.positions.investments){
 document.getElementById("stat-count").textContent=D.meta.stock_count;
 document.getElementById("stat-source").textContent=D.meta.source;
 document.getElementById("stat-updated").textContent=D.meta.generated;
+var _stUni=document.getElementById("stat-universe-updated");if(_stUni)_stUni.textContent=D.meta.universe_updated||"\u2014";  /* MD-V2-S36-BRIEF-MARKER */
 
 // ---- Key panel column descriptions per tab ----
 var KEY_DEFS={
@@ -7961,7 +7984,7 @@ function SUM_renderQualifiedStocks() {
     // G1: base counts (binary thresholds — no continuous value, show ✓/✗ only)
     if (k === 'T1' || k === 'T2') return t[k === 'T1' ? 'T1_3_plus_bases' : 'T2_4_plus_bases'] ? 'pass' : 'fail';
     // G2 T3: 200D flattening (binary derived) — no continuous % to show
-    if (k === 'T3') return t.T3_200D_flattening ? 'flat' : '—';
+    if (k === 'T3') return t.T3_200D_flattening ? 'flat' : 'rising';
     // G2 T4: 50D < 150D — show pct gap
     if (k === 'T4') return row.ma_50 != null && row.ma_150 != null ? s3FmtPct((row.ma_50 - row.ma_150) / row.ma_150 * 100) : '—';
     // G3 T5: volume down/up ratio (binary)
@@ -7994,9 +8017,9 @@ function SUM_renderQualifiedStocks() {
   function s3PillFor(rating, count) {
     if (rating === 'Probable Invalidation') {
       var c = Math.min(Math.max(count, 6), 10);
-      return '<span class="pill pill-prob-inv-' + c + '">Probable Inv.</span>';
+      return '<span class="pill pill-prob-inv-' + c + '">Probable Invalidation</span>';
     }
-    if (rating === 'Plausible Invalidation') return '<span class="pill pill-pla-inv">Plausible Inv.</span>';
+    if (rating === 'Plausible Invalidation') return '<span class="pill pill-pla-inv">Plausible Invalidation</span>';
     if (rating === 'Possible Topping') return '<span class="pill pill-pos-top">Possible Top.</span>';
     return '<span class="pill pill-none">None</span>';
   }
@@ -8238,7 +8261,7 @@ function SUM_renderQualifiedStocks() {
       '<div class="group-captions" style="grid-template-columns: repeat(5, 1fr);">' +
         '<div class="gcap gcap-g1"><b>Group 1 · Base count</b><span class="db">How mature is the run?</span> Each successive base built since the low raises the odds the trend is getting late.<span class="intro">Two base-count tests:</span><span class="tline"><span class="tnum">(1)</span> Has the stock built <u>3 or more bases</u> since its 52-week low (a maturing run)?</span><span class="tline"><span class="tnum">(2)</span> <u>4 or more</u> &mdash; the classic late-stage-base warning?</span></div>' +
         '<div class="gcap gcap-g2"><b>Group 2 · Price trend rolling over</b><span class="db">The trend is losing its lift</span> &mdash; the long-term average is going flat and the short-term has already crossed below.<span class="intro">Two roll-over tests:</span><span class="tline"><span class="tnum">(1)</span> Is the <u>200-day MA flattening</u> &mdash; recently rising, but now its month-on-month change is <u>near zero (under 1.5%) and decelerating</u>?</span><span class="tline"><span class="tnum">(2)</span> Has the <u>50-day MA crossed below the 150-day</u>?</span></div>' +
-        '<div class="gcap gcap-g3"><b>Group 3 · The debate</b>The clear mid-term uptrend of Stage 2 is becoming a <span class="db">tug-of-war between buyers and sellers</span> &mdash; choppier price action as <span class="db">distribution</span> creeps in.<span class="intro">Three distribution signals tested:</span><span class="tline"><span class="tnum">(1)</span> Is down-day volume <u>at least 10% above up-day volume</u>, averaged over <u>the last ~20 trading days</u>?</span><span class="tline"><span class="tnum">(2)</span> Is short-run volatility expanding &mdash; the <u>10-day ATR at least 10% above the 20-day ATR</u>?</span><span class="tline"><span class="tnum">(3)</span> Yet is price still <u>within 5% of the 50-day MA</u> &mdash; no decisive breakout up or down?</span></div>' +
+        '<div class="gcap gcap-g3"><b>Group 3 · Investor/holder debate</b>The clear mid-term uptrend of Stage 2 is becoming a <span class="db">tug-of-war between buyers and sellers</span> &mdash; choppier price action as <span class="db">distribution</span> creeps in.<span class="intro">Three distribution signals tested:</span><span class="tline"><span class="tnum">(1)</span> Is down-day volume <u>at least 10% above up-day volume</u>, averaged over <u>the last ~20 trading days</u>?</span><span class="tline"><span class="tnum">(2)</span> Is short-run volatility expanding &mdash; the <u>10-day ATR at least 10% above the 20-day ATR</u>?</span><span class="tline"><span class="tnum">(3)</span> Yet is price still <u>within 5% of the 50-day MA</u> &mdash; no decisive breakout up or down?</span></div>' +
         '<div class="gcap gcap-g4"><b>Group 4 · Lower lows</b><span class="db">Downside structure is forming</span> &mdash; pullback lows are now printing below the ones before them.<span class="intro">Two lower-low tests:</span><span class="tline"><span class="tnum">(1)</span> Are there <u>2 or more lower lows in the last month</u>?</span><span class="tline"><span class="tnum">(2)</span> <u>3 or more in the last three months</u>?</span></div>' +
         '<div class="gcap gcap-g5"><b>Group 5 · RS trend</b><span class="db">Relative strength has turned down</span> &mdash; a single test, but on a signal that often leads price.<span class="intro">One relative-strength test:</span><span class="tline"><span class="tnum">(1)</span> Has the stock <u>underperformed its benchmark by more than 5%</u> over the last 3 months?</span></div>' +
       '</div>' +
@@ -8259,7 +8282,7 @@ function SUM_renderQualifiedStocks() {
               '<th class="gh-rating grp-start-rating" colspan="2">Stage 3 rating · thresholds 2/10 · 4/10 · 6+/10</th>' +
               '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Base count</th>' +
               '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 · Price trend rolling over</th>' +
-              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="3">Group 3 · The debate</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="3">Group 3 · Investor/holder debate</th>' +
               '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Group 4 · Lower lows</th>' +
               '<th class="gh-g5 grp-start-g5 grp-end-g5" colspan="1">Group 5 · RS trend</th>' +
               '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
@@ -8828,17 +8851,17 @@ function SUM_renderQualifiedStocks() {
     // internal tab keys unchanged (display-only rename).
     nav.innerHTML = ''
       + '<span class="v2-nav-label">MD V2</span>'
-      + '<span class="v2-nav-grp-label">Stages</span>'
+      + '<span class="v2-nav-grp-label">Stages - MT/LT trends</span>'
       + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_1" onclick="switchTab(\'stage_1\')">Stage 1 (Basing)</button>'
       + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_2" onclick="switchTab(\'stage_2\')">Stage 2 (Uptrend)</button>'
       + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_3" onclick="switchTab(\'stage_3\')">Stage 3 (Topping)</button>'
       + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_4" onclick="switchTab(\'stage_4\')">Stage 4 (Decline)</button>'
       + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Indicators</span>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="pre_indicators" onclick="switchTab(\'pre_indicators\')">Pre-test indicators</button>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators" onclick="switchTab(\'post_indicators\')">Post-test indicators</button>'
+      + '<span class="v2-nav-grp-label">Early-stage indicators</span>'
+      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="pre_indicators" onclick="switchTab(\'pre_indicators\')">Pre-farfalle indicators</button>'
+      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators" onclick="switchTab(\'post_indicators\')">Post-farfalle indicators</button>'
       + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Capital qualification</span>'
+      + '<span class="v2-nav-grp-label">Late-stage capital qualification</span>'
       + '<button class="v2-nav-btn v2-grp-setups" data-v2-tab="setups_s1pb" onclick="switchTab(\'setups_s1pb\')">Stage 1 and Stage N PBs</button>'
       + '<button class="v2-nav-btn v2-grp-setups" data-v2-tab="setups_s2vcp" onclick="switchTab(\'setups_s2vcp\')">Stage 2 VCPs and retests</button>'
       + '<span class="v2-nav-sep"></span>'
@@ -9683,7 +9706,7 @@ function SUM_renderQualifiedStocks() {
   {
     "key": "breakdown_50D",
     "label": "Breakdown through 50-day MA",
-    "shortLabel": "Breakdown 50D",
+    "shortLabel": "Negatively breaking through ST trend (50D MA)",
     "supergroup": "bear",
     "tierLadder": [
       "Possible",
@@ -9708,7 +9731,7 @@ function SUM_renderQualifiedStocks() {
   {
     "key": "breakdown_150D",
     "label": "Breakdown through 150-day MA",
-    "shortLabel": "Breakdown 150D",
+    "shortLabel": "Negatively breaking through MT trend (150D MA)",
     "supergroup": "bear",
     "tierLadder": [
       "Possible",
@@ -9733,7 +9756,7 @@ function SUM_renderQualifiedStocks() {
   {
     "key": "breakdown_200D",
     "label": "Breakdown through 200-day MA",
-    "shortLabel": "Breakdown 200D",
+    "shortLabel": "Negatively breaking through LT trend (200D MA)",
     "supergroup": "bear",
     "tierLadder": [
       "Possible",
@@ -10535,9 +10558,9 @@ function SUM_renderQualifiedStocks() {
   }
 ];
   var ST_SUPERGROUPS = [];
-  var ST_TONE = {"probing_bet": "pi-tile-pullback", "vcp_after_s1_plateau": "pi-tile-basing", "healthy_retest": "pi-tile-collapsing", "vcp_after_s2_base": "pi-tile-amber"};
-  var ST_STRIP = {"probing_bet": "pi-strip-pullback", "vcp_after_s1_plateau": "pi-strip-basing", "healthy_retest": "pi-strip-collapsing", "vcp_after_s2_base": "pi-strip-amber"};
-  var ST_CHIP = {"probing_bet": "pullback", "vcp_after_s1_plateau": "basing", "healthy_retest": "collapsing", "vcp_after_s2_base": "amber"};
+  var ST_TONE = {"probing_bet": "pi-tile-pullback", "vcp_after_s1_plateau": "pi-tile-basing", "healthy_retest": "pi-tile-navy", "vcp_after_s2_base": "pi-tile-amber"};
+  var ST_STRIP = {"probing_bet": "pi-strip-pullback", "vcp_after_s1_plateau": "pi-strip-basing", "healthy_retest": "pi-strip-navy", "vcp_after_s2_base": "pi-strip-amber"};
+  var ST_CHIP = {"probing_bet": "pullback", "vcp_after_s1_plateau": "basing", "healthy_retest": "navy", "vcp_after_s2_base": "amber"};
 
   // MD-V2-SETUPS-SPLIT-S33-MARKER: the single "Capital qualification setups" tab
   // is split into two tabs, each rendering a 2-pattern subset. The renderer below
@@ -12097,16 +12120,16 @@ function SUM_renderQualifiedStocks() {
     { section:'Stages', key:'stage_3', label:'Stage 3 - Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
     { section:'Stages', key:'stage_4', label:'Stage 4 - Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
     // -- Pre-test indicators --
-    { section:'Pre-test indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pre_indicators', patternKey:'pulling_back_uptrend' },
-    { section:'Pre-test indicators', key:'basing', label:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pre_indicators', patternKey:'basing' },
-    { section:'Pre-test indicators', key:'collapsing', label:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'pre_indicators', patternKey:'collapsing' },
+    { section:'Pre-farfalle indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pre_indicators', patternKey:'pulling_back_uptrend' },
+    { section:'Pre-farfalle indicators', key:'basing', label:'Basing in a MT/LT uptrend', ratingPath:'group:pre_indicators:basing', tabId:'pre_indicators', patternKey:'basing' },
+    { section:'Pre-farfalle indicators', key:'collapsing', label:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'pre_indicators', patternKey:'collapsing' },
     // -- Post-test indicators (ratingPath -> md_v2.post_indicators.<k>.rating;
     //    md_v2.indicators.<k> is a bare boolean and has no .rating - Request 1) --
-    { section:'Post-test indicators', key:'breakout', label:'Breakout', ratingPath:'group:post_indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
-    { section:'Post-test indicators', key:'advancing', label:'Advancing', ratingPath:'group:post_indicators:advancing', tabId:'post_indicators', patternKey:'advancing' },
-    { section:'Post-test indicators', key:'breakdown_50D', label:'Breakdown 50D', ratingPath:'group:post_indicators:breakdown_50D', tabId:'post_indicators', patternKey:'breakdown_50D' },
-    { section:'Post-test indicators', key:'breakdown_150D', label:'Breakdown 150D', ratingPath:'group:post_indicators:breakdown_150D', tabId:'post_indicators', patternKey:'breakdown_150D' },
-    { section:'Post-test indicators', key:'breakdown_200D', label:'Breakdown 200D', ratingPath:'group:post_indicators:breakdown_200D', tabId:'post_indicators', patternKey:'breakdown_200D' },
+    { section:'Post-farfalle indicators', key:'breakout', label:'Breakout', ratingPath:'group:post_indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
+    { section:'Post-farfalle indicators', key:'advancing', label:'Advancing', ratingPath:'group:post_indicators:advancing', tabId:'post_indicators', patternKey:'advancing' },
+    { section:'Post-farfalle indicators', key:'breakdown_50D', label:'Negatively breaking through ST trend (50D MA)', ratingPath:'group:post_indicators:breakdown_50D', tabId:'post_indicators', patternKey:'breakdown_50D' },
+    { section:'Post-farfalle indicators', key:'breakdown_150D', label:'Negatively breaking through MT trend (150D MA)', ratingPath:'group:post_indicators:breakdown_150D', tabId:'post_indicators', patternKey:'breakdown_150D' },
+    { section:'Post-farfalle indicators', key:'breakdown_200D', label:'Negatively breaking through LT trend (200D MA)', ratingPath:'group:post_indicators:breakdown_200D', tabId:'post_indicators', patternKey:'breakdown_200D' },
     // -- Capital qualification setups --
     { section:'Capital qualification setups', key:'probing_bet', label:'Probing bet', ratingPath:'group:setups:probing_bet', tabId:'setups_s1pb', patternKey:'probing_bet' },
     { section:'Capital qualification setups', key:'vcp_after_s1_plateau', label:'VCP after Stage 1->2 plateau', ratingPath:'group:setups:vcp_after_s1_plateau', tabId:'setups_s1pb', patternKey:'vcp_after_s1_plateau' },
@@ -12127,16 +12150,30 @@ function SUM_renderQualifiedStocks() {
   // section -> group-band colour-hook class (shared by both tables)
   var MO_GROUP_CLS = {
     'Stages': 'mo-mx-g-stages',
-    'Pre-test indicators': 'mo-mx-g-pretest',
-    'Post-test indicators': 'mo-mx-g-posttest',
+    'Pre-farfalle indicators': 'mo-mx-g-pretest',
+    'Post-farfalle indicators': 'mo-mx-g-posttest',
     'Capital qualification setups': 'mo-mx-g-setups',
     'Capital deployment tests': 'mo-mx-g-tests'
   };
+  // MD-V2-S36-BRIEF-MARKER: per-section class suffix for the body-cell visual
+  // grouping border (CSS rule #mo-matrix-table tbody td.mo-sec-start-*).
+  var MO_SECTION_BORDER_CLS = {
+    'Stages': 'mo-sec-start-stages',
+    'Pre-farfalle indicators': 'mo-sec-start-pretest',
+    'Post-farfalle indicators': 'mo-sec-start-posttest',
+    'Capital qualification setups': 'mo-sec-start-setups',
+    'Capital deployment tests': 'mo-sec-start-tests'
+  };
+  function moIsSectionStart(idx){
+    if (idx === 0) return MO_ROWS[0].section;
+    if (MO_ROWS[idx].section !== MO_ROWS[idx-1].section) return MO_ROWS[idx].section;
+    return null;
+  }
   // short section labels for the group band - the full names are long.
   var MO_GROUP_LABEL = {
     'Stages': 'Stages',
-    'Pre-test indicators': 'Pre-test',
-    'Post-test indicators': 'Post-test',
+    'Pre-farfalle indicators': 'Pre-farfalle',
+    'Post-farfalle indicators': 'Post-farfalle',
     'Capital qualification setups': 'Qualification setups',
     'Capital deployment tests': 'Deployment tests'
   };
@@ -12459,10 +12496,12 @@ function SUM_renderQualifiedStocks() {
         '<span class="mo-mx-tk">' + moMxText(rec.ticker) + '</span></td>';
       for (var r = 0; r < MO_ROWS.length; r++) {
         var tier = moNormaliseTier(moReadRating(md, MO_ROWS[r].ratingPath));
+        var secStart = moIsSectionStart(r);  /* MD-V2-S36-BRIEF-MARKER */
+        var tdCls = secStart ? (' class="' + MO_SECTION_BORDER_CLS[secStart] + '"') : '';
         if (tier === 'None') {
-          html += '<td><span class="mo-mx-pill mo-mx-p-none">&#8211;</span></td>';
+          html += '<td' + tdCls + '><span class="mo-mx-pill mo-mx-p-none">&#8211;</span></td>';
         } else {
-          html += '<td><span class="mo-mx-pill ' + MO_MX_TIER_PILL[tier] + '">' + tier + '</span></td>';
+          html += '<td' + tdCls + '><span class="mo-mx-pill ' + MO_MX_TIER_PILL[tier] + '">' + tier + '</span></td>';
         }
       }
       html += '</tr>';
@@ -12569,7 +12608,8 @@ renderTab("mm99");
         '    <div class="header-stats">\n'
         '      <span>Stocks: <span class="stat-value" id="stat-count">&mdash;</span></span>\n'
         '      <span>Data: <span class="stat-value" id="stat-source">&mdash;</span></span>\n'
-        '      <span>Updated: <span class="stat-value" id="stat-updated">&mdash;</span></span>\n'
+        '      <span>Price data updated: <span class="stat-value" id="stat-updated">&mdash;</span></span>\n'
+        '      <span>Stock universe updated: <span class="stat-value" id="stat-universe-updated">&mdash;</span></span>\n'
         '    </div>\n'
         '    <div class="header-right-btns">\n'
         '      <button class="ctrl-btn" onclick="openKey()">Key</button>\n'

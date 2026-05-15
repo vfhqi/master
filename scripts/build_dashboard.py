@@ -1815,7 +1815,7 @@ body[data-active-tab="master_overview"] {
    ladder: chip row -> section-group row -> column-title row. */
 #mo-matrix-wrap { margin-top: 18px; }
 #mo-matrix-caption { font-size: 11px; color: #7a7560; margin: 0 0 6px 2px; }
-#mo-matrix-table { border-collapse: separate; border-spacing: 0; font-size: 12px; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#mo-matrix-table { border-collapse: separate; border-spacing: 0; font-size: 12px; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; table-layout: fixed; }
 #mo-matrix-table thead { position: static; }
 /* chip row - the per-column vertical filter chips, topmost sticky header row */
 #mo-matrix-table thead tr.mo-mx-chip-row th {
@@ -1894,6 +1894,7 @@ body[data-active-tab="master_overview"] {
   position: sticky; left: 0; z-index: 5;
   background: #fbfaf5; text-align: left; white-space: nowrap;
   padding: 4px 10px; border-right: 1px solid #e0dcc8;
+  overflow: hidden; text-overflow: ellipsis;
 }
 #mo-matrix-table tbody tr:hover td.mo-mx-name-cell { background: #f4f1e6; }
 #mo-matrix-table tbody td.mo-mx-name-cell .mo-mx-co { font-weight: 600; color: #2a2a2a; }
@@ -1923,7 +1924,7 @@ body[data-active-tab="master_overview"] {
    then shows the count of stocks meeting all selected criteria AND its own;
    the matrix below filters to that set. Replaces the Wave 3 per-column chip
    filter (chips removed; the chip CSS above is now inert/dead). */
-#mo-main-table { border-collapse: separate; border-spacing: 0; font-size: 12px; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#mo-main-table { border-collapse: separate; border-spacing: 0; font-size: 12px; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; table-layout: fixed; }
 #mo-main-table thead { position: static; }
 #mo-main-table thead th { background: #f3efe2; border-bottom: 1px solid #e0dcc8; }
 /* section-group band - reuses the matrix mo-mx-g-* colour hooks */
@@ -1958,6 +1959,12 @@ body[data-active-tab="master_overview"] {
 #mo-main-table tr.mo-total-row td.mo-tier-label { color: #777; }
 /* the Clear-all button shows armed when a selection is active */
 #mo-clear-btn.active { background: #BA7517; border-color: #BA7517; color: #fff; }
+/* MD-V2-OVERVIEW-COLALIGN-S35B-MARKER: shared colgroup widths -
+   240px first column + 20x76px screen columns; combined with
+   table-layout:fixed on both tables, this is what makes the
+   summary table line up column-for-column with the matrix. */
+col.mo-cg-label  { width: 240px; }
+col.mo-cg-screen { width: 76px; }
 /* MD-V2-MASTER-OVERVIEW-MARKER-CSS-END */
 
 
@@ -12138,6 +12145,16 @@ function SUM_renderQualifiedStocks() {
     'Plausible': 'mo-mx-p-pla', 'Probable': 'mo-mx-p-prob'
   };
 
+  // MD-V2-OVERVIEW-COLALIGN-S35B-MARKER: shared colgroup string.
+  // Both the summary table and the matrix emit this same colgroup
+  // so their columns share identical fixed widths under
+  // table-layout:fixed - that is what makes the two tables align.
+  var MO_COLGROUP = (function(){
+    var s = '<col class="mo-cg-label">';
+    for (var i = 0; i < MO_ROWS.length; i++) s += '<col class="mo-cg-screen">';
+    return s;
+  })();
+
   // ----- shared helpers (unchanged from S27 / Wave 3) -----
   function moPricesLookup() {
     if (window._moPricesByTicker) return window._moPricesByTicker;
@@ -12311,7 +12328,7 @@ function SUM_renderQualifiedStocks() {
       }
       colTr += '</tr>';
       var table = '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="mo-main-table">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
-        '<thead>' + groupTr + colTr + '</thead><tbody id="mo-tbody"></tbody></table></div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
+        '<colgroup>' + MO_COLGROUP + '</colgroup><thead>' + groupTr + colTr + '</thead><tbody id="mo-tbody"></tbody></table></div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
       host.innerHTML = intro + controls + table;
     }
 
@@ -12410,7 +12427,7 @@ function SUM_renderQualifiedStocks() {
         'Filtered by the pattern you select in the summary table above; click a screen ' +
         'name to open that screen\'s own tab.</div>' +
         '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="mo-matrix-table">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
-        '<thead></thead><tbody id="mo-matrix-tbody"></tbody></table></div></div>' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
+        '<colgroup>' + MO_COLGROUP + '</colgroup><thead></thead><tbody id="mo-matrix-tbody"></tbody></table></div></div>' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<div id="mo-matrix-foot"></div>';
       host.appendChild(wrap);
     }

@@ -1119,6 +1119,16 @@ body[data-active-tab="master_overview"] .v2-nav { display: flex; }
 .v2-nav-btn.v2-grp-indicators:hover { background: #e8f2ee; }
 .v2-nav-btn.v2-grp-setups:hover { background: #efecf6; }
 .v2-nav-btn.v2-grp-tests:hover { background: #f6efe6; }
+/* MD-V2-S40-ANDROID-NAV-OVERFLOW-FIX: shrink v2-nav components on tablet widths so all
+   group labels (incl. 'Capital deployment') and buttons fit on one row
+   within the 70px fixed header without overflowing horizontally. */
+@media (max-width: 1024px) {
+  .v2-nav { gap: 4px; padding: 6px 8px; }
+  .v2-nav-grp-label { font-size: 8px; letter-spacing: 0.2px; margin: 0 2px 0 0; }
+  .v2-nav-btn { padding: 4px 8px; font-size: 10px; }
+  .v2-nav-sep { margin: 0 3px; font-size: 11px; }
+  .v2-nav-label { font-size: 9px; margin-right: 4px; }
+}
 
 /* ===== Group caption parity for Stage 2/3/4 ===== */
 /* Stage 1 already styles .gcap inside .group-captions. Replicate for s2/s3/s4. */

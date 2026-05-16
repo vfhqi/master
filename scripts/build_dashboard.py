@@ -1969,19 +1969,36 @@ body[data-active-tab="master_overview"] {
 #mo-main-table tr.mo-total-row td.mo-tier-label { color: #777; }
 /* the Clear-all button shows armed when a selection is active */
 #mo-clear-btn.active { background: #BA7517; border-color: #BA7517; color: #fff; }
-/* MD-V2-S36-BRIEF-MARKER: Overview matrix visual supergroup grouping - a coloured
-   left border on the first body cell of each section bands the section all the
-   way down through the matrix, matching the thead group-band colours. */
-#mo-matrix-table tbody td.mo-sec-start-stages   { border-left: 3px solid #1b5e20; }
-#mo-matrix-table tbody td.mo-sec-start-pretest  { border-left: 3px solid #0F6E56; }
-#mo-matrix-table tbody td.mo-sec-start-posttest { border-left: 3px solid #A32D2D; }
-#mo-matrix-table tbody td.mo-sec-start-setups   { border-left: 3px solid #BA7517; }
-#mo-matrix-table tbody td.mo-sec-start-tests    { border-left: 3px solid #185FA5; }
-#mo-main-table   tbody td.mo-sec-start-stages   { border-left: 3px solid #1b5e20; }
-#mo-main-table   tbody td.mo-sec-start-pretest  { border-left: 3px solid #0F6E56; }
-#mo-main-table   tbody td.mo-sec-start-posttest { border-left: 3px solid #A32D2D; }
-#mo-main-table   tbody td.mo-sec-start-setups   { border-left: 3px solid #BA7517; }
-#mo-main-table   tbody td.mo-sec-start-tests    { border-left: 3px solid #185FA5; }
+/* MD-V2-S38-SECTIONS-OVERVIEW-MARKER: comprehensive Overview supergroup grouping.
+   Each supergroup column block gets BOTH a left border on its first cell and a
+   right border on its last cell, on BOTH tables (summary + matrix). 2px wide,
+   ~45% alpha so the bracketing reads as a guide rather than a hard line.
+   The supergroup header cells also get a very subtle (~7% alpha) background
+   tint towards their text colour, so the supergroup is visible even where the
+   body cells happen to all be the same tier-tint. */
+/* body-cell left borders (first column of each section) */
+#mo-matrix-table tbody td.mo-sec-start-stages,   #mo-main-table tbody td.mo-sec-start-stages   { border-left: 2px solid rgba(27,94,32,0.45); }
+#mo-matrix-table tbody td.mo-sec-start-pretest,  #mo-main-table tbody td.mo-sec-start-pretest  { border-left: 2px solid rgba(15,110,86,0.45); }
+#mo-matrix-table tbody td.mo-sec-start-posttest, #mo-main-table tbody td.mo-sec-start-posttest { border-left: 2px solid rgba(163,45,45,0.45); }
+#mo-matrix-table tbody td.mo-sec-start-setups,   #mo-main-table tbody td.mo-sec-start-setups   { border-left: 2px solid rgba(186,117,23,0.45); }
+#mo-matrix-table tbody td.mo-sec-start-tests,    #mo-main-table tbody td.mo-sec-start-tests    { border-left: 2px solid rgba(24,95,165,0.45); }
+/* body-cell right borders (last column of each section) */
+#mo-matrix-table tbody td.mo-sec-end-stages,   #mo-main-table tbody td.mo-sec-end-stages   { border-right: 2px solid rgba(27,94,32,0.45); }
+#mo-matrix-table tbody td.mo-sec-end-pretest,  #mo-main-table tbody td.mo-sec-end-pretest  { border-right: 2px solid rgba(15,110,86,0.45); }
+#mo-matrix-table tbody td.mo-sec-end-posttest, #mo-main-table tbody td.mo-sec-end-posttest { border-right: 2px solid rgba(163,45,45,0.45); }
+#mo-matrix-table tbody td.mo-sec-end-setups,   #mo-main-table tbody td.mo-sec-end-setups   { border-right: 2px solid rgba(186,117,23,0.45); }
+#mo-matrix-table tbody td.mo-sec-end-tests,    #mo-main-table tbody td.mo-sec-end-tests    { border-right: 2px solid rgba(24,95,165,0.45); }
+/* very subtle header tint on each supergroup group-band cell */
+#mo-matrix-table thead tr.mo-mx-group-row th.mo-mx-g-stages,
+#mo-main-table   thead tr.mo-group-row    th.mo-mx-g-stages   { background-color: rgba(27,94,32,0.07); }
+#mo-matrix-table thead tr.mo-mx-group-row th.mo-mx-g-pretest,
+#mo-main-table   thead tr.mo-group-row    th.mo-mx-g-pretest  { background-color: rgba(15,110,86,0.07); }
+#mo-matrix-table thead tr.mo-mx-group-row th.mo-mx-g-posttest,
+#mo-main-table   thead tr.mo-group-row    th.mo-mx-g-posttest { background-color: rgba(163,45,45,0.07); }
+#mo-matrix-table thead tr.mo-mx-group-row th.mo-mx-g-setups,
+#mo-main-table   thead tr.mo-group-row    th.mo-mx-g-setups   { background-color: rgba(186,117,23,0.07); }
+#mo-matrix-table thead tr.mo-mx-group-row th.mo-mx-g-tests,
+#mo-main-table   thead tr.mo-group-row    th.mo-mx-g-tests    { background-color: rgba(24,95,165,0.07); }
 /* MD-V2-OVERVIEW-COLALIGN-S35B-MARKER: shared colgroup widths -
    240px first column + 20x76px screen columns; combined with
    table-layout:fixed on both tables, this is what makes the
@@ -8871,7 +8888,7 @@ function SUM_renderQualifiedStocks() {
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Overview</span>'
-      + '<button class="v2-nav-btn v2-grp-overview" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Master Overview</button>';  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
+      + '<button class="v2-nav-btn v2-grp-overview" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Overview</button>';  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
     hdr.appendChild(nav);
   }
   function syncV2State(id) {
@@ -12165,10 +12182,30 @@ function SUM_renderQualifiedStocks() {
     'Capital qualification setups': 'mo-sec-start-setups',
     'Capital deployment tests': 'mo-sec-start-tests'
   };
+  // MD-V2-S38-SECTIONS-OVERVIEW-MARKER: matching end-of-section map.
+  var MO_SECTION_END_BORDER_CLS = {
+    'Stages': 'mo-sec-end-stages',
+    'Pre-farfalle indicators': 'mo-sec-end-pretest',
+    'Post-farfalle indicators': 'mo-sec-end-posttest',
+    'Capital qualification setups': 'mo-sec-end-setups',
+    'Capital deployment tests': 'mo-sec-end-tests'
+  };
   function moIsSectionStart(idx){
     if (idx === 0) return MO_ROWS[0].section;
     if (MO_ROWS[idx].section !== MO_ROWS[idx-1].section) return MO_ROWS[idx].section;
     return null;
+  }
+  function moIsSectionEnd(idx){
+    if (idx === MO_ROWS.length - 1) return MO_ROWS[idx].section;
+    if (MO_ROWS[idx].section !== MO_ROWS[idx+1].section) return MO_ROWS[idx].section;
+    return null;
+  }
+  function moSectionEdgeCls(idx){
+    var a = moIsSectionStart(idx), b = moIsSectionEnd(idx);
+    var s = '';
+    if (a) s += ' ' + MO_SECTION_BORDER_CLS[a];
+    if (b) s += ' ' + MO_SECTION_END_BORDER_CLS[b];
+    return s;
   }
   // short section labels for the group band - the full names are long.
   var MO_GROUP_LABEL = {
@@ -12337,7 +12374,7 @@ function SUM_renderQualifiedStocks() {
     var host = document.getElementById('tab-master_overview');
     if (!host) return;
     if (!host.querySelector('#mo-main-table')) {
-      var intro = '<div class="s1-intro">Master Overview is the synoptic view of the whole MD V2 system. The summary table below is the control surface: every rating tier as a row, every screen - the four stages, the pre-test and post-test indicators, the capital qualification setups and the capital deployment tests - as a column, lined up with the full matrix beneath it. Click any count cell to select that screen-and-tier as a criterion; every cell then shows how many stocks meet all the criteria you have selected AND its own (the &quot;patterns&quot; you are looking for), and the matrix below filters to that set. Click multiple cells to build a pattern - tiers within one screen combine as OR, screens combine as AND. Click a screen name to open that screen&apos;s own tab. Use &quot;Clear all&quot; to reset.</div>';
+      var intro = '<div class="s1-intro">Overview is the synoptic view of the whole MD V2 system. The summary table below is the control surface: every rating tier as a row, every screen - the four stages, the pre-test and post-test indicators, the capital qualification setups and the capital deployment tests - as a column, lined up with the full matrix beneath it. Click any count cell to select that screen-and-tier as a criterion; every cell then shows how many stocks meet all the criteria you have selected AND its own (the &quot;patterns&quot; you are looking for), and the matrix below filters to that set. Click multiple cells to build a pattern - tiers within one screen combine as OR, screens combine as AND. Click a screen name to open that screen&apos;s own tab. Use &quot;Clear all&quot; to reset.</div>';
       var controls = '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
           '<button class="toggle-btn active" data-mo-scope="all" onclick="moSetScope(\'all\')">All</button>' +
@@ -12399,7 +12436,7 @@ function SUM_renderQualifiedStocks() {
         var rowDef = MO_ROWS[c];
         var n = counts[rowDef.key][tier];
         var sel = moSelIsOn(rowDef.key, tier);
-        var cls = 'mo-cell ' + MO_TIER_CLS[tier] + (n > 0 ? ' mo-has' : ' mo-zero') + (sel ? ' mo-cell-sel' : '');
+        var cls = 'mo-cell ' + MO_TIER_CLS[tier] + (n > 0 ? ' mo-has' : ' mo-zero') + (sel ? ' mo-cell-sel' : '') + moSectionEdgeCls(c);  /* MD-V2-S38-SECTIONS-OVERVIEW-MARKER */
         var tip = rowDef.label + ' / ' + tier + ' - ' + n + ' stock(s)' +
           (anySel ? ' meeting the selected pattern' : '') +
           (sel ? '; selected (click to remove)' : '; click to add to the pattern');
@@ -12414,7 +12451,7 @@ function SUM_renderQualifiedStocks() {
     for (var c2 = 0; c2 < MO_ROWS.length; c2++) {
       var ck = MO_ROWS[c2].key;
       var tot = counts[ck]['Possible'] + counts[ck]['Plausible'] + counts[ck]['Probable'];
-      html += '<td class="mo-total-cell" title="' + moMxAttr(MO_ROWS[c2].label + ' - ' + tot + ' rated' + (anySel ? ' within the selected pattern' : '')) + '">' +
+      html += '<td class="mo-total-cell' + moSectionEdgeCls(c2) + '" title="' + moMxAttr(MO_ROWS[c2].label + ' - ' + tot + ' rated' + (anySel ? ' within the selected pattern' : '')) + '">' +  /* MD-V2-S38-SECTIONS-OVERVIEW-MARKER */
         tot.toLocaleString('en-GB') + '</td>';
     }
     html += '</tr>';
@@ -12497,8 +12534,8 @@ function SUM_renderQualifiedStocks() {
         '<span class="mo-mx-tk">' + moMxText(rec.ticker) + '</span></td>';
       for (var r = 0; r < MO_ROWS.length; r++) {
         var tier = moNormaliseTier(moReadRating(md, MO_ROWS[r].ratingPath));
-        var secStart = moIsSectionStart(r);  /* MD-V2-S36-BRIEF-MARKER */
-        var tdCls = secStart ? (' class="' + MO_SECTION_BORDER_CLS[secStart] + '"') : '';
+        var edge = moSectionEdgeCls(r);  /* MD-V2-S38-SECTIONS-OVERVIEW-MARKER */
+        var tdCls = edge ? (' class="' + edge.replace(/^ /, '') + '"') : '';
         if (tier === 'None') {
           html += '<td' + tdCls + '><span class="mo-mx-pill mo-mx-p-none">&#8211;</span></td>';
         } else {

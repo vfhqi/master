@@ -124,6 +124,8 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="Skip chart regen AND dashboard build")
     ap.add_argument("--no-restore", action="store_true", help="Don't restore backup on failure (debug only)")
     ap.add_argument("--quiet", action="store_true", help="Reduce logging")
+    ap.add_argument("--seed-test-history", type=int, default=0, metavar="N",
+                    help="MD-V2-S39-T-C-REFRESH-PASSTHROUGH: pass-through to generate_master_data.py - back-create N days of test history (cap 20). 0 = no seeding (default)")
     args = ap.parse_args()
 
     n_total = 5
@@ -161,10 +163,17 @@ def main():
         sys.exit(3)
 
     # ───── Step 2: generate_master_data.py ─────
-    step("Regenerate master data (--full-universe --with-history)", n_total, 2, args)
+    _gmd_args = ["--full-universe", "--with-history"]
+    if getattr(args, "seed_test_history", 0) > 0:
+        # MD-V2-S39-T-C-REFRESH-PASSTHROUGH: one-off seed backfill mode.
+        _gmd_args.extend(["--seed-test-history", str(args.seed_test_history)])
+        _label = "Regenerate master data (--full-universe --with-history --seed-test-history %d)" % args.seed_test_history
+    else:
+        _label = "Regenerate master data (--full-universe --with-history)"
+    step(_label, n_total, 2, args)
     rc, elapsed = run_script(
         "generate_master_data.py",
-        ["--full-universe", "--with-history"],
+        _gmd_args,
         args,
     )
     if rc != 0:

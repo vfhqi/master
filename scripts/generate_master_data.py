@@ -2651,18 +2651,19 @@ def _extract_change_summary(history, offsets=None):
 #
 # The one-off SEED (apply_test_history with seed=N) re-evaluates the 4
 # deployment tests at recent historical bar slices to back-create history.
-# Per Richard 14-May-26: seed depth capped at 6 days for the shake-out
-# phase (cheap to regenerate if a test definition changes); the format and
-# the dashboard degradation handle up to 20, so a later full backfill is
-# just a deeper seed run, no re-architecting.
+# Per Richard 16-May-26 (S39 T-C, MD-V2-S39-T-C-SEED-DEPTH-20): seed depth
+# bumped from 6 to 20 days now that the shake-out phase is done. Run
+# --seed-test-history 20 once Windows-side to fully populate; daily pipeline
+# appends from there. Format supports up to 20 natively; TEST_HISTORY_MAX_KEEP
+# (30 days) gives one week of cushion before the rolling-window trim kicks in.
 
 TEST_HISTORY_PATH = DATA_DIR / "test-history.json"
 
 # The 4 live deployment tests whose qualify-history we persist.
 DEPLOYMENT_TEST_KEYS = ["ma_retest_upwards", "vcp_deploy_s1", "vcp_deploy_s2", "probing_bet"]
 
-# Window sizes (trading days). Format supports up to 20; seed depth is a
-# separate, smaller knob (Richard: 6 for now).
+# Window sizes (trading days). Format supports up to 20; seed depth knob
+# bumped to 20 per S39 T-C (Richard 16-May-26). See header comment above.
 TEST_HISTORY_WINDOWS = {"l5d": 5, "l20d": 20}
 TEST_HISTORY_MAX_KEEP = 30  # cap stored days so the file does not grow unbounded
 
@@ -2888,7 +2889,7 @@ def main():
     parser.add_argument("--with-history", action="store_true", help="Compute historical stages at T-1/T-5/T-22 for CHANGES tab")
     parser.add_argument("--allow-unmapped", action="store_true", help="Allow watchlist stocks with no canonical taxonomy (default: abort)")
     parser.add_argument("--strict-integrity", action="store_true", help="Abort on any system-integrity audit warning (default: warn-only)")
-    parser.add_argument("--seed-test-history", type=int, default=0, metavar="N", help="MD-V2-TESTS-S27-MARKER: one-off - back-create N days of deployment-test history (Richard cap: 6)")
+    parser.add_argument("--seed-test-history", type=int, default=0, metavar="N", help="MD-V2-TESTS-S27-MARKER: one-off - back-create N days of deployment-test history (Richard cap: 20 per S39 T-C, MD-V2-S39-T-C-SEED-DEPTH-20)")
     args = parser.parse_args()
 
     # ── Advisory: system-integrity audit (cross-file ticker drift) ──

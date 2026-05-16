@@ -1130,6 +1130,14 @@ body[data-active-tab="master_overview"] .v2-nav { display: flex; }
   .v2-nav-label { font-size: 9px; margin-right: 4px; }
 }
 
+/* MD-V2-S40-RESPONSIVE-SHORT-HEADERS: at narrow viewports (tablet + smaller), hide the long
+   column-header label and show the short form via attr(data-short).
+   Each MO_ROWS entry now carries `short:` alongside `label:`. */
+@media (max-width: 1200px) {
+  th.mo-col-with-short .mo-col-long { display: none; }
+  th.mo-col-with-short::before { content: attr(data-short); }
+}
+
 /* ===== Group caption parity for Stage 2/3/4 ===== */
 /* Stage 1 already styles .gcap inside .group-captions. Replicate for s2/s3/s4. */
 #tab-stage_2 .group-captions,
@@ -12151,32 +12159,32 @@ function SUM_renderQualifiedStocks() {
   //   tabId - the tab a screen-name click opens.
   var MO_ROWS = [
     // -- Stages --
-    { section:'Stages', key:'stage_1', label:'Stage 1 - Basing', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
-    { section:'Stages', key:'stage_2', label:'Stage 2 - Uptrend', ratingPath:'stage:stage_2', tabId:'stage_2', patternKey:null },
-    { section:'Stages', key:'stage_3', label:'Stage 3 - Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
-    { section:'Stages', key:'stage_4', label:'Stage 4 - Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
+    { section:'Stages', key:'stage_1', label:'Stage 1 - Basing', short:'S1 Basing', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
+    { section:'Stages', key:'stage_2', label:'Stage 2 - Uptrend', short:'S2 Uptrend', ratingPath:'stage:stage_2', tabId:'stage_2', patternKey:null },
+    { section:'Stages', key:'stage_3', label:'Stage 3 - Topping', short:'S3 Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
+    { section:'Stages', key:'stage_4', label:'Stage 4 - Decline', short:'S4 Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
     // -- Pre-test indicators --
-    { section:'Pre-farfalle indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pre_indicators', patternKey:'pulling_back_uptrend' },
-    { section:'Pre-farfalle indicators', key:'basing', label:'Basing in a MT/LT uptrend', ratingPath:'group:pre_indicators:basing', tabId:'pre_indicators', patternKey:'basing' },
-    { section:'Pre-farfalle indicators', key:'collapsing', label:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'pre_indicators', patternKey:'collapsing' },
+    { section:'Pre-farfalle indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', short:'Pulling back', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pre_indicators', patternKey:'pulling_back_uptrend' },
+    { section:'Pre-farfalle indicators', key:'basing', label:'Basing in a MT/LT uptrend', short:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pre_indicators', patternKey:'basing' },
+    { section:'Pre-farfalle indicators', key:'collapsing', label:'Collapsing', short:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'pre_indicators', patternKey:'collapsing' },
     // -- Post-test indicators (ratingPath -> md_v2.post_indicators.<k>.rating;
     //    md_v2.indicators.<k> is a bare boolean and has no .rating - Request 1) --
-    { section:'Post-farfalle indicators', key:'breakout', label:'Breakout', ratingPath:'group:post_indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
-    { section:'Post-farfalle indicators', key:'advancing', label:'Advancing', ratingPath:'group:post_indicators:advancing', tabId:'post_indicators', patternKey:'advancing' },
-    { section:'Post-farfalle indicators', key:'breakdown_50D', label:'Negatively breaking through ST trend (50D MA)', ratingPath:'group:post_indicators:breakdown_50D', tabId:'post_indicators', patternKey:'breakdown_50D' },
-    { section:'Post-farfalle indicators', key:'breakdown_150D', label:'Negatively breaking through MT trend (150D MA)', ratingPath:'group:post_indicators:breakdown_150D', tabId:'post_indicators', patternKey:'breakdown_150D' },
-    { section:'Post-farfalle indicators', key:'breakdown_200D', label:'Negatively breaking through LT trend (200D MA)', ratingPath:'group:post_indicators:breakdown_200D', tabId:'post_indicators', patternKey:'breakdown_200D' },
+    { section:'Post-farfalle indicators', key:'breakout', label:'Breakout', short:'Breakout', ratingPath:'group:post_indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
+    { section:'Post-farfalle indicators', key:'advancing', label:'Advancing', short:'Advancing', ratingPath:'group:post_indicators:advancing', tabId:'post_indicators', patternKey:'advancing' },
+    { section:'Post-farfalle indicators', key:'breakdown_50D', label:'Negatively breaking through ST trend (50D MA)', short:'Breaking 50D', ratingPath:'group:post_indicators:breakdown_50D', tabId:'post_indicators', patternKey:'breakdown_50D' },
+    { section:'Post-farfalle indicators', key:'breakdown_150D', label:'Negatively breaking through MT trend (150D MA)', short:'Breaking 150D', ratingPath:'group:post_indicators:breakdown_150D', tabId:'post_indicators', patternKey:'breakdown_150D' },
+    { section:'Post-farfalle indicators', key:'breakdown_200D', label:'Negatively breaking through LT trend (200D MA)', short:'Breaking 200D', ratingPath:'group:post_indicators:breakdown_200D', tabId:'post_indicators', patternKey:'breakdown_200D' },
     // -- Capital qualification setups --
-    { section:'Capital qualification setups', key:'probing_bet', label:'Probing bet', ratingPath:'group:setups:probing_bet', tabId:'setups_s1pb', patternKey:'probing_bet' },
-    { section:'Capital qualification setups', key:'vcp_after_s1_plateau', label:'VCP after Stage 1->2 plateau', ratingPath:'group:setups:vcp_after_s1_plateau', tabId:'setups_s1pb', patternKey:'vcp_after_s1_plateau' },
-    { section:'Capital qualification setups', key:'healthy_retest', label:'Healthy retest within MT/LT uptrend', ratingPath:'group:setups:healthy_retest', tabId:'setups_s2vcp', patternKey:'healthy_retest' },
-    { section:'Capital qualification setups', key:'vcp_after_s2_base', label:'VCP after Stage 2 base', ratingPath:'group:setups:vcp_after_s2_base', tabId:'setups_s2vcp', patternKey:'vcp_after_s2_base' },
+    { section:'Capital qualification setups', key:'probing_bet', label:'Probing bet', short:'Probing bet', ratingPath:'group:setups:probing_bet', tabId:'setups_s1pb', patternKey:'probing_bet' },
+    { section:'Capital qualification setups', key:'vcp_after_s1_plateau', label:'VCP after Stage 1->2 plateau', short:'VCP S1 plateau', ratingPath:'group:setups:vcp_after_s1_plateau', tabId:'setups_s1pb', patternKey:'vcp_after_s1_plateau' },
+    { section:'Capital qualification setups', key:'healthy_retest', label:'Healthy retest within MT/LT uptrend', short:'Healthy retest', ratingPath:'group:setups:healthy_retest', tabId:'setups_s2vcp', patternKey:'healthy_retest' },
+    { section:'Capital qualification setups', key:'vcp_after_s2_base', label:'VCP after Stage 2 base', short:'VCP S2 base', ratingPath:'group:setups:vcp_after_s2_base', tabId:'setups_s2vcp', patternKey:'vcp_after_s2_base' },
     // -- Capital deployment tests --
-    { section:'Capital deployment tests', key:'ma_retest_upwards', label:'Upwards moving average retest', ratingPath:'group:tests:ma_retest_upwards', tabId:'tests', patternKey:'ma_retest_upwards' },
-    { section:'Capital deployment tests', key:'vcp_deploy_s1', label:'VCP after Stage 1->2', ratingPath:'group:tests:vcp_deploy_s1', tabId:'tests', patternKey:'vcp_deploy_s1' },
-    { section:'Capital deployment tests', key:'vcp_deploy_s2', label:'VCP after Stage 2 base', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests', patternKey:'vcp_deploy_s2' },
-    { section:'Capital deployment tests', key:'probing_bet_test', label:'Probing bet', ratingPath:'group:tests:probing_bet', tabId:'tests', patternKey:'probing_bet' }
-  ];
+    { section:'Capital deployment tests', key:'ma_retest_upwards', label:'Upwards moving average retest', short:'MA retest', ratingPath:'group:tests:ma_retest_upwards', tabId:'tests', patternKey:'ma_retest_upwards' },
+    { section:'Capital deployment tests', key:'vcp_deploy_s1', label:'VCP after Stage 1->2', short:'VCP S1 deploy', ratingPath:'group:tests:vcp_deploy_s1', tabId:'tests', patternKey:'vcp_deploy_s1' },
+    { section:'Capital deployment tests', key:'vcp_deploy_s2', label:'VCP after Stage 2 base', short:'VCP S2 deploy', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests', patternKey:'vcp_deploy_s2' },
+    { section:'Capital deployment tests', key:'probing_bet_test', label:'Probing bet', short:'PB deploy', ratingPath:'group:tests:probing_bet', tabId:'tests', patternKey:'probing_bet' }
+  ]; /* MD-V2-S40-RESPONSIVE-SHORT-HEADERS — short forms added */
 
   // The 4 rating tiers (Stage 1 splits Probable into Early/Late upstream; the
   // normaliser folds both into Probable).
@@ -12420,9 +12428,10 @@ function SUM_renderQualifiedStocks() {
       groupTr += '</tr>';
       var colTr = '<tr class="mo-col-row">';
       for (var t = 0; t < MO_ROWS.length; t++) {
-        colTr += '<th title="' + moMxAttr(MO_ROWS[t].label + ' - open this screen\'s tab') + '" ' +
+        colTr += '<th class="mo-col-with-short" title="' + moMxAttr(MO_ROWS[t].label + ' - open this screen\'s tab') + '" ' +
+          'data-short="' + moMxAttr(MO_ROWS[t].short || MO_ROWS[t].label) + '" ' +
           'onclick="moJumpToTab(\'' + moMxAttr(MO_ROWS[t].key) + '\')">' +
-          moMxText(MO_ROWS[t].label) + '</th>';
+          '<span class="mo-col-long">' + moMxText(MO_ROWS[t].label) + '</span></th>';
       }
       colTr += '</tr>';
       var table = '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="mo-main-table">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
@@ -12503,9 +12512,10 @@ function SUM_renderQualifiedStocks() {
     // column-title row: one cell per screen, labels WRAP; click opens the tab.
     var colTr = '<tr class="mo-mx-col-row"><th class="mo-mx-screen-col">Stock</th>';
     for (var t = 0; t < MO_ROWS.length; t++) {
-      colTr += '<th title="' + moMxAttr(MO_ROWS[t].label + ' - open this screen\'s tab') + '" ' +
+      colTr += '<th class="mo-col-with-short" title="' + moMxAttr(MO_ROWS[t].label + ' - open this screen\'s tab') + '" ' +
+        'data-short="' + moMxAttr(MO_ROWS[t].short || MO_ROWS[t].label) + '" ' +
         'onclick="moJumpToTab(\'' + moMxAttr(MO_ROWS[t].key) + '\')" style="cursor:pointer">' +
-        moMxText(MO_ROWS[t].label) + '</th>';
+        '<span class="mo-col-long">' + moMxText(MO_ROWS[t].label) + '</span></th>';
     }
     colTr += '</tr>';
 

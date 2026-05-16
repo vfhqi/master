@@ -694,6 +694,9 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 #s1-main-table thead tr.group-header-row th { position: sticky; top: 0; }
 #s1-main-table thead tr.col-header-row  th { position: sticky; top: 28px; border-top: 1px solid #e0dcc8; }
 #s1-main-table thead .gh-inputs { color: #555; }
+/* MD-V2-S40-INPUTS-LIVE-COUNT: live row count appended to 'Inputs' supergroup
+   column-header. Slightly muted relative to the label. */
+th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; font-variant-numeric: tabular-nums; }
 #s1-main-table thead .gh-rating, #s1-main-table thead .gh-persist { color: #1b5e20; }
 #s1-main-table thead .gh-g1 { color: #b08a4e; }
 #s1-main-table thead .gh-g2 { color: #5a8a6a; }
@@ -8957,6 +8960,64 @@ function SUM_renderQualifiedStocks() {
   }
 })();
 /* MD-V2-CHROME-PARITY-MARKER-JS-END */
+
+/* MD-V2-S40-INPUTS-LIVE-COUNT: live row-count next to the "Inputs" supergroup
+   column-header on every tab that carries one. Updates on tbody mutation
+   (rating-tile filter change, sort, etc.). Self-contained IIFE; one
+   injection covers all 8 tabs (Stage 1-4 + PI/PO/ST/CT). */
+(function() {
+  var attached = new WeakSet();
+  function attachTo(table) {
+    if (attached.has(table)) return;
+    var th = table.querySelector('th.gh-inputs');
+    var tbody = table.tBodies[0];
+    if (!th || !tbody) return;
+    if (!th.querySelector('.inputs-count')) {
+      var orig = '';
+      for (var i = 0; i < th.childNodes.length; i++) {
+        if (th.childNodes[i].nodeType === 3) { orig += th.childNodes[i].nodeValue; }
+      }
+      orig = (orig || 'Inputs').trim();
+      th.innerHTML = '<span class="inputs-text">' + orig + '</span> <span class="inputs-count" aria-live="polite"></span>';
+    }
+    var span = th.querySelector('.inputs-count');
+    function refresh() {
+      var n = tbody.querySelectorAll('tr').length;
+      span.textContent = n > 0 ? '(' + n.toLocaleString('en-GB') + ')' : '';
+    }
+    attached.add(table);
+    refresh();
+    new MutationObserver(refresh).observe(tbody, { childList: true });
+  }
+  function scan() {
+    var tables = document.querySelectorAll('table');
+    for (var i = 0; i < tables.length; i++) {
+      if (tables[i].querySelector('th.gh-inputs')) attachTo(tables[i]);
+    }
+  }
+  function init() {
+    scan();
+    new MutationObserver(function(muts) {
+      var needsScan = false;
+      for (var i = 0; i < muts.length && !needsScan; i++) {
+        var added = muts[i].addedNodes;
+        if (!added) continue;
+        for (var j = 0; j < added.length; j++) {
+          var n = added[j];
+          if (n.nodeType !== 1) continue;
+          if (n.tagName === 'TABLE' || (n.querySelector && n.querySelector('table'))) { needsScan = true; break; }
+        }
+      }
+      if (needsScan) scan();
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
 
 
 /* MD-V2-PRE-INDICATORS-MARKER-MODULE-START */

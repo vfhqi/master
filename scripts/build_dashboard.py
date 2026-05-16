@@ -12357,6 +12357,11 @@ function SUM_renderQualifiedStocks() {
     for (var i = 0; i < MO_ROWS.length; i++) if (MO_ROWS[i].key === rowKey) row = MO_ROWS[i];
     if (!row) return;
     window._mdJump = { tab: row.tabId };
+    /* MD-V2-MDJUMP-CACHEHIT-FIX-S39: force re-render of target tab so the
+       _mdJump consumer fires on cache-hit. Without this, switchTab serves the
+       cached innerHTML and the chip filter never applies. S34 carry. */
+    var _mdjTgt = document.getElementById('tab-' + row.tabId);
+    if (_mdjTgt) _mdjTgt.setAttribute('data-stale', '1');
     if (typeof window.switchTab === 'function') window.switchTab(row.tabId);
   }
   window.moJumpToTab = moJumpToTab;

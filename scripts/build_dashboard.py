@@ -6890,6 +6890,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '—';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s1 */
     var formatted = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + formatted + ')' : formatted;
   }
@@ -7472,6 +7473,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '—';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s2 */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -7956,6 +7958,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '—';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s3 */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -8455,6 +8458,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '—';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s4 */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -9153,6 +9157,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-pi */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -9936,6 +9941,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-po */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -10757,6 +10763,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-st */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -11553,6 +11560,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-ct */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }

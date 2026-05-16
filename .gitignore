@@ -22,3 +22,11 @@ Thumbs.db
 # follow the doctrinal sidecar pattern .bak-pre-<op>-<YYYYMMDD-HHMMSS>.
 scripts/*.bak
 scripts/*.bak-*
+
+# MD-V2-S39B-GITIGNORE-BROADER (16-May-26)
+# Broader scope than S39a -- catches data/ pipeline sidecar backups and the
+# root-level ic-ratings-dashboard html backup. Pure local-recovery artefacts;
+# 9 already-tracked files removed via git rm --cached in the same commit.
+data/*.bak
+data/*.bak-*
+ic-ratings-dashboard.bak-*.html

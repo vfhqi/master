@@ -2143,26 +2143,41 @@ def compute_master_dashboard_screens(prices, filter_results):
         ad_count = sum(1 for v in ad_tests.values() if v)
         ind["advancing"] = bool(ad_count == 3)
 
-        # ---- Indicator: Breakdown 50D (2 tests) ----
+        # ---- Indicator: Breakdown 50D (2 tests + MA hard gate) ----  MD-V2-S41-BREAKDOWN-MA-HARD-GATE-MARKER
+        # S41 (16-May-26, brief #10): MA-precondition HARD GATE on bd_50D_ma_gate
+        # = (MA5 > MA50). NOT a counted test — if the gate fails, the indicator
+        # is force-filtered (qualifies=False and rating="None" downstream).
+        # Filters DIASORIN-class false positives (price nicks above MA from
+        # below, falls back, T1+T2 trip without a real prior uptrend).
+        ma5_v_bd = mas.get("5D")
         bd50_t1 = bool(price is not None and ma50 is not None and price < ma50)
         bd50_t2 = bool(ma50_prev_v is not None and ma50_prev_v > 0 and _price_prev >= ma50_prev_v * 0.99)
+        bd50_ma_gate = bool(ma5_v_bd is not None and ma50 is not None and ma5_v_bd > ma50)
         bd50_tests = {"t1_price_below_50dma": bd50_t1, "t2_prev_at_or_above_50dma": bd50_t2}
         bd50_count = sum(1 for v in bd50_tests.values() if v)
-        ind["breakdown_50D"] = bool(bd50_count == 2)
+        ind["breakdown_50D"] = bool(bd50_count == 2 and bd50_ma_gate)
 
-        # ---- Indicator: Breakdown 150D (2 tests) ----
+        # ---- Indicator: Breakdown 150D (2 tests + MA hard gate) ----
+        # S41 (16-May-26, brief #9): MA-precondition HARD GATE on
+        # bd_150D_ma_gate = (MA10 > MA150). Same logic at MT timeframe.
+        ma10_v_bd = mas.get("10D")
         bd150_t1 = bool(price is not None and ma150 is not None and price < ma150)
         bd150_t2 = bool(ma150_prev_v is not None and ma150_prev_v > 0 and _price_prev >= ma150_prev_v * 0.99)
+        bd150_ma_gate = bool(ma10_v_bd is not None and ma150 is not None and ma10_v_bd > ma150)
         bd150_tests = {"t1_price_below_150dma": bd150_t1, "t2_prev_at_or_above_150dma": bd150_t2}
         bd150_count = sum(1 for v in bd150_tests.values() if v)
-        ind["breakdown_150D"] = bool(bd150_count == 2)
+        ind["breakdown_150D"] = bool(bd150_count == 2 and bd150_ma_gate)
 
-        # ---- Indicator: Breakdown 200D (2 tests) ----
+        # ---- Indicator: Breakdown 200D (2 tests + MA hard gate) ----
+        # S41 (16-May-26, brief #8): MA-precondition HARD GATE on
+        # bd_200D_ma_gate = (MA20 > MA200). THE DIASORIN FIX.
+        ma20_v_bd = mas.get("20D")
         bd200_t1 = bool(price is not None and ma200 is not None and price < ma200)
         bd200_t2 = bool(ma200_prev_v is not None and ma200_prev_v > 0 and _price_prev >= ma200_prev_v * 0.99)
+        bd200_ma_gate = bool(ma20_v_bd is not None and ma200 is not None and ma20_v_bd > ma200)
         bd200_tests = {"t1_price_below_200dma": bd200_t1, "t2_prev_at_or_above_200dma": bd200_t2}
         bd200_count = sum(1 for v in bd200_tests.values() if v)
-        ind["breakdown_200D"] = bool(bd200_count == 2)
+        ind["breakdown_200D"] = bool(bd200_count == 2 and bd200_ma_gate)
 
         md["indicators"] = ind
 
@@ -2189,26 +2204,35 @@ def compute_master_dashboard_screens(prices, filter_results):
             },
             "breakdown_50D": {
                 "tests": bd50_tests, "count": bd50_count, "total": 2,
-                "rating": _pre_rating(bd50_count, 2), "qualifies": ind["breakdown_50D"],
+                "rating": _pre_rating(bd50_count, 2) if bd50_ma_gate else "None",
+                "qualifies": ind["breakdown_50D"],
+                "ma_gate": {"name": "ma5_above_ma50", "passes": bd50_ma_gate},
                 "test_values": {
                     "t1_price_below_50dma": _md_v2_pct_gap(price, ma50),
                     "t2_prev_at_or_above_50dma": _md_v2_pct_gap(_price_prev, ma50_prev_v),
+                    "ma_gate_ma5_above_ma50": _md_v2_pct_gap(ma5_v_bd, ma50),
                 },
             },
             "breakdown_150D": {
                 "tests": bd150_tests, "count": bd150_count, "total": 2,
-                "rating": _pre_rating(bd150_count, 2), "qualifies": ind["breakdown_150D"],
+                "rating": _pre_rating(bd150_count, 2) if bd150_ma_gate else "None",
+                "qualifies": ind["breakdown_150D"],
+                "ma_gate": {"name": "ma10_above_ma150", "passes": bd150_ma_gate},
                 "test_values": {
                     "t1_price_below_150dma": _md_v2_pct_gap(price, ma150),
                     "t2_prev_at_or_above_150dma": _md_v2_pct_gap(_price_prev, ma150_prev_v),
+                    "ma_gate_ma10_above_ma150": _md_v2_pct_gap(ma10_v_bd, ma150),
                 },
             },
             "breakdown_200D": {
                 "tests": bd200_tests, "count": bd200_count, "total": 2,
-                "rating": _pre_rating(bd200_count, 2), "qualifies": ind["breakdown_200D"],
+                "rating": _pre_rating(bd200_count, 2) if bd200_ma_gate else "None",
+                "qualifies": ind["breakdown_200D"],
+                "ma_gate": {"name": "ma20_above_ma200", "passes": bd200_ma_gate},
                 "test_values": {
                     "t1_price_below_200dma": _md_v2_pct_gap(price, ma200),
                     "t2_prev_at_or_above_200dma": _md_v2_pct_gap(_price_prev, ma200_prev_v),
+                    "ma_gate_ma20_above_ma200": _md_v2_pct_gap(ma20_v_bd, ma200),
                 },
             },
         }

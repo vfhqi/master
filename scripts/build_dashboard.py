@@ -638,7 +638,8 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 .filter-pill{transition:opacity 0.2s}.filter-pill:hover{opacity:0.8}
 
 /* MD-V2-STAGE1-MARKER-CSS-START */
-.s1-intro { background: var(--bg-card, #fbfaf5); border: 1px solid var(--border, #e0dcc8); border-radius: 4px; padding: 12px 16px; margin-bottom: 14px; font-size: 12px; color: var(--text-muted, #666); max-width: 920px; }
+/* MD-V2-S37-FOLLOWUP-MARKER: .s1-intro is the page-description ribbon at the top of every tab. Dropped max-width so it wraps full-width and uses the row, rather than being a tall narrow column. */
+.s1-intro { background: var(--bg-card, #fbfaf5); border: 1px solid var(--border, #e0dcc8); border-radius: 4px; padding: 12px 16px; margin-bottom: 14px; font-size: 12px; color: var(--text-muted, #666); }
 .s1-intro b { color: #2a2a2a; }
 .s1-controls { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; padding: 9px 14px; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
 .s1-controls .ctrl-grp { display: flex; align-items: center; gap: 5px; padding-right: 14px; border-right: 1px solid #e0dcc8; }
@@ -9308,8 +9309,8 @@ function SUM_renderQualifiedStocks() {
       }
       // rating-tier chip row (D-MD-V2-59)
       var chips = '';
-      for (var c = 0; c < pat.tierLadder.length; c++) {
-        var tier = pat.tierLadder[c];
+      for (var c = 0; c < 3; c++) {  /* MD-V2-S37-FOLLOWUP-MARKER: canonical 3-tier chip set */
+        var tier = ['Possible','Plausible','Probable'][c];
         var on = sel.indexOf(tier) > -1;
         var tc = tierCounts[tier] || 0;
         chips += '<span class="pi-tier-chip pi-chip-' + tintCls[pat.key].replace('pi-tile-','') +
@@ -9705,7 +9706,7 @@ function SUM_renderQualifiedStocks() {
   },
   {
     "key": "breakdown_50D",
-    "label": "Breakdown through 50-day MA",
+    "label": "Negatively breaking through ST trend (50D MA)",
     "shortLabel": "Negatively breaking through ST trend (50D MA)",
     "supergroup": "bear",
     "tierLadder": [
@@ -9730,7 +9731,7 @@ function SUM_renderQualifiedStocks() {
   },
   {
     "key": "breakdown_150D",
-    "label": "Breakdown through 150-day MA",
+    "label": "Negatively breaking through MT trend (150D MA)",
     "shortLabel": "Negatively breaking through MT trend (150D MA)",
     "supergroup": "bear",
     "tierLadder": [
@@ -9755,7 +9756,7 @@ function SUM_renderQualifiedStocks() {
   },
   {
     "key": "breakdown_200D",
-    "label": "Breakdown through 200-day MA",
+    "label": "Negatively breaking through LT trend (200D MA)",
     "shortLabel": "Negatively breaking through LT trend (200D MA)",
     "supergroup": "bear",
     "tierLadder": [
@@ -10076,8 +10077,8 @@ function SUM_renderQualifiedStocks() {
         breakdown += k + ' of ' + pat.total + ': ' + (hist[k] || 0).toLocaleString('en-GB');
       }
       var chips = '';
-      for (var c = 0; c < pat.tierLadder.length; c++) {
-        var tier = pat.tierLadder[c];
+      for (var c = 0; c < 3; c++) {  /* MD-V2-S37-FOLLOWUP-MARKER: canonical 3-tier chip set */
+        var tier = ['Possible','Plausible','Probable'][c];
         var on = sel.indexOf(tier) > -1;
         var tc = tierCounts[tier] || 0;
         chips += '<span class="pi-tier-chip pi-chip-' + PO_CHIP[pat.key] +
@@ -10899,8 +10900,8 @@ function SUM_renderQualifiedStocks() {
         breakdown += k + ' of ' + pat.total + ': ' + (hist[k] || 0).toLocaleString('en-GB');
       }
       var chips = '';
-      for (var c = 0; c < pat.tierLadder.length; c++) {
-        var tier = pat.tierLadder[c];
+      for (var c = 0; c < 3; c++) {  /* MD-V2-S37-FOLLOWUP-MARKER: canonical 3-tier chip set */
+        var tier = ['Possible','Plausible','Probable'][c];
         var on = sel.indexOf(tier) > -1;
         var tc = tierCounts[tier] || 0;
         chips += '<span class="pi-tier-chip pi-chip-' + ST_CHIP[pat.key] +
@@ -11762,8 +11763,8 @@ function SUM_renderQualifiedStocks() {
         breakdown += k + ' of ' + pat.total + ': ' + (hist[k] || 0).toLocaleString('en-GB');
       }
       var chips = '';
-      for (var c = 0; c < pat.tierLadder.length; c++) {
-        var tier = pat.tierLadder[c];
+      for (var c = 0; c < 3; c++) {  /* MD-V2-S37-FOLLOWUP-MARKER: canonical 3-tier chip set */
+        var tier = ['Possible','Plausible','Probable'][c];
         var on = sel.indexOf(tier) > -1;
         var tc = tierCounts[tier] || 0;
         chips += '<span class="pi-tier-chip pi-chip-' + CT_TONE_CHIP[pat.tone] +

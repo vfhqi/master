@@ -659,6 +659,12 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 .s1-rating-tiles .rt-label { font-size: 11px; font-weight: 600; color: #666; letter-spacing: 0.2px; }
 .s1-rating-tiles .rt-count { font-size: 22px; font-weight: 700; color: #2a2a2a; margin-top: 3px; line-height: 1; font-variant-numeric: tabular-nums; }
 .s1-rating-tiles .rt-sub { font-size: 10px; color: #999; margin-top: 3px; }
+/* MD-V2-S40-PER-TILE-THRESHOLDS: per-tile threshold line beneath rt-sub; shows the
+   pass-count threshold for each tier (≥X/Y). None tier emits NBSP to
+   preserve vertical rhythm. Applies to all 4 Stage tabs via the
+   s1-rating-tiles class (shared by Stage 2/3/4 grids). */
+.s1-rating-tiles .rt-thresh { font-size: 10px; font-weight: 600; color: #777; margin-top: 4px; letter-spacing: 0.1px; }
+.s1-rating-tiles .rating-tile.active .rt-thresh { color: rgba(255,255,255,0.85); }
 .s1-rating-tiles .rt-strip { height: 3px; border-radius: 2px; margin-top: 7px; }
 .s1-rating-tiles .rt-strip-pl  { background: #14501c; }
 .s1-rating-tiles .rt-strip-pe  { background: #4a9658; }
@@ -7134,6 +7140,7 @@ function SUM_renderQualifiedStocks() {
     var total = rows.length;
     var order = ['None','Possible','Plausible','Probable Early','Probable Late'];
     var strip = {'Probable Late':'pl','Probable Early':'pe','Plausible':'pla','Possible':'pos','None':'none'};
+    var S1_THRESH = {'Probable Late':'≥5/8','Probable Early':'≥4/8','Plausible':'≥3/8','Possible':'≥2/8','None':'\u00a0'}; /* MD-V2-S40-PER-TILE-THRESHOLDS-tile-s1 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i];
@@ -7144,6 +7151,7 @@ function SUM_renderQualifiedStocks() {
            '<div class="rt-label">' + r + '</div>' +
            '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
            '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-thresh">' + (S1_THRESH[r] || '\u00a0') + '</div>' +
            '<div class="rt-strip rt-strip-' + strip[r] + '"></div>' +
            '</div>';
     }
@@ -7330,7 +7338,7 @@ function SUM_renderQualifiedStocks() {
           '<thead>' +
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
-              '<th class="gh-rating grp-start-rating" colspan="2">Stage 1 rating · thresholds 2/8 · 3/8 · 4/8 · 5+/8</th>' +
+              '<th class="gh-rating grp-start-rating" colspan="2">Stage 1 rating</th>' /* MD-V2-S40-PER-TILE-THRESHOLDS-gh-s1 */ +
               '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Slowing decline</th>' +
               '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 · Flat moving averages</th>' +
               '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 · Moving average stack</th>' +
@@ -7649,6 +7657,7 @@ function SUM_renderQualifiedStocks() {
     var total = rows.length;
     var order = ['None','Possible','Plausible','Probable'];
     var strip = {'Probable':'prob','Plausible':'pla','Possible':'pos','None':'none'};
+    var S2_THRESH = {'Probable':'≥7/10','Plausible':'≥6/10','Possible':'≥5/10','None':'\u00a0'}; /* MD-V2-S40-PER-TILE-THRESHOLDS-tile-s2 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i], cnt = uc[r] || 0;
@@ -7658,6 +7667,7 @@ function SUM_renderQualifiedStocks() {
            '<div class="rt-label">' + r + '</div>' +
            '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
            '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-thresh">' + (S2_THRESH[r] || '\u00a0') + '</div>' +
            '<div class="rt-strip rt-strip-' + strip[r] + '"></div>' +
            '</div>';
     }
@@ -7810,7 +7820,7 @@ function SUM_renderQualifiedStocks() {
           '<thead>' +
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
-              '<th class="gh-rating grp-start-rating" colspan="2">Stage 2 rating · thresholds 5/10 · 6/10 · 7+/10</th>' +
+              '<th class="gh-rating grp-start-rating" colspan="2">Stage 2 rating</th>' /* MD-V2-S40-PER-TILE-THRESHOLDS-gh-s2 */ +
               '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Long-term trend</th>' +
               '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 · Medium-term trend</th>' +
               '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="1">Group 3 · Short-term trend</th>' +
@@ -8157,6 +8167,7 @@ function SUM_renderQualifiedStocks() {
       'Possible Topping':'pos-top',
       'None':'none'
     };
+    var S3_THRESH = {'Probable Invalidation':'≥6/10','Plausible Invalidation':'≥4/10','Possible Topping':'≥2/10','None':'\u00a0'}; /* MD-V2-S40-PER-TILE-THRESHOLDS-tile-s3 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i], cnt = uc[r] || 0;
@@ -8166,6 +8177,7 @@ function SUM_renderQualifiedStocks() {
            '<div class="rt-label">' + r + '</div>' +
            '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
            '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-thresh">' + (S3_THRESH[r] || '\u00a0') + '</div>' +
            '<div class="rt-strip rt-strip-' + strip[r] + '"></div>' +
            '</div>';
     }
@@ -8318,7 +8330,7 @@ function SUM_renderQualifiedStocks() {
           '<thead>' +
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
-              '<th class="gh-rating grp-start-rating" colspan="2">Stage 3 rating · thresholds 2/10 · 4/10 · 6+/10</th>' +
+              '<th class="gh-rating grp-start-rating" colspan="2">Stage 3 rating</th>' /* MD-V2-S40-PER-TILE-THRESHOLDS-gh-s3 */ +
               '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Base count</th>' +
               '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 · Price trend rolling over</th>' +
               '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="3">Group 3 · Investor/holder debate</th>' +
@@ -8641,6 +8653,7 @@ function SUM_renderQualifiedStocks() {
     var total = rows.length;
     var order = ['None','Possible','Plausible','Probable'];
     var strip = {'Probable':'prob','Plausible':'pla','Possible':'pos','None':'none'};
+    var S4_THRESH = {'Probable':'≥3/7','Plausible':'≥2/7','Possible':'≥1/7','None':'\u00a0'}; /* MD-V2-S40-PER-TILE-THRESHOLDS-tile-s4 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i], cnt = uc[r] || 0;
@@ -8650,6 +8663,7 @@ function SUM_renderQualifiedStocks() {
            '<div class="rt-label">' + r + '</div>' +
            '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
            '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-thresh">' + (S4_THRESH[r] || '\u00a0') + '</div>' +
            '<div class="rt-strip rt-strip-' + strip[r] + '"></div>' +
            '</div>';
     }
@@ -8799,7 +8813,7 @@ function SUM_renderQualifiedStocks() {
           '<thead>' +
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
-              '<th class="gh-rating grp-start-rating" colspan="2">Stage 4 rating · thresholds 1/7 · 2/7 · 3+/7</th>' +
+              '<th class="gh-rating grp-start-rating" colspan="2">Stage 4 rating</th>' /* MD-V2-S40-PER-TILE-THRESHOLDS-gh-s4 */ +
               '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Price trend down</th>' +
               '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="3">Group 2 · MA stack inverted</th>' +
               '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 · RS weak</th>' +

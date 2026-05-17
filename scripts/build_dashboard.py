@@ -532,6 +532,10 @@ table.data-table td.col-identity{white-space:nowrap}
 body.chart-from-left .chart-panel{left:0;right:auto;border-left:none;border-right:1px solid var(--border);transform:translateX(-100%)}
 body.chart-from-left .chart-panel.open{transform:translateX(0)}
 #s1-main-table td.name-cell,#s2-main-table td.name-cell,#s3-main-table td.name-cell,#s4-main-table td.name-cell,#pi-main-table td.name-cell,#po-main-table td.name-cell,.st-main-table td.name-cell,#ct-main-table td.name-cell,#mo-matrix-table td.mo-mx-name-cell{cursor:pointer}
+/* MD-V2-S41-CHART-RIGHT-FREEZE-COL-MARKER CSS -- freeze company/ticker first column on the LEFT across all V2 tabs (Stage 1-4, PI, PO, ST, CT). Pattern mirrors #mo-matrix-table td.mo-mx-name-cell at L1930. The first th in col-header-row gets sticky-left + higher z-index so the column header pins above tbody. Group-header row first th (supergroup label, has colspan>=2) is NOT sticky-left -- it would visually overlap neighbouring supergroup labels on horizontal scroll. */
+#s1-main-table tbody td.name-cell,#s2-main-table tbody td.name-cell,#s3-main-table tbody td.name-cell,#s4-main-table tbody td.name-cell,#pi-main-table tbody td.name-cell,#po-main-table tbody td.name-cell,.st-main-table tbody td.name-cell,#ct-main-table tbody td.name-cell{position:sticky;left:0;z-index:5;background:#fbfaf5;border-right:1px solid #e0dcc8}
+#s1-main-table tbody tr:hover td.name-cell,#s2-main-table tbody tr:hover td.name-cell,#s3-main-table tbody tr:hover td.name-cell,#s4-main-table tbody tr:hover td.name-cell,#pi-main-table tbody tr:hover td.name-cell,#po-main-table tbody tr:hover td.name-cell,.st-main-table tbody tr:hover td.name-cell,#ct-main-table tbody tr:hover td.name-cell{background:#f4f1e6}
+#s1-main-table thead tr.col-header-row th:first-child,#s2-main-table thead tr.col-header-row th:first-child,#s3-main-table thead tr.col-header-row th:first-child,#s4-main-table thead tr.col-header-row th:first-child,#pi-main-table thead tr.col-header-row th:first-child,#po-main-table thead tr.col-header-row th:first-child,.st-main-table thead tr.col-header-row th:first-child,#ct-main-table thead tr.col-header-row th:first-child{position:sticky;left:0;z-index:70;background:#fbfaf5;border-right:1px solid #e0dcc8}
 body[data-active-tab^="stage_"] #hdr-chart-btn,body[data-active-tab="pre_indicators"] #hdr-chart-btn,body[data-active-tab="post_indicators"] #hdr-chart-btn,body[data-active-tab^="setups"] #hdr-chart-btn,body[data-active-tab="tests"] #hdr-chart-btn,body[data-active-tab="master_overview"] #hdr-chart-btn{display:none!important}
 body.chart-from-left .s1-controls{left:var(--chart-panel-w,0)!important;transition:left .3s ease}
 body.chart-from-left #mo-matrix-table tbody td.mo-mx-name-cell,body.chart-from-left #mo-matrix-table thead th.mo-mx-screen-col{left:var(--chart-panel-w,0)!important;transition:left .3s ease}
@@ -1189,6 +1193,23 @@ body[data-active-tab="master_overview"] .v2-nav { display: flex; }
 #tab-stage_2 .group-captions .gcap-g4 b { color: #8a5a6a; }
 #tab-stage_2 .group-captions .gcap-g5 { border-left-color: #6a5a8a; }
 #tab-stage_2 .group-captions .gcap-g5 b { color: #6a5a8a; }
+/* MD-V2-S42-STAGE-COLOUR-MIRROR-MARKER -- stage_3 and stage_4 per-group caption accents placed AFTER the shared default rule (#tab-stage_3 .group-captions .gcap { border-left: 3px solid #b08a4e; }) so cascade source order makes them win. The original per-stage accent rules at L875-884 (stage_3) and L990-994 (stage_4) had identical specificity to the shared default but came EARLIER in source, so the gold default was overriding the orange/red palettes. Colours match each stage's existing .gh-g{N} thead text-colors. */
+#tab-stage_3 .group-captions .gcap-g1 { border-left-color: #d97706; }
+#tab-stage_3 .group-captions .gcap-g1 b { color: #b45309; }
+#tab-stage_3 .group-captions .gcap-g2 { border-left-color: #c2410c; }
+#tab-stage_3 .group-captions .gcap-g2 b { color: #9a3412; }
+#tab-stage_3 .group-captions .gcap-g3 { border-left-color: #b91c1c; }
+#tab-stage_3 .group-captions .gcap-g3 b { color: #991b1b; }
+#tab-stage_3 .group-captions .gcap-g4 { border-left-color: #7c2d12; }
+#tab-stage_3 .group-captions .gcap-g4 b { color: #7c2d12; }
+#tab-stage_3 .group-captions .gcap-g5 { border-left-color: #6a5a8a; }
+#tab-stage_3 .group-captions .gcap-g5 b { color: #6a5a8a; }
+#tab-stage_4 .group-captions .gcap-g1 { border-left-color: #991b1b; }
+#tab-stage_4 .group-captions .gcap-g1 b { color: #991b1b; }
+#tab-stage_4 .group-captions .gcap-g2 { border-left-color: #7f1d1d; }
+#tab-stage_4 .group-captions .gcap-g2 b { color: #7f1d1d; }
+#tab-stage_4 .group-captions .gcap-g3 { border-left-color: #6a5a8a; }
+#tab-stage_4 .group-captions .gcap-g3 b { color: #6a5a8a; }
 /* MD-V2-CHROME-PARITY-MARKER-CSS-END */
 
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-START */
@@ -2287,8 +2308,8 @@ window.setChartWidth=function(p){
   pn.style.width=p+"%";
   document.documentElement.style.setProperty("--chart-panel-w",p+"vw");
   var _cwMain=document.querySelector(".main");
-  if(document.body.classList.contains("chart-from-left")){_cwMain.style.marginLeft=p+"%";_cwMain.style.marginRight="0";}
-  else{_cwMain.style.marginRight=p+"%";_cwMain.style.marginLeft="0";}
+  // S41: always right-margin push (chart-from-left is dead post-S41).
+  _cwMain.style.marginRight=p+"%";_cwMain.style.marginLeft="0";
   var b=document.querySelectorAll(".chart-width-btn");
   for(var j=0;j<b.length;j++)b[j].classList.remove("active");
   if(event&&event.target)event.target.classList.add("active");
@@ -2684,9 +2705,10 @@ window.openChart=function(t){
   var _wasChartOpen=p.classList.contains("open");
   var _freshChart=(_prevChartTicker!==t)||!_wasChartOpen;
   var _bodyCl=document.body.classList;
-  if(!_wasChartOpen||(_bodyCl.contains("chart-from-left")!==_isV2chart)){
+  // MD-V2-S41-CHART-RIGHT-FREEZE-COL-MARKER -- V2 tabs no longer slide chart from LEFT; always use default right-slide so the new sticky-first-column on V2 tables keeps company/ticker visible while data cells scroll behind the chart panel.
+  if(_bodyCl.contains("chart-from-left")){
     p.style.transition="none";
-    if(_isV2chart)_bodyCl.add("chart-from-left");else _bodyCl.remove("chart-from-left");
+    _bodyCl.remove("chart-from-left");
     void p.offsetWidth;
     p.style.transition="";
   }
@@ -2696,8 +2718,8 @@ window.openChart=function(t){
   p.classList.add("open");
   document.body.classList.add("chart-open");
   var _chartMain=document.querySelector(".main");
-  if(_isV2chart){_chartMain.style.marginRight="0";_chartMain.style.marginLeft="50%";}
-  else{_chartMain.style.marginLeft="0";_chartMain.style.marginRight="50%";}
+  // S41: always push the table to the LEFT with margin-right; chart slides from right on all tabs now.
+  _chartMain.style.marginLeft="0";_chartMain.style.marginRight="50%";
   // FIX-S4-CHARTLAYOUT: Compact layout — one row for width+zoom, smaller legend, ticker inline
   // On PB tab, enable 5D+10D MAs by default
   // MD-CHART-V2-WIRING-MARKER: 5D+10D MAs on for PB (legacy) + non-Stage V2 tabs; off elsewhere.
@@ -6919,7 +6941,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '—';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
-    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s1 */
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s1; S41 tolerance; MD-V2-S41-FMTNUM-NEAR-INTEGER-MARKER */
     var formatted = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + formatted + ')' : formatted;
   }
@@ -7504,7 +7526,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '—';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
-    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s2 */
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s2; S41 tolerance */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -7991,7 +8013,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '—';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
-    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s3 */
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s3; S41 tolerance */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -8493,7 +8515,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '—';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
-    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s4 */
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-s4; S41 tolerance */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -9252,7 +9274,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
-    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-pi */
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-pi; S41 tolerance */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -10036,7 +10058,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
-    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-po */
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-po; S41 tolerance */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -10858,7 +10880,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
-    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-st */
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-st; S41 tolerance */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -11655,7 +11677,7 @@ function SUM_renderQualifiedStocks() {
     if (n == null || isNaN(n)) return '-';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
-    if (n === Math.round(n)) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-ct */
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-ct; S41 tolerance */
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
   }
@@ -12236,7 +12258,9 @@ function SUM_renderQualifiedStocks() {
   //   tabId - the tab a screen-name click opens.
   var MO_ROWS = [
     // -- Stages --
-    { section:'Stages', key:'stage_1', label:'Stage 1 - Basing', short:'S1 Basing', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
+    /* MD-V2-S41-OVERVIEW-STAGE1-SPLIT-MARKER -- Stage 1 split into Early + Late columns; each row carries subTier consumed by moNormaliseTier. */
+    { section:'Stages', key:'stage_1_early', label:'Stage 1 - Basing (Probable Early)', short:'S1 Early', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null, subTier:'Probable Early' },
+    { section:'Stages', key:'stage_1_late',  label:'Stage 1 - Basing (Probable Late)',  short:'S1 Late',  ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null, subTier:'Probable Late' },
     { section:'Stages', key:'stage_2', label:'Stage 2 - Uptrend', short:'S2 Uptrend', ratingPath:'stage:stage_2', tabId:'stage_2', patternKey:null },
     { section:'Stages', key:'stage_3', label:'Stage 3 - Topping', short:'S3 Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
     { section:'Stages', key:'stage_4', label:'Stage 4 - Decline', short:'S4 Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
@@ -12348,8 +12372,16 @@ function SUM_renderQualifiedStocks() {
     for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
     return out;
   }
-  function moNormaliseTier(raw) {
+  function moNormaliseTier(raw, subTier) {
     if (!raw) return 'None';
+    // MD-V2-S41-OVERVIEW-STAGE1-SPLIT: subTier-aware normalisation. When the
+    // row carries a subTier (Stage 1 Early/Late split), the cell shows
+    // "Probable" only when raw matches that specific tier; the OTHER Probable
+    // variant downgrades to Plausible (visible-but-not-top-tier).
+    if (subTier) {
+      if (raw === subTier) return 'Probable';
+      if (raw.indexOf('Probable') === 0) return 'Plausible';
+    }
     if (raw.indexOf('Probable') === 0) return 'Probable';
     if (raw.indexOf('Plausible') === 0) return 'Plausible';
     if (raw.indexOf('Possible') === 0) return 'Possible';
@@ -12417,7 +12449,7 @@ function SUM_renderQualifiedStocks() {
       var keys = [];
       for (var kk in f) { if (f.hasOwnProperty(kk) && f[kk]) keys.push(kk); }
       if (keys.length === 0) continue;
-      var tier = moNormaliseTier(moReadRating(md, row.ratingPath));
+      var tier = moNormaliseTier(moReadRating(md, row.ratingPath), row.subTier);  /* MD-V2-S41-OVERVIEW-STAGE1-SPLIT */
       var hit = false;
       for (var j = 0; j < keys.length; j++) { if (keys[j] === tier) { hit = true; break; } }
       if (!hit) return false;
@@ -12529,7 +12561,7 @@ function SUM_renderQualifiedStocks() {
       if (!moSelRowPasses(md)) continue;
       for (var k = 0; k < MO_ROWS.length; k++) {
         var rw = MO_ROWS[k];
-        var tr = moNormaliseTier(moReadRating(md, rw.ratingPath));
+        var tr = moNormaliseTier(moReadRating(md, rw.ratingPath), rw.subTier);  /* MD-V2-S41-OVERVIEW-STAGE1-SPLIT */
         counts[rw.key][tr]++;
       }
     }
@@ -12643,7 +12675,7 @@ function SUM_renderQualifiedStocks() {
         '<span class="mo-mx-co">' + moMxText(rec.company || rec.ticker) + '</span>' +
         '<span class="mo-mx-tk">' + moMxText(rec.ticker) + '</span></td>';
       for (var r = 0; r < MO_ROWS.length; r++) {
-        var tier = moNormaliseTier(moReadRating(md, MO_ROWS[r].ratingPath));
+        var tier = moNormaliseTier(moReadRating(md, MO_ROWS[r].ratingPath), MO_ROWS[r].subTier);  /* MD-V2-S41-OVERVIEW-STAGE1-SPLIT */
         var edge = moSectionEdgeCls(r);  /* MD-V2-S38-SECTIONS-OVERVIEW-MARKER */
         var tdCls = edge ? (' class="' + edge.replace(/^ /, '') + '"') : '';
         if (tier === 'None') {
@@ -12760,7 +12792,7 @@ renderTab("mm99");
         '      <span>Stock universe updated: <span class="stat-value" id="stat-universe-updated">&mdash;</span></span>\n'
         '    </div>\n'
         '    <div class="header-right-btns">\n'
-        '      <button class="ctrl-btn" onclick="openKey()">Key</button>\n'
+        # MD-V2-S41-REMOVE-KEY-BUTTON-MARKER -- "Key" button removed per S41 brief (16-May-26)
         '      <button class="ctrl-btn" id="hdr-chart-btn" onclick="openChart(\'Overview\')">Chart</button>\n'
         '    </div>\n'
         '  </div>\n'

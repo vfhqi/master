@@ -2704,7 +2704,9 @@ window.openChart=function(t){
   if(currentTab==="pb"||(_isV2chart&&!_isStageChart)){chartVis.ma5=true;chartVis.ma10=true}else{chartVis.ma5=false;chartVis.ma10=false}
   // Fresh open from a V2 tab resets zoom + the always-on series to the per-tab defaults.
   if(_freshChart&&_isV2chart){
-    chartZoom=_isStageChart?"2Y":"6M";
+    // MD-V2-CHART-ZOOM-PER-TAB-OVERRIDE-S42-MARKER: per-tab zoom override layered above the two-tier default. 200D break-down on post_indicators; vcp_after_s1_plateau on setups_s1pb; vcp_after_s2_base on setups_s2vcp.
+    var _zoomByTabS42={post_indicators:"2Y",setups_s1pb:"3M",setups_s2vcp:"3M"};
+    chartZoom=_zoomByTabS42[currentTab]||(_isStageChart?"2Y":"6M");
     chartVis.ma20=true;chartVis.ma50=true;chartVis.ma100=true;chartVis.ma150=true;chartVis.ma200=true;
     chartVis.obv=true;chartVis.vol=true;chartVis.vol20=true;chartVis.vol50=true;
   }

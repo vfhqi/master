@@ -2604,6 +2604,94 @@ def compute_master_dashboard_screens(prices, filter_results):
             "_note": "S27: vcp test split into vcp_deploy_s1 + vcp_deploy_s2; this alias = OR of both.",
         }
 
+        # ---- Tests: Probing bet (S1, S2) + Speculative bet (S3, S4) ----
+        # MD-V2-S46-PROBING-SPEC-MARKER (18-May-26, D-MD-V2-108 + D-MD-V2-110)
+        # Four stage-parameterised variants of one underlying test per Richard's
+        # S46 brief §8.1. Architecture:
+        #   Group A: Stage X hard precondition (D-MD-V2-109; variant differs by stage)
+        #   Group B: 5D rising + 10D rising (test-internal per Divergence 1 Option A)
+        #   Group C: P > 20D + 20D turn (rising now + was falling 5d ago) + today's close +2%
+        # 6 criteria. Today's-close confirmation per D-MD-V2-111.
+        # PREREQUISITE: requires Patcher C (MD-V2-S46-MAS-5D-LOOKBACK-MARKER)
+        # for mas["20D_5d_ago"] / mas["20D_6d_ago"]. Without Patcher C, the
+        # 20D turn check reads None and is always False (degrades gracefully;
+        # tests still compute but never reach Probable+).
+        ps_ma5_now = mas.get("5D")
+        ps_ma5_prev = mas.get("5D_prev")
+        ps_ma10_now = mas.get("10D")
+        ps_ma10_prev = mas.get("10D_prev")
+        ps_ma20_now = mas.get("20D")
+        ps_ma20_prev = mas.get("20D_prev")
+        ps_ma20_5d_ago = mas.get("20D_5d_ago")
+        ps_ma20_6d_ago = mas.get("20D_6d_ago")
+        ps_b1_5d_rising = bool(ps_ma5_now is not None and ps_ma5_prev is not None and ps_ma5_now > ps_ma5_prev)
+        ps_b2_10d_rising = bool(ps_ma10_now is not None and ps_ma10_prev is not None and ps_ma10_now > ps_ma10_prev)
+        ps_c1_price_gt_20d = bool(price is not None and ps_ma20_now is not None and price > ps_ma20_now)
+        ps_c2_ma20_now_rising = bool(ps_ma20_now is not None and ps_ma20_prev is not None and ps_ma20_now > ps_ma20_prev)
+        ps_c2_ma20_was_falling_5d_ago = bool(ps_ma20_5d_ago is not None and ps_ma20_6d_ago is not None and ps_ma20_5d_ago < ps_ma20_6d_ago)
+        ps_c2_ma20_turn = bool(ps_c2_ma20_now_rising and ps_c2_ma20_was_falling_5d_ago)
+        ps_c3_followthrough = bool(close_pct_change_today is not None and close_pct_change_today >= 0.02)
+
+        def _ps_rating(stage_qualifies):
+            if not stage_qualifies:
+                return "None"
+            if not (ps_b1_5d_rising and ps_b2_10d_rising):
+                return "None"
+            if ps_c1_price_gt_20d and ps_c2_ma20_turn and ps_c3_followthrough:
+                return "Qualified"
+            if ps_c1_price_gt_20d and ps_c2_ma20_turn:
+                return "Probable"
+            if ps_c1_price_gt_20d or ps_c2_ma20_turn:
+                return "Plausible"
+            return "Possible"
+
+        def _ps_build(stage_qualifies, variant_key, stage_rating_value):
+            ps_tests = {
+                "g1_stage_qualifies": stage_qualifies,
+                "g2_5d_rising": ps_b1_5d_rising,
+                "g3_10d_rising": ps_b2_10d_rising,
+                "g4_price_gt_20d": ps_c1_price_gt_20d,
+                "g5_20d_turn_last_5d": ps_c2_ma20_turn,
+                "g6_followthrough_close_ge2pct": ps_c3_followthrough,
+            }
+            ps_count = sum(1 for v in ps_tests.values() if v)
+            ps_rating = _ps_rating(stage_qualifies)
+            return {
+                "tests": ps_tests, "count": ps_count, "total": 6,
+                "rating": ps_rating,
+                "qualifies": bool(ps_rating == "Qualified"),
+                "info_variant": variant_key,
+                "info_stage_rating": stage_rating_value,
+                "test_values": {
+                    "g1_stage_qualifies": (stage_rating_value if stage_qualifies else "not in stage"),
+                    "g2_5d_rising": ("rising" if ps_b1_5d_rising else "not rising"),
+                    "g3_10d_rising": ("rising" if ps_b2_10d_rising else "not rising"),
+                    "g4_price_gt_20d": _md_v2_pct_gap(price, ps_ma20_now),
+                    "g5_20d_turn_last_5d": (
+                        "turn (rising now, falling 5d ago)" if ps_c2_ma20_turn
+                        else "rising but no recent turn" if ps_c2_ma20_now_rising
+                        else "not rising"
+                    ),
+                    "g6_followthrough_close_ge2pct": _md_v2_round(close_pct_change_today),
+                },
+            }
+
+        # Stage gates per variant. Stage X must be at any non-None rating
+        # (Possible+/Plausible+/Probable+) for the variant to fire.
+        _s1_rating_val = s1.get("rating") if isinstance(s1, dict) else None
+        _s2_rating_val = s2.get("rating") if isinstance(s2, dict) else None
+        _s3_rating_val = s3.get("rating") if isinstance(s3, dict) else None
+        _s4_rating_val = s4.get("rating") if isinstance(s4, dict) else None
+        _s1_in = bool(_s1_rating_val not in (None, "None"))
+        _s2_in = bool(_s2_rating_val not in (None, "None"))
+        _s3_in = bool(_s3_rating_val not in (None, "None"))
+        _s4_in = bool(_s4_rating_val not in (None, "None"))
+
+        tests["probing_bet_s1"] = _ps_build(_s1_in, "probing_bet_s1", _s1_rating_val)
+        tests["probing_bet_s2"] = _ps_build(_s2_in, "probing_bet_s2", _s2_rating_val)
+        tests["speculative_bet_s3"] = _ps_build(_s3_in, "speculative_bet_s3", _s3_rating_val)
+        tests["speculative_bet_s4"] = _ps_build(_s4_in, "speculative_bet_s4", _s4_rating_val)
+
         md["tests"] = tests
 
         # ──────────────────────────────────────────────────────────────

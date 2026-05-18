@@ -2073,9 +2073,15 @@ def compute_master_dashboard_screens(prices, filter_results):
             return "Possible"
 
         md["pre_indicators"] = {
+            # MD-V2-S46-PB-LADDER-MARKER (18-May-26, D-MD-V2-107):
+            # Custom rating ladder for pulling_back_uptrend per Richard's spec.
+            # 4/4 = Probable; 3/4 = Plausible; 2/4 = Possible; 0-1/4 = None.
+            # Raises Possible floor from 1/4 to 2/4 vs the shared _pre_rating
+            # function (which still governs the other eight pre-indicators).
             "pulling_back_uptrend": {
                 "tests": pb_tests, "count": pb_count, "total": 4,
-                "rating": _pre_rating(pb_count, 4), "qualifies": ind["pulling_back_uptrend"],
+                "rating": ("Probable" if pb_count >= 4 else "Plausible" if pb_count >= 3 else "Possible" if pb_count >= 2 else "None"),
+                "qualifies": ind["pulling_back_uptrend"],
                 "test_values": {
                     "t1_50d_rising": "rising" if pb_t1_50d_rising else "not rising",
                     "t2_150d_rising": "rising" if pb_t2_150d_rising else "not rising",

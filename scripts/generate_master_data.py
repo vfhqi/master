@@ -2414,6 +2414,87 @@ def compute_master_dashboard_screens(prices, filter_results):
             },
         }
 
+        # ---- Test: Healthy retest of upwards MA (healthy_retest) ----
+        # MD-V2-S46-HEALTHY-RETEST-MARKER (18-May-26, D-MD-V2-108)
+        # New "Core MM trade" test per Richard's S46 brief §8.2. Coexists
+        # with ma_retest_upwards above during transition; dashboard render
+        # is a follow-up patcher. Architecture per D-MD-V2-108:
+        #   Group A: Stage 2 hard precondition (D-MD-V2-109)
+        #   Group B: pulling-back-uptrend inlined (4 tests, all required)
+        #   Group C: 6 healthy-retest setup tests (reuse mr_setup_t1-t6)
+        #   Group D: reclaim + confirmation (reuse mr_trig_* above)
+        # 13 criteria total. Today's-close confirmation per D-MD-V2-111.
+        # v1: criterion 12 (reclaim) uses mr_trig_reclaim ("price > MA now");
+        # the 10-day window enhancement is a follow-up patcher (needs new
+        # upstream field in uptrend_retest filter).
+        hr_stage_qualifies = bool(s2.get("rating") in ("Probable", "Plausible"))
+        hr_b1_50d_rising = bool(pb_t1_50d_rising)
+        hr_b2_150d_rising = bool(pb_t2_150d_rising)
+        hr_b3_5d_declining = bool(pb_t3_5d_rolling)
+        hr_b4_10d_declining = bool(pb_t4_10d_rolling)
+        hr_tests = {
+            "g1_stage_2_qualifies": hr_stage_qualifies,
+            "g2_b1_50d_rising": hr_b1_50d_rising,
+            "g2_b2_150d_rising": hr_b2_150d_rising,
+            "g2_b3_5d_declining": hr_b3_5d_declining,
+            "g2_b4_10d_declining": hr_b4_10d_declining,
+            "g3_c1_volume_contracting": mr_setup_t1_vol_contracting,
+            "g3_c2_up_vol_gt_down_vol": mr_setup_t2_updown_ge105,
+            "g3_c3_few_distribution_days": mr_setup_t3_few_dist_days,
+            "g3_c4_volatility_reducing": mr_setup_t4_volatility_contracting,
+            "g3_c5_testing_meaningful_ma": mr_setup_t5_testing_ma,
+            "g3_c6_buying_through_l10d": mr_setup_t6_buying_l10d,
+            "g4_d1_reclaimed_ma": mr_trig_reclaim,
+            "g4_d2_confirmation_close_ge2pct": mr_trig_confirmation,
+        }
+        hr_count = sum(1 for v in hr_tests.values() if v)
+        _hr_group_b_all = bool(hr_b1_50d_rising and hr_b2_150d_rising and
+                               hr_b3_5d_declining and hr_b4_10d_declining)
+        _hr_group_c_count = sum([
+            1 if mr_setup_t1_vol_contracting else 0,
+            1 if mr_setup_t2_updown_ge105 else 0,
+            1 if mr_setup_t3_few_dist_days else 0,
+            1 if mr_setup_t4_volatility_contracting else 0,
+            1 if mr_setup_t5_testing_ma else 0,
+            1 if mr_setup_t6_buying_l10d else 0,
+        ])
+        if not hr_stage_qualifies:
+            hr_rating = "None"
+        elif not _hr_group_b_all:
+            hr_rating = "None"
+        elif _hr_group_c_count < 3:
+            hr_rating = "Possible"
+        elif not mr_trig_reclaim:
+            hr_rating = "Plausible"
+        elif not mr_trig_confirmation:
+            hr_rating = "Probable"
+        else:
+            hr_rating = "Qualified"
+        hr_qualifies = bool(hr_rating == "Qualified")
+        tests["healthy_retest"] = {
+            "tests": hr_tests, "count": hr_count, "total": 13,
+            "rating": hr_rating,
+            "qualifies": hr_qualifies,
+            "info_ma_retested": utr_test_ma,
+            "info_retest_count": (utr_retest_counts.get(utr_test_ma) if utr_test_ma else None),
+            "info_window_note": "v1: criterion 12 is 'price > MA now'; 10-day window enhancement deferred to follow-up patcher",
+            "test_values": {
+                "g1_stage_2_qualifies": (s2.get("rating") if hr_stage_qualifies else "not S2 P/P"),
+                "g2_b1_50d_rising": ("rising" if hr_b1_50d_rising else "not rising"),
+                "g2_b2_150d_rising": ("rising" if hr_b2_150d_rising else "not rising"),
+                "g2_b3_5d_declining": ("declining" if hr_b3_5d_declining else "not declining"),
+                "g2_b4_10d_declining": ("declining" if hr_b4_10d_declining else "not declining"),
+                "g3_c1_volume_contracting": _md_v2_round(utr_vol_trend, 3),
+                "g3_c2_up_vol_gt_down_vol": _md_v2_round(utr_updown_ratio, 3),
+                "g3_c3_few_distribution_days": utr_dist_days,
+                "g3_c4_volatility_reducing": _md_v2_round(utr_pullback_contraction, 3),
+                "g3_c5_testing_meaningful_ma": (utr_test_ma if utr_test_ma else "none"),
+                "g3_c6_buying_through_l10d": _md_v2_round(utr_candle_quality_10d, 3),
+                "g4_d1_reclaimed_ma": _md_v2_pct_gap(price, _test_ma_val),
+                "g4_d2_confirmation_close_ge2pct": _md_v2_round(close_pct_change_today),
+            },
+        }
+
         # ---- Test: VCP after Stage 1->2 (vcp_deploy_s1) ----  D-MD-V2-64/65
         # Gate column: Stage 1 rating is Probable Early OR Probable Late.
         # Then the 4 VCP contraction columns (this test's OWN columns) +

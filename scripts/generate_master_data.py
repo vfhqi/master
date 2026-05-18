@@ -381,11 +381,16 @@ def build_prices_json(universe, raw_data, benchmark_rows):
         rs_composites[ticker] = rs_composite
 
         # Build MAs dict (current + previous day for DoD comparison)
+        # MD-V2-S46-MAS-5D-LOOKBACK-MARKER (18-May-26): also expose 5d-ago + 6d-ago
+        # MA values to enable the Probing/Spec test (D-MD-V2-108) criterion 5
+        # ("20D MA rising AND was falling 5 days ago" -> 5-day actionability window).
         mas = {}
         for p in SMA_PERIODS:
             key = f"sma_{p}"
             mas[f"{p}D"] = latest.get(key)
             mas[f"{p}D_prev"] = prev.get(key)
+            mas[f"{p}D_5d_ago"] = rows_with_sma[-6].get(key) if len(rows_with_sma) >= 6 else None
+            mas[f"{p}D_6d_ago"] = rows_with_sma[-7].get(key) if len(rows_with_sma) >= 7 else None
 
         # Previous day close for the SMA DoD calculations in the pullback monitor
         prev_sma_rows = rows_with_sma[-2] if len(rows_with_sma) > 1 else None

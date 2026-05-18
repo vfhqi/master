@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-05-17 12:59",
+    "generated": "2026-05-18 13:16",
     "offsets": [
       0,
       1,
@@ -719,7 +719,7 @@
       },
       "AI-FR": {
         "basing_plateau": "Late",
-        "probing_bet": "Late",
+        "probing_bet": null,
         "mm99": "Early",
         "vcp": null,
         "uptrend_retest": null
@@ -740,10 +740,10 @@
       },
       "BNP-FR": {
         "basing_plateau": null,
-        "probing_bet": "Capital",
+        "probing_bet": null,
         "mm99": "Late",
         "vcp": null,
-        "uptrend_retest": "Early"
+        "uptrend_retest": null
       },
       "CAP-FR": {
         "basing_plateau": null,
@@ -1884,7 +1884,7 @@
         "probing_bet": "Capital",
         "mm99": "Late",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "BRG-NO": {
         "basing_plateau": null,
@@ -2000,8 +2000,8 @@
       },
       "CALT-IT": {
         "basing_plateau": null,
-        "probing_bet": "Late",
-        "mm99": "Early",
+        "probing_bet": null,
+        "mm99": null,
         "vcp": null,
         "uptrend_retest": null
       },
@@ -2091,8 +2091,8 @@
       },
       "CE-IT": {
         "basing_plateau": null,
-        "probing_bet": "Capital",
-        "mm99": "Late",
+        "probing_bet": null,
+        "mm99": "Early",
         "vcp": null,
         "uptrend_retest": null
       },
@@ -2211,7 +2211,7 @@
       "CMB-IT": {
         "basing_plateau": null,
         "probing_bet": "Capital",
-        "mm99": "Capital",
+        "mm99": "Late",
         "vcp": null,
         "uptrend_retest": null
       },
@@ -2773,7 +2773,7 @@
         "probing_bet": "Capital",
         "mm99": "Capital",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "ENO-ES": {
         "basing_plateau": null,
@@ -2848,7 +2848,7 @@
       "ERG-IT": {
         "basing_plateau": null,
         "probing_bet": "Capital",
-        "mm99": "Late",
+        "mm99": "Early",
         "vcp": null,
         "uptrend_retest": null
       },
@@ -2946,7 +2946,7 @@
       "FBK-IT": {
         "basing_plateau": "Early",
         "probing_bet": "Capital",
-        "mm99": "Late",
+        "mm99": "Early",
         "vcp": null,
         "uptrend_retest": "Early"
       },
@@ -3028,11 +3028,11 @@
         "uptrend_retest": null
       },
       "FLUX-BE": {
-        "basing_plateau": null,
-        "probing_bet": "Capital",
-        "mm99": "Late",
+        "basing_plateau": "Late",
+        "probing_bet": "Late",
+        "mm99": "Early",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "FME-DE": {
         "basing_plateau": "Early",
@@ -3256,7 +3256,7 @@
         "probing_bet": "Capital",
         "mm99": "Capital",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "GIVN-CH": {
         "basing_plateau": null,
@@ -3553,7 +3553,7 @@
         "uptrend_retest": null
       },
       "HO-FR": {
-        "basing_plateau": "Late",
+        "basing_plateau": "Early",
         "probing_bet": null,
         "mm99": null,
         "vcp": null,
@@ -3569,7 +3569,7 @@
       "HOLN-CH": {
         "basing_plateau": null,
         "probing_bet": "Capital",
-        "mm99": "Early",
+        "mm99": null,
         "vcp": null,
         "uptrend_retest": null
       },
@@ -3674,7 +3674,7 @@
       "IG-IT": {
         "basing_plateau": null,
         "probing_bet": null,
-        "mm99": "Late",
+        "mm99": "Early",
         "vcp": null,
         "uptrend_retest": null
       },
@@ -4163,10 +4163,10 @@
       },
       "LTMC-IT": {
         "basing_plateau": null,
-        "probing_bet": "Capital",
-        "mm99": "Late",
+        "probing_bet": "Late",
+        "mm99": "Early",
         "vcp": null,
-        "uptrend_retest": "Late"
+        "uptrend_retest": "Early"
       },
       "LXS-DE": {
         "basing_plateau": null,
@@ -4506,7 +4506,7 @@
       },
       "NEXI-IT": {
         "basing_plateau": null,
-        "probing_bet": "Capital",
+        "probing_bet": "Late",
         "mm99": null,
         "vcp": null,
         "uptrend_retest": null
@@ -4919,7 +4919,7 @@
       },
       "PUUILO-FI": {
         "basing_plateau": "Early",
-        "probing_bet": "Capital",
+        "probing_bet": "Late",
         "mm99": null,
         "vcp": null,
         "uptrend_retest": null
@@ -5052,7 +5052,7 @@
       },
       "RF-FR": {
         "basing_plateau": null,
-        "probing_bet": "Capital",
+        "probing_bet": null,
         "mm99": null,
         "vcp": null,
         "uptrend_retest": null
@@ -5137,7 +5137,7 @@
       "RWAY-IT": {
         "basing_plateau": "Late",
         "probing_bet": null,
-        "mm99": "Early",
+        "mm99": null,
         "vcp": null,
         "uptrend_retest": null
       },
@@ -5458,7 +5458,7 @@
       },
       "SOLB-BE": {
         "basing_plateau": "Early",
-        "probing_bet": "Late",
+        "probing_bet": null,
         "mm99": null,
         "vcp": null,
         "uptrend_retest": null
@@ -5710,17 +5710,17 @@
       },
       "TE-FR": {
         "basing_plateau": "Early",
-        "probing_bet": "Capital",
-        "mm99": "Late",
+        "probing_bet": "Late",
+        "mm99": null,
         "vcp": null,
-        "uptrend_retest": "Late"
+        "uptrend_retest": null
       },
       "TEMN-CH": {
         "basing_plateau": null,
-        "probing_bet": "Late",
+        "probing_bet": null,
         "mm99": "Early",
         "vcp": null,
-        "uptrend_retest": "Early"
+        "uptrend_retest": null
       },
       "TEN-IT": {
         "basing_plateau": null,
@@ -5776,7 +5776,7 @@
         "probing_bet": "Capital",
         "mm99": "Capital",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "THEON-NL": {
         "basing_plateau": null,
@@ -6028,7 +6028,7 @@
         "probing_bet": "Capital",
         "mm99": "Capital",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "UPM-FI": {
         "basing_plateau": null,
@@ -6404,7 +6404,7 @@
       "YRM-IT": {
         "basing_plateau": null,
         "probing_bet": null,
-        "mm99": "Early",
+        "mm99": null,
         "vcp": null,
         "uptrend_retest": null
       },
@@ -7343,10 +7343,10 @@
       },
       "AI-FR": {
         "basing_plateau": "Late",
-        "probing_bet": "Capital",
+        "probing_bet": null,
         "mm99": "Early",
         "vcp": null,
-        "uptrend_retest": "Early"
+        "uptrend_retest": null
       },
       "AIR-FR": {
         "basing_plateau": null,
@@ -7364,7 +7364,7 @@
       },
       "BNP-FR": {
         "basing_plateau": null,
-        "probing_bet": "Capital",
+        "probing_bet": null,
         "mm99": "Late",
         "vcp": null,
         "uptrend_retest": null
@@ -8382,7 +8382,7 @@
         "probing_bet": "Capital",
         "mm99": "Late",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "BILI.A-SE": {
         "basing_plateau": "Early",
@@ -8624,7 +8624,7 @@
       },
       "CALT-IT": {
         "basing_plateau": null,
-        "probing_bet": "Late",
+        "probing_bet": null,
         "mm99": "Early",
         "vcp": null,
         "uptrend_retest": "Late"
@@ -8715,10 +8715,10 @@
       },
       "CE-IT": {
         "basing_plateau": null,
-        "probing_bet": "Capital",
-        "mm99": "Late",
+        "probing_bet": null,
+        "mm99": "Early",
         "vcp": null,
-        "uptrend_retest": "Early"
+        "uptrend_retest": null
       },
       "CEM-IT": {
         "basing_plateau": null,
@@ -8835,7 +8835,7 @@
       "CMB-IT": {
         "basing_plateau": null,
         "probing_bet": "Capital",
-        "mm99": "Capital",
+        "mm99": "Late",
         "vcp": null,
         "uptrend_retest": null
       },
@@ -9397,7 +9397,7 @@
         "probing_bet": "Capital",
         "mm99": "Capital",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "ENO-ES": {
         "basing_plateau": null,
@@ -9471,8 +9471,8 @@
       },
       "ERG-IT": {
         "basing_plateau": null,
-        "probing_bet": "Capital",
-        "mm99": "Late",
+        "probing_bet": "Late",
+        "mm99": "Early",
         "vcp": null,
         "uptrend_retest": null
       },
@@ -9570,9 +9570,9 @@
       "FBK-IT": {
         "basing_plateau": "Early",
         "probing_bet": "Capital",
-        "mm99": "Late",
+        "mm99": "Early",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "FCT-IT": {
         "basing_plateau": null,
@@ -9652,11 +9652,11 @@
         "uptrend_retest": null
       },
       "FLUX-BE": {
-        "basing_plateau": "Early",
-        "probing_bet": "Capital",
-        "mm99": "Late",
+        "basing_plateau": "Late",
+        "probing_bet": "Late",
+        "mm99": "Early",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "FME-DE": {
         "basing_plateau": "Early",
@@ -9880,7 +9880,7 @@
         "probing_bet": "Capital",
         "mm99": "Capital",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "GIVN-CH": {
         "basing_plateau": null,
@@ -10298,7 +10298,7 @@
       "IG-IT": {
         "basing_plateau": null,
         "probing_bet": null,
-        "mm99": "Capital",
+        "mm99": "Late",
         "vcp": null,
         "uptrend_retest": null
       },
@@ -11543,7 +11543,7 @@
       },
       "PUUILO-FI": {
         "basing_plateau": "Early",
-        "probing_bet": "Capital",
+        "probing_bet": "Late",
         "mm99": null,
         "vcp": null,
         "uptrend_retest": null
@@ -11676,7 +11676,7 @@
       },
       "RF-FR": {
         "basing_plateau": null,
-        "probing_bet": "Capital",
+        "probing_bet": null,
         "mm99": null,
         "vcp": null,
         "uptrend_retest": null
@@ -11824,7 +11824,7 @@
       "SBMO-NL": {
         "basing_plateau": null,
         "probing_bet": "Capital",
-        "mm99": "Late",
+        "mm99": "Capital",
         "vcp": null,
         "uptrend_retest": "Early"
       },
@@ -12082,8 +12082,8 @@
       },
       "SOLB-BE": {
         "basing_plateau": "Early",
-        "probing_bet": "Capital",
-        "mm99": "Early",
+        "probing_bet": null,
+        "mm99": null,
         "vcp": null,
         "uptrend_retest": null
       },
@@ -12134,7 +12134,7 @@
         "probing_bet": "Capital",
         "mm99": "Capital",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "SRAIL-CH": {
         "basing_plateau": "Late",
@@ -12334,10 +12334,10 @@
       },
       "TE-FR": {
         "basing_plateau": "Early",
-        "probing_bet": "Capital",
-        "mm99": "Late",
+        "probing_bet": "Late",
+        "mm99": null,
         "vcp": null,
-        "uptrend_retest": "Late"
+        "uptrend_retest": null
       },
       "TEMN-CH": {
         "basing_plateau": null,
@@ -12351,7 +12351,7 @@
         "probing_bet": "Capital",
         "mm99": "Capital",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "TEP-GB": {
         "basing_plateau": null,
@@ -12652,7 +12652,7 @@
         "probing_bet": "Capital",
         "mm99": "Capital",
         "vcp": null,
-        "uptrend_retest": null
+        "uptrend_retest": "Early"
       },
       "UPM-FI": {
         "basing_plateau": null,
@@ -13028,7 +13028,7 @@
       "YRM-IT": {
         "basing_plateau": null,
         "probing_bet": null,
-        "mm99": "Early",
+        "mm99": null,
         "vcp": null,
         "uptrend_retest": null
       },
@@ -26841,24 +26841,6 @@
       "direction": "upgrade"
     },
     {
-      "ticker": "AI-FR",
-      "filter": "probing_bet",
-      "current": "Late",
-      "previous": "Capital",
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "downgrade"
-    },
-    {
-      "ticker": "AI-FR",
-      "filter": "uptrend_retest",
-      "current": null,
-      "previous": "Early",
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "downgrade"
-    },
-    {
       "ticker": "AIR-FR",
       "filter": "probing_bet",
       "current": null,
@@ -26875,15 +26857,6 @@
       "offset": 1,
       "offset_label": "T-1",
       "direction": "downgrade"
-    },
-    {
-      "ticker": "BNP-FR",
-      "filter": "uptrend_retest",
-      "current": "Early",
-      "previous": null,
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "upgrade"
     },
     {
       "ticker": "CS-FR",
@@ -27399,15 +27372,6 @@
       "direction": "upgrade"
     },
     {
-      "ticker": "BGN-IT",
-      "filter": "uptrend_retest",
-      "current": "Early",
-      "previous": null,
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "upgrade"
-    },
-    {
       "ticker": "BNR-DE",
       "filter": "uptrend_retest",
       "current": "Early",
@@ -27433,6 +27397,15 @@
       "offset": 1,
       "offset_label": "T-1",
       "direction": "downgrade"
+    },
+    {
+      "ticker": "BRE-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 1,
+      "offset_label": "T-1",
+      "direction": "upgrade"
     },
     {
       "ticker": "BUFAB-SE",
@@ -27481,6 +27454,15 @@
     },
     {
       "ticker": "CALT-IT",
+      "filter": "mm99",
+      "current": null,
+      "previous": "Early",
+      "offset": 1,
+      "offset_label": "T-1",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "CALT-IT",
       "filter": "uptrend_retest",
       "current": null,
       "previous": "Late",
@@ -27496,15 +27478,6 @@
       "offset": 1,
       "offset_label": "T-1",
       "direction": "upgrade"
-    },
-    {
-      "ticker": "CE-IT",
-      "filter": "uptrend_retest",
-      "current": null,
-      "previous": "Early",
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "downgrade"
     },
     {
       "ticker": "CHEMM-DK",
@@ -28047,6 +28020,15 @@
       "direction": "upgrade"
     },
     {
+      "ticker": "ERG-IT",
+      "filter": "probing_bet",
+      "current": "Capital",
+      "previous": "Late",
+      "offset": 1,
+      "offset_label": "T-1",
+      "direction": "upgrade"
+    },
+    {
       "ticker": "EUROB-GR",
       "filter": "probing_bet",
       "current": null,
@@ -28057,15 +28039,6 @@
     },
     {
       "ticker": "EVN-AT",
-      "filter": "uptrend_retest",
-      "current": "Early",
-      "previous": null,
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "upgrade"
-    },
-    {
-      "ticker": "FBK-IT",
       "filter": "uptrend_retest",
       "current": "Early",
       "previous": null,
@@ -28090,15 +28063,6 @@
       "offset": 1,
       "offset_label": "T-1",
       "direction": "upgrade"
-    },
-    {
-      "ticker": "FLUX-BE",
-      "filter": "basing_plateau",
-      "current": null,
-      "previous": "Early",
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "downgrade"
     },
     {
       "ticker": "FMONC-FR",
@@ -28299,9 +28263,18 @@
       "direction": "downgrade"
     },
     {
+      "ticker": "HO-FR",
+      "filter": "basing_plateau",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 1,
+      "offset_label": "T-1",
+      "direction": "downgrade"
+    },
+    {
       "ticker": "HOLN-CH",
       "filter": "mm99",
-      "current": "Early",
+      "current": null,
       "previous": "Late",
       "offset": 1,
       "offset_label": "T-1",
@@ -28337,8 +28310,8 @@
     {
       "ticker": "IG-IT",
       "filter": "mm99",
-      "current": "Late",
-      "previous": "Capital",
+      "current": "Early",
+      "previous": "Late",
       "offset": 1,
       "offset_label": "T-1",
       "direction": "downgrade"
@@ -28588,12 +28561,21 @@
     },
     {
       "ticker": "LTMC-IT",
-      "filter": "uptrend_retest",
+      "filter": "probing_bet",
       "current": "Late",
-      "previous": "Early",
+      "previous": "Capital",
       "offset": 1,
       "offset_label": "T-1",
-      "direction": "upgrade"
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "LTMC-IT",
+      "filter": "mm99",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 1,
+      "offset_label": "T-1",
+      "direction": "downgrade"
     },
     {
       "ticker": "MAERSK.B-DK",
@@ -28747,6 +28729,15 @@
       "offset": 1,
       "offset_label": "T-1",
       "direction": "upgrade"
+    },
+    {
+      "ticker": "NEXI-IT",
+      "filter": "probing_bet",
+      "current": "Late",
+      "previous": "Capital",
+      "offset": 1,
+      "offset_label": "T-1",
+      "direction": "downgrade"
     },
     {
       "ticker": "NG-GB",
@@ -29037,15 +29028,6 @@
       "direction": "upgrade"
     },
     {
-      "ticker": "RWAY-IT",
-      "filter": "mm99",
-      "current": "Early",
-      "previous": null,
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "upgrade"
-    },
-    {
       "ticker": "SALM-NO",
       "filter": "probing_bet",
       "current": "Capital",
@@ -29080,15 +29062,6 @@
       "offset": 1,
       "offset_label": "T-1",
       "direction": "downgrade"
-    },
-    {
-      "ticker": "SBMO-NL",
-      "filter": "mm99",
-      "current": "Capital",
-      "previous": "Late",
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "upgrade"
     },
     {
       "ticker": "SBMO-NL",
@@ -29217,24 +29190,6 @@
       "direction": "downgrade"
     },
     {
-      "ticker": "SOLB-BE",
-      "filter": "probing_bet",
-      "current": "Late",
-      "previous": "Capital",
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "downgrade"
-    },
-    {
-      "ticker": "SOLB-BE",
-      "filter": "mm99",
-      "current": null,
-      "previous": "Early",
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "downgrade"
-    },
-    {
       "ticker": "SOLV-BE",
       "filter": "probing_bet",
       "current": "Capital",
@@ -29248,6 +29203,15 @@
       "filter": "probing_bet",
       "current": "Late",
       "previous": "Capital",
+      "offset": 1,
+      "offset_label": "T-1",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "SPM-IT",
+      "filter": "uptrend_retest",
+      "current": null,
+      "previous": "Early",
       "offset": 1,
       "offset_label": "T-1",
       "direction": "downgrade"
@@ -29325,22 +29289,13 @@
       "direction": "upgrade"
     },
     {
-      "ticker": "TEMN-CH",
-      "filter": "probing_bet",
-      "current": "Late",
-      "previous": null,
-      "offset": 1,
-      "offset_label": "T-1",
-      "direction": "upgrade"
-    },
-    {
-      "ticker": "TEMN-CH",
+      "ticker": "TEN-IT",
       "filter": "uptrend_retest",
-      "current": "Early",
-      "previous": null,
+      "current": null,
+      "previous": "Early",
       "offset": 1,
       "offset_label": "T-1",
-      "direction": "upgrade"
+      "direction": "downgrade"
     },
     {
       "ticker": "TEQ-SE",
@@ -29359,6 +29314,15 @@
       "offset": 1,
       "offset_label": "T-1",
       "direction": "downgrade"
+    },
+    {
+      "ticker": "TGYM-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 1,
+      "offset_label": "T-1",
+      "direction": "upgrade"
     },
     {
       "ticker": "THEON-NL",
@@ -30468,15 +30432,6 @@
       "direction": "upgrade"
     },
     {
-      "ticker": "AI-FR",
-      "filter": "probing_bet",
-      "current": "Late",
-      "previous": null,
-      "offset": 5,
-      "offset_label": "T-5",
-      "direction": "upgrade"
-    },
-    {
       "ticker": "AIR-FR",
       "filter": "probing_bet",
       "current": null,
@@ -30496,8 +30451,8 @@
     },
     {
       "ticker": "BNP-FR",
-      "filter": "mm99",
-      "current": "Late",
+      "filter": "probing_bet",
+      "current": null,
       "previous": "Capital",
       "offset": 5,
       "offset_label": "T-5",
@@ -30505,12 +30460,12 @@
     },
     {
       "ticker": "BNP-FR",
-      "filter": "uptrend_retest",
-      "current": "Early",
-      "previous": null,
+      "filter": "mm99",
+      "current": "Late",
+      "previous": "Capital",
       "offset": 5,
       "offset_label": "T-5",
-      "direction": "upgrade"
+      "direction": "downgrade"
     },
     {
       "ticker": "CAP-FR",
@@ -31494,6 +31449,15 @@
       "direction": "downgrade"
     },
     {
+      "ticker": "BRE-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "upgrade"
+    },
+    {
       "ticker": "BRKN-CH",
       "filter": "uptrend_retest",
       "current": "Early",
@@ -31577,7 +31541,7 @@
     {
       "ticker": "CALT-IT",
       "filter": "probing_bet",
-      "current": "Late",
+      "current": null,
       "previous": "Capital",
       "offset": 5,
       "offset_label": "T-5",
@@ -31586,7 +31550,7 @@
     {
       "ticker": "CALT-IT",
       "filter": "mm99",
-      "current": "Early",
+      "current": null,
       "previous": "Late",
       "offset": 5,
       "offset_label": "T-5",
@@ -31615,6 +31579,24 @@
       "filter": "probing_bet",
       "current": "Late",
       "previous": "Capital",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "CE-IT",
+      "filter": "probing_bet",
+      "current": null,
+      "previous": "Capital",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "CE-IT",
+      "filter": "mm99",
+      "current": "Early",
+      "previous": "Late",
       "offset": 5,
       "offset_label": "T-5",
       "direction": "downgrade"
@@ -31735,15 +31717,6 @@
       "offset": 5,
       "offset_label": "T-5",
       "direction": "downgrade"
-    },
-    {
-      "ticker": "CMB-IT",
-      "filter": "mm99",
-      "current": "Capital",
-      "previous": "Late",
-      "offset": 5,
-      "offset_label": "T-5",
-      "direction": "upgrade"
     },
     {
       "ticker": "CNA-GB",
@@ -32322,15 +32295,6 @@
       "direction": "upgrade"
     },
     {
-      "ticker": "ENI-IT",
-      "filter": "uptrend_retest",
-      "current": null,
-      "previous": "Early",
-      "offset": 5,
-      "offset_label": "T-5",
-      "direction": "downgrade"
-    },
-    {
       "ticker": "ENOG-GB",
       "filter": "probing_bet",
       "current": "Capital",
@@ -32383,6 +32347,15 @@
       "offset": 5,
       "offset_label": "T-5",
       "direction": "upgrade"
+    },
+    {
+      "ticker": "ERG-IT",
+      "filter": "mm99",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
     },
     {
       "ticker": "EUROB-GR",
@@ -32485,6 +32458,15 @@
     },
     {
       "ticker": "FBK-IT",
+      "filter": "mm99",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "FBK-IT",
       "filter": "uptrend_retest",
       "current": "Early",
       "previous": null,
@@ -32540,11 +32522,38 @@
     {
       "ticker": "FLUX-BE",
       "filter": "basing_plateau",
-      "current": null,
+      "current": "Late",
       "previous": "Early",
       "offset": 5,
       "offset_label": "T-5",
+      "direction": "upgrade"
+    },
+    {
+      "ticker": "FLUX-BE",
+      "filter": "probing_bet",
+      "current": "Late",
+      "previous": "Capital",
+      "offset": 5,
+      "offset_label": "T-5",
       "direction": "downgrade"
+    },
+    {
+      "ticker": "FLUX-BE",
+      "filter": "mm99",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "FLUX-BE",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "upgrade"
     },
     {
       "ticker": "FMONC-FR",
@@ -32752,6 +32761,15 @@
       "offset": 5,
       "offset_label": "T-5",
       "direction": "downgrade"
+    },
+    {
+      "ticker": "G-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "upgrade"
     },
     {
       "ticker": "GJF-NO",
@@ -33024,9 +33042,18 @@
       "direction": "downgrade"
     },
     {
+      "ticker": "HO-FR",
+      "filter": "basing_plateau",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
       "ticker": "HOLN-CH",
       "filter": "mm99",
-      "current": "Early",
+      "current": null,
       "previous": "Late",
       "offset": 5,
       "offset_label": "T-5",
@@ -33098,7 +33125,7 @@
     {
       "ticker": "IG-IT",
       "filter": "mm99",
-      "current": "Late",
+      "current": "Early",
       "previous": "Capital",
       "offset": 5,
       "offset_label": "T-5",
@@ -33610,8 +33637,26 @@
     },
     {
       "ticker": "LTMC-IT",
-      "filter": "uptrend_retest",
+      "filter": "probing_bet",
       "current": "Late",
+      "previous": "Capital",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "LTMC-IT",
+      "filter": "mm99",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "LTMC-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
       "previous": null,
       "offset": 5,
       "offset_label": "T-5",
@@ -33976,6 +34021,15 @@
       "offset": 5,
       "offset_label": "T-5",
       "direction": "upgrade"
+    },
+    {
+      "ticker": "NEXI-IT",
+      "filter": "probing_bet",
+      "current": "Late",
+      "previous": "Capital",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
     },
     {
       "ticker": "NG-GB",
@@ -34347,6 +34401,15 @@
       "direction": "downgrade"
     },
     {
+      "ticker": "PUUILO-FI",
+      "filter": "probing_bet",
+      "current": "Late",
+      "previous": "Capital",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
       "ticker": "PZU-PL",
       "filter": "basing_plateau",
       "current": "Early",
@@ -34428,6 +34491,15 @@
       "direction": "downgrade"
     },
     {
+      "ticker": "RF-FR",
+      "filter": "probing_bet",
+      "current": null,
+      "previous": "Capital",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
       "ticker": "RHIM-GB",
       "filter": "probing_bet",
       "current": null,
@@ -34495,6 +34567,15 @@
       "filter": "probing_bet",
       "current": null,
       "previous": "Capital",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "RWAY-IT",
+      "filter": "mm99",
+      "current": null,
+      "previous": "Early",
       "offset": 5,
       "offset_label": "T-5",
       "direction": "downgrade"
@@ -34788,15 +34869,6 @@
       "direction": "downgrade"
     },
     {
-      "ticker": "SOLB-BE",
-      "filter": "probing_bet",
-      "current": "Late",
-      "previous": null,
-      "offset": 5,
-      "offset_label": "T-5",
-      "direction": "upgrade"
-    },
-    {
       "ticker": "SOL-IT",
       "filter": "uptrend_retest",
       "current": null,
@@ -35032,15 +35104,6 @@
     },
     {
       "ticker": "TE-FR",
-      "filter": "mm99",
-      "current": "Late",
-      "previous": "Early",
-      "offset": 5,
-      "offset_label": "T-5",
-      "direction": "upgrade"
-    },
-    {
-      "ticker": "TEMN-CH",
       "filter": "probing_bet",
       "current": "Late",
       "previous": "Capital",
@@ -35049,9 +35112,27 @@
       "direction": "downgrade"
     },
     {
-      "ticker": "TEMN-CH",
+      "ticker": "TE-FR",
       "filter": "mm99",
-      "current": "Early",
+      "current": null,
+      "previous": "Early",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "TE-FR",
+      "filter": "uptrend_retest",
+      "current": null,
+      "previous": "Late",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "TEMN-CH",
+      "filter": "probing_bet",
+      "current": null,
       "previous": "Capital",
       "offset": 5,
       "offset_label": "T-5",
@@ -35059,12 +35140,12 @@
     },
     {
       "ticker": "TEMN-CH",
-      "filter": "uptrend_retest",
+      "filter": "mm99",
       "current": "Early",
-      "previous": null,
+      "previous": "Capital",
       "offset": 5,
       "offset_label": "T-5",
-      "direction": "upgrade"
+      "direction": "downgrade"
     },
     {
       "ticker": "TEN-IT",
@@ -35110,6 +35191,15 @@
       "offset": 5,
       "offset_label": "T-5",
       "direction": "downgrade"
+    },
+    {
+      "ticker": "TGYM-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "upgrade"
     },
     {
       "ticker": "THEON-NL",
@@ -35332,6 +35422,15 @@
       "filter": "mm99",
       "current": "Capital",
       "previous": "Late",
+      "offset": 5,
+      "offset_label": "T-5",
+      "direction": "upgrade"
+    },
+    {
+      "ticker": "UNI-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
       "offset": 5,
       "offset_label": "T-5",
       "direction": "upgrade"
@@ -35713,15 +35812,6 @@
       "offset": 5,
       "offset_label": "T-5",
       "direction": "downgrade"
-    },
-    {
-      "ticker": "YRM-IT",
-      "filter": "mm99",
-      "current": "Early",
-      "previous": null,
-      "offset": 5,
-      "offset_label": "T-5",
-      "direction": "upgrade"
     },
     {
       "ticker": "ZEAL-DK",
@@ -36941,7 +37031,7 @@
     {
       "ticker": "AI-FR",
       "filter": "probing_bet",
-      "current": "Late",
+      "current": null,
       "previous": "Capital",
       "offset": 22,
       "offset_label": "T-22",
@@ -36976,12 +37066,12 @@
     },
     {
       "ticker": "BNP-FR",
-      "filter": "uptrend_retest",
-      "current": "Early",
-      "previous": null,
+      "filter": "probing_bet",
+      "current": null,
+      "previous": "Capital",
       "offset": 22,
       "offset_label": "T-22",
-      "direction": "upgrade"
+      "direction": "downgrade"
     },
     {
       "ticker": "CAP-FR",
@@ -38739,6 +38829,15 @@
       "direction": "upgrade"
     },
     {
+      "ticker": "BRE-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "upgrade"
+    },
+    {
       "ticker": "BRG-NO",
       "filter": "basing_plateau",
       "current": null,
@@ -38893,12 +38992,12 @@
     },
     {
       "ticker": "CALT-IT",
-      "filter": "probing_bet",
-      "current": "Late",
-      "previous": null,
+      "filter": "mm99",
+      "current": null,
+      "previous": "Early",
       "offset": 22,
       "offset_label": "T-22",
-      "direction": "upgrade"
+      "direction": "downgrade"
     },
     {
       "ticker": "CARM-FR",
@@ -39043,6 +39142,24 @@
       "offset": 22,
       "offset_label": "T-22",
       "direction": "upgrade"
+    },
+    {
+      "ticker": "CE-IT",
+      "filter": "probing_bet",
+      "current": null,
+      "previous": "Capital",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "CE-IT",
+      "filter": "mm99",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
     },
     {
       "ticker": "CEM-IT",
@@ -39241,15 +39358,6 @@
       "offset": 22,
       "offset_label": "T-22",
       "direction": "downgrade"
-    },
-    {
-      "ticker": "CMB-IT",
-      "filter": "mm99",
-      "current": "Capital",
-      "previous": "Late",
-      "offset": 22,
-      "offset_label": "T-22",
-      "direction": "upgrade"
     },
     {
       "ticker": "CMO-ES",
@@ -40134,15 +40242,6 @@
       "direction": "upgrade"
     },
     {
-      "ticker": "ENI-IT",
-      "filter": "uptrend_retest",
-      "current": null,
-      "previous": "Early",
-      "offset": 22,
-      "offset_label": "T-22",
-      "direction": "downgrade"
-    },
-    {
       "ticker": "ENOG-GB",
       "filter": "probing_bet",
       "current": "Capital",
@@ -40213,15 +40312,6 @@
       "offset": 22,
       "offset_label": "T-22",
       "direction": "downgrade"
-    },
-    {
-      "ticker": "ERG-IT",
-      "filter": "mm99",
-      "current": "Late",
-      "previous": "Early",
-      "offset": 22,
-      "offset_label": "T-22",
-      "direction": "upgrade"
     },
     {
       "ticker": "ETL-FR",
@@ -40396,6 +40486,15 @@
     },
     {
       "ticker": "FBK-IT",
+      "filter": "mm99",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "FBK-IT",
       "filter": "uptrend_retest",
       "current": "Early",
       "previous": null,
@@ -40540,12 +40639,30 @@
     },
     {
       "ticker": "FLUX-BE",
-      "filter": "basing_plateau",
-      "current": null,
+      "filter": "probing_bet",
+      "current": "Late",
+      "previous": "Capital",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "FLUX-BE",
+      "filter": "mm99",
+      "current": "Early",
       "previous": "Late",
       "offset": 22,
       "offset_label": "T-22",
       "direction": "downgrade"
+    },
+    {
+      "ticker": "FLUX-BE",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "upgrade"
     },
     {
       "ticker": "FME-DE",
@@ -41014,6 +41131,15 @@
       "offset": 22,
       "offset_label": "T-22",
       "direction": "downgrade"
+    },
+    {
+      "ticker": "G-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "upgrade"
     },
     {
       "ticker": "GIVN-CH",
@@ -41494,15 +41620,6 @@
     },
     {
       "ticker": "HO-FR",
-      "filter": "basing_plateau",
-      "current": "Late",
-      "previous": "Early",
-      "offset": 22,
-      "offset_label": "T-22",
-      "direction": "upgrade"
-    },
-    {
-      "ticker": "HO-FR",
       "filter": "probing_bet",
       "current": null,
       "previous": "Capital",
@@ -41524,6 +41641,15 @@
       "filter": "probing_bet",
       "current": null,
       "previous": "Late",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "HOLN-CH",
+      "filter": "mm99",
+      "current": null,
+      "previous": "Early",
       "offset": 22,
       "offset_label": "T-22",
       "direction": "downgrade"
@@ -41684,7 +41810,7 @@
     {
       "ticker": "IG-IT",
       "filter": "mm99",
-      "current": "Late",
+      "current": "Early",
       "previous": "Capital",
       "offset": 22,
       "offset_label": "T-22",
@@ -42430,8 +42556,26 @@
     },
     {
       "ticker": "LTMC-IT",
-      "filter": "uptrend_retest",
+      "filter": "probing_bet",
       "current": "Late",
+      "previous": "Capital",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "LTMC-IT",
+      "filter": "mm99",
+      "current": "Early",
+      "previous": "Late",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "LTMC-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
       "previous": null,
       "offset": 22,
       "offset_label": "T-22",
@@ -43039,6 +43183,15 @@
       "offset": 22,
       "offset_label": "T-22",
       "direction": "upgrade"
+    },
+    {
+      "ticker": "NEXI-IT",
+      "filter": "probing_bet",
+      "current": "Late",
+      "previous": "Capital",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
     },
     {
       "ticker": "NG-GB",
@@ -43717,6 +43870,15 @@
     },
     {
       "ticker": "PUUILO-FI",
+      "filter": "probing_bet",
+      "current": "Late",
+      "previous": "Capital",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "PUUILO-FI",
       "filter": "mm99",
       "current": null,
       "previous": "Early",
@@ -43923,6 +44085,15 @@
       "direction": "upgrade"
     },
     {
+      "ticker": "RF-FR",
+      "filter": "probing_bet",
+      "current": null,
+      "previous": "Capital",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
+    },
+    {
       "ticker": "RHIM-GB",
       "filter": "probing_bet",
       "current": null,
@@ -44026,6 +44197,15 @@
       "filter": "probing_bet",
       "current": null,
       "previous": "Capital",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "RWAY-IT",
+      "filter": "mm99",
+      "current": null,
+      "previous": "Early",
       "offset": 22,
       "offset_label": "T-22",
       "direction": "downgrade"
@@ -44483,7 +44663,7 @@
     {
       "ticker": "SOLB-BE",
       "filter": "probing_bet",
-      "current": "Late",
+      "current": null,
       "previous": "Capital",
       "offset": 22,
       "offset_label": "T-22",
@@ -44815,24 +44995,6 @@
     },
     {
       "ticker": "TE-FR",
-      "filter": "mm99",
-      "current": "Late",
-      "previous": "Early",
-      "offset": 22,
-      "offset_label": "T-22",
-      "direction": "upgrade"
-    },
-    {
-      "ticker": "TE-FR",
-      "filter": "uptrend_retest",
-      "current": "Late",
-      "previous": null,
-      "offset": 22,
-      "offset_label": "T-22",
-      "direction": "upgrade"
-    },
-    {
-      "ticker": "TEMN-CH",
       "filter": "probing_bet",
       "current": "Late",
       "previous": "Capital",
@@ -44841,13 +45003,22 @@
       "direction": "downgrade"
     },
     {
-      "ticker": "TEMN-CH",
-      "filter": "uptrend_retest",
-      "current": "Early",
-      "previous": null,
+      "ticker": "TE-FR",
+      "filter": "mm99",
+      "current": null,
+      "previous": "Early",
       "offset": 22,
       "offset_label": "T-22",
-      "direction": "upgrade"
+      "direction": "downgrade"
+    },
+    {
+      "ticker": "TEMN-CH",
+      "filter": "probing_bet",
+      "current": null,
+      "previous": "Capital",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "downgrade"
     },
     {
       "ticker": "TEP-GB",
@@ -44911,6 +45082,15 @@
       "offset": 22,
       "offset_label": "T-22",
       "direction": "downgrade"
+    },
+    {
+      "ticker": "TGYM-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "upgrade"
     },
     {
       "ticker": "THEON-NL",
@@ -45295,6 +45475,15 @@
       "filter": "mm99",
       "current": "Capital",
       "previous": "Late",
+      "offset": 22,
+      "offset_label": "T-22",
+      "direction": "upgrade"
+    },
+    {
+      "ticker": "UNI-IT",
+      "filter": "uptrend_retest",
+      "current": "Early",
+      "previous": null,
       "offset": 22,
       "offset_label": "T-22",
       "direction": "upgrade"
@@ -45865,15 +46054,6 @@
       "offset": 22,
       "offset_label": "T-22",
       "direction": "downgrade"
-    },
-    {
-      "ticker": "YRM-IT",
-      "filter": "mm99",
-      "current": "Early",
-      "previous": null,
-      "offset": 22,
-      "offset_label": "T-22",
-      "direction": "upgrade"
     },
     {
       "ticker": "YUBICO-SE",

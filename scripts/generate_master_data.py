@@ -2030,6 +2030,13 @@ def compute_master_dashboard_screens(prices, filter_results):
         if ma200_m6 is not None and ma200_m7 is not None and ma200_m7 > 0:
             prior_uptrend_pct = round(((ma200_m6 - ma200_m7) / ma200_m7) * 100, 2)
         s3["prior_uptrend"] = prior_uptrend
+        # MD-V2-S48-PRIOR-UPTREND-VISIBLE-MARKER (19-May-26):
+        # Expose prior_uptrend in groups so dashboard can render as visible
+        # column. The hard precondition forces rating to None when False
+        # even if test count is high — without visibility users see a
+        # high-scoring 'None' and assume the dashboard is broken.
+        s3["groups"]["g6_prior_uptrend_gate"] = {"PU": bool(prior_uptrend)}
+        s3["tests"]["G_prior_uptrend_gate_passed"] = bool(prior_uptrend)
         s3["test_values"] = {
             "prior_uptrend": prior_uptrend,
             "prior_uptrend_pct": prior_uptrend_pct,
@@ -2103,6 +2110,12 @@ def compute_master_dashboard_screens(prices, filter_results):
             "s3_days_ago": s3_lookback["days_ago"],
             "s3_history_depth_ok": s3_lookback["history_depth_ok"],
         }
+        # MD-V2-S48-S3-LOOKBACK-VISIBLE-MARKER (19-May-26):
+        # Expose s3_lookback as a group/test so the dashboard renders a
+        # visible column on the Stage 4 tab (D-MD-V2-115 originally made
+        # this INFO-only but Richard wants it visible for audit).
+        s4["groups"]["g4_s3_lookback"] = {"S3_fired_60d": bool(s3_lookback["fired"])}
+        s4["tests"]["INFO_S3_fired_in_last_60d"] = bool(s3_lookback["fired"])
 
         md["stage_4"] = s4
 

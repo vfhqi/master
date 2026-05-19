@@ -8041,7 +8041,12 @@ function SUM_renderQualifiedStocks() {
     var total = rows.length;
     var order = ['None','Possible','Plausible','Probable'];
     var strip = {'Probable':'prob','Plausible':'pla','Possible':'pos','None':'none'};
-    var S2_THRESH = {'Probable':'≥7/10','Plausible':'≥6/10','Possible':'≥5/10','None':'\u00a0'}; /* MD-V2-S40-PER-TILE-THRESHOLDS-tile-s2 */
+    var S2_THRESH = {
+      'Probable':'\u22657 of 10 tests pass (LT/MT/ST trend up + RS strong + base depth)',
+      'Plausible':'\u22656 of 10 tests pass',
+      'Possible':'\u22655 of 10 tests pass',
+      'None':'<5 of 10 tests'
+    }; /* MD-V2-S48b-PER-TILE-CRITERIA-tile-s2 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i], cnt = uc[r] || 0;
@@ -8299,6 +8304,11 @@ function SUM_renderQualifiedStocks() {
     { id:'g4_t8',    label:'2+ lower lows in last month',              sortKey:'g4_t8', cls:'grp-start-g4', testGroup:'g4_lower_lows', testKey:'T8' },
     { id:'g4_t9',    label:'3+ lower lows in last 3 months',           sortKey:'g4_t9', cls:'grp-end-g4', testGroup:'g4_lower_lows', testKey:'T9' },
     { id:'g5_t10',   label:'RS trend weakening (3m < -5%)',            sortKey:'g5_t10', cls:'grp-start-g5 grp-end-g5', testGroup:'g5_rs_trend', testKey:'T10' },
+    /* MD-V2-S48-PRIOR-UPTREND-COLUMN-MARKER (19-May-26):
+       Prior-uptrend gate visibility column. When PU = false, the rating
+       is forced to None regardless of test count. This column exposes
+       the gate state so high-scoring stocks rated None are explained. */
+    { id:'g6_pu',    label:'Prior uptrend? (200D rising 6-7mo ago)',  sortKey:'g6_pu', cls:'grp-start-g6 grp-end-g6', testGroup:'g6_prior_uptrend_gate', testKey:'PU' },
     { id:'persist',  label:'Last 12 months',            sortKey:'persistence_count', cls:'grp-start-persist' }
   ];
   var S3_RATING_RANK = { 'Probable Invalidation':4, 'Plausible Invalidation':3, 'Possible Topping':2, 'None':1 };
@@ -8551,7 +8561,12 @@ function SUM_renderQualifiedStocks() {
       'Possible Topping':'pos-top',
       'None':'none'
     };
-    var S3_THRESH = {'Probable Invalidation':'≥6/10','Plausible Invalidation':'≥4/10','Possible Topping':'≥2/10','None':'\u00a0'}; /* MD-V2-S40-PER-TILE-THRESHOLDS-tile-s3 */
+    var S3_THRESH = {
+      'Probable Invalidation':'\u22656 of 10 tests AND prior-uptrend gate passed',
+      'Plausible Invalidation':'\u22654 of 10 tests AND prior-uptrend gate passed',
+      'Possible Topping':'\u22652 of 10 tests AND prior-uptrend gate passed',
+      'None':'<2 of 10 tests OR prior-uptrend gate failed (200D not rising 6-7mo ago)'
+    }; /* MD-V2-S48b-PER-TILE-CRITERIA-tile-s3 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i], cnt = uc[r] || 0;
@@ -8617,7 +8632,7 @@ function SUM_renderQualifiedStocks() {
         s3InputCell(s, 'ma_150') + s3InputCell(s, 'ma_200') +
         '<td class="grp-start-rating">' + s3PillFor(s.rating, s.count) + '</td>' +
         '<td>' + s3ScorePips(s) + '</td>';
-      for (var j = 9; j <= 18; j++) html += s3TestCell(s, S3_COLS[j]);
+      for (var j = 9; j <= 19; j++) html += s3TestCell(s, S3_COLS[j]);
       html += '<td class="grp-start-persist">' + s3PersistCells(s.persistence, s.rating) + '</td>' +
         '</tr>';
     }
@@ -8806,6 +8821,11 @@ function SUM_renderQualifiedStocks() {
     { id:'g2_t5',    label:'50-day below 150-day',                    sortKey:'g2_t5', cls:'grp-end-g2', testGroup:'g2_ma_stack', testKey:'T5' },
     { id:'g3_t6',    label:'RS absolute weak (vs ind or pctile < 50)', sortKey:'g3_t6', cls:'grp-start-g3', testGroup:'g3_rs', testKey:'T6' },
     { id:'g3_t7',    label:'RS trend weak (3m < -5%)',                 sortKey:'g3_t7', cls:'grp-end-g3', testGroup:'g3_rs', testKey:'T7' },
+    /* MD-V2-S48-S3-LOOKBACK-COLUMN-MARKER (19-May-26):
+       Stage 3 lookback INFO column — did Stage 3 fire on this stock in
+       the last 60 trading days? Per D-MD-V2-115 this stays INFO-only
+       (does not modify Stage 4 rating) but is now visible for audit. */
+    { id:'g4_s3lb',  label:'Stage 3 fired in last 60d?',             sortKey:'g4_s3lb', cls:'grp-start-g4 grp-end-g4', testGroup:'g4_s3_lookback', testKey:'S3_fired_60d' },
     { id:'persist',  label:'Last 12 months',            sortKey:'persistence_count', cls:'grp-start-persist' }
   ];
   var S4_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
@@ -9037,7 +9057,12 @@ function SUM_renderQualifiedStocks() {
     var total = rows.length;
     var order = ['None','Possible','Plausible','Probable'];
     var strip = {'Probable':'prob','Plausible':'pla','Possible':'pos','None':'none'};
-    var S4_THRESH = {'Probable':'≥3/7','Plausible':'≥2/7','Possible':'≥1/7','None':'\u00a0'}; /* MD-V2-S40-PER-TILE-THRESHOLDS-tile-s4 */
+    var S4_THRESH = {
+      'Probable':'200D declining AND full MA stack inverted (price<50<150<200) AND 150<200 AND 50<150',
+      'Plausible':'150-day below 200-day AND 50-day below 150-day',
+      'Possible':'150-day below 200-day OR 50-day below 150-day',
+      'None':'No stack inversion'
+    }; /* MD-V2-S48b-PER-TILE-CRITERIA-tile-s4 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i], cnt = uc[r] || 0;
@@ -9103,7 +9128,7 @@ function SUM_renderQualifiedStocks() {
         s4InputCell(s, 'ma_150') + s4InputCell(s, 'ma_200') +
         '<td class="grp-start-rating">' + s4PillFor(s.rating, s.count) + '</td>' +
         '<td>' + s4ScorePips(s) + '</td>';
-      for (var j = 9; j <= 15; j++) html += s4TestCell(s, S4_COLS[j]);
+      for (var j = 9; j <= 16; j++) html += s4TestCell(s, S4_COLS[j]);
       html += '<td class="grp-start-persist">' + s4PersistCells(s.persistence, s.rating) + '</td>' +
         '</tr>';
     }

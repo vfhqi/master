@@ -886,10 +886,13 @@ def build_prices_json(universe, raw_data, benchmark_rows):
                 if not sub_window:
                     continue
                 sub_low = min(r["low"] for r in sub_window)
-                if sub_low > sj_high * 0.85:
+                # MD-V2-S48-BASECOUNT-RELAX-MARKER (19-May-26):
+                # Relaxed 15% drop / 20-day below to 8% / 10-day so the
+                # algorithm captures Stage 2 typical-base patterns.
+                if sub_low > sj_high * 0.92:
                     continue
                 days_below = sum(1 for r in sub_window if r["high"] < sj_high)
-                if days_below < 20:
+                if days_below < 10:
                     continue
                 sub_low_idx_in_sub = next(i for i, r in enumerate(sub_window) if r["low"] == sub_low)
                 post_low_window = sub_window[sub_low_idx_in_sub:]

@@ -7517,7 +7517,12 @@ function SUM_renderQualifiedStocks() {
     var total = rows.length;
     var order = ['None','Possible','Plausible','Probable'];
     var strip = {'Probable':'pl','Plausible':'pla','Possible':'pos','None':'none'};
-    var S1_THRESH = {'Probable':'\u22657/10 + both Group 1','Plausible':'\u22654/10 + 1 of Group 1','Possible':'\u22652/10','None':'\u00a0'}; /* MD-V2-S48-PER-TILE-THRESHOLDS-tile-s1 */
+    var S1_THRESH = {
+      'Probable':'\u22657 of 10 tests AND BOTH Group 1 (prior downtrend)',
+      'Plausible':'\u22654 of 10 tests AND \u22651 of Group 1 (prior downtrend)',
+      'Possible':'\u22652 of 10 tests (no Group 1 gate)',
+      'None':'<2 of 10 tests OR fails Probable/Plausible gate'
+    }; /* MD-V2-S48b-PER-TILE-CRITERIA-tile-s1 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i];

@@ -91,10 +91,37 @@ def main():
     if missing[:5]:
         print(f"    First 5 missing: {missing[:5]}")
 
-    # Benchmark not in chart-data — feed empty list; RS returns None per
-    # compute_rs_composite line 256 (early return when len(benchmark_rows)<252)
+    # MD-V2-S48-SYNTHETIC-BENCHMARK-MARKER (19-May-26):
+    # chart-data.json has no ^STOXX benchmark, so we build a synthetic
+    # equal-weight benchmark from the universe itself. This restores
+    # relative-strength tests on Stages 2 / 3 / 4 without depending on
+    # yfinance. The benchmark is a per-day average of all per-stock closes
+    # (and a synthetic OHLCV row in build_prices_json's expected shape).
+    print(f"  Synthesising equal-weight benchmark from universe...")
+    from collections import defaultdict
+    by_date_closes = defaultdict(list)
+    by_date_volumes = defaultdict(list)
+    for yf_t, rows in raw_data.items():
+        for r in rows:
+            by_date_closes[r["date"]].append(r["close"])
+            by_date_volumes[r["date"]].append(r.get("volume", 0))
+    sorted_dates = sorted(by_date_closes.keys())
     benchmark_rows = []
-    print(f"  Benchmark: EMPTY (RS will be None for all stocks — correct fail-safe)")
+    for d in sorted_dates:
+        cl = by_date_closes[d]
+        if len(cl) < 100:
+            continue  # require enough constituents for a representative average
+        avg = sum(cl) / len(cl)
+        vol_total = sum(by_date_volumes[d])
+        benchmark_rows.append({
+            "date": d,
+            "open": avg,
+            "high": avg,
+            "low": avg,
+            "close": avg,
+            "volume": vol_total,
+        })
+    print(f"  Synthetic benchmark: {len(benchmark_rows)} daily bars")
 
     # Fresh import to avoid stale sys.modules
     for mod in ("generate_master_data", "_md_v2_screens"):

@@ -1861,11 +1861,14 @@ def compute_master_dashboard_screens(prices, filter_results):
         s1["new_group_count"] = new_count
         s1["new_group_both"] = new_both
 
-        # Rating ladder (D-MD-V2-116):
+        # Rating ladder (D-MD-V2-118, 19-May-26):
+        # Collapsed Probable Early + Probable Late into single Probable tier
+        # per Richard's 17-May definitions and 19-May reaffirmation.
+        # Probable: count >= 7 AND both new prior-downtrend tests pass
+        # Plausible: count >= 4 AND at least 1 new prior-downtrend test passes
+        # Possible: count >= 2 (no gate)
         if new_both and count >= 7:
-            s1["rating"] = "Probable Late"
-        elif new_count >= 1 and count >= 5:
-            s1["rating"] = "Probable Early"
+            s1["rating"] = "Probable"
         elif new_count >= 1 and count >= 4:
             s1["rating"] = "Plausible"
         elif count >= 2:
@@ -3384,19 +3387,29 @@ def main():
         print(f"WARNING: stock_mapping_final.json not found at {sm_path} — using raw watchlist taxonomy")
 
     # Fetch data
+    # MD-V2-S48-NO-SAMPLE-FALLBACK-MARKER (19-May-26):
+    # The silent fallback to sample data is REMOVED. If yfinance fails to
+    # import or fetch, the run halts with a clear error so the operator
+    # sees the failure instead of shipping synthetic ratings.
+    # The --sample flag is preserved for explicit testing only.
     data_source = "sample"
     if args.sample:
-        print("\n── Generating sample data ──")
+        print("\n── Generating sample data (explicit --sample flag) ──")
         raw_data = generate_sample_data(universe)
     else:
         print("\n── Fetching yfinance data ──")
         try:
             raw_data = fetch_all_data(universe, full_refresh=args.full_refresh)
             data_source = "yfinance"
-        except ImportError:
-            print("  yfinance not available — falling back to sample data")
-            print("  NOTE: Run this on Richard's machine with yfinance installed for real data")
-            raw_data = generate_sample_data(universe)
+        except ImportError as e:
+            raise RuntimeError(
+                "yfinance is not installed. Pipeline refuses to fall back to "
+                "sample data because that contaminated the dashboard on "
+                "19-May-26. Install yfinance ('pip install yfinance --upgrade') "
+                "on the machine running this pipeline. To deliberately use "
+                "sample data, re-run with --sample. Underlying ImportError: "
+                f"{e}"
+            )
 
     # Get benchmark data
     benchmark_rows = raw_data.get(BENCHMARK_TICKER, [])

@@ -693,7 +693,7 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 .s1-rating-tiles .rating-tile.tint-pos  { background: rgba(196, 192, 176, 0.18); }
 .s1-rating-tiles .rating-tile.tint-none { background: rgba(224, 221, 208, 0.30); }
 
-#tab-stage_1 .group-captions { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+#tab-stage_1 .group-captions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; }
 #tab-stage_1 .gcap { background: #fbfaf5; border-left: 3px solid; padding: 9px 12px; font-size: 11px; color: #2a2a2a; line-height: 1.45; border-radius: 0 3px 3px 0; }
 #tab-stage_1 .gcap b { display: block; font-size: 11px; font-weight: 700; margin-bottom: 3px; letter-spacing: 0.2px; }
 #tab-stage_1 .gcap-g1 { border-color: #b08a4e; } #tab-stage_1 .gcap-g1 b { color: #b08a4e; }
@@ -7174,19 +7174,21 @@ function SUM_renderQualifiedStocks() {
     { id:'ma_200',   label:'200 day moving average',    sortKey:'ma_200', cls:'num' },
     { id:'rating',   label:'Rating',                    sortKey:'rating_rank', cls:'grp-start-rating' },
     { id:'count',    label:'Score',                     sortKey:'count', cls:'' },
-    { id:'g1_150',   label:'150-day decelerating',      sortKey:'g1_150', cls:'grp-start-g1', testGroup:'g1', testKey:'T1_150D' },
-    { id:'g1_200',   label:'200-day decelerating',      sortKey:'g1_200', cls:'grp-end-g1', testGroup:'g1', testKey:'T2_200D' },
-    { id:'g2_t3',    label:'150-day flat ±2%',          sortKey:'g2_t3', cls:'grp-start-g2', testGroup:'g2', testKey:'T3' },
-    { id:'g2_t4',    label:'200-day flat ±2%',          sortKey:'g2_t4', cls:'grp-end-g2', testGroup:'g2', testKey:'T4' },
-    { id:'g3_t5',    label:'50-day above 97% × 150-day', sortKey:'g3_t5', cls:'grp-start-g3', testGroup:'g3', testKey:'T5' },
-    { id:'g3_t6',    label:'150-day above 97% × 200-day', sortKey:'g3_t6', cls:'grp-end-g3', testGroup:'g3', testKey:'T6' },
-    { id:'g4_t7',    label:'1-month low > prior 3M low', sortKey:'g4_t7', cls:'grp-start-g4', testGroup:'g4', testKey:'T7' },
-    { id:'g4_t8',    label:'3-month low > prior 3M low', sortKey:'g4_t8', cls:'grp-end-g4', testGroup:'g4', testKey:'T8' },
+    { id:'g1_pd1',   label:'150D was declining 4-6mo ago', sortKey:'g1_pd1', cls:'grp-start-g1', testGroup:'g1', testKey:'PD1_150D' },
+    { id:'g1_pd2',   label:'200D was declining 4-6mo ago', sortKey:'g1_pd2', cls:'grp-end-g1', testGroup:'g1', testKey:'PD2_200D' },
+    { id:'g2_150',   label:'150-day decelerating',      sortKey:'g2_150', cls:'grp-start-g2', testGroup:'g2', testKey:'T1_150D' },
+    { id:'g2_200',   label:'200-day decelerating',      sortKey:'g2_200', cls:'grp-end-g2', testGroup:'g2', testKey:'T2_200D' },
+    { id:'g3_t3',    label:'150-day flat ±2%',          sortKey:'g3_t3', cls:'grp-start-g3', testGroup:'g3', testKey:'T3' },
+    { id:'g3_t4',    label:'200-day flat ±2%',          sortKey:'g3_t4', cls:'grp-end-g3', testGroup:'g3', testKey:'T4' },
+    { id:'g4_t5',    label:'50-day above 150-day',      sortKey:'g4_t5', cls:'grp-start-g4', testGroup:'g4', testKey:'T5' },
+    { id:'g4_t6',    label:'150-day above 200-day',     sortKey:'g4_t6', cls:'grp-end-g4', testGroup:'g4', testKey:'T6' },
+    { id:'g5_t7',    label:'1-month low > prior 3M low', sortKey:'g5_t7', cls:'grp-start-g5', testGroup:'g5', testKey:'T7' },
+    { id:'g5_t8',    label:'3-month low > prior 3M low', sortKey:'g5_t8', cls:'grp-end-g5', testGroup:'g5', testKey:'T8' },
     { id:'persist',  label:'Last 12 months',            sortKey:'persistence_count', cls:'grp-start-persist' }
   ];
 
-  var S1_RATING_RANK = { 'Probable Late':5, 'Probable Early':4, 'Plausible':3, 'Possible':2, 'None':1 };
-  var S1_TINT_CLS = { 'Probable Late':'tint-pl','Probable Early':'tint-pe','Plausible':'tint-pla','Possible':'tint-pos','None':'tint-none' };
+  var S1_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
+  var S1_TINT_CLS = { 'Probable':'tint-pl','Plausible':'tint-pla','Possible':'tint-pos','None':'tint-none' };
 
   // ===== Data accessors =====
   function s1PricesLookup() {
@@ -7379,11 +7381,14 @@ function SUM_renderQualifiedStocks() {
   function s1TestPasses(row, col) {
     var g = row.groups;
     if (col.testGroup === 'g1') {
-      if (col.testKey === 'T1_150D') return !!(g.g1_slowing_decline && g.g1_slowing_decline.T1_150D_decelerating);
-      if (col.testKey === 'T2_200D') return !!(g.g1_slowing_decline && g.g1_slowing_decline.T2_200D_decelerating);
-    } else if (col.testGroup === 'g2') return !!(g.g2_flat_mas && g.g2_flat_mas[col.testKey]);
-    else if (col.testGroup === 'g3') return !!(g.g3_stack && g.g3_stack[col.testKey]);
-    else if (col.testGroup === 'g4') return !!(g.g4_higher_lows && g.g4_higher_lows[col.testKey]);
+      if (col.testKey === 'PD1_150D') return !!(g.g1_prior_downtrend && g.g1_prior_downtrend.PD1_150D_was_declining_4to6mo_ago);
+      if (col.testKey === 'PD2_200D') return !!(g.g1_prior_downtrend && g.g1_prior_downtrend.PD2_200D_was_declining_4to6mo_ago);
+    } else if (col.testGroup === 'g2') {
+      if (col.testKey === 'T1_150D') return !!(g.g2_slowing_decline && g.g2_slowing_decline.T1_150D_decelerating);
+      if (col.testKey === 'T2_200D') return !!(g.g2_slowing_decline && g.g2_slowing_decline.T2_200D_decelerating);
+    } else if (col.testGroup === 'g3') return !!(g.g3_flat_mas && g.g3_flat_mas[col.testKey]);
+    else if (col.testGroup === 'g4') return !!(g.g4_stack && g.g4_stack[col.testKey]);
+    else if (col.testGroup === 'g5') return !!(g.g5_higher_lows && g.g5_higher_lows[col.testKey]);
     return false;
   }
 
@@ -7400,11 +7405,10 @@ function SUM_renderQualifiedStocks() {
   }
 
   function s1PillFor(rating, count) {
-    if (rating === 'Probable Late') {
-      var c = Math.min(Math.max(count, 5), 8);
-      return '<span class="pill pill-pl-' + c + '">Probable Late</span>';
+    if (rating === 'Probable') {
+      var c = Math.min(Math.max(count || 7, 7), 10);
+      return '<span class="pill pill-pl-' + c + '">Probable</span>';
     }
-    if (rating === 'Probable Early') return '<span class="pill pill-pe">Probable Early</span>';
     if (rating === 'Plausible') return '<span class="pill pill-pla">Plausible</span>';
     if (rating === 'Possible') return '<span class="pill pill-pos">Possible</span>';
     return '<span class="pill pill-none">None</span>';
@@ -7413,23 +7417,23 @@ function SUM_renderQualifiedStocks() {
   function s1ScorePips(row) {
     var t = row.tests;
     var passed = [
+      !!t.T_PD1_150D_was_declining_4to6mo_ago, !!t.T_PD2_200D_was_declining_4to6mo_ago,
       !!t.T1_150D_decel, !!t.T2_200D_decel,
       !!t.T3_150D_flat,  !!t.T4_200D_flat,
-      !!t.T5_50_above_150x97, !!t.T6_150_above_200x97,
+      !!t.T5_50_above_150, !!t.T6_150_above_200,
       !!t.T7_higher_lows_1m,  !!t.T8_higher_lows_3m
     ];
     var count = passed.filter(Boolean).length;
     var s = '';
-    for (var i = 0; i < 8; i++) s += '<span class="pip ' + (passed[i] ? 'on' : '') + '"></span>';
-    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/8</span></div>';
+    for (var i = 0; i < 10; i++) s += '<span class="pip ' + (passed[i] ? 'on' : '') + '"></span>';
+    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/10</span></div>';
   }
 
   function s1PersistCells(arr, rating) {
     var h = '';
     for (var i = 0; i < 12; i++) {
       if (i === 11 && arr && arr[11]) {
-        var cls = rating === 'Probable Late' ? 'r-pl' :
-                  rating === 'Probable Early' ? 'r-pe' :
+        var cls = rating === 'Probable' ? 'r-pl' :
                   rating === 'Plausible' ? 'r-pla' :
                   rating === 'Possible' ? 'r-pos' : 'r-none';
         h += '<span class="persist-cell ' + cls + '" title="Current month: ' + rating + '"></span>';
@@ -7459,14 +7463,16 @@ function SUM_renderQualifiedStocks() {
   function s1GetSortVal(row, key) {
     if (key === 'rating_rank') return S1_RATING_RANK[row.rating] || 0;
     if (key === 'persistence_count') return (row.persistence || []).filter(Boolean).length;
-    if (key === 'g1_150') return row.groups.g1_slowing_decline && row.groups.g1_slowing_decline.T1_150D_decelerating ? 1 : 0;
-    if (key === 'g1_200') return row.groups.g1_slowing_decline && row.groups.g1_slowing_decline.T2_200D_decelerating ? 1 : 0;
-    if (key === 'g2_t3') return row.groups.g2_flat_mas && row.groups.g2_flat_mas.T3 ? 1 : 0;
-    if (key === 'g2_t4') return row.groups.g2_flat_mas && row.groups.g2_flat_mas.T4 ? 1 : 0;
-    if (key === 'g3_t5') return row.groups.g3_stack && row.groups.g3_stack.T5 ? 1 : 0;
-    if (key === 'g3_t6') return row.groups.g3_stack && row.groups.g3_stack.T6 ? 1 : 0;
-    if (key === 'g4_t7') return row.groups.g4_higher_lows && row.groups.g4_higher_lows.T7 ? 1 : 0;
-    if (key === 'g4_t8') return row.groups.g4_higher_lows && row.groups.g4_higher_lows.T8 ? 1 : 0;
+    if (key === 'g1_pd1') return row.groups.g1_prior_downtrend && row.groups.g1_prior_downtrend.PD1_150D_was_declining_4to6mo_ago ? 1 : 0;
+    if (key === 'g1_pd2') return row.groups.g1_prior_downtrend && row.groups.g1_prior_downtrend.PD2_200D_was_declining_4to6mo_ago ? 1 : 0;
+    if (key === 'g2_150') return row.groups.g2_slowing_decline && row.groups.g2_slowing_decline.T1_150D_decelerating ? 1 : 0;
+    if (key === 'g2_200') return row.groups.g2_slowing_decline && row.groups.g2_slowing_decline.T2_200D_decelerating ? 1 : 0;
+    if (key === 'g3_t3') return row.groups.g3_flat_mas && row.groups.g3_flat_mas.T3 ? 1 : 0;
+    if (key === 'g3_t4') return row.groups.g3_flat_mas && row.groups.g3_flat_mas.T4 ? 1 : 0;
+    if (key === 'g4_t5') return row.groups.g4_stack && row.groups.g4_stack.T5 ? 1 : 0;
+    if (key === 'g4_t6') return row.groups.g4_stack && row.groups.g4_stack.T6 ? 1 : 0;
+    if (key === 'g5_t7') return row.groups.g5_higher_lows && row.groups.g5_higher_lows.T7 ? 1 : 0;
+    if (key === 'g5_t8') return row.groups.g5_higher_lows && row.groups.g5_higher_lows.T8 ? 1 : 0;
     var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
     if (PCT_KEYS.indexOf(key) > -1 && s1State.mode.inputs === 'pct') {
       var ref = row[key];
@@ -7507,9 +7513,9 @@ function SUM_renderQualifiedStocks() {
     if (!tiles) return;
     var uc = s1UniverseCounts(rows);
     var total = rows.length;
-    var order = ['None','Possible','Plausible','Probable Early','Probable Late'];
-    var strip = {'Probable Late':'pl','Probable Early':'pe','Plausible':'pla','Possible':'pos','None':'none'};
-    var S1_THRESH = {'Probable Late':'≥5/8','Probable Early':'≥4/8','Plausible':'≥3/8','Possible':'≥2/8','None':'\u00a0'}; /* MD-V2-S40-PER-TILE-THRESHOLDS-tile-s1 */
+    var order = ['None','Possible','Plausible','Probable'];
+    var strip = {'Probable':'pl','Plausible':'pla','Possible':'pos','None':'none'};
+    var S1_THRESH = {'Probable':'\u22657/10 + both Group 1','Plausible':'\u22654/10 + 1 of Group 1','Possible':'\u22652/10','None':'\u00a0'}; /* MD-V2-S48-PER-TILE-THRESHOLDS-tile-s1 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i];
@@ -7658,7 +7664,7 @@ function SUM_renderQualifiedStocks() {
     if (host.querySelector('#s1-main-table')) return true;  // already built
 
     var html = '' +
-      '<div class="s1-intro">Stage 1 looks for stocks whose long-term trend has stopped going down and started to flatten. The aim is to spot bases <b>before</b> a Stage 2 uptrend kicks off — the earliest, highest-conviction point to consider initiating a position. Eight separate tests across four groups; the more tests a stock passes, the more likely it has genuinely entered a consolidation phase rather than a temporary pause in a downtrend.</div>' +
+      '<div class="s1-intro">Stage 1 looks for stocks whose long-term trend has stopped going down and started to flatten. The aim is to spot bases <b>before</b> a Stage 2 uptrend kicks off — the earliest, highest-conviction point to consider initiating a position. Ten separate tests across five groups; the new Group 1 (Prior downtrend, added 19-May-26) acts as a gate to filter out Stage 2 stocks that look like Stage 1 by accident. The more tests a stock passes, the more likely it has genuinely entered a consolidation phase rather than a temporary pause in a downtrend.</div>' +
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-s1-grp="inputs" data-s1-val="pct" onclick="s1SetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -7688,10 +7694,11 @@ function SUM_renderQualifiedStocks() {
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="s1-rating-tiles"></div>' +
       '<div class="group-captions">' +
-        '<div class="gcap gcap-g1"><b>Group 1 · Slowing decline</b>A <span class="db">downtrend running out of force</span> &mdash; the long-term moving averages are still falling, but each month they fall a little less than the last.<span class="intro">Two decline-deceleration tests:</span><span class="tline"><span class="tnum">(1)</span> Over the last 3 months, is the 150-day MA <u>declining but decelerating</u> &mdash; each monthly fall <u>smaller than the one before</u>?</span><span class="tline"><span class="tnum">(2)</span> The same test on the <u>200-day MA</u>?</span></div>' +
-        '<div class="gcap gcap-g2"><b>Group 2 · Flat moving averages</b><span class="db">The clearest mechanical signature of a base</span> &mdash; the long-term trend has genuinely stalled, neither rising nor falling.<span class="intro">Two flatness tests:</span><span class="tline"><span class="tnum">(1)</span> Is the 150-day MA <u>within &plusmn;2%</u> of where it sat <u>1, 2 and 3 months ago</u>?</span><span class="tline"><span class="tnum">(2)</span> The same test on the <u>200-day MA</u>?</span></div>' +
-        '<div class="gcap gcap-g3"><b>Group 3 · Moving average stack</b>Price has begun to <span class="db">lift the recent trend above the longer one</span> &mdash; the look of a late base or an early Stage 2 transition.<span class="intro">Two stack tests:</span><span class="tline"><span class="tnum">(1)</span> Is the <u>50-day MA above the 150-day</u> (allowing a 3% tolerance)?</span><span class="tline"><span class="tnum">(2)</span> Is the <u>150-day MA above the 200-day</u> (same 3% tolerance)?</span></div>' +
-        '<div class="gcap gcap-g4"><b>Group 4 · Higher lows</b><span class="db">Buyers stepping in earlier each time</span> &mdash; recent pullback lows are printing above the ones before them.<span class="intro">Two higher-low tests:</span><span class="tline"><span class="tnum">(1)</span> Are there <u>2 or more higher lows</u> in the recent swing structure?</span><span class="tline"><span class="tnum">(2)</span> Are there <u>3 or more</u> &mdash; the stronger signal?</span></div>' +
+        '<div class="gcap gcap-g1"><b>Group 1 &middot; Prior downtrend</b><span class="db">Was the stock actually in a downtrend before now?</span> &mdash; this is the gate that filters out Stage 2 stocks whose long-term moving averages happen to be flat today.<span class="intro">Two prior-downtrend tests:</span><span class="tline"><span class="tnum">(1)</span> Was the <u>150-day MA falling month-on-month 4-6 months ago</u> (at least 2 of those 3 months)?</span><span class="tline"><span class="tnum">(2)</span> Same test on the <u>200-day MA</u>?</span></div>' +
+        '<div class="gcap gcap-g2"><b>Group 2 &middot; Slowing decline</b>A <span class="db">downtrend running out of force</span> &mdash; the long-term moving averages are still falling, but each month they fall a little less than the last.<span class="intro">Two decline-deceleration tests:</span><span class="tline"><span class="tnum">(1)</span> Over the last 3 months, is the 150-day MA <u>declining but decelerating</u> &mdash; each monthly fall <u>smaller than the one before</u>?</span><span class="tline"><span class="tnum">(2)</span> The same test on the <u>200-day MA</u>?</span></div>' +
+        '<div class="gcap gcap-g3"><b>Group 3 &middot; Flat moving averages</b><span class="db">The clearest mechanical signature of a base</span> &mdash; the long-term trend has genuinely stalled, neither rising nor falling.<span class="intro">Two flatness tests:</span><span class="tline"><span class="tnum">(1)</span> Is the 150-day MA <u>within &plusmn;2%</u> of where it sat <u>1, 2 and 3 months ago</u>?</span><span class="tline"><span class="tnum">(2)</span> The same test on the <u>200-day MA</u>?</span></div>' +
+        '<div class="gcap gcap-g4"><b>Group 4 &middot; Moving average stack</b>Price has begun to <span class="db">lift the recent trend above the longer one</span> &mdash; the look of a late base or an early Stage 2 transition.<span class="intro">Two stack tests:</span><span class="tline"><span class="tnum">(1)</span> Is the <u>50-day MA above the 150-day</u>?</span><span class="tline"><span class="tnum">(2)</span> Is the <u>150-day MA above the 200-day</u>?</span></div>' +
+        '<div class="gcap gcap-g5"><b>Group 5 &middot; Higher lows</b><span class="db">Buyers stepping in earlier each time</span> &mdash; recent pullback lows are printing above the ones before them.<span class="intro">Two higher-low tests:</span><span class="tline"><span class="tnum">(1)</span> Are there <u>2 or more higher lows</u> in the recent swing structure?</span><span class="tline"><span class="tnum">(2)</span> Are there <u>3 or more</u> &mdash; the stronger signal?</span></div>' +
       '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s1-main-table">' +
@@ -7700,18 +7707,19 @@ function SUM_renderQualifiedStocks() {
             '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
             '<col class="c-ma150"><col class="c-ma200">' +
             '<col class="c-rating"><col class="c-score">' +
-            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
-            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+            '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
             '<col class="c-persist">' +
           '</colgroup>' +
           '<thead>' +
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
               '<th class="gh-rating grp-start-rating" colspan="2">Stage 1 rating</th>' /* MD-V2-S40-PER-TILE-THRESHOLDS-gh-s1 */ +
-              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 · Slowing decline</th>' +
-              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 · Flat moving averages</th>' +
-              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 · Moving average stack</th>' +
-              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Group 4 · Higher lows</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 &middot; Prior downtrend</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 &middot; Slowing decline</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 &middot; Flat moving averages</th>' +
+              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Group 4 &middot; Moving average stack</th>' +
+              '<th class="gh-g5 grp-start-g5 grp-end-g5" colspan="2">Group 5 &middot; Higher lows</th>' +
               '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
             '</tr>' +
             '<tr class="col-header-row" id="s1-col-header-row"></tr>' +
@@ -14000,9 +14008,8 @@ function SUM_renderQualifiedStocks() {
   //   tabId - the tab a screen-name click opens.
   var MO_ROWS = [
     // -- Stages --
-    /* MD-V2-S41-OVERVIEW-STAGE1-SPLIT-MARKER -- Stage 1 split into Early + Late columns; each row carries subTier consumed by moNormaliseTier. */
-    { section:'Stages', key:'stage_1_early', label:'Stage 1 - Basing (Probable Early)', short:'S1 Early', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null, subTier:'Probable Early' },
-    { section:'Stages', key:'stage_1_late',  label:'Stage 1 - Basing (Probable Late)',  short:'S1 Late',  ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null, subTier:'Probable Late' },
+    /* MD-V2-S48-OVERVIEW-STAGE1-COLLAPSE-MARKER (19-May-26) -- Stage 1 single column; Probable Early/Late collapsed into single Probable upstream. */
+    { section:'Stages', key:'stage_1', label:'Stage 1 - Basing', short:'S1 Basing', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
     { section:'Stages', key:'stage_2', label:'Stage 2 - Uptrend', short:'S2 Uptrend', ratingPath:'stage:stage_2', tabId:'stage_2', patternKey:null },
     { section:'Stages', key:'stage_3', label:'Stage 3 - Topping', short:'S3 Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
     { section:'Stages', key:'stage_4', label:'Stage 4 - Decline', short:'S4 Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },

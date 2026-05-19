@@ -2700,7 +2700,11 @@ def compute_master_dashboard_screens(prices, filter_results):
                 return "Qualified"
             if ps_c1_price_gt_20d and ps_c2_ma20_turn:
                 return "Probable"
-            if ps_c1_price_gt_20d or ps_c2_ma20_turn:
+            # MD-V2-S47C-PS-PLAUSIBLE-TIGHTEN-MARKER (19-May-26): was 'c1 OR c2' for Plausible
+            # which was too loose (Plausible counts 200+ across variants). Tightened to require
+            # c1 (price above 20D MA) specifically — the actual breakout signal. c2 alone (20D
+            # turn without price above) drops to Possible.
+            if ps_c1_price_gt_20d:
                 return "Plausible"
             return "Possible"
 
@@ -2741,10 +2745,20 @@ def compute_master_dashboard_screens(prices, filter_results):
         _s2_rating_val = s2.get("rating") if isinstance(s2, dict) else None
         _s3_rating_val = s3.get("rating") if isinstance(s3, dict) else None
         _s4_rating_val = s4.get("rating") if isinstance(s4, dict) else None
-        _s1_in = bool(_s1_rating_val not in (None, "None"))
-        _s2_in = bool(_s2_rating_val not in (None, "None"))
-        _s3_in = bool(_s3_rating_val not in (None, "None"))
-        _s4_in = bool(_s4_rating_val not in (None, "None"))
+        # MD-V2-S47C-PS-ENTRY-GATE-TIGHTEN-MARKER (19-May-26): was 'any non-None stage rating' which
+        # was too loose (Plausible counts 200+ across variants in broad market). Tightened to require
+        # confirmed-stage rating only. Note stage labels differ: Stage 1 uses "Probable Early"/"Probable
+        # Late", Stage 3 uses "Probable Invalidation"/"Plausible Invalidation"/"Possible Topping",
+        # Stage 4 uses "Probable"/"Probable (Accelerating)"/"Plausible"/"Possible". Substring match
+        # on "Probable" or "Plausible" catches the confirmed tier across all four.
+        def _rating_confirmed(r):
+            if not r or r == "None":
+                return False
+            return ("Probable" in r) or ("Plausible" in r)
+        _s1_in = _rating_confirmed(_s1_rating_val)
+        _s2_in = _rating_confirmed(_s2_rating_val)
+        _s3_in = _rating_confirmed(_s3_rating_val) or (_s3_rating_val == "Possible Topping")
+        _s4_in = _rating_confirmed(_s4_rating_val)
 
         tests["probing_bet_s1"] = _ps_build(_s1_in, "probing_bet_s1", _s1_rating_val)
         tests["probing_bet_s2"] = _ps_build(_s2_in, "probing_bet_s2", _s2_rating_val)

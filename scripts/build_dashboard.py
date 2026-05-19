@@ -764,6 +764,8 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s1-main-table .pill-pl-6 { background: #1e6a25; color: #fff; }
 #s1-main-table .pill-pl-7 { background: #145718; color: #fff; }
 #s1-main-table .pill-pl-8 { background: #08400d; color: #fff; }
+#s1-main-table .pill-pl-9 { background: #062f08; color: #fff; }
+#s1-main-table .pill-pl-10 { background: #042205; color: #fff; }
 #s1-main-table .pill-pe   { background: #4a9658; color: #fff; }
 #s1-main-table .pill-pla  { background: #6b8a98; color: #fff; }
 #s1-main-table .pill-pos  { background: #c4c0b0; color: #5a5a4a; font-weight: 600; }
@@ -7273,7 +7275,7 @@ function SUM_renderQualifiedStocks() {
     return out;
   }
   function s1UniverseCounts(rows) {
-    var c = {'Probable Late':0,'Probable Early':0,'Plausible':0,'Possible':0,'None':0};
+    var c = {'Probable':0,'Plausible':0,'Possible':0,'None':0};
     for (var i = 0; i < rows.length; i++) {
       if (c[rows[i].rating] !== undefined) c[rows[i].rating]++;
     }

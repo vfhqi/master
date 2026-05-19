@@ -163,6 +163,12 @@ TABS = [
     {"id": "setups_s2vcp", "label": "Stage 2 VCPs and retests", "accent": "#BA7517"},
     # MD-V2-TESTS-MARKER - Capital qualification tests (3 tests)
     {"id": "tests", "label": "Tests", "accent": "#0F6E56"},
+    # MD-V2-S47-TAB-HEALTHY-RETEST-MARKER - Healthy Retest of MA (13-criterion standalone)
+    {"id": "setups_healthy_retest", "label": "Healthy Retest", "accent": "#2E7D32"},
+    # MD-V2-S47-TAB-PROBING-BET-MARKER - Probing Bets S1+S2 (6-criterion x2)
+    {"id": "tests_probing_bet", "label": "Probing Bets", "accent": "#6b46c1"},
+    # MD-V2-S47-TAB-SPECULATIVE-BET-MARKER - Speculative Bets S3+S4 (6-criterion x2)
+    {"id": "tests_speculative_bet", "label": "Speculative Bets", "accent": "#c62828"},
     # MD-V2-MASTER-OVERVIEW-S27-MARKER - synoptic rating matrix, default landing tab
     {"id": "master_overview", "label": "Overview", "accent": "#1b3d5c"},
     # Data / reference tabs
@@ -183,6 +189,9 @@ IMPLEMENTED_TABS = [
     "post_indicators",  # MD-V2-POST-INDICATORS-MARKER
     "setups_s1pb", "setups_s2vcp",  # MD-V2-SETUPS-MARKER
     "tests",  # MD-V2-TESTS-MARKER
+    "setups_healthy_retest",  # MD-V2-S47-TAB-HEALTHY-RETEST-MARKER
+    "tests_probing_bet",  # MD-V2-S47-TAB-PROBING-BET-MARKER
+    "tests_speculative_bet",  # MD-V2-S47-TAB-SPECULATIVE-BET-MARKER
     "master_overview",  # MD-V2-MASTER-OVERVIEW-S27-MARKER
     "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
     "ssem", "val",
@@ -536,7 +545,10 @@ body.chart-from-left .chart-panel.open{transform:translateX(0)}
 #s1-main-table tbody td.name-cell,#s2-main-table tbody td.name-cell,#s3-main-table tbody td.name-cell,#s4-main-table tbody td.name-cell,#pi-main-table tbody td.name-cell,#po-main-table tbody td.name-cell,.st-main-table tbody td.name-cell,#ct-main-table tbody td.name-cell{position:sticky;left:0;z-index:5;background:#fbfaf5;border-right:1px solid #e0dcc8}
 #s1-main-table tbody tr:hover td.name-cell,#s2-main-table tbody tr:hover td.name-cell,#s3-main-table tbody tr:hover td.name-cell,#s4-main-table tbody tr:hover td.name-cell,#pi-main-table tbody tr:hover td.name-cell,#po-main-table tbody tr:hover td.name-cell,.st-main-table tbody tr:hover td.name-cell,#ct-main-table tbody tr:hover td.name-cell{background:#f4f1e6}
 #s1-main-table thead tr.col-header-row th:first-child,#s2-main-table thead tr.col-header-row th:first-child,#s3-main-table thead tr.col-header-row th:first-child,#s4-main-table thead tr.col-header-row th:first-child,#pi-main-table thead tr.col-header-row th:first-child,#po-main-table thead tr.col-header-row th:first-child,.st-main-table thead tr.col-header-row th:first-child,#ct-main-table thead tr.col-header-row th:first-child{position:sticky;left:0;z-index:70;background:#fbfaf5;border-right:1px solid #e0dcc8}
-body[data-active-tab^="stage_"] #hdr-chart-btn,body[data-active-tab="pre_indicators"] #hdr-chart-btn,body[data-active-tab="post_indicators"] #hdr-chart-btn,body[data-active-tab^="setups"] #hdr-chart-btn,body[data-active-tab="tests"] #hdr-chart-btn,body[data-active-tab="master_overview"] #hdr-chart-btn{display:none!important}
+body[data-active-tab^="stage_"] #hdr-chart-btn,body[data-active-tab="pre_indicators"] #hdr-chart-btn,body[data-active-tab="post_indicators"] #hdr-chart-btn,body[data-active-tab^="setups"] #hdr-chart-btn,body[data-active-tab="tests"] #hdr-chart-btn,
+body[data-active-tab="tests_speculative_bet"] #hdr-chart-btn,
+body[data-active-tab="tests_probing_bet"] #hdr-chart-btn,
+body[data-active-tab="setups_healthy_retest"] #hdr-chart-btn,body[data-active-tab="master_overview"] #hdr-chart-btn{display:none!important}
 body.chart-from-left .s1-controls{left:var(--chart-panel-w,0)!important;transition:left .3s ease}
 body.chart-from-left #mo-matrix-table tbody td.mo-mx-name-cell,body.chart-from-left #mo-matrix-table thead th.mo-mx-screen-col{left:var(--chart-panel-w,0)!important;transition:left .3s ease}
 /* MD-V2-GROUP-CAPTIONS-MARKER: signposting + emphasis for the rewritten group-test captions */
@@ -1102,6 +1114,9 @@ body[data-active-tab="pre_indicators"] .header-tabs-row,
 body[data-active-tab="post_indicators"] .header-tabs-row,
 body[data-active-tab^="setups"] .header-tabs-row,
 body[data-active-tab="tests"] .header-tabs-row,
+body[data-active-tab="tests_speculative_bet"] .header-tabs-row,
+body[data-active-tab="tests_probing_bet"] .header-tabs-row,
+body[data-active-tab="setups_healthy_retest"] .header-tabs-row,
 body[data-active-tab="master_overview"] .header-tabs-row { display: none !important; }
 
 /* V2 mini nav strip - visible only on V2 tabs */
@@ -1111,6 +1126,9 @@ body[data-active-tab="pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
 body[data-active-tab^="setups"] .v2-nav,
 body[data-active-tab="tests"] .v2-nav,
+body[data-active-tab="tests_speculative_bet"] .v2-nav,
+body[data-active-tab="tests_probing_bet"] .v2-nav,
+body[data-active-tab="setups_healthy_retest"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav { display: flex; }
 .v2-nav-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; margin-right: 8px; }
 .v2-nav-btn { display: inline-block; padding: 5px 11px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
@@ -1220,6 +1238,9 @@ body[data-active-tab="pre_indicators"] .header-controls-row,
 body[data-active-tab="post_indicators"] .header-controls-row,
 body[data-active-tab^="setups"] .header-controls-row,
 body[data-active-tab="tests"] .header-controls-row,
+body[data-active-tab="tests_speculative_bet"] .header-controls-row,
+body[data-active-tab="tests_probing_bet"] .header-controls-row,
+body[data-active-tab="setups_healthy_retest"] .header-controls-row,
 body[data-active-tab="master_overview"] .header-controls-row { display: none !important; }
 /* MD-V2-PI-V2-S25-MARKER: EDIT 1 - Block A header chrome shrink on V2 tabs (D-MD-V2-47).
    Legacy header is sized for 3 rows; V2 tabs show only header-top + v2-nav.
@@ -1230,18 +1251,27 @@ body[data-active-tab="pre_indicators"] .header,
 body[data-active-tab="post_indicators"] .header,
 body[data-active-tab^="setups"] .header,
 body[data-active-tab="tests"] .header,
+body[data-active-tab="tests_speculative_bet"] .header,
+body[data-active-tab="tests_probing_bet"] .header,
+body[data-active-tab="setups_healthy_retest"] .header,
 body[data-active-tab="master_overview"] .header { padding-bottom: 0 !important; }
 body[data-active-tab^="stage_"],
 body[data-active-tab="pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
+body[data-active-tab="tests_speculative_bet"],
+body[data-active-tab="tests_probing_bet"],
+body[data-active-tab="setups_healthy_retest"],
 body[data-active-tab="master_overview"] { --header-height: 70px; }
 body[data-active-tab^="stage_"] .v2-nav,
 body[data-active-tab="pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
 body[data-active-tab^="setups"] .v2-nav,
 body[data-active-tab="tests"] .v2-nav,
+body[data-active-tab="tests_speculative_bet"] .v2-nav,
+body[data-active-tab="tests_probing_bet"] .v2-nav,
+body[data-active-tab="setups_healthy_retest"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; padding-bottom: 4px !important; }
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
 
@@ -1715,6 +1745,9 @@ body[data-active-tab="pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
+body[data-active-tab="tests_speculative_bet"],
+body[data-active-tab="tests_probing_bet"],
+body[data-active-tab="setups_healthy_retest"],
 body[data-active-tab="master_overview"] { --v2-ribbon-h: 46px; }
 
 /* The ribbon: sticky directly under the fixed MD V2 nav header. */
@@ -1723,6 +1756,9 @@ body[data-active-tab="pre_indicators"] .controls.s1-controls,
 body[data-active-tab="post_indicators"] .controls.s1-controls,
 body[data-active-tab^="setups"] .controls.s1-controls,
 body[data-active-tab="tests"] .controls.s1-controls,
+body[data-active-tab="tests_speculative_bet"] .controls.s1-controls,
+body[data-active-tab="tests_probing_bet"] .controls.s1-controls,
+body[data-active-tab="setups_healthy_retest"] .controls.s1-controls,
 body[data-active-tab="master_overview"] .controls.s1-controls {
   position: sticky;
   top: var(--header-height);
@@ -1837,6 +1873,9 @@ body[data-active-tab="pre_indicators"] .table-wrap,
 body[data-active-tab="post_indicators"] .table-wrap,
 body[data-active-tab^="setups"] .table-wrap,
 body[data-active-tab="tests"] .table-wrap,
+body[data-active-tab="tests_speculative_bet"] .table-wrap,
+body[data-active-tab="tests_probing_bet"] .table-wrap,
+body[data-active-tab="setups_healthy_retest"] .table-wrap,
 body[data-active-tab="master_overview"] .table-wrap {
   overflow: visible;
 }
@@ -1852,6 +1891,9 @@ body[data-active-tab="pre_indicators"] .v2-hscroll,
 body[data-active-tab="post_indicators"] .v2-hscroll,
 body[data-active-tab^="setups"] .v2-hscroll,
 body[data-active-tab="tests"] .v2-hscroll,
+body[data-active-tab="tests_speculative_bet"] .v2-hscroll,
+body[data-active-tab="tests_probing_bet"] .v2-hscroll,
+body[data-active-tab="setups_healthy_retest"] .v2-hscroll,
 body[data-active-tab="master_overview"] .v2-hscroll {
   overflow: visible;
 }
@@ -1862,6 +1904,9 @@ body[data-active-tab="pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
+body[data-active-tab="tests_speculative_bet"],
+body[data-active-tab="tests_probing_bet"],
+body[data-active-tab="setups_healthy_retest"],
 body[data-active-tab="master_overview"] {
   overflow-x: auto;
 }
@@ -2059,6 +2104,303 @@ col.mo-cg-screen { width: 76px; }
 
 
 /* MD-V2-REMOVE-SUMMARY-MARKER applied 20260513-184203 */
+
+/* ================================================================ */
+/* MD-V2-S47-TASK-2-CSS-MOVED-TO-HEAD-MARKER (19-May-26 rework)        */
+/* Originally emitted inline in JS by Task-2 patchers; moved here so   */
+/* the CSS lives where CSS belongs and the JS context stays continuous */
+/* ================================================================ */
+
+/* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER-CSS-START */
+/* Healthy Retest of MA — standalone 13-criterion test tab (S47) */
+#tab-setups_healthy_retest .group-captions { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 16px 0 14px 0; }
+#tab-setups_healthy_retest .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #2E7D32; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
+#tab-setups_healthy_retest .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #2E7D32; font-size: 11px; letter-spacing: 0.2px; }
+#tab-setups_healthy_retest .s1-rating-tiles { display: grid; grid-template-columns: 1fr; gap: 8px; }
+#tab-setups_healthy_retest .s1-rating-tiles .pi-tile-pullback { background: rgba(46,125,50,0.10); border: 1px solid rgba(46,125,50,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-setups_healthy_retest .s1-rating-tiles .pi-tile-pullback.active { background: rgba(46,125,50,0.22); border: 1.5px solid #2E7D32; }
+#tab-setups_healthy_retest .s1-rating-tiles .pi-strip-pullback { background: #2E7D32; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-setups_healthy_retest .s1-rating-tiles .rt-breakdown { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.35; }
+#tab-setups_healthy_retest .pi-tier-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+#tab-setups_healthy_retest .pi-tier-chip { font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer; user-select: none; border: 0.5px solid; line-height: 1.4; white-space: nowrap; transition: background 0.12s, color 0.12s; }
+#tab-setups_healthy_retest .pi-chip-pullback { background: #E1F5EE; color: #2E7D32; border-color: #9FE1CB; }
+#tab-setups_healthy_retest .pi-chip-pullback.on { background: #2E7D32; color: #fff; border-color: #2E7D32; font-weight: 500; }
+#tab-setups_healthy_retest .pi-tier-chip:hover { filter: brightness(0.96); }
+#tab-setups_healthy_retest .s1-rating-tiles .rating-tile.active { box-shadow: inset 0 0 0 1.5px currentColor; }
+/* Re-use the ct-main-table styles via shared class — table uses id="hr-main-table" */
+#hr-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#hr-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#hr-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#hr-main-table thead th:hover { background: #f0ebd9 !important; }
+#hr-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+#hr-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
+#hr-main-table thead tr.group-header-row th { position: sticky; top: 0; }
+#hr-main-table thead tr.sub-group-row th { position: sticky; top: 24px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; color: #888; padding: 3px; font-weight: 600; background: #f8f6ee !important; border-bottom: 1px solid #e0dcc8; }
+#hr-main-table thead tr.col-header-row th { position: sticky; top: 44px; border-top: 1px solid #e0dcc8; }
+#hr-main-table thead .gh-inputs { color: #555; }
+#hr-main-table thead .gh-stageinfo { color: #7a6a3a; }
+#hr-main-table thead .gh-tests { color: #2E7D32; }
+#hr-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+#hr-main-table .hd .lbl { white-space: normal; word-break: break-word; }
+#hr-main-table .hd .sort-arrow { font-size: 9px; color: #2E7D32; flex: 0 0 auto; line-height: 1; }
+#hr-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+#hr-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+#hr-main-table tr:hover { background: rgba(46,125,50,0.05); }
+#hr-main-table td.grp-start-stageinfo, #hr-main-table th.grp-start-stageinfo { border-left: 2px solid rgba(122,106,58,0.40); }
+#hr-main-table td.grp-start-rating, #hr-main-table th.grp-start-rating { border-left: 2px solid rgba(46,125,50,0.40); }
+#hr-main-table td.grp-start-tests, #hr-main-table th.grp-start-tests { border-left: 2px solid rgba(46,125,50,0.40); }
+#hr-main-table td.pi-pass { background: rgba(46,125,50,0.12); color: #2E7D32; font-weight: 700; }
+#hr-main-table td.pi-fail { color: #999; }
+#hr-main-table td.pi-rating-cell { padding: 3px 4px; }
+#hr-main-table .pi-pill { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+#hr-main-table .pi-pill-tint-qualified { background: #1b5e20; color: #fff; }
+#hr-main-table .pi-pill-tint-prob { background: #2E7D32; color: #fff; }
+#hr-main-table .pi-pill-tint-pla  { background: rgba(46,125,50,0.30); color: #0a4a3a; }
+#hr-main-table .pi-pill-tint-pos  { background: rgba(46,125,50,0.14); color: #3a6a5a; }
+#hr-main-table .pi-pill-tint-none { background: #ece9dd; color: #999; }
+#hr-main-table td.pi-score-cell { padding: 4px 3px; }
+#hr-main-table .pi-pip-row { display: inline-flex; align-items: center; gap: 2px; justify-content: center; }
+#hr-main-table .pi-pip-row .pip { width: 6px; height: 6px; border-radius: 50%; background: #d8d4c4; display: inline-block; }
+#hr-main-table .pi-pip-row .pip.on { background: #2E7D32; }
+#hr-main-table .pi-pip-row .pi-score-num { font-size: 9px; color: #777; margin-left: 3px; font-weight: 600; }
+#hr-main-table td.ct-stage-info-cell { padding: 3px 4px; }
+#hr-main-table .ct-info-label { display: inline-block; padding: 2px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
+#hr-main-table td.ct-stage-info-cell.tint-prob .ct-info-label { background: rgba(46,125,50,0.22); color: #0a4a3a; }
+#hr-main-table td.ct-stage-info-cell.tint-pla  .ct-info-label { background: rgba(46,125,50,0.13); color: #3a6a5a; }
+#hr-main-table td.ct-stage-info-cell.tint-pos  .ct-info-label { background: rgba(46,125,50,0.07); color: #6a7a72; }
+#hr-main-table td.ct-stage-info-cell.tint-none .ct-info-label { background: #f0ede1; color: #aaa; }
+#hr-main-table td.ct-window-col { padding: 3px 4px; font-size: 10px; }
+#hr-main-table td.ct-window-fired-recent { background: rgba(46,125,50,0.16); }
+#hr-main-table td.ct-window-fired-recent .ct-window-label { color: #0a4a3a; font-weight: 700; }
+#hr-main-table td.ct-window-fired-older { background: rgba(186,117,23,0.14); }
+#hr-main-table td.ct-window-fired-older .ct-window-label { color: #7a4e0a; font-weight: 600; }
+#hr-main-table td.ct-window-none { color: #bbb; }
+#hr-main-table td.ct-window-building { color: #b59a5a; font-style: italic; font-size: 9px; }
+#hr-main-table td.ct-window-na { color: #ccc; }
+#hr-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+#hr-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#hr-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
+#hr-main-table td.name-cell .live-dot { color: #2e7d32; font-weight: 700; margin-right: 4px; display: inline-block; vertical-align: middle; line-height: 1; font-size: 10px; }
+#hr-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+#hr-main-table td.taxon .ind { color: #666; font-weight: 500; }
+#hr-main-table td.taxon .sec { color: #999; }
+#hr-main-table col.c-name { width: 124px; }
+#hr-main-table col.c-taxon { width: 150px; }
+#hr-main-table col.c-price { width: 50px; }
+#hr-main-table col.c-52wh { width: 48px; }
+#hr-main-table col.c-52wl { width: 48px; }
+#hr-main-table col.c-ma150 { width: 48px; }
+#hr-main-table col.c-ma200 { width: 48px; }
+#hr-main-table col.c-pullback { width: 58px; }
+#hr-main-table col.c-stageinfo { width: 56px; }
+#hr-main-table col.c-rating { width: 64px; }
+#hr-main-table col.c-score { width: 52px; }
+#hr-main-table col.c-test { width: 64px; }
+#hr-main-table col.c-window { width: 52px; }
+#hr-main-table tr.tint-row td.name-cell, #hr-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+#hr-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+#hr-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
+#hr-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+/* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER-CSS-END */
+
+/* MD-V2-S47-TAB-PROBING-BET-MARKER-CSS-START */
+/* Probing Bets (S1+S2) — two 6-criterion test variants on one tab (S47) */
+#tab-tests_probing_bet .group-captions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 14px 0; }
+#tab-tests_probing_bet .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #6b46c1; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
+#tab-tests_probing_bet .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #6b46c1; font-size: 11px; letter-spacing: 0.2px; }
+#tab-tests_probing_bet .group-captions .gcap-g1 { border-left-color: #6b46c1; }
+#tab-tests_probing_bet .group-captions .gcap-g1 b { color: #6b46c1; }
+#tab-tests_probing_bet .group-captions .gcap-g2 { border-left-color: #7c3aed; }
+#tab-tests_probing_bet .group-captions .gcap-g2 b { color: #7c3aed; }
+#tab-tests_probing_bet .s1-rating-tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+#tab-tests_probing_bet .s1-rating-tiles .pi-tile-s1 { background: rgba(107,70,193,0.10); border: 1px solid rgba(107,70,193,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-tests_probing_bet .s1-rating-tiles .pi-tile-s1.active { background: rgba(107,70,193,0.22); border: 1.5px solid #6b46c1; }
+#tab-tests_probing_bet .s1-rating-tiles .pi-strip-s1 { background: #6b46c1; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-tests_probing_bet .s1-rating-tiles .pi-tile-s2 { background: rgba(124,58,237,0.10); border: 1px solid rgba(124,58,237,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-tests_probing_bet .s1-rating-tiles .pi-tile-s2.active { background: rgba(124,58,237,0.22); border: 1.5px solid #7c3aed; }
+#tab-tests_probing_bet .s1-rating-tiles .pi-strip-s2 { background: #7c3aed; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-tests_probing_bet .s1-rating-tiles .rt-breakdown { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.35; }
+#tab-tests_probing_bet .pi-tier-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+#tab-tests_probing_bet .pi-tier-chip { font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer; user-select: none; border: 0.5px solid; line-height: 1.4; white-space: nowrap; transition: background 0.12s, color 0.12s; }
+#tab-tests_probing_bet .pi-chip-s1 { background: #EDE9F9; color: #6b46c1; border-color: #C4B5FD; }
+#tab-tests_probing_bet .pi-chip-s1.on { background: #6b46c1; color: #fff; border-color: #6b46c1; font-weight: 500; }
+#tab-tests_probing_bet .pi-chip-s2 { background: #EDE9F9; color: #7c3aed; border-color: #C4B5FD; }
+#tab-tests_probing_bet .pi-chip-s2.on { background: #7c3aed; color: #fff; border-color: #7c3aed; font-weight: 500; }
+#tab-tests_probing_bet .pi-tier-chip:hover { filter: brightness(0.96); }
+/* Table styles — clone ct-main-table with purple accent */
+#pb-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#pb-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#pb-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#pb-main-table thead th:hover { background: #f0ebd9 !important; }
+#pb-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+#pb-main-table thead tr.group-header-row th { position: sticky; top: 0; }
+#pb-main-table thead tr.sub-group-row th { position: sticky; top: 24px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; color: #888; padding: 3px; font-weight: 600; background: #f8f6ee !important; border-bottom: 1px solid #e0dcc8; }
+#pb-main-table thead tr.col-header-row th { position: sticky; top: 44px; border-top: 1px solid #e0dcc8; }
+#pb-main-table thead .gh-inputs { color: #555; }
+#pb-main-table thead .gh-stageinfo { color: #7a6a3a; }
+#pb-main-table thead .gh-g1 { color: #6b46c1; }
+#pb-main-table thead .gh-g2 { color: #7c3aed; }
+#pb-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+#pb-main-table .hd .lbl { white-space: normal; word-break: break-word; }
+#pb-main-table .hd .sort-arrow { font-size: 9px; color: #6b46c1; flex: 0 0 auto; line-height: 1; }
+#pb-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+#pb-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+#pb-main-table tr:hover { background: rgba(107,70,193,0.05); }
+#pb-main-table td.grp-start-stageinfo, #pb-main-table th.grp-start-stageinfo { border-left: 2px solid rgba(122,106,58,0.40); }
+#pb-main-table td.grp-start-g1, #pb-main-table th.grp-start-g1 { border-left: 2px solid rgba(107,70,193,0.40); }
+#pb-main-table td.grp-start-g2, #pb-main-table th.grp-start-g2 { border-left: 2px solid rgba(124,58,237,0.40); }
+#pb-main-table td.pi-pass { background: rgba(107,70,193,0.12); color: #6b46c1; font-weight: 700; }
+#pb-main-table td.pi-fail { color: #999; }
+#pb-main-table td.pi-rating-cell { padding: 3px 4px; }
+#pb-main-table .pi-pill { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+#pb-main-table .pi-pill-tint-qualified { background: #4c1d95; color: #fff; }
+#pb-main-table .pi-pill-tint-prob { background: #6b46c1; color: #fff; }
+#pb-main-table .pi-pill-tint-pla  { background: rgba(107,70,193,0.30); color: #3b1f7a; }
+#pb-main-table .pi-pill-tint-pos  { background: rgba(107,70,193,0.14); color: #5a4a7a; }
+#pb-main-table .pi-pill-tint-none { background: #ece9dd; color: #999; }
+#pb-main-table td.pi-score-cell { padding: 4px 3px; }
+#pb-main-table .pi-pip-row { display: inline-flex; align-items: center; gap: 2px; justify-content: center; }
+#pb-main-table .pi-pip-row .pip { width: 6px; height: 6px; border-radius: 50%; background: #d8d4c4; display: inline-block; }
+#pb-main-table .pi-pip-row .pip.on { background: #6b46c1; }
+#pb-main-table .pi-pip-row .pi-score-num { font-size: 9px; color: #777; margin-left: 3px; font-weight: 600; }
+#pb-main-table td.ct-stage-info-cell { padding: 3px 4px; }
+#pb-main-table .ct-info-label { display: inline-block; padding: 2px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
+#pb-main-table td.ct-stage-info-cell.tint-prob .ct-info-label { background: rgba(107,70,193,0.22); color: #3b1f7a; }
+#pb-main-table td.ct-stage-info-cell.tint-pla  .ct-info-label { background: rgba(107,70,193,0.13); color: #5a4a7a; }
+#pb-main-table td.ct-stage-info-cell.tint-pos  .ct-info-label { background: rgba(107,70,193,0.07); color: #6a7a72; }
+#pb-main-table td.ct-stage-info-cell.tint-none .ct-info-label { background: #f0ede1; color: #aaa; }
+#pb-main-table td.ct-window-col { padding: 3px 4px; font-size: 10px; }
+#pb-main-table td.ct-window-fired-recent { background: rgba(107,70,193,0.16); }
+#pb-main-table td.ct-window-fired-recent .ct-window-label { color: #3b1f7a; font-weight: 700; }
+#pb-main-table td.ct-window-fired-older { background: rgba(186,117,23,0.14); }
+#pb-main-table td.ct-window-fired-older .ct-window-label { color: #7a4e0a; font-weight: 600; }
+#pb-main-table td.ct-window-none { color: #bbb; }
+#pb-main-table td.ct-window-building { color: #b59a5a; font-style: italic; font-size: 9px; }
+#pb-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+#pb-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#pb-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
+#pb-main-table td.name-cell .live-dot { color: #2e7d32; font-weight: 700; margin-right: 4px; }
+#pb-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+#pb-main-table td.taxon .ind { color: #666; font-weight: 500; }
+#pb-main-table td.taxon .sec { color: #999; }
+#pb-main-table col.c-name { width: 124px; }
+#pb-main-table col.c-taxon { width: 150px; }
+#pb-main-table col.c-price { width: 50px; }
+#pb-main-table col.c-52wh { width: 48px; }
+#pb-main-table col.c-52wl { width: 48px; }
+#pb-main-table col.c-ma150 { width: 48px; }
+#pb-main-table col.c-ma200 { width: 48px; }
+#pb-main-table col.c-pullback { width: 58px; }
+#pb-main-table col.c-stageinfo { width: 56px; }
+#pb-main-table col.c-rating { width: 64px; }
+#pb-main-table col.c-score { width: 52px; }
+#pb-main-table col.c-test { width: 64px; }
+#pb-main-table col.c-window { width: 52px; }
+#pb-main-table tr.tint-row td.name-cell, #pb-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+#pb-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+#pb-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
+#pb-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+/* MD-V2-S47-TAB-PROBING-BET-MARKER-CSS-END */
+
+/* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER-CSS-START */
+/* Speculative Bets (S3+S4) — two 6-criterion test variants on one tab (S47) */
+#tab-tests_speculative_bet .group-captions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 14px 0; }
+#tab-tests_speculative_bet .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #c62828; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
+#tab-tests_speculative_bet .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #c62828; font-size: 11px; letter-spacing: 0.2px; }
+#tab-tests_speculative_bet .group-captions .gcap-g1 { border-left-color: #c62828; }
+#tab-tests_speculative_bet .group-captions .gcap-g1 b { color: #c62828; }
+#tab-tests_speculative_bet .group-captions .gcap-g2 { border-left-color: #e65100; }
+#tab-tests_speculative_bet .group-captions .gcap-g2 b { color: #e65100; }
+#tab-tests_speculative_bet .s1-rating-tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+#tab-tests_speculative_bet .s1-rating-tiles .pi-tile-s3 { background: rgba(198,40,40,0.10); border: 1px solid rgba(198,40,40,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-tests_speculative_bet .s1-rating-tiles .pi-tile-s3.active { background: rgba(198,40,40,0.22); border: 1.5px solid #c62828; }
+#tab-tests_speculative_bet .s1-rating-tiles .pi-strip-s3 { background: #c62828; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-tests_speculative_bet .s1-rating-tiles .pi-tile-s4 { background: rgba(230,81,0,0.10); border: 1px solid rgba(230,81,0,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-tests_speculative_bet .s1-rating-tiles .pi-tile-s4.active { background: rgba(230,81,0,0.22); border: 1.5px solid #e65100; }
+#tab-tests_speculative_bet .s1-rating-tiles .pi-strip-s4 { background: #e65100; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-tests_speculative_bet .s1-rating-tiles .rt-breakdown { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.35; }
+#tab-tests_speculative_bet .pi-tier-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+#tab-tests_speculative_bet .pi-tier-chip { font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer; user-select: none; border: 0.5px solid; line-height: 1.4; white-space: nowrap; transition: background 0.12s, color 0.12s; }
+#tab-tests_speculative_bet .pi-chip-s3 { background: #FFEBEE; color: #c62828; border-color: #EF9A9A; }
+#tab-tests_speculative_bet .pi-chip-s3.on { background: #c62828; color: #fff; border-color: #c62828; font-weight: 500; }
+#tab-tests_speculative_bet .pi-chip-s4 { background: #FFF3E0; color: #e65100; border-color: #FFCC80; }
+#tab-tests_speculative_bet .pi-chip-s4.on { background: #e65100; color: #fff; border-color: #e65100; font-weight: 500; }
+#tab-tests_speculative_bet .pi-tier-chip:hover { filter: brightness(0.96); }
+/* Table styles — clone pb-main-table with red/amber accent */
+#sb-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#sb-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#sb-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#sb-main-table thead th:hover { background: #f0ebd9 !important; }
+#sb-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+#sb-main-table thead tr.group-header-row th { position: sticky; top: 0; }
+#sb-main-table thead tr.sub-group-row th { position: sticky; top: 24px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; color: #888; padding: 3px; font-weight: 600; background: #f8f6ee !important; border-bottom: 1px solid #e0dcc8; }
+#sb-main-table thead tr.col-header-row th { position: sticky; top: 44px; border-top: 1px solid #e0dcc8; }
+#sb-main-table thead .gh-inputs { color: #555; }
+#sb-main-table thead .gh-stageinfo { color: #7a6a3a; }
+#sb-main-table thead .gh-g1 { color: #c62828; }
+#sb-main-table thead .gh-g2 { color: #e65100; }
+#sb-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+#sb-main-table .hd .lbl { white-space: normal; word-break: break-word; }
+#sb-main-table .hd .sort-arrow { font-size: 9px; color: #c62828; flex: 0 0 auto; line-height: 1; }
+#sb-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+#sb-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+#sb-main-table tr:hover { background: rgba(198,40,40,0.05); }
+#sb-main-table td.grp-start-stageinfo, #sb-main-table th.grp-start-stageinfo { border-left: 2px solid rgba(122,106,58,0.40); }
+#sb-main-table td.grp-start-g1, #sb-main-table th.grp-start-g1 { border-left: 2px solid rgba(198,40,40,0.40); }
+#sb-main-table td.grp-start-g2, #sb-main-table th.grp-start-g2 { border-left: 2px solid rgba(230,81,0,0.40); }
+#sb-main-table td.pi-pass { background: rgba(198,40,40,0.12); color: #c62828; font-weight: 700; }
+#sb-main-table td.pi-fail { color: #999; }
+#sb-main-table td.pi-rating-cell { padding: 3px 4px; }
+#sb-main-table .pi-pill { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+#sb-main-table .pi-pill-tint-qualified { background: #7f1d1d; color: #fff; }
+#sb-main-table .pi-pill-tint-prob { background: #c62828; color: #fff; }
+#sb-main-table .pi-pill-tint-pla  { background: rgba(198,40,40,0.30); color: #7f1d1d; }
+#sb-main-table .pi-pill-tint-pos  { background: rgba(198,40,40,0.14); color: #8a5a5a; }
+#sb-main-table .pi-pill-tint-none { background: #ece9dd; color: #999; }
+#sb-main-table td.pi-score-cell { padding: 4px 3px; }
+#sb-main-table .pi-pip-row { display: inline-flex; align-items: center; gap: 2px; justify-content: center; }
+#sb-main-table .pi-pip-row .pip { width: 6px; height: 6px; border-radius: 50%; background: #d8d4c4; display: inline-block; }
+#sb-main-table .pi-pip-row .pip.on { background: #c62828; }
+#sb-main-table .pi-pip-row .pi-score-num { font-size: 9px; color: #777; margin-left: 3px; font-weight: 600; }
+#sb-main-table td.ct-stage-info-cell { padding: 3px 4px; }
+#sb-main-table .ct-info-label { display: inline-block; padding: 2px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
+#sb-main-table td.ct-stage-info-cell.tint-prob .ct-info-label { background: rgba(198,40,40,0.22); color: #7f1d1d; }
+#sb-main-table td.ct-stage-info-cell.tint-pla  .ct-info-label { background: rgba(198,40,40,0.13); color: #8a5a5a; }
+#sb-main-table td.ct-stage-info-cell.tint-pos  .ct-info-label { background: rgba(198,40,40,0.07); color: #6a7a72; }
+#sb-main-table td.ct-stage-info-cell.tint-none .ct-info-label { background: #f0ede1; color: #aaa; }
+#sb-main-table td.ct-window-col { padding: 3px 4px; font-size: 10px; }
+#sb-main-table td.ct-window-fired-recent { background: rgba(198,40,40,0.16); }
+#sb-main-table td.ct-window-fired-recent .ct-window-label { color: #7f1d1d; font-weight: 700; }
+#sb-main-table td.ct-window-fired-older { background: rgba(186,117,23,0.14); }
+#sb-main-table td.ct-window-fired-older .ct-window-label { color: #7a4e0a; font-weight: 600; }
+#sb-main-table td.ct-window-none { color: #bbb; }
+#sb-main-table td.ct-window-building { color: #b59a5a; font-style: italic; font-size: 9px; }
+#sb-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+#sb-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#sb-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
+#sb-main-table td.name-cell .live-dot { color: #2e7d32; font-weight: 700; margin-right: 4px; }
+#sb-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+#sb-main-table td.taxon .ind { color: #666; font-weight: 500; }
+#sb-main-table td.taxon .sec { color: #999; }
+#sb-main-table col.c-name { width: 124px; }
+#sb-main-table col.c-taxon { width: 150px; }
+#sb-main-table col.c-price { width: 50px; }
+#sb-main-table col.c-52wh { width: 48px; }
+#sb-main-table col.c-52wl { width: 48px; }
+#sb-main-table col.c-ma150 { width: 48px; }
+#sb-main-table col.c-ma200 { width: 48px; }
+#sb-main-table col.c-pullback { width: 58px; }
+#sb-main-table col.c-stageinfo { width: 56px; }
+#sb-main-table col.c-rating { width: 64px; }
+#sb-main-table col.c-score { width: 52px; }
+#sb-main-table col.c-test { width: 64px; }
+#sb-main-table col.c-window { width: 52px; }
+#sb-main-table tr.tint-row td.name-cell, #sb-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+#sb-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+#sb-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
+#sb-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+/* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER-CSS-END */
+
 """
 
     # ---- JavaScript ----
@@ -2699,7 +3041,7 @@ window.openChart=function(t){
   chartTicker=t;
   var p=document.getElementById("chart-panel");
   // MD-CHART-V2-WIRING-MARKER: V2 tabs slide the chart panel in from the LEFT; legacy keeps the right.
-  var _v2chartTabs={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,master_overview:1};
+  var _v2chartTabs={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet:1,tests_speculative_bet:1,master_overview:1};  /* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER */
   var _isV2chart=!!_v2chartTabs[currentTab];
   var _isStageChart=/^stage_[1-4]$/.test(currentTab);
   var _wasChartOpen=p.classList.contains("open");
@@ -2786,7 +3128,7 @@ window.setChartScaleMode=function(m){
 // MD-CHART-V2-WIRING-MARKER: V2 tabs - clicking a company/ticker name-cell opens that stock's chart.
 // This is the only chart entry point on V2 tabs (the header "Chart" button is hidden there via CSS).
 document.addEventListener("click",function(e){
-  var _v2ct={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,master_overview:1};
+  var _v2ct={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet:1,tests_speculative_bet:1,master_overview:1};  /* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER */
   if(!_v2ct[document.body.getAttribute("data-active-tab")])return;
   var _nameCell=e.target.closest("td.name-cell, td.mo-mx-name-cell");
   if(!_nameCell)return;
@@ -8948,6 +9290,9 @@ function SUM_renderQualifiedStocks() {
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Capital deployment</span>'
       + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests" onclick="switchTab(\'tests\')">Capital deployment tests</button>'
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">Healthy Retest</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet" onclick="switchTab(\'tests_probing_bet\')">Probing Bets</button>'  /* MD-V2-S47-TAB-PROBING-BET-MARKER */
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet" onclick="switchTab(\'tests_speculative_bet\')">Speculative Bets</button>'  /* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER */
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Overview</span>'
@@ -12229,6 +12574,1403 @@ function SUM_renderQualifiedStocks() {
 /* MD-V2-TESTS-MARKER-MODULE-END */
 
 
+
+/* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER-MODULE-START */
+// =============================================================================
+// HEALTHY RETEST OF MA — STANDALONE TAB MODULE (S47)
+// =============================================================================
+// MD-V2-S47-TAB-HEALTHY-RETEST-MARKER — idempotency marker for patcher detection
+//
+// Renders md_v2.tests.healthy_retest — the 13-criterion S46 test:
+//   Group A: Stage 2 hard precondition (1 criterion)
+//   Group B: Early-stage indicators (4 criteria: 2 uptrend + 2 pullback)
+//   Group C: Healthy-retest setup (6 criteria)
+//   Group D: Capital deployment trigger (2 criteria)
+// =============================================================================
+
+(function() {
+  'use strict';
+
+  var HR_KEY = 'healthy_retest';
+
+  // Tier ladder includes Qualified (above Probable)
+  var HR_TIERS = ['None', 'Possible', 'Plausible', 'Probable', 'Qualified'];
+  var HR_TIER_DISPLAY = ['Possible', 'Plausible', 'Probable', 'Qualified'];
+  var HR_RATING_RANK = { 'Qualified':6, 'Probable':5, 'Plausible':3, 'Possible':2, 'None':1 };
+  var HR_RATING_CLS  = { 'Qualified':'tint-qualified', 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
+
+  // The 13 tests in order, with group labels for sub-group row
+  var HR_TESTS = [
+    { key: 'g1_stage_2_qualifies',         label: 'Stage 2 qualifies',        group: 'precondition', tooltip: 'Stage 2 rating is Probable or Plausible — hard precondition' },
+    { key: 'g2_b1_50d_rising',             label: '50D MA rising',            group: 'indicator',    tooltip: '50-day moving average is rising day-over-day' },
+    { key: 'g2_b2_150d_rising',            label: '150D MA rising',           group: 'indicator',    tooltip: '150-day moving average is rising day-over-day' },
+    { key: 'g2_b3_5d_declining',           label: '5D MA declining',          group: 'indicator',    tooltip: '5-day moving average is declining — pulling back' },
+    { key: 'g2_b4_10d_declining',          label: '10D MA declining',         group: 'indicator',    tooltip: '10-day moving average is declining — pulling back' },
+    { key: 'g3_c1_volume_contracting',     label: 'Volume contracting',       group: 'setup',        tooltip: '10-day average volume below the 50-day — selling drying up' },
+    { key: 'g3_c2_up_vol_gt_down_vol',     label: 'Up-vol > down-vol',        group: 'setup',        tooltip: 'Up-day volume exceeds down-day volume over the last month' },
+    { key: 'g3_c3_few_distribution_days',  label: 'Few distribution days',    group: 'setup',        tooltip: 'Three or fewer distribution days over the last 25 sessions' },
+    { key: 'g3_c4_volatility_reducing',    label: 'Volatility reducing',      group: 'setup',        tooltip: '10-day ATR below the 20-day — orderly pullback' },
+    { key: 'g3_c5_testing_meaningful_ma',  label: 'Testing a meaningful MA',  group: 'setup',        tooltip: 'Price has come down to within range of a 50/100/150/200-day MA' },
+    { key: 'g3_c6_buying_through_l10d',    label: 'Buying through 10 days',   group: 'setup',        tooltip: 'At least half of the last 10 days closed in the upper 40% of range' },
+    { key: 'g4_d1_reclaimed_ma',           label: 'Reclaimed the MA',         group: 'trigger',      tooltip: 'Current price is back above the moving average being tested' },
+    { key: 'g4_d2_confirmation_close_ge2pct', label: 'Confirm: close 2%+ up', group: 'trigger',      tooltip: 'Today\'s close is at least 2% above yesterday\'s' }
+  ];
+
+  var hrState = {
+    mode: { inputs: 'pct', tests: 'tick' },
+    scope: 'all',
+    tierFilter: [],
+    tint: 'none',
+    port: 'off',
+    sort: { col: 'company', dir: 'asc' }
+  };
+
+  // --- data lookups (reuse from ct module where exported, else standalone) ---
+  function hrPricesLookup() {
+    if (window._ctPricesByTicker) return window._ctPricesByTicker;
+    var out = {};
+    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    window._ctPricesByTicker = out;
+    return out;
+  }
+  function hrLiveTickers() {
+    var out = {};
+    var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
+    for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
+    return out;
+  }
+  function hrLiveSectors() {
+    var out = {}, prices = hrPricesLookup(), tickers = hrLiveTickers();
+    for (var t in tickers) { var p = prices[t]; if (p && p.sector) out[p.sector] = true; }
+    return out;
+  }
+  function hrLiveIndustries() {
+    var out = {}, prices = hrPricesLookup(), tickers = hrLiveTickers();
+    for (var t in tickers) { var p = prices[t]; if (p && p.industry) out[p.industry] = true; }
+    return out;
+  }
+  function hrGetRec(row) {
+    var dk = row.md_v2 && row.md_v2.tests;
+    return (dk && dk[HR_KEY]) || null;
+  }
+  function hrEvalTest(row, testKey) {
+    var rec = hrGetRec(row);
+    if (!rec || !rec.tests) return false;
+    return !!rec.tests[testKey];
+  }
+  function hrRowRating(row) {
+    var rec = hrGetRec(row);
+    return rec ? (rec.rating || 'None') : 'None';
+  }
+  function hrStageRating(row, stageKey) {
+    var md = row.md_v2 || {};
+    var st = md[stageKey];
+    return (st && st.rating) || 'None';
+  }
+  function hrGetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = hrPricesLookup();
+    var live = hrLiveTickers(), liveS = hrLiveSectors(), liveI = hrLiveIndustries();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2 || !s.md_v2.tests) continue;
+      var rec = s.md_v2.tests[HR_KEY];
+      if (!rec) continue;
+      var p = prices[s.ticker] || {};
+      var mas = p.mas || {};
+      rows.push({
+        ticker: s.ticker, company: p.company_name || s.ticker,
+        sector: p.sector || '', industry: p.industry || '',
+        price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
+        recent_pullback: p.recent_pullback_pct,
+        ma_150: mas['150D'], ma_200: mas['200D'],
+        md_v2: s.md_v2,
+        is_live: !!live[s.ticker],
+        sector_in_portfolio: !!liveS[p.sector],
+        industry_in_portfolio: !!liveI[p.industry]
+      });
+    }
+    return rows;
+  }
+
+  // --- counts ---
+  function hrTierCounts(rows) {
+    var c = {};
+    for (var i = 0; i < HR_TIERS.length; i++) c[HR_TIERS[i]] = 0;
+    for (var j = 0; j < rows.length; j++) {
+      var r = hrRowRating(rows[j]);
+      if (c[r] != null) c[r]++;
+    }
+    return c;
+  }
+  function hrPassHistogram(rows) {
+    var h = [];
+    for (var k = 0; k <= 13; k++) h[k] = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var rec = hrGetRec(rows[i]);
+      var cnt = rec ? (rec.count || 0) : 0;
+      if (cnt >= 0 && cnt <= 13) h[cnt]++;
+    }
+    return h;
+  }
+
+  // --- formatting helpers (standalone copies to avoid cross-module deps) ---
+  function hrFmtNum(n) {
+    if (n == null || isNaN(n)) return '-';
+    var abs = Math.abs(n);
+    var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0;
+    var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+    return n < 0 ? '(' + f + ')' : f;
+  }
+  function hrFmtPct(p) {
+    if (p == null || isNaN(p)) return '-';
+    var r = Math.round(p), abs = Math.abs(r);
+    return r < 0 ? '(' + abs + ')%' : r + '%';
+  }
+  function hrColourForIntensity(i) {
+    if (i >= 0.6) return '#2E7D32';
+    if (i >= 0.25) return '#4CAF50';
+    if (i >= 0.05) return '#81C784';
+    if (i <= -0.6) return '#A32D2D';
+    if (i <= -0.25) return '#E24B4A';
+    if (i <= -0.05) return '#F09595';
+    return '#888';
+  }
+  function hrInputCell(row, key, extraCls) {
+    extraCls = extraCls || '';
+    var v = row[key];
+    if (key === 'price') return '<td class="num ' + extraCls + '">' + hrFmtNum(v) + '</td>';
+    if (key === 'recent_pullback') {
+      if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">-</td>';
+      var pctVal = v * 100;
+      var pi_intensity = Math.max(-1, Math.min(1, (pctVal - 5) / 20));
+      var col = hrColourForIntensity(-pi_intensity);
+      return '<td class="num ' + extraCls + '" style="color:' + col + '">' + Math.round(pctVal) + '%</td>';
+    }
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">-</td>';
+    var pct = (row.price - v) / v * 100;
+    var intensity = 0;
+    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 5) / 20));
+    else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
+    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
+    var colour = hrColourForIntensity(intensity);
+    var text = (hrState.mode.inputs === 'pct') ? hrFmtPct(pct) : hrFmtNum(v);
+    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+  }
+  function hrStageInfoCell(row, stageKey, cls) {
+    var rating = hrStageRating(row, stageKey);
+    var rcls = HR_RATING_CLS[rating] || (rating.indexOf('Probable') === 0 ? 'tint-prob'
+              : rating.indexOf('Plausible') === 0 ? 'tint-pla'
+              : rating.indexOf('Possible') === 0 ? 'tint-pos' : 'tint-none');
+    return '<td class="' + (cls || '') + ' ct-stage-info-cell ' + rcls + '">' +
+           '<span class="ct-info-label">' + rating + '</span></td>';
+  }
+  function hrTestValueFor(row, testKey) {
+    var rec = hrGetRec(row);
+    var tv = rec && rec.test_values;
+    if (!tv || !(testKey in tv)) return '—';
+    var v = tv[testKey];
+    if (v === null || v === undefined) return '—';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number') {
+      if (isNaN(v)) return '—';
+      if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return hrFmtPct(v * 100);
+      return hrFmtNum(v);
+    }
+    return String(v);
+  }
+  function hrTestCell(row, testKey, cls) {
+    var pass = hrEvalTest(row, testKey);
+    var extra = cls || '';
+    if (hrState.mode.tests === 'val') {
+      var v = hrTestValueFor(row, testKey);
+      var colour = pass ? hrColourForIntensity(0.7) : hrColourForIntensity(-0.4);
+      return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+    }
+    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
+    return '<td class="pi-fail ' + extra + '">.</td>';
+  }
+  function hrRatingCell(row, cls) {
+    var rating = hrRowRating(row);
+    var rcls = HR_RATING_CLS[rating] || 'tint-none';
+    return '<td class="' + (cls || '') + ' pi-rating-cell ' + rcls + '"><span class="pi-pill pi-pill-' + rcls + '">' + rating + '</span></td>';
+  }
+  function hrScoreCell(row, cls) {
+    var rec = hrGetRec(row);
+    var cnt = rec ? (rec.count || 0) : 0;
+    var tot = rec ? (rec.total || 0) : 0;
+    var s = '';
+    for (var i = 0; i < tot; i++) s += '<span class="pip ' + (i < cnt ? 'on' : '') + '"></span>';
+    return '<td class="' + (cls || '') + ' pi-score-cell"><div class="pi-pip-row">' + s +
+           '<span class="pi-score-num">' + cnt + '/' + tot + '</span></div></td>';
+  }
+  function hrWindowCell(row, windowKey, cls) {
+    var rec = hrGetRec(row);
+    var extra = cls || '';
+    if (!rec) return '<td class="' + extra + ' ct-window-na">-</td>';
+    var depth = rec.history_depth || 0;
+    var windowDays = (windowKey === 'l5d') ? 5 : 20;
+    if (depth < windowDays) {
+      return '<td class="' + extra + ' ct-window-building" title="' + depth +
+             ' of ' + windowDays + ' days of history accumulated">building</td>';
+    }
+    var fired = (windowKey === 'l5d') ? !!rec.fired_l5d : !!rec.fired_l20d;
+    if (!fired) return '<td class="' + extra + ' ct-window-none">-</td>';
+    var ds = rec.days_since_fired;
+    var label;
+    if (ds === 0) label = 'today';
+    else if (ds === 1) label = '1d ago';
+    else if (ds != null) label = ds + 'd ago';
+    else label = 'fired';
+    var shadeCls = (ds != null && ds <= 5) ? 'ct-window-fired-recent' : 'ct-window-fired-older';
+    return '<td class="' + extra + ' ' + shadeCls + '" title="most recent fire ' + label + '">' +
+           '<span class="ct-window-label">' + label + '</span></td>';
+  }
+  function hrHashColor(label, alpha) {
+    if (!label) return null;
+    var h = 0;
+    for (var i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff;
+    return 'hsla(' + (h % 360) + ', 35%, 55%, ' + alpha + ')';
+  }
+  function hrPortfolioInfo(row) {
+    if (row.is_live) return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)', bgHover:'rgba(27,94,32,0.14)' };
+    if (row.sector_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)', bgHover:'rgba(27,94,32,0.08)' };
+    if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' };
+    return null;
+  }
+
+  // --- sorting ---
+  var HR_COL_MODEL = null;
+  function hrBuildColModel() {
+    if (HR_COL_MODEL) return HR_COL_MODEL;
+    var cols = [
+      { id:'name',     sortKey:'company',         kind:'input' },
+      { id:'taxon',    sortKey:'sector',           kind:'input' },
+      { id:'price',    sortKey:'price',            kind:'input' },
+      { id:'high_52w', sortKey:'high_52w',         kind:'input' },
+      { id:'low_52w',  sortKey:'low_52w',          kind:'input' },
+      { id:'ma_150',   sortKey:'ma_150',           kind:'input' },
+      { id:'ma_200',   sortKey:'ma_200',           kind:'input' },
+      { id:'pullback', sortKey:'recent_pullback',  kind:'input' }
+    ];
+    var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
+    for (var si = 0; si < STAGES.length; si++) {
+      cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] });
+    }
+    cols.push({ id:'hr_rating', sortKey:'hr__rating', kind:'rating' });
+    cols.push({ id:'hr_score',  sortKey:'hr__score',  kind:'score' });
+    for (var t = 0; t < HR_TESTS.length; t++) {
+      cols.push({ id:'hr_t'+(t+1), sortKey:'hr__'+HR_TESTS[t].key, kind:'test', testKey:HR_TESTS[t].key, group:HR_TESTS[t].group });
+    }
+    cols.push({ id:'hr_l5d',  sortKey:'hr__l5d',  kind:'window', windowKey:'l5d' });
+    cols.push({ id:'hr_l20d', sortKey:'hr__l20d', kind:'window', windowKey:'l20d' });
+    HR_COL_MODEL = cols;
+    return cols;
+  }
+  function hrGetSortVal(row, key) {
+    if (key.indexOf('stageinfo__') === 0) {
+      var sk = key.split('__')[1];
+      return HR_RATING_RANK[hrStageRating(row, sk)] || 0;
+    }
+    if (key === 'hr__rating') return HR_RATING_RANK[hrRowRating(row)] || 0;
+    if (key === 'hr__score') { var rec = hrGetRec(row); return rec ? (rec.count || 0) : 0; }
+    if (key === 'hr__l5d' || key === 'hr__l20d') {
+      var rec2 = hrGetRec(row);
+      if (!rec2) return -1;
+      var sub = key.split('__')[1];
+      var windowDays = (sub === 'l5d') ? 5 : 20;
+      var depth = rec2.history_depth || 0;
+      if (depth < windowDays) return -2;
+      var fired = (sub === 'l5d') ? rec2.fired_l5d : rec2.fired_l20d;
+      if (!fired) return -1;
+      var ds = rec2.days_since_fired;
+      return (ds == null) ? 0 : (1000 - ds);
+    }
+    if (key.indexOf('hr__') === 0) {
+      var testKey = key.substring(4);
+      return hrEvalTest(row, testKey) ? 1 : 0;
+    }
+    if (key === 'recent_pullback') return row.recent_pullback == null ? -Infinity : row.recent_pullback;
+    var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
+    if (PCT_KEYS.indexOf(key) > -1 && hrState.mode.inputs === 'pct') {
+      var ref = row[key];
+      if (ref == null || row.price == null || ref === 0) return -Infinity;
+      return (row.price - ref) / ref * 100;
+    }
+    if (key in row) return row[key];
+    return 0;
+  }
+  function hrOnSort(key) {
+    if (hrState.sort.col === key) hrState.sort.dir = hrState.sort.dir === 'desc' ? 'asc' : 'desc';
+    else hrState.sort = { col: key, dir: key === 'company' ? 'asc' : 'desc' };
+    hrBuildHeaderRow();
+    hrRenderRows();
+  }
+
+  // --- header row ---
+  function hrBuildHeaderRow() {
+    var tr = document.getElementById('hr-col-header-row');
+    if (!tr) return;
+    var cols = hrBuildColModel();
+    var INPUT_LABELS = ['Company - Ticker','Industry - Sector','Price','52wk high','52wk low','150D MA','200D MA','Pullback'];
+    var STAGE_LABELS = ['Stage 1','Stage 2','Stage 3','Stage 4'];
+    var h = '';
+    for (var i = 0; i < cols.length; i++) {
+      var c = cols[i];
+      var isSort = hrState.sort.col === c.sortKey;
+      var arrow = isSort
+        ? '<span class="sort-arrow">' + (hrState.sort.dir === 'desc' ? String.fromCharCode(9660) : String.fromCharCode(9650)) + '</span>'
+        : '<span class="sort-placeholder"></span>';
+      var label, title, cls = '';
+      if (c.kind === 'input') { label = INPUT_LABELS[i]; title = label; }
+      else if (c.kind === 'stageinfo') { label = STAGE_LABELS[i - 8]; title = label + ' rating'; cls = (i === 8 ? 'grp-start-stageinfo ' : ''); }
+      else if (c.kind === 'rating') { label = 'Rating'; title = 'Healthy Retest rating'; cls = 'grp-start-rating '; }
+      else if (c.kind === 'score') { label = 'Score'; title = 'Pass count out of 13'; }
+      else if (c.kind === 'test') { var tDef = HR_TESTS[i - 14]; label = tDef.label; title = tDef.tooltip; cls = (i === 14 ? 'grp-start-tests ' : ''); }
+      else if (c.kind === 'window') { label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label; cls = 'ct-window-col'; }
+      else { label = '?'; title = ''; }
+      h += '<th class="' + cls + '" data-sort-key="' + c.sortKey + '" title="' + title + '">' +
+           '<span class="hd"><span class="lbl">' + label + '</span>' + arrow + '</span></th>';
+    }
+    tr.innerHTML = h;
+  }
+
+  // --- tile ---
+  function hrPatternTile(scopeRows) {
+    var tiles = document.getElementById('hr-pattern-tiles');
+    if (!tiles) return;
+    var tierCounts = hrTierCounts(scopeRows);
+    var total = scopeRows.length;
+    var cnt = total - (tierCounts['None'] || 0);
+    var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+    var sel = hrState.tierFilter;
+    var anySel = sel.length > 0;
+    var headline = cnt, headSub = 'of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%';
+    if (anySel) {
+      var ft = 0;
+      for (var z = 0; z < sel.length; z++) ft += (tierCounts[sel[z]] || 0);
+      headline = ft;
+      headSub = sel.join(' + ') + ' · filtered';
+    }
+    var hist = hrPassHistogram(scopeRows);
+    var breakdown = '';
+    for (var k = 1; k <= 13; k++) {
+      if (k > 1) breakdown += ' · ';
+      breakdown += k + '/13: ' + (hist[k] || 0).toLocaleString('en-GB');
+    }
+    var chips = '';
+    for (var c = 0; c < HR_TIER_DISPLAY.length; c++) {
+      var tier = HR_TIER_DISPLAY[c];
+      var on = sel.indexOf(tier) > -1;
+      var tc = tierCounts[tier] || 0;
+      chips += '<span class="pi-tier-chip pi-chip-pullback' +
+               (on ? ' on' : '') + '" data-tier="' + tier + '">' +
+               tier + ' ' + tc.toLocaleString('en-GB') + (on ? ' ' + String.fromCharCode(10003) : '') + '</span>';
+    }
+    var activeCls = anySel ? ' active' : '';
+    tiles.innerHTML = '<div class="rating-tile pi-tile-pullback' + activeCls + '" title="Healthy Retest of Upwards MA — 13-criterion test">' +
+         '<div class="rt-label">Healthy Retest</div>' +
+         '<div class="rt-count">' + headline.toLocaleString('en-GB') + '</div>' +
+         '<div class="rt-sub">' + headSub + '</div>' +
+         '<div class="rt-breakdown">' + breakdown + '</div>' +
+         '<div class="pi-tier-chips">' + chips + '</div>' +
+         '<div class="rt-strip pi-strip-pullback"></div>' +
+         '</div>';
+  }
+
+  // --- scope / filter ---
+  function hrUpdateScopeCounts(rows) {
+    function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
+    set('hr-cnt-all',      rows.length);
+    set('hr-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
+    set('hr-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
+    set('hr-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
+  }
+  function hrApplyScope(all) {
+    var rows = all.slice();
+    if (hrState.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
+    else if (hrState.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
+    else if (hrState.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
+    return rows;
+  }
+  function hrApplyTierFilter(rows) {
+    var sel = hrState.tierFilter;
+    if (sel.length === 0) return rows;
+    return rows.filter(function(r) {
+      var rating = hrRowRating(r);
+      return sel.indexOf(rating) > -1;
+    });
+  }
+
+  // --- main render ---
+  function hrRenderRows() {
+    var tbody = document.getElementById('hr-tbody');
+    if (!tbody) return;
+    var all = hrGetRows();
+    var scopeRows = hrApplyScope(all);
+    hrUpdateScopeCounts(all);
+    hrPatternTile(scopeRows);
+    var rows = hrApplyTierFilter(scopeRows);
+    rows.sort(function(a,b) {
+      var va = hrGetSortVal(a, hrState.sort.col), vb = hrGetSortVal(b, hrState.sort.col);
+      var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
+      if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker);
+      return hrState.sort.dir === 'desc' ? -cmp : cmp;
+    });
+    var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i];
+      var styles = [], cls = [];
+      if (hrState.tint === 'industry') { styles.push('--tint-bg: ' + hrHashColor(s.industry, 0.16)); cls.push('tint-row'); }
+      else if (hrState.tint === 'sector') { styles.push('--tint-bg: ' + hrHashColor(s.sector, 0.16)); cls.push('tint-row'); }
+      if (hrState.port === 'on') {
+        var pinf = hrPortfolioInfo(s);
+        if (pinf) {
+          styles.push('--portfolio-color: ' + pinf.color);
+          styles.push('--portfolio-bg: ' + pinf.bg);
+          styles.push('--portfolio-bg-hover: ' + pinf.bgHover);
+          cls.push('portfolio-band'); cls.push('portfolio-tint');
+        }
+      }
+      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">' + String.fromCharCode(9679) + '</span>' : '';
+      html += '<tr' + clsAttr + styleAttr + '>' +
+        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
+        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
+        hrInputCell(s, 'price') + hrInputCell(s, 'high_52w') + hrInputCell(s, 'low_52w') +
+        hrInputCell(s, 'ma_150') + hrInputCell(s, 'ma_200') + hrInputCell(s, 'recent_pullback');
+      // 4-stage info block
+      for (var si = 0; si < STAGES.length; si++) {
+        html += hrStageInfoCell(s, STAGES[si], si === 0 ? 'grp-start-stageinfo' : '');
+      }
+      // Rating + score
+      html += hrRatingCell(s, 'grp-start-rating');
+      html += hrScoreCell(s, '');
+      // 13 test columns
+      for (var ti = 0; ti < HR_TESTS.length; ti++) {
+        var tCls = (ti === 0) ? 'grp-start-tests' : '';
+        html += hrTestCell(s, HR_TESTS[ti].key, tCls);
+      }
+      // L5D / L20D
+      html += hrWindowCell(s, 'l5d', 'ct-window-col');
+      html += hrWindowCell(s, 'l20d', 'ct-window-col');
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  // --- control setters ---
+  window.hrSetMode = function(kind, val) {
+    hrState.mode[kind] = val;
+    var btns = document.querySelectorAll('button[data-hr-grp="' + kind + '"]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-hr-val') === val);
+    hrRenderRows();
+  };
+  window.hrSetScope = function(s) {
+    hrState.scope = s;
+    var btns = document.querySelectorAll('button[data-hr-scope]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-hr-scope') === s);
+    hrRenderRows();
+  };
+  window.hrSetTint = function(t) {
+    hrState.tint = t;
+    var btns = document.querySelectorAll('button[data-hr-tint]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-hr-tint') === t);
+    hrRenderRows();
+  };
+  window.hrSetPort = function(p) {
+    hrState.port = p;
+    var btns = document.querySelectorAll('button[data-hr-port]');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-hr-port') === p);
+    hrRenderRows();
+  };
+  window.hrToggleTier = function(tier) {
+    var sel = hrState.tierFilter;
+    var idx = sel.indexOf(tier);
+    if (idx > -1) sel.splice(idx, 1);
+    else sel.push(tier);
+    hrRenderRows();
+  };
+  window.hrSelectAllTiers = function() {
+    var sel = hrState.tierFilter;
+    var onlyProb = (sel.length === 1 && sel[0] === 'Probable');
+    hrState.tierFilter = onlyProb ? [] : ['Probable'];
+    hrRenderRows();
+  };
+  window.hrOnSort = hrOnSort;
+
+  // --- scaffold ---
+  function hrBuildScaffold() {
+    var host = document.getElementById('tab-setups_healthy_retest');
+    if (!host) return false;
+    if (host.querySelector('#hr-main-table')) return true;
+
+    // colgroup
+    var cg = '<col class="c-name"><col class="c-taxon">' +
+             '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
+             '<col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
+    for (var si = 0; si < 4; si++) cg += '<col class="c-stageinfo">';
+    cg += '<col class="c-rating"><col class="c-score">';
+    for (var ti = 0; ti < 13; ti++) cg += '<col class="c-test">';
+    cg += '<col class="c-window"><col class="c-window">';
+
+    // group-header row
+    var gHdr = '<th class="gh-inputs" colspan="8">Inputs</th>' +
+               '<th class="gh-stageinfo grp-start-stageinfo" colspan="4">Stage ratings</th>' +
+               '<th class="gh-tests grp-start-rating" colspan="' + (2 + 13 + 2) + '">Healthy Retest of Upwards MA</th>';
+
+    // sub-group row
+    var subGrp = '<th class="sg-spacer" colspan="8"></th>' +
+                 '<th class="sg-spacer" colspan="4"></th>' +
+                 '<th class="sub-g" colspan="2">Rating</th>' +
+                 '<th class="sub-g" colspan="1">Gate</th>' +
+                 '<th class="sub-g" colspan="4">Indicator</th>' +
+                 '<th class="sub-g" colspan="6">Setup</th>' +
+                 '<th class="sub-g" colspan="2">Trigger</th>' +
+                 '<th class="sub-g" colspan="2">Context</th>';
+
+    var theadRows = '<tr class="group-header-row">' + gHdr + '</tr>' +
+                    '<tr class="sub-group-row">' + subGrp + '</tr>' +
+                    '<tr class="col-header-row" id="hr-col-header-row"></tr>';
+
+    var captionHtml = '<div class="gcap"><b>Healthy Retest of Upwards MA</b>' +
+      '<span class="db">The trigger that pairs with the Healthy retest setup — a stock pulling back to an upwards-moving MA in a Stage 2 uptrend, then reclaiming it on healthy volume and volatility.</span>' +
+      '<span class="intro">13 criteria across 4 groups:</span>' +
+      '<span class="tline"><span class="tnum">(A)</span> <u>Stage 2 hard precondition</u> — Probable or Plausible</span>' +
+      '<span class="tline"><span class="tnum">(B)</span> <u>Early-stage indicators</u> — 50D and 150D rising (uptrend) + 5D and 10D declining (pullback)</span>' +
+      '<span class="tline"><span class="tnum">(C)</span> <u>Healthy-retest setup</u> — volume contracting, up-vol beats down-vol, few distribution days, volatility reducing, testing a meaningful MA, buying through 10 days</span>' +
+      '<span class="tline"><span class="tnum">(D)</span> <u>Trigger</u> — reclaimed the MA + confirmation close 2%+ above yesterday</span>' +
+      '</div>';
+
+    var html = '' +
+      '<div class="s1-intro">Healthy Retest of Upwards MA — the 13-criterion test for a Core Minervini trade. A stock must be in a Stage 2 uptrend (Probable or Plausible), pulling back towards an upwards-moving MA on healthy volume and volatility characteristics, then reclaiming the MA with a confirming up-day. Rating tiers: Qualified (all 13), Probable (12 of 13 — missing only the confirmation), Plausible (gate + indicators + 3 of 6 setup criteria), Possible (gate + indicators only). Click a tier chip to filter. Click the tile body to select Probable.</div>' +
+      '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
+          '<button class="toggle-btn active" data-hr-grp="inputs" data-hr-val="pct" onclick="hrSetMode(\'inputs\',\'pct\')">show as %</button>' +
+          '<button class="toggle-btn" data-hr-grp="inputs" data-hr-val="raw" onclick="hrSetMode(\'inputs\',\'raw\')">show as numbers</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +
+          '<button class="toggle-btn active" data-hr-grp="tests" data-hr-val="tick" onclick="hrSetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-hr-grp="tests" data-hr-val="val" onclick="hrSetMode(\'tests\',\'val\')">show test values</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
+          '<button class="toggle-btn active" data-hr-scope="all" onclick="hrSetScope(\'all\')">All <span id="hr-cnt-all"></span></button>' +
+          '<button class="toggle-btn" data-hr-scope="live" onclick="hrSetScope(\'live\')">Live <span id="hr-cnt-live"></span></button>' +
+          '<button class="toggle-btn" data-hr-scope="sector" onclick="hrSetScope(\'sector\')">Sectors <span id="hr-cnt-sector"></span></button>' +
+          '<button class="toggle-btn" data-hr-scope="industry" onclick="hrSetScope(\'industry\')">Industries <span id="hr-cnt-industry"></span></button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Peers</button>' +
+          '<button class="toggle-btn disabled" title="Definition pending">Cohorts</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span>' +
+          '<button class="toggle-btn active" data-hr-tint="none" onclick="hrSetTint(\'none\')">Off</button>' +
+          '<button class="toggle-btn" data-hr-tint="industry" onclick="hrSetTint(\'industry\')">Industry</button>' +
+          '<button class="toggle-btn" data-hr-tint="sector" onclick="hrSetTint(\'sector\')">Sector</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+          '<button class="toggle-btn active" data-hr-port="off" onclick="hrSetPort(\'off\')">Off</button>' +
+          '<button class="toggle-btn" data-hr-port="on" onclick="hrSetPort(\'on\')">On</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="hr-pattern-tiles"></div>' +
+      '<div class="group-captions">' + captionHtml + '</div>' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +
+        '<table class="data-table" id="hr-main-table">' +
+          '<colgroup>' + cg + '</colgroup>' +
+          '<thead>' + theadRows + '</thead>' +
+          '<tbody id="hr-tbody"></tbody>' +
+        '</table>' +
+      '</div></div>';
+    host.innerHTML = html;
+
+    // Tile click events
+    var tiles = document.getElementById('hr-pattern-tiles');
+    if (tiles) {
+      tiles.addEventListener('click', function(e) {
+        var chip = e.target.closest('.pi-tier-chip');
+        if (chip) {
+          var ct = chip.getAttribute('data-tier');
+          if (ct) hrToggleTier(ct);
+          return;
+        }
+        var tile = e.target.closest('.rating-tile');
+        if (tile) hrSelectAllTiers();
+      });
+    }
+    // Header sort events
+    var hdr = document.getElementById('hr-col-header-row');
+    if (hdr) {
+      hdr.addEventListener('click', function(e) {
+        var th = e.target.closest('th');
+        if (!th) return;
+        var key = th.getAttribute('data-sort-key');
+        if (key) hrOnSort(key);
+      });
+    }
+    return true;
+  }
+
+  function renderHealthyRetest() {
+    if (!hrBuildScaffold()) return;
+    hrBuildHeaderRow();
+    hrRenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();
+  }
+  window.renderHealthyRetest = renderHealthyRetest;
+
+})();
+
+/* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER-MODULE-END */
+
+
+
+/* MD-V2-S47-TAB-PROBING-BET-MARKER-MODULE-START */
+// =============================================================================
+// PROBING BETS (S1+S2) — TAB MODULE (S47)
+// =============================================================================
+// MD-V2-S47-TAB-PROBING-BET-MARKER
+// Two 6-criterion test variants on one tab:
+//   probing_bet_s1: Stage 1 MT troughing + breakout => S1 early probing bet
+//   probing_bet_s2: Stage 2 MT/LT uptrend + breakout => S2 idiosyncratic probing bet
+// =============================================================================
+
+(function() {
+  'use strict';
+
+  var PB_PATTERNS = [
+    {
+      key: 'probing_bet_s1',
+      label: 'Stage 1 MT troughing trend + breakout ⇒ S1 early probing bet',
+      shortLabel: 'S1 Probing',
+      tone: 's1',
+      tierLadder: ['Possible', 'Plausible', 'Probable', 'Qualified'],
+      total: 6,
+      tooltip: 'A breakout on a Stage 1 (basing/troughing) stock — a probing position to see if the trend is turning.',
+      caption: '<span class="db">A positive breakout on a Stage 1 stock.</span> The 5D and 10D MAs must be rising. Price must be above the 20D MA, and the 20D MA must have turned up in the last 5 days. Confirmation requires a close 2%+ above yesterday.',
+      tests: [
+        { key: 'g1_stage_qualifies',            label: 'Stage 1 qualifies',    group: 'gate',    tooltip: 'Stage 1 rating is Probable or Plausible — hard precondition' },
+        { key: 'g2_5d_rising',                   label: '5D MA rising',         group: 'setup',   tooltip: '5-day moving average is rising day-over-day' },
+        { key: 'g3_10d_rising',                  label: '10D MA rising',        group: 'setup',   tooltip: '10-day moving average is rising day-over-day' },
+        { key: 'g4_price_gt_20d',                label: 'Price > 20D MA',       group: 'trigger', tooltip: 'Current price is above the 20-day moving average' },
+        { key: 'g5_20d_turn_last_5d',            label: '20D MA turned up',     group: 'trigger', tooltip: '20D MA is rising now AND was falling 5 days ago — the turn' },
+        { key: 'g6_followthrough_close_ge2pct',  label: 'Confirm: close 2%+',   group: 'trigger', tooltip: 'Today close at least 2% above yesterday — follow-through confirmation' }
+      ]
+    },
+    {
+      key: 'probing_bet_s2',
+      label: 'Stage 2 MT/LT uptrend + breakout ⇒ S2 idiosyncratic probing bet',
+      shortLabel: 'S2 Probing',
+      tone: 's2',
+      tierLadder: ['Possible', 'Plausible', 'Probable', 'Qualified'],
+      total: 6,
+      tooltip: 'A breakout on a Stage 2 (uptrend) stock that did not base or pull back — a probing position, often event-driven.',
+      caption: '<span class="db">A positive breakout on a Stage 2 stock without the standard pullback or basing pattern.</span> Same criteria as S1 probing bet, but the stock is in a confirmed MT/LT uptrend. Often triggered by an event or news.',
+      tests: [
+        { key: 'g1_stage_qualifies',            label: 'Stage 2 qualifies',    group: 'gate',    tooltip: 'Stage 2 rating is Probable or Plausible — hard precondition' },
+        { key: 'g2_5d_rising',                   label: '5D MA rising',         group: 'setup',   tooltip: '5-day moving average is rising day-over-day' },
+        { key: 'g3_10d_rising',                  label: '10D MA rising',        group: 'setup',   tooltip: '10-day moving average is rising day-over-day' },
+        { key: 'g4_price_gt_20d',                label: 'Price > 20D MA',       group: 'trigger', tooltip: 'Current price is above the 20-day moving average' },
+        { key: 'g5_20d_turn_last_5d',            label: '20D MA turned up',     group: 'trigger', tooltip: '20D MA is rising now AND was falling 5 days ago — the turn' },
+        { key: 'g6_followthrough_close_ge2pct',  label: 'Confirm: close 2%+',   group: 'trigger', tooltip: 'Today close at least 2% above yesterday — follow-through confirmation' }
+      ]
+    }
+  ];
+
+  var PB_TONE_TILE  = { s1:'pi-tile-s1', s2:'pi-tile-s2' };
+  var PB_TONE_STRIP = { s1:'pi-strip-s1', s2:'pi-strip-s2' };
+  var PB_TONE_CHIP  = { s1:'s1', s2:'s2' };
+
+  var pbState = {
+    mode: { inputs: 'pct', tests: 'tick' },
+    scope: 'all',
+    tierFilter: {},
+    tint: 'none',
+    port: 'off',
+    sort: { col: 'company', dir: 'asc' }
+  };
+  for (var _ip = 0; _ip < PB_PATTERNS.length; _ip++) pbState.tierFilter[PB_PATTERNS[_ip].key] = [];
+
+  var PB_RATING_RANK = { 'Qualified':6, 'Probable':5, 'Plausible':3, 'Possible':2, 'None':1 };
+  var PB_RATING_CLS  = { 'Qualified':'tint-qualified', 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
+
+  // --- data lookups ---
+  function pbPricesLookup() {
+    if (window._ctPricesByTicker) return window._ctPricesByTicker;
+    var out = {};
+    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    window._ctPricesByTicker = out;
+    return out;
+  }
+  function pbLiveTickers() { var o = {}; var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || []; for (var i = 0; i < inv.length; i++) if (inv[i].ticker) o[inv[i].ticker] = true; return o; }
+  function pbLiveSectors() { var o = {}, p = pbPricesLookup(), t = pbLiveTickers(); for (var k in t) { var px = p[k]; if (px && px.sector) o[px.sector] = true; } return o; }
+  function pbLiveIndustries() { var o = {}, p = pbPricesLookup(), t = pbLiveTickers(); for (var k in t) { var px = p[k]; if (px && px.industry) o[px.industry] = true; } return o; }
+  function pbPatternRec(row, patternKey) { var dk = row.md_v2 && row.md_v2.tests; return (dk && dk[patternKey]) || null; }
+  function pbEvalTest(row, patternKey, testKey) { var rec = pbPatternRec(row, patternKey); if (!rec || !rec.tests) return false; return !!rec.tests[testKey]; }
+  function pbRowRating(row, patternKey) { var rec = pbPatternRec(row, patternKey); return rec ? (rec.rating || 'None') : 'None'; }
+  function pbStageRating(row, stageKey) { var md = row.md_v2 || {}; var st = md[stageKey]; return (st && st.rating) || 'None'; }
+  function pbGetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = pbPricesLookup();
+    var live = pbLiveTickers(), liveS = pbLiveSectors(), liveI = pbLiveIndustries();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2 || !s.md_v2.tests) continue;
+      var p = prices[s.ticker] || {};
+      var mas = p.mas || {};
+      rows.push({
+        ticker: s.ticker, company: p.company_name || s.ticker,
+        sector: p.sector || '', industry: p.industry || '',
+        price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
+        recent_pullback: p.recent_pullback_pct,
+        ma_150: mas['150D'], ma_200: mas['200D'],
+        md_v2: s.md_v2,
+        is_live: !!live[s.ticker],
+        sector_in_portfolio: !!liveS[p.sector],
+        industry_in_portfolio: !!liveI[p.industry]
+      });
+    }
+    return rows;
+  }
+
+  // --- counts ---
+  function pbTierCounts(rows, patternKey) { var c = { 'Qualified':0, 'Probable':0, 'Plausible':0, 'Possible':0, 'None':0 }; for (var i = 0; i < rows.length; i++) { var r = pbRowRating(rows[i], patternKey); if (c[r] != null) c[r]++; } return c; }
+  function pbPassHistogram(rows, patternKey) { var h = []; for (var k = 0; k <= 6; k++) h[k] = 0; for (var i = 0; i < rows.length; i++) { var rec = pbPatternRec(rows[i], patternKey); var cnt = rec ? (rec.count || 0) : 0; if (cnt >= 0 && cnt <= 6) h[cnt]++; } return h; }
+
+  // --- formatting helpers ---
+  function pbFmtNum(n) { if (n == null || isNaN(n)) return '-'; var abs = Math.abs(n); var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2); if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp }); return n < 0 ? '(' + f + ')' : f; }
+  function pbFmtPct(p) { if (p == null || isNaN(p)) return '-'; var r = Math.round(p), abs = Math.abs(r); return r < 0 ? '(' + abs + ')%' : r + '%'; }
+  function pbColourForIntensity(i) { if (i >= 0.6) return '#6b46c1'; if (i >= 0.25) return '#7c3aed'; if (i >= 0.05) return '#a78bfa'; if (i <= -0.6) return '#A32D2D'; if (i <= -0.25) return '#E24B4A'; if (i <= -0.05) return '#F09595'; return '#888'; }
+  function pbInputCell(row, key, extraCls) {
+    extraCls = extraCls || '';
+    var v = row[key];
+    if (key === 'price') return '<td class="num ' + extraCls + '">' + pbFmtNum(v) + '</td>';
+    if (key === 'recent_pullback') { if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">-</td>'; var pctVal = v * 100; var pi_i = Math.max(-1, Math.min(1, (pctVal - 5) / 20)); return '<td class="num ' + extraCls + '" style="color:' + pbColourForIntensity(-pi_i) + '">' + Math.round(pctVal) + '%</td>'; }
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">-</td>';
+    var pct = (row.price - v) / v * 100;
+    var intensity = 0;
+    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 5) / 20));
+    else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
+    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
+    var text = (pbState.mode.inputs === 'pct') ? pbFmtPct(pct) : pbFmtNum(v);
+    return '<td class="num ' + extraCls + '" style="color:' + pbColourForIntensity(intensity) + '">' + text + '</td>';
+  }
+  function pbStageInfoCell(row, stageKey, cls) { var rating = pbStageRating(row, stageKey); var rcls = PB_RATING_CLS[rating] || (rating.indexOf('Probable') === 0 ? 'tint-prob' : rating.indexOf('Plausible') === 0 ? 'tint-pla' : rating.indexOf('Possible') === 0 ? 'tint-pos' : 'tint-none'); return '<td class="' + (cls || '') + ' ct-stage-info-cell ' + rcls + '"><span class="ct-info-label">' + rating + '</span></td>'; }
+  function pbTestValueFor(row, patternKey, testKey) { var rec = pbPatternRec(row, patternKey); var tv = rec && rec.test_values; if (!tv || !(testKey in tv)) return '—'; var v = tv[testKey]; if (v === null || v === undefined) return '—'; if (typeof v === 'string') return v; if (typeof v === 'number') { if (isNaN(v)) return '—'; if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return pbFmtPct(v * 100); return pbFmtNum(v); } return String(v); }
+  function pbTestCell(row, patternKey, testKey, cls) {
+    var pass = pbEvalTest(row, patternKey, testKey);
+    var extra = cls || '';
+    if (pbState.mode.tests === 'val') { var v = pbTestValueFor(row, patternKey, testKey); var colour = pass ? pbColourForIntensity(0.7) : pbColourForIntensity(-0.4); return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">' + v + '</td>'; }
+    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
+    return '<td class="pi-fail ' + extra + '">.</td>';
+  }
+  function pbRatingCell(row, patternKey, cls) { var rating = pbRowRating(row, patternKey); var rcls = PB_RATING_CLS[rating] || 'tint-none'; return '<td class="' + (cls || '') + ' pi-rating-cell ' + rcls + '"><span class="pi-pill pi-pill-' + rcls + '">' + rating + '</span></td>'; }
+  function pbScoreCell(row, patternKey, cls) { var rec = pbPatternRec(row, patternKey); var cnt = rec ? (rec.count || 0) : 0; var tot = rec ? (rec.total || 0) : 0; var s = ''; for (var i = 0; i < tot; i++) s += '<span class="pip ' + (i < cnt ? 'on' : '') + '"></span>'; return '<td class="' + (cls || '') + ' pi-score-cell"><div class="pi-pip-row">' + s + '<span class="pi-score-num">' + cnt + '/' + tot + '</span></div></td>'; }
+  function pbWindowCell(row, patternKey, windowKey, cls) { var rec = pbPatternRec(row, patternKey); var extra = cls || ''; if (!rec) return '<td class="' + extra + ' ct-window-na">-</td>'; var depth = rec.history_depth || 0; var windowDays = (windowKey === 'l5d') ? 5 : 20; if (depth < windowDays) return '<td class="' + extra + ' ct-window-building" title="' + depth + ' of ' + windowDays + ' days of history accumulated">building</td>'; var fired = (windowKey === 'l5d') ? !!rec.fired_l5d : !!rec.fired_l20d; if (!fired) return '<td class="' + extra + ' ct-window-none">-</td>'; var ds = rec.days_since_fired; var label; if (ds === 0) label = 'today'; else if (ds === 1) label = '1d ago'; else if (ds != null) label = ds + 'd ago'; else label = 'fired'; var shadeCls = (ds != null && ds <= 5) ? 'ct-window-fired-recent' : 'ct-window-fired-older'; return '<td class="' + extra + ' ' + shadeCls + '"><span class="ct-window-label">' + label + '</span></td>'; }
+  function pbHashColor(label, alpha) { if (!label) return null; var h = 0; for (var i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff; return 'hsla(' + (h % 360) + ', 35%, 55%, ' + alpha + ')'; }
+  function pbPortfolioInfo(row) { if (row.is_live) return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)', bgHover:'rgba(27,94,32,0.14)' }; if (row.sector_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)', bgHover:'rgba(27,94,32,0.08)' }; if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' }; return null; }
+
+  // --- column model (built dynamically like ct module) ---
+  function pbBuildCols() {
+    var cols = [
+      { id:'name',     sortKey:'company',         kind:'input' },
+      { id:'taxon',    sortKey:'sector',           kind:'input' },
+      { id:'price',    sortKey:'price',            kind:'input' },
+      { id:'high_52w', sortKey:'high_52w',         kind:'input' },
+      { id:'low_52w',  sortKey:'low_52w',          kind:'input' },
+      { id:'ma_150',   sortKey:'ma_150',           kind:'input' },
+      { id:'ma_200',   sortKey:'ma_200',           kind:'input' },
+      { id:'pullback', sortKey:'recent_pullback',  kind:'input' }
+    ];
+    var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
+    for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] });
+    for (var p = 0; p < PB_PATTERNS.length; p++) {
+      var pat = PB_PATTERNS[p];
+      var gi = p + 1;
+      cols.push({ id:'p'+gi+'_rating', sortKey:pat.key+'__rating', kind:'rating', patternKey:pat.key });
+      cols.push({ id:'p'+gi+'_score',  sortKey:pat.key+'__score',  kind:'score',  patternKey:pat.key });
+      for (var t = 0; t < pat.tests.length; t++) {
+        cols.push({ id:'p'+gi+'t'+(t+1), sortKey:pat.key+'__'+pat.tests[t].key, kind:'test', patternKey:pat.key, testKey:pat.tests[t].key, group:pat.tests[t].group, label:pat.tests[t].label, tooltip:pat.tests[t].tooltip });
+      }
+      cols.push({ id:'p'+gi+'_l5d',  sortKey:pat.key+'__l5d',  kind:'window', patternKey:pat.key, windowKey:'l5d' });
+      cols.push({ id:'p'+gi+'_l20d', sortKey:pat.key+'__l20d', kind:'window', patternKey:pat.key, windowKey:'l20d' });
+    }
+    return cols;
+  }
+  var PB_COLS = pbBuildCols();
+  var PB_INPUT_COUNT = 8;
+  var PB_STAGEINFO_COUNT = 4;
+
+  // --- sorting ---
+  function pbGetSortVal(row, key) {
+    if (key.indexOf('stageinfo__') === 0) { var sk = key.split('__')[1]; return PB_RATING_RANK[pbStageRating(row, sk)] || 0; }
+    if (key.indexOf('__') > 0) {
+      var parts = key.split('__'); var patKey = parts[0], sub = parts[1];
+      var rec = pbPatternRec(row, patKey);
+      if (sub === 'rating') return rec ? (PB_RATING_RANK[rec.rating] || 0) : 0;
+      if (sub === 'score')  return rec ? (rec.count || 0) : 0;
+      if (sub === 'l5d' || sub === 'l20d') { if (!rec) return -1; var wd = (sub === 'l5d') ? 5 : 20; if ((rec.history_depth || 0) < wd) return -2; var fired = (sub === 'l5d') ? rec.fired_l5d : rec.fired_l20d; if (!fired) return -1; var ds = rec.days_since_fired; return (ds == null) ? 0 : (1000 - ds); }
+      return pbEvalTest(row, patKey, sub) ? 1 : 0;
+    }
+    if (key === 'recent_pullback') return row.recent_pullback == null ? -Infinity : row.recent_pullback;
+    var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
+    if (PCT_KEYS.indexOf(key) > -1 && pbState.mode.inputs === 'pct') { var ref = row[key]; if (ref == null || row.price == null || ref === 0) return -Infinity; return (row.price - ref) / ref * 100; }
+    if (key in row) return row[key];
+    return 0;
+  }
+  function pbOnSort(key) {
+    if (pbState.sort.col === key) pbState.sort.dir = pbState.sort.dir === 'desc' ? 'asc' : 'desc';
+    else pbState.sort = { col: key, dir: key === 'company' ? 'asc' : 'desc' };
+    pbBuildHeaderRow();
+    pbRenderRows();
+  }
+  function pbBuildHeaderRow() {
+    var tr = document.getElementById('pb-col-header-row');
+    if (!tr) return;
+    var INPUT_LABELS = ['Company - Ticker','Industry - Sector','Price','52wk high','52wk low','150D MA','200D MA','Pullback'];
+    var STAGE_LABELS = ['Stage 1','Stage 2','Stage 3','Stage 4'];
+    var h = '';
+    for (var i = 0; i < PB_COLS.length; i++) {
+      var c = PB_COLS[i];
+      var isSort = pbState.sort.col === c.sortKey;
+      var arrow = isSort ? '<span class="sort-arrow">' + (pbState.sort.dir === 'desc' ? String.fromCharCode(9660) : String.fromCharCode(9650)) + '</span>' : '<span class="sort-placeholder"></span>';
+      var label, title, cls = '';
+      if (c.kind === 'input') { label = INPUT_LABELS[i]; title = label; }
+      else if (c.kind === 'stageinfo') { label = STAGE_LABELS[i - PB_INPUT_COUNT]; title = label + ' rating'; cls = (i === PB_INPUT_COUNT ? 'grp-start-stageinfo ' : ''); }
+      else if (c.kind === 'rating') { label = 'Rating'; title = c.patternKey + ' rating'; cls = 'grp-start-g' + (PB_PATTERNS.indexOf(PB_PATTERNS.filter(function(p){return p.key===c.patternKey})[0]) + 1) + ' '; }
+      else if (c.kind === 'score') { label = 'Score'; title = 'Pass count out of 6'; }
+      else if (c.kind === 'test') { label = c.label; title = c.tooltip || c.label; }
+      else if (c.kind === 'window') { label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label; cls = 'ct-window-col'; }
+      else { label = '?'; title = ''; }
+      h += '<th class="' + cls + '" data-sort-key="' + c.sortKey + '" title="' + title + '"><span class="hd"><span class="lbl">' + label + '</span>' + arrow + '</span></th>';
+    }
+    tr.innerHTML = h;
+  }
+
+  // --- tiles ---
+  function pbPatternTiles(scopeRows) {
+    var tiles = document.getElementById('pb-pattern-tiles');
+    if (!tiles) return;
+    var total = scopeRows.length;
+    var h = '';
+    for (var i = 0; i < PB_PATTERNS.length; i++) {
+      var pat = PB_PATTERNS[i];
+      var tierCounts = pbTierCounts(scopeRows, pat.key);
+      var cnt = total - (tierCounts['None'] || 0);
+      var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+      var sel = pbState.tierFilter[pat.key] || [];
+      var anySel = sel.length > 0;
+      var headline = cnt, headSub = 'of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%';
+      if (anySel) { var ft = 0; for (var z = 0; z < sel.length; z++) ft += (tierCounts[sel[z]] || 0); headline = ft; headSub = sel.join(' + ') + ' · filtered'; }
+      var hist = pbPassHistogram(scopeRows, pat.key);
+      var breakdown = '';
+      for (var k = 1; k <= 6; k++) { if (k > 1) breakdown += ' · '; breakdown += k + '/6: ' + (hist[k] || 0).toLocaleString('en-GB'); }
+      var chips = '';
+      var TIERS = ['Possible','Plausible','Probable','Qualified'];
+      for (var c = 0; c < TIERS.length; c++) {
+        var tier = TIERS[c]; var on = sel.indexOf(tier) > -1; var tc = tierCounts[tier] || 0;
+        chips += '<span class="pi-tier-chip pi-chip-' + PB_TONE_CHIP[pat.tone] + (on ? ' on' : '') + '" data-pattern="' + pat.key + '" data-tier="' + tier + '">' + tier + ' ' + tc.toLocaleString('en-GB') + (on ? ' ' + String.fromCharCode(10003) : '') + '</span>';
+      }
+      var activeCls = anySel ? ' active' : '';
+      h += '<div class="rating-tile ' + PB_TONE_TILE[pat.tone] + activeCls + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
+           '<div class="rt-label">' + pat.shortLabel + '</div><div class="rt-count">' + headline.toLocaleString('en-GB') + '</div><div class="rt-sub">' + headSub + '</div>' +
+           '<div class="rt-breakdown">' + breakdown + '</div><div class="pi-tier-chips" data-pattern="' + pat.key + '">' + chips + '</div>' +
+           '<div class="rt-strip ' + PB_TONE_STRIP[pat.tone] + '"></div></div>';
+    }
+    tiles.innerHTML = h;
+  }
+
+  // --- scope / filter ---
+  function pbUpdateScopeCounts(rows) { function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; } set('pb2-cnt-all', rows.length); set('pb2-cnt-live', rows.filter(function(r){return r.is_live}).length); set('pb2-cnt-sector', rows.filter(function(r){return r.sector_in_portfolio}).length); set('pb2-cnt-industry', rows.filter(function(r){return r.industry_in_portfolio}).length); }
+  function pbApplyScope(all) { var rows = all.slice(); if (pbState.scope === 'live') rows = rows.filter(function(r){return r.is_live}); else if (pbState.scope === 'sector') rows = rows.filter(function(r){return r.sector_in_portfolio}); else if (pbState.scope === 'industry') rows = rows.filter(function(r){return r.industry_in_portfolio}); return rows; }
+  function pbApplyTierFilter(rows) {
+    var active = [];
+    for (var p = 0; p < PB_PATTERNS.length; p++) { var k = PB_PATTERNS[p].key; var sel = pbState.tierFilter[k] || []; if (sel.length > 0) active.push({ key: k, tiers: sel }); }
+    if (active.length === 0) return rows;
+    return rows.filter(function(r) { for (var a = 0; a < active.length; a++) { var rating = pbRowRating(r, active[a].key); if (active[a].tiers.indexOf(rating) === -1) return false; } return true; });
+  }
+
+  // --- main render ---
+  function pbRenderRows() {
+    var tbody = document.getElementById('pb-tbody');
+    if (!tbody) return;
+    var all = pbGetRows();
+    var scopeRows = pbApplyScope(all);
+    pbUpdateScopeCounts(all);
+    pbPatternTiles(scopeRows);
+    var rows = pbApplyTierFilter(scopeRows);
+    rows.sort(function(a,b) { var va = pbGetSortVal(a, pbState.sort.col), vb = pbGetSortVal(b, pbState.sort.col); var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0); if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker); return pbState.sort.dir === 'desc' ? -cmp : cmp; });
+    var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i];
+      var styles = [], cls = [];
+      if (pbState.tint === 'industry') { styles.push('--tint-bg: ' + pbHashColor(s.industry, 0.16)); cls.push('tint-row'); }
+      else if (pbState.tint === 'sector') { styles.push('--tint-bg: ' + pbHashColor(s.sector, 0.16)); cls.push('tint-row'); }
+      if (pbState.port === 'on') { var pinf = pbPortfolioInfo(s); if (pinf) { styles.push('--portfolio-color: ' + pinf.color); styles.push('--portfolio-bg: ' + pinf.bg); styles.push('--portfolio-bg-hover: ' + pinf.bgHover); cls.push('portfolio-band'); cls.push('portfolio-tint'); } }
+      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">' + String.fromCharCode(9679) + '</span>' : '';
+      html += '<tr' + clsAttr + styleAttr + '>' +
+        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
+        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
+        pbInputCell(s, 'price') + pbInputCell(s, 'high_52w') + pbInputCell(s, 'low_52w') + pbInputCell(s, 'ma_150') + pbInputCell(s, 'ma_200') + pbInputCell(s, 'recent_pullback');
+      for (var si = 0; si < STAGES.length; si++) html += pbStageInfoCell(s, STAGES[si], si === 0 ? 'grp-start-stageinfo' : '');
+      for (var pi = 0; pi < PB_PATTERNS.length; pi++) {
+        var pat = PB_PATTERNS[pi];
+        var gi = pi + 1;
+        html += pbRatingCell(s, pat.key, 'grp-start-g' + gi);
+        html += pbScoreCell(s, pat.key, '');
+        for (var ti = 0; ti < pat.tests.length; ti++) html += pbTestCell(s, pat.key, pat.tests[ti].key, '');
+        html += pbWindowCell(s, pat.key, 'l5d', 'ct-window-col');
+        html += pbWindowCell(s, pat.key, 'l20d', 'ct-window-col');
+      }
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  // --- control setters ---
+  window.pb2SetMode = function(kind, val) { pbState.mode[kind] = val; var btns = document.querySelectorAll('button[data-pb2-grp="' + kind + '"]'); for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-pb2-val') === val); pbRenderRows(); };
+  window.pb2SetScope = function(s) { pbState.scope = s; var btns = document.querySelectorAll('button[data-pb2-scope]'); for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-pb2-scope') === s); pbRenderRows(); };
+  window.pb2SetTint = function(t) { pbState.tint = t; var btns = document.querySelectorAll('button[data-pb2-tint]'); for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-pb2-tint') === t); pbRenderRows(); };
+  window.pb2SetPort = function(p) { pbState.port = p; var btns = document.querySelectorAll('button[data-pb2-port]'); for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-pb2-port') === p); pbRenderRows(); };
+  window.pb2ToggleTier = function(patternKey, tier) { var sel = pbState.tierFilter[patternKey] || []; var idx = sel.indexOf(tier); if (idx > -1) sel.splice(idx, 1); else sel.push(tier); pbState.tierFilter[patternKey] = sel; pbRenderRows(); };
+  window.pb2SelectAllTiers = function(patternKey) { var sel = pbState.tierFilter[patternKey] || []; var onlyProb = (sel.length === 1 && sel[0] === 'Probable'); pbState.tierFilter[patternKey] = onlyProb ? [] : ['Probable']; pbRenderRows(); };
+  window.pb2OnSort = pbOnSort;
+
+  // --- scaffold ---
+  function pbPatternBlockSpan(pat) { return 2 + pat.tests.length + 2; }
+  function pbBuildScaffold() {
+    var host = document.getElementById('tab-tests_probing_bet');
+    if (!host) return false;
+    if (host.querySelector('#pb-main-table')) return true;
+    var cg = '<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-52wh"><col class="c-52wl"><col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
+    for (var sgc = 0; sgc < PB_STAGEINFO_COUNT; sgc++) cg += '<col class="c-stageinfo">';
+    var groupHtml = '<th class="gh-inputs" colspan="' + PB_INPUT_COUNT + '">Inputs</th><th class="gh-stageinfo grp-start-stageinfo" colspan="' + PB_STAGEINFO_COUNT + '">Stage ratings</th>';
+    var subGroupHtml = '<th class="sg-spacer" colspan="' + PB_INPUT_COUNT + '"></th><th class="sg-spacer" colspan="' + PB_STAGEINFO_COUNT + '"></th>';
+    for (var p = 0; p < PB_PATTERNS.length; p++) {
+      var pat = PB_PATTERNS[p]; var gi = p + 1; var span = pbPatternBlockSpan(pat);
+      cg += '<col class="c-rating"><col class="c-score">'; for (var t = 0; t < pat.tests.length; t++) cg += '<col class="c-test">'; cg += '<col class="c-window"><col class="c-window">';
+      groupHtml += '<th class="gh-g' + gi + ' grp-start-g' + gi + '" colspan="' + span + '">' + pat.shortLabel + '</th>';
+      var setupCount = 0, triggerCount = 0; for (var st = 0; st < pat.tests.length; st++) { if (pat.tests[st].group === 'trigger') triggerCount++; else setupCount++; }
+      subGroupHtml += '<th class="sub-g sub-g-rating sub-g' + gi + '" colspan="2">Rating</th>';
+      if (setupCount > 0) subGroupHtml += '<th class="sub-g sub-g-setup sub-g' + gi + '" colspan="' + setupCount + '">Setup</th>';
+      if (triggerCount > 0) subGroupHtml += '<th class="sub-g sub-g-trigger sub-g' + gi + '" colspan="' + triggerCount + '">Trigger</th>';
+      subGroupHtml += '<th class="sub-g sub-g-context sub-g' + gi + '" colspan="2">Context</th>';
+    }
+    var captionsHtml = '';
+    for (var cp = 0; cp < PB_PATTERNS.length; cp++) { var cpat = PB_PATTERNS[cp]; captionsHtml += '<div class="gcap gcap-g' + (cp+1) + '"><b>' + cpat.shortLabel + '</b>' + cpat.caption + '</div>'; }
+    var theadRows = '<tr class="group-header-row">' + groupHtml + '</tr><tr class="sub-group-row">' + subGroupHtml + '</tr><tr class="col-header-row" id="pb-col-header-row"></tr>';
+    var html = '<div class="s1-intro">Probing Bets — Stage 1 and Stage 2 breakout tests. A probing bet is a small starter position on a stock that breaks out positively without first completing a full basing or pullback pattern. In Stage 1 (troughing), this probes whether the trend is turning. In Stage 2 (uptrend), this catches idiosyncratic or event-driven breakouts. Both use the same 6-criterion template: stage gate + 5D/10D MAs rising + price above 20D + 20D MA turned up in last 5 days + confirmation close. The 5-day turn window ensures only fresh breakouts appear.</div>' +
+      '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span><button class="toggle-btn active" data-pb2-grp="inputs" data-pb2-val="pct" onclick="pb2SetMode(\'inputs\',\'pct\')">show as %</button><button class="toggle-btn" data-pb2-grp="inputs" data-pb2-val="raw" onclick="pb2SetMode(\'inputs\',\'raw\')">show as numbers</button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span><button class="toggle-btn active" data-pb2-grp="tests" data-pb2-val="tick" onclick="pb2SetMode(\'tests\',\'tick\')">show ticks</button><button class="toggle-btn" data-pb2-grp="tests" data-pb2-val="val" onclick="pb2SetMode(\'tests\',\'val\')">show test values</button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span><button class="toggle-btn active" data-pb2-scope="all" onclick="pb2SetScope(\'all\')">All <span id="pb2-cnt-all"></span></button><button class="toggle-btn" data-pb2-scope="live" onclick="pb2SetScope(\'live\')">Live <span id="pb2-cnt-live"></span></button><button class="toggle-btn" data-pb2-scope="sector" onclick="pb2SetScope(\'sector\')">Sectors <span id="pb2-cnt-sector"></span></button><button class="toggle-btn" data-pb2-scope="industry" onclick="pb2SetScope(\'industry\')">Industries <span id="pb2-cnt-industry"></span></button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span><button class="toggle-btn active" data-pb2-tint="none" onclick="pb2SetTint(\'none\')">Off</button><button class="toggle-btn" data-pb2-tint="industry" onclick="pb2SetTint(\'industry\')">Industry</button><button class="toggle-btn" data-pb2-tint="sector" onclick="pb2SetTint(\'sector\')">Sector</button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span><button class="toggle-btn active" data-pb2-port="off" onclick="pb2SetPort(\'off\')">Off</button><button class="toggle-btn" data-pb2-port="on" onclick="pb2SetPort(\'on\')">On</button></div>' +
+      '</div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="pb-pattern-tiles"></div>' +
+      '<div class="group-captions">' + captionsHtml + '</div>' +
+      '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="pb-main-table"><colgroup>' + cg + '</colgroup><thead>' + theadRows + '</thead><tbody id="pb-tbody"></tbody></table></div></div>';
+    host.innerHTML = html;
+    var tilesEl = document.getElementById('pb-pattern-tiles');
+    if (tilesEl) { tilesEl.addEventListener('click', function(e) { var chip = e.target.closest('.pi-tier-chip'); if (chip) { var cp = chip.getAttribute('data-pattern'); var ct = chip.getAttribute('data-tier'); if (cp && ct) pb2ToggleTier(cp, ct); return; } var tile = e.target.closest('.rating-tile'); if (!tile) return; var k = tile.getAttribute('data-pattern'); if (k) pb2SelectAllTiers(k); }); }
+    var hdr = document.getElementById('pb-col-header-row');
+    if (hdr) { hdr.addEventListener('click', function(e) { var th = e.target.closest('th'); if (!th) return; var key = th.getAttribute('data-sort-key'); if (key) pb2OnSort(key); }); }
+    return true;
+  }
+
+  function renderProbingBet() {
+    if (!pbBuildScaffold()) return;
+    pbBuildHeaderRow();
+    pbRenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();
+  }
+  window.renderProbingBet = renderProbingBet;
+
+})();
+
+/* MD-V2-S47-TAB-PROBING-BET-MARKER-MODULE-END */
+
+
+
+/* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER-MODULE-START */
+// =============================================================================
+// SPECULATIVE BETS (S3+S4) — TAB MODULE (S47)
+// =============================================================================
+// MD-V2-S47-TAB-SPECULATIVE-BET-MARKER
+// Two 6-criterion test variants on one tab:
+//   speculative_bet_s3: Stage 3 topping/declining + breakout => speculative short-side or contrarian bet
+//   speculative_bet_s4: Stage 4 declining/basing + breakout => speculative early turnaround bet
+// =============================================================================
+
+(function() {
+  'use strict';
+
+  var SB_PATTERNS = [
+    {
+      key: 'speculative_bet_s3',
+      label: 'Stage 3 topping/declining trend + breakout ⇒ S3 speculative bet',
+      shortLabel: 'S3 Speculative',
+      tone: 's3',
+      tierLadder: ['Possible', 'Plausible', 'Probable', 'Qualified'],
+      total: 6,
+      tooltip: 'A breakout on a Stage 3 (topping/early decline) stock — a speculative position, often contrarian or short-side.',
+      caption: '<span class="db">A positive breakout on a Stage 3 stock.</span> The 5D and 10D MAs must be rising. Price must be above the 20D MA, and the 20D MA must have turned up in the last 5 days. Confirmation requires a close 2%+ above yesterday. Stage 3 context makes this inherently speculative.',
+      tests: [
+        { key: 'g1_stage_qualifies',            label: 'Stage 3 qualifies',    group: 'gate',    tooltip: 'Stage 3 rating is Probable or Plausible — hard precondition' },
+        { key: 'g2_5d_rising',                   label: '5D MA rising',         group: 'setup',   tooltip: '5-day moving average is rising day-over-day' },
+        { key: 'g3_10d_rising',                  label: '10D MA rising',        group: 'setup',   tooltip: '10-day moving average is rising day-over-day' },
+        { key: 'g4_price_gt_20d',                label: 'Price > 20D MA',       group: 'trigger', tooltip: 'Current price is above the 20-day moving average' },
+        { key: 'g5_20d_turn_last_5d',            label: '20D MA turned up',     group: 'trigger', tooltip: '20D MA is rising now AND was falling 5 days ago — the turn' },
+        { key: 'g6_followthrough_close_ge2pct',  label: 'Confirm: close 2%+',   group: 'trigger', tooltip: 'Today close at least 2% above yesterday — follow-through confirmation' }
+      ]
+    },
+    {
+      key: 'speculative_bet_s4',
+      label: 'Stage 4 declining/basing trend + breakout ⇒ S4 speculative bet',
+      shortLabel: 'S4 Speculative',
+      tone: 's4',
+      tierLadder: ['Possible', 'Plausible', 'Probable', 'Qualified'],
+      total: 6,
+      tooltip: 'A breakout on a Stage 4 (declining/bottoming) stock — a speculative early turnaround bet before the stage flips.',
+      caption: '<span class="db">A positive breakout on a Stage 4 stock that has not yet transitioned to Stage 1.</span> Same criteria as S3 speculative bet, but the stock is in a confirmed decline or bottoming phase. These are the highest-risk bets — the trend is still against you.',
+      tests: [
+        { key: 'g1_stage_qualifies',            label: 'Stage 4 qualifies',    group: 'gate',    tooltip: 'Stage 4 rating is Probable or Plausible — hard precondition' },
+        { key: 'g2_5d_rising',                   label: '5D MA rising',         group: 'setup',   tooltip: '5-day moving average is rising day-over-day' },
+        { key: 'g3_10d_rising',                  label: '10D MA rising',        group: 'setup',   tooltip: '10-day moving average is rising day-over-day' },
+        { key: 'g4_price_gt_20d',                label: 'Price > 20D MA',       group: 'trigger', tooltip: 'Current price is above the 20-day moving average' },
+        { key: 'g5_20d_turn_last_5d',            label: '20D MA turned up',     group: 'trigger', tooltip: '20D MA is rising now AND was falling 5 days ago — the turn' },
+        { key: 'g6_followthrough_close_ge2pct',  label: 'Confirm: close 2%+',   group: 'trigger', tooltip: 'Today close at least 2% above yesterday — follow-through confirmation' }
+      ]
+    }
+  ];
+
+  var SB_TONE_TILE  = { s3:'pi-tile-s3', s4:'pi-tile-s4' };
+  var SB_TONE_STRIP = { s3:'pi-strip-s3', s4:'pi-strip-s4' };
+  var SB_TONE_CHIP  = { s3:'s3', s4:'s4' };
+
+  var sbState = {
+    mode: { inputs: 'pct', tests: 'tick' },
+    scope: 'all',
+    tierFilter: {},
+    tint: 'none',
+    port: 'off',
+    sort: { col: 'company', dir: 'asc' }
+  };
+  for (var _ip = 0; _ip < SB_PATTERNS.length; _ip++) sbState.tierFilter[SB_PATTERNS[_ip].key] = [];
+
+  var SB_RATING_RANK = { 'Qualified':6, 'Probable':5, 'Plausible':3, 'Possible':2, 'None':1 };
+  var SB_RATING_CLS  = { 'Qualified':'tint-qualified', 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
+
+  // --- data lookups ---
+  function sbPricesLookup() {
+    if (window._ctPricesByTicker) return window._ctPricesByTicker;
+    var out = {};
+    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    window._ctPricesByTicker = out;
+    return out;
+  }
+  function sbLiveTickers() { var o = {}; var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || []; for (var i = 0; i < inv.length; i++) if (inv[i].ticker) o[inv[i].ticker] = true; return o; }
+  function sbLiveSectors() { var o = {}, p = sbPricesLookup(), t = sbLiveTickers(); for (var k in t) { var px = p[k]; if (px && px.sector) o[px.sector] = true; } return o; }
+  function sbLiveIndustries() { var o = {}, p = sbPricesLookup(), t = sbLiveTickers(); for (var k in t) { var px = p[k]; if (px && px.industry) o[px.industry] = true; } return o; }
+  function sbPatternRec(row, patternKey) { var dk = row.md_v2 && row.md_v2.tests; return (dk && dk[patternKey]) || null; }
+  function sbEvalTest(row, patternKey, testKey) { var rec = sbPatternRec(row, patternKey); if (!rec || !rec.tests) return false; return !!rec.tests[testKey]; }
+  function sbRowRating(row, patternKey) { var rec = sbPatternRec(row, patternKey); return rec ? (rec.rating || 'None') : 'None'; }
+  function sbStageRating(row, stageKey) { var md = row.md_v2 || {}; var st = md[stageKey]; return (st && st.rating) || 'None'; }
+  function sbGetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = sbPricesLookup();
+    var live = sbLiveTickers(), liveS = sbLiveSectors(), liveI = sbLiveIndustries();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2 || !s.md_v2.tests) continue;
+      var p = prices[s.ticker] || {};
+      var mas = p.mas || {};
+      rows.push({
+        ticker: s.ticker, company: p.company_name || s.ticker,
+        sector: p.sector || '', industry: p.industry || '',
+        price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
+        recent_pullback: p.recent_pullback_pct,
+        ma_150: mas['150D'], ma_200: mas['200D'],
+        md_v2: s.md_v2,
+        is_live: !!live[s.ticker],
+        sector_in_portfolio: !!liveS[p.sector],
+        industry_in_portfolio: !!liveI[p.industry]
+      });
+    }
+    return rows;
+  }
+
+  // --- counts ---
+  function sbTierCounts(rows, patternKey) { var c = { 'Qualified':0, 'Probable':0, 'Plausible':0, 'Possible':0, 'None':0 }; for (var i = 0; i < rows.length; i++) { var r = sbRowRating(rows[i], patternKey); if (c[r] != null) c[r]++; } return c; }
+  function sbPassHistogram(rows, patternKey) { var h = []; for (var k = 0; k <= 6; k++) h[k] = 0; for (var i = 0; i < rows.length; i++) { var rec = sbPatternRec(rows[i], patternKey); var cnt = rec ? (rec.count || 0) : 0; if (cnt >= 0 && cnt <= 6) h[cnt]++; } return h; }
+
+  // --- formatting helpers ---
+  function sbFmtNum(n) { if (n == null || isNaN(n)) return '-'; var abs = Math.abs(n); var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2); if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp }); return n < 0 ? '(' + f + ')' : f; }
+  function sbFmtPct(p) { if (p == null || isNaN(p)) return '-'; var r = Math.round(p), abs = Math.abs(r); return r < 0 ? '(' + abs + ')%' : r + '%'; }
+  function sbColourForIntensity(i) { if (i >= 0.6) return '#c62828'; if (i >= 0.25) return '#e65100'; if (i >= 0.05) return '#ff8a65'; if (i <= -0.6) return '#A32D2D'; if (i <= -0.25) return '#E24B4A'; if (i <= -0.05) return '#F09595'; return '#888'; }
+  function sbInputCell(row, key, extraCls) {
+    extraCls = extraCls || '';
+    var v = row[key];
+    if (key === 'price') return '<td class="num ' + extraCls + '">' + sbFmtNum(v) + '</td>';
+    if (key === 'recent_pullback') { if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">-</td>'; var pctVal = v * 100; var pi_i = Math.max(-1, Math.min(1, (pctVal - 5) / 20)); return '<td class="num ' + extraCls + '" style="color:' + sbColourForIntensity(-pi_i) + '">' + Math.round(pctVal) + '%</td>'; }
+    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">-</td>';
+    var pct = (row.price - v) / v * 100;
+    var intensity = 0;
+    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 5) / 20));
+    else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
+    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
+    var text = (sbState.mode.inputs === 'pct') ? sbFmtPct(pct) : sbFmtNum(v);
+    return '<td class="num ' + extraCls + '" style="color:' + sbColourForIntensity(intensity) + '">' + text + '</td>';
+  }
+  function sbStageInfoCell(row, stageKey, cls) { var rating = sbStageRating(row, stageKey); var rcls = SB_RATING_CLS[rating] || (rating.indexOf('Probable') === 0 ? 'tint-prob' : rating.indexOf('Plausible') === 0 ? 'tint-pla' : rating.indexOf('Possible') === 0 ? 'tint-pos' : 'tint-none'); return '<td class="' + (cls || '') + ' ct-stage-info-cell ' + rcls + '"><span class="ct-info-label">' + rating + '</span></td>'; }
+  function sbTestValueFor(row, patternKey, testKey) { var rec = sbPatternRec(row, patternKey); var tv = rec && rec.test_values; if (!tv || !(testKey in tv)) return '—'; var v = tv[testKey]; if (v === null || v === undefined) return '—'; if (typeof v === 'string') return v; if (typeof v === 'number') { if (isNaN(v)) return '—'; if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return sbFmtPct(v * 100); return sbFmtNum(v); } return String(v); }
+  function sbTestCell(row, patternKey, testKey, cls) {
+    var pass = sbEvalTest(row, patternKey, testKey);
+    var extra = cls || '';
+    if (sbState.mode.tests === 'val') { var v = sbTestValueFor(row, patternKey, testKey); var colour = pass ? sbColourForIntensity(0.7) : sbColourForIntensity(-0.4); return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">' + v + '</td>'; }
+    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
+    return '<td class="pi-fail ' + extra + '">.</td>';
+  }
+  function sbRatingCell(row, patternKey, cls) { var rating = sbRowRating(row, patternKey); var rcls = SB_RATING_CLS[rating] || 'tint-none'; return '<td class="' + (cls || '') + ' pi-rating-cell ' + rcls + '"><span class="pi-pill pi-pill-' + rcls + '">' + rating + '</span></td>'; }
+  function sbScoreCell(row, patternKey, cls) { var rec = sbPatternRec(row, patternKey); var cnt = rec ? (rec.count || 0) : 0; var tot = rec ? (rec.total || 0) : 0; var s = ''; for (var i = 0; i < tot; i++) s += '<span class="pip ' + (i < cnt ? 'on' : '') + '"></span>'; return '<td class="' + (cls || '') + ' pi-score-cell"><div class="pi-pip-row">' + s + '<span class="pi-score-num">' + cnt + '/' + tot + '</span></div></td>'; }
+  function sbWindowCell(row, patternKey, windowKey, cls) { var rec = sbPatternRec(row, patternKey); var extra = cls || ''; if (!rec) return '<td class="' + extra + ' ct-window-na">-</td>'; var depth = rec.history_depth || 0; var windowDays = (windowKey === 'l5d') ? 5 : 20; if (depth < windowDays) return '<td class="' + extra + ' ct-window-building" title="' + depth + ' of ' + windowDays + ' days of history accumulated">building</td>'; var fired = (windowKey === 'l5d') ? !!rec.fired_l5d : !!rec.fired_l20d; if (!fired) return '<td class="' + extra + ' ct-window-none">-</td>'; var ds = rec.days_since_fired; var label; if (ds === 0) label = 'today'; else if (ds === 1) label = '1d ago'; else if (ds != null) label = ds + 'd ago'; else label = 'fired'; var shadeCls = (ds != null && ds <= 5) ? 'ct-window-fired-recent' : 'ct-window-fired-older'; return '<td class="' + extra + ' ' + shadeCls + '"><span class="ct-window-label">' + label + '</span></td>'; }
+  function sbHashColor(label, alpha) { if (!label) return null; var h = 0; for (var i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff; return 'hsla(' + (h % 360) + ', 35%, 55%, ' + alpha + ')'; }
+  function sbPortfolioInfo(row) { if (row.is_live) return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)', bgHover:'rgba(27,94,32,0.14)' }; if (row.sector_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)', bgHover:'rgba(27,94,32,0.08)' }; if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' }; return null; }
+
+  // --- column model ---
+  function sbBuildCols() {
+    var cols = [
+      { id:'name',     sortKey:'company',         kind:'input' },
+      { id:'taxon',    sortKey:'sector',           kind:'input' },
+      { id:'price',    sortKey:'price',            kind:'input' },
+      { id:'high_52w', sortKey:'high_52w',         kind:'input' },
+      { id:'low_52w',  sortKey:'low_52w',          kind:'input' },
+      { id:'ma_150',   sortKey:'ma_150',           kind:'input' },
+      { id:'ma_200',   sortKey:'ma_200',           kind:'input' },
+      { id:'pullback', sortKey:'recent_pullback',  kind:'input' }
+    ];
+    var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
+    for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] });
+    for (var p = 0; p < SB_PATTERNS.length; p++) {
+      var pat = SB_PATTERNS[p];
+      var gi = p + 1;
+      cols.push({ id:'p'+gi+'_rating', sortKey:pat.key+'__rating', kind:'rating', patternKey:pat.key });
+      cols.push({ id:'p'+gi+'_score',  sortKey:pat.key+'__score',  kind:'score',  patternKey:pat.key });
+      for (var t = 0; t < pat.tests.length; t++) {
+        cols.push({ id:'p'+gi+'t'+(t+1), sortKey:pat.key+'__'+pat.tests[t].key, kind:'test', patternKey:pat.key, testKey:pat.tests[t].key, group:pat.tests[t].group, label:pat.tests[t].label, tooltip:pat.tests[t].tooltip });
+      }
+      cols.push({ id:'p'+gi+'_l5d',  sortKey:pat.key+'__l5d',  kind:'window', patternKey:pat.key, windowKey:'l5d' });
+      cols.push({ id:'p'+gi+'_l20d', sortKey:pat.key+'__l20d', kind:'window', patternKey:pat.key, windowKey:'l20d' });
+    }
+    return cols;
+  }
+  var SB_COLS = sbBuildCols();
+  var SB_INPUT_COUNT = 8;
+  var SB_STAGEINFO_COUNT = 4;
+
+  // --- sorting ---
+  function sbGetSortVal(row, key) {
+    if (key.indexOf('stageinfo__') === 0) { var sk = key.split('__')[1]; return SB_RATING_RANK[sbStageRating(row, sk)] || 0; }
+    if (key.indexOf('__') > 0) {
+      var parts = key.split('__'); var patKey = parts[0], sub = parts[1];
+      var rec = sbPatternRec(row, patKey);
+      if (sub === 'rating') return rec ? (SB_RATING_RANK[rec.rating] || 0) : 0;
+      if (sub === 'score')  return rec ? (rec.count || 0) : 0;
+      if (sub === 'l5d' || sub === 'l20d') { if (!rec) return -1; var wd = (sub === 'l5d') ? 5 : 20; if ((rec.history_depth || 0) < wd) return -2; var fired = (sub === 'l5d') ? rec.fired_l5d : rec.fired_l20d; if (!fired) return -1; var ds = rec.days_since_fired; return (ds == null) ? 0 : (1000 - ds); }
+      return sbEvalTest(row, patKey, sub) ? 1 : 0;
+    }
+    if (key === 'recent_pullback') return row.recent_pullback == null ? -Infinity : row.recent_pullback;
+    var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
+    if (PCT_KEYS.indexOf(key) > -1 && sbState.mode.inputs === 'pct') { var ref = row[key]; if (ref == null || row.price == null || ref === 0) return -Infinity; return (row.price - ref) / ref * 100; }
+    if (key in row) return row[key];
+    return 0;
+  }
+  function sbOnSort(key) {
+    if (sbState.sort.col === key) sbState.sort.dir = sbState.sort.dir === 'desc' ? 'asc' : 'desc';
+    else sbState.sort = { col: key, dir: key === 'company' ? 'asc' : 'desc' };
+    sbBuildHeaderRow();
+    sbRenderRows();
+  }
+  function sbBuildHeaderRow() {
+    var tr = document.getElementById('sb-col-header-row');
+    if (!tr) return;
+    var INPUT_LABELS = ['Company - Ticker','Industry - Sector','Price','52wk high','52wk low','150D MA','200D MA','Pullback'];
+    var STAGE_LABELS = ['Stage 1','Stage 2','Stage 3','Stage 4'];
+    var h = '';
+    for (var i = 0; i < SB_COLS.length; i++) {
+      var c = SB_COLS[i];
+      var isSort = sbState.sort.col === c.sortKey;
+      var arrow = isSort ? '<span class="sort-arrow">' + (sbState.sort.dir === 'desc' ? String.fromCharCode(9660) : String.fromCharCode(9650)) + '</span>' : '<span class="sort-placeholder"></span>';
+      var label, title, cls = '';
+      if (c.kind === 'input') { label = INPUT_LABELS[i]; title = label; }
+      else if (c.kind === 'stageinfo') { label = STAGE_LABELS[i - SB_INPUT_COUNT]; title = label + ' rating'; cls = (i === SB_INPUT_COUNT ? 'grp-start-stageinfo ' : ''); }
+      else if (c.kind === 'rating') { label = 'Rating'; title = c.patternKey + ' rating'; cls = 'grp-start-g' + (SB_PATTERNS.indexOf(SB_PATTERNS.filter(function(p){return p.key===c.patternKey})[0]) + 1) + ' '; }
+      else if (c.kind === 'score') { label = 'Score'; title = 'Pass count out of 6'; }
+      else if (c.kind === 'test') { label = c.label; title = c.tooltip || c.label; }
+      else if (c.kind === 'window') { label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label; cls = 'ct-window-col'; }
+      else { label = '?'; title = ''; }
+      h += '<th class="' + cls + '" data-sort-key="' + c.sortKey + '" title="' + title + '"><span class="hd"><span class="lbl">' + label + '</span>' + arrow + '</span></th>';
+    }
+    tr.innerHTML = h;
+  }
+
+  // --- tiles ---
+  function sbPatternTiles(scopeRows) {
+    var tiles = document.getElementById('sb-pattern-tiles');
+    if (!tiles) return;
+    var total = scopeRows.length;
+    var h = '';
+    for (var i = 0; i < SB_PATTERNS.length; i++) {
+      var pat = SB_PATTERNS[i];
+      var tierCounts = sbTierCounts(scopeRows, pat.key);
+      var cnt = total - (tierCounts['None'] || 0);
+      var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+      var sel = sbState.tierFilter[pat.key] || [];
+      var anySel = sel.length > 0;
+      var headline = cnt, headSub = 'of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%';
+      if (anySel) { var ft = 0; for (var z = 0; z < sel.length; z++) ft += (tierCounts[sel[z]] || 0); headline = ft; headSub = sel.join(' + ') + ' · filtered'; }
+      var hist = sbPassHistogram(scopeRows, pat.key);
+      var breakdown = '';
+      for (var k = 1; k <= 6; k++) { if (k > 1) breakdown += ' · '; breakdown += k + '/6: ' + (hist[k] || 0).toLocaleString('en-GB'); }
+      var chips = '';
+      var TIERS = ['Possible','Plausible','Probable','Qualified'];
+      for (var c = 0; c < TIERS.length; c++) {
+        var tier = TIERS[c]; var on = sel.indexOf(tier) > -1; var tc = tierCounts[tier] || 0;
+        chips += '<span class="pi-tier-chip pi-chip-' + SB_TONE_CHIP[pat.tone] + (on ? ' on' : '') + '" data-pattern="' + pat.key + '" data-tier="' + tier + '">' + tier + ' ' + tc.toLocaleString('en-GB') + (on ? ' ' + String.fromCharCode(10003) : '') + '</span>';
+      }
+      var activeCls = anySel ? ' active' : '';
+      h += '<div class="rating-tile ' + SB_TONE_TILE[pat.tone] + activeCls + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
+           '<div class="rt-label">' + pat.shortLabel + '</div><div class="rt-count">' + headline.toLocaleString('en-GB') + '</div><div class="rt-sub">' + headSub + '</div>' +
+           '<div class="rt-breakdown">' + breakdown + '</div><div class="pi-tier-chips" data-pattern="' + pat.key + '">' + chips + '</div>' +
+           '<div class="rt-strip ' + SB_TONE_STRIP[pat.tone] + '"></div></div>';
+    }
+    tiles.innerHTML = h;
+  }
+
+  // --- scope / filter ---
+  function sbUpdateScopeCounts(rows) { function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; } set('sb2-cnt-all', rows.length); set('sb2-cnt-live', rows.filter(function(r){return r.is_live}).length); set('sb2-cnt-sector', rows.filter(function(r){return r.sector_in_portfolio}).length); set('sb2-cnt-industry', rows.filter(function(r){return r.industry_in_portfolio}).length); }
+  function sbApplyScope(all) { var rows = all.slice(); if (sbState.scope === 'live') rows = rows.filter(function(r){return r.is_live}); else if (sbState.scope === 'sector') rows = rows.filter(function(r){return r.sector_in_portfolio}); else if (sbState.scope === 'industry') rows = rows.filter(function(r){return r.industry_in_portfolio}); return rows; }
+  function sbApplyTierFilter(rows) {
+    var active = [];
+    for (var p = 0; p < SB_PATTERNS.length; p++) { var k = SB_PATTERNS[p].key; var sel = sbState.tierFilter[k] || []; if (sel.length > 0) active.push({ key: k, tiers: sel }); }
+    if (active.length === 0) return rows;
+    return rows.filter(function(r) { for (var a = 0; a < active.length; a++) { var rating = sbRowRating(r, active[a].key); if (active[a].tiers.indexOf(rating) === -1) return false; } return true; });
+  }
+
+  // --- main render ---
+  function sbRenderRows() {
+    var tbody = document.getElementById('sb-tbody');
+    if (!tbody) return;
+    var all = sbGetRows();
+    var scopeRows = sbApplyScope(all);
+    sbUpdateScopeCounts(all);
+    sbPatternTiles(scopeRows);
+    var rows = sbApplyTierFilter(scopeRows);
+    rows.sort(function(a,b) { var va = sbGetSortVal(a, sbState.sort.col), vb = sbGetSortVal(b, sbState.sort.col); var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0); if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker); return sbState.sort.dir === 'desc' ? -cmp : cmp; });
+    var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i];
+      var styles = [], cls = [];
+      if (sbState.tint === 'industry') { styles.push('--tint-bg: ' + sbHashColor(s.industry, 0.16)); cls.push('tint-row'); }
+      else if (sbState.tint === 'sector') { styles.push('--tint-bg: ' + sbHashColor(s.sector, 0.16)); cls.push('tint-row'); }
+      if (sbState.port === 'on') { var pinf = sbPortfolioInfo(s); if (pinf) { styles.push('--portfolio-color: ' + pinf.color); styles.push('--portfolio-bg: ' + pinf.bg); styles.push('--portfolio-bg-hover: ' + pinf.bgHover); cls.push('portfolio-band'); cls.push('portfolio-tint'); } }
+      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">' + String.fromCharCode(9679) + '</span>' : '';
+      html += '<tr' + clsAttr + styleAttr + '>' +
+        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
+        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
+        sbInputCell(s, 'price') + sbInputCell(s, 'high_52w') + sbInputCell(s, 'low_52w') + sbInputCell(s, 'ma_150') + sbInputCell(s, 'ma_200') + sbInputCell(s, 'recent_pullback');
+      for (var si = 0; si < STAGES.length; si++) html += sbStageInfoCell(s, STAGES[si], si === 0 ? 'grp-start-stageinfo' : '');
+      for (var pi = 0; pi < SB_PATTERNS.length; pi++) {
+        var pat = SB_PATTERNS[pi];
+        var gi = pi + 1;
+        html += sbRatingCell(s, pat.key, 'grp-start-g' + gi);
+        html += sbScoreCell(s, pat.key, '');
+        for (var ti = 0; ti < pat.tests.length; ti++) html += sbTestCell(s, pat.key, pat.tests[ti].key, '');
+        html += sbWindowCell(s, pat.key, 'l5d', 'ct-window-col');
+        html += sbWindowCell(s, pat.key, 'l20d', 'ct-window-col');
+      }
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  // --- control setters ---
+  window.sb2SetMode = function(kind, val) { sbState.mode[kind] = val; var btns = document.querySelectorAll('button[data-sb2-grp="' + kind + '"]'); for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-sb2-val') === val); sbRenderRows(); };
+  window.sb2SetScope = function(s) { sbState.scope = s; var btns = document.querySelectorAll('button[data-sb2-scope]'); for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-sb2-scope') === s); sbRenderRows(); };
+  window.sb2SetTint = function(t) { sbState.tint = t; var btns = document.querySelectorAll('button[data-sb2-tint]'); for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-sb2-tint') === t); sbRenderRows(); };
+  window.sb2SetPort = function(p) { sbState.port = p; var btns = document.querySelectorAll('button[data-sb2-port]'); for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-sb2-port') === p); sbRenderRows(); };
+  window.sb2ToggleTier = function(patternKey, tier) { var sel = sbState.tierFilter[patternKey] || []; var idx = sel.indexOf(tier); if (idx > -1) sel.splice(idx, 1); else sel.push(tier); sbState.tierFilter[patternKey] = sel; sbRenderRows(); };
+  window.sb2SelectAllTiers = function(patternKey) { var sel = sbState.tierFilter[patternKey] || []; var onlyProb = (sel.length === 1 && sel[0] === 'Probable'); sbState.tierFilter[patternKey] = onlyProb ? [] : ['Probable']; sbRenderRows(); };
+  window.sb2OnSort = sbOnSort;
+
+  // --- scaffold ---
+  function sbPatternBlockSpan(pat) { return 2 + pat.tests.length + 2; }
+  function sbBuildScaffold() {
+    var host = document.getElementById('tab-tests_speculative_bet');
+    if (!host) return false;
+    if (host.querySelector('#sb-main-table')) return true;
+    var cg = '<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-52wh"><col class="c-52wl"><col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
+    for (var sgc = 0; sgc < SB_STAGEINFO_COUNT; sgc++) cg += '<col class="c-stageinfo">';
+    var groupHtml = '<th class="gh-inputs" colspan="' + SB_INPUT_COUNT + '">Inputs</th><th class="gh-stageinfo grp-start-stageinfo" colspan="' + SB_STAGEINFO_COUNT + '">Stage ratings</th>';
+    var subGroupHtml = '<th class="sg-spacer" colspan="' + SB_INPUT_COUNT + '"></th><th class="sg-spacer" colspan="' + SB_STAGEINFO_COUNT + '"></th>';
+    for (var p = 0; p < SB_PATTERNS.length; p++) {
+      var pat = SB_PATTERNS[p]; var gi = p + 1; var span = sbPatternBlockSpan(pat);
+      cg += '<col class="c-rating"><col class="c-score">'; for (var t = 0; t < pat.tests.length; t++) cg += '<col class="c-test">'; cg += '<col class="c-window"><col class="c-window">';
+      groupHtml += '<th class="gh-g' + gi + ' grp-start-g' + gi + '" colspan="' + span + '">' + pat.shortLabel + '</th>';
+      var setupCount = 0, triggerCount = 0; for (var st = 0; st < pat.tests.length; st++) { if (pat.tests[st].group === 'trigger') triggerCount++; else setupCount++; }
+      subGroupHtml += '<th class="sub-g sub-g-rating sub-g' + gi + '" colspan="2">Rating</th>';
+      if (setupCount > 0) subGroupHtml += '<th class="sub-g sub-g-setup sub-g' + gi + '" colspan="' + setupCount + '">Setup</th>';
+      if (triggerCount > 0) subGroupHtml += '<th class="sub-g sub-g-trigger sub-g' + gi + '" colspan="' + triggerCount + '">Trigger</th>';
+      subGroupHtml += '<th class="sub-g sub-g-context sub-g' + gi + '" colspan="2">Context</th>';
+    }
+    var captionsHtml = '';
+    for (var cp = 0; cp < SB_PATTERNS.length; cp++) { var cpat = SB_PATTERNS[cp]; captionsHtml += '<div class="gcap gcap-g' + (cp+1) + '"><b>' + cpat.shortLabel + '</b>' + cpat.caption + '</div>'; }
+    var theadRows = '<tr class="group-header-row">' + groupHtml + '</tr><tr class="sub-group-row">' + subGroupHtml + '</tr><tr class="col-header-row" id="sb-col-header-row"></tr>';
+    var html = '<div class="s1-intro">Speculative Bets — Stage 3 and Stage 4 breakout tests. A speculative bet is a position on a stock that breaks out positively while in an unfavourable stage. In Stage 3 (topping/early decline), this is often a contrarian or short-side play. In Stage 4 (declining/bottoming), this is an early turnaround bet before the stage flips. Both use the same 6-criterion template as the probing bets: stage gate + 5D/10D MAs rising + price above 20D + 20D MA turned up in last 5 days + confirmation close. These carry the highest risk because the primary trend is against you.</div>' +
+      '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span><button class="toggle-btn active" data-sb2-grp="inputs" data-sb2-val="pct" onclick="sb2SetMode(\'inputs\',\'pct\')">show as %</button><button class="toggle-btn" data-sb2-grp="inputs" data-sb2-val="raw" onclick="sb2SetMode(\'inputs\',\'raw\')">show as numbers</button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span><button class="toggle-btn active" data-sb2-grp="tests" data-sb2-val="tick" onclick="sb2SetMode(\'tests\',\'tick\')">show ticks</button><button class="toggle-btn" data-sb2-grp="tests" data-sb2-val="val" onclick="sb2SetMode(\'tests\',\'val\')">show test values</button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span><button class="toggle-btn active" data-sb2-scope="all" onclick="sb2SetScope(\'all\')">All <span id="sb2-cnt-all"></span></button><button class="toggle-btn" data-sb2-scope="live" onclick="sb2SetScope(\'live\')">Live <span id="sb2-cnt-live"></span></button><button class="toggle-btn" data-sb2-scope="sector" onclick="sb2SetScope(\'sector\')">Sectors <span id="sb2-cnt-sector"></span></button><button class="toggle-btn" data-sb2-scope="industry" onclick="sb2SetScope(\'industry\')">Industries <span id="sb2-cnt-industry"></span></button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span><button class="toggle-btn active" data-sb2-tint="none" onclick="sb2SetTint(\'none\')">Off</button><button class="toggle-btn" data-sb2-tint="industry" onclick="sb2SetTint(\'industry\')">Industry</button><button class="toggle-btn" data-sb2-tint="sector" onclick="sb2SetTint(\'sector\')">Sector</button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span><button class="toggle-btn active" data-sb2-port="off" onclick="sb2SetPort(\'off\')">Off</button><button class="toggle-btn" data-sb2-port="on" onclick="sb2SetPort(\'on\')">On</button></div>' +
+      '</div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="sb-pattern-tiles"></div>' +
+      '<div class="group-captions">' + captionsHtml + '</div>' +
+      '<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="sb-main-table"><colgroup>' + cg + '</colgroup><thead>' + theadRows + '</thead><tbody id="sb-tbody"></tbody></table></div></div>';
+    host.innerHTML = html;
+    var tilesEl = document.getElementById('sb-pattern-tiles');
+    if (tilesEl) { tilesEl.addEventListener('click', function(e) { var chip = e.target.closest('.pi-tier-chip'); if (chip) { var cp = chip.getAttribute('data-pattern'); var ct = chip.getAttribute('data-tier'); if (cp && ct) sb2ToggleTier(cp, ct); return; } var tile = e.target.closest('.rating-tile'); if (!tile) return; var k = tile.getAttribute('data-pattern'); if (k) sb2SelectAllTiers(k); }); }
+    var hdr = document.getElementById('sb-col-header-row');
+    if (hdr) { hdr.addEventListener('click', function(e) { var th = e.target.closest('th'); if (!th) return; var key = th.getAttribute('data-sort-key'); if (key) sb2OnSort(key); }); }
+    return true;
+  }
+
+  function renderSpeculativeBet() {
+    if (!sbBuildScaffold()) return;
+    sbBuildHeaderRow();
+    sbRenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();
+  }
+  window.renderSpeculativeBet = renderSpeculativeBet;
+
+})();
+
+/* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER-MODULE-END */
+
+
 /* MD-V2-MASTER-OVERVIEW-MARKER-MODULE-START */
 /* MD-V2-MASTER-OVERVIEW-MARKER-START */
 (function() {
@@ -12281,10 +14023,13 @@ function SUM_renderQualifiedStocks() {
     { section:'Capital qualification setups', key:'healthy_retest', label:'Healthy retest within MT/LT uptrend', short:'Healthy retest', ratingPath:'group:setups:healthy_retest', tabId:'setups_s2vcp', patternKey:'healthy_retest' },
     { section:'Capital qualification setups', key:'vcp_after_s2_base', label:'VCP after Stage 2 base', short:'VCP S2 base', ratingPath:'group:setups:vcp_after_s2_base', tabId:'setups_s2vcp', patternKey:'vcp_after_s2_base' },
     // -- Capital deployment tests --
-    { section:'Capital deployment tests', key:'ma_retest_upwards', label:'Upwards moving average retest', short:'MA retest', ratingPath:'group:tests:ma_retest_upwards', tabId:'tests', patternKey:'ma_retest_upwards' },
-    { section:'Capital deployment tests', key:'vcp_deploy_s1', label:'VCP after Stage 1->2', short:'VCP S1 deploy', ratingPath:'group:tests:vcp_deploy_s1', tabId:'tests', patternKey:'vcp_deploy_s1' },
-    { section:'Capital deployment tests', key:'vcp_deploy_s2', label:'VCP after Stage 2 base', short:'VCP S2 deploy', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests', patternKey:'vcp_deploy_s2' },
-    { section:'Capital deployment tests', key:'probing_bet_test', label:'Probing bet', short:'PB deploy', ratingPath:'group:tests:probing_bet', tabId:'tests', patternKey:'probing_bet' }
+    // MD-V2-S47C-OVERVIEW-NEW-TESTS-MARKER (19-May-26): replaced 4 legacy tests with the 5 new tests
+    // per Richard's 19-May brief. Healthy VCP (Trade #2) deferred until pipeline computation ships.
+    { section:'Capital deployment tests', key:'healthy_retest', label:'Healthy retest of upwards MA', short:'HR', ratingPath:'group:tests:healthy_retest', tabId:'setups_healthy_retest', patternKey:'healthy_retest' },
+    { section:'Capital deployment tests', key:'probing_bet_s1', label:'Probing bet S1', short:'PB S1', ratingPath:'group:tests:probing_bet_s1', tabId:'tests_probing_bet', patternKey:'probing_bet_s1' },
+    { section:'Capital deployment tests', key:'probing_bet_s2', label:'Probing bet S2', short:'PB S2', ratingPath:'group:tests:probing_bet_s2', tabId:'tests_probing_bet', patternKey:'probing_bet_s2' },
+    { section:'Capital deployment tests', key:'speculative_bet_s3', label:'Speculative bet S3', short:'SB S3', ratingPath:'group:tests:speculative_bet_s3', tabId:'tests_speculative_bet', patternKey:'speculative_bet_s3' },
+    { section:'Capital deployment tests', key:'speculative_bet_s4', label:'Speculative bet S4', short:'SB S4', ratingPath:'group:tests:speculative_bet_s4', tabId:'tests_speculative_bet', patternKey:'speculative_bet_s4' }
   ]; /* MD-V2-S40-RESPONSIVE-SHORT-HEADERS — short forms added */
 
   // The 4 rating tiers (Stage 1 splits Probable into Early/Late upstream; the
@@ -12733,6 +14478,9 @@ function renderTab(id){
   else if(id==="setups_s2vcp")renderSetupsS2VCP();  /* MD-V2-SETUPS-MARKER */
   else if(id==="master_overview")renderMasterOverview();  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
   else if(id==="tests")renderTests();  /* MD-V2-TESTS-MARKER MD-V2-TESTS-S27-MARKER: was renderCapTests (undefined) */
+  else if(id==="setups_healthy_retest")renderHealthyRetest();  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
+  else if(id==="tests_probing_bet")renderProbingBet();  /* MD-V2-S47-TAB-PROBING-BET-MARKER */
+  else if(id==="tests_speculative_bet")renderSpeculativeBet();  /* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER */
   else if(id==="mm99")renderMM99();
   else if(id==="bp")renderBP();
   else if(id==="pb")renderPB();

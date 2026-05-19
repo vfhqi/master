@@ -2589,7 +2589,7 @@ def compute_master_dashboard_screens(prices, filter_results):
         # Gate column: Stage 1 rating is Probable Early OR Probable Late.
         # Then the 4 VCP contraction columns (this test's OWN columns) +
         # breakout trigger + confirmation trigger.
-        vd1_gate_s1_probable = bool(s1["rating"] in ("Probable Early", "Probable Late"))
+        vd1_gate_s1_probable = bool("Probable" in str(s1.get("rating", "")))
         vd1_trig_breakout = bool(ind["breakout"])
         vd1_trig_confirmation = bool(close_pct_change_today is not None and close_pct_change_today >= 0.02)
         vd1_tests = {
@@ -2761,16 +2761,18 @@ def compute_master_dashboard_screens(prices, filter_results):
                 },
             }
 
-        # Stage gates per variant. Stage X must be at any non-None rating
-        # (Possible+/Plausible+/Probable+) for the variant to fire.
+        # Stage gates per variant.
+        # S1/S2/S4: must be Plausible or Probable (substring match handles any sub-tier labels).
+        # S3: any non-None rating is eligible (Possible Topping keeps) per D-MD-V2-110 —
+        #     the Stage 3 prior-uptrend hard gate is already aggressive enough.
         _s1_rating_val = s1.get("rating") if isinstance(s1, dict) else None
         _s2_rating_val = s2.get("rating") if isinstance(s2, dict) else None
         _s3_rating_val = s3.get("rating") if isinstance(s3, dict) else None
         _s4_rating_val = s4.get("rating") if isinstance(s4, dict) else None
-        _s1_in = bool(_s1_rating_val not in (None, "None"))
-        _s2_in = bool(_s2_rating_val not in (None, "None"))
+        _s1_in = bool(_s1_rating_val is not None and ("Plausible" in str(_s1_rating_val) or "Probable" in str(_s1_rating_val)))
+        _s2_in = bool(_s2_rating_val is not None and ("Plausible" in str(_s2_rating_val) or "Probable" in str(_s2_rating_val)))
         _s3_in = bool(_s3_rating_val not in (None, "None"))
-        _s4_in = bool(_s4_rating_val not in (None, "None"))
+        _s4_in = bool(_s4_rating_val is not None and ("Plausible" in str(_s4_rating_val) or "Probable" in str(_s4_rating_val)))
 
         tests["probing_bet_s1"] = _ps_build(_s1_in, "probing_bet_s1", _s1_rating_val)
         tests["probing_bet_s2"] = _ps_build(_s2_in, "probing_bet_s2", _s2_rating_val)

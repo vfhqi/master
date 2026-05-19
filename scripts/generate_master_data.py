@@ -1803,8 +1803,11 @@ def compute_master_dashboard_screens(prices, filter_results):
         s1["groups"]["g2_flat_mas"] = {"T3": s1_t3, "T4": s1_t4}
 
         # Group 3 — Positively stacked MAs
-        s1_t5 = (ma50 is not None and ma150 is not None and ma150 > 0 and ma50 > ma150 * 0.97)
-        s1_t6 = (ma150 is not None and ma200 is not None and ma200 > 0 and ma150 > ma200 * 0.97)
+        # MD-V2-S47-S1-CUSHION-REMOVAL-MARKER (18-May-26, D-MD-V2-112):
+        # Path B — strict positive stack. Removed x0.97 cushion from T5/T6.
+        # 50D must be ABOVE 150D; 150D must be ABOVE 200D. No 3% tolerance.
+        s1_t5 = (ma50 is not None and ma150 is not None and ma50 > ma150)
+        s1_t6 = (ma150 is not None and ma200 is not None and ma150 > ma200)
         s1["tests"]["T5_50_above_150x97"] = s1_t5
         s1["tests"]["T6_150_above_200x97"] = s1_t6
         s1["groups"]["g3_stack"] = {"T5": s1_t5, "T6": s1_t6}
@@ -1861,9 +1864,22 @@ def compute_master_dashboard_screens(prices, filter_results):
         s2["groups"]["g2_mt_trend"] = {"T3": s2_t3, "T4": s2_t4}
 
         # Group 3 — ST trend
+        # MD-V2-S47-S2-NEW-CRITERIA-MARKER (18-May-26, D-MD-V2-113):
+        # Added T11 (50D>200D), T12 (50D rising d/d), moved to Group 3.
+        # T13 (150D rising d/d) added to Group 2 below.
         s2_t5 = (ma50 is not None and ma150 is not None and ma50 > ma150)
+        s2_t11 = (ma50 is not None and ma200 is not None and ma50 > ma200)
+        s2_t12 = (ma50 is not None and ma50_prev is not None and ma50 > ma50_prev)
         s2["tests"]["T5_50_above_150"] = s2_t5
-        s2["groups"]["g3_st_trend"] = {"T5": s2_t5}
+        s2["tests"]["T11_50_above_200"] = s2_t11
+        s2["tests"]["T12_50D_rising"] = s2_t12
+        s2["groups"]["g3_st_trend"] = {"T5": s2_t5, "T11": s2_t11, "T12": s2_t12}
+
+        # T13 — 150D MA rising (day-over-day). Logically belongs to Group 2
+        # (MT trend) but added here to keep diff localised. Appended to g2.
+        s2_t13 = (ma150 is not None and ma150_prev is not None and ma150 > ma150_prev)
+        s2["tests"]["T13_150D_rising"] = s2_t13
+        s2["groups"]["g2_mt_trend"]["T13"] = s2_t13
 
         # Group 4 — Price leadership
         s2_t6 = (price is not None and h52 is not None and h52 > 0 and price >= h52 * 0.75)
@@ -1881,13 +1897,15 @@ def compute_master_dashboard_screens(prices, filter_results):
         s2["tests"]["T10_RS_vs_market_70"] = s2_t10
         s2["groups"]["g5_rs"] = {"T8": s2_t8, "T9": s2_t9, "T10": s2_t10}
 
-        s2_count = sum(1 for t in [s2_t1, s2_t2, s2_t3, s2_t4, s2_t5, s2_t6, s2_t7, s2_t8, s2_t9, s2_t10] if t)
+        # Composite count — 13 tests (was 10; +T11, +T12, +T13 per D-MD-V2-113)
+        s2_count = sum(1 for t in [s2_t1, s2_t2, s2_t3, s2_t4, s2_t5, s2_t6, s2_t7, s2_t8, s2_t9, s2_t10, s2_t11, s2_t12, s2_t13] if t)
         s2["count"] = s2_count
-        if s2_count >= 7:
+        s2["total"] = 13
+        if s2_count >= 12:  # MD-V2-S47B-S2-TIGHTEN-12-OF-13 (19-May-26 audit-hook tighten)
             s2["rating"] = "Probable"
-        elif s2_count == 6:
+        elif s2_count >= 9:
             s2["rating"] = "Plausible"
-        elif s2_count == 5:
+        elif s2_count >= 8:
             s2["rating"] = "Possible"
         else:
             s2["rating"] = "None"
@@ -1924,12 +1942,13 @@ def compute_master_dashboard_screens(prices, filter_results):
         s3_t5 = (adv_1m_dn > 0 and adv_1m_up > 0 and adv_1m_dn >= adv_1m_up * 1.10)
         # Volatility test #6 needs ATR L1M vs prior 3M — approximate using utr_pullback_contraction (ATR10/ATR20)
         s3_t6 = (p.get("utr_pullback_contraction") is not None and p["utr_pullback_contraction"] >= 1.10)
-        # No-breakout test #7 — price fails > 5% above 50D for 5+ days
-        # Approximation: price within 5% of 50D currently
-        s3_t7 = (price is not None and ma50 is not None and ma50 > 0 and price <= ma50 * 1.05)
+        # MD-V2-S47-S3-PRIOR-UPTREND-MARKER (18-May-26, D-MD-V2-114):
+        # T7 tightened: strict price < 50D AND 50D rolling over (was: price <= 50D * 1.05).
+        s3_t7 = (price is not None and ma50 is not None and ma50_prev is not None
+                 and price < ma50 and ma50 < ma50_prev)
         s3["tests"]["T5_volume_down_up_ratio"] = s3_t5
         s3["tests"]["T6_volatility_increase"] = s3_t6
-        s3["tests"]["T7_no_breakout"] = s3_t7
+        s3["tests"]["T7_price_below_50d_and_50d_rolling"] = s3_t7
         s3["groups"]["g3_debate"] = {"T5": s3_t5, "T6": s3_t6, "T7": s3_t7}
 
         # Group 4 — Lower lows
@@ -1960,11 +1979,34 @@ def compute_master_dashboard_screens(prices, filter_results):
             s3["rating"] = "Possible Topping"
         else:
             s3["rating"] = "None"
+
+        # Prior-uptrend hard precondition (D-MD-V2-114):
+        # Stage 3 should only fire if the stock was previously in Stage 2.
+        # Proxy: 200D MA was rising 6-7 months ago (ma200_m6 > ma200_m7).
+        ma200_m6 = ma200_samples[-7] if len(ma200_samples) >= 7 else None
+        ma200_m7 = ma200_samples[-8] if len(ma200_samples) >= 8 else None
+        prior_uptrend = bool(ma200_m6 is not None and ma200_m7 is not None and ma200_m6 > ma200_m7)
+        if not prior_uptrend:
+            s3["rating"] = "None"
+
+        # Display column: prior_uptrend boolean + pct change for Group 1.
+        # Dashboard's existing %-vs-yes/no toggle handles the display.
+        prior_uptrend_pct = None
+        if ma200_m6 is not None and ma200_m7 is not None and ma200_m7 > 0:
+            prior_uptrend_pct = round(((ma200_m6 - ma200_m7) / ma200_m7) * 100, 2)
+        s3["prior_uptrend"] = prior_uptrend
+        s3["test_values"] = {
+            "prior_uptrend": prior_uptrend,
+            "prior_uptrend_pct": prior_uptrend_pct,
+        }
+
         md["stage_3"] = s3
 
         # ──────────────────────────────────────────────────────────────
         # STAGE 4 — Decline
         # ──────────────────────────────────────────────────────────────
+        # D-MD-V2-115: ensure Stage 3 snapshot cache is loaded for lookback.
+        _ensure_stage3_snapshots()
         s4 = {"tests": {}, "groups": {}, "count": 0, "rating": "None"}
         # Group 1 — Price trends
         s4_t1 = (ma200 is not None and ma200_prev is not None and ma200 < ma200_prev)
@@ -1997,14 +2039,31 @@ def compute_master_dashboard_screens(prices, filter_results):
 
         s4_count = sum(1 for t in [s4_t1, s4_t2, s4_t3, s4_t4, s4_t5, s4_t6, s4_t7] if t)
         s4["count"] = s4_count
-        if s4_count >= 3:
+
+        # MD-V2-S47-S4-REWRITE-MARKER (18-May-26, D-MD-V2-115):
+        # Specific-combinations ladder per Richard's 17-May definitions.
+        # Replaces old count-based ladder (3/7, 2/7, 1/7).
+        if s4_t1 and s4_t3 and s4_t4 and s4_t5:
             s4["rating"] = "Probable"
-        elif s4_count == 2:
+            if s4_t2:
+                s4["rating"] = "Probable (Accelerating)"
+        elif s4_t4 and s4_t5:
             s4["rating"] = "Plausible"
-        elif s4_count == 1:
+        elif s4_t4 or s4_t5:
             s4["rating"] = "Possible"
         else:
             s4["rating"] = "None"
+
+        # Stage-3 lookback INFO column (D-MD-V2-115):
+        # Does NOT modify Stage 4 rating — informational only.
+        s3_lookback = _stage_3_fired_in_last_60d(ticker, _s47_stage3_snapshots)
+        s4["info_stage_3_lookback"] = s3_lookback
+        s4["test_values"] = {
+            "s3_fired_in_60d": s3_lookback["fired"],
+            "s3_days_ago": s3_lookback["days_ago"],
+            "s3_history_depth_ok": s3_lookback["history_depth_ok"],
+        }
+
         md["stage_4"] = s4
 
         # ──────────────────────────────────────────────────────────────
@@ -3051,11 +3110,103 @@ def apply_test_history(filter_results, seed=0, raw_data=None, universe=None,
     return filter_results
 
 
+# ── Stage 3 lifecycle lookback infrastructure (D-MD-V2-115) ──
+
+def _load_stage3_snapshots():
+    """Load Stage 3 lifecycle rating snapshots from data/stage-snapshots.json.
+
+    Returns a dict keyed by date-string, where each value is a dict mapping
+    ticker to its Stage 3 lifecycle rating (e.g. "Probable Invalidation",
+    "Plausible Invalidation", "Possible Topping", "None", or null if not
+    yet recorded). Returns empty dict on any load failure.
+    """
+    snapshot_path = DATA_DIR / "stage-snapshots.json"
+    if not snapshot_path.exists():
+        return {}
+    try:
+        with open(snapshot_path) as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return {}
+    # Extract only the "stage_3_rating" field from each day's per-ticker dict.
+    result = {}
+    for day_str, tickers in data.items():
+        day_ratings = {}
+        for tk, fields in tickers.items():
+            if isinstance(fields, dict):
+                day_ratings[tk] = fields.get("stage_3_rating")
+        result[day_str] = day_ratings
+    return result
+
+
+# Module-level cache — loaded once per run, used by all _stage_3_fired_in_last_60d calls.
+_s47_stage3_snapshots = None
+
+
+def _ensure_stage3_snapshots():
+    """Lazy-load the Stage 3 snapshot cache exactly once per pipeline run."""
+    global _s47_stage3_snapshots
+    if _s47_stage3_snapshots is None:
+        _s47_stage3_snapshots = _load_stage3_snapshots()
+    return _s47_stage3_snapshots
+
+
+def _stage_3_fired_in_last_60d(ticker, snapshots):
+    """Check if ticker had a Stage 3 Probable or Plausible rating in last 60 days.
+
+    Args:
+        ticker: stock ticker string
+        snapshots: dict from _load_stage3_snapshots()
+
+    Returns:
+        dict with three fields:
+        - fired (bool): True if any snapshot in the last 60 trading days shows
+          this ticker at Stage 3 "Probable Invalidation" or "Plausible Invalidation".
+        - days_ago (int or None): number of calendar days since the most recent
+          Stage 3 firing, or None if no firing found in the window.
+        - history_depth_ok (bool): True if >=10 days of snapshot history exist
+          overall. If False, result should display "insufficient history".
+    """
+    if not snapshots:
+        return {"fired": False, "days_ago": None, "history_depth_ok": False}
+
+    sorted_dates = sorted(snapshots.keys(), reverse=True)
+    history_depth_ok = len(sorted_dates) >= 10
+
+    today = date.today()
+    cutoff = today - timedelta(days=60)
+    qualifying_ratings = {"Probable Invalidation", "Plausible Invalidation"}
+
+    fired = False
+    days_ago = None
+
+    for day_str in sorted_dates:
+        try:
+            day_date = datetime.strptime(day_str, "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        if day_date < cutoff:
+            break  # Past the 60-day window
+
+        rating = snapshots.get(day_str, {}).get(ticker)
+        if rating in qualifying_ratings:
+            fired = True
+            delta = (today - day_date).days
+            if days_ago is None or delta < days_ago:
+                days_ago = delta
+
+    return {"fired": fired, "days_ago": days_ago, "history_depth_ok": history_depth_ok}
+
+
 def _save_daily_snapshot(filter_results):
     """Append today's stage assignments to data/stage-snapshots.json.
 
     This builds up real day-by-day history over time. Each entry is keyed
     by date so re-running on the same day overwrites (idempotent).
+
+    D-MD-V2-115 extension: also persists Stage 3 lifecycle rating
+    alongside the existing setup-stage data, enabling the Stage 4
+    lookback column.
     """
     FILTERS = ["basing_plateau", "probing_bet", "mm99", "vcp", "uptrend_retest"]
     snapshot_path = DATA_DIR / "stage-snapshots.json"
@@ -3073,7 +3224,12 @@ def _save_daily_snapshot(filter_results):
     today = date.today().strftime("%Y-%m-%d")
     today_stages = {}
     for r in filter_results:
-        today_stages[r["ticker"]] = {f: r[f].get("stage") for f in FILTERS}
+        entry = {f: r[f].get("stage") for f in FILTERS}
+        # D-MD-V2-115: persist Stage 3 lifecycle rating for lookback
+        md_v2 = r.get("md_v2", {})
+        s3 = md_v2.get("stage_3", {})
+        entry["stage_3_rating"] = s3.get("rating", "None")
+        today_stages[r["ticker"]] = entry
 
     existing[today] = today_stages
 

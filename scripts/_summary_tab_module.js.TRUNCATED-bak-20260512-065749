@@ -1,0 +1,590 @@
+// =============================================================================
+// SUMMARY TAB MODULE — V1 (12-May-26)
+// =============================================================================
+// SUMMARY-TAB-MARKER — idempotency marker for patcher detection
+//
+// Authored Session 19 (12-May-26). Locked spec: decisions.md D-MD-UI-38..47.
+// V1 TM rating: placeholder dichotomy per Richard 12-May-26 (bell-curve parked
+// as Q13 in open-questions.md). 6 master ratings:
+//   1. Technical Momentum (TM) — placeholder dichotomy
+//   2. Thematic Fit         — placeholder "C"
+//   3. Fundamental Change   — placeholder "C"
+//   4. ICBB                  — placeholder "C"
+//   5. SSEM                  — reuse existing ssemRatingMap (computed at startup)
+//   6. Valuation             — bell-curve INVERTED of pe_percentile (eligible=25 stocks)
+//
+// This module exports (via globals attached to window):
+//   - masterRatingsMap   {ticker: {tm, thematic, fund_chg, icbb, ssem, val}}
+//   - summaryFilters     {tm, thematic, fund_chg, icbb, ssem, val} - 3-state per toggle
+//   - summarySectorGrouping (bool)
+//   - deriveMasterRatings()  - call at startup after precomputeSsemRatings
+//   - renderSummary()        - call from renderTab dispatch
+//   - cycleSummaryFilter(rating)  - toggle handler
+//   - toggleSummarySectorGrouping() - sector grouping handler
+//
+// All other functions are scoped via the SUM_ prefix to avoid namespace collision.
+// =============================================================================
+
+/* SUMMARY-TAB-MARKER-START */
+
+// State globals
+var masterRatingsMap = {};  // ticker -> {tm, thematic, fund_chg, icbb, ssem, val}
+var summaryFilters = {      // 3-state per master rating: ""=none, "A"=A only, "AB"=A or B
+  tm: "", thematic: "", fund_chg: "", icbb: "", ssem: "", val: ""
+};
+var summarySectorGrouping = false;
+
+// Master rating IDs (left-to-right order matches D-MD-UI-40)
+var SUM_RATINGS = ["tm","thematic","fund_chg","icbb","ssem","val"];
+var SUM_RATING_LABELS = {
+  tm: "Technical Momentum",
+  thematic: "Thematic Fit",
+  fund_chg: "Fundamental Change",
+  icbb: "ICBB",
+  ssem: "SSEM",
+  val: "Valuation"
+};
+var SUM_RATING_SHORT = {
+  tm: "TM", thematic: "Them", fund_chg: "Fund", icbb: "ICBB", ssem: "SSEM", val: "Val"
+};
+var SUM_PLACEHOLDER_TOOLTIP = "Placeholder pending REPOSITORY A&J memo rollout";
+
+// =============================================================================
+// PHASE 2 — deriveMasterRatings: compute 6 ratings per ticker, store in map
+// =============================================================================
+
+function SUM_v1TmRating(tk) {
+  // V1 placeholder logic per Richard 12-May-26.
+  // Priority order: Stage 4 Capital → F, Stage 3 Capital → D,
+  //                 Stage 2 Capital → A, PB Capital → B, BP Capital → C,
+  //                 Stage 2 Late → C, otherwise →
+  var fm = (typeof filterMap !== "undefined") ? filterMap[tk] : null;
+  if (!fm) return "-";
+  var s = function(k) { return (fm[k] && fm[k].stage) ? fm[k].stage : null; };
+  if (s("s4_declining") === "Capital" || s("collapse") === "Capital") return "F";
+  if (s("s3_topping") === "Capital") return "D";
+  if (s("mm99") === "Capital" || s("vcp") === "Capital" || s("uptrend_retest") === "Capital") return "A";
+  if (s("probing_bet") === "Capital") return "B";
+  if (s("basing_plateau") === "Capital") return "C";
+  if (s("mm99") === "Late" || s("vcp") === "Late" || s("uptrend_retest") === "Late") return "C";
+  return "-";
+}
+
+function SUM_v1ValRating(tk, valEligible, valBuckets) {
+  // V1 valuation: bell-curve INVERTED on pe_percentile (lowest=cheapest=A)
+  // 10/15/25/25/25 split applied to eligible (non-null pe_percentile) only.
+  // valBuckets passed in pre-computed at deriveMasterRatings level.
+  if (!valBuckets || valBuckets[tk] == null) return "-";
+  return valBuckets[tk];
+}
+
+function deriveMasterRatings() {
+  // Build universe (prices.json keyed list)
+  if (!D || !D.prices) return;
+
+  // Pre-compute Valuation bell-curve INVERTED across eligible stocks.
+  var valElig = [];
+  if (D.valuation) {
+    for (var tk in D.valuation) {
+      if (!D.valuation.hasOwnProperty(tk)) continue;
+      if (tk === "_meta") continue;
+      var v = D.valuation[tk];
+      if (v && v.pe_percentile != null) {
+        valElig.push({ticker: tk, pct: v.pe_percentile});
+      }
+    }
+  }
+  // Sort ascending (lower percentile = cheaper = A)
+  valElig.sort(function(a,b){
+    if (a.pct !== b.pct) return a.pct - b.pct;
+    return (a.ticker || "").localeCompare(b.ticker || "");
+  });
+  var nVal = valElig.length;
+  var vA = Math.ceil(nVal * 0.10);
+  var vB = vA + Math.ceil(nVal * 0.15);
+  var vC = vB + Math.ceil(nVal * 0.25);
+  var vD = vC + Math.ceil(nVal * 0.25);
+  var valBuckets = {};
+  for (var vi = 0; vi < nVal; vi++) {
+    var vr;
+    if (vi < vA) vr = "A";
+    else if (vi < vB) vr = "B";
+    else if (vi < vC) vr = "C";
+    else if (vi < vD) vr = "D";
+    else vr = "F";
+    valBuckets[valElig[vi].ticker] = vr;
+  }
+
+  // Build per-ticker master ratings
+  masterRatingsMap = {};
+  for (var pi = 0; pi < D.prices.length; pi++) {
+    var p = D.prices[pi];
+    var tkr = p.ticker;
+    masterRatingsMap[tkr] = {
+      tm:       SUM_v1TmRating(tkr),
+      thematic: "C",   // placeholder
+      fund_chg: "C",   // placeholder
+      icbb:     "C",   // placeholder
+      ssem:     (typeof ssemRatingMap !== "undefined" && ssemRatingMap[tkr]) ? ssemRatingMap[tkr] : "-",
+      val:      valBuckets[tkr] != null ? valBuckets[tkr] : "-"
+    };
+  }
+}
+
+// =============================================================================
+// PHASE 3 — renderSummary: draw the SUMMARY tab
+// =============================================================================
+
+// Ratings ordering for sort comparisons (A=5, B=4, C=3, D=2, F=1, -=0)
+function SUM_ratingSortKey(g) {
+  var order = {A: 5, B: 4, C: 3, D: 2, F: 1, "-": 0};
+  return order[g] != null ? order[g] : -1;
+}
+
+// Returns true if ticker's rating for `key` passes the current 3-state filter
+function SUM_passesFilter(rating, filterState) {
+  if (filterState === "") return true;  // No filter
+  if (filterState === "A") return rating === "A";
+  if (filterState === "AB") return rating === "A" || rating === "B";
+  return true;
+}
+
+// HTML for an A-F rating pill (matches SSEM pill style for visual consistency)
+function SUM_ratingPill(grade, isPlaceholder) {
+  var key = (grade === "-") ? "N" : grade;
+  var label = (grade === "-") ? "&mdash;" : grade;
+  var ttl = isPlaceholder ? ' title="' + SUM_PLACEHOLDER_TOOLTIP + '"' : "";
+  return '<span class="ssem-rating-pill ssem-rating-' + key + '"' + ttl + '>' + label + '</span>';
+}
+
+// HTML for 3-state filter toggle button
+function SUM_filterToggleHTML(ratingId) {
+  var state = summaryFilters[ratingId];
+  var label = SUM_RATING_SHORT[ratingId];
+  var stateLabel = state === "" ? "all" : (state === "A" ? "A" : "A|B");
+  var activeClass = state === "" ? "" : "sum-tog-active";
+  var stateColor = state === "A" ? "#2f855a" : (state === "AB" ? "#38a169" : "#888");
+  return '<button class="tog sum-tog ' + activeClass + '" ' +
+         'onclick="cycleSummaryFilter(\'' + ratingId + '\')" ' +
+         'title="' + SUM_RATING_LABELS[ratingId] + ' filter: cycles No filter → A only → A or B" ' +
+         'style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;font-size:11px">' +
+         '<span style="font-weight:700">' + label + '</span>' +
+         '<span style="color:' + stateColor + ';font-weight:600;font-size:10px">' + stateLabel + '</span>' +
+         '</button>';
+}
+
+// Cycle filter state: "" → "A" → "AB" → ""
+window.cycleSummaryFilter = function(ratingId) {
+  var cur = summaryFilters[ratingId];
+  var next = cur === "" ? "A" : (cur === "A" ? "AB" : "");
+  summaryFilters[ratingId] = next;
+  renderSummary();
+};
+
+// Sector grouping toggle
+window.toggleSummarySectorGrouping = function() {
+  summarySectorGrouping = !summarySectorGrouping;
+  renderSummary();
+};
+
+// Get the canonical industry/sector for a ticker (uses existing taxonomy helper)
+function SUM_getTaxonomy(tkr) {
+  if (typeof getTaxonomy === "function") return getTaxonomy(tkr);
+  var tm = (D && D.ticker_mapping) ? D.ticker_mapping[tkr] : null;
+  return {
+    industry: tm ? tm.industry : "",
+    sector: tm ? tm.sector : ""
+  };
+}
+
+function renderSummary() {
+  buildHeaderControls("summary");
+  var container = document.getElementById("tab-summary");
+  if (!container) return;
+
+  // Ensure masterRatingsMap is populated
+  if (Object.keys(masterRatingsMap).length === 0) {
+    deriveMasterRatings();
+  }
+
+  var h = "";
+
+  // -------- Section 1: Header controls --------
+  h += '<div class="summary-controls" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:rgba(100,100,100,0.04);border-bottom:1px solid var(--border);margin-bottom:8px">';
+  h += '<div style="font-size:11px;color:var(--text-secondary);font-weight:600;letter-spacing:.3px">MASTER RATING FILTERS:</div>';
+  for (var ri = 0; ri < SUM_RATINGS.length; ri++) {
+    h += SUM_filterToggleHTML(SUM_RATINGS[ri]);
+  }
+  // Sector grouping toggle
+  var sgActive = summarySectorGrouping ? "sum-tog-active" : "";
+  var sgLabel = summarySectorGrouping ? "ON" : "OFF";
+  h += '<span style="margin-left:16px;color:var(--text-secondary);font-size:11px">|</span>';
+  h += '<button class="tog sum-tog ' + sgActive + '" onclick="toggleSummarySectorGrouping()" ' +
+       'title="Group stocks by sector in Qualified Stocks table" ' +
+       'style="padding:3px 8px;font-size:11px">' +
+       '<span style="font-weight:700">Sector grouping</span> ' +
+       '<span style="color:#666;font-size:10px">' + sgLabel + '</span>' +
+       '</button>';
+  // Reset button
+  h += '<button class="tog" onclick="resetSummaryFilters()" style="padding:3px 8px;font-size:11px;margin-left:auto">Reset filters</button>';
+  h += '</div>';
+
+  // V1 placeholder warning (subtle)
+  h += '<div style="padding:4px 12px;font-size:10px;color:var(--text-secondary);font-style:italic;background:rgba(180,120,30,0.06);border-bottom:1px solid rgba(180,120,30,0.15)">';
+  h += 'V1: Technical Momentum uses placeholder dichotomy. Thematic Fit / Fundamental Change / ICBB use placeholder "C" (uniform). Bell-curve methodology and REPOSITORY rating sources are in development.';
+  h += '</div>';
+
+  // -------- Section 2: Waterfall (3 rows x 6 cols) --------
+  h += SUM_renderWaterfall();
+
+  // -------- Section 3: Industries flow --------
+  h += SUM_renderIndustriesFlow();
+
+  // -------- Section 4: Sectors flow --------
+  h += SUM_renderSectorsFlow();
+
+  // -------- Section 5: Qualified Stocks table --------
+  h += SUM_renderQualifiedStocks();
+
+  container.innerHTML = h;
+}
+
+// Reset all filters helper
+window.resetSummaryFilters = function() {
+  summaryFilters = {tm:"", thematic:"", fund_chg:"", icbb:"", ssem:"", val:""};
+  summarySectorGrouping = false;
+  renderSummary();
+};
+
+// =============================================================================
+// SECTION 2 — Waterfall (3 rows × 6 cols) with pass-through rule
+// =============================================================================
+
+function SUM_renderWaterfall() {
+  // Build universe ticker list
+  var tickers = [];
+  for (var pi = 0; pi < D.prices.length; pi++) tickers.push(D.prices[pi].ticker);
+  // Use D.meta.stock_count when available (aligns with the header "Stocks:" count)
+  var Y = (D.meta && D.meta.stock_count) ? D.meta.stock_count : tickers.length;
+
+  // Three thresholds: A only, A or B, A or B or C
+  var THRESHOLDS = [
+    {key: "A",   label: "A only",       passSet: {A:1}},
+    {key: "AB",  label: "A or B",       passSet: {A:1,B:1}},
+    {key: "ABC", label: "A or B or C",  passSet: {A:1,B:1,C:1}}
+  ];
+
+  // For each threshold row, walk the 6 cols left-to-right with pass-through.
+  // At column N: stock survives if (rated in pass-set in column N) OR (rating is "-" → fold forward).
+  // Surviving stocks carry into column N+1.
+  var rows = [];  // rows[i] = {key, label, cells: [{count, foldForwarded}], muted}
+  for (var ti = 0; ti < THRESHOLDS.length; ti++) {
+    var thr = THRESHOLDS[ti];
+    var survivors = tickers.slice();  // start with full universe
+    var cells = [];
+    for (var ci = 0; ci < SUM_RATINGS.length; ci++) {
+      var ratingId = SUM_RATINGS[ci];
+      var nextSurvivors = [];
+      var foldedCount = 0;
+      for (var si = 0; si < survivors.length; si++) {
+        var tkr = survivors[si];
+        var mr = masterRatingsMap[tkr];
+        var rg = mr ? mr[ratingId] : "-";
+        if (rg === "-") {
+          // Pass-through fold-forward
+          nextSurvivors.push(tkr);
+          foldedCount++;
+        } else if (thr.passSet[rg]) {
+          nextSurvivors.push(tkr);
+        }
+        // else: filtered out
+      }
+      cells.push({
+        count: nextSurvivors.length,
+        foldForwarded: foldedCount,
+        inputCount: survivors.length
+      });
+      survivors = nextSurvivors;
+    }
+    rows.push({
+      key: thr.key,
+      label: thr.label,
+      cells: cells,
+      muted: (thr.key === "ABC")
+    });
+  }
+
+  // Render
+  var h = '<div class="summary-section" style="margin:8px 12px 16px 12px">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Funnel — multi-rating pass-through</div>';
+  h += '<div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;font-style:italic">';
+  h += 'Stocks without a rating in a column are folded forward (counted as passing). Row 3 (A/B/C) is greyed as cross-reference only.';
+  h += '</div>';
+  h += '<table class="data-table" style="width:100%;table-layout:fixed">';
+  h += '<colgroup><col style="width:90px">';
+  for (var cj = 0; cj < 6; cj++) h += '<col>';
+  h += '</colgroup>';
+  h += '<thead><tr><th style="background:rgba(100,100,100,0.06);text-align:left;padding:6px 8px">Threshold</th>';
+  for (var ri = 0; ri < SUM_RATINGS.length; ri++) {
+    h += '<th style="background:rgba(100,100,100,0.06);font-size:11px;font-weight:700;text-align:center;padding:6px 8px">';
+    h += SUM_RATING_LABELS[SUM_RATINGS[ri]];
+    h += '</th>';
+  }
+  h += '</tr></thead><tbody>';
+
+  var ROW_BG = ["rgba(39,103,73,0.18)", "rgba(56,161,105,0.10)", "rgba(180,180,180,0.18)"];
+  var ROW_TEXT = ["#1a4731", "#22543d", "#777"];
+  for (var rri = 0; rri < rows.length; rri++) {
+    var row = rows[rri];
+    h += '<tr>';
+    var labelStyle = 'font-weight:700;padding:6px 8px;background:' + ROW_BG[rri] + ';color:' + ROW_TEXT[rri] + ';text-align:center;font-size:11px;letter-spacing:.3px';
+    h += '<td style="' + labelStyle + '">' + row.label + '</td>';
+    for (var cn = 0; cn < row.cells.length; cn++) {
+      var c = row.cells[cn];
+      var cellStyle = 'text-align:center;padding:8px;font-family:Menlo,monospace;font-size:13px;font-weight:600;';
+      if (row.muted) cellStyle += 'color:#777;background:rgba(200,200,200,0.06);';
+      else cellStyle += 'color:#1a4731;background:' + ROW_BG[rri] + ';';
+      var tooltip = c.foldForwarded > 0
+        ? c.foldForwarded + " of these " + c.count + " stocks passed via missing-rating fold-forward"
+        : "No fold-forward in this cell";
+      h += '<td style="' + cellStyle + '" title="' + tooltip + '">';
+      h += c.count + ' / ' + Y;
+      h += '</td>';
+    }
+    h += '</tr>';
+  }
+  h += '</tbody></table>';
+  h += '</div>';
+  return h;
+}
+
+// =============================================================================
+// SECTION 3+4 — Industries / Sectors flow (heatmap matrices)
+// =============================================================================
+
+function SUM_buildGroupAggregates(groupKey /* "industry" or "sector" */) {
+  // Returns: array of {groupName, total, perRating: {tm: {A,B,C,D,F,dash}, ...}}
+  // Each rating's pct_AB = (A+B) / total
+  var groups = {};
+  for (var pi = 0; pi < D.prices.length; pi++) {
+    var p = D.prices[pi];
+    var tax = SUM_getTaxonomy(p.ticker);
+    var gn = tax[groupKey];
+    if (!gn) continue;
+    if (!groups[gn]) {
+      groups[gn] = {groupName: gn, total: 0, perRating: {}};
+      for (var ri = 0; ri < SUM_RATINGS.length; ri++) {
+        groups[gn].perRating[SUM_RATINGS[ri]] = {A:0,B:0,C:0,D:0,F:0,dash:0};
+      }
+    }
+    groups[gn].total++;
+    var mr = masterRatingsMap[p.ticker];
+    if (!mr) continue;
+    for (var rj = 0; rj < SUM_RATINGS.length; rj++) {
+      var rid = SUM_RATINGS[rj];
+      var g = mr[rid];
+      if (g === "-") groups[gn].perRating[rid].dash++;
+      else if (g === "A" || g === "B" || g === "C" || g === "D" || g === "F") groups[gn].perRating[rid][g]++;
+    }
+  }
+  // Convert to array; compute pct_AB and pct_A per rating
+  var out = [];
+  for (var gn2 in groups) {
+    if (!groups.hasOwnProperty(gn2)) continue;
+    var g2 = groups[gn2];
+    for (var rk = 0; rk < SUM_RATINGS.length; rk++) {
+      var rid2 = SUM_RATINGS[rk];
+      var pr = g2.perRating[rid2];
+      pr.pct_AB = g2.total > 0 ? (pr.A + pr.B) / g2.total : 0;
+      pr.pct_A = g2.total > 0 ? pr.A / g2.total : 0;
+    }
+    out.push(g2);
+  }
+  // Default sort: TM pct_AB desc, then Thematic pct_AB desc, then Fund pct_AB desc
+  out.sort(function(a,b){
+    var ka = a.perRating.tm.pct_AB, kb = b.perRating.tm.pct_AB;
+    if (ka !== kb) return kb - ka;
+    var k2a = a.perRating.thematic.pct_AB, k2b = b.perRating.thematic.pct_AB;
+    if (k2a !== k2b) return k2b - k2a;
+    var k3a = a.perRating.fund_chg.pct_AB, k3b = b.perRating.fund_chg.pct_AB;
+    if (k3a !== k3b) return k3b - k3a;
+    return (a.groupName || "").localeCompare(b.groupName || "");
+  });
+  return out;
+}
+
+function SUM_heatmapCellColor(pct) {
+  // Green-scale heatmap: 0% = white, 100% = strong green
+  // Returns inline style background
+  if (pct <= 0) return "background:#fafafa";
+  var t = Math.min(pct, 1);
+  // Green ramp from rgba(56,161,105,0.05) to rgba(56,161,105,0.65)
+  var alpha = 0.05 + t * 0.60;
+  return "background:rgba(56,161,105," + alpha.toFixed(2) + ")";
+}
+
+function SUM_renderHeatmapMatrix(rows, title, maxVisibleRows /* null = full */, anchorId) {
+  // rows = result from SUM_buildGroupAggregates
+  // Each cell shows: pct_AB as percentage, with green-scale background
+  var h = '<div class="summary-section" style="margin:16px 12px" id="' + anchorId + '">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px">' + title + '</div>';
+
+  var wrapStyle = '';
+  if (maxVisibleRows) {
+    // Approx 28px per row + 60px header
+    wrapStyle = 'style="max-height:' + (maxVisibleRows * 28 + 60) + 'px;overflow-y:auto;border:1px solid var(--border)"';
+  }
+  h += '<div class="ind-sec-wrap" ' + wrapStyle + '>';
+  h += '<table class="data-table" style="width:100%;table-layout:fixed">';
+  h += '<colgroup><col style="width:30%">';
+  for (var c = 0; c < 6; c++) h += '<col style="width:11.66%">';
+  h += '</colgroup>';
+  h += '<thead style="position:sticky;top:0;background:var(--bg-primary);z-index:2"><tr>';
+  h += '<th style="background:rgba(100,100,100,0.06);text-align:left;padding:6px 8px;font-size:11px">' + title.replace(" flow", "").replace(/s$/, "") + '</th>';
+  for (var ri = 0; ri < SUM_RATINGS.length; ri++) {
+    h += '<th style="background:rgba(100,100,100,0.06);font-size:10px;font-weight:700;text-align:center;padding:6px 4px">';
+    h += SUM_RATING_SHORT[SUM_RATINGS[ri]];
+    h += '</th>';
+  }
+  h += '</tr></thead><tbody>';
+
+  for (var rr = 0; rr < rows.length; rr++) {
+    var row = rows[rr];
+    h += '<tr>';
+    var nameAttr = row.groupName.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+    h += '<td style="padding:4px 8px;font-size:11px;font-weight:600;color:var(--text-primary);cursor:default" title="' + nameAttr + ' (' + row.total + ' stocks)">' + row.groupName + ' <span style="color:var(--text-secondary);font-weight:400">(' + row.total + ')</span></td>';
+    for (var rj = 0; rj < SUM_RATINGS.length; rj++) {
+      var rid = SUM_RATINGS[rj];
+      var pr = row.perRating[rid];
+      var pct = pr.pct_AB;
+      var color = SUM_heatmapCellColor(pct);
+      var pctStr = pct > 0 ? Math.round(pct * 100) + "%" : "—";
+      var subTxt = pr.A + "/" + pr.B + "/" + pr.C + "/" + pr.D + "/" + pr.F;
+      var ttl = SUM_RATING_LABELS[rid] + ": A=" + pr.A + " B=" + pr.B + " C=" + pr.C + " D=" + pr.D + " F=" + pr.F + " of " + row.total;
+      h += '<td style="text-align:center;padding:4px;font-family:Menlo,monospace;font-size:11px;font-weight:600;' + color + '" title="' + ttl + '">' + pctStr + '</td>';
+    }
+    h += '</tr>';
+  }
+  h += '</tbody></table></div></div>';
+  return h;
+}
+
+function SUM_renderIndustriesFlow() {
+  var rows = SUM_buildGroupAggregates("industry");
+  return SUM_renderHeatmapMatrix(rows, "Industries flow", null /* full-height */, "sum-industries");
+}
+
+function SUM_renderSectorsFlow() {
+  var rows = SUM_buildGroupAggregates("sector");
+  return SUM_renderHeatmapMatrix(rows, "Sectors flow", 15 /* scroll at row 16+ */, "sum-sectors");
+}
+
+// =============================================================================
+// SECTION 5 — Qualified Stocks table
+// =============================================================================
+
+function SUM_renderQualifiedStocks() {
+  // Apply 6 master-rating filter toggles (AND-combined) to universe
+  var rows = [];
+  for (var pi = 0; pi < D.prices.length; pi++) {
+    var p = D.prices[pi];
+    var mr = masterRatingsMap[p.ticker];
+    if (!mr) continue;
+    var keep = true;
+    for (var ri = 0; ri < SUM_RATINGS.length; ri++) {
+      var rid = SUM_RATINGS[ri];
+      if (!SUM_passesFilter(mr[rid], summaryFilters[rid])) {
+        keep = false; break;
+      }
+    }
+    if (!keep) continue;
+    var tax = SUM_getTaxonomy(p.ticker);
+    rows.push({
+      ticker: p.ticker,
+      company: p.company_name || p.ticker,
+      industry: tax.industry || "",
+      sector: tax.sector || "",
+      mr: mr
+    });
+  }
+
+  // Default sort: 6-key cascade on master ratings, ticker alphabetical tiebreak
+  rows.sort(function(a,b){
+    for (var k = 0; k < SUM_RATINGS.length; k++) {
+      var rid = SUM_RATINGS[k];
+      var ka = SUM_ratingSortKey(a.mr[rid]);
+      var kb = SUM_ratingSortKey(b.mr[rid]);
+      if (ka !== kb) return kb - ka;  // descending (A first)
+    }
+    return (a.ticker || "").localeCompare(b.ticker || "");
+  });
+
+  // Optional sector grouping
+  if (summarySectorGrouping) {
+    rows.sort(function(a,b){
+      var sa = a.sector || "zz_no_sector";
+      var sb = b.sector || "zz_no_sector";
+      if (sa !== sb) return sa.localeCompare(sb);
+      // Within sector, retain cascade sort
+      for (var k = 0; k < SUM_RATINGS.length; k++) {
+        var rid = SUM_RATINGS[k];
+        var ka = SUM_ratingSortKey(a.mr[rid]);
+        var kb = SUM_ratingSortKey(b.mr[rid]);
+        if (ka !== kb) return kb - ka;
+      }
+      return (a.ticker || "").localeCompare(b.ticker || "");
+    });
+  }
+
+  var h = '<div class="summary-section" style="margin:16px 12px" id="sum-qualified">';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+  h += '<div style="font-size:13px;font-weight:700;color:var(--text-primary)">Qualified Stocks</div>';
+  h += '<div style="font-size:11px;color:var(--text-secondary)">' + rows.length + ' stocks pass all active filters</div>';
+  h += '</div>';
+
+  // PERF FIX: max-height + internal scroll prevents Chrome from painting all 948 rows
+  // at once. Sticky thead keeps column headers visible while scrolling inside the table.
+  h += '<div style="max-height:600px;overflow-y:auto;overflow-x:auto;border:1px solid var(--border)">';
+  h += '<table class="data-table" style="width:100%">';
+  h += '<thead style="position:sticky;top:0;background:var(--bg-primary);z-index:5">';
+  // Group header row
+  h += '<tr class="group-header-row">';
+  h += '<th colspan="4" style="background:rgba(100,100,100,0.06);font-size:10px;font-weight:700;color:var(--text-primary)">Inputs</th>';
+  h += '<th colspan="6" style="background:rgba(56,161,105,0.10);font-size:10px;font-weight:700;color:#1a4731;text-align:center">Master Ratings</th>';
+  h += '</tr>';
+  // Column header row
+  h += '<tr>';
+  h += '<th style="text-align:left;padding:4px 6px;font-size:10px;background:var(--bg-primary)">Ticker</th>';
+  h += '<th style="text-align:left;padding:4px 6px;font-size:10px;background:var(--bg-primary)">Company</th>';
+  h += '<th style="text-align:left;padding:4px 6px;font-size:10px;background:var(--bg-primary)">Industry</th>';
+  h += '<th style="text-align:left;padding:4px 6px;font-size:10px;background:var(--bg-primary)">Sector</th>';
+  for (var ri = 0; ri < SUM_RATINGS.length; ri++) {
+    h += '<th style="text-align:center;padding:4px 6px;font-size:10px;background:var(--bg-primary)">' + SUM_RATING_SHORT[SUM_RATINGS[ri]] + '</th>';
+  }
+  h += '</tr></thead><tbody>';
+
+  var _prevSector = null;
+  for (var rr = 0; rr < rows.length; rr++) {
+    var row = rows[rr];
+    if (summarySectorGrouping && row.sector !== _prevSector) {
+      var secCount = rows.filter(function(r){return r.sector === row.sector}).length;
+      h += '<tr class="group-header-row"><td colspan="10" style="background:rgba(100,100,100,0.06);font-weight:700;font-size:11px;padding:4px 8px;color:var(--text-primary)">' + (row.sector || "Unknown") + ' <span style="font-weight:400;color:var(--text-secondary)">(' + secCount + ')</span></td></tr>';
+      _prevSector = row.sector;
+    }
+    h += '<tr>';
+    h += '<td style="padding:3px 6px;font-size:11px;font-family:Menlo,monospace">' + row.ticker + '</td>';
+    h += '<td style="padding:3px 6px;font-size:11px">' + row.company + '</td>';
+    h += '<td style="padding:3px 6px;font-size:11px;color:var(--text-secondary)">' + row.industry + '</td>';
+    h += '<td style="padding:3px 6px;font-size:11px;color:var(--text-secondary)">' + row.sector + '</td>';
+    for (var rj = 0; rj < SUM_RATINGS.length; rj++) {
+      var rid = SUM_RATINGS[rj];
+      var isPh = (rid === "thematic" || rid === "fund_chg" || rid === "icbb");
+      h += '<td style="text-align:center;padding:3px 6px">' + SUM_ratingPill(row.mr[rid], isPh) + '</td>';
+    }
+    h += '</tr>';
+  }
+  h += '</tbody></table></div></div>';
+  return h;
+}
+
+/* SUMMARY-TAB-MARKER-END-V11 */

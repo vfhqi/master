@@ -1,0 +1,442 @@
+#!/usr/bin/env python3
+"""
+stage_classifier.py
+────────────────────
+Per-stock 4-stage classifier (Weinstein-style).
+
+This module is a **standalone utility** designed to be importable by:
+  - master-dashboard build pipeline (future Stages tab)
+  - Universe & Portfolio Reports — Sector/Industry Technical Changes Report
+  - any downstream consumer needing per-stock stage assignment
+
+It does NOT live inside generate_master_data.py because the stage taxonomy
+is conceptually orthogonal to the MM99/BP/PB/UTR/VCP screens. Those screens
+ask "is this stock at a qualified setup right now?" — Stages asks "what
+regime is this stock in?". Both views are needed.
+
+──────────────────────────────────────────────────────────────────────
+DEFINITIONS (Weinstein-style)
+
+The 150D moving average (~30-week MA) is the spine. Stage is defined by:
+  (a) Price position relative to 150D MA
+  (b) 150D MA slope over the trailing 22 trading days
+  (c) Recent stage history (for Stage 1 vs Stage 3 disambiguation)
+
+Stage 1 — Basing / Bottoming
+  150D MA flat (slope within ±FLAT_PCT over 22D)
+  AND price within ±NEAR_MA_PCT of 150D MA
+  AND looking back 60 trading days, the stock had been in Stage 4
+       (i.e. transitioning UP from a downtrend)
+
+Stage 2 — Markup / Uptrend
+  Price > 150D MA
+  AND 150D MA rising (slope > +FLAT_PCT over 22D)
+
+Stage 3 — Topping / Distribution
+  150D MA flat (slope within ±FLAT_PCT over 22D)
+  AND price within ±NEAR_MA_PCT of 150D MA
+  AND looking back 60 trading days, the stock had been in Stage 2
+       (i.e. transitioning DOWN from an uptrend)
+
+Stage 4 — Declining / Downtrend
+  Price < 150D MA
+  AND 150D MA falling (slope < -FLAT_PCT over 22D)
+
+Unclassified
+  Insufficient history (< ~172 trading days available)
+  OR data anomalies (missing MA values, etc.)
+
+──────────────────────────────────────────────────────────────────────
+RELATIONSHIP TO MM99 GROUPS
+
+| MM99 group | What it tests             | Stage relationship              |
+|------------|---------------------------|----------------------------------|
+| A (LT)     | P > 200D MA + 200D rising | Necessary for Stage 2 (not suf.) |
+| B (MT)     | P > 150D MA + 150D > 200D | Strong Stage 2 indicator         |
+| C (ST)     | 50D > 150D + P > 50D      | Could be Stage 2 OR early St 3   |
+| D (Lead)   | 52W positioning            | Not a stage proxy                |
+| E (RS)     | Excess returns vs peers   | Independent — RS Momentum bucket |
+
+A stock can pass MM99 LT+MT+ST AND already be in early Stage 3 because
+Stage 3 is defined by **slope flattening**, not price-vs-MA alone.
+
+──────────────────────────────────────────────────────────────────────
+TUNABLE THRESHOLDS
+
+These are deliberately exposed as module constants so they can be
+revised after seeing real-world classifier behaviour.
+
+FLAT_PCT       = 0.02   # ±2% over 22D = "MA is flat"
+NEAR_MA_PCT    = 0.10   # within ±10% of 150D MA = "price near MA"
+HISTORY_LOOKBACK_DAYS = 60   # how far back to check prior stage
+MIN_HISTORY_DAYS = 172  # minimum chart history to classify
+
+──────────────────────────────────────────────────────────────────────
+"""
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import Iterable, Optional
+
+
+__version__ = "1.1.0"  # 12-May-26 — patch: edge-case refinement using recent 22D price action
+
+# Tunable thresholds — exposed as module constants for easy revision
+# SENSITIVITY (measured 12-May-26 across 973 ticker universe):
+#   FLAT_PCT is the LOAD-BEARING threshold. Going from ±1% to ±5% shifts Stage 2
+#   from 410 → 124 stocks (3.3× swing). ±2% is the chosen default but is NOT
+#   robust. Distribution at ±1% / ±1.5% / ±2% / ±2.5% / ±3% / ±5%:
+#       S2:  410 /  367 /  325 /  279 /  237 /  124
+#       S4:  243 /  215 /  187 /  148 /  124 /   57
+#   NEAR_MA_PCT is benign: going from ±5% to ±20% shifts only S1/S3 by ~25
+#   stocks. The ±10% choice is robust.
+FLAT_PCT = 0.02
+NEAR_MA_PCT = 0.10
+HISTORY_LOOKBACK_DAYS = 60
+MIN_HISTORY_DAYS = 172
+
+
+@dataclass
+class StageResult:
+    stage: Optional[int]          # 1, 2, 3, 4, or None
+    label: str                    # human-readable label
+    confidence: str               # "high" | "medium" | "low"
+    inputs: dict                  # the inputs used (for audit)
+
+
+def _label(stage: Optional[int]) -> str:
+    return {
+        1: "Stage 1 — Basing",
+        2: "Stage 2 — Markup",
+        3: "Stage 3 — Topping",
+        4: "Stage 4 — Declining",
+        None: "Unclassified",
+    }[stage]
+
+
+def classify_from_ohlc(closes: list[float], dates: Optional[list[str]] = None) -> StageResult:
+    """Classify a stock's stage from a chronological list of closing prices.
+
+    closes: list of closing prices, oldest first; must contain at least
+            MIN_HISTORY_DAYS values for reliable classification.
+
+    Returns StageResult with stage 1/2/3/4 or None (Unclassified).
+    """
+    n = len(closes)
+    if n < MIN_HISTORY_DAYS:
+        return StageResult(
+            stage=None,
+            label=_label(None),
+            confidence="low",
+            inputs={"reason": f"insufficient history: {n} < {MIN_HISTORY_DAYS}"},
+        )
+
+    # Helper — 150D simple moving average ending at index i (inclusive)
+    def ma150(i: int) -> Optional[float]:
+        if i + 1 < 150:
+            return None
+        window = closes[i - 149 : i + 1]
+        if any(c is None for c in window):
+            return None
+        return sum(window) / 150
+
+    # Helper — 22D slope of 150D MA expressed as fractional change
+    def ma150_slope_22d(i: int) -> Optional[float]:
+        cur = ma150(i)
+        prior = ma150(i - 22)
+        if cur is None or prior is None or prior == 0:
+            return None
+        return (cur - prior) / prior  # fractional change
+
+    # Current snapshot
+    last_i = n - 1
+    current_price = closes[last_i]
+    current_ma = ma150(last_i)
+    current_slope = ma150_slope_22d(last_i)
+
+    if current_price is None or current_ma is None or current_slope is None:
+        return StageResult(
+            stage=None,
+            label=_label(None),
+            confidence="low",
+            inputs={"reason": "missing current MA/slope"},
+        )
+
+    # Position vs MA
+    above_ma = current_price > current_ma
+    pct_from_ma = (current_price - current_ma) / current_ma
+    near_ma = abs(pct_from_ma) <= NEAR_MA_PCT
+    ma_rising = current_slope > FLAT_PCT
+    ma_falling = current_slope < -FLAT_PCT
+    ma_flat = not ma_rising and not ma_falling
+
+    inputs = {
+        "current_price": round(current_price, 4),
+        "current_150d_ma": round(current_ma, 4),
+        "pct_from_ma": round(pct_from_ma, 4),
+        "ma_slope_22d_pct": round(current_slope, 4),
+        "above_ma": above_ma,
+        "near_ma": near_ma,
+        "ma_rising": ma_rising,
+        "ma_falling": ma_falling,
+        "ma_flat": ma_flat,
+    }
+
+    # Clear-cut Stage 2: price above rising MA
+    if above_ma and ma_rising:
+        return StageResult(stage=2, label=_label(2), confidence="high", inputs=inputs)
+
+    # Clear-cut Stage 4: price below falling MA
+    if (not above_ma) and ma_falling:
+        return StageResult(stage=4, label=_label(4), confidence="high", inputs=inputs)
+
+    # Transitional zone: flat MA + price near MA → need prior history
+    # to distinguish Stage 1 (basing after Stage 4) vs Stage 3 (topping after Stage 2)
+    if ma_flat and near_ma:
+        # Look back HISTORY_LOOKBACK_DAYS to determine prior regime
+        lookback_i = last_i - HISTORY_LOOKBACK_DAYS
+        prior_ma = ma150(lookback_i)
+        prior_slope = ma150_slope_22d(lookback_i)
+        if prior_ma is None or prior_slope is None:
+            # Not enough history to disambiguate — call it the dominant side
+            # Default: if price is above MA → Stage 3 risk; below → Stage 1
+            stage = 3 if above_ma else 1
+            inputs["disambiguation"] = f"insufficient prior history; defaulted by current position"
+            return StageResult(stage=stage, label=_label(stage), confidence="low", inputs=inputs)
+
+        prior_price = closes[lookback_i]
+        prior_above = prior_price > prior_ma
+        prior_rising = prior_slope > FLAT_PCT
+        prior_falling = prior_slope < -FLAT_PCT
+
+        # Was the stock in Stage 2 lookback days ago? → Stage 3 now
+        if prior_above and prior_rising:
+            return StageResult(stage=3, label=_label(3), confidence="high", inputs={**inputs, "prior_regime": "Stage 2"})
+
+        # Was the stock in Stage 4 lookback days ago? → Stage 1 now
+        if (not prior_above) and prior_falling:
+            return StageResult(stage=1, label=_label(1), confidence="high", inputs={**inputs, "prior_regime": "Stage 4"})
+
+        # Default by current price position
+        stage = 3 if above_ma else 1
+        inputs["disambiguation"] = "ambiguous prior regime; defaulted by current position"
+        return StageResult(stage=stage, label=_label(stage), confidence="medium", inputs=inputs)
+
+    # Mixed edge cases handled below.
+    # Patch 12-May-26 (v1.1): refine "below rising MA" + "above flat MA" to weight
+    # recent 22D price action, not just current position. Validation surfaced 4-6
+    # stocks (AZN-GB, HNR1-DE, SREN-CH, NEX-FR etc.) misclassified by the prior rules.
+
+    # Helper: recent 22D price action (last 22 trading days)
+    def recent_22d_price_change():
+        if last_i < 22:
+            return None
+        prior_close = closes[last_i - 22]
+        if prior_close is None or prior_close == 0:
+            return None
+        return (current_price - prior_close) / prior_close
+
+    recent_22d = recent_22d_price_change()
+
+    if above_ma and ma_flat:
+        # Above a flat MA. If recent 22D action is up, it's late S2 / early S3.
+        # If recent 22D is down, it's S3 confirmed (topping out).
+        if recent_22d is not None and recent_22d < -0.03:
+            return StageResult(stage=3, label=_label(3), confidence="medium", inputs={**inputs, "recent_22d_pct": round(recent_22d, 4), "note": "above flat MA, recent decline — S3 confirmed"})
+        if recent_22d is not None and recent_22d > 0.03:
+            return StageResult(stage=2, label=_label(2), confidence="low", inputs={**inputs, "recent_22d_pct": round(recent_22d, 4), "note": "above flat MA, recent advance — late S2 (slope lagging)"})
+        return StageResult(stage=3, label=_label(3), confidence="low", inputs={**inputs, "note": "above flat MA, neutral recent action"})
+
+    if (not above_ma) and ma_flat:
+        # Below a flat MA. If recent 22D is down, S4 confirmed onset.
+        # If recent 22D is up (rebound), S1 forming.
+        if recent_22d is not None and recent_22d < -0.03:
+            return StageResult(stage=4, label=_label(4), confidence="medium", inputs={**inputs, "recent_22d_pct": round(recent_22d, 4), "note": "below flat MA, recent decline — S4 confirmed"})
+        if recent_22d is not None and recent_22d > 0.03:
+            return StageResult(stage=1, label=_label(1), confidence="medium", inputs={**inputs, "recent_22d_pct": round(recent_22d, 4), "note": "below flat MA, recent advance — S1 forming"})
+        return StageResult(stage=1, label=_label(1), confidence="low", inputs={**inputs, "note": "below flat MA, neutral recent action"})
+
+    if above_ma and ma_falling:
+        # Price above falling MA — Stage 3 (rolling over)
+        return StageResult(stage=3, label=_label(3), confidence="medium", inputs={**inputs, "note": "above falling MA — early S3"})
+
+    if (not above_ma) and ma_rising:
+        # Price below rising MA. CRITICAL FIX (v1.1): this is usually a Stage 2
+        # pullback (uptrend testing MA from above), NOT Stage 1 basing.
+        # Only call S1 if recent 22D action is sharply negative AND price has been
+        # below MA for a while (i.e. genuine basing pattern).
+        if recent_22d is not None and recent_22d < -0.05:
+            return StageResult(stage=1, label=_label(1), confidence="medium", inputs={**inputs, "recent_22d_pct": round(recent_22d, 4), "note": "below rising MA, sharp recent decline — S1 basing"})
+        # Default: Stage 2 pullback
+        recent_str = round(recent_22d, 4) if recent_22d is not None else None
+        return StageResult(
+            stage=2, label=_label(2), confidence="medium",
+            inputs={**inputs, "recent_22d_pct": recent_str, "note": "below rising MA — S2 pullback (testing trend)"},
+        )
+
+    # Shouldn't reach here, but fail safe
+    return StageResult(stage=None, label=_label(None), confidence="low", inputs={**inputs, "reason": "unreachable"})
+
+
+def classify_many(ticker_closes_map: dict[str, list[float]]) -> dict[str, StageResult]:
+    """Batch classify many tickers. Input is {ticker: [closes]}."""
+    return {t: classify_from_ohlc(c) for t, c in ticker_closes_map.items()}
+
+
+# ──────────────────────────────────────────────────────────────────────
+# Self-tests — synthetic price series with known stages
+# ──────────────────────────────────────────────────────────────────────
+
+def _self_test() -> tuple[int, int, list]:
+    """Run synthetic-data tests. Returns (passed, total, failures)."""
+    failures = []
+    passed = 0
+    total = 0
+
+    def check(name: str, expected_stage, result: StageResult, expected_conf: str | None = None):
+        nonlocal passed, total
+        total += 1
+        ok = result.stage == expected_stage
+        if expected_conf:
+            ok = ok and result.confidence == expected_conf
+        if ok:
+            passed += 1
+        else:
+            failures.append(
+                f"  FAIL {name}: expected stage={expected_stage}"
+                f"{f' conf={expected_conf}' if expected_conf else ''}, "
+                f"got stage={result.stage} conf={result.confidence}, label={result.label}"
+            )
+
+    # ── Test 1: Clean Stage 2 — price growing 0.5%/day, 200 days
+    closes = [100 * (1.005 ** i) for i in range(200)]
+    check("clean_stage_2_uptrend", 2, classify_from_ohlc(closes), expected_conf="high")
+
+    # ── Test 2: Clean Stage 4 — price declining 0.5%/day, 200 days
+    closes = [100 * (0.995 ** i) for i in range(200)]
+    check("clean_stage_4_downtrend", 4, classify_from_ohlc(closes), expected_conf="high")
+
+    # ── Test 3: Insufficient history → None
+    closes = [100.0] * 50
+    check("insufficient_history", None, classify_from_ohlc(closes))
+
+    # ── Test 4: Empty input → None
+    check("empty_input", None, classify_from_ohlc([]))
+
+    # ── Test 5: Stage 1 — declined sharply then bottomed flat for last 60 days
+    closes_down = [200 * (0.99 ** i) for i in range(140)]
+    closes_flat = [closes_down[-1] + (i % 3 - 1) * 0.5 for i in range(60)]  # noisy flat
+    closes = closes_down + closes_flat
+    res = classify_from_ohlc(closes)
+    # Could be S1 or S4 depending on MA position — accept either as long as not S2/S3
+    total += 1
+    if res.stage in (1, 4):
+        passed += 1
+    else:
+        failures.append(f"  FAIL stage_1_basing_after_decline: expected 1 or 4, got {res.stage}")
+
+    # ── Test 6: Stage 3 — rose sharply then plateaued for last 60 days
+    closes_up = [50 * (1.01 ** i) for i in range(140)]
+    closes_flat = [closes_up[-1] + (i % 3 - 1) * 0.5 for i in range(60)]
+    closes = closes_up + closes_flat
+    res = classify_from_ohlc(closes)
+    total += 1
+    if res.stage in (2, 3):
+        passed += 1
+    else:
+        failures.append(f"  FAIL stage_3_topping_after_advance: expected 2 or 3, got {res.stage}")
+
+    # ── Test 7: v1.1 fix — below rising MA should be S2 pullback, not S1
+    # Simulate: rising trend (0.4%/day for 180 days), then mild pullback last 10 days
+    closes_up = [100 * (1.004 ** i) for i in range(190)]
+    pull_start = closes_up[-1]
+    closes_pull = [pull_start * (1 - 0.005 * i) for i in range(10)]  # -0.5%/day for 10 days = ~5% pullback
+    closes = closes_up + closes_pull
+    res = classify_from_ohlc(closes)
+    # Expected: S2 pullback (price likely below 150D MA after pullback, but MA still rising sharply)
+    total += 1
+    if res.stage == 2:
+        passed += 1
+    else:
+        failures.append(
+            f"  FAIL v1.1_below_rising_ma_is_s2: expected S2 pullback, got {res.stage}. "
+            f"Inputs: {res.inputs.get('above_ma')=}, {res.inputs.get('ma_slope_22d_pct')=}"
+        )
+
+    return passed, total, failures
+
+
+if __name__ == "__main__" and len([a for a in __import__("sys").argv if a == "--test"]):
+    print(f"stage_classifier.py v{__version__} — running self-tests")
+    p, t, fails = _self_test()
+    print(f"\nResult: {p}/{t} passed")
+    if fails:
+        print("Failures:")
+        for f in fails:
+            print(f)
+    import sys
+    sys.exit(0 if p == t else 1)
+
+
+# ──────────────────────────────────────────────────────────────────────
+# Self-test when run standalone
+# ──────────────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    import argparse
+    import json
+    import re
+    from pathlib import Path
+    from collections import Counter
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--charts-dir",
+        type=Path,
+        default=Path(__file__).resolve().parent.parent / "charts",
+    )
+    ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--limit", type=int, default=0, help="0 = no limit")
+    args = ap.parse_args()
+
+    line_re = re.compile(r'CHART_REGISTRY\["([^"]+)"\]\s*=\s*(\[.*\]);?\s*$', re.DOTALL)
+
+    results: dict[str, dict] = {}
+    counter = Counter()
+    confidence_counter = Counter()
+    files = sorted(args.charts_dir.glob("*.js"))
+    if args.limit:
+        files = files[: args.limit]
+    print(f"Classifying {len(files)} tickers...")
+
+    for cf in files:
+        try:
+            txt = cf.read_text(encoding="utf-8", errors="ignore")
+            idx = txt.find("CHART_REGISTRY[")
+            m = line_re.search(txt[idx:])
+            if not m:
+                continue
+            ticker = m.group(1)
+            rows = json.loads(m.group(2).rstrip(";\n "))
+            closes = [r[4] for r in rows if len(r) >= 5 and r[4] is not None]
+            res = classify_from_ohlc(closes)
+            results[ticker] = {
+                "stage": res.stage,
+                "label": res.label,
+                "confidence": res.confidence,
+                "inputs": res.inputs,
+            }
+            counter[res.stage] += 1
+            confidence_counter[res.confidence] += 1
+        except Exception as e:
+            print(f"  FAIL {cf.name}: {e}")
+
+    print("\nDistribution:")
+    for k in [1, 2, 3, 4, None]:
+        print(f"  Stage {k if k else 'Unclassified'}: {counter[k]:>4}")
+    print("\nConfidence:")
+    for k in ["high", "medium", "low"]:
+        print(f"  {k:>6}: {confidence_counter[k]:>4}")
+
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(results, indent=None), encoding="utf-8")
+        print(f"\nWrote {len(results)} entries to {args.out}")

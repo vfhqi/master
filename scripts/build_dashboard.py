@@ -13949,7 +13949,7 @@ window.TAB_LABELS = TAB_LABELS;
       { id:'pullback', sortKey:'recent_pullback',  kind:'input' }
     ];
     var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
-    if (PB_STAGEINFO_COUNT > 0) { for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] }); }
+    for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] });
     for (var p = 0; p < SB_PATTERNS.length; p++) {
       var pat = SB_PATTERNS[p];
       var gi = p + 1;
@@ -14377,7 +14377,7 @@ window.TAB_LABELS = TAB_LABELS;
       { id:'pullback', sortKey:'recent_pullback', kind:'input' }
     ];
     var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
-    if (PB_STAGEINFO_COUNT > 0) { for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] }); }
+    for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] });
     cols.push({ id:'g1_rating', sortKey:'hvcp__rating', kind:'rating' });
     cols.push({ id:'g1_score',  sortKey:'hvcp__score',  kind:'score' });
     var TESTS = HVCP_PATTERN.tests;

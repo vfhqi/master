@@ -340,7 +340,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13
 table.data-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:auto}
 /* SESSION 10 — D-MD-UI-13: sticky thead replaces per-row top arithmetic. Browser stacks group-header-row and col-header-row natively below the page header. Works on every screen size, every zoom level, every device. Box-shadow gives the freeze-line a visible separator from rows below. background needed so row content scrolling underneath doesn't bleed through cell-border gaps. */
 table.data-table thead{position:sticky;top:var(--header-height);z-index:8;background:#f0ede3;box-shadow:0 2px 4px rgba(0,0,0,0.06)}
-table.data-table th{background:#f0ede3;color:#6b6b6b;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.3px;padding:4px 4px;text-align:left;border-bottom:2px solid var(--border);z-index:5;cursor:pointer;white-space:nowrap;user-select:none;-webkit-user-select:none;overflow:hidden;text-overflow:ellipsis}
+table.data-table th{background:#f0ede3;color:#6b6b6b;font-weight:600;font-size:10px;text-transform:none;letter-spacing:.3px;padding:4px 4px;text-align:left;border-bottom:2px solid var(--border);z-index:5;cursor:pointer;white-space:nowrap;user-select:none;-webkit-user-select:none;overflow:hidden;text-overflow:ellipsis}
 /* SESSION 9 Pass 1.2 — D-MD-UI-10: Live Portfolio table thead is non-sticky (it's short, no need to pin; pinning competes with Qualified Stocks thead) */
 table.data-table.data-table-portfolio thead{position:static;box-shadow:none}
 table.data-table.data-table-portfolio th{position:static}
@@ -777,6 +777,9 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s1-main-table .score-pip-row { display: inline-flex; gap: 2px; align-items: center; }
 #s1-main-table .pip { width: 7px; height: 7px; border-radius: 50%; background: #ddd; display: inline-block; }
 #s1-main-table .pip.on { background: #1b5e20; }
+#s1-main-table .pip.gate-ok{background:#1b5e20}
+#s1-main-table .pip.gate-x{background:#8B0000;position:relative}
+#s1-main-table .pip.gate-x::after{content:"\00D7";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:6px;font-weight:900;line-height:1}
 #s1-main-table .score-num { font-weight: 700; color: #1b5e20; margin-left: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
 
 #s1-main-table .persist-row { display: inline-flex; gap: 1px; align-items: center; }
@@ -875,6 +878,9 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s2-main-table .pip { width: 6px; height: 6px; border-radius: 50%; background: #ddd; display: inline-block; }
 #s2-main-table .pip.on { background: #2e7d32; }
 #s2-main-table .pip.rs-on { background: #6b46c1; } /* MD-V2-S49-RS-PIP-COLOUR: RS group (G5) pips purple */
+#s2-main-table .pip.gate-ok{background:#2e7d32}
+#s2-main-table .pip.gate-x{background:#8B0000;position:relative}
+#s2-main-table .pip.gate-x::after{content:"\00D7";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:5px;font-weight:900;line-height:1}
 #s2-main-table .score-num { font-weight: 700; color: #2e7d32; margin-left: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
 #s2-main-table .persist-row { display: inline-flex; gap: 1px; align-items: center; }
 #s2-main-table .persist-cell { width: 7px; height: 11px; background: #ece8d8; border-radius: 1px; }
@@ -987,6 +993,9 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s3-main-table .score-pip-row { display: inline-flex; gap: 2px; align-items: center; }
 #s3-main-table .pip.pip-bear { width: 6px; height: 6px; border-radius: 50%; background: #ddd; display: inline-block; }
 #s3-main-table .pip.pip-bear.on { background: #991b1b; }
+#s3-main-table .pip.pip-bear.gate-ok{background:#991b1b}
+#s3-main-table .pip.pip-bear.gate-x{background:#8B0000;position:relative}
+#s3-main-table .pip.pip-bear.gate-x::after{content:"\00D7";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:5px;font-weight:900;line-height:1}
 #s3-main-table .score-num { font-weight: 700; color: #991b1b; margin-left: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
 
 /* Persistence cells - bearish */
@@ -1097,6 +1106,9 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s4-main-table .score-pip-row { display: inline-flex; gap: 2px; align-items: center; }
 #s4-main-table .pip.pip-bear { width: 6px; height: 6px; border-radius: 50%; background: #ddd; display: inline-block; }
 #s4-main-table .pip.pip-bear.on { background: #7f1d1d; }
+#s4-main-table .pip.pip-bear.gate-ok{background:#7f1d1d}
+#s4-main-table .pip.pip-bear.gate-x{background:#8B0000;position:relative}
+#s4-main-table .pip.pip-bear.gate-x::after{content:"\00D7";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:5px;font-weight:900;line-height:1}
 #s4-main-table .score-num { font-weight: 700; color: #7f1d1d; margin-left: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
 
 /* Persistence cells - deep red */
@@ -2789,7 +2801,7 @@ window.openChart=function(t){
   // Fresh open from a V2 tab resets zoom + the always-on series to the per-tab defaults.
   if(_freshChart&&_isV2chart){
     // MD-V2-CHART-ZOOM-PER-TAB-OVERRIDE-S42-MARKER: per-tab zoom override layered above the two-tier default. 200D break-down on post_indicators; vcp_after_s1_plateau on setups_s1pb; vcp_after_s2_base on setups_s2vcp.
-    var _zoomByTabS42={post_indicators:"2Y",setups_s1pb:"3M",setups_s2vcp:"3M"};
+    var _zoomByTabS42={post_indicators:"2Y",setups_s1pb:"3M",setups_s2vcp:"3M",setups_healthy_retest:"6M",stage_3:"6M"};
     chartZoom=_zoomByTabS42[currentTab]||(_isStageChart?"2Y":"6M");
     chartVis.ma20=true;chartVis.ma50=true;chartVis.ma100=true;chartVis.ma150=true;chartVis.ma200=true;
     chartVis.obv=true;chartVis.vol=true;chartVis.vol20=true;chartVis.vol50=true;
@@ -6877,7 +6889,7 @@ function SUM_renderQualifiedStocks() {
   var s1State = {
     mode: { inputs: 'pct', tests: 'tick' },
     scope: 'all',
-    ratingFilter: null,
+    ratingFilter: [],
     tint: 'none',     // none | industry | sector
     port: 'off',      // off | on
     sort: { col: 'count', dir: 'desc' }
@@ -6891,14 +6903,14 @@ function SUM_renderQualifiedStocks() {
     { id:'price',     label:'Price',                         sortKey:'price', cls:'num' },
     { id:'high_52w',  label:'52 week high',                  sortKey:'high_52w', cls:'num' },
     { id:'low_52w',   label:'52 week low',                   sortKey:'low_52w', cls:'num' },
-    { id:'ma_150',    label:'150 day moving average',        sortKey:'ma_150', cls:'num' },
-    { id:'ma_200',    label:'200 day moving average',        sortKey:'ma_200', cls:'num' },
+    { id:'ma_150',    label:'150D MA',        sortKey:'ma_150', cls:'num' },
+    { id:'ma_200',    label:'200D MA',        sortKey:'ma_200', cls:'num' },
     { id:'rating',    label:'Rating',                        sortKey:'rating_rank', cls:'grp-start-rating' },
-    { id:'streak',    label:'Soft stack streak (days)',      sortKey:'streak', cls:'' },
-    { id:'g200D',     label:'200-day still declining (gate)',sortKey:'gate_200D', cls:'grp-start-g1 grp-end-g1', colType:'gate', gateField:'gate_200D' },
-    { id:'gp150',     label:'Price above 150-day (gate)',   sortKey:'gate_p150', cls:'grp-start-g2', colType:'gate', gateField:'gate_p150' },
-    { id:'stack_1m',  label:'Soft stack held ≥1 month',sortKey:'stack_1m_pass', cls:'', colType:'streak_thresh', threshold:21 },
-    { id:'stack_3m',  label:'Soft stack held ≥3 months',sortKey:'stack_3m_pass', cls:'grp-end-g2', colType:'streak_thresh', threshold:63 },
+    { id:'streak',    label:'Stack streak (days)',      sortKey:'streak', cls:'' },
+    { id:'g200D',     label:'1. 200D MA still declining (gate)',sortKey:'gate_200D', cls:'grp-start-g1 grp-end-g1', colType:'gate', gateField:'gate_200D' },
+    { id:'gp150',     label:'2. Price above 150D MA (gate)',sortKey:'gate_p150', cls:'grp-start-g2', colType:'gate', gateField:'gate_p150' },
+    { id:'stack_1m',  label:'3. 50D > 150D and 150D > 200D for 1M',sortKey:'stack_1m_pass', cls:'', colType:'streak_thresh', threshold:21 },
+    { id:'stack_3m',  label:'4. 50D > 150D and 150D > 200D for 3M+',sortKey:'stack_3m_pass', cls:'grp-end-g2', colType:'streak_thresh', threshold:63 },
     { id:'sec_in_ind',label:'# sectors in industry',        sortKey:'sectors_in_industry', cls:'grp-start-g3', colType:'count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 },
     { id:'co_in_sec', label:'# companies in sector',        sortKey:'companies_in_sector', cls:'grp-end-g3', colType:'count', countKey:'companies_in_sector', countRedAt:2, countAmberAt:5 },
     { id:'persist',   label:'Last 12 months',               sortKey:'persistence_count', cls:'grp-start-persist' }
@@ -7156,7 +7168,7 @@ function SUM_renderQualifiedStocks() {
   }
 
   function s1ScorePips(row) {
-    // MD-V2-S49-PIP-DIV-MARKER: group dividers between G1 Slowing/G2 Flat/G3 Stack/G4 HigherLows
+    // MD-V2-S58-GATE-DOTS: gate dots first, then test pips
     var t = row.tests;
     var passed = [
       !!t.T1_150D_decel, !!t.T2_200D_decel,
@@ -7165,8 +7177,11 @@ function SUM_renderQualifiedStocks() {
       !!t.T7_higher_lows_1m,  !!t.T8_higher_lows_3m
     ];
     var count = passed.filter(Boolean).length;
+    var g200D = !!row.gate_200D, gp150 = !!row.gate_p150;
+    var s = '<span class="pip ' + (g200D ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gp150 ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip-div"></span>';
     var divAfter = {1:true, 3:true, 5:true};
-    var s = '';
     for (var i = 0; i < 8; i++) {
       s += '<span class="pip ' + (passed[i] ? 'on' : '') + '"></span>';
       if (divAfter[i]) s += '<span class="pip-div"></span>';
@@ -7263,8 +7278,8 @@ function SUM_renderQualifiedStocks() {
     var order = ['None','Possible','Plausible','Probable'];
     var strip = {'Probable':'pl','Plausible':'pla','Possible':'pos','None':'none'};
     var S1_THRESH = {
-      'Probable':  'Long-term still down \u00b7 price above 150-day \u00b7 soft stack \u22653 months',
-      'Plausible': 'Long-term still down \u00b7 price above 150-day \u00b7 soft stack \u22651 month',
+      'Probable':  'Long-term still down \u00b7 price above 150D MA \u00b7 MA stack held \u22653 months',
+      'Plausible': 'Long-term still down \u00b7 price above 150D MA \u00b7 MA stack held \u22651 month',
       'Possible':  'Long-term still down \u00b7 price above 150-day; stack not yet established',
       'None':      'Gate(s) fail \u00b7 no bottoming evidence'
     }; /* MD-V2-S55-PER-TILE-CRITERIA-s1 */
@@ -7272,7 +7287,7 @@ function SUM_renderQualifiedStocks() {
     for (var i = 0; i < order.length; i++) {
       var r = order[i];
       var cnt = uc[r] || 0;
-      var act = s1State.ratingFilter === r ? ' active' : '';
+      var act = s1State.ratingFilter.indexOf(r) > -1 ? ' active' : '';
       var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
       h += '<div class="rating-tile ' + (S1_TINT_CLS[r] || 'tint-none') + act + '" data-rating="' + r + '">' +
            '<div class="rt-label">' + r + '</div>' +
@@ -7306,11 +7321,7 @@ function SUM_renderQualifiedStocks() {
     if (s1State.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
     else if (s1State.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
     else if (s1State.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
-    if (s1State.ratingFilter) rows = rows.filter(function(r){
-      // MD-V2-S54-S1-PROBABLE-FIX: new data emits plain 'Probable' only
-      if (s1State.ratingFilter === 'Probable') return r.rating === 'Probable';
-      return r.rating === s1State.ratingFilter;
-    });
+    if (s1State.ratingFilter.length > 0) rows = rows.filter(function(r){ return s1State.ratingFilter.indexOf(r.rating) > -1; });
 
     rows.sort(function(a, b) {
       var va = s1GetSortVal(a, s1State.sort.col), vb = s1GetSortVal(b, s1State.sort.col);
@@ -7400,7 +7411,8 @@ function SUM_renderQualifiedStocks() {
     s1RenderRows();
   }
   function s1ToggleRating(r) {
-    s1State.ratingFilter = (s1State.ratingFilter === r) ? null : r;
+    var _i = s1State.ratingFilter.indexOf(r);
+    if (_i > -1) s1State.ratingFilter.splice(_i, 1); else s1State.ratingFilter.push(r);
     s1RenderRows();
   }
 
@@ -7447,10 +7459,10 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn" data-s1-port="on" onclick="s1SetPort(\'on\')">On</button>' +
         '</div>' +
       '</div>' +
-      '<div class="rating-tiles s1-rating-tiles" id="s1-rating-tiles"></div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="s1-rating-tiles" style="grid-template-columns: repeat(4, 1fr);"></div>' +
       '<div class="group-captions" style="grid-template-columns: repeat(2, 1fr);">' +
         '<div class="gcap gcap-g1"><b>Group 1 · Longer-term trend downwards?</b>Stage 1 only makes sense if we are <span class="db">coming out of a downtrend</span> &mdash; not chasing weakness in an existing uptrend.<span class="intro">One long-term gate:</span><span class="tline"><span class="tnum">(1)</span> Is the <u>200-day MA still declining</u> versus where it sat 80 trading days ago?</span></div>' +
-        '<div class="gcap gcap-g2"><b>Group 2 · Short-term trend troughed?</b>Even with the long-term still down, the <span class="db">short-term should show signs of bottoming</span> &mdash; price reclaiming its medium-term MA and the recent MA stack holding.<span class="intro">Three short-term tests:</span><span class="tline"><span class="tnum">(2)</span> Is <u>price above the 150-day MA</u>?</span><span class="tline"><span class="tnum">(3)</span> Has the <u>soft MA stack held for at least 1 month</u> (≥21 trading days)?</span><span class="tline"><span class="tnum">(4)</span> Has it <u>held for 3 months or more</u> (≥63 days)?</span></div>' +
+        '<div class="gcap gcap-g2"><b>Group 2 · Short-term trend troughed?</b>Even with the long-term still down, the <span class="db">short-term should show signs of bottoming</span> &mdash; price reclaiming its medium-term MA and the recent MA stack holding.<span class="intro">Three short-term tests:</span><span class="tline"><span class="tnum">(2)</span> Is <u>price above the 150-day MA</u>?</span><span class="tline"><span class="tnum">(3)</span> Has the <u>MA stack (50D>150D>200D) held for at least 1 month</u> (≥21 trading days)?</span><span class="tline"><span class="tnum">(4)</span> Has it <u>held for 3 months or more</u> (≥63 days)?</span></div>' +
       '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s1-main-table">' +
@@ -7468,9 +7480,9 @@ function SUM_renderQualifiedStocks() {
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
               '<th class="gh-rating grp-start-rating" colspan="2">Stage 1 rating</th>' /* MD-V2-S55-gh-s1 */ +
-              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Longer-term trend downwards?</th>' +
-              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="3">Short-term trend troughed?</th>' +
-              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Taxonomy context</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Group 1 — Longer-term trend downwards?</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="3">Group 2 — Short-term trend troughed?</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 — Taxonomy context?</th>' +
               '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
             '</tr>' +
             '<tr class="col-header-row" id="s1-col-header-row"></tr>' +
@@ -7537,7 +7549,7 @@ function SUM_renderQualifiedStocks() {
 
   var s2State = {
     mode: { inputs: 'pct', tests: 'tick' },
-    scope: 'all', ratingFilter: null, tint: 'none', port: 'off',
+    scope: 'all', ratingFilter: [], tint: 'none', port: 'off',
     sort: { col: 'count', dir: 'desc' }
   };
 
@@ -7548,19 +7560,19 @@ function SUM_renderQualifiedStocks() {
     { id:'price',     label:'Price',                         sortKey:'price', cls:'num' },
     { id:'high_52w',  label:'52 week high',                  sortKey:'high_52w', cls:'num' },
     { id:'low_52w',   label:'52 week low',                   sortKey:'low_52w', cls:'num' },
-    { id:'ma_150',    label:'150 day moving average',        sortKey:'ma_150', cls:'num' },
-    { id:'ma_200',    label:'200 day moving average',        sortKey:'ma_200', cls:'num' },
+    { id:'ma_150',    label:'150D MA',        sortKey:'ma_150', cls:'num' },
+    { id:'ma_200',    label:'200D MA',        sortKey:'ma_200', cls:'num' },
     { id:'rating',    label:'Rating',                        sortKey:'rating_rank', cls:'grp-start-rating' },
     { id:'count',     label:'Score',                         sortKey:'count', cls:'' },
-    { id:'gp200',     label:'Price above 200-day (gate)',    sortKey:'gate_gp200', cls:'grp-start-g1', testGroup:'_gates', testKey:'g1_P_above_200D' },
-    { id:'g150_200',  label:'150-day above 200-day (gate)',  sortKey:'gate_g150_200', cls:'grp-end-g1', testGroup:'_gates', testKey:'g3_150D_above_200D' },
-    { id:'gp150',     label:'Price above 150-day (gate)',    sortKey:'gate_gp150', cls:'grp-start-g2', testGroup:'_gates', testKey:'g2_P_above_150D' },
-    { id:'g52wh',     label:'Within 25% of 52w high (gate)',sortKey:'gate_g52wh', cls:'grp-end-g2', testGroup:'_gates', testKey:'g4_within_25pct_52WH' },
-    { id:'t5',        label:'50-day above 150-day',          sortKey:'t5_sort', cls:'grp-start-g3', testGroup:'g1_ma_stack', testKey:'T5' },
-    { id:'t6',        label:'50-day above 200-day',          sortKey:'t6_sort', cls:'grp-end-g3', testGroup:'g1_ma_stack', testKey:'T6' },
-    { id:'t7',        label:'Industry RS pctl ≥70',         sortKey:'t7_sort', cls:'grp-start-g4', testGroup:'g2_rs', testKey:'T7' },
-    { id:'t8',        label:'Sector RS pctl in industry ≥70',sortKey:'t8_sort', cls:'', testGroup:'g2_rs', testKey:'T8' },
-    { id:'t9',        label:'Stock RS vs industry ≥70',     sortKey:'t9_sort', cls:'grp-end-g4', testGroup:'g2_rs', testKey:'T9' },
+    { id:'gp200',     label:'1. Price above 200D MA (gate)', sortKey:'gate_gp200', cls:'grp-start-g1', testGroup:'_gates', testKey:'g1_P_above_200D' },
+    { id:'g150_200',  label:'2. 150D MA above 200D MA (gate)',sortKey:'gate_g150_200', cls:'grp-end-g1', testGroup:'_gates', testKey:'g3_150D_above_200D' },
+    { id:'gp150',     label:'3. Price above 150D MA (gate)', sortKey:'gate_gp150', cls:'grp-start-g2', testGroup:'_gates', testKey:'g2_P_above_150D' },
+    { id:'g52wh',     label:'4. Within 25% of 52w high (gate)',sortKey:'gate_g52wh', cls:'grp-end-g2', testGroup:'_gates', testKey:'g4_within_25pct_52WH' },
+    { id:'t5',        label:'5. 50D MA above 150D MA',       sortKey:'t5_sort', cls:'grp-start-g3', testGroup:'g1_ma_stack', testKey:'T5' },
+    { id:'t6',        label:'6. 50D MA above 200D MA',       sortKey:'t6_sort', cls:'grp-end-g3', testGroup:'g1_ma_stack', testKey:'T6' },
+    { id:'t7',        label:'7. Industry pct. ≥70',         sortKey:'t7_sort', cls:'grp-start-g4', testGroup:'g2_rs', testKey:'T7' },
+    { id:'t8',        label:'8. Sector pct. in industry ≥70',sortKey:'t8_sort', cls:'', testGroup:'g2_rs', testKey:'T8' },
+    { id:'t9',        label:'9. Stock vs industry pct. ≥70',     sortKey:'t9_sort', cls:'grp-end-g4', testGroup:'g2_rs', testKey:'T9' },
     { id:'sec_in_ind',label:'# sectors in industry',        sortKey:'sectors_in_industry', cls:'grp-start-g5', colType:'count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 },
     { id:'co_in_sec', label:'# companies in sector',        sortKey:'companies_in_sector', cls:'grp-end-g5', colType:'count', countKey:'companies_in_sector', countRedAt:2, countAmberAt:5 },
     { id:'persist',   label:'Last 12 months',               sortKey:'persistence_count', cls:'grp-start-persist' }
@@ -7710,7 +7722,7 @@ function SUM_renderQualifiedStocks() {
     if (rating === 'Possible') return '<span class="pill pill-pos">Possible</span>';
     return '<span class="pill pill-none">None</span>';
   }
-  // MD-V2-S54-S2-PIPS: 5 tests (T5-T9)
+  // MD-V2-S58-S2-PIPS: gate dots + 5 tests (T5-T9)
   function s2ScorePips(row) {
     var t = row.tests;
     var passed = [
@@ -7718,9 +7730,14 @@ function SUM_renderQualifiedStocks() {
       !!t.T7_industry_RS_pct_ge70, !!t.T8_sector_RS_pct_ge70, !!t.T9_stock_RS_vs_industry_ge70
     ];
     var count = passed.filter(Boolean).length;
+    var gates = (row.groups && row.groups._gates) || {};
+    var s = '<span class="pip ' + (gates.g1_P_above_200D ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gates.g3_150D_above_200D ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gates.g2_P_above_150D ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gates.g4_within_25pct_52WH ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip-div"></span>';
     var divAfter = {1:true};
     var rsIdx = {2:true, 3:true, 4:true};
-    var s = '';
     for (var i = 0; i < 5; i++) {
       var cls = passed[i] ? (rsIdx[i] ? 'rs-on' : 'on') : '';
       s += '<span class="pip ' + cls + '"></span>';
@@ -7813,7 +7830,7 @@ function SUM_renderQualifiedStocks() {
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i], cnt = uc[r] || 0;
-      var act = s2State.ratingFilter === r ? ' active' : '';
+      var act = s2State.ratingFilter.indexOf(r) > -1 ? ' active' : '';
       var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
       h += '<div class="rating-tile ' + S2_TINT_CLS[r] + act + '" data-rating="' + r + '">' +
            '<div class="rt-label">' + r + '</div>' +
@@ -7843,7 +7860,7 @@ function SUM_renderQualifiedStocks() {
     if (s2State.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
     else if (s2State.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
     else if (s2State.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
-    if (s2State.ratingFilter) rows = rows.filter(function(r){ return r.rating === s2State.ratingFilter; });
+    if (s2State.ratingFilter.length > 0) rows = rows.filter(function(r){ return s2State.ratingFilter.indexOf(r.rating) > -1; });
     rows.sort(function(a,b) {
       var va = s2GetSortVal(a, s2State.sort.col), vb = s2GetSortVal(b, s2State.sort.col);
       var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
@@ -7907,7 +7924,8 @@ function SUM_renderQualifiedStocks() {
     s2RenderRows();
   }
   function s2ToggleRating(r) {
-    s2State.ratingFilter = (s2State.ratingFilter === r) ? null : r;
+    var _i = s2State.ratingFilter.indexOf(r);
+    if (_i > -1) s2State.ratingFilter.splice(_i, 1); else s2State.ratingFilter.push(r);
     s2RenderRows();
   }
   window.s2SetMode = s2SetMode;
@@ -7974,11 +7992,11 @@ function SUM_renderQualifiedStocks() {
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
               '<th class="gh-rating grp-start-rating" colspan="2">Stage 2 rating</th>' /* MD-V2-S55-gh-s2 */ +
-              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Long-term trend upwards?</th>' +
-              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Mid-term trend upwards?</th>' +
-              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Short-term trend upwards?</th>' +
-              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="3">Relative strength</th>' +
-              '<th class="gh-g5 grp-start-g5 grp-end-g5" colspan="2">Taxonomy context</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Group 1 — Long-term trend upwards?</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 — Mid-term trend upwards?</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 — Short-term trend upwards?</th>' +
+              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="3">Group 4 — Relative strength?</th>' +
+              '<th class="gh-g5 grp-start-g5 grp-end-g5" colspan="2">Group 5 — Taxonomy context?</th>' +
               '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
             '</tr>' +
             '<tr class="col-header-row" id="s2-col-header-row"></tr>' +
@@ -8044,7 +8062,7 @@ function SUM_renderQualifiedStocks() {
 
   var s3State = {
     mode: { inputs: 'pct', tests: 'tick' },
-    scope: 'all', ratingFilter: null, tint: 'none', port: 'off',
+    scope: 'all', ratingFilter: [], tint: 'none', port: 'off',
     sort: { col: 'count', dir: 'desc' }
   };
 
@@ -8056,18 +8074,18 @@ function SUM_renderQualifiedStocks() {
     { id:'price',     label:'Price',                               sortKey:'price', cls:'num' },
     { id:'high_52w',  label:'52 week high',                        sortKey:'high_52w', cls:'num' },
     { id:'low_52w',   label:'52 week low',                         sortKey:'low_52w', cls:'num' },
-    { id:'ma_150',    label:'150 day moving average',              sortKey:'ma_150', cls:'num' },
-    { id:'ma_200',    label:'200 day moving average',              sortKey:'ma_200', cls:'num' },
+    { id:'ma_150',    label:'150D MA',              sortKey:'ma_150', cls:'num' },
+    { id:'ma_200',    label:'200D MA',              sortKey:'ma_200', cls:'num' },
     { id:'rating',    label:'Rating',                              sortKey:'rating_rank', cls:'grp-start-rating' },
     { id:'count',     label:'Score',                               sortKey:'count', cls:'' },
-    { id:'g200D_r',   label:'200-day still rising vs 80d (gate)',  sortKey:'gate_g200D_r', cls:'grp-start-g1 grp-end-g1', testGroup:'_gates3', testKey:'gate_200D_still_rising_vs_80d' },
-    { id:'gp200',     label:'Price above 200-day (gate)',          sortKey:'gate_gp200_s3', cls:'grp-start-g2 grp-end-g2', testGroup:'_gates3', testKey:'gate_price_above_200D' },
-    { id:'t3',        label:'3+ bases (504d window)',              sortKey:'t3_s3', cls:'grp-start-g3 grp-end-g3', testGroup:'g1_base_deterioration', testKey:'T3' },
-    { id:'t4',        label:'50-day < 103% of 150-day',            sortKey:'t4_s3', cls:'grp-start-g4', testGroup:'g1_base_deterioration', testKey:'T4' },
-    { id:'t5',        label:'Down vol > up vol (L20d)',            sortKey:'t5_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T5' },
-    { id:'t6',        label:'ATR expansion ≥10% vs prior 80d',    sortKey:'t6_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T6' },
-    { id:'t7',        label:'≥2 lower lows in last 2 months',     sortKey:'t7_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T7' },
-    { id:'t8',        label:'Sector RS pctl dropped >10pts vs 3M', sortKey:'t8_s3', cls:'grp-end-g4', testGroup:'g3_rs_degradation', testKey:'T8' },
+    { id:'g200D_r',   label:'1. 200D MA still rising vs 80D (gate)',  sortKey:'gate_g200D_r', cls:'grp-start-g1 grp-end-g1', testGroup:'_gates3', testKey:'gate_200D_still_rising_vs_80d' },
+    { id:'gp200',     label:'2. Price above 200D MA (gate)',       sortKey:'gate_gp200_s3', cls:'grp-start-g2 grp-end-g2', testGroup:'_gates3', testKey:'gate_price_above_200D' },
+    { id:'t3',        label:'3. 2+ bases (504d window)',              sortKey:'t3_s3', cls:'grp-start-g3 grp-end-g3', testGroup:'g1_base_deterioration', testKey:'T3' },
+    { id:'t4',        label:'4. 50D MA ≤ 150D MA',            sortKey:'t4_s3', cls:'grp-start-g4', testGroup:'g1_base_deterioration', testKey:'T4' },
+    { id:'t5',        label:'5. Down vol > up vol (L20d)',            sortKey:'t5_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T5' },
+    { id:'t6',        label:'6. L1M volatility > P4M',    sortKey:'t6_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T6' },
+    { id:'t7',        label:'7. ≥2 lower lows in last 2 months',     sortKey:'t7_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T7' },
+    { id:'t8',        label:'8. 10%+ lower sector RS L3M', sortKey:'t8_s3', cls:'grp-end-g4', testGroup:'g3_rs_degradation', testKey:'T8' },
     { id:'sec_in_ind',label:'# sectors in industry',               sortKey:'sectors_in_industry', cls:'grp-start-g5', colType:'count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 },
     { id:'co_in_sec', label:'# companies in sector',               sortKey:'companies_in_sector', cls:'grp-end-g5', colType:'count', countKey:'companies_in_sector', countRedAt:2, countAmberAt:5 },
     { id:'persist',   label:'Last 12 months',                      sortKey:'persistence_count', cls:'grp-start-persist' }
@@ -8126,13 +8144,17 @@ function SUM_renderQualifiedStocks() {
         gate_200D_still_rising_vs_80d: !!(s3.gate_200D_still_rising_vs_80d),
         gate_price_above_200D: !!(s3.gate_price_above_200D)
       };
+      var _s3tv = s3.test_values || {};
+      if (_s3tv.T3_base_count_504d != null && s3grps.g1_base_deterioration) {
+        s3grps.g1_base_deterioration.T3 = (_s3tv.T3_base_count_504d >= 2);
+      }
       rows.push({
         ticker: s.ticker, company: p.company_name || s.ticker,
         sector: p.sector || '', industry: p.industry || '',
         price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
         ma_50: mas['50D'], ma_150: mas['150D'], ma_200: mas['200D'],
         rating: s3.rating, count: s3.count,
-        tests: s3.tests || {}, groups: s3grps, persistence: pers,
+        tests: s3.tests || {}, groups: s3grps, test_values: _s3tv, persistence: pers,
         rs_sector: p.rs_vs_sector_pct, rs_industry: p.rs_vs_industry_pct, rs_market: p.rs_market_pct,
         sectors_in_industry: (s.md_v2.sectors_in_industry_count || 0),
         companies_in_sector: (s.md_v2.companies_in_sector_count || 0),
@@ -8254,17 +8276,21 @@ function SUM_renderQualifiedStocks() {
     if (rating === 'Possible' || rating === 'Possible Topping') return '<span class="pill pill-pos-top">Possible</span>';
     return '<span class="pill pill-none">None</span>';
   }
-  // MD-V2-S54-S3-PIPS: 6 tests (T3-T8)
+  // MD-V2-S58-S3-PIPS: gate dots + 6 tests; T3 uses 2+ threshold
   function s3ScorePips(row) {
-    var t = row.tests;
+    var t = row.tests, _tv = row.test_values || {};
+    var t3pass = (_tv.T3_base_count_504d != null) ? (_tv.T3_base_count_504d >= 2) : !!(t.T3_base_count_504d_ge2 || t.T3_base_count_504d_ge3);
     var passed = [
-      !!t.T3_base_count_504d_ge3, !!t.T4_50D_below_103pct_150D,
+      t3pass, !!t.T4_50D_below_103pct_150D,
       !!t.T5_down_vol_exceeds_up_vol, !!t.T6_ATR_expansion_ge110, !!t.T7_price_below_50D_and_50D_rolling,
       !!t.T8_sector_RS_drift_gt10pts
     ];
     var count = passed.filter(Boolean).length;
+    var g3 = (row.groups && row.groups._gates3) || {};
+    var s = '<span class="pip pip-bear ' + (g3.gate_200D_still_rising_vs_80d ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip pip-bear ' + (g3.gate_price_above_200D ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip-div"></span>';
     var s3DivAfter = {1:true, 4:true};
-    var s = '';
     for (var i = 0; i < 6; i++) {
       s += '<span class="pip pip-bear ' + (passed[i] ? 'on' : '') + '"></span>';
       if (s3DivAfter[i]) s += '<span class="pip-div"></span>';
@@ -8361,7 +8387,7 @@ function SUM_renderQualifiedStocks() {
     var h = '';
     for (var i = 0; i < order.length; i++) {
       var r = order[i], cnt = uc[r] || 0;
-      var act = s3State.ratingFilter === r ? ' active' : '';
+      var act = s3State.ratingFilter.indexOf(r) > -1 ? ' active' : '';
       var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
       h += '<div class="rating-tile ' + S3_TINT_CLS[r] + act + '" data-rating="' + r + '">' +
            '<div class="rt-label">' + r + '</div>' +
@@ -8391,7 +8417,7 @@ function SUM_renderQualifiedStocks() {
     if (s3State.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
     else if (s3State.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
     else if (s3State.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
-    if (s3State.ratingFilter) rows = rows.filter(function(r){ return r.rating === s3State.ratingFilter; });
+    if (s3State.ratingFilter.length > 0) rows = rows.filter(function(r){ return s3State.ratingFilter.indexOf(r.rating) > -1; });
     rows.sort(function(a,b) {
       var va = s3GetSortVal(a, s3State.sort.col), vb = s3GetSortVal(b, s3State.sort.col);
       var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
@@ -8455,7 +8481,8 @@ function SUM_renderQualifiedStocks() {
     s3RenderRows();
   }
   function s3ToggleRating(r) {
-    s3State.ratingFilter = (s3State.ratingFilter === r) ? null : r;
+    var _i = s3State.ratingFilter.indexOf(r);
+    if (_i > -1) s3State.ratingFilter.splice(_i, 1); else s3State.ratingFilter.push(r);
     s3RenderRows();
   }
   window.s3SetMode = s3SetMode;
@@ -8502,8 +8529,8 @@ function SUM_renderQualifiedStocks() {
       '<div class="group-captions" style="grid-template-columns: repeat(4, 1fr);">' +
         '<div class="gcap gcap-g1"><b>Group 1 · Long-term trend upwards?</b>Stage 3 only applies to a <span class="db">previously confirmed uptrend</span> &mdash; if the long-term trend is not still up, the right place to look is Stage 1 or Stage 4.<span class="intro">One long-term gate:</span><span class="tline"><span class="tnum">(1)</span> Is the <u>200-day MA still higher</u> than it sat 80 trading days ago?</span></div>' +
         '<div class="gcap gcap-g2"><b>Group 2 · Mid-term trend upwards?</b>The mid-term must <span class="db">still be intact</span> for trend-exhaustion to even be meaningful &mdash; price has to be above its 200-day MA.<span class="intro">One mid-term gate:</span><span class="tline"><span class="tnum">(2)</span> Is <u>price above its 200-day MA</u>?</span></div>' +
-        '<div class="gcap gcap-g3"><b>Group 3 · Mid-term trend extended?</b><span class="db">How mature is the run?</span> Each successive base built since the 52-week low raises the odds the trend is getting late.<span class="intro">One maturity test:</span><span class="tline"><span class="tnum">(3)</span> Has the stock built <u>3 or more bases</u> since its 52-week low?</span></div>' +
-        '<div class="gcap gcap-g4"><b>Group 4 · Short-term trend breaking down?</b>Even with the long-term still up, the <span class="db">short term is now showing distribution</span> &mdash; MA stack tightening, volume rotating down, volatility expanding, swing lows printing lower, RS slipping.<span class="intro">Five breakdown tests:</span><span class="tline"><span class="tnum">(4)</span> Is the <u>50-day within 3% below the 150-day</u> (stack tightening toward a cross)?</span><span class="tline"><span class="tnum">(5)</span> Is down-day volume <u>at least 10% above up-day volume</u> over the last ~20 days?</span><span class="tline"><span class="tnum">(6)</span> Is short-run volatility <u>expanding by 10%+</u> versus the prior 80 days?</span><span class="tline"><span class="tnum">(7)</span> Are there <u>2 or more lower lows</u> in the last 2 months?</span><span class="tline"><span class="tnum">(8)</span> Has sector RS percentile <u>dropped more than 10 points</u> versus 3 months ago?</span></div>' +
+        '<div class="gcap gcap-g3"><b>Group 3 · Mid-term trend extended?</b><span class="db">How mature is the run?</span> Each successive base built since the 52-week low raises the odds the trend is getting late.<span class="intro">One maturity test:</span><span class="tline"><span class="tnum">(3)</span> Has the stock built <u>2 or more bases</u> since its 52-week low (504-day window)?</span></div>' +
+        '<div class="gcap gcap-g4"><b>Group 4 · Short-term trend breaking down?</b>Even with the long-term still up, the <span class="db">short term is now showing distribution</span> &mdash; MA stack tightening, volume rotating down, volatility expanding, swing lows printing lower, RS slipping.<span class="intro">Five breakdown tests:</span><span class="tline"><span class="tnum">(4)</span> Is the <u>50D MA at or below 150D MA</u> (i.e. within 3% below — stack tightening toward a cross)?</span><span class="tline"><span class="tnum">(5)</span> Is down-day volume <u>at least 10% above up-day volume</u> over the last ~20 days?</span><span class="tline"><span class="tnum">(6)</span> Is last-month volatility <u>above the prior 4-month average</u> (L1M ATR vs P4M average ATR)?</span><span class="tline"><span class="tnum">(7)</span> Are there <u>2 or more lower lows</u> in the last 2 months?</span><span class="tline"><span class="tnum">(8)</span> Has sector RS percentile <u>dropped more than 10 points</u> versus 3 months ago?</span></div>' +
       '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s3-main-table">' +
@@ -8523,11 +8550,11 @@ function SUM_renderQualifiedStocks() {
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
               '<th class="gh-rating grp-start-rating" colspan="2">Stage 3 rating</th>' /* MD-V2-S55-gh-s3 */ +
-              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Long-term trend upwards?</th>' +
-              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="1">Mid-term trend upwards?</th>' +
-              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="1">Mid-term trend extended?</th>' +
-              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="5">Short-term trend breaking down?</th>' +
-              '<th class="gh-g5 grp-start-g5 grp-end-g5" colspan="2">Taxonomy context</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Group 1 — Long-term trend upwards?</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="1">Group 2 — Mid-term trend upwards?</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="1">Group 3 — Mid-term trend extended?</th>' +
+              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="5">Group 4 — Short-term trend breaking down?</th>' +
+              '<th class="gh-g5 grp-start-g5 grp-end-g5" colspan="2">Group 5 — Taxonomy context?</th>' +
               '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
             '</tr>' +
             '<tr class="col-header-row" id="s3-col-header-row"></tr>' +
@@ -8605,14 +8632,14 @@ function SUM_renderQualifiedStocks() {
     { id:'price',     label:'Price',                         sortKey:'price', cls:'num' },
     { id:'high_52w',  label:'52 week high',                  sortKey:'high_52w', cls:'num' },
     { id:'low_52w',   label:'52 week low',                   sortKey:'low_52w', cls:'num' },
-    { id:'ma_150',    label:'150 day moving average',        sortKey:'ma_150', cls:'num' },
-    { id:'ma_200',    label:'200 day moving average',        sortKey:'ma_200', cls:'num' },
+    { id:'ma_150',    label:'150D MA',        sortKey:'ma_150', cls:'num' },
+    { id:'ma_200',    label:'200D MA',        sortKey:'ma_200', cls:'num' },
     { id:'rating',    label:'Rating',                        sortKey:'rating_rank', cls:'grp-start-rating' },
     { id:'count',     label:'Score',                         sortKey:'count', cls:'' },
-    { id:'gp200_s4',  label:'Price below 200-day (gate)',    sortKey:'gate_gp200_s4', cls:'grp-start-g1 grp-end-g1', testGroup:'_gates4', testKey:'gate_price_below_200D' },
-    { id:'t2',        label:'100-day MoM declining',         sortKey:'t2_s4', cls:'grp-start-g2', testGroup:'g1_ma_decline', testKey:'T2' },
-    { id:'t3',        label:'200-day MoM declining',         sortKey:'t3_s4', cls:'grp-end-g2', testGroup:'g1_ma_decline', testKey:'T3' },
-    { id:'t4',        label:'Full bearish stack (P<50<150<200)', sortKey:'t4_s4', cls:'grp-start-g3 grp-end-g3', testGroup:'g2_ma_stack', testKey:'T4' },
+    { id:'gp200_s4',  label:'1. Price below 200D MA (gate)',    sortKey:'gate_gp200_s4', cls:'grp-start-g1 grp-end-g1', testGroup:'_gates4', testKey:'gate_price_below_200D' },
+    { id:'t2',        label:'2. 100D MA MoM declining',         sortKey:'t2_s4', cls:'grp-start-g2', testGroup:'g1_ma_decline', testKey:'T2' },
+    { id:'t3',        label:'3. 200D MA MoM declining',         sortKey:'t3_s4', cls:'grp-end-g2', testGroup:'g1_ma_decline', testKey:'T3' },
+    { id:'t4',        label:'4. Full bearish stack (P<50<150<200)', sortKey:'t4_s4', cls:'grp-start-g3 grp-end-g3', testGroup:'g2_ma_stack', testKey:'T4' },
     { id:'sec_in_ind',label:'# sectors in industry',        sortKey:'sectors_in_industry', cls:'grp-start-g4', colType:'count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 },
     { id:'co_in_sec', label:'# companies in sector',        sortKey:'companies_in_sector', cls:'grp-end-g4', colType:'count', countKey:'companies_in_sector', countRedAt:2, countAmberAt:5 },
     { id:'persist',   label:'Last 12 months',               sortKey:'persistence_count', cls:'grp-start-persist' }
@@ -8775,15 +8802,17 @@ function SUM_renderQualifiedStocks() {
     if (rating === 'Possible') return '<span class="pill pill-pos">Possible</span>';
     return '<span class="pill pill-none">None</span>';
   }
-  // MD-V2-S54-S4-PIPS: 3 tests (T2-T4)
+  // MD-V2-S58-S4-PIPS: gate dot + 3 tests (T2-T4)
   function s4ScorePips(row) {
     var t = row.tests;
     var passed = [
       !!t.T2_100D_MoM_declining, !!t.T3_200D_MoM_declining, !!t.T4_bearish_MA_stack
     ];
     var count = passed.filter(Boolean).length;
+    var g4 = (row.groups && row.groups._gates4) || {};
+    var s = '<span class="pip pip-bear ' + (g4.gate_price_below_200D ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip-div"></span>';
     var s4DivAfter = {1:true};
-    var s = '';
     for (var i = 0; i < 3; i++) {
       s += '<span class="pip pip-bear ' + (passed[i] ? 'on' : '') + '"></span>';
       if (s4DivAfter[i]) s += '<span class="pip-div"></span>';
@@ -9035,10 +9064,10 @@ function SUM_renderQualifiedStocks() {
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
               '<th class="gh-rating grp-start-rating" colspan="2">Stage 4 rating</th>' /* MD-V2-S55-gh-s4 */ +
-              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Long-term trend</th>' +
-              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Mid-term trend</th>' +
-              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="1">Near-term trend</th>' +
-              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Taxonomy context</th>' +
+              '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Group 1 — Long-term trend declining?</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 — Mid-term trend declining?</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="1">Group 3 — Near-term trend declining?</th>' +
+              '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Group 4 — Taxonomy context?</th>' +
               '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
             '</tr>' +
             '<tr class="col-header-row" id="s4-col-header-row"></tr>' +
@@ -9342,8 +9371,8 @@ function SUM_renderQualifiedStocks() {
       { id:'price',    label:'Price',                  sortKey:'price',           cls:'num',       kind:'input' },
       { id:'high_52w', label:'52 week high',           sortKey:'high_52w',        cls:'num',       kind:'input' },
       { id:'low_52w',  label:'52 week low',            sortKey:'low_52w',         cls:'num',       kind:'input' },
-      { id:'ma_150',   label:'150 day moving average', sortKey:'ma_150',          cls:'num',       kind:'input' },
-      { id:'ma_200',   label:'200 day moving average', sortKey:'ma_200',          cls:'num',       kind:'input' },
+      { id:'ma_150',   label:'150D MA', sortKey:'ma_150',          cls:'num',       kind:'input' },
+      { id:'ma_200',   label:'200D MA', sortKey:'ma_200',          cls:'num',       kind:'input' },
       { id:'pullback', label:'Recent pullback',        sortKey:'recent_pullback', cls:'num',       kind:'input' }
     ];
     for (var p = 0; p < PI_PATTERNS.length; p++) {
@@ -10138,8 +10167,8 @@ function SUM_renderQualifiedStocks() {
       { id:'price',    label:'Price',                  sortKey:'price',           cls:'num',       kind:'input' },
       { id:'high_52w', label:'52 week high',           sortKey:'high_52w',        cls:'num',       kind:'input' },
       { id:'low_52w',  label:'52 week low',            sortKey:'low_52w',         cls:'num',       kind:'input' },
-      { id:'ma_150',   label:'150 day moving average', sortKey:'ma_150',          cls:'num',       kind:'input' },
-      { id:'ma_200',   label:'200 day moving average', sortKey:'ma_200',          cls:'num',       kind:'input' },
+      { id:'ma_150',   label:'150D MA', sortKey:'ma_150',          cls:'num',       kind:'input' },
+      { id:'ma_200',   label:'200D MA', sortKey:'ma_200',          cls:'num',       kind:'input' },
       { id:'pullback', label:'Recent pullback',        sortKey:'recent_pullback', cls:'num',       kind:'input' }
     ];
     for (var p = 0; p < PO_PATTERNS.length; p++) {
@@ -10961,8 +10990,8 @@ function SUM_renderQualifiedStocks() {
       { id:'price',    label:'Price',                  sortKey:'price',           cls:'num',       kind:'input' },
       { id:'high_52w', label:'52 week high',           sortKey:'high_52w',        cls:'num',       kind:'input' },
       { id:'low_52w',  label:'52 week low',            sortKey:'low_52w',         cls:'num',       kind:'input' },
-      { id:'ma_150',   label:'150 day moving average', sortKey:'ma_150',          cls:'num',       kind:'input' },
-      { id:'ma_200',   label:'200 day moving average', sortKey:'ma_200',          cls:'num',       kind:'input' },
+      { id:'ma_150',   label:'150D MA', sortKey:'ma_150',          cls:'num',       kind:'input' },
+      { id:'ma_200',   label:'200D MA', sortKey:'ma_200',          cls:'num',       kind:'input' },
       { id:'pullback', label:'Recent pullback',        sortKey:'recent_pullback', cls:'num',       kind:'input' }
     ];
     for (var p = 0; p < stCur.patterns.length; p++) {
@@ -11716,8 +11745,8 @@ function SUM_renderQualifiedStocks() {
       { id:'price',    label:'Price',                  sortKey:'price',           cls:'num',       kind:'input' },
       { id:'high_52w', label:'52 week high',           sortKey:'high_52w',        cls:'num',       kind:'input' },
       { id:'low_52w',  label:'52 week low',            sortKey:'low_52w',         cls:'num',       kind:'input' },
-      { id:'ma_150',   label:'150 day moving average', sortKey:'ma_150',          cls:'num',       kind:'input' },
-      { id:'ma_200',   label:'200 day moving average', sortKey:'ma_200',          cls:'num',       kind:'input' },
+      { id:'ma_150',   label:'150D MA', sortKey:'ma_150',          cls:'num',       kind:'input' },
+      { id:'ma_200',   label:'200D MA', sortKey:'ma_200',          cls:'num',       kind:'input' },
       { id:'pullback', label:'Recent pullback',        sortKey:'recent_pullback', cls:'num',       kind:'input' }
     ];
     // 4-stage info block (D-MD-V2-66) - info only, not in any qualify logic.
@@ -12454,10 +12483,18 @@ window.TAB_LABELS = TAB_LABELS;
 </script>
 <style>
 /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER-CSS-START */
-/* Healthy Retest of MA — standalone 13-criterion test tab (S47) */
-#tab-setups_healthy_retest .group-captions { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 16px 0 14px 0; }
-#tab-setups_healthy_retest .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #2E7D32; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
-#tab-setups_healthy_retest .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #2E7D32; font-size: 11px; letter-spacing: 0.2px; }
+/* Healthy Retest of MA — 4-group redesign (S56) */
+#tab-setups_healthy_retest .group-captions { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: 16px 0 14px 0; }
+#tab-setups_healthy_retest .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #aaa; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
+#tab-setups_healthy_retest .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; font-size: 11px; letter-spacing: 0.2px; }
+#tab-setups_healthy_retest .group-captions .gcap-g1 { border-left-color: #b08a4e; }
+#tab-setups_healthy_retest .group-captions .gcap-g1 b { color: #b08a4e; }
+#tab-setups_healthy_retest .group-captions .gcap-g2 { border-left-color: #4a6a8a; }
+#tab-setups_healthy_retest .group-captions .gcap-g2 b { color: #4a6a8a; }
+#tab-setups_healthy_retest .group-captions .gcap-g3 { border-left-color: #3a7a5a; }
+#tab-setups_healthy_retest .group-captions .gcap-g3 b { color: #3a7a5a; }
+#tab-setups_healthy_retest .group-captions .gcap-g4 { border-left-color: #8a4a3a; }
+#tab-setups_healthy_retest .group-captions .gcap-g4 b { color: #8a4a3a; }
 #tab-setups_healthy_retest .s1-rating-tiles { display: grid; grid-template-columns: 1fr; gap: 8px; }
 #tab-setups_healthy_retest .s1-rating-tiles .pi-tile-pullback { background: rgba(46,125,50,0.10); border: 1px solid rgba(46,125,50,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-setups_healthy_retest .s1-rating-tiles .pi-tile-pullback.active { background: rgba(46,125,50,0.22); border: 1.5px solid #2E7D32; }
@@ -12469,7 +12506,6 @@ window.TAB_LABELS = TAB_LABELS;
 #tab-setups_healthy_retest .pi-chip-pullback.on { background: #2E7D32; color: #fff; border-color: #2E7D32; font-weight: 500; }
 #tab-setups_healthy_retest .pi-tier-chip:hover { filter: brightness(0.96); }
 #tab-setups_healthy_retest .s1-rating-tiles .rating-tile.active { box-shadow: inset 0 0 0 1.5px currentColor; }
-/* Re-use the ct-main-table styles via shared class — table uses id="hr-main-table" */
 #hr-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
 #hr-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
 #hr-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
@@ -12480,37 +12516,53 @@ window.TAB_LABELS = TAB_LABELS;
 #hr-main-table thead tr.sub-group-row th { position: sticky; top: 24px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; color: #888; padding: 3px; font-weight: 600; background: #f8f6ee !important; border-bottom: 1px solid #e0dcc8; }
 #hr-main-table thead tr.col-header-row th { position: sticky; top: 44px; border-top: 1px solid #e0dcc8; }
 #hr-main-table thead .gh-inputs { color: #555; }
-#hr-main-table thead .gh-stageinfo { color: #7a6a3a; }
-#hr-main-table thead .gh-tests { color: #2E7D32; }
+#hr-main-table thead .gh-g1 { color: #b08a4e; }
+#hr-main-table thead .gh-rating { color: #2E7D32; }
+#hr-main-table thead .gh-g2 { color: #4a6a8a; }
+#hr-main-table thead .gh-g3 { color: #3a7a5a; }
+#hr-main-table thead .gh-g4 { color: #8a4a3a; }
+#hr-main-table thead .gh-context { color: #888; }
 #hr-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
 #hr-main-table .hd .lbl { white-space: normal; word-break: break-word; }
 #hr-main-table .hd .sort-arrow { font-size: 9px; color: #2E7D32; flex: 0 0 auto; line-height: 1; }
 #hr-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
 #hr-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
 #hr-main-table tr:hover { background: rgba(46,125,50,0.05); }
-#hr-main-table td.grp-start-stageinfo, #hr-main-table th.grp-start-stageinfo { border-left: 2px solid rgba(122,106,58,0.40); }
-#hr-main-table td.grp-start-rating, #hr-main-table th.grp-start-rating { border-left: 2px solid rgba(46,125,50,0.40); }
-#hr-main-table td.grp-start-tests, #hr-main-table th.grp-start-tests { border-left: 2px solid rgba(46,125,50,0.40); }
-#hr-main-table td.pi-pass { background: rgba(46,125,50,0.12); color: #2E7D32; font-weight: 700; }
-#hr-main-table td.pi-fail { color: #999; }
-#hr-main-table td.pi-rating-cell { padding: 3px 4px; }
-#hr-main-table .pi-pill { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+#hr-main-table td.grp-start-g1, #hr-main-table th.grp-start-g1 { border-left: 2px solid rgba(176,138,78,0.50); }
+#hr-main-table td.grp-start-rating, #hr-main-table th.grp-start-rating { border-left: 2px solid rgba(46,125,50,0.50); }
+#hr-main-table td.grp-start-g2, #hr-main-table th.grp-start-g2 { border-left: 2px solid rgba(74,106,138,0.50); }
+#hr-main-table td.grp-start-g3, #hr-main-table th.grp-start-g3 { border-left: 2px solid rgba(58,122,90,0.50); }
+#hr-main-table td.grp-start-g4, #hr-main-table th.grp-start-g4 { border-left: 2px solid rgba(138,74,58,0.50); }
+#hr-main-table td.grp-start-context, #hr-main-table th.grp-start-context { border-left: 2px solid rgba(136,136,136,0.35); }
+#hr-main-table td.s2-gate-pass { background: rgba(176,138,78,0.18); color: #7a5a1a; font-weight: 700; }
+#hr-main-table td.s2-gate-fail { color: #bbb; }
+#hr-main-table td.s2-test-pass { background: rgba(176,138,78,0.12); color: #7a5a1a; font-weight: 700; }
+#hr-main-table td.s2-test-fail { color: #ccc; }
+#hr-main-table .s2-pill { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+#hr-main-table .s2-pill-prob { background: #b08a4e; color: #fff; }
+#hr-main-table .s2-pill-pla  { background: rgba(176,138,78,0.35); color: #6a4a10; }
+#hr-main-table .s2-pill-pos  { background: rgba(176,138,78,0.15); color: #8a6a2a; }
+#hr-main-table .s2-pill-none { background: #ece9dd; color: #aaa; }
+#hr-main-table td.pi-rating-cell { padding: 3px 4px; background: rgba(46,125,50,0.04); }
+#hr-main-table .pi-pill { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 9.5px; font-weight: 800; line-height: 1.3; white-space: nowrap; letter-spacing: 0.1px; }
 #hr-main-table .pi-pill-tint-qualified { background: #1b5e20; color: #fff; }
 #hr-main-table .pi-pill-tint-prob { background: #2E7D32; color: #fff; }
 #hr-main-table .pi-pill-tint-pla  { background: rgba(46,125,50,0.30); color: #0a4a3a; }
 #hr-main-table .pi-pill-tint-pos  { background: rgba(46,125,50,0.14); color: #3a6a5a; }
 #hr-main-table .pi-pill-tint-none { background: #ece9dd; color: #999; }
-#hr-main-table td.pi-score-cell { padding: 4px 3px; }
+#hr-main-table td.pi-score-cell { padding: 4px 3px; background: rgba(46,125,50,0.04); border-right: 1px solid rgba(46,125,50,0.18); }
 #hr-main-table .pi-pip-row { display: inline-flex; align-items: center; gap: 2px; justify-content: center; }
 #hr-main-table .pi-pip-row .pip { width: 6px; height: 6px; border-radius: 50%; background: #d8d4c4; display: inline-block; }
 #hr-main-table .pi-pip-row .pip.on { background: #2E7D32; }
-#hr-main-table .pi-pip-row .pi-score-num { font-size: 9px; color: #777; margin-left: 3px; font-weight: 600; }
-#hr-main-table td.ct-stage-info-cell { padding: 3px 4px; }
-#hr-main-table .ct-info-label { display: inline-block; padding: 2px 5px; border-radius: 3px; font-size: 9px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
-#hr-main-table td.ct-stage-info-cell.tint-prob .ct-info-label { background: rgba(46,125,50,0.22); color: #0a4a3a; }
-#hr-main-table td.ct-stage-info-cell.tint-pla  .ct-info-label { background: rgba(46,125,50,0.13); color: #3a6a5a; }
-#hr-main-table td.ct-stage-info-cell.tint-pos  .ct-info-label { background: rgba(46,125,50,0.07); color: #6a7a72; }
-#hr-main-table td.ct-stage-info-cell.tint-none .ct-info-label { background: #f0ede1; color: #aaa; }
+#hr-main-table .pi-pip-row .pi-score-num { font-size: 9.5px; color: #444; margin-left: 4px; font-weight: 700; }
+#hr-main-table td.pi-pass { background: rgba(46,125,50,0.12); color: #2E7D32; font-weight: 700; }
+#hr-main-table td.pi-fail { color: #999; }
+#hr-main-table td.pb-info-cell { color: #4a6a8a; font-weight: 600; font-size: 11px; }
+#hr-main-table td.pb-info-cell.pb-deep { color: #8a4a3a; }
+#hr-main-table td.ma-pct-pass { font-weight: 700; }
+#hr-main-table td.ma-pct-none { color: #ccc; }
+#hr-main-table td.ma-name-cell { font-size: 10px; color: #888; font-weight: 600; }
+#hr-main-table td.ma-name-cell.ma-name-hit { color: #3a7a5a; font-weight: 700; }
 #hr-main-table td.ct-window-col { padding: 3px 4px; font-size: 10px; }
 #hr-main-table td.ct-window-fired-recent { background: rgba(46,125,50,0.16); }
 #hr-main-table td.ct-window-fired-recent .ct-window-label { color: #0a4a3a; font-weight: 700; }
@@ -12529,76 +12581,80 @@ window.TAB_LABELS = TAB_LABELS;
 #hr-main-table col.c-name { width: 124px; }
 #hr-main-table col.c-taxon { width: 150px; }
 #hr-main-table col.c-price { width: 50px; }
-#hr-main-table col.c-52wh { width: 48px; }
-#hr-main-table col.c-52wl { width: 48px; }
-#hr-main-table col.c-ma150 { width: 48px; }
-#hr-main-table col.c-ma200 { width: 48px; }
 #hr-main-table col.c-pullback { width: 58px; }
-#hr-main-table col.c-stageinfo { width: 56px; }
-#hr-main-table col.c-rating { width: 64px; }
-#hr-main-table col.c-score { width: 52px; }
-#hr-main-table col.c-test { width: 64px; }
+#hr-main-table col.c-s2-rating { width: 72px; }
+#hr-main-table col.c-s2-gate { width: 40px; }
+#hr-main-table col.c-s2-test { width: 40px; }
+#hr-main-table col.c-rating { width: 72px; }
+#hr-main-table col.c-score { width: 56px; }
+#hr-main-table col.c-test { width: 40px; }
+#hr-main-table col.c-pb-info { width: 52px; }
+#hr-main-table col.c-ma-pct { width: 52px; }
+#hr-main-table col.c-ma-name { width: 42px; }
 #hr-main-table col.c-window { width: 52px; }
 #hr-main-table tr.tint-row td.name-cell, #hr-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
 #hr-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
 #hr-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
 #hr-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
 /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER-CSS-END */
+
 </style>
 <script>
 
 
 /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER-MODULE-START */
 // =============================================================================
-// HEALTHY RETEST OF MA — STANDALONE TAB MODULE (S47)
-// =============================================================================
-// MD-V2-S47-TAB-HEALTHY-RETEST-MARKER — idempotency marker for patcher detection
-//
-// Renders md_v2.tests.healthy_retest — the 13-criterion S46 test:
-//   Group A: Stage 2 hard precondition (1 criterion)
-//   Group B: Early-stage indicators (4 criteria: 2 uptrend + 2 pullback)
-//   Group C: Healthy-retest setup (6 criteria)
-//   Group D: Capital deployment trigger (2 criteria)
+// HEALTHY RETEST OF MA — S56 4-GROUP REDESIGN
+// MD-V2-S47-TAB-HEALTHY-RETEST-MARKER — idempotency marker
+// G1: Stage 2 rating + 4 gates + 5 tests
+// G2: 5D/10D declining + pullback info
+// G3: 4 setup tests + MA% + MA name + candle
+// G4: reclaim + confirmation
 // =============================================================================
 
 (function() {
   'use strict';
 
   var HR_KEY = 'healthy_retest';
-
-  // Tier ladder includes Qualified (above Probable)
   var HR_TIERS = ['None', 'Possible', 'Plausible', 'Probable', 'Qualified'];
   var HR_TIER_DISPLAY = ['Possible', 'Plausible', 'Probable', 'Qualified'];
   var HR_RATING_RANK = { 'Qualified':6, 'Probable':5, 'Plausible':3, 'Possible':2, 'None':1 };
   var HR_RATING_CLS  = { 'Qualified':'tint-qualified', 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
 
-  // The 13 tests in order, with group labels for sub-group row
-  var HR_TESTS = [
-    { key: 'g1_stage_2_qualifies',         label: 'Stage 2 qualifies',        group: 'precondition', tooltip: 'Stage 2 rating is Probable or Plausible — hard precondition' },
-    { key: 'g2_b1_50d_rising',             label: '50D MA rising',            group: 'indicator',    tooltip: '50-day moving average is rising day-over-day' },
-    { key: 'g2_b2_150d_rising',            label: '150D MA rising',           group: 'indicator',    tooltip: '150-day moving average is rising day-over-day' },
-    { key: 'g2_b3_5d_declining',           label: '5D MA declining',          group: 'indicator',    tooltip: '5-day moving average is declining — pulling back' },
-    { key: 'g2_b4_10d_declining',          label: '10D MA declining',         group: 'indicator',    tooltip: '10-day moving average is declining — pulling back' },
-    { key: 'g3_c1_volume_contracting',     label: 'Volume contracting',       group: 'setup',        tooltip: '10-day average volume below the 50-day — selling drying up' },
-    { key: 'g3_c2_up_vol_gt_down_vol',     label: 'Up-vol > down-vol',        group: 'setup',        tooltip: 'Up-day volume exceeds down-day volume over the last month' },
-    { key: 'g3_c3_few_distribution_days',  label: 'Few distribution days',    group: 'setup',        tooltip: 'Three or fewer distribution days over the last 25 sessions' },
-    { key: 'g3_c4_volatility_reducing',    label: 'Volatility reducing',      group: 'setup',        tooltip: '10-day ATR below the 20-day — orderly pullback' },
-    { key: 'g3_c5_testing_meaningful_ma',  label: 'Testing a meaningful MA',  group: 'setup',        tooltip: 'Price has come down to within range of a 50/100/150/200-day MA' },
-    { key: 'g3_c6_buying_through_l10d',    label: 'Buying through 10 days',   group: 'setup',        tooltip: 'At least half of the last 10 days closed in the upper 40% of range' },
-    { key: 'g4_d1_reclaimed_ma',           label: 'Reclaimed the MA',         group: 'trigger',      tooltip: 'Current price is back above the moving average being tested' },
-    { key: 'g4_d2_confirmation_close_ge2pct', label: 'Confirm: close 2%+ up', group: 'trigger',      tooltip: 'Today\'s close is at least 2% above yesterday\'s' }
+  var S2_GATES = [
+    { key: 'g1_P_above_200D',      label: '1. P > 200D MA (gate)',  tooltip: 'Price above the 200-day MA' },
+    { key: 'g2_P_above_150D',      label: '2. P > 150D MA (gate)',  tooltip: 'Price above the 150-day MA' },
+    { key: 'g3_150D_above_200D',   label: '3. 150D MA > 200D MA (gate)', tooltip: '150-day MA above 200-day MA' },
+    { key: 'g4_within_25pct_52WH', label: '4. Within 25% of 52w high (gate)', tooltip: 'Price within 25% of 52-week high' }
+  ];
+  var S2_TESTS = [
+    { key: 'T5_50D_above_150D',            label: '5. 50D MA > 150D MA', tooltip: '50-day MA above 150-day MA' },
+    { key: 'T6_50D_above_200D',            label: '6. 50D MA > 200D MA', tooltip: '50-day MA above 200-day MA' },
+    { key: 'T7_industry_RS_pct_ge70',      label: '7. Industry pct. ≥70', tooltip: 'Industry RS percentile >= 70' },
+    { key: 'T8_sector_RS_pct_ge70',        label: '8. Sector pct. in industry ≥70', tooltip: 'Sector RS percentile >= 70 within industry' },
+    { key: 'T9_stock_RS_vs_industry_ge70', label: '9. Stock pct. vs industry ≥70', tooltip: 'Stock RS vs industry percentile >= 70' }
+  ];
+  var HR_TESTS_G2 = [
+    { key: 'g2_b3_5d_declining',  label: '10. 5D MA declining', tooltip: '5-day MA declining day-over-day' },
+    { key: 'g2_b4_10d_declining', label: '11. 10D MA declining', tooltip: '10-day MA declining day-over-day' }
+  ];
+  var HR_TESTS_G3 = [
+    { key: 'g3_c1_volume_contracting',    label: '12. Vol contracting', tooltip: '10-day average volume below the 50-day' },
+    { key: 'g3_c2_up_vol_gt_down_vol',    label: '13. Up-vol > down-vol', tooltip: 'Up-day volume exceeds down-day volume' },
+    { key: 'g3_c3_few_distribution_days', label: '14. Few dist days', tooltip: '3 or fewer distribution days in last 25 sessions' },
+    { key: 'g3_c4_volatility_reducing',   label: '15. Vol reducing',  tooltip: '10-day ATR below 20-day ATR' }
+  ];
+  var HR_TESTS_G4 = [
+    { key: 'g4_d1_reclaimed_ma',              label: '17. Reclaimed MA', tooltip: 'Price crossed back above tested MA in last 10 days' },
+    { key: 'g4_d2_confirmation_close_ge2pct', label: '18. Confirm 2%+ up', tooltip: "Today's close >= 2% above yesterday's" }
   ];
 
   var hrState = {
     mode: { inputs: 'pct', tests: 'tick' },
-    scope: 'all',
-    tierFilter: [],
-    tint: 'none',
-    port: 'off',
+    scope: 'all', tierFilter: [], tint: 'none', port: 'off',
     sort: { col: 'company', dir: 'asc' }
   };
 
-  // --- data lookups (reuse from ct module where exported, else standalone) ---
   function hrPricesLookup() {
     if (window._ctPricesByTicker) return window._ctPricesByTicker;
     var out = {};
@@ -12636,10 +12692,28 @@ window.TAB_LABELS = TAB_LABELS;
     var rec = hrGetRec(row);
     return rec ? (rec.rating || 'None') : 'None';
   }
-  function hrStageRating(row, stageKey) {
-    var md = row.md_v2 || {};
-    var st = md[stageKey];
-    return (st && st.rating) || 'None';
+  function hrS2Rating(row) {
+    var s2 = row.md_v2 && row.md_v2.stage_2;
+    return (s2 && s2.rating) || 'None';
+  }
+  function hrS2GateVal(row, gateKey) {
+    var s2 = row.md_v2 && row.md_v2.stage_2;
+    if (!s2) return false;
+    return !!(s2.gates && s2.gates[gateKey]);
+  }
+  function hrS2TestVal(row, testKey) {
+    var s2 = row.md_v2 && row.md_v2.stage_2;
+    if (!s2) return false;
+    return !!(s2.tests && s2.tests[testKey]);
+  }
+  function hrGetMaInfo(row) {
+    var rec = hrGetRec(row);
+    var maLabel = rec && rec.info_ma_retested;
+    if (!maLabel) return { pct: null, name: null };
+    var maNum = maLabel.replace('D', '').replace('d', '');
+    var maVal = row['ma_' + maNum];
+    if (!maVal || !row.price) return { pct: null, name: maLabel };
+    return { pct: (row.price - maVal) / maVal * 100, name: maLabel };
   }
   function hrGetRows() {
     var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
@@ -12656,8 +12730,8 @@ window.TAB_LABELS = TAB_LABELS;
       rows.push({
         ticker: s.ticker, company: p.company_name || s.ticker,
         sector: p.sector || '', industry: p.industry || '',
-        price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
-        recent_pullback: p.recent_pullback_pct,
+        price: p.price, recent_pullback: p.recent_pullback_pct,
+        ma_50: mas['50D'], ma_100: mas['100D'],
         ma_150: mas['150D'], ma_200: mas['200D'],
         md_v2: s.md_v2,
         is_live: !!live[s.ticker],
@@ -12668,32 +12742,21 @@ window.TAB_LABELS = TAB_LABELS;
     return rows;
   }
 
-  // --- counts ---
   function hrTierCounts(rows) {
     var c = {};
     for (var i = 0; i < HR_TIERS.length; i++) c[HR_TIERS[i]] = 0;
-    for (var j = 0; j < rows.length; j++) {
-      var r = hrRowRating(rows[j]);
-      if (c[r] != null) c[r]++;
-    }
+    for (var j = 0; j < rows.length; j++) { var r = hrRowRating(rows[j]); if (c[r] != null) c[r]++; }
     return c;
   }
   function hrPassHistogram(rows) {
-    var h = [];
-    for (var k = 0; k <= 13; k++) h[k] = 0;
-    for (var i = 0; i < rows.length; i++) {
-      var rec = hrGetRec(rows[i]);
-      var cnt = rec ? (rec.count || 0) : 0;
-      if (cnt >= 0 && cnt <= 13) h[cnt]++;
-    }
+    var h = []; for (var k = 0; k <= 13; k++) h[k] = 0;
+    for (var i = 0; i < rows.length; i++) { var rec = hrGetRec(rows[i]); var cnt = rec ? (rec.count || 0) : 0; if (cnt >= 0 && cnt <= 13) h[cnt]++; }
     return h;
   }
 
-  // --- formatting helpers (standalone copies to avoid cross-module deps) ---
   function hrFmtNum(n) {
     if (n == null || isNaN(n)) return '-';
-    var abs = Math.abs(n);
-    var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    var abs = Math.abs(n), dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
     if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0;
     var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
     return n < 0 ? '(' + f + ')' : f;
@@ -12704,103 +12767,9 @@ window.TAB_LABELS = TAB_LABELS;
     return r < 0 ? '(' + abs + ')%' : r + '%';
   }
   function hrColourForIntensity(i) {
-    if (i >= 0.6) return '#2E7D32';
-    if (i >= 0.25) return '#4CAF50';
-    if (i >= 0.05) return '#81C784';
-    if (i <= -0.6) return '#A32D2D';
-    if (i <= -0.25) return '#E24B4A';
-    if (i <= -0.05) return '#F09595';
+    if (i >= 0.6) return '#2E7D32'; if (i >= 0.25) return '#4CAF50'; if (i >= 0.05) return '#81C784';
+    if (i <= -0.6) return '#A32D2D'; if (i <= -0.25) return '#E24B4A'; if (i <= -0.05) return '#F09595';
     return '#888';
-  }
-  function hrInputCell(row, key, extraCls) {
-    extraCls = extraCls || '';
-    var v = row[key];
-    if (key === 'price') return '<td class="num ' + extraCls + '">' + hrFmtNum(v) + '</td>';
-    if (key === 'recent_pullback') {
-      if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">-</td>';
-      var pctVal = v * 100;
-      var pi_intensity = Math.max(-1, Math.min(1, (pctVal - 5) / 20));
-      var col = hrColourForIntensity(-pi_intensity);
-      return '<td class="num ' + extraCls + '" style="color:' + col + '">' + Math.round(pctVal) + '%</td>';
-    }
-    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">-</td>';
-    var pct = (row.price - v) / v * 100;
-    var intensity = 0;
-    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 5) / 20));
-    else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
-    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
-    var colour = hrColourForIntensity(intensity);
-    var text = (hrState.mode.inputs === 'pct') ? hrFmtPct(pct) : hrFmtNum(v);
-    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
-  }
-  function hrStageInfoCell(row, stageKey, cls) {
-    var rating = hrStageRating(row, stageKey);
-    var rcls = HR_RATING_CLS[rating] || (rating.indexOf('Probable') === 0 ? 'tint-prob'
-              : rating.indexOf('Plausible') === 0 ? 'tint-pla'
-              : rating.indexOf('Possible') === 0 ? 'tint-pos' : 'tint-none');
-    return '<td class="' + (cls || '') + ' ct-stage-info-cell ' + rcls + '">' +
-           '<span class="ct-info-label">' + rating + '</span></td>';
-  }
-  function hrTestValueFor(row, testKey) {
-    var rec = hrGetRec(row);
-    var tv = rec && rec.test_values;
-    if (!tv || !(testKey in tv)) return '—';
-    var v = tv[testKey];
-    if (v === null || v === undefined) return '—';
-    if (typeof v === 'string') return v;
-    if (typeof v === 'number') {
-      if (isNaN(v)) return '—';
-      if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return hrFmtPct(v * 100);
-      return hrFmtNum(v);
-    }
-    return String(v);
-  }
-  function hrTestCell(row, testKey, cls) {
-    var pass = hrEvalTest(row, testKey);
-    var extra = cls || '';
-    if (hrState.mode.tests === 'val') {
-      var v = hrTestValueFor(row, testKey);
-      var colour = pass ? hrColourForIntensity(0.7) : hrColourForIntensity(-0.4);
-      return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">' + v + '</td>';
-    }
-    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
-    return '<td class="pi-fail ' + extra + '">.</td>';
-  }
-  function hrRatingCell(row, cls) {
-    var rating = hrRowRating(row);
-    var rcls = HR_RATING_CLS[rating] || 'tint-none';
-    return '<td class="' + (cls || '') + ' pi-rating-cell ' + rcls + '"><span class="pi-pill pi-pill-' + rcls + '">' + rating + '</span></td>';
-  }
-  function hrScoreCell(row, cls) {
-    var rec = hrGetRec(row);
-    var cnt = rec ? (rec.count || 0) : 0;
-    var tot = rec ? (rec.total || 0) : 0;
-    var s = '';
-    for (var i = 0; i < tot; i++) s += '<span class="pip ' + (i < cnt ? 'on' : '') + '"></span>';
-    return '<td class="' + (cls || '') + ' pi-score-cell"><div class="pi-pip-row">' + s +
-           '<span class="pi-score-num">' + cnt + '/' + tot + '</span></div></td>';
-  }
-  function hrWindowCell(row, windowKey, cls) {
-    var rec = hrGetRec(row);
-    var extra = cls || '';
-    if (!rec) return '<td class="' + extra + ' ct-window-na">-</td>';
-    var depth = rec.history_depth || 0;
-    var windowDays = (windowKey === 'l5d') ? 5 : 20;
-    if (depth < windowDays) {
-      return '<td class="' + extra + ' ct-window-building" title="' + depth +
-             ' of ' + windowDays + ' days of history accumulated">building</td>';
-    }
-    var fired = (windowKey === 'l5d') ? !!rec.fired_l5d : !!rec.fired_l20d;
-    if (!fired) return '<td class="' + extra + ' ct-window-none">-</td>';
-    var ds = rec.days_since_fired;
-    var label;
-    if (ds === 0) label = 'today';
-    else if (ds === 1) label = '1d ago';
-    else if (ds != null) label = ds + 'd ago';
-    else label = 'fired';
-    var shadeCls = (ds != null && ds <= 5) ? 'ct-window-fired-recent' : 'ct-window-fired-older';
-    return '<td class="' + extra + ' ' + shadeCls + '" title="most recent fire ' + label + '">' +
-           '<span class="ct-window-label">' + label + '</span></td>';
   }
   function hrHashColor(label, alpha) {
     if (!label) return null;
@@ -12815,322 +12784,370 @@ window.TAB_LABELS = TAB_LABELS;
     return null;
   }
 
-  // --- sorting ---
+  function hrInputCell(row, key, extraCls) {
+    extraCls = extraCls || '';
+    if (key === 'price') return '<td class="num ' + extraCls + '">' + hrFmtNum(row.price) + '</td>';
+    if (key === 'recent_pullback') {
+      var v = row.recent_pullback;
+      if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">-</td>';
+      var pctVal = v * 100;
+      var intensity = Math.max(-1, Math.min(1, (pctVal - 5) / 20));
+      return '<td class="num ' + extraCls + '" style="color:' + hrColourForIntensity(-intensity) + '">' + Math.round(pctVal) + '%</td>';
+    }
+    return '<td class="num ' + extraCls + '">-</td>';
+  }
+  function hrS2RatingCell(row, cls) {
+    var rating = hrS2Rating(row);
+    var pc = rating === 'Probable' ? 's2-pill-prob' : rating === 'Plausible' ? 's2-pill-pla' : rating === 'Possible' ? 's2-pill-pos' : 's2-pill-none';
+    return '<td class="' + (cls||'') + '"><span class="s2-pill ' + pc + '">' + rating + '</span></td>';
+  }
+  function hrS2GateCell(row, gateKey, cls) {
+    if (hrS2GateVal(row, gateKey)) return '<td class="s2-gate-pass ' + (cls||'') + '"><span class="tick">✓</span></td>';
+    return '<td class="s2-gate-fail ' + (cls||'') + '">.</td>';
+  }
+  function hrS2TestCell(row, testKey, cls) {
+    if (hrS2TestVal(row, testKey)) return '<td class="s2-test-pass ' + (cls||'') + '"><span class="tick">✓</span></td>';
+    return '<td class="s2-test-fail ' + (cls||'') + '">.</td>';
+  }
+  function hrTestCell(row, testKey, cls) {
+    var pass = hrEvalTest(row, testKey);
+    if (pass) return '<td class="pi-pass ' + (cls||'') + '"><span class="tick">✓</span></td>';
+    return '<td class="pi-fail ' + (cls||'') + '">.</td>';
+  }
+  function hrRatingCell(row, cls) {
+    var rating = hrRowRating(row);
+    var rcls = HR_RATING_CLS[rating] || 'tint-none';
+    return '<td class="' + (cls||'') + ' pi-rating-cell ' + rcls + '"><span class="pi-pill pi-pill-' + rcls + '">' + rating + '</span></td>';
+  }
+  function hrScoreCell(row, cls) {
+    var rec = hrGetRec(row);
+    var cnt = rec ? (rec.count || 0) : 0, tot = rec ? (rec.total || 0) : 0;
+    var s = '';
+    for (var i = 0; i < tot; i++) s += '<span class="pip ' + (i < cnt ? 'on' : '') + '"></span>';
+    return '<td class="' + (cls||'') + ' pi-score-cell"><div class="pi-pip-row">' + s + '<span class="pi-score-num">' + cnt + '/' + tot + '</span></div></td>';
+  }
+  function hrPullbackInfoCell(row, cls) {
+    var v = row.recent_pullback;
+    if (v == null || isNaN(v)) return '<td class="pb-info-cell ' + (cls||'') + '">-</td>';
+    var pctVal = v * 100;
+    return '<td class="pb-info-cell' + (pctVal < -15 ? ' pb-deep' : '') + ' ' + (cls||'') + '">' + Math.round(pctVal) + '%</td>';
+  }
+  function hrMaPctCell(row, cls) {
+    var info = hrGetMaInfo(row);
+    if (info.pct == null) return '<td class="ma-pct-none ' + (cls||'') + '">-</td>';
+    var pct = info.pct;
+    var sign = pct >= 0 ? '+' : '';
+    var col = hrColourForIntensity(Math.max(-1, Math.min(1, pct / 6)));
+    return '<td class="ma-pct-pass ' + (cls||'') + '" style="color:' + col + '">' + sign + pct.toFixed(1) + '%</td>';
+  }
+  function hrMaNameCell(row, cls) {
+    var info = hrGetMaInfo(row);
+    if (!info.name) return '<td class="ma-name-cell ' + (cls||'') + '">-</td>';
+    return '<td class="ma-name-cell ma-name-hit ' + (cls||'') + '">' + info.name + '</td>';
+  }
+  function hrWindowCell(row, windowKey, cls) {
+    var rec = hrGetRec(row);
+    var extra = cls || '';
+    if (!rec) return '<td class="' + extra + ' ct-window-na">-</td>';
+    var depth = rec.history_depth || 0, windowDays = (windowKey === 'l5d') ? 5 : 20;
+    if (depth < windowDays) return '<td class="' + extra + ' ct-window-building" title="' + depth + ' of ' + windowDays + ' days">building</td>';
+    var fired = (windowKey === 'l5d') ? !!rec.fired_l5d : !!rec.fired_l20d;
+    if (!fired) return '<td class="' + extra + ' ct-window-none">-</td>';
+    var ds = rec.days_since_fired;
+    var label = ds === 0 ? 'today' : ds === 1 ? '1d ago' : (ds != null ? ds + 'd ago' : 'fired');
+    var shadeCls = (ds != null && ds <= 5) ? 'ct-window-fired-recent' : 'ct-window-fired-older';
+    return '<td class="' + extra + ' ' + shadeCls + '" title="' + label + '"><span class="ct-window-label">' + label + '</span></td>';
+  }
+
   var HR_COL_MODEL = null;
+  var S2_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
+
   function hrBuildColModel() {
     if (HR_COL_MODEL) return HR_COL_MODEL;
     var cols = [
-      { id:'name',     sortKey:'company',         kind:'input' },
-      { id:'taxon',    sortKey:'sector',           kind:'input' },
-      { id:'price',    sortKey:'price',            kind:'input' },
-      { id:'high_52w', sortKey:'high_52w',         kind:'input' },
-      { id:'low_52w',  sortKey:'low_52w',          kind:'input' },
-      { id:'ma_150',   sortKey:'ma_150',           kind:'input' },
-      { id:'ma_200',   sortKey:'ma_200',           kind:'input' },
-      { id:'pullback', sortKey:'recent_pullback',  kind:'input' }
+      { id:'name',     sortKey:'company',        kind:'name' },
+      { id:'taxon',    sortKey:'sector',          kind:'taxon' },
+      { id:'price',    sortKey:'price',           kind:'price' },
+      { id:'pullback', sortKey:'recent_pullback', kind:'pullback' }
     ];
-    var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
-    for (var si = 0; si < STAGES.length; si++) {
-      cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] });
-    }
+    cols.push({ id:'s2_rating', sortKey:'s2__rating', kind:'s2rating' });
+    for (var gi = 0; gi < S2_GATES.length; gi++)
+      cols.push({ id:'s2g'+gi, sortKey:'s2g__'+S2_GATES[gi].key, kind:'s2gate', gateKey:S2_GATES[gi].key, label:S2_GATES[gi].label, tooltip:S2_GATES[gi].tooltip });
+    for (var ti = 0; ti < S2_TESTS.length; ti++)
+      cols.push({ id:'s2t'+ti, sortKey:'s2t__'+S2_TESTS[ti].key, kind:'s2test', testKey:S2_TESTS[ti].key, label:S2_TESTS[ti].label, tooltip:S2_TESTS[ti].tooltip });
     cols.push({ id:'hr_rating', sortKey:'hr__rating', kind:'rating' });
     cols.push({ id:'hr_score',  sortKey:'hr__score',  kind:'score' });
-    for (var t = 0; t < HR_TESTS.length; t++) {
-      cols.push({ id:'hr_t'+(t+1), sortKey:'hr__'+HR_TESTS[t].key, kind:'test', testKey:HR_TESTS[t].key, group:HR_TESTS[t].group });
-    }
-    cols.push({ id:'hr_l5d',  sortKey:'hr__l5d',  kind:'window', windowKey:'l5d' });
+    cols.push({ id:'hr_g2_0', sortKey:'hr__'+HR_TESTS_G2[0].key, kind:'hrtest', testKey:HR_TESTS_G2[0].key, label:HR_TESTS_G2[0].label, tooltip:HR_TESTS_G2[0].tooltip, grpStart:'g2' });
+    cols.push({ id:'hr_g2_1', sortKey:'hr__'+HR_TESTS_G2[1].key, kind:'hrtest', testKey:HR_TESTS_G2[1].key, label:HR_TESTS_G2[1].label, tooltip:HR_TESTS_G2[1].tooltip });
+    cols.push({ id:'g2_pb',   sortKey:'g2__pb_info', kind:'pb_info' });
+    for (var g3i = 0; g3i < HR_TESTS_G3.length; g3i++)
+      cols.push({ id:'hr_g3_'+g3i, sortKey:'hr__'+HR_TESTS_G3[g3i].key, kind:'hrtest', testKey:HR_TESTS_G3[g3i].key, label:HR_TESTS_G3[g3i].label, tooltip:HR_TESTS_G3[g3i].tooltip, grpStart: g3i===0?'g3':null });
+    cols.push({ id:'g3_ma_pct',  sortKey:'g3__ma_pct',  kind:'ma_pct' });
+    cols.push({ id:'g3_ma_name', sortKey:'g3__ma_name', kind:'ma_name' });
+    cols.push({ id:'hr_g3_c6', sortKey:'hr__g3_c6_buying_through_l10d', kind:'hrtest', testKey:'g3_c6_buying_through_l10d', label:'16. Buying through 10 days', tooltip:'At least half of last 10 days closed in upper 40% of daily range' });
+    cols.push({ id:'hr_g4_0', sortKey:'hr__'+HR_TESTS_G4[0].key, kind:'hrtest', testKey:HR_TESTS_G4[0].key, label:HR_TESTS_G4[0].label, tooltip:HR_TESTS_G4[0].tooltip, grpStart:'g4' });
+    cols.push({ id:'hr_g4_1', sortKey:'hr__'+HR_TESTS_G4[1].key, kind:'hrtest', testKey:HR_TESTS_G4[1].key, label:HR_TESTS_G4[1].label, tooltip:HR_TESTS_G4[1].tooltip });
+    cols.push({ id:'hr_l5d',  sortKey:'hr__l5d',  kind:'window', windowKey:'l5d',  grpStart:'context' });
     cols.push({ id:'hr_l20d', sortKey:'hr__l20d', kind:'window', windowKey:'l20d' });
     HR_COL_MODEL = cols;
     return cols;
   }
+
   function hrGetSortVal(row, key) {
-    if (key.indexOf('stageinfo__') === 0) {
-      var sk = key.split('__')[1];
-      return HR_RATING_RANK[hrStageRating(row, sk)] || 0;
-    }
+    if (key === 'company') return row.company || '';
+    if (key === 'sector')  return row.sector  || '';
+    if (key === 'price')   return row.price   || 0;
+    if (key === 'recent_pullback') return row.recent_pullback == null ? -Infinity : row.recent_pullback;
+    if (key === 's2__rating') return S2_RATING_RANK[hrS2Rating(row)] || 0;
+    if (key.indexOf('s2g__') === 0) return hrS2GateVal(row, key.substring(5)) ? 1 : 0;
+    if (key.indexOf('s2t__') === 0) return hrS2TestVal(row, key.substring(5)) ? 1 : 0;
     if (key === 'hr__rating') return HR_RATING_RANK[hrRowRating(row)] || 0;
     if (key === 'hr__score') { var rec = hrGetRec(row); return rec ? (rec.count || 0) : 0; }
+    if (key === 'g2__pb_info') return row.recent_pullback == null ? -Infinity : row.recent_pullback;
+    if (key === 'g3__ma_pct') { var inf = hrGetMaInfo(row); return inf.pct == null ? -Infinity : inf.pct; }
+    if (key === 'g3__ma_name') { var inf2 = hrGetMaInfo(row); return inf2.name || 'ZZZ'; }
     if (key === 'hr__l5d' || key === 'hr__l20d') {
-      var rec2 = hrGetRec(row);
-      if (!rec2) return -1;
-      var sub = key.split('__')[1];
-      var windowDays = (sub === 'l5d') ? 5 : 20;
-      var depth = rec2.history_depth || 0;
-      if (depth < windowDays) return -2;
-      var fired = (sub === 'l5d') ? rec2.fired_l5d : rec2.fired_l20d;
-      if (!fired) return -1;
-      var ds = rec2.days_since_fired;
-      return (ds == null) ? 0 : (1000 - ds);
+      var rec2 = hrGetRec(row); if (!rec2) return -1;
+      var sub = key.split('__')[1], wd = sub === 'l5d' ? 5 : 20;
+      if ((rec2.history_depth || 0) < wd) return -2;
+      var fi = sub === 'l5d' ? rec2.fired_l5d : rec2.fired_l20d;
+      if (!fi) return -1;
+      var ds = rec2.days_since_fired; return ds == null ? 0 : (1000 - ds);
     }
-    if (key.indexOf('hr__') === 0) {
-      var testKey = key.substring(4);
-      return hrEvalTest(row, testKey) ? 1 : 0;
-    }
-    if (key === 'recent_pullback') return row.recent_pullback == null ? -Infinity : row.recent_pullback;
-    var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
-    if (PCT_KEYS.indexOf(key) > -1 && hrState.mode.inputs === 'pct') {
-      var ref = row[key];
-      if (ref == null || row.price == null || ref === 0) return -Infinity;
-      return (row.price - ref) / ref * 100;
-    }
-    if (key in row) return row[key];
+    if (key.indexOf('hr__') === 0) return hrEvalTest(row, key.substring(4)) ? 1 : 0;
     return 0;
   }
   function hrOnSort(key) {
     if (hrState.sort.col === key) hrState.sort.dir = hrState.sort.dir === 'desc' ? 'asc' : 'desc';
-    else hrState.sort = { col: key, dir: key === 'company' ? 'asc' : 'desc' };
+    else hrState.sort = { col: key, dir: (key === 'company' || key === 'sector') ? 'asc' : 'desc' };
     hrBuildHeaderRow();
     hrRenderRows();
   }
 
-  // --- header row ---
   function hrBuildHeaderRow() {
     var tr = document.getElementById('hr-col-header-row');
     if (!tr) return;
     var cols = hrBuildColModel();
-    var INPUT_LABELS = ['Company - Ticker','Industry - Sector','Price','52wk high','52wk low','150D MA','200D MA','Pullback'];
-    var STAGE_LABELS = ['Stage 1','Stage 2','Stage 3','Stage 4'];
     var h = '';
     for (var i = 0; i < cols.length; i++) {
       var c = cols[i];
       var isSort = hrState.sort.col === c.sortKey;
-      var arrow = isSort
-        ? '<span class="sort-arrow">' + (hrState.sort.dir === 'desc' ? String.fromCharCode(9660) : String.fromCharCode(9650)) + '</span>'
-        : '<span class="sort-placeholder"></span>';
+      var arrow = isSort ? '<span class="sort-arrow">' + (hrState.sort.dir === 'desc' ? '▼' : '▲') + '</span>' : '<span class="sort-placeholder"></span>';
       var label, title, cls = '';
-      if (c.kind === 'input') { label = INPUT_LABELS[i]; title = label; }
-      else if (c.kind === 'stageinfo') { label = STAGE_LABELS[i - 8]; title = label + ' rating'; cls = (i === 8 ? 'grp-start-stageinfo ' : ''); }
-      else if (c.kind === 'rating') { label = 'Rating'; title = 'Healthy Retest rating'; cls = 'grp-start-rating '; }
-      else if (c.kind === 'score') { label = 'Score'; title = 'Pass count out of 13'; }
-      else if (c.kind === 'test') { var tDef = HR_TESTS[i - 14]; label = tDef.label; title = tDef.tooltip; cls = (i === 14 ? 'grp-start-tests ' : ''); }
-      else if (c.kind === 'window') { label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label; cls = 'ct-window-col'; }
+      if (c.kind === 'name')      { label = 'Company · Ticker'; title = label; }
+      else if (c.kind === 'taxon')   { label = 'Industry · Sector'; title = label; }
+      else if (c.kind === 'price')   { label = 'Price'; title = 'Last price'; }
+      else if (c.kind === 'pullback'){ label = 'Pullback'; title = 'Pullback from recent swing high (%)'; }
+      else if (c.kind === 's2rating'){ label = 'S2 Rating'; title = 'Stage 2 uptrend rating'; cls = 'grp-start-g1'; }
+      else if (c.kind === 's2gate')  { label = c.label; title = c.tooltip; }
+      else if (c.kind === 's2test')  { label = c.label; title = c.tooltip; }
+      else if (c.kind === 'rating')  { label = 'HR Rating'; title = 'Healthy Retest rating'; cls = 'grp-start-rating'; }
+      else if (c.kind === 'score')   { label = 'Score'; title = 'Pass count / 13'; }
+      else if (c.kind === 'hrtest') {
+        label = c.label; title = c.tooltip;
+        if (c.grpStart === 'g2') cls = 'grp-start-g2';
+        else if (c.grpStart === 'g3') cls = 'grp-start-g3';
+        else if (c.grpStart === 'g4') cls = 'grp-start-g4';
+      }
+      else if (c.kind === 'pb_info') { label = 'Pullback'; title = 'Pullback depth for context'; }
+      else if (c.kind === 'ma_pct')  { label = 'Testing MA'; title = '% distance from price to the tested MA'; }
+      else if (c.kind === 'ma_name') { label = 'Which MA'; title = 'Which MA is being tested (50D/100D/150D/200D)'; }
+      else if (c.kind === 'window') {
+        label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label;
+        cls = (c.grpStart === 'context' ? 'grp-start-context ' : '') + 'ct-window-col';
+      }
       else { label = '?'; title = ''; }
-      h += '<th class="' + cls + '" data-sort-key="' + c.sortKey + '" title="' + title + '">' +
-           '<span class="hd"><span class="lbl">' + label + '</span>' + arrow + '</span></th>';
+      h += '<th class="' + cls + '" data-sort-key="' + c.sortKey + '" title="' + title.replace(/"/g, '&quot;') + '"><span class="hd"><span class="lbl">' + label + '</span>' + arrow + '</span></th>';
     }
     tr.innerHTML = h;
   }
 
-  // --- tile ---
   function hrPatternTile(scopeRows) {
     var tiles = document.getElementById('hr-pattern-tiles');
     if (!tiles) return;
-    var tierCounts = hrTierCounts(scopeRows);
-    var total = scopeRows.length;
-    var cnt = total - (tierCounts['None'] || 0);
-    var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
-    var sel = hrState.tierFilter;
-    var anySel = sel.length > 0;
+    var tc = hrTierCounts(scopeRows), total = scopeRows.length;
+    var cnt = total - (tc['None'] || 0), pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+    var sel = hrState.tierFilter, anySel = sel.length > 0;
     var headline = cnt, headSub = 'of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%';
     if (anySel) {
-      var ft = 0;
-      for (var z = 0; z < sel.length; z++) ft += (tierCounts[sel[z]] || 0);
-      headline = ft;
-      headSub = sel.join(' + ') + ' · filtered';
+      var ft = 0; for (var z = 0; z < sel.length; z++) ft += (tc[sel[z]] || 0);
+      headline = ft; headSub = sel.join(' + ') + ' · filtered';
     }
-    var hist = hrPassHistogram(scopeRows);
-    var breakdown = '';
-    for (var k = 1; k <= 13; k++) {
-      if (k > 1) breakdown += ' · ';
-      breakdown += k + '/13: ' + (hist[k] || 0).toLocaleString('en-GB');
-    }
+    var hist = hrPassHistogram(scopeRows), breakdown = '';
+    for (var k = 1; k <= 13; k++) { if (k > 1) breakdown += ' · '; breakdown += k + '/13: ' + (hist[k]||0).toLocaleString('en-GB'); }
     var chips = '';
-    for (var c = 0; c < HR_TIER_DISPLAY.length; c++) {
-      var tier = HR_TIER_DISPLAY[c];
-      var on = sel.indexOf(tier) > -1;
-      var tc = tierCounts[tier] || 0;
-      chips += '<span class="pi-tier-chip pi-chip-pullback' +
-               (on ? ' on' : '') + '" data-tier="' + tier + '">' +
-               tier + ' ' + tc.toLocaleString('en-GB') + (on ? ' ' + String.fromCharCode(10003) : '') + '</span>';
+    for (var ci = 0; ci < HR_TIER_DISPLAY.length; ci++) {
+      var tier = HR_TIER_DISPLAY[ci], on = sel.indexOf(tier) > -1, tcc = tc[tier] || 0;
+      chips += '<span class="pi-tier-chip pi-chip-pullback' + (on ? ' on' : '') + '" data-tier="' + tier + '">' + tier + ' ' + tcc.toLocaleString('en-GB') + (on ? ' ✓' : '') + '</span>';
     }
-    var activeCls = anySel ? ' active' : '';
-    tiles.innerHTML = '<div class="rating-tile pi-tile-pullback' + activeCls + '" title="Healthy Retest of Upwards MA — 13-criterion test">' +
-         '<div class="rt-label">Healthy Retest</div>' +
-         '<div class="rt-count">' + headline.toLocaleString('en-GB') + '</div>' +
-         '<div class="rt-sub">' + headSub + '</div>' +
-         '<div class="rt-breakdown">' + breakdown + '</div>' +
-         '<div class="pi-tier-chips">' + chips + '</div>' +
-         '<div class="rt-strip pi-strip-pullback"></div>' +
-         '</div>';
+    tiles.innerHTML = '<div class="rating-tile pi-tile-pullback' + (anySel ? ' active' : '') + '" title="Healthy Retest of Upwards MA">' +
+      '<div class="rt-label">Healthy Retest</div><div class="rt-count">' + headline.toLocaleString('en-GB') + '</div>' +
+      '<div class="rt-sub">' + headSub + '</div><div class="rt-breakdown">' + breakdown + '</div>' +
+      '<div class="pi-tier-chips">' + chips + '</div><div class="rt-strip pi-strip-pullback"></div></div>';
   }
 
-  // --- scope / filter ---
   function hrUpdateScopeCounts(rows) {
     function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
-    set('hr-cnt-all',      rows.length);
+    set('hr-cnt-all', rows.length);
     set('hr-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
     set('hr-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
     set('hr-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
   }
   function hrApplyScope(all) {
     var rows = all.slice();
-    if (hrState.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
-    else if (hrState.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
+    if (hrState.scope === 'live')     rows = rows.filter(function(r){ return r.is_live; });
+    else if (hrState.scope === 'sector')   rows = rows.filter(function(r){ return r.sector_in_portfolio; });
     else if (hrState.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
     return rows;
   }
   function hrApplyTierFilter(rows) {
-    var sel = hrState.tierFilter;
-    if (sel.length === 0) return rows;
-    return rows.filter(function(r) {
-      var rating = hrRowRating(r);
-      return sel.indexOf(rating) > -1;
-    });
+    var sel = hrState.tierFilter; if (sel.length === 0) return rows;
+    return rows.filter(function(r){ return sel.indexOf(hrRowRating(r)) > -1; });
   }
 
-  // --- main render ---
   function hrRenderRows() {
-    var tbody = document.getElementById('hr-tbody');
-    if (!tbody) return;
-    var all = hrGetRows();
-    var scopeRows = hrApplyScope(all);
-    hrUpdateScopeCounts(all);
-    hrPatternTile(scopeRows);
+    var tbody = document.getElementById('hr-tbody'); if (!tbody) return;
+    var all = hrGetRows(), scopeRows = hrApplyScope(all);
+    hrUpdateScopeCounts(all); hrPatternTile(scopeRows);
     var rows = hrApplyTierFilter(scopeRows);
-    rows.sort(function(a,b) {
+    rows.sort(function(a,b){
       var va = hrGetSortVal(a, hrState.sort.col), vb = hrGetSortVal(b, hrState.sort.col);
-      var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
+      var cmp = (typeof va === 'string') ? va.localeCompare(vb) : ((va||0)-(vb||0));
       if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker);
       return hrState.sort.dir === 'desc' ? -cmp : cmp;
     });
-    var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
     var html = '';
     for (var i = 0; i < rows.length; i++) {
-      var s = rows[i];
-      var styles = [], cls = [];
+      var s = rows[i], styles = [], cls = [];
       if (hrState.tint === 'industry') { styles.push('--tint-bg: ' + hrHashColor(s.industry, 0.16)); cls.push('tint-row'); }
       else if (hrState.tint === 'sector') { styles.push('--tint-bg: ' + hrHashColor(s.sector, 0.16)); cls.push('tint-row'); }
       if (hrState.port === 'on') {
         var pinf = hrPortfolioInfo(s);
-        if (pinf) {
-          styles.push('--portfolio-color: ' + pinf.color);
-          styles.push('--portfolio-bg: ' + pinf.bg);
-          styles.push('--portfolio-bg-hover: ' + pinf.bgHover);
-          cls.push('portfolio-band'); cls.push('portfolio-tint');
-        }
+        if (pinf) { styles.push('--portfolio-color:'+pinf.color,'--portfolio-bg:'+pinf.bg,'--portfolio-bg-hover:'+pinf.bgHover); cls.push('portfolio-band','portfolio-tint'); }
       }
-      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
-      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
-      var liveDot = s.is_live ? '<span class="live-dot">' + String.fromCharCode(9679) + '</span>' : '';
-      html += '<tr' + clsAttr + styleAttr + '>' +
-        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
-        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
-        hrInputCell(s, 'price') + hrInputCell(s, 'high_52w') + hrInputCell(s, 'low_52w') +
-        hrInputCell(s, 'ma_150') + hrInputCell(s, 'ma_200') + hrInputCell(s, 'recent_pullback');
-      // 4-stage info block
-      for (var si = 0; si < STAGES.length; si++) {
-        html += hrStageInfoCell(s, STAGES[si], si === 0 ? 'grp-start-stageinfo' : '');
-      }
-      // Rating + score
+      var sa = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var ca = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var liveDot = s.is_live ? '<span class="live-dot">●</span>' : '';
+      html += '<tr' + ca + sa + '>';
+      // Inputs (4)
+      html += '<td class="name-cell"><div class="co">' + liveDot + (s.company||s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>';
+      html += '<td class="taxon"><div class="ind">' + (s.industry||'') + '</div><div class="sec">' + (s.sector||'') + '</div></td>';
+      html += hrInputCell(s, 'price');
+      html += hrInputCell(s, 'recent_pullback');
+      // G1: S2 rating + 4 gates + 5 tests (10)
+      html += hrS2RatingCell(s, 'grp-start-g1');
+      for (var gi2 = 0; gi2 < S2_GATES.length; gi2++) html += hrS2GateCell(s, S2_GATES[gi2].key);
+      for (var ti2 = 0; ti2 < S2_TESTS.length; ti2++) html += hrS2TestCell(s, S2_TESTS[ti2].key);
+      // Rating + Score (2)
       html += hrRatingCell(s, 'grp-start-rating');
       html += hrScoreCell(s, '');
-      // 13 test columns
-      for (var ti = 0; ti < HR_TESTS.length; ti++) {
-        var tCls = (ti === 0) ? 'grp-start-tests' : '';
-        html += hrTestCell(s, HR_TESTS[ti].key, tCls);
-      }
-      // L5D / L20D
-      html += hrWindowCell(s, 'l5d', 'ct-window-col');
+      // G2: 5D, 10D, pullback info (3)
+      html += hrTestCell(s, HR_TESTS_G2[0].key, 'grp-start-g2');
+      html += hrTestCell(s, HR_TESTS_G2[1].key, '');
+      html += hrPullbackInfoCell(s, '');
+      // G3: 4 tests + MA% + MA name + candle (7)
+      html += hrTestCell(s, HR_TESTS_G3[0].key, 'grp-start-g3');
+      for (var g3j = 1; g3j < HR_TESTS_G3.length; g3j++) html += hrTestCell(s, HR_TESTS_G3[g3j].key, '');
+      html += hrMaPctCell(s, '');
+      html += hrMaNameCell(s, '');
+      html += hrTestCell(s, 'g3_c6_buying_through_l10d', '');
+      // G4: reclaim + confirm (2)
+      html += hrTestCell(s, HR_TESTS_G4[0].key, 'grp-start-g4');
+      html += hrTestCell(s, HR_TESTS_G4[1].key, '');
+      // Context (2)
+      html += hrWindowCell(s, 'l5d', 'ct-window-col grp-start-context');
       html += hrWindowCell(s, 'l20d', 'ct-window-col');
       html += '</tr>';
     }
     tbody.innerHTML = html;
   }
 
-  // --- control setters ---
   window.hrSetMode = function(kind, val) {
     hrState.mode[kind] = val;
-    var btns = document.querySelectorAll('button[data-hr-grp="' + kind + '"]');
-    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-hr-val') === val);
+    document.querySelectorAll('button[data-hr-grp="'+kind+'"]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-hr-val')===val); });
     hrRenderRows();
   };
   window.hrSetScope = function(s) {
     hrState.scope = s;
-    var btns = document.querySelectorAll('button[data-hr-scope]');
-    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-hr-scope') === s);
+    document.querySelectorAll('button[data-hr-scope]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-hr-scope')===s); });
     hrRenderRows();
   };
   window.hrSetTint = function(t) {
     hrState.tint = t;
-    var btns = document.querySelectorAll('button[data-hr-tint]');
-    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-hr-tint') === t);
+    document.querySelectorAll('button[data-hr-tint]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-hr-tint')===t); });
     hrRenderRows();
   };
   window.hrSetPort = function(p) {
     hrState.port = p;
-    var btns = document.querySelectorAll('button[data-hr-port]');
-    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-hr-port') === p);
+    document.querySelectorAll('button[data-hr-port]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-hr-port')===p); });
     hrRenderRows();
   };
   window.hrToggleTier = function(tier) {
-    var sel = hrState.tierFilter;
-    var idx = sel.indexOf(tier);
-    if (idx > -1) sel.splice(idx, 1);
-    else sel.push(tier);
+    var sel = hrState.tierFilter, idx = sel.indexOf(tier);
+    if (idx > -1) sel.splice(idx, 1); else sel.push(tier);
     hrRenderRows();
   };
   window.hrSelectAllTiers = function() {
     var sel = hrState.tierFilter;
-    var onlyProb = (sel.length === 1 && sel[0] === 'Probable');
-    hrState.tierFilter = onlyProb ? [] : ['Probable'];
+    hrState.tierFilter = (sel.length === 1 && sel[0] === 'Probable') ? [] : ['Probable'];
     hrRenderRows();
   };
   window.hrOnSort = hrOnSort;
 
-  // --- scaffold ---
   function hrBuildScaffold() {
     var host = document.getElementById('tab-setups_healthy_retest');
     if (!host) return false;
     if (host.querySelector('#hr-main-table')) return true;
 
-    // colgroup
-    var cg = '<col class="c-name"><col class="c-taxon">' +
-             '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
-             '<col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
-    for (var si = 0; si < 4; si++) cg += '<col class="c-stageinfo">';
-    cg += '<col class="c-rating"><col class="c-score">';
-    for (var ti = 0; ti < 13; ti++) cg += '<col class="c-test">';
-    cg += '<col class="c-window"><col class="c-window">';
+    // colgroup: 4 inputs + 10 G1 + 2 rating + 3 G2 + 7 G3 + 2 G4 + 2 context = 30
+    var cg = '<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-pullback">' +
+             '<col class="c-s2-rating"><col class="c-s2-gate"><col class="c-s2-gate"><col class="c-s2-gate"><col class="c-s2-gate">' +
+             '<col class="c-s2-test"><col class="c-s2-test"><col class="c-s2-test"><col class="c-s2-test"><col class="c-s2-test">' +
+             '<col class="c-rating"><col class="c-score">' +
+             '<col class="c-test"><col class="c-test"><col class="c-pb-info">' +
+             '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
+             '<col class="c-ma-pct"><col class="c-ma-name"><col class="c-test">' +
+             '<col class="c-test"><col class="c-test">' +
+             '<col class="c-window"><col class="c-window">';
 
-    // group-header row
-    var gHdr = '<th class="gh-inputs" colspan="8">Inputs</th>' +
-               '<th class="gh-stageinfo grp-start-stageinfo" colspan="4">Stage ratings</th>' +
-               '<th class="gh-tests grp-start-rating" colspan="' + (2 + 13 + 2) + '">Healthy Retest of Upwards MA</th>';
+    var gHdr = '<th class="gh-inputs" colspan="4">Inputs</th>' +
+               '<th class="gh-g1 grp-start-g1" colspan="10">Group 1 — Upwards long-term trend?</th>' +
+               '<th class="gh-rating grp-start-rating" colspan="2">Rating</th>' +
+               '<th class="gh-g2 grp-start-g2" colspan="3">Group 2 — Pulling back mid-term trend?</th>' +
+               '<th class="gh-g3 grp-start-g3" colspan="7">Group 3 — Healthy retest of rising MA?</th>' +
+               '<th class="gh-g4 grp-start-g4" colspan="2">Group 4 — Successful test?</th>' +
+               '<th class="gh-context grp-start-context" colspan="2">Context</th>';
 
-    // sub-group row
-    var subGrp = '<th class="sg-spacer" colspan="8"></th>' +
-                 '<th class="sg-spacer" colspan="4"></th>' +
-                 '<th class="sub-g" colspan="2">Rating</th>' +
-                 '<th class="sub-g" colspan="1">Gate</th>' +
-                 '<th class="sub-g" colspan="4">Indicator</th>' +
-                 '<th class="sub-g" colspan="6">Setup</th>' +
-                 '<th class="sub-g" colspan="2">Trigger</th>' +
-                 '<th class="sub-g" colspan="2">Context</th>';
+    var subGrp = '<th class="sg-spacer" colspan="4"></th>' +
+                 '<th class="sub-g grp-start-g1" colspan="1">Rating</th>' +
+                 '<th class="sub-g" colspan="4">Gates</th>' +
+                 '<th class="sub-g" colspan="5">Tests</th>' +
+                 '<th class="sub-g grp-start-rating" colspan="2">Rating</th>' +
+                 '<th class="sub-g grp-start-g2" colspan="2">Trend</th>' +
+                 '<th class="sub-g" colspan="1">Info</th>' +
+                 '<th class="sub-g grp-start-g3" colspan="4">Setup</th>' +
+                 '<th class="sub-g" colspan="2">MA test</th>' +
+                 '<th class="sub-g" colspan="1">Candle</th>' +
+                 '<th class="sub-g grp-start-g4" colspan="2">Trigger</th>' +
+                 '<th class="sub-g grp-start-context" colspan="2">Context</th>';
 
-    var theadRows = '<tr class="group-header-row">' + gHdr + '</tr>' +
-                    '<tr class="sub-group-row">' + subGrp + '</tr>' +
-                    '<tr class="col-header-row" id="hr-col-header-row"></tr>';
-
-    var captionHtml = '<div class="gcap"><b>Healthy Retest of Upwards MA</b>' +
-      '<span class="db">The trigger that pairs with the Healthy retest setup — a stock pulling back to an upwards-moving MA in a Stage 2 uptrend, then reclaiming it on healthy volume and volatility.</span>' +
-      '<span class="intro">13 criteria across 4 groups:</span>' +
-      '<span class="tline"><span class="tnum">(A)</span> <u>Stage 2 hard precondition</u> — Probable or Plausible</span>' +
-      '<span class="tline"><span class="tnum">(B)</span> <u>Early-stage indicators</u> — 50D and 150D rising (uptrend) + 5D and 10D declining (pullback)</span>' +
-      '<span class="tline"><span class="tnum">(C)</span> <u>Healthy-retest setup</u> — volume contracting, up-vol beats down-vol, few distribution days, volatility reducing, testing a meaningful MA, buying through 10 days</span>' +
-      '<span class="tline"><span class="tnum">(D)</span> <u>Trigger</u> — reclaimed the MA + confirmation close 2%+ above yesterday</span>' +
+    var captionHtml =
+      '<div class="gcap gcap-g1"><b>Group 1 — Upwards long-term trend (Stage)</b>' +
+        '<span class="db">Is this stock in a confirmed Stage 2 uptrend? Four hard gates (price above both long MAs, 150D above 200D, within 25% of 52-week high) plus five tests deepening conviction: MA stack and relative strength vs industry, sector, and the broader market. The S2 rating shown is the existing Stage 2 tab rating for this stock.</span>' +
+      '</div>' +
+      '<div class="gcap gcap-g2"><b>Group 2 — Pulling back mid-term trend (Indicator)</b>' +
+        '<span class="db">The short-term trend must be rolling over — a genuine pullback within the longer uptrend. Both the 5-day and 10-day MAs must be declining day-over-day. Pullback depth is shown for context. Both tests must pass for any Healthy Retest rating to fire.</span>' +
+      '</div>' +
+      '<div class="gcap gcap-g3"><b>Group 3 — Healthy retest of rising MA (Setup)</b>' +
+        '<span class="db">Quality of the pullback. Volume should be drying up (not panic selling), up-day volume should dominate, distribution days should be few, and volatility should be contracting. The MA test column shows the % distance to whichever of the 50/100/150/200-day MAs price is nearest to. Daily close in upper candle checks that at least half the last 10 days closed in the upper 40% of their high-low range.</span>' +
+      '</div>' +
+      '<div class="gcap gcap-g4"><b>Group 4 — Successful test (Trigger)</b>' +
+        '<span class="db">The deployment trigger. Price has pulled back to a rising MA and is now reclaiming it. Two tests: price must have crossed back above the tested MA in the last 10 trading days, and today\'s close must be at least 2% above yesterday\'s confirming follow-through buying.</span>' +
       '</div>';
 
     var html = '' +
-      '<div class="s1-intro">Healthy Retest of Upwards MA — the 13-criterion test for a Core Minervini trade. A stock must be in a Stage 2 uptrend (Probable or Plausible), pulling back towards an upwards-moving MA on healthy volume and volatility characteristics, then reclaiming the MA with a confirming up-day. Rating tiers: Qualified (all 13), Probable (12 of 13 — missing only the confirmation), Plausible (gate + indicators + 3 of 6 setup criteria), Possible (gate + indicators only). Click a tier chip to filter. Click the tile body to select Probable.</div>' +
+      '<div class="s1-intro">Healthy Retest of Upwards MA — the 13-criterion test for a Core Minervini trade. A stock must be in a confirmed Stage 2 uptrend, pulling back towards an upwards-moving MA on healthy volume and volatility characteristics, then reclaiming the MA with a confirming up-day. Rating tiers: Qualified (all 13), Probable (12 of 13, missing only the confirmation), Plausible (gate + G2 indicators + 3+ of 6 G3 setup), Possible (gate + G2 indicators only).</div>' +
       '<div class="controls s1-controls">' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
-          '<button class="toggle-btn active" data-hr-grp="inputs" data-hr-val="pct" onclick="hrSetMode(\'inputs\',\'pct\')">show as %</button>' +
-          '<button class="toggle-btn" data-hr-grp="inputs" data-hr-val="raw" onclick="hrSetMode(\'inputs\',\'raw\')">show as numbers</button>' +
-        '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +
-          '<button class="toggle-btn active" data-hr-grp="tests" data-hr-val="tick" onclick="hrSetMode(\'tests\',\'tick\')">show ticks</button>' +
-          '<button class="toggle-btn" data-hr-grp="tests" data-hr-val="val" onclick="hrSetMode(\'tests\',\'val\')">show test values</button>' +
-        '</div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
           '<button class="toggle-btn active" data-hr-scope="all" onclick="hrSetScope(\'all\')">All <span id="hr-cnt-all"></span></button>' +
           '<button class="toggle-btn" data-hr-scope="live" onclick="hrSetScope(\'live\')">Live <span id="hr-cnt-live"></span></button>' +
@@ -13152,36 +13169,26 @@ window.TAB_LABELS = TAB_LABELS;
       '<div class="rating-tiles s1-rating-tiles" id="hr-pattern-tiles"></div>' +
       '<div class="group-captions">' + captionHtml + '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +
-        '<table class="data-table" id="hr-main-table">' +
-          '<colgroup>' + cg + '</colgroup>' +
-          '<thead>' + theadRows + '</thead>' +
-          '<tbody id="hr-tbody"></tbody>' +
-        '</table>' +
+        '<table class="data-table" id="hr-main-table"><colgroup>' + cg + '</colgroup>' +
+        '<thead><tr class="group-header-row">' + gHdr + '</tr><tr class="sub-group-row">' + subGrp + '</tr><tr class="col-header-row" id="hr-col-header-row"></tr></thead>' +
+        '<tbody id="hr-tbody"></tbody></table>' +
       '</div></div>';
+
     host.innerHTML = html;
 
-    // Tile click events
-    var tiles = document.getElementById('hr-pattern-tiles');
-    if (tiles) {
-      tiles.addEventListener('click', function(e) {
+    var tilesEl = document.getElementById('hr-pattern-tiles');
+    if (tilesEl) {
+      tilesEl.addEventListener('click', function(e) {
         var chip = e.target.closest('.pi-tier-chip');
-        if (chip) {
-          var ct = chip.getAttribute('data-tier');
-          if (ct) hrToggleTier(ct);
-          return;
-        }
-        var tile = e.target.closest('.rating-tile');
-        if (tile) hrSelectAllTiers();
+        if (chip) { var ct = chip.getAttribute('data-tier'); if (ct) hrToggleTier(ct); return; }
+        if (e.target.closest('.rating-tile')) hrSelectAllTiers();
       });
     }
-    // Header sort events
-    var hdr = document.getElementById('hr-col-header-row');
-    if (hdr) {
-      hdr.addEventListener('click', function(e) {
-        var th = e.target.closest('th');
-        if (!th) return;
-        var key = th.getAttribute('data-sort-key');
-        if (key) hrOnSort(key);
+    var hdrEl = document.getElementById('hr-col-header-row');
+    if (hdrEl) {
+      hdrEl.addEventListener('click', function(e) {
+        var th = e.target.closest('th'); if (!th) return;
+        var key = th.getAttribute('data-sort-key'); if (key) hrOnSort(key);
       });
     }
     return true;
@@ -13465,7 +13472,7 @@ window.TAB_LABELS = TAB_LABELS;
       { id:'pullback', sortKey:'recent_pullback',  kind:'input' }
     ];
     var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
-    for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] });
+    if (PB_STAGEINFO_COUNT > 0) { for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] }); }
     for (var p = 0; p < PB_PATTERNS.length; p++) {
       var pat = PB_PATTERNS[p];
       var gi = p + 1;
@@ -13481,7 +13488,7 @@ window.TAB_LABELS = TAB_LABELS;
   }
   var PB_COLS = pbBuildCols();
   var PB_INPUT_COUNT = 8;
-  var PB_STAGEINFO_COUNT = 4;
+  var PB_STAGEINFO_COUNT = 0;
 
   // --- sorting ---
   function pbGetSortVal(row, key) {
@@ -13629,8 +13636,8 @@ window.TAB_LABELS = TAB_LABELS;
     if (host.querySelector('#pb-main-table')) return true;
     var cg = '<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-52wh"><col class="c-52wl"><col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
     for (var sgc = 0; sgc < PB_STAGEINFO_COUNT; sgc++) cg += '<col class="c-stageinfo">';
-    var groupHtml = '<th class="gh-inputs" colspan="' + PB_INPUT_COUNT + '">Inputs</th><th class="gh-stageinfo grp-start-stageinfo" colspan="' + PB_STAGEINFO_COUNT + '">Stage ratings</th>';
-    var subGroupHtml = '<th class="sg-spacer" colspan="' + PB_INPUT_COUNT + '"></th><th class="sg-spacer" colspan="' + PB_STAGEINFO_COUNT + '"></th>';
+    var groupHtml = '<th class="gh-inputs" colspan="' + PB_INPUT_COUNT + '">Inputs</th>';
+    var subGroupHtml = '<th class="sg-spacer" colspan="' + PB_INPUT_COUNT + '"></th>';
     for (var p = 0; p < PB_PATTERNS.length; p++) {
       var pat = PB_PATTERNS[p]; var gi = p + 1; var span = pbPatternBlockSpan(pat);
       cg += '<col class="c-rating"><col class="c-score">'; for (var t = 0; t < pat.tests.length; t++) cg += '<col class="c-test">'; cg += '<col class="c-window"><col class="c-window">';
@@ -13942,7 +13949,7 @@ window.TAB_LABELS = TAB_LABELS;
       { id:'pullback', sortKey:'recent_pullback',  kind:'input' }
     ];
     var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
-    for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] });
+    if (PB_STAGEINFO_COUNT > 0) { for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] }); }
     for (var p = 0; p < SB_PATTERNS.length; p++) {
       var pat = SB_PATTERNS[p];
       var gi = p + 1;
@@ -14370,7 +14377,7 @@ window.TAB_LABELS = TAB_LABELS;
       { id:'pullback', sortKey:'recent_pullback', kind:'input' }
     ];
     var STAGES = ['stage_1','stage_2','stage_3','stage_4'];
-    for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] });
+    if (PB_STAGEINFO_COUNT > 0) { for (var si = 0; si < STAGES.length; si++) cols.push({ id:'info_'+STAGES[si], sortKey:'stageinfo__'+STAGES[si], kind:'stageinfo', stageKey:STAGES[si] }); }
     cols.push({ id:'g1_rating', sortKey:'hvcp__rating', kind:'rating' });
     cols.push({ id:'g1_score',  sortKey:'hvcp__score',  kind:'score' });
     var TESTS = HVCP_PATTERN.tests;
@@ -15125,6 +15132,9 @@ renderTab("mm99");
         '    <div class="header-right-btns">\n'
         # MD-V2-S41-REMOVE-KEY-BUTTON-MARKER -- "Key" button removed per S41 brief (16-May-26)
         '      <button class="ctrl-btn" id="hdr-chart-btn" onclick="openChart(\'Overview\')">Chart</button>\n'
+        '      <a class="ctrl-btn" href="../../databases/soi-list.html" title="Standardised Stocks of Interest list">SOI List</a>\n'
+        '      <a class="ctrl-btn" href="../../landing-page.html" title="Operating system landing page">Home</a>\n'
+        '      <a class="ctrl-btn" href="../../reports-memos-repository.html" title="Research repository">Repository</a>\n'
         '    </div>\n'
         '  </div>\n'
         '  <!-- Row 2: #1 TABS (left) + #2 JUMP TO (right) -->\n'
@@ -15194,16 +15204,3 @@ def main():
 
     size = os.path.getsize(OUTPUT_PATH)
     print("  Written: {} ({:,} bytes)".format(OUTPUT_PATH, size))
-
-    # Post-write backup
-    backup_dir = PROJECT_DIR / "backups"
-    backup_dir.mkdir(exist_ok=True)
-    ts = datetime.now().strftime("%Y%m%d_%H%M")
-    backup_path = backup_dir / "index_post_{}.html".format(ts)
-    shutil.copy2(OUTPUT_PATH, backup_path)
-    print("  Post-write backup: {}".format(backup_path))
-    print("Done.")
-
-
-if __name__ == "__main__":
-    main()

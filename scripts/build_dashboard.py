@@ -15204,3 +15204,15 @@ def main():
 
     size = os.path.getsize(OUTPUT_PATH)
     print("  Written: {} ({:,} bytes)".format(OUTPUT_PATH, size))
+    # Post-write backup
+    backup_dir = PROJECT_DIR / "backups"
+    backup_dir.mkdir(exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M")
+    backup_path = backup_dir / "index_post_{}.html".format(ts)
+    shutil.copy2(OUTPUT_PATH, backup_path)
+    print("  Post-write backup: {}".format(backup_path))
+    print("Done.")
+
+
+if __name__ == "__main__":
+    main()

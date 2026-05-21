@@ -2783,6 +2783,17 @@ def compute_master_dashboard_screens(prices, filter_results):
         ps_c2_ma20_turn = bool(ps_c2_ma20_now_rising and ps_c2_ma20_was_falling_5d_ago)
         ps_c3_followthrough = bool(close_pct_change_today is not None and close_pct_change_today >= 0.02)
 
+        # Group E -- 50D MA variant (S2 Probing Bet).  Uses same lookback structure as 20D.
+        # D-MD-FILTER-1 (22-Apr-26): S2PB Group E = T11 (P>50D MA) + T12 (50D MA rising DoD).
+        ps_ma50_now  = mas.get("50D")
+        ps_ma50_prev = mas.get("50D_prev")
+        ps_ma50_5d_ago = mas.get("50D_5d_ago")
+        ps_ma50_6d_ago = mas.get("50D_6d_ago")
+        ps_c1_price_gt_50d = bool(price is not None and ps_ma50_now is not None and price > ps_ma50_now)
+        ps_c2_ma50_now_rising = bool(ps_ma50_now is not None and ps_ma50_prev is not None and ps_ma50_now > ps_ma50_prev)
+        ps_c2_ma50_was_falling_5d_ago = bool(ps_ma50_5d_ago is not None and ps_ma50_6d_ago is not None and ps_ma50_5d_ago < ps_ma50_6d_ago)
+        ps_c2_ma50_turn = bool(ps_c2_ma50_now_rising and ps_c2_ma50_was_falling_5d_ago)
+
         def _ps_rating(stage_qualifies):
             if not stage_qualifies:
                 return "None"
@@ -2827,6 +2838,51 @@ def compute_master_dashboard_screens(prices, filter_results):
                 },
             }
 
+        # 50D variant rating + builder (S2 Probing Bet only).
+        def _ps_rating_50d(stage_qualifies):
+            if not stage_qualifies:
+                return "None"
+            if not (ps_b1_5d_rising and ps_b2_10d_rising):
+                return "None"
+            if ps_c1_price_gt_50d and ps_c2_ma50_turn and ps_c3_followthrough:
+                return "Qualified"
+            if ps_c1_price_gt_50d and ps_c2_ma50_turn:
+                return "Probable"
+            if ps_c1_price_gt_50d or ps_c2_ma50_turn:
+                return "Plausible"
+            return "Possible"
+
+        def _ps_build_50d(stage_qualifies, variant_key, stage_rating_value):
+            ps_tests = {
+                "g1_stage_qualifies": stage_qualifies,
+                "g2_5d_rising": ps_b1_5d_rising,
+                "g3_10d_rising": ps_b2_10d_rising,
+                "g4_price_gt_50d": ps_c1_price_gt_50d,
+                "g5_50d_turn_last_5d": ps_c2_ma50_turn,
+                "g6_followthrough_close_ge2pct": ps_c3_followthrough,
+            }
+            ps_count = sum(1 for v in ps_tests.values() if v)
+            ps_rating = _ps_rating_50d(stage_qualifies)
+            return {
+                "tests": ps_tests, "count": ps_count, "total": 6,
+                "rating": ps_rating,
+                "qualifies": bool(ps_rating == "Qualified"),
+                "info_variant": variant_key,
+                "info_stage_rating": stage_rating_value,
+                "test_values": {
+                    "g1_stage_qualifies": (stage_rating_value if stage_qualifies else "not in stage"),
+                    "g2_5d_rising": ("rising" if ps_b1_5d_rising else "not rising"),
+                    "g3_10d_rising": ("rising" if ps_b2_10d_rising else "not rising"),
+                    "g4_price_gt_50d": _md_v2_pct_gap(price, ps_ma50_now),
+                    "g5_50d_turn_last_5d": (
+                        "turn (rising now, falling 5d ago)" if ps_c2_ma50_turn
+                        else "rising but no recent turn" if ps_c2_ma50_now_rising
+                        else "not rising"
+                    ),
+                    "g6_followthrough_close_ge2pct": _md_v2_round(close_pct_change_today),
+                },
+            }
+
         # Stage gates per variant.
         # S1/S2/S4: must be Plausible or Probable (substring match handles any sub-tier labels).
         # S3: any non-None rating is eligible (Possible Topping keeps) per D-MD-V2-110 —
@@ -2855,7 +2911,7 @@ def compute_master_dashboard_screens(prices, filter_results):
                 _pb["stage"] = None
 
         tests["probing_bet_s1"] = _ps_build(_s1_in, "probing_bet_s1", _s1_rating_val)
-        tests["probing_bet_s2"] = _ps_build(_s2_in, "probing_bet_s2", _s2_rating_val)
+        tests["probing_bet_s2"] = _ps_build_50d(_s2_in, "probing_bet_s2", _s2_rating_val)  # D-MD-FILTER-1: Group E (50D)
         tests["speculative_bet_s3"] = _ps_build(_s3_in, "speculative_bet_s3", _s3_rating_val)
         tests["speculative_bet_s4"] = _ps_build(_s4_in, "speculative_bet_s4", _s4_rating_val)
 

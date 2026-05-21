@@ -13673,24 +13673,29 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var tiles = document.getElementById('hr-pattern-tiles');
     if (!tiles) return;
     var tc = hrTierCounts(scopeRows), total = scopeRows.length;
-    var cnt = total - (tc['None'] || 0), pct = total > 0 ? Math.round(cnt / total * 100) : 0;
-    var sel = hrState.tierFilter, anySel = sel.length > 0;
-    var headline = cnt, headSub = 'of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%';
-    if (anySel) {
-      var ft = 0; for (var z = 0; z < sel.length; z++) ft += (tc[sel[z]] || 0);
-      headline = ft; headSub = sel.join(' + ') + ' · filtered';
+    var order = ['Possible', 'Plausible', 'Probable', 'Qualified'];
+    var tint  = {'Possible':'tint-pos','Plausible':'tint-pla','Probable':'tint-pe','Qualified':'tint-pl'};
+    var strip = {'Possible':'pos','Plausible':'pla','Probable':'prob','Qualified':'pl'};
+    var HR_THRESH = {
+      'Possible':  'Stage 2 ✓ · all 4 pullback gates ✓ · fewer than 3 of 6 quality tests',
+      'Plausible': 'Stage 2 ✓ · pullback gates ✓ · 3+ of 6 quality tests · MA not yet reclaimed',
+      'Probable':  'Pullback + quality tests ✓ · MA reclaimed ✓ · no 2%+ up-close yet',
+      'Qualified': 'All 13 criteria pass · MA reclaimed · 2%+ up-close confirmed'
+    };
+    var sel = hrState.tierFilter, h = '';
+    for (var i = 0; i < order.length; i++) {
+      var r = order[i], cnt = tc[r] || 0;
+      var act = sel.indexOf(r) > -1 ? ' active' : '';
+      var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
+      h += '<div class="rating-tile ' + tint[r] + act + '" data-tier="' + r + '">' +
+           '<div class="rt-label">' + r + '</div>' +
+           '<div class="rt-count">' + cnt.toLocaleString('en-GB') + '</div>' +
+           '<div class="rt-sub">of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%</div>' +
+           '<div class="rt-thresh">' + (HR_THRESH[r] || ' ') + '</div>' +
+           '<div class="rt-strip rt-strip-' + strip[r] + '"></div>' +
+           '</div>';
     }
-    var hist = hrPassHistogram(scopeRows), breakdown = '';
-    for (var k = 1; k <= 13; k++) { if (k > 1) breakdown += ' · '; breakdown += k + '/13: ' + (hist[k]||0).toLocaleString('en-GB'); }
-    var chips = '';
-    for (var ci = 0; ci < HR_TIER_DISPLAY.length; ci++) {
-      var tier = HR_TIER_DISPLAY[ci], on = sel.indexOf(tier) > -1, tcc = tc[tier] || 0;
-      chips += '<span class="pi-tier-chip pi-chip-pullback' + (on ? ' on' : '') + '" data-tier="' + tier + '">' + tier + ' ' + tcc.toLocaleString('en-GB') + (on ? ' ✓' : '') + '</span>';
-    }
-    tiles.innerHTML = '<div class="rating-tile pi-tile-pullback' + (anySel ? ' active' : '') + '" title="Healthy Retest of Upwards MA">' +
-      '<div class="rt-label">Healthy Retest</div><div class="rt-count">' + headline.toLocaleString('en-GB') + '</div>' +
-      '<div class="rt-sub">' + headSub + '</div><div class="rt-breakdown">' + breakdown + '</div>' +
-      '<div class="pi-tier-chips">' + chips + '</div><div class="rt-strip pi-strip-pullback"></div></div>';
+    tiles.innerHTML = h;
   }
 
   function hrUpdateScopeCounts(rows) {
@@ -13873,7 +13878,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
           '<button class="toggle-btn" data-hr-port="on" onclick="hrSetPort(\'on\')">On</button>' +
         '</div>' +
       '</div>' +
-      '<div class="rating-tiles s1-rating-tiles" id="hr-pattern-tiles"></div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="hr-pattern-tiles" style="grid-template-columns: repeat(4, 1fr);"></div>' +
       '<div class="group-captions">' + captionHtml + '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +
         '<table class="data-table" id="hr-main-table"><colgroup>' + cg + '</colgroup>' +
@@ -13886,9 +13891,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var tilesEl = document.getElementById('hr-pattern-tiles');
     if (tilesEl) {
       tilesEl.addEventListener('click', function(e) {
-        var chip = e.target.closest('.pi-tier-chip');
-        if (chip) { var ct = chip.getAttribute('data-tier'); if (ct) hrToggleTier(ct); return; }
-        if (e.target.closest('.rating-tile')) hrSelectAllTiers();
+        var tile = e.target.closest('.rating-tile[data-tier]');
+        if (tile) { var ct = tile.getAttribute('data-tier'); if (ct) hrToggleTier(ct); }
       });
     }
     var hdrEl = document.getElementById('hr-col-header-row');
@@ -14248,22 +14252,32 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   }
 
   function renderTile(scopeRows){
-    var el=document.getElementById('pbs1-tile'); if(!el)return;
-    var tc=tierCounts(scopeRows),total=scopeRows.length,cnt=total-(tc['None']||0);
-    var sel=pbs1State.tierFilter||[],anySel=sel.length>0;
-    var headline=cnt,headSub='of '+total.toLocaleString('en-GB')+' · '+Math.round(cnt/Math.max(1,total)*100)+'%';
-    if(anySel){var ft=0;for(var z=0;z<sel.length;z++)ft+=(tc[sel[z]]||0);headline=ft;headSub=sel.join(' + ')+' · filtered';}
-    var hist=passHistogram(scopeRows),breakdown='';
-    for(var k=1;k<=6;k++){if(k>1)breakdown+=' · ';breakdown+=k+'/6: '+(hist[k]||0).toLocaleString('en-GB');}
-    var chips='';
-    var TIER_DISP=['Possible','Plausible','Probable','Qualified'];
-    for(var c=0;c<TIER_DISP.length;c++){var t=TIER_DISP[c];var on=sel.indexOf(t)>-1;chips+='<span class="pi-tier-chip '+CHIP_CLS+(on?' on':'')+'" data-tier="'+t+'">'+t+' '+(tc[t]||0).toLocaleString('en-GB')+(on?' &#10003;':'')+'</span>';}
-    el.innerHTML='<div class="rating-tile '+TILE_CLS+(anySel?' active':'')+'">'
-      +'<div class="rt-label">S1 Probing Bet</div><div class="rt-count">'+headline.toLocaleString('en-GB')+'</div>'
-      +'<div class="rt-sub">'+headSub+'</div><div class="rt-breakdown">'+breakdown+'</div>'
-      +'<div class="pi-tier-chips">'+chips+'</div>'
-      +'<div class="rt-strip '+STRIP_CLS+'"></div></div>';
-    el.onclick=function(e){var chip=e.target.closest('.pi-tier-chip');if(chip){var t=chip.getAttribute('data-tier');if(t)window.pbs1ToggleTier(t);}};
+    var el=document.getElementById('pbs1-tile');if(!el)return;
+    var tc=tierCounts(scopeRows),total=scopeRows.length;
+    var order=['Possible','Plausible','Probable','Qualified'];
+    var tint={'Possible':'tint-pos','Plausible':'tint-pla','Probable':'tint-pe','Qualified':'tint-pl'};
+    var strip={'Possible':'pos','Plausible':'pla','Probable':'prob','Qualified':'pl'};
+    var PB1_THRESH={
+      'Possible':  'Stage 1 ✓ · 5D+10D rising ✓ · price not above 20D MA; 20D MA not yet turned',
+      'Plausible': 'Stage 1 ✓ · 5D+10D rising ✓ · price above 20D MA or 20D MA turned (one of two)',
+      'Probable':  'Stage 1 ✓ · 5D+10D rising ✓ · price>20D + 20D turned ✓ · no 2%+ up-close yet',
+      'Qualified': 'All 6 criteria pass · price>20D MA · 20D MA turned · 2%+ up-close ✓'
+    };
+    var sel=pbs1State.tierFilter||[],h='';
+    for(var i=0;i<order.length;i++){
+      var r=order[i],cnt=tc[r]||0;
+      var act=sel.indexOf(r)>-1?' active':'';
+      var pct=total>0?Math.round(cnt/Math.max(1,total)*100):0;
+      h+='<div class="rating-tile '+tint[r]+act+'" data-tier="'+r+'">'
+        +'<div class="rt-label">'+r+'</div>'
+        +'<div class="rt-count">'+cnt.toLocaleString('en-GB')+'</div>'
+        +'<div class="rt-sub">of '+total.toLocaleString('en-GB')+' · '+pct+'%</div>'
+        +'<div class="rt-thresh">'+(PB1_THRESH[r]||' ')+'</div>'
+        +'<div class="rt-strip rt-strip-'+strip[r]+'">​</div>'
+        +'</div>';
+    }
+    el.innerHTML=h;
+    el.onclick=function(e){var tile=e.target.closest('.rating-tile[data-tier]');if(tile){var t=tile.getAttribute('data-tier');if(t)window.pbs1ToggleTier(t);}};
   }
 
   function renderRows(){
@@ -14362,7 +14376,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
           +'<button class="toggle-btn" data-pbs1-port="on" onclick="pbs1SetPort(\'on\')">On</button>'
         +'</div>'
       +'</div>'
-      +'<div class="s1-rating-tiles" id="pbs1-tile"></div>'
+      +'<div class="s1-rating-tiles" id="pbs1-tile" style="grid-template-columns: repeat(4, 1fr);"></div>'
       +'<div class="group-captions">'+'<div class="gcap gcap-g1"><b>Group 1 — Stage 1 qualifying?</b>The stock must be in an active Stage 1 base. Two hard gates: 200D MA still declining vs 80 days ago, and price above 150D MA. If either fails, the stock does not qualify for a probing bet.</div>'+'<div class="gcap gcap-g2"><b>Group 2 — Entry setup?</b>Four tests checking whether the stock is in a pullback setup within the base: 5D MA rising, 10D MA rising, price above 20D MA, 20D MA turned up.</div>'+'<div class="gcap gcap-g3"><b>Group 3 — Trigger?</b>One test: the 20D MA has turned up — the short-term trend is reversing upward within the Stage 1 base.</div>'+'<div class="gcap gcap-g4"><b>Group 4 — Confirmation?</b>One test: price has closed more than 2% above the trigger level, confirming the move has conviction rather than stalling.</div>'+'</div>'
       +'<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="'+TABLE_ID+'"><colgroup>'+cg+'</colgroup><thead>'+thead+'</thead><tbody id="pbs1-tbody"></tbody></table></div></div>';
     var hdr=document.getElementById('pbs1-col-header');
@@ -14529,20 +14543,31 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 
   function renderTile(scopeRows){
     var el=document.getElementById('pbs2-tile');if(!el)return;
-    var tc=tierCounts(scopeRows),total=scopeRows.length,cnt=total-(tc['None']||0);
-    var sel=pbs2State.tierFilter||[],anySel=sel.length>0;
-    var headline=cnt,headSub='of '+total.toLocaleString('en-GB')+' \xb7 '+Math.round(cnt/Math.max(1,total)*100)+'%';
-    if(anySel){var ft=0;for(var z=0;z<sel.length;z++)ft+=(tc[sel[z]]||0);headline=ft;headSub=sel.join(' + ')+' \xb7 filtered';}
-    var hist=passHistogram(scopeRows),breakdown='';
-    for(var k=1;k<=6;k++){if(k>1)breakdown+=' \xb7 ';breakdown+=k+'/6: '+(hist[k]||0).toLocaleString('en-GB');}
-    var chips='';var TIER_DISP=['Possible','Plausible','Probable','Qualified'];
-    for(var c=0;c<TIER_DISP.length;c++){var t=TIER_DISP[c];var on=sel.indexOf(t)>-1;chips+='<span class="pi-tier-chip '+CHIP_CLS+(on?' on':'')+'" data-tier="'+t+'">'+t+' '+(tc[t]||0).toLocaleString('en-GB')+(on?' &#10003;':'')+'</span>';}
-    el.innerHTML='<div class="rating-tile '+TILE_CLS+(anySel?' active':'')+'">'
-      +'<div class="rt-label">S2 Probing Bet</div><div class="rt-count">'+headline.toLocaleString('en-GB')+'</div>'
-      +'<div class="rt-sub">'+headSub+'</div><div class="rt-breakdown">'+breakdown+'</div>'
-      +'<div class="pi-tier-chips">'+chips+'</div>'
-      +'<div class="rt-strip '+STRIP_CLS+'"></div></div>';
-    el.onclick=function(e){var chip=e.target.closest('.pi-tier-chip');if(chip){var t=chip.getAttribute('data-tier');if(t)window.pbs2ToggleTier(t);}};
+    var tc=tierCounts(scopeRows),total=scopeRows.length;
+    var order=['Possible','Plausible','Probable','Qualified'];
+    var tint={'Possible':'tint-pos','Plausible':'tint-pla','Probable':'tint-pe','Qualified':'tint-pl'};
+    var strip={'Possible':'pos','Plausible':'pla','Probable':'prob','Qualified':'pl'};
+    var PB2_THRESH={
+      'Possible':  'Stage 1 ✓ · 5D+10D rising ✓ · price not above 50D MA; 50D MA not yet turned',
+      'Plausible': 'Stage 1 ✓ · 5D+10D rising ✓ · price above 50D MA or 50D MA turned (one of two)',
+      'Probable':  'Stage 1 ✓ · 5D+10D rising ✓ · price>50D + 50D turned ✓ · no 2%+ up-close yet',
+      'Qualified': 'All 6 criteria pass · price>50D MA · 50D MA turned · 2%+ up-close ✓'
+    };
+    var sel=pbs2State.tierFilter||[],h='';
+    for(var i=0;i<order.length;i++){
+      var r=order[i],cnt=tc[r]||0;
+      var act=sel.indexOf(r)>-1?' active':'';
+      var pct=total>0?Math.round(cnt/Math.max(1,total)*100):0;
+      h+='<div class="rating-tile '+tint[r]+act+'" data-tier="'+r+'">'
+        +'<div class="rt-label">'+r+'</div>'
+        +'<div class="rt-count">'+cnt.toLocaleString('en-GB')+'</div>'
+        +'<div class="rt-sub">of '+total.toLocaleString('en-GB')+' · '+pct+'%</div>'
+        +'<div class="rt-thresh">'+(PB2_THRESH[r]||' ')+'</div>'
+        +'<div class="rt-strip rt-strip-'+strip[r]+'">​</div>'
+        +'</div>';
+    }
+    el.innerHTML=h;
+    el.onclick=function(e){var tile=e.target.closest('.rating-tile[data-tier]');if(tile){var t=tile.getAttribute('data-tier');if(t)window.pbs2ToggleTier(t);}};
   }
 
   function renderRows(){
@@ -14643,7 +14668,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
           +'<button class="toggle-btn" data-pbs2-port="on" onclick="pbs2SetPort(\'on\')">On</button>'
         +'</div>'
       +'</div>'
-      +'<div class="s1-rating-tiles" id="pbs2-tile"></div>'
+      +'<div class="s1-rating-tiles" id="pbs2-tile" style="grid-template-columns: repeat(4, 1fr);"></div>'
       +'<div class="group-captions">'+'<div class="gcap gcap-g1"><b>Group 1 — Stage 2 qualifying?</b>The stock must be in a confirmed Stage 2 uptrend. Four hard gates (price above 200D and 150D MA, 150D above 200D, within 25% of 52-week high) plus five conviction tests on MA stack and relative strength. The S2 rating shown is the Stage 2 screen rating for this stock.</div>'+'<div class="gcap gcap-g2"><b>Group 2 — Entry setup?</b>Four tests checking whether the breakout setup is in place: 5D MA rising, 10D MA rising, price above 50D MA, 50D MA turned up in the last 5 days.</div>'+'<div class="gcap gcap-g3"><b>Group 3 — Trigger?</b>One test: the 50D MA has freshly turned up — the short-term trend is re-accelerating within the Stage 2 uptrend.</div>'+'<div class="gcap gcap-g4"><b>Group 4 — Confirmation?</b>One test: price has closed more than 2% above the trigger level, confirming conviction behind the breakout move.</div>'+'</div>'
       +'<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="'+TABLE_ID+'"><colgroup>'+cg+'</colgroup><thead>'+thead+'</thead><tbody id="pbs2-tbody"></tbody></table></div></div>';
     var hdr=document.getElementById('pbs2-col-header');

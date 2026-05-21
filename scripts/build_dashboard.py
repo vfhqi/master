@@ -16650,15 +16650,72 @@ function sspRenderCohort(ticker, p){
     return h||'<span class="ssp-cohort-name" style="color:#aaa;cursor:default">—</span>';
   }
 
-  document.getElementById('ssp-col-industry').innerHTML = _listHtml(indList, ticker);
-  document.getElementById('ssp-col-sector').innerHTML   = _listHtml(secList, ticker);
+  /* S-SSV-01: group industry peers by narrow sector */
+  (function(){
+    var px01 = _sspPrices();
+    var bySecMap01 = {};
+    for(var i=0;i<indList.length;i++){
+      var itm01 = indList[i];
+      var s01 = (px01[itm01.ticker]&&px01[itm01.ticker].sector)||'(Unknown)';
+      if(!bySecMap01[s01]) bySecMap01[s01]=[];
+      bySecMap01[s01].push(itm01);
+    }
+    var secs01 = Object.keys(bySecMap01).sort();
+    var h01 = '';
+    for(var si=0;si<secs01.length;si++){
+      var sec01 = secs01[si];
+      var grp01 = bySecMap01[sec01].slice().sort(function(a,b){return a.company<b.company?-1:1;});
+      h01 += '<span class="ssp-cohort-group-hdr">'+_sspHtml(sec01)+'</span>';
+      h01 += _listHtml(grp01, ticker);
+    }
+    document.getElementById('ssp-col-industry').innerHTML = h01||'<span class="ssp-cohort-name" style="color:#aaa;cursor:default">—</span>';
+  })();
+  /* S-SSV-02: group sector peers by geography */
+  (function(){
+    var byGeoMap02 = {};
+    for(var i=0;i<secList.length;i++){
+      var itm02 = secList[i];
+      var sfx02 = itm02.ticker.indexOf('-')>-1 ? itm02.ticker.split('-').pop() : 'XX';
+      var geo02 = GEO_NAMES[sfx02]||sfx02;
+      if(!byGeoMap02[geo02]) byGeoMap02[geo02]=[];
+      byGeoMap02[geo02].push(itm02);
+    }
+    var geos02 = Object.keys(byGeoMap02).sort();
+    var h02 = '';
+    for(var gi=0;gi<geos02.length;gi++){
+      var geo02k = geos02[gi];
+      var grp02 = byGeoMap02[geo02k].slice().sort(function(a,b){return a.company<b.company?-1:1;});
+      h02 += '<span class="ssp-cohort-group-hdr">'+_sspHtml(geo02k)+'</span>';
+      h02 += _listHtml(grp02, ticker);
+    }
+    document.getElementById('ssp-col-sector').innerHTML = h02||'<span class="ssp-cohort-name" style="color:#aaa;cursor:default">—</span>';
+  })();
   document.getElementById('ssp-col-cohort').innerHTML   = cohortHtml;
   /* Geography column: add header with country name */
   var geoEl = document.getElementById('ssp-col-geo');
   /* update the column header to show country name */
   var geoColHdr = geoEl.closest('.ssp-cohort-col').querySelector('.ssp-cohort-col-hdr');
-  if(geoColHdr) geoColHdr.textContent = 'Geography — '+geoLabel+' ('+suffix+')';
-  geoEl.innerHTML = _listHtml(geoList, ticker);
+  if(geoColHdr) geoColHdr.textContent = 'Group 4 — Geography — '+geoLabel+' ('+suffix+')';
+  /* S-SSV-03: group geo peers by broad industry */
+  (function(){
+    var px03 = _sspPrices();
+    var byIndMap03 = {};
+    for(var i=0;i<geoList.length;i++){
+      var itm03 = geoList[i];
+      var ind03 = (px03[itm03.ticker]&&px03[itm03.ticker].industry)||'(Unknown)';
+      if(!byIndMap03[ind03]) byIndMap03[ind03]=[];
+      byIndMap03[ind03].push(itm03);
+    }
+    var inds03 = Object.keys(byIndMap03).sort();
+    var h03 = '';
+    for(var ii=0;ii<inds03.length;ii++){
+      var ind03k = inds03[ii];
+      var grp03 = byIndMap03[ind03k].slice().sort(function(a,b){return a.company<b.company?-1:1;});
+      h03 += '<span class="ssp-cohort-group-hdr">'+_sspHtml(ind03k)+'</span>';
+      h03 += _listHtml(grp03, ticker);
+    }
+    geoEl.innerHTML = h03||'<span class="ssp-cohort-name" style="color:#aaa;cursor:default">—</span>';
+  })();
 }
 
 /* ---- render chart ---- */
@@ -16956,9 +17013,9 @@ renderTab("mm99");
         '    <div class="ssp-cohort-pane">\n'
         '      <div class="ssp-cohort-hdr">Sector, industry, cohort and geography</div>\n'
         '      <div class="ssp-cohort-body" id="ssp-cohort-body">\n'
-        '        <div class="ssp-cohort-col"><div class="ssp-cohort-col-hdr">Industry</div><div class="ssp-cohort-names" id="ssp-col-industry"></div></div>\n'
-        '        <div class="ssp-cohort-col"><div class="ssp-cohort-col-hdr">Sector</div><div class="ssp-cohort-names" id="ssp-col-sector"></div></div>\n'
-        '        <div class="ssp-cohort-col"><div class="ssp-cohort-col-hdr">Named cohort</div><div class="ssp-cohort-names" id="ssp-col-cohort"></div></div>\n'
+        '        <div class="ssp-cohort-col"><div class="ssp-cohort-col-hdr">Group 1 — Industry peers</div><div class="ssp-cohort-names" id="ssp-col-industry"></div></div>\n'
+        '        <div class="ssp-cohort-col"><div class="ssp-cohort-col-hdr">Group 2 — Sector peers</div><div class="ssp-cohort-names" id="ssp-col-sector"></div></div>\n'
+        '        <div class="ssp-cohort-col"><div class="ssp-cohort-col-hdr">Group 3 — Named cohorts</div><div class="ssp-cohort-names" id="ssp-col-cohort"></div></div>\n'
         '        <div class="ssp-cohort-col"><div class="ssp-cohort-col-hdr">Geography</div><div class="ssp-cohort-names" id="ssp-col-geo"></div></div>\n'
         '      </div>\n'
         '    </div>\n'

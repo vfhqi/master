@@ -16822,6 +16822,8 @@ renderTab("mm99");
         '        oninput="sspOnInput(this.value)" onkeydown="sspKeydown(event)">\n'
         '      <div class="ssp-dropdown" id="ssp-dropdown" style="display:none"></div>\n'
         '    </div>\n'
+        '    <span class="ssp-hdr-stock" id="ssp-hdr-ticker"></span>\n'
+        '    <span class="ssp-hdr-company" id="ssp-hdr-company"></span>\n'
         '    <button class="ssp-close-btn" onclick="closeStockView()" title="Close Stock View">&times;</button>\n'
         '  </div>\n'
         '  <div class="ssp-tbl-band" id="ssp-tbl-band"></div>\n'

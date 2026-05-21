@@ -13916,7 +13916,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #tab-tests_probing_bet_s1 .group-captions .gcap-g1 { border-left-color: #b08a4e; } #tab-tests_probing_bet_s1 .group-captions .gcap-g1 b { color: #b08a4e; }
 #tab-tests_probing_bet_s1 .group-captions .gcap-g2 { border-left-color: #5a8a6a; } #tab-tests_probing_bet_s1 .group-captions .gcap-g2 b { color: #5a8a6a; }
 #tab-tests_probing_bet_s1 .group-captions .gcap-g3 { border-left-color: #4a6a8a; } #tab-tests_probing_bet_s1 .group-captions .gcap-g3 b { color: #4a6a8a; }
-#tab-tests_probing_bet_s1 .group-captions .gcap-g4 { border-left-color: #888; }    #tab-tests_probing_bet_s1 .group-captions .gcap-g4 b { color: #888; }
+#tab-tests_probing_bet_s1 .group-captions .gcap-g4 { border-left-color: #8a4a3a; }    #tab-tests_probing_bet_s1 .group-captions .gcap-g4 b { color: #8a4a3a; }
 #tab-tests_probing_bet_s1 .s1-rating-tiles { display: grid; grid-template-columns: 1fr; gap: 8px; }
 #tab-tests_probing_bet_s1 .s1-rating-tiles .pi-tile-s1pb { background: rgba(27,94,32,0.08); border: 1px solid rgba(27,94,32,0.22); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-tests_probing_bet_s1 .s1-rating-tiles .pi-tile-s1pb.active { background: rgba(27,94,32,0.18); border: 1.5px solid #1b5e20; }
@@ -13934,7 +13934,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #tab-tests_probing_bet_s2 .group-captions .gcap-g1 { border-left-color: #b08a4e; } #tab-tests_probing_bet_s2 .group-captions .gcap-g1 b { color: #b08a4e; }
 #tab-tests_probing_bet_s2 .group-captions .gcap-g2 { border-left-color: #5a8a6a; } #tab-tests_probing_bet_s2 .group-captions .gcap-g2 b { color: #5a8a6a; }
 #tab-tests_probing_bet_s2 .group-captions .gcap-g3 { border-left-color: #4a6a8a; } #tab-tests_probing_bet_s2 .group-captions .gcap-g3 b { color: #4a6a8a; }
-#tab-tests_probing_bet_s2 .group-captions .gcap-g4 { border-left-color: #888; }    #tab-tests_probing_bet_s2 .group-captions .gcap-g4 b { color: #888; }
+#tab-tests_probing_bet_s2 .group-captions .gcap-g4 { border-left-color: #8a4a3a; }    #tab-tests_probing_bet_s2 .group-captions .gcap-g4 b { color: #8a4a3a; }
 #tab-tests_probing_bet_s2 .s1-rating-tiles { display: grid; grid-template-columns: 1fr; gap: 8px; }
 #tab-tests_probing_bet_s2 .s1-rating-tiles .pi-tile-s2pb { background: rgba(46,125,50,0.08); border: 1px solid rgba(46,125,50,0.22); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-tests_probing_bet_s2 .s1-rating-tiles .pi-tile-s2pb.active { background: rgba(46,125,50,0.18); border: 1.5px solid #2e7d32; }
@@ -14054,7 +14054,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #pb-s1-table col.c-ctx-rating, #pb-s2-table col.c-ctx-rating { width: 70px; }
 #pb-s1-table col.c-ctx-gate, #pb-s2-table col.c-ctx-gate { width: 40px; }
 #pb-s1-table col.c-ctx-test, #pb-s2-table col.c-ctx-test { width: 40px; }
-#pb-s1-table col.c-ctx-streak, #pb-s2-table col.c-ctx-streak { width: 44px; }
+#pb-s1-table col.c-ctx-score { width: 80px; }
+#pb-s1-table col.c-ctx-count { width: 44px; }
 #pb-s1-table col.c-rating, #pb-s2-table col.c-rating { width: 70px; }
 #pb-s1-table col.c-score, #pb-s2-table col.c-score { width: 54px; }
 #pb-s1-table col.c-test, #pb-s2-table col.c-test { width: 40px; }
@@ -14156,6 +14157,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function s1RatingCell(row,cls){var r=stageRating(row);var pc=r==='Probable'?'s1ctx-pill-prob':r==='Plausible'?'s1ctx-pill-pla':r==='Possible'?'s1ctx-pill-pos':'s1ctx-pill-none';return'<td class="'+(cls||'')+'"><span class="'+CTX_PILL_CLS+' '+pc+'">'+r+'</span></td>';}
   function s1GateCell(row,key,cls){var p=s1Gate(row,key);return p?'<td class="'+CTX_PASS_CLS+' '+(cls||'')+'"><span class="tick">&#10003;</span></td>':'<td class="'+CTX_FAIL_CLS+' '+(cls||'')+'">.</td>';}
   function s1StreakCell(row,cls){var s=getStageRec(row);var v=s?s.streak:null;if(v==null)return'<td class="'+(cls||'')+'">-</td>';return'<td class="'+(cls||'')+'" style="color:'+colGreen(Math.max(-1,Math.min(1,(v-40)/80)))+'">'+v+'</td>';}
+  function s1ctxScoreCell(row,cls){var s1=getStageRec(row);if(!s1)return'<td class="'+(cls||'')+' pi-score-cell">-</td>';var t=s1.tests||{};var passed=[!!t.T1_150D_decel,!!t.T2_200D_decel,!!t.T3_150D_flat,!!t.T4_200D_flat,!!t.T5_50_above_150x97,!!t.T6_150_above_200x97,!!t.T7_higher_lows_1m,!!t.T8_higher_lows_3m];var cnt=passed.filter(Boolean).length;var g200=!!(s1.gate_200D_declining_vs_80d),gp15=!!(s1.gate_price_above_150D);var s='<span class="pip '+(g200?'gate-ok':'gate-x')+'"></span><span class="pip '+(gp15?'gate-ok':'gate-x')+'"></span><span class="pip-div"></span>';var div={1:true,3:true,5:true};for(var i=0;i<8;i++){s+='<span class="pip '+(passed[i]?'on':'')+'"></span>';if(div[i])s+='<span class="pip-div"></span>';}return'<td class="'+(cls||'')+' pi-score-cell"><div class="score-pip-row">'+s+'<span class="score-num">'+cnt+'/8</span></div></td>';}
+  function s1ctxStackCell(row,thresh,cls){var s1=getStageRec(row);var v=s1?(s1.streak||0):0;var pass=v>=thresh;return pass?'<td class="'+CTX_PASS_CLS+' '+(cls||'')+'">' +'<span class="tick">&#10003;</span></td>':'<td class="'+CTX_FAIL_CLS+' '+(cls||'')+'">.</td>';}
+  function s1ctxCountCell(row,key,redAt,amberAt,cls){var v=(row.md_v2&&row.md_v2[key])||0;var cstyle=v<=redAt?'color:#a83232':(v<=amberAt?'color:#b45309':'color:#555');return'<td class="num '+(cls||'')+'" style="'+cstyle+'">'+v+'</td>';}
   function pbRatingCell(row,cls){var r=pbRating(row);var rc=TIER_CLS[r]||'tint-none';return'<td class="'+(cls||'')+' pi-rating-cell '+rc+'"><span class="pi-pill pi-pill-'+rc+'">'+r+'</span></td>';}
   function pbScoreCell(row,cls){var rec=getPbRec(row);var cnt=rec?(rec.count||0):0,tot=rec?(rec.total||0):0;var s='';for(var i=0;i<tot;i++)s+='<span class="pip '+(i<cnt?'on':'')+'"></span>';return'<td class="'+(cls||'')+' pi-score-cell"><div class="pi-pip-row">'+s+'<span class="pi-score-num">'+cnt+'/'+tot+'</span></div></td>';}
   function pbTestCell(row,key,cls){var p=pbTest(row,key);return p?'<td class="pi-pass '+(cls||'')+'"><span class="tick">&#10003;</span></td>':'<td class="pi-fail '+(cls||'')+'">.</td>';}
@@ -14186,7 +14190,11 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(key==='pb__rating')return TIER_RANK[pbRating(row)]||0;
     if(key==='pb__score'){var r=getPbRec(row);return r?(r.count||0):0;}
     if(key==='s1__rating')return TIER_RANK[stageRating(row)]||0;
-    if(key==='s1__streak'){var s=getStageRec(row);return s?(s.streak||0):0;}
+    if(key==='s1__count'){var s=getStageRec(row);return s?(s.count||0):0;}
+    if(key==='s1__stack1m'){var s=getStageRec(row);return s&&(s.streak||0)>=21?1:0;}
+    if(key==='s1__stack3m'){var s=getStageRec(row);return s&&(s.streak||0)>=63?1:0;}
+    if(key==='s1__sec_in_ind'){return(row.md_v2&&row.md_v2.sectors_in_industry_count)||0;}
+    if(key==='s1__co_in_sec'){return(row.md_v2&&row.md_v2.companies_in_sector_count)||0;}
     if(key.indexOf('s1g__')===0){return s1Gate(row,key.slice(5))?1:0;}
     if(key.indexOf('pb__')===0){var tk=key.slice(4);if(tk==='l5d'||tk==='l20d'){var rec=getPbRec(row);if(!rec)return-1;var wd=tk==='l5d'?5:20;if((rec.history_depth||0)<wd)return-2;var fired=tk==='l5d'?rec.fired_l5d:rec.fired_l20d;if(!fired)return-1;var ds=rec.days_since_fired;return ds==null?0:1000-ds;}return pbTest(row,tk)?1:0;}
     if(key==='rds__date'){var idx=window.RDS_INDEX||{};return idx[row.ticker]||'';}
@@ -14198,23 +14206,27 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var tr=document.getElementById('pbs1-col-header');if(!tr)return;
     var COL_LABELS={
       name:'Company - Ticker',taxon:'Industry - Sector',price:'Price',pullback:'Pullback',
-      s1rating:'S1 Rating',s1g0:S1_GATE_DEFS[0].label,s1g1:S1_GATE_DEFS[1].label,s1streak:'Streak',
+      s1rating:'S1 Rating',s1score:'S1 Score',s1g0:S1_GATE_DEFS[0].label,s1g1:S1_GATE_DEFS[1].label,
+      s1stack1m:'3. Stack 1M+',s1stack3m:'4. Stack 3M+',s1secinind:'Sectors in ind.',s1cosinsec:'Cos in sector',
       pbrating:'Rating',pbscore:'Score',
       g1:'1. Gate: stage',g2:'2. 5D rising',g3:'3. 10D rising',g4:'4. P&gt;20D',
       g5:'5. 20D turned up',g6:'6. Close 2%+',
       l5d:'Fired 5d',l20d:'Fired 20d',rds:'RDS'
     };
     var COL_KEYS={name:'company',taxon:'sector',price:'price',pullback:'recent_pullback',
-      s1rating:'s1__rating',s1g0:'s1g__'+S1_GATE_DEFS[0].key,s1g1:'s1g__'+S1_GATE_DEFS[1].key,s1streak:'s1__streak',
+      s1rating:'s1__rating',s1score:'s1__count',s1g0:'s1g__'+S1_GATE_DEFS[0].key,s1g1:'s1g__'+S1_GATE_DEFS[1].key,
+      s1stack1m:'s1__stack1m',s1stack3m:'s1__stack3m',s1secinind:'s1__sec_in_ind',s1cosinsec:'s1__co_in_sec',
       pbrating:'pb__rating',pbscore:'pb__score',
       g1:'pb__g1_stage_qualifies',g2:'pb__g2_5d_rising',g3:'pb__g3_10d_rising',g4:'pb__g4_price_gt_20d',
       g5:'pb__g5_20d_turn_last_5d',g6:'pb__g6_followthrough_close_ge2pct',
       l5d:'pb__l5d',l20d:'pb__l20d',rds:'rds__date'};
-    var COL_GRP_START={s1rating:'grp-start-g1',pbrating:'grp-start-rating',g1:'grp-start-g2',g5:'grp-start-g3',l5d:'grp-start-context'};
-    var COL_TOOLTIPS={s1rating:'Stage 1 rating',s1g0:S1_GATE_DEFS[0].tooltip,s1g1:S1_GATE_DEFS[1].tooltip,s1streak:'Soft-stack streak (days)',
+    var COL_GRP_START={s1rating:'grp-start-g1',pbrating:'grp-start-rating',g1:'grp-start-g2',g5:'grp-start-g3',g6:'grp-start-g4',l5d:'grp-start-context'};
+    var COL_TOOLTIPS={s1rating:'Stage 1 rating',s1score:'S1 tests passed (of 8)',s1g0:S1_GATE_DEFS[0].tooltip,s1g1:S1_GATE_DEFS[1].tooltip,
+      s1stack1m:'MA stack held \u226521 days (1 month+)',s1stack3m:'MA stack held \u226563 days (3 months+)',
+      s1secinind:'Sectors in industry (context)',s1cosinsec:'Companies in sector (context)',
       pbrating:'PB S1 overall rating',pbscore:'Tests passed out of 6'};
     for(var i=0;i<PB_TESTS.length;i++)COL_TOOLTIPS['g'+(i+1)]=PB_TESTS[i].tooltip;
-    var ORDER=['name','taxon','price','pullback','pbrating','pbscore','s1rating','s1g0','s1g1','s1streak','g1','g2','g3','g4','g5','g6','l5d','l20d','rds'];
+    var ORDER=['name','taxon','price','pullback','pbrating','pbscore','s1rating','s1score','s1g0','s1g1','s1stack1m','s1stack3m','s1secinind','s1cosinsec','g1','g2','g3','g4','g5','g6','l5d','l20d','rds'];
     var h='';
     for(var ci=0;ci<ORDER.length;ci++){
       var id=ORDER[ci],sk=COL_KEYS[id],isSort=pbs1State.sort.col===sk;
@@ -14268,15 +14280,19 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +pbRatingCell(s,'grp-start-rating')
         +pbScoreCell(s,'')
         +s1RatingCell(s,'grp-start-g1')
+        +s1ctxScoreCell(s,'')
         +s1GateCell(s,S1_GATE_DEFS[0].key,'')
         +s1GateCell(s,S1_GATE_DEFS[1].key,'')
-        +s1StreakCell(s,'')
+        +s1ctxStackCell(s,21,'')
+        +s1ctxStackCell(s,63,'')
+        +s1ctxCountCell(s,'sectors_in_industry_count',2,4,'')
+        +s1ctxCountCell(s,'companies_in_sector_count',2,5,'')
         +pbTestCell(s,'g1_stage_qualifies','grp-start-g2')
         +pbTestCell(s,'g2_5d_rising','')
         +pbTestCell(s,'g3_10d_rising','')
         +pbTestCell(s,'g4_price_gt_20d','')
         +pbTestCell(s,'g5_20d_turn_last_5d','grp-start-g3')
-        +pbTestCell(s,'g6_followthrough_close_ge2pct','')
+        +pbTestCell(s,'g6_followthrough_close_ge2pct','grp-start-g4')
         +windowCell(s,'l5d','ct-window-col grp-start-context')
         +windowCell(s,'l20d','ct-window-col')
         +rdsCell(s,'')
@@ -14297,21 +14313,23 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(host.querySelector('#'+TABLE_ID))return true;
     var cg='<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-pullback">'
       +'<col class="c-rating"><col class="c-score">'
-      +'<col class="c-ctx-rating"><col class="c-ctx-gate"><col class="c-ctx-gate"><col class="c-ctx-streak">'
+      +'<col class="c-ctx-rating"><col class="c-ctx-score"><col class="c-ctx-gate"><col class="c-ctx-gate"><col class="c-ctx-test"><col class="c-ctx-test"><col class="c-ctx-count"><col class="c-ctx-count">'
       +'<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">'
       +'<col class="c-test"><col class="c-test">'
       +'<col class="c-window"><col class="c-window"><col class="c-rds">';
     var grpRow='<th class="gh-inputs" colspan="4">Inputs</th>'
       +'<th class="gh-rating grp-start-rating" colspan="2">Rating</th>'
-      +'<th class="gh-g1 grp-start-g1" colspan="4">Group 1 — Stage 1 qualifying?</th>'
+      +'<th class="gh-g1 grp-start-g1" colspan="8">Group 1 — Stage 1 qualifying?</th>'
       +'<th class="gh-g2 grp-start-g2" colspan="4">Group 2 — Entry setup?</th>'
-      +'<th class="gh-g3 grp-start-g3" colspan="2">Group 3 — Trigger?</th>'
+      +'<th class="gh-g3 grp-start-g3" colspan="1">Group 3 — Trigger?</th>'
+      +'<th class="gh-g4 grp-start-g4" colspan="1">Group 4 — Confirmation?</th>'
       +'<th class="gh-context grp-start-context" colspan="3">Context</th>';
     var subRow='<th colspan="4"></th>'
       +'<th colspan="1">Rating</th><th colspan="1">Score</th>'
-      +'<th colspan="1">Stage rating</th><th colspan="2">Gates</th><th colspan="1">Streak</th>'
+      +'<th colspan="1">Stage rating</th><th colspan="1">Score</th><th colspan="2">Gates</th><th colspan="2">Stack</th><th colspan="2">Taxonomy</th>'
       +'<th colspan="1">Gate</th><th colspan="3">Setup</th>'
-      +'<th colspan="2">Trigger</th>'
+      +'<th colspan="1">Trigger</th>'
+      +'<th colspan="1">Confirm</th>'
       +'<th colspan="2">Fired</th><th colspan="1">RDS</th>';
     var thead='<tr class="group-header-row">'+grpRow+'</tr>'
       +'<tr class="sub-group-row">'+subRow+'</tr>'
@@ -14483,7 +14501,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       g1:'pb__g1_stage_qualifies',g2:'pb__g2_5d_rising',g3:'pb__g3_10d_rising',g4:'pb__g4_price_gt_50d',
       g5:'pb__g5_50d_turn_last_5d',g6:'pb__g6_followthrough_close_ge2pct',
       l5d:'pb__l5d',l20d:'pb__l20d',rds:'rds__date'};
-    var GRP_START={s2rating:'grp-start-g1',pbrating:'grp-start-rating',g1:'grp-start-g2',g5:'grp-start-g3',l5d:'grp-start-context'};
+    var GRP_START={s2rating:'grp-start-g1',pbrating:'grp-start-rating',g1:'grp-start-g2',g5:'grp-start-g3',g6:'grp-start-g4',l5d:'grp-start-context'};
     var TOOLTIPS={s2rating:'Stage 2 rating',
       s2g0:S2_GATE_DEFS[0].tooltip,s2g1:S2_GATE_DEFS[1].tooltip,s2g2:S2_GATE_DEFS[2].tooltip,s2g3:S2_GATE_DEFS[3].tooltip,
       s2t0:S2_TEST_DEFS[0].tooltip,s2t1:S2_TEST_DEFS[1].tooltip,s2t2:S2_TEST_DEFS[2].tooltip,s2t3:S2_TEST_DEFS[3].tooltip,s2t4:S2_TEST_DEFS[4].tooltip,
@@ -14554,7 +14572,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +pbTestCell(s,'g3_10d_rising','')
         +pbTestCell(s,'g4_price_gt_50d','')
         +pbTestCell(s,'g5_50d_turn_last_5d','grp-start-g3')
-        +pbTestCell(s,'g6_followthrough_close_ge2pct','')
+        +pbTestCell(s,'g6_followthrough_close_ge2pct','grp-start-g4')
         +windowCell(s,'l5d','ct-window-col grp-start-context')
         +windowCell(s,'l20d','ct-window-col')
         +rdsCell(s,'')
@@ -14584,13 +14602,15 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<th class="gh-rating grp-start-rating" colspan="2">Rating</th>'
       +'<th class="gh-g1 grp-start-g1" colspan="10">Group 1 — Stage 2 qualifying?</th>'
       +'<th class="gh-g2 grp-start-g2" colspan="4">Group 2 — Entry setup?</th>'
-      +'<th class="gh-g3 grp-start-g3" colspan="2">Group 3 — Trigger?</th>'
+      +'<th class="gh-g3 grp-start-g3" colspan="1">Group 3 — Trigger?</th>'
+      +'<th class="gh-g4 grp-start-g4" colspan="1">Group 4 — Confirmation?</th>'
       +'<th class="gh-context grp-start-context" colspan="3">Context</th>';
     var subRow='<th colspan="4"></th>'
       +'<th colspan="1">Rating</th><th colspan="1">Score</th>'
       +'<th colspan="1">Stage rating</th><th colspan="4">Gates</th><th colspan="5">Tests</th>'
       +'<th colspan="1">Gate</th><th colspan="3">Setup</th>'
-      +'<th colspan="2">Trigger</th>'
+      +'<th colspan="1">Trigger</th>'
+      +'<th colspan="1">Confirm</th>'
       +'<th colspan="2">Fired</th><th colspan="1">RDS</th>';
     var thead='<tr class="group-header-row">'+grpRow+'</tr>'
       +'<tr class="sub-group-row">'+subRow+'</tr>'

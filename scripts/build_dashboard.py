@@ -1554,7 +1554,10 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #po-main-table .pi-pill-tint-prob { background: #0F6E56; color: #fff; }
 #po-main-table .pi-pill-tint-pla  { background: rgba(15,110,86,0.30); color: #0a4a3a; }
 #po-main-table .pi-pill-tint-pos  { background: rgba(15,110,86,0.14); color: #3a6a5a; }
-#po-main-table .pi-pill-tint-none { background: #ece9dd; color: #999; }
+#po-main-table .pi-pill-tint-none      { background: #ece9dd; color: #999; }
+#po-main-table .pi-pill-tint-qualified { background: #1b5e20; color: #fff; }
+#po-main-table td.grp-start-tr, #po-main-table th.grp-start-tr { border-left: 2px solid rgba(60,60,60,0.25); }
+#po-main-table thead .gh-test-ratings { color: #555; }
 #po-main-table td.pi-score-cell { padding: 4px 3px; }
 #po-main-table .pi-pip-row { display: inline-flex; align-items: center; gap: 2px; justify-content: center; }
 #po-main-table .pi-pip-row .pip { width: 6px; height: 6px; border-radius: 50%; background: #d8d4c4; display: inline-block; }
@@ -10905,7 +10908,11 @@ function SUM_renderQualifiedStocks() {
     cols.push({ id:'s1_rat', label:'S1', sortKey:'s1_rating', cls:'grp-start-sr', kind:'stage_rating', stageKey:'stage_1' });
     cols.push({ id:'s2_rat', label:'S2', sortKey:'s2_rating', cls:'',             kind:'stage_rating', stageKey:'stage_2' });
     cols.push({ id:'s3_rat', label:'S3', sortKey:'s3_rating', cls:'',             kind:'stage_rating', stageKey:'stage_3' });
-    cols.push({ id:'s4_rat', label:'S4', sortKey:'s4_rating', cls:'',             kind:'stage_rating', stageKey:'stage_4' });
+    cols.push({ id:'s4_rat',   label:'S4',   sortKey:'s4_rating',   cls:'',             kind:'stage_rating', stageKey:'stage_4' });
+    cols.push({ id:'s1pb_rat', label:'S1PB', sortKey:'s1pb_rating', cls:'grp-start-tr', kind:'setup_rating',  testKey:'probing_bet_s1' });
+    cols.push({ id:'s2pb_rat', label:'S2PB', sortKey:'s2pb_rating', cls:'',             kind:'setup_rating',  testKey:'probing_bet_s2' });
+    cols.push({ id:'s3sb_rat', label:'S3SB', sortKey:'s3sb_rating', cls:'',             kind:'setup_rating',  testKey:'speculative_bet_s3' });
+    cols.push({ id:'s4sb_rat', label:'S4SB', sortKey:'s4sb_rating', cls:'',             kind:'setup_rating',  testKey:'speculative_bet_s4' });
     for (var p = 0; p < PO_PATTERNS.length; p++) {
       var pat = PO_PATTERNS[p];
       var gi = p + 1;
@@ -11075,6 +11082,15 @@ function SUM_renderQualifiedStocks() {
     }
     return String(v);
   }
+  var SETUP_RATING_CLS = {'Qualified':'tint-qualified','Probable':'tint-prob','Plausible':'tint-pla','Possible':'tint-pos','None':'tint-none'};
+  function poSetupRatingCell(row, col) {
+    var td = row.md_v2 && row.md_v2.tests && row.md_v2.tests[col.testKey];
+    var r = (td && td.rating) || 'None';
+    var rcls = SETUP_RATING_CLS[r] || 'tint-none';
+    return '<td class="' + (col.cls||'')
+      + ' pi-rating-cell ' + rcls
+      + '"><span class="pi-pill pi-pill-' + rcls + '">' + r + '</span></td>';
+  }
   function poStageRatingCell(row, col) {
     var sd = row.md_v2 && row.md_v2[col.stageKey];
     var r = (sd && sd.rating) || 'None';
@@ -11131,6 +11147,11 @@ function SUM_renderQualifiedStocks() {
     }
     if (key === 'recent_pullback') return row.recent_pullback == null ? -Infinity : row.recent_pullback;
     var SR_RANK = {'Probable':4,'Plausible':3,'Possible':2,'None':1};
+    var TR_RANK = {'Qualified':6,'Probable':5,'Plausible':3,'Possible':2,'None':1};
+    if (key === 's1pb_rating') { var _t1=row.md_v2&&row.md_v2.tests&&row.md_v2.tests.probing_bet_s1;    return TR_RANK[(_t1&&_t1.rating)||'None']||1; }
+    if (key === 's2pb_rating') { var _t2=row.md_v2&&row.md_v2.tests&&row.md_v2.tests.probing_bet_s2;    return TR_RANK[(_t2&&_t2.rating)||'None']||1; }
+    if (key === 's3sb_rating') { var _t3=row.md_v2&&row.md_v2.tests&&row.md_v2.tests.speculative_bet_s3; return TR_RANK[(_t3&&_t3.rating)||'None']||1; }
+    if (key === 's4sb_rating') { var _t4=row.md_v2&&row.md_v2.tests&&row.md_v2.tests.speculative_bet_s4; return TR_RANK[(_t4&&_t4.rating)||'None']||1; }
     if (key === 's1_rating') { var _s1=row.md_v2&&row.md_v2.stage_1; return SR_RANK[(_s1&&_s1.rating)||'None']||1; }
     if (key === 's2_rating') { var _s2=row.md_v2&&row.md_v2.stage_2; return SR_RANK[(_s2&&_s2.rating)||'None']||1; }
     if (key === 's3_rating') { var _s3=row.md_v2&&row.md_v2.stage_3; return SR_RANK[(_s3&&_s3.rating)||'None']||1; }
@@ -11285,6 +11306,7 @@ function SUM_renderQualifiedStocks() {
         if (col.kind === 'rating') html += poRatingCell(s, col);
         else if (col.kind === 'score') html += poScoreCell(s, col);
         else if (col.kind === 'stage_rating') html += poStageRatingCell(s, col);
+        else if (col.kind === 'setup_rating')  html += poSetupRatingCell(s, col);
         else html += poTestCell(s, col);
       }
       html += '</tr>';
@@ -11353,13 +11375,16 @@ function SUM_renderQualifiedStocks() {
     var colgroupHtml = '<col class="c-name"><col class="c-taxon">' +
                        '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
                        '<col class="c-ma150"><col class="c-ma200"><col class="c-pullback">' +
+                       '<col class="c-rating"><col class="c-rating"><col class="c-rating"><col class="c-rating">' +
                        '<col class="c-rating"><col class="c-rating"><col class="c-rating"><col class="c-rating">';
     var inputsColspan = 8;
     var hasSuper = _poActiveSupergroups.length > 0;
     var superHtml = '<th class="gh-inputs sg-spacer" colspan="' + inputsColspan + '"></th>'
-                  + '<th class="gh-stage-ratings sg-spacer" colspan="4"></th>';
+                  + '<th class="gh-stage-ratings sg-spacer" colspan="4"></th>'
+                  + '<th class="gh-test-ratings sg-spacer" colspan="4"></th>';
     var groupHtml = '<th class="gh-inputs" colspan="' + inputsColspan + '">Inputs</th>'
-                  + '<th class="gh-stage-ratings grp-start-sr" colspan="4">Stage Ratings</th>';
+                  + '<th class="gh-stage-ratings grp-start-sr" colspan="4">Stage Ratings</th>'
+                  + '<th class="gh-test-ratings grp-start-tr" colspan="4">Setup/Test Ratings</th>';
 
     if (hasSuper) {
       var sgCols = {};

@@ -157,8 +157,9 @@ TABS = [
     {"id": "stage_3",   "label": "Stage 3",           "accent": "#b45309"},
     # MD-V2-STAGE4-MARKER — Stage 4 (Decline / Capitulation) tab
     {"id": "stage_4",   "label": "Stage 4",           "accent": "#991b1b"},
-    # MD-V2-PRE-INDICATORS-MARKER - Pre-indicators (3 leading binary patterns)
-    {"id": "pre_indicators", "label": "Pre-Indicators", "accent": "#0F6E56"},
+    # MD-V2-PRE-INDICATORS-MARKER - Split into positive and negative indicator pages
+    {"id": "pos_pre_indicators", "label": "Positive pre-setup/test indicators", "accent": "#0F6E56"},
+    {"id": "neg_pre_indicators", "label": "Negative pre-setup/test indicators", "accent": "#A32D2D"},
     # MD-V2-POST-INDICATORS-MARKER - Post-indicators (5 trailing binary patterns)
     {"id": "post_indicators", "label": "Post-Indicators", "accent": "#A32D2D"},
     # MD-V2-SETUPS-MARKER - Setups (4 capital-deployment-eligibility patterns)
@@ -191,7 +192,8 @@ IMPLEMENTED_TABS = [
     "stage_2",  # MD-V2-STAGE2-MARKER
     "stage_3",  # MD-V2-STAGE3-MARKER
     "stage_4",  # MD-V2-STAGE4-MARKER
-    "pre_indicators",  # MD-V2-PRE-INDICATORS-MARKER
+    "pos_pre_indicators",  # MD-V2-PRE-INDICATORS-MARKER-POSITIVE
+    "neg_pre_indicators",  # MD-V2-PRE-INDICATORS-MARKER-NEGATIVE
     "post_indicators",  # MD-V2-POST-INDICATORS-MARKER
     "setups_s1pb", "setups_s2vcp",  # MD-V2-SETUPS-MARKER
     "tests",  # MD-V2-TESTS-MARKER
@@ -549,12 +551,12 @@ table.data-table td.col-identity{white-space:nowrap}
 /* MD-CHART-V2-WIRING-MARKER: chart panel slides in from the LEFT on V2 tabs (legacy keeps the right). */
 body.chart-from-left .chart-panel{left:0;right:auto;border-left:none;border-right:1px solid var(--border);transform:translateX(-100%)}
 body.chart-from-left .chart-panel.open{transform:translateX(0)}
-#s1-main-table td.name-cell,#s2-main-table td.name-cell,#s3-main-table td.name-cell,#s4-main-table td.name-cell,#pi-main-table td.name-cell,#po-main-table td.name-cell,.st-main-table td.name-cell,#ct-main-table td.name-cell,#mo-matrix-table td.mo-mx-name-cell{cursor:pointer}
+#s1-main-table td.name-cell,#s2-main-table td.name-cell,#s3-main-table td.name-cell,#s4-main-table td.name-cell,#ppi-main-table td.name-cell,#npi-main-table td.name-cell,#po-main-table td.name-cell,.st-main-table td.name-cell,#ct-main-table td.name-cell,#mo-matrix-table td.mo-mx-name-cell{cursor:pointer}
 /* MD-V2-S41-CHART-RIGHT-FREEZE-COL-MARKER CSS -- freeze company/ticker first column on the LEFT across all V2 tabs (Stage 1-4, PI, PO, ST, CT). Pattern mirrors #mo-matrix-table td.mo-mx-name-cell at L1930. The first th in col-header-row gets sticky-left + higher z-index so the column header pins above tbody. Group-header row first th (supergroup label, has colspan>=2) is NOT sticky-left -- it would visually overlap neighbouring supergroup labels on horizontal scroll. */
-#s1-main-table tbody td.name-cell,#s2-main-table tbody td.name-cell,#s3-main-table tbody td.name-cell,#s4-main-table tbody td.name-cell,#pi-main-table tbody td.name-cell,#po-main-table tbody td.name-cell,.st-main-table tbody td.name-cell,#ct-main-table tbody td.name-cell{position:sticky;left:0;z-index:5;background:#fbfaf5;border-right:1px solid #e0dcc8}
-#s1-main-table tbody tr:hover td.name-cell,#s2-main-table tbody tr:hover td.name-cell,#s3-main-table tbody tr:hover td.name-cell,#s4-main-table tbody tr:hover td.name-cell,#pi-main-table tbody tr:hover td.name-cell,#po-main-table tbody tr:hover td.name-cell,.st-main-table tbody tr:hover td.name-cell,#ct-main-table tbody tr:hover td.name-cell{background:#f4f1e6}
-#s1-main-table thead tr.col-header-row th:first-child,#s2-main-table thead tr.col-header-row th:first-child,#s3-main-table thead tr.col-header-row th:first-child,#s4-main-table thead tr.col-header-row th:first-child,#pi-main-table thead tr.col-header-row th:first-child,#po-main-table thead tr.col-header-row th:first-child,.st-main-table thead tr.col-header-row th:first-child,#ct-main-table thead tr.col-header-row th:first-child{position:sticky;left:0;z-index:70;background:#fbfaf5;border-right:1px solid #e0dcc8}
-body[data-active-tab^="stage_"] #hdr-chart-btn,body[data-active-tab="pre_indicators"] #hdr-chart-btn,body[data-active-tab="post_indicators"] #hdr-chart-btn,body[data-active-tab^="setups"] #hdr-chart-btn,body[data-active-tab="tests"] #hdr-chart-btn,
+#s1-main-table tbody td.name-cell,#s2-main-table tbody td.name-cell,#s3-main-table tbody td.name-cell,#s4-main-table tbody td.name-cell,#ppi-main-table tbody td.name-cell,#npi-main-table tbody td.name-cell,#po-main-table tbody td.name-cell,.st-main-table tbody td.name-cell,#ct-main-table tbody td.name-cell{position:sticky;left:0;z-index:5;background:#fbfaf5;border-right:1px solid #e0dcc8}
+#s1-main-table tbody tr:hover td.name-cell,#s2-main-table tbody tr:hover td.name-cell,#s3-main-table tbody tr:hover td.name-cell,#s4-main-table tbody tr:hover td.name-cell,#ppi-main-table tbody tr:hover td.name-cell,#npi-main-table tbody tr:hover td.name-cell,#po-main-table tbody tr:hover td.name-cell,.st-main-table tbody tr:hover td.name-cell,#ct-main-table tbody tr:hover td.name-cell{background:#f4f1e6}
+#s1-main-table thead tr.col-header-row th:first-child,#s2-main-table thead tr.col-header-row th:first-child,#s3-main-table thead tr.col-header-row th:first-child,#s4-main-table thead tr.col-header-row th:first-child,#ppi-main-table thead tr.col-header-row th:first-child,#npi-main-table thead tr.col-header-row th:first-child,#po-main-table thead tr.col-header-row th:first-child,.st-main-table thead tr.col-header-row th:first-child,#ct-main-table thead tr.col-header-row th:first-child{position:sticky;left:0;z-index:70;background:#fbfaf5;border-right:1px solid #e0dcc8}
+body[data-active-tab^="stage_"] #hdr-chart-btn,body[data-active-tab="pos_pre_indicators"] #hdr-chart-btn,body[data-active-tab="neg_pre_indicators"] #hdr-chart-btn,body[data-active-tab="post_indicators"] #hdr-chart-btn,body[data-active-tab^="setups"] #hdr-chart-btn,body[data-active-tab="tests"] #hdr-chart-btn,
 body[data-active-tab="tests_healthy_vcp"] #hdr-chart-btn,
 body[data-active-tab="tests_speculative_bet"] #hdr-chart-btn,
 body[data-active-tab="tests_probing_bet_s1"] #hdr-chart-btn,
@@ -1073,7 +1075,7 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s4-main-table td.test-fail { color: #999; }
 #s4-main-table td.test-val  { font-size: 10px; }
 /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
-#pi-main-table td.test-val { font-size: 10px; }
+#ppi-main-table td.test-val ,#npi-main-table td.test-val { font-size: 10px; }
 #po-main-table td.test-val { font-size: 10px; }
 .st-main-table td.test-val { font-size: 10px; }
 #ct-main-table td.test-val { font-size: 10px; }
@@ -1134,7 +1136,7 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 /* MD-V2-CHROME-PARITY-MARKER-CSS-START */
 /* ===== Legacy chrome suppression on V2 tabs ===== */
 body[data-active-tab^="stage_"] .header-tabs-row,
-body[data-active-tab="pre_indicators"] .header-tabs-row,
+body[data-active-tab="pos_pre_indicators"] .header-tabs-row,body[data-active-tab="neg_pre_indicators"] .header-tabs-row,
 body[data-active-tab="post_indicators"] .header-tabs-row,
 body[data-active-tab^="setups"] .header-tabs-row,
 body[data-active-tab="tests"] .header-tabs-row,
@@ -1148,7 +1150,7 @@ body[data-active-tab="master_overview"] .header-tabs-row { display: none !import
 /* V2 mini nav strip - visible only on V2 tabs */
 .v2-nav { display: none; padding: 8px 12px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 6px; align-items: center; }
 body[data-active-tab^="stage_"] .v2-nav,
-body[data-active-tab="pre_indicators"] .v2-nav,
+body[data-active-tab="pos_pre_indicators"] .v2-nav,body[data-active-tab="neg_pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
 body[data-active-tab^="setups"] .v2-nav,
 body[data-active-tab="tests"] .v2-nav,
@@ -1262,7 +1264,7 @@ body[data-active-tab="master_overview"] .v2-nav { display: flex; }
 /* Extend chrome suppression: also hide .header-controls-row (the #3 Toggles / #4 Filters row)
    on every V2 tab. The initial patch missed this row. */
 body[data-active-tab^="stage_"] .header-controls-row,
-body[data-active-tab="pre_indicators"] .header-controls-row,
+body[data-active-tab="pos_pre_indicators"] .header-controls-row,body[data-active-tab="neg_pre_indicators"] .header-controls-row,
 body[data-active-tab="post_indicators"] .header-controls-row,
 body[data-active-tab^="setups"] .header-controls-row,
 body[data-active-tab="tests"] .header-controls-row,
@@ -1277,7 +1279,7 @@ body[data-active-tab="master_overview"] .header-controls-row { display: none !im
    Shrink the fixed header + override --header-height so the table does not
    float up under it, and tighten the v2-nav padding. CSS-only, no HTML change. */
 body[data-active-tab^="stage_"] .header,
-body[data-active-tab="pre_indicators"] .header,
+body[data-active-tab="pos_pre_indicators"] .header,body[data-active-tab="neg_pre_indicators"] .header,
 body[data-active-tab="post_indicators"] .header,
 body[data-active-tab^="setups"] .header,
 body[data-active-tab="tests"] .header,
@@ -1288,7 +1290,7 @@ body[data-active-tab="tests_probing_bet_s2"] .header,
 body[data-active-tab="setups_healthy_retest"] .header,
 body[data-active-tab="master_overview"] .header { padding-bottom: 0 !important; }
 body[data-active-tab^="stage_"],
-body[data-active-tab="pre_indicators"],
+body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
@@ -1299,7 +1301,7 @@ body[data-active-tab="tests_probing_bet_s2"],
 body[data-active-tab="setups_healthy_retest"],
 body[data-active-tab="master_overview"] { --header-height: 70px; }
 body[data-active-tab^="stage_"] .v2-nav,
-body[data-active-tab="pre_indicators"] .v2-nav,
+body[data-active-tab="pos_pre_indicators"] .v2-nav,body[data-active-tab="neg_pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
 body[data-active-tab^="setups"] .v2-nav,
 body[data-active-tab="tests"] .v2-nav,
@@ -1311,105 +1313,163 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
 
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-START */
-/* Session 25 rebuild (D-MD-V2-49,-50,-55,-56,-57,-58) */
-#tab-pre_indicators .group-captions { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin: 16px 0 14px 0; }
-#tab-pre_indicators .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #b08a4e; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
-#tab-pre_indicators .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #b08a4e; font-size: 11px; letter-spacing: 0.2px; }
-#tab-pre_indicators .group-captions .gcap-g1 { border-left-color: #0F6E56; }
-#tab-pre_indicators .group-captions .gcap-g1 b { color: #0F6E56; }
-#tab-pre_indicators .group-captions .gcap-g2 { border-left-color: #1D7A4E; }
-#tab-pre_indicators .group-captions .gcap-g2 b { color: #1D7A4E; }
-#tab-pre_indicators .group-captions .gcap-g3 { border-left-color: #A32D2D; }
-#tab-pre_indicators .group-captions .gcap-g3 b { color: #A32D2D; }
+/* Session 61: pre-indicators round 2 — S2 group first, Group N format, description tiles */
 
-#tab-pre_indicators .s1-rating-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
-#tab-pre_indicators .s1-rating-tiles .pi-tile-pullback   { background: rgba(15, 110, 86, 0.10); border: 1px solid rgba(15,110,86,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
-#tab-pre_indicators .s1-rating-tiles .pi-tile-basing     { background: rgba(29, 122, 78, 0.10); border: 1px solid rgba(29,122,78,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
-#tab-pre_indicators .s1-rating-tiles .pi-tile-collapsing { background: rgba(163, 45, 45, 0.10); border: 1px solid rgba(163,45,45,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
-#tab-pre_indicators .s1-rating-tiles .pi-tile-pullback.active   { background: rgba(15, 110, 86, 0.22); border: 1.5px solid #0F6E56; }
-#tab-pre_indicators .s1-rating-tiles .pi-tile-basing.active     { background: rgba(29, 122, 78, 0.22); border: 1.5px solid #1D7A4E; }
-#tab-pre_indicators .s1-rating-tiles .pi-tile-collapsing.active { background: rgba(163, 45, 45, 0.22); border: 1.5px solid #A32D2D; }
-#tab-pre_indicators .s1-rating-tiles .pi-strip-pullback   { background: #0F6E56; height: 4px; margin-top: 6px; border-radius: 2px; }
-#tab-pre_indicators .s1-rating-tiles .pi-strip-basing     { background: #1D7A4E; height: 4px; margin-top: 6px; border-radius: 2px; }
-#tab-pre_indicators .s1-rating-tiles .pi-strip-collapsing { background: #A32D2D; height: 4px; margin-top: 6px; border-radius: 2px; }
-/* D-MD-V2-57: pass-count breakdown line - smaller text than the master count */
-#tab-pre_indicators .s1-rating-tiles .rt-breakdown { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.35; }
+/* ── Shared: group-captions container ─────────────────────────────────────────── */
+#tab-pos_pre_indicators .group-captions,
+#tab-neg_pre_indicators .group-captions { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin: 16px 0 14px 0; }
+#tab-pos_pre_indicators .group-captions .gcap,
+#tab-neg_pre_indicators .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #b08a4e; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
+#tab-pos_pre_indicators .group-captions .gcap b,
+#tab-neg_pre_indicators .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #b08a4e; font-size: 11px; letter-spacing: 0.2px; }
 
-#pi-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
-#pi-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
-#pi-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
-#pi-main-table thead th:hover { background: #f0ebd9 !important; }
-/* Super-group banner row (D-MD-V2-56) */
-#pi-main-table thead .super-group-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; padding: 5px 3px; cursor: default; line-height: 1.25; }
-#pi-main-table thead .super-group-row th:hover { background: #f3efe2 !important; }
-#pi-main-table thead .super-group-row th.sg-spacer { background: #fbfaf5 !important; }
-#pi-main-table thead .super-group-row th.sg-positive { color: #0F6E56; border-bottom: 2px solid rgba(15,110,86,0.45); }
-#pi-main-table thead .super-group-row th.sg-negative { color: #A32D2D; border-bottom: 2px solid rgba(163,45,45,0.45); }
-#pi-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; line-height: 1.25; }
-#pi-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
-#pi-main-table thead tr.super-group-row  th { position: sticky; top: 0; }
-#pi-main-table thead tr.group-header-row th { position: sticky; top: 24px; }
-#pi-main-table thead tr.col-header-row   th { position: sticky; top: 48px; border-top: 1px solid #e0dcc8; }
-#pi-main-table thead .gh-inputs { color: #555; }
-#pi-main-table thead .gh-g1 { color: #0F6E56; }
-#pi-main-table thead .gh-g2 { color: #1D7A4E; }
-#pi-main-table thead .gh-g3 { color: #A32D2D; }
-#pi-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
-#pi-main-table .hd .lbl { white-space: normal; word-break: break-word; }
-#pi-main-table .hd .sort-arrow { font-size: 9px; color: #0F6E56; flex: 0 0 auto; line-height: 1; }
-#pi-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
-#pi-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
-#pi-main-table tr:hover { background: rgba(15,110,86,0.05); }
-#pi-main-table td.grp-start-g1, #pi-main-table th.grp-start-g1 { border-left: 2px solid rgba(15,110,86,0.40); }
-#pi-main-table td.grp-start-g2, #pi-main-table th.grp-start-g2 { border-left: 2px solid rgba(29,122,78,0.40); }
-#pi-main-table td.grp-start-g3, #pi-main-table th.grp-start-g3 { border-left: 2px solid rgba(163,45,45,0.40); }
-#pi-main-table td.pi-pass { background: rgba(15,110,86,0.12); color: #0F6E56; font-weight: 700; }
-#pi-main-table td.pi-fail { color: #999; }
-/* Rating + score column group per pattern (D-MD-V2-55) */
-#pi-main-table td.pi-rating-cell { padding: 3px 4px; }
-#pi-main-table .pi-pill { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
-#pi-main-table .pi-pill-tint-prob { background: #0F6E56; color: #fff; }
-#pi-main-table .pi-pill-tint-pla  { background: rgba(15,110,86,0.30); color: #0a4a3a; }
-#pi-main-table .pi-pill-tint-pos  { background: rgba(15,110,86,0.14); color: #3a6a5a; }
-#pi-main-table .pi-pill-tint-none { background: #ece9dd; color: #999; }
-#pi-main-table td.pi-score-cell { padding: 4px 3px; }
-#pi-main-table .pi-pip-row { display: inline-flex; align-items: center; gap: 2px; justify-content: center; }
-#pi-main-table .pi-pip-row .pip { width: 6px; height: 6px; border-radius: 50%; background: #d8d4c4; display: inline-block; }
-#pi-main-table .pi-pip-row .pip.on { background: #0F6E56; }
-#pi-main-table .pi-pip-row .pi-score-num { font-size: 9px; color: #777; margin-left: 3px; font-weight: 600; }
-#pi-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
-#pi-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#pi-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
-#pi-main-table td.name-cell .live-dot { color: #2e7d32; font-weight: 700; margin-right: 4px; display: inline-block; vertical-align: middle; line-height: 1; font-size: 10px; }
-#pi-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
-#pi-main-table td.taxon .ind { color: #666; font-weight: 500; }
-#pi-main-table td.taxon .sec { color: #999; }
-#pi-main-table col.c-name { width: 124px; }
-#pi-main-table col.c-taxon { width: 150px; }
-#pi-main-table col.c-price { width: 50px; }
-#pi-main-table col.c-52wh { width: 48px; }
-#pi-main-table col.c-52wl { width: 48px; }
-#pi-main-table col.c-ma150 { width: 48px; }
-#pi-main-table col.c-ma200 { width: 48px; }
-#pi-main-table col.c-pullback { width: 58px; }
-#pi-main-table col.c-rating { width: 64px; }
-#pi-main-table col.c-score { width: 52px; }
-#pi-main-table col.c-test { width: 64px; }
-#pi-main-table tr.tint-row td.name-cell, #pi-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
-#pi-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
-#pi-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
-#pi-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
-/* MD-V2-PI-CHIPS-S25-MARKER: rating-tier multi-select chip filter (D-MD-V2-59) */
-#tab-pre_indicators .s1-rating-tiles .pi-tier-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
-#tab-pre_indicators .pi-tier-chip { font-size: 10px; padding: 2px 6px; border-radius: var(--border-radius-md, 4px); cursor: pointer; user-select: none; border: 0.5px solid; line-height: 1.4; white-space: nowrap; transition: background 0.12s, color 0.12s; }
-#tab-pre_indicators .pi-chip-pullback { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; }
-#tab-pre_indicators .pi-chip-pullback.on { background: #0F6E56; color: #fff; border-color: #0F6E56; font-weight: 500; }
-#tab-pre_indicators .pi-chip-basing { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; }
-#tab-pre_indicators .pi-chip-basing.on { background: #1D7A4E; color: #fff; border-color: #1D7A4E; font-weight: 500; }
-#tab-pre_indicators .pi-chip-collapsing { background: #FCEBEB; color: #A32D2D; border-color: #F7C1C1; }
-#tab-pre_indicators .pi-chip-collapsing.on { background: #A32D2D; color: #fff; border-color: #A32D2D; font-weight: 500; }
-#tab-pre_indicators .pi-tier-chip:hover { filter: brightness(0.96); }
-#tab-pre_indicators .s1-rating-tiles .rating-tile.active { box-shadow: inset 0 0 0 1.5px currentColor; }
+/* ── Positive tab: group-caption accent colours (g1=S2 amber, g4=pullback green, g5=basing) */
+#tab-pos_pre_indicators .group-captions .gcap-g1 { border-left-color: #b08a4e; }
+#tab-pos_pre_indicators .group-captions .gcap-g1 b { color: #b08a4e; }
+#tab-pos_pre_indicators .group-captions .gcap-g4 { border-left-color: #0F6E56; }
+#tab-pos_pre_indicators .group-captions .gcap-g4 b { color: #0F6E56; }
+#tab-pos_pre_indicators .group-captions .gcap-g5 { border-left-color: #1D7A4E; }
+#tab-pos_pre_indicators .group-captions .gcap-g5 b { color: #1D7A4E; }
+
+/* ── Negative tab: group-caption accent colours (g1=S2 amber, g4=collapsing, g5=S3) ── */
+#tab-neg_pre_indicators .group-captions .gcap-g1 { border-left-color: #b08a4e; }
+#tab-neg_pre_indicators .group-captions .gcap-g1 b { color: #b08a4e; }
+#tab-neg_pre_indicators .group-captions .gcap-g4 { border-left-color: #A32D2D; }
+#tab-neg_pre_indicators .group-captions .gcap-g4 b { color: #A32D2D; }
+#tab-neg_pre_indicators .group-captions .gcap-g5 { border-left-color: #9a3412; }
+#tab-neg_pre_indicators .group-captions .gcap-g5 b { color: #9a3412; }
+
+/* ── Shared: rating-tiles grid ─────────────────────────────────────────────── */
+#tab-pos_pre_indicators .s1-rating-tiles,
+#tab-neg_pre_indicators .s1-rating-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+
+/* ── Positive tab: rating tiles (pullback + basing) ────────────────────── */
+#tab-pos_pre_indicators .s1-rating-tiles .pi-tile-pullback { background: rgba(15,110,86,0.10); border: 1px solid rgba(15,110,86,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-pos_pre_indicators .s1-rating-tiles .pi-tile-basing   { background: rgba(29,122,78,0.10); border: 1px solid rgba(29,122,78,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-pos_pre_indicators .s1-rating-tiles .pi-tile-pullback.active { background: rgba(15,110,86,0.22); border: 1.5px solid #0F6E56; }
+#tab-pos_pre_indicators .s1-rating-tiles .pi-tile-basing.active   { background: rgba(29,122,78,0.22); border: 1.5px solid #1D7A4E; }
+#tab-pos_pre_indicators .s1-rating-tiles .pi-strip-pullback { background: #0F6E56; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-pos_pre_indicators .s1-rating-tiles .pi-strip-basing   { background: #1D7A4E; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-pos_pre_indicators .s1-rating-tiles .rt-breakdown { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.35; }
+
+/* ── Negative tab: rating tile (collapsing) ─────────────────────────────── */
+#tab-neg_pre_indicators .s1-rating-tiles .pi-tile-collapsing { background: rgba(163,45,45,0.10); border: 1px solid rgba(163,45,45,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-neg_pre_indicators .s1-rating-tiles .pi-tile-collapsing.active { background: rgba(163,45,45,0.22); border: 1.5px solid #A32D2D; }
+#tab-neg_pre_indicators .s1-rating-tiles .pi-strip-collapsing { background: #A32D2D; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-neg_pre_indicators .s1-rating-tiles .rt-breakdown { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.35; }
+
+/* ── Shared: chip filter row ────────────────────────────────────────────── */
+#tab-pos_pre_indicators .s1-rating-tiles .pi-tier-chips,
+#tab-neg_pre_indicators .s1-rating-tiles .pi-tier-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+#tab-pos_pre_indicators .pi-tier-chip,
+#tab-neg_pre_indicators .pi-tier-chip { font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer; user-select: none; border: 0.5px solid; line-height: 1.4; white-space: nowrap; transition: background 0.12s, color 0.12s; }
+#tab-pos_pre_indicators .pi-tier-chip:hover,
+#tab-neg_pre_indicators .pi-tier-chip:hover { filter: brightness(0.96); }
+#tab-pos_pre_indicators .s1-rating-tiles .rating-tile.active,
+#tab-neg_pre_indicators .s1-rating-tiles .rating-tile.active { box-shadow: inset 0 0 0 1.5px currentColor; }
+
+/* ── Positive tab chips ─────────────────────────────────────────────────── */
+#tab-pos_pre_indicators .pi-chip-pullback { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; }
+#tab-pos_pre_indicators .pi-chip-pullback.on { background: #0F6E56; color: #fff; border-color: #0F6E56; font-weight: 500; }
+#tab-pos_pre_indicators .pi-chip-basing { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; }
+#tab-pos_pre_indicators .pi-chip-basing.on { background: #1D7A4E; color: #fff; border-color: #1D7A4E; font-weight: 500; }
+
+/* ── Negative tab chip ────────────────────────────────────────────────────── */
+#tab-neg_pre_indicators .pi-chip-collapsing { background: #FCEBEB; color: #A32D2D; border-color: #F7C1C1; }
+#tab-neg_pre_indicators .pi-chip-collapsing.on { background: #A32D2D; color: #fff; border-color: #A32D2D; font-weight: 500; }
+
+/* ── Shared: table base structure ─────────────────────────────────────────── */
+#ppi-main-table, #npi-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
+#ppi-main-table thead, #npi-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+#ppi-main-table thead th, #npi-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
+#ppi-main-table thead th:hover, #npi-main-table thead th:hover { background: #f0ebd9 !important; }
+#ppi-main-table thead .super-group-row th, #npi-main-table thead .super-group-row th { background: #f3efe2 !important; font-size: 9px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+#ppi-main-table thead .super-group-row th:hover, #npi-main-table thead .super-group-row th:hover { background: #f3efe2 !important; }
+#ppi-main-table thead .super-group-row th.sg-spacer, #npi-main-table thead .super-group-row th.sg-spacer { background: #fbfaf5 !important; }
+#ppi-main-table thead .super-group-row th.sg-positive { color: #0F6E56; border-bottom: 2px solid rgba(15,110,86,0.45); }
+#ppi-main-table thead .super-group-row th.sg-negative { color: #A32D2D; border-bottom: 2px solid rgba(163,45,45,0.45); }
+#npi-main-table thead .super-group-row th.sg-positive { color: #0F6E56; border-bottom: 2px solid rgba(15,110,86,0.45); }
+#npi-main-table thead .super-group-row th.sg-negative { color: #A32D2D; border-bottom: 2px solid rgba(163,45,45,0.45); }
+#ppi-main-table thead .group-header-row th, #npi-main-table thead .group-header-row th { background: #f3efe2 !important; font-size: 9.5px; text-transform: none; font-weight: 700; letter-spacing: 0.2px; padding: 5px 3px; cursor: default; line-height: 1.25; }
+#ppi-main-table thead .group-header-row th:hover, #npi-main-table thead .group-header-row th:hover { background: #f3efe2 !important; }
+#ppi-main-table thead tr.super-group-row th,  #npi-main-table thead tr.super-group-row th  { position: sticky; top: 0; }
+#ppi-main-table thead tr.group-header-row th, #npi-main-table thead tr.group-header-row th { position: sticky; top: 24px; }
+#ppi-main-table thead tr.col-header-row th,   #npi-main-table thead tr.col-header-row th   { position: sticky; top: 48px; border-top: 1px solid #e0dcc8; }
+#ppi-main-table thead .gh-inputs, #npi-main-table thead .gh-inputs { color: #555; }
+#ppi-main-table .hd, #npi-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
+#ppi-main-table .hd .lbl, #npi-main-table .hd .lbl { white-space: normal; word-break: break-word; }
+#ppi-main-table .hd .sort-arrow, #npi-main-table .hd .sort-arrow { font-size: 9px; flex: 0 0 auto; line-height: 1; }
+#ppi-main-table .hd .sort-placeholder, #npi-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+#ppi-main-table td, #npi-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+#ppi-main-table td.name-cell, #npi-main-table td.name-cell { text-align: left; padding: 4px 4px 4px 8px; line-height: 1.15; }
+#ppi-main-table td.name-cell .co, #npi-main-table td.name-cell .co { font-weight: 700; font-size: 11px; color: #2a2a2a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#ppi-main-table td.name-cell .tk, #npi-main-table td.name-cell .tk { font-size: 9px; color: #999; font-weight: 500; margin-top: 1px; }
+#ppi-main-table td.name-cell .live-dot, #npi-main-table td.name-cell .live-dot { color: #2e7d32; font-weight: 700; margin-right: 4px; display: inline-block; vertical-align: middle; line-height: 1; font-size: 10px; }
+#ppi-main-table td.taxon, #npi-main-table td.taxon { text-align: left; font-size: 9px; line-height: 1.2; padding: 4px; }
+#ppi-main-table td.taxon .ind, #npi-main-table td.taxon .ind { color: #666; font-weight: 500; }
+#ppi-main-table td.taxon .sec, #npi-main-table td.taxon .sec { color: #999; }
+#ppi-main-table td.pi-fail, #npi-main-table td.pi-fail { color: #999; }
+#ppi-main-table td.pi-rating-cell, #npi-main-table td.pi-rating-cell { padding: 3px 4px; }
+#ppi-main-table .pi-pill, #npi-main-table .pi-pill { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+#ppi-main-table .pi-pill-tint-none, #npi-main-table .pi-pill-tint-none { background: #ece9dd; color: #999; }
+#ppi-main-table td.pi-score-cell, #npi-main-table td.pi-score-cell { padding: 4px 3px; }
+#ppi-main-table .pi-pip-row, #npi-main-table .pi-pip-row { display: inline-flex; align-items: center; gap: 2px; justify-content: center; }
+#ppi-main-table .pi-pip-row .pip, #npi-main-table .pi-pip-row .pip { width: 6px; height: 6px; border-radius: 50%; background: #d8d4c4; display: inline-block; }
+#ppi-main-table .pi-pip-row .pi-score-num, #npi-main-table .pi-pip-row .pi-score-num { font-size: 9px; color: #777; margin-left: 3px; font-weight: 600; }
+#ppi-main-table tr.tint-row td.name-cell, #ppi-main-table tr.tint-row td.taxon,
+#npi-main-table tr.tint-row td.name-cell, #npi-main-table tr.tint-row td.taxon { background: var(--tint-bg) !important; }
+#ppi-main-table tr.portfolio-band td:last-child, #npi-main-table tr.portfolio-band td:last-child { border-right: 4px solid var(--portfolio-color); }
+#ppi-main-table tr.portfolio-tint, #npi-main-table tr.portfolio-tint { background: var(--portfolio-bg); }
+#ppi-main-table tr.portfolio-tint:hover, #npi-main-table tr.portfolio-tint:hover { background: var(--portfolio-bg-hover); }
+
+/* ── Positive table: accent colours and hover ─────────────────────────────── */
+#ppi-main-table tr:hover { background: rgba(15,110,86,0.05); }
+#ppi-main-table thead .gh-g1 { color: #b08a4e; }
+#ppi-main-table thead .gh-g4 { color: #0F6E56; }
+#ppi-main-table thead .gh-g5 { color: #1D7A4E; }
+#ppi-main-table .hd .sort-arrow { color: #0F6E56; }
+#ppi-main-table td.pi-pass { background: rgba(15,110,86,0.12); color: #0F6E56; font-weight: 700; }
+#ppi-main-table .pi-pip-row .pip.on { background: #0F6E56; }
+#ppi-main-table .pi-pill-tint-prob { background: #0F6E56; color: #fff; }
+#ppi-main-table .pi-pill-tint-pla  { background: rgba(15,110,86,0.30); color: #0a4a3a; }
+#ppi-main-table .pi-pill-tint-pos  { background: rgba(15,110,86,0.14); color: #3a6a5a; }
+
+/* ── Positive table: group border colours ────────────────────────────────── */
+/* g1=S2-start (amber), g2=MA sub-grp (muted), g3=context sub-grp (muted), g4=pullback, g5=basing */
+#ppi-main-table td.grp-start-g1, #ppi-main-table th.grp-start-g1 { border-left: 2px solid rgba(176,138,78,0.45); }
+#ppi-main-table td.grp-start-g2, #ppi-main-table th.grp-start-g2 { border-left: 2px solid rgba(90,138,106,0.30); }
+#ppi-main-table td.grp-start-g3, #ppi-main-table th.grp-start-g3 { border-left: 2px solid rgba(74,106,138,0.30); }
+#ppi-main-table td.grp-start-g4, #ppi-main-table th.grp-start-g4 { border-left: 2px solid rgba(15,110,86,0.40); }
+#ppi-main-table td.grp-start-g5, #ppi-main-table th.grp-start-g5 { border-left: 2px solid rgba(29,122,78,0.40); }
+
+/* ── Negative table: accent colours and hover ─────────────────────────────── */
+#npi-main-table tr:hover { background: rgba(163,45,45,0.05); }
+#npi-main-table thead .gh-g1 { color: #b08a4e; }
+#npi-main-table thead .gh-g4 { color: #A32D2D; }
+#npi-main-table thead .gh-g5 { color: #9a3412; }
+#npi-main-table .hd .sort-arrow { color: #A32D2D; }
+#npi-main-table td.pi-pass { background: rgba(163,45,45,0.12); color: #A32D2D; font-weight: 700; }
+#npi-main-table .pi-pip-row .pip.on { background: #A32D2D; }
+#npi-main-table .pi-pill-tint-prob { background: #A32D2D; color: #fff; }
+#npi-main-table .pi-pill-tint-pla  { background: rgba(163,45,45,0.30); color: #5a1010; }
+#npi-main-table .pi-pill-tint-pos  { background: rgba(163,45,45,0.14); color: #7a3030; }
+
+/* ── Negative table: group border colours ────────────────────────────────── */
+/* g1=S2-start (amber), g2=MA sub-grp, g3=context sub-grp, g4=collapsing (red), g5=S3 signals */
+#npi-main-table td.grp-start-g1, #npi-main-table th.grp-start-g1 { border-left: 2px solid rgba(176,138,78,0.45); }
+#npi-main-table td.grp-start-g2, #npi-main-table th.grp-start-g2 { border-left: 2px solid rgba(90,138,106,0.30); }
+#npi-main-table td.grp-start-g3, #npi-main-table th.grp-start-g3 { border-left: 2px solid rgba(74,106,138,0.30); }
+#npi-main-table td.grp-start-g4, #npi-main-table th.grp-start-g4 { border-left: 2px solid rgba(163,45,45,0.40); }
+#npi-main-table td.grp-start-g5, #npi-main-table th.grp-start-g5 { border-left: 2px solid rgba(154,52,18,0.35); }
+
+/* ── Shared: core col widths ────────────────────────────────────────────── */
+#ppi-main-table col.c-name,  #npi-main-table col.c-name  { width: 124px; }
+#ppi-main-table col.c-taxon, #npi-main-table col.c-taxon { width: 150px; }
+#ppi-main-table col.c-price, #npi-main-table col.c-price { width: 50px; }
+#ppi-main-table col.c-pullback, #npi-main-table col.c-pullback { width: 58px; }
+#ppi-main-table col.c-rating,   #npi-main-table col.c-rating   { width: 64px; }
+#ppi-main-table col.c-score,    #npi-main-table col.c-score    { width: 52px; }
+#ppi-main-table col.c-test,     #npi-main-table col.c-test     { width: 64px; }
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-END */
 /* MD-V2-POST-INDICATORS-MARKER-CSS-START */
 /* Session 26 - generated from PI v3 CSS template, namespaced to #tab-post_indicators */
@@ -1776,7 +1836,7 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
    time by the JS helper below (the ribbon wraps at narrow widths so a
    fixed guess is fragile); it falls back to 46px before first measure. */
 body[data-active-tab^="stage_"],
-body[data-active-tab="pre_indicators"],
+body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
@@ -1789,7 +1849,7 @@ body[data-active-tab="master_overview"] { --v2-ribbon-h: 46px; }
 
 /* The ribbon: sticky directly under the fixed MD V2 nav header. */
 body[data-active-tab^="stage_"] .controls.s1-controls,
-body[data-active-tab="pre_indicators"] .controls.s1-controls,
+body[data-active-tab="pos_pre_indicators"] .controls.s1-controls,body[data-active-tab="neg_pre_indicators"] .controls.s1-controls,
 body[data-active-tab="post_indicators"] .controls.s1-controls,
 body[data-active-tab^="setups"] .controls.s1-controls,
 body[data-active-tab="tests"] .controls.s1-controls,
@@ -1813,7 +1873,7 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
    above the ribbon's 60. The thead's own sticky/top is neutralised so the
    per-ROW offsets are what take effect. */
 #s1-main-table thead, #s2-main-table thead, #s3-main-table thead,
-#s4-main-table thead, #pi-main-table thead, #po-main-table thead,
+#s4-main-table thead, #ppi-main-table thead,#npi-main-table thead, #po-main-table thead,
 .st-main-table thead, #ct-main-table thead {
   position: static !important;
   z-index: auto !important;
@@ -1838,21 +1898,21 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
 }
 /* PI / PO / ST: 3 header rows. Row heights 24px (super-group) + 24px
    (group-header) measured from the existing 0/24/48 ladder. */
-#pi-main-table thead tr.super-group-row th,
+#ppi-main-table thead tr.super-group-row th,#npi-main-table thead tr.super-group-row th,
 #po-main-table thead tr.super-group-row th,
 .st-main-table thead tr.super-group-row th {
   position: sticky;
   top: calc(var(--header-height) + var(--v2-ribbon-h));
   z-index: 72;
 }
-#pi-main-table thead tr.group-header-row th,
+#ppi-main-table thead tr.group-header-row th,#npi-main-table thead tr.group-header-row th,
 #po-main-table thead tr.group-header-row th,
 .st-main-table thead tr.group-header-row th {
   position: sticky;
   top: calc(var(--header-height) + var(--v2-ribbon-h) + 24px);
   z-index: 71;
 }
-#pi-main-table thead tr.col-header-row th,
+#ppi-main-table thead tr.col-header-row th,#npi-main-table thead tr.col-header-row th,
 #po-main-table thead tr.col-header-row th,
 .st-main-table thead tr.col-header-row th {
   position: sticky;
@@ -1908,7 +1968,7 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
    not become the containing block for VERTICAL sticky positioning, so
    the frozen headers keep working AND wide tables still scroll sideways. */
 body[data-active-tab^="stage_"] .table-wrap,
-body[data-active-tab="pre_indicators"] .table-wrap,
+body[data-active-tab="pos_pre_indicators"] .table-wrap,body[data-active-tab="neg_pre_indicators"] .table-wrap,
 body[data-active-tab="post_indicators"] .table-wrap,
 body[data-active-tab^="setups"] .table-wrap,
 body[data-active-tab="tests"] .table-wrap,
@@ -1928,7 +1988,7 @@ body[data-active-tab="master_overview"] .table-wrap {
    the only non-trapping option, since any intermediate overflow-x:auto
    ancestor also gets overflow-y:auto and steals the sticky anchor. */
 body[data-active-tab^="stage_"] .v2-hscroll,
-body[data-active-tab="pre_indicators"] .v2-hscroll,
+body[data-active-tab="pos_pre_indicators"] .v2-hscroll,body[data-active-tab="neg_pre_indicators"] .v2-hscroll,
 body[data-active-tab="post_indicators"] .v2-hscroll,
 body[data-active-tab^="setups"] .v2-hscroll,
 body[data-active-tab="tests"] .v2-hscroll,
@@ -1943,7 +2003,7 @@ body[data-active-tab="master_overview"] .v2-hscroll {
 /* MD-V2-WAVE3C-REAL-STICKY-FIX-MARKER: the page itself is the horizontal scroller on V2 tabs.
    Scoped to the 6 V2 tab-states so legacy tabs keep body overflow-x:hidden. */
 body[data-active-tab^="stage_"],
-body[data-active-tab="pre_indicators"],
+body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
@@ -2124,6 +2184,19 @@ body[data-active-tab="master_overview"] {
 /* body-cell right borders (last column of each section) */
 #mo-matrix-table tbody td.mo-sec-end-stages,   #mo-main-table tbody td.mo-sec-end-stages   { border-right: 2px solid rgba(27,94,32,0.45); }
 #mo-matrix-table tbody td.mo-sec-end-pretest,  #mo-main-table tbody td.mo-sec-end-pretest  { border-right: 2px solid rgba(15,110,86,0.45); }
+/* pos-pretest + neg-pretest section rules (added patcher_4 — pre_indicators tab split) */
+#mo-matrix-table thead tr.mo-mx-group-row th.mo-mx-g-pos-pretest  { color: #0F6E56; }
+#mo-main-table   thead tr.mo-group-row    th.mo-mx-g-pos-pretest  { color: #0F6E56; }
+#mo-matrix-table thead tr.mo-mx-group-row th.mo-mx-g-neg-pretest  { color: #A32D2D; }
+#mo-main-table   thead tr.mo-group-row    th.mo-mx-g-neg-pretest  { color: #A32D2D; }
+#mo-matrix-table thead tr.mo-mx-group-row th.mo-mx-g-pos-pretest,
+#mo-main-table   thead tr.mo-group-row    th.mo-mx-g-pos-pretest  { background-color: rgba(15,110,86,0.07); }
+#mo-matrix-table thead tr.mo-mx-group-row th.mo-mx-g-neg-pretest,
+#mo-main-table   thead tr.mo-group-row    th.mo-mx-g-neg-pretest  { background-color: rgba(163,45,45,0.07); }
+#mo-matrix-table tbody td.mo-sec-start-pos-pretest, #mo-main-table tbody td.mo-sec-start-pos-pretest { border-left:  2px solid rgba(15,110,86,0.45); }
+#mo-matrix-table tbody td.mo-sec-end-pos-pretest,   #mo-main-table tbody td.mo-sec-end-pos-pretest   { border-right: 2px solid rgba(15,110,86,0.45); }
+#mo-matrix-table tbody td.mo-sec-start-neg-pretest, #mo-main-table tbody td.mo-sec-start-neg-pretest { border-left:  2px solid rgba(163,45,45,0.45); }
+#mo-matrix-table tbody td.mo-sec-end-neg-pretest,   #mo-main-table tbody td.mo-sec-end-neg-pretest   { border-right: 2px solid rgba(163,45,45,0.45); }
 #mo-matrix-table tbody td.mo-sec-end-posttest, #mo-main-table tbody td.mo-sec-end-posttest { border-right: 2px solid rgba(163,45,45,0.45); }
 #mo-matrix-table tbody td.mo-sec-end-setups,   #mo-main-table tbody td.mo-sec-end-setups   { border-right: 2px solid rgba(186,117,23,0.45); }
 #mo-matrix-table tbody td.mo-sec-end-tests,    #mo-main-table tbody td.mo-sec-end-tests    { border-right: 2px solid rgba(24,95,165,0.45); }
@@ -2790,7 +2863,7 @@ window.openChart=function(t){
   chartTicker=t;
   var p=document.getElementById("chart-panel");
   // MD-CHART-V2-WIRING-MARKER: V2 tabs slide the chart panel in from the LEFT; legacy keeps the right.
-  var _v2chartTabs={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet_s1:1,tests_probing_bet_s2:1,tests_speculative_bet:1,tests_healthy_vcp:1,master_overview:1};  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
+  var _v2chartTabs={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pos_pre_indicators:1,neg_pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet_s1:1,tests_probing_bet_s2:1,tests_speculative_bet:1,tests_healthy_vcp:1,master_overview:1};  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
   var _isV2chart=!!_v2chartTabs[currentTab];
   var _isStageChart=/^stage_[1-4]$/.test(currentTab);
   var _wasChartOpen=p.classList.contains("open");
@@ -2877,7 +2950,7 @@ window.setChartScaleMode=function(m){
 // MD-CHART-V2-WIRING-MARKER: V2 tabs - clicking a company/ticker name-cell opens that stock's chart.
 // This is the only chart entry point on V2 tabs (the header "Chart" button is hidden there via CSS).
 document.addEventListener("click",function(e){
-  var _v2ct={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet_s1:1,tests_probing_bet_s2:1,tests_speculative_bet:1,tests_healthy_vcp:1,master_overview:1};  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
+  var _v2ct={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pos_pre_indicators:1,neg_pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet_s1:1,tests_probing_bet_s2:1,tests_speculative_bet:1,tests_healthy_vcp:1,master_overview:1};  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
   if(!_v2ct[document.body.getAttribute("data-active-tab")])return;
   var _nameCell=e.target.closest("td.name-cell, td.mo-mx-name-cell");
   if(!_nameCell)return;
@@ -9137,7 +9210,7 @@ function SUM_renderQualifiedStocks() {
   // offsets are exact even when the ribbon wraps at narrow widths.
   function measureV2Ribbon() {
     var active = document.body.getAttribute('data-active-tab') || '';
-    var v2 = (active.indexOf('stage_') === 0 || active === 'pre_indicators' ||
+    var v2 = (active.indexOf('stage_') === 0 || active === 'pos_pre_indicators' || active === 'neg_pre_indicators' ||
               active === 'post_indicators' || active.indexOf('setups') === 0 ||
               active === 'tests' || active === 'master_overview');
     if (!v2) return;
@@ -9180,7 +9253,8 @@ function SUM_renderQualifiedStocks() {
       + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_4" onclick="switchTab(\'stage_4\')">Stage 4 (Decline)</button>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Early-stage indicators</span>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="pre_indicators" onclick="switchTab(\'pre_indicators\')">Pre-farfalle indicators</button>'
+      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="pos_pre_indicators" onclick="switchTab(\'pos_pre_indicators\')">Positive pre-setup/test indicators</button>'
+      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="neg_pre_indicators" onclick="switchTab(\'neg_pre_indicators\')">Negative pre-setup/test indicators</button>'
       + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators" onclick="switchTab(\'post_indicators\')">Post-farfalle indicators</button>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Late-stage capital qualification</span>'
@@ -9292,187 +9366,150 @@ function SUM_renderQualifiedStocks() {
 
 /* MD-V2-PRE-INDICATORS-MARKER-MODULE-START */
 // =============================================================================
-// PRE-TEST INDICATORS TAB MODULE - Master Dashboard V2 (Session 25 rebuild)
+// POSITIVE PRE-INDICATORS TAB MODULE (pos_pre_indicators)
+// Patterns: pulling_back_uptrend + basing. Plus full Stage 2 quality columns.
 // =============================================================================
-// MD-V2-PRE-INDICATORS-MARKER - idempotency marker for patcher detection
-//
-// Session 25 (14-May-26) rebuild. Locked decisions D-MD-V2-49,-50,-55,-56,-57,-58.
-// Reads the structured md_v2.pre_indicators object emitted by _md_v2_screens.py.
-//
-// 3 pre-test indicator patterns, each = AND of named constituent tests:
-//   Pulling back within MT/LT uptrend (4 tests)  [Positive]
-//   Basing (4 tests)                              [Positive]
-//   Collapsing (2 tests)                          [Negative]
-//
-// Each pattern column block = [Rating][Score][test columns...] - mirrors Stages.
-// Super-group banding: "Positive pre-test indicators" / "Negative pre-test indicators".
-// =============================================================================
-
-/* MD-V2-PRE-INDICATORS-MARKER-START */
-
 (function() {
   'use strict';
 
-  // MD-V2-PI-CHIPS-S25-MARKER: rating-tier multi-select chip filter (D-MD-V2-59).
-  // piState.tierFilter holds, per pattern, an array of selected rating tiers.
-  // Empty array = no tier filter for that pattern (shows all). Intra-pattern
-  // selections OR-combine; cross-pattern selections AND-combine.
-  var piState = {
+  var ppiState = {
     mode: { inputs: 'pct', tests: 'tick' },
     scope: 'all',
-    tierFilter: { pulling_back_uptrend: [], basing: [], collapsing: [] },
+    tierFilter: { pulling_back_uptrend: [], basing: [] },
     tint: 'none',
     port: 'off',
     sort: { col: 'company', dir: 'asc' }
   };
 
-  // The 3 pre-test indicator patterns. testKey values must match the keys in
-  // md_v2.pre_indicators[patternKey].tests emitted by _md_v2_screens.py.
-  // tierLadder: the Option A rating tiers this pattern can take (D-MD-V2-55).
-  // 2-test patterns (Collapsing) have no Plausible tier.
-  var PI_PATTERNS = [
+  var PPI_PATTERNS = [
     {
-      key: 'pulling_back_uptrend',
-      label: 'Pulling back within MT/LT uptrend',
-      shortLabel: 'Pulling back',
-      supergroup: 'positive',
-      tierLadder: ['Possible', 'Plausible', 'Probable'],
-      tooltip: 'Stock in a real medium/long-term uptrend (50-day and 150-day moving averages still rising) that is currently pulling back (5-day and 10-day moving averages rolling over).',
-      caption: 'A stock in a <span class="db">real medium/long-term uptrend</span> that is <span class="db">currently inside a pullback</span> &mdash; the dip you want to see in a healthy trend.<span class="intro">Four tests &mdash; all must pass:</span><span class="tline"><span class="tnum">(1)</span> Is the <u>50-day MA still rising</u> (higher today than yesterday)?</span><span class="tline"><span class="tnum">(2)</span> Is the <u>150-day MA still rising</u>?</span><span class="tline"><span class="tnum">(3)</span> Is the <u>5-day MA rolling over</u> (lower today than yesterday &mdash; confirms the pullback)?</span><span class="tline"><span class="tnum">(4)</span> Is the <u>10-day MA rolling over</u> too?</span>',
+      key: 'pulling_back_uptrend', label: 'Pulling back within MT/LT uptrend',
+      shortLabel: 'Pulling back', supergroup: 'positive',
+      tierLadder: ['Possible','Plausible','Probable'],
+      tooltip: 'Stock in a real medium/long-term uptrend that is currently pulling back.',
+      caption: 'A stock in a <span class="db">real medium/long-term uptrend</span> that is <span class="db">currently inside a pullback</span>.<span class="intro">Four tests:</span><span class="tline"><span class="tnum">(1)</span> <u>50-day MA still rising</u></span><span class="tline"><span class="tnum">(2)</span> <u>150-day MA still rising</u></span><span class="tline"><span class="tnum">(3)</span> <u>5-day MA rolling over</u></span><span class="tline"><span class="tnum">(4)</span> <u>10-day MA rolling over</u></span>',
       total: 4,
       tests: [
-        { key: 't1_50d_rising',       label: '50-day MA still rising',  tooltip: '50-day moving average is higher today than yesterday' },
-        { key: 't2_150d_rising',      label: '150-day MA still rising', tooltip: '150-day moving average is higher today than yesterday' },
-        { key: 't3_5d_rolling_over',  label: '5-day MA rolling over',   tooltip: '5-day moving average is lower today than yesterday - confirms we are inside a pullback' },
-        { key: 't4_10d_rolling_over', label: '10-day MA rolling over',  tooltip: '10-day moving average is lower today than yesterday' }
+        { key: 't1_50d_rising',       label: '50-day MA still rising',  tooltip: '50-day MA higher today than yesterday' },
+        { key: 't2_150d_rising',      label: '150-day MA still rising', tooltip: '150-day MA higher today than yesterday' },
+        { key: 't3_5d_rolling_over',  label: '5-day MA rolling over',   tooltip: '5-day MA lower today than yesterday' },
+        { key: 't4_10d_rolling_over', label: '10-day MA rolling over',  tooltip: '10-day MA lower today than yesterday' }
       ]
     },
     {
-      key: 'basing',
-      label: 'Basing',
-      shortLabel: 'Basing',
-      supergroup: 'positive',
-      tierLadder: ['Possible', 'Plausible', 'Probable'],
-      tooltip: 'Price fell at least 15% from a recent swing high to a recent low (even if partly reclawed since), has stayed below that high for at least 20 trading days, sits above its 200-day MA, and the 200-day MA is still rising.',
-      caption: 'A <span class="db">genuine base forming within an intact long-term uptrend</span> &mdash; the pause that resets a trend, not a breakdown.<span class="intro">Four tests &mdash; all must pass:</span><span class="tline"><span class="tnum">(1)</span> Did price fall <u>at least 15%</u> from its recent swing high (deepest drawdown, even if partly reclaimed since)?</span><span class="tline"><span class="tnum">(2)</span> Has price stayed <u>below that high for at least 20 trading days</u>?</span><span class="tline"><span class="tnum">(3)</span> Is price <u>above its 200-day MA</u>?</span><span class="tline"><span class="tnum">(4)</span> Is the 200-day MA <u>still rising month-on-month</u>?</span>',
+      key: 'basing', label: 'Basing', shortLabel: 'Basing', supergroup: 'positive',
+      tierLadder: ['Possible','Plausible','Probable'],
+      tooltip: 'Price fell at least 15% from a recent swing high, stayed below that high for 20+ days, above 200D MA, and 200D MA still rising.',
+      caption: 'A <span class="db">genuine base forming within an intact long-term uptrend</span>.<span class="intro">Four tests:</span><span class="tline"><span class="tnum">(1)</span> <u>Price pullback at least 15%</u></span><span class="tline"><span class="tnum">(2)</span> <u>Below high for at least L20D</u></span><span class="tline"><span class="tnum">(3)</span> <u>Price above 200D MA</u></span><span class="tline"><span class="tnum">(4)</span> <u>200D MA still rising</u></span>',
       total: 4,
       tests: [
-        { key: 't1_price_pullback_ge15',   label: 'Price pullback at least 15%',    tooltip: 'Deepest drawdown from the recent swing high reached at least 15% - even if price has since reclawed some of the loss' },
-        { key: 't2_time_below_high_ge20d', label: 'Below high at least L20D',        tooltip: 'Price has been below the recent swing high for at least the last 20 trading days' },
-        { key: 't3_price_above_200d',      label: 'Price above 200-day MA',          tooltip: 'Current price is above the 200-day moving average' },
-        { key: 't4_200d_rising',           label: '200-day MA still rising',         tooltip: '200-day moving average is rising month-on-month (this month versus last month)' }
-      ]
-    },
-    {
-      key: 'collapsing',
-      label: 'Collapsing',
-      shortLabel: 'Collapsing',
-      supergroup: 'negative',
-      tierLadder: ['Possible', 'Probable'],
-      tooltip: 'Price is 30% or more below its 52-week high AND has fallen at least 20% from its recent high.',
-      caption: 'A stock in <span class="db">genuine breakdown</span> &mdash; not a dip, a decisive failure.<span class="intro">Two tests &mdash; both must pass:</span><span class="tline"><span class="tnum">(1)</span> Is price <u>30% or more below its 52-week high</u>?</span><span class="tline"><span class="tnum">(2)</span> Has price <u>fallen at least 20% from its recent high</u>?</span>',
-      total: 2,
-      tests: [
-        { key: 't1_price_le_70pct_52wh', label: 'Price 30%+ below 52W high', tooltip: 'Current price is 30% or more below the 52-week high' },
-        { key: 't2_pullback_ge20',       label: 'Pullback at least 20%',     tooltip: 'Recent pullback from the recent high is at least 20%' }
+        { key: 't1_price_pullback_ge15',   label: 'Price pullback ≥15%',    tooltip: 'Deepest drawdown from recent swing high reached at least 15%' },
+        { key: 't2_time_below_high_ge20d', label: 'Below high at least L20D',    tooltip: 'Price has been below the recent swing high for at least 20 trading days' },
+        { key: 't3_price_above_200d',      label: 'Price above 200D MA',         tooltip: 'Current price is above the 200-day moving average' },
+        { key: 't4_200d_rising',           label: '200D MA still rising',        tooltip: '200-day MA rising month-on-month' }
       ]
     }
   ];
 
-  var PI_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
-  var PI_RATING_CLS  = { 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
+  var PPI_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
+  var PPI_RATING_CLS  = { 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
 
-  function buildCols() {
+  function ppiBuildCols() {
     var cols = [
-      { id:'name',     label:'Company - Ticker',       sortKey:'company',         cls:'name-cell', kind:'input' },
-      { id:'taxon',    label:'Industry - Sector',      sortKey:'sector',          cls:'taxon',     kind:'input' },
+      { id:'name',     label:'Company · Ticker',  sortKey:'company',         cls:'name-cell', kind:'input' },
+      { id:'taxon',    label:'Industry · Sector', sortKey:'sector',          cls:'taxon',     kind:'input' },
       { id:'price',    label:'Price',                  sortKey:'price',           cls:'num',       kind:'input' },
-      { id:'high_52w', label:'52 week high',           sortKey:'high_52w',        cls:'num',       kind:'input' },
-      { id:'low_52w',  label:'52 week low',            sortKey:'low_52w',         cls:'num',       kind:'input' },
-      { id:'ma_150',   label:'150D MA', sortKey:'ma_150',          cls:'num',       kind:'input' },
-      { id:'ma_200',   label:'200D MA', sortKey:'ma_200',          cls:'num',       kind:'input' },
       { id:'pullback', label:'Recent pullback',        sortKey:'recent_pullback', cls:'num',       kind:'input' }
     ];
-    for (var p = 0; p < PI_PATTERNS.length; p++) {
-      var pat = PI_PATTERNS[p];
-      var gi = p + 1;
-      cols.push({ id:'p'+gi+'_rating', label:'Rating', sortKey:pat.key+'__rating', cls:'grp-start-g'+gi+' pi-rating-col', kind:'rating', patternKey:pat.key });
-      cols.push({ id:'p'+gi+'_score',  label:'Score',  sortKey:pat.key+'__score',  cls:'pi-score-col',                   kind:'score',  patternKey:pat.key });
+    // Group 1: Stage 2 quality (g1=S2-start, g2=MA sub-group, g3=context sub-group, persist)
+    cols.push({ id:'s2_rat',    label:'Rating', sortKey:'s2_rating_rank', cls:'grp-start-g1', kind:'s2_pill' });
+    cols.push({ id:'s2_scr',    label:'Score',  sortKey:'s2_count',       cls:'',             kind:'s2_score' });
+    cols.push({ id:'s2_gp200',  label:'1. Price above 200D MA (gate)',           sortKey:'s2_gp200',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g1_P_above_200D' });
+    cols.push({ id:'s2_g1502',  label:'2. 150D MA above 200D MA (gate)',         sortKey:'s2_g1502',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g3_150D_above_200D' });
+    cols.push({ id:'s2_gp150',  label:'3. Price above 150D MA (gate)',           sortKey:'s2_gp150',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g2_P_above_150D' });
+    cols.push({ id:'s2_g52wh',  label:'4. Within 25% of 52w high (gate)',        sortKey:'s2_g52wh',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g4_within_25pct_52WH' });
+    cols.push({ id:'s2_t5',     label:'5. 50D MA above 150D MA',                 sortKey:'s2_t5',     cls:'grp-start-g2', kind:'s2_test', testGroup:'g1_ma_stack', testKey:'T5' });
+    cols.push({ id:'s2_t6',     label:'6. 50D MA above 200D MA',                 sortKey:'s2_t6',     cls:'', kind:'s2_test', testGroup:'g1_ma_stack', testKey:'T6' });
+    cols.push({ id:'s2_t7',     label:'7. Industry pct. ≥70',              sortKey:'s2_t7',     cls:'', kind:'s2_test', testGroup:'g2_rs', testKey:'T7' });
+    cols.push({ id:'s2_t8',     label:'8. Sector pct. in industry ≥70',    sortKey:'s2_t8',     cls:'', kind:'s2_test', testGroup:'g2_rs', testKey:'T8' });
+    cols.push({ id:'s2_t9',     label:'9. Stock vs industry pct. ≥70',     sortKey:'s2_t9',     cls:'', kind:'s2_test', testGroup:'g2_rs', testKey:'T9' });
+    cols.push({ id:'s2_sii',    label:'# sectors in industry',  sortKey:'sectors_in_industry', cls:'grp-start-g3', kind:'s2_count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 });
+    cols.push({ id:'s2_cis',    label:'# companies in sector',  sortKey:'companies_in_sector',  cls:'',            kind:'s2_count', countKey:'companies_in_sector',  countRedAt:2, countAmberAt:5 });
+    cols.push({ id:'persist',   label:'Last 12 months',         sortKey:'s2_persist_count',    cls:'grp-start-persist', kind:'s2_persist' });
+    // Groups 2 and 3: pattern tests with sequential numbers starting at 10
+    for (var p = 0; p < PPI_PATTERNS.length; p++) {
+      var pat = PPI_PATTERNS[p]; var gi = p + 4;
+      var testOffset = 10;
+      for (var prevP = 0; prevP < p; prevP++) testOffset += PPI_PATTERNS[prevP].tests.length;
+      cols.push({ id:'p'+(p+1)+'_rat', label:'Rating', sortKey:pat.key+'__rating', cls:'grp-start-g'+gi+' pi-rating-col', kind:'pi_rating', patternKey:pat.key });
+      cols.push({ id:'p'+(p+1)+'_scr', label:'Score',  sortKey:pat.key+'__score',  cls:'pi-score-col',                    kind:'pi_score',  patternKey:pat.key });
       for (var t = 0; t < pat.tests.length; t++) {
-        var test = pat.tests[t];
-        cols.push({
-          id: 'p'+gi+'t'+(t+1),
-          label: test.label,
-          sortKey: pat.key + '__' + test.key,
-          cls: '',
-          tooltip: test.tooltip,
-          kind: 'test',
-          patternKey: pat.key,
-          testKey: test.key
-        });
+        var tst = pat.tests[t], tNum = testOffset + t;
+        cols.push({ id:'p'+(p+1)+'t'+(t+1), label:(tNum + '. ' + tst.label), sortKey:pat.key+'__'+tst.key, cls:'', tooltip:tst.tooltip, kind:'pi_test', patternKey:pat.key, testKey:tst.key });
       }
     }
     return cols;
   }
-  var PI_COLS = buildCols();
+  var PPI_COLS = ppiBuildCols();
 
-  function piPricesLookup() {
-    if (window._piPricesByTicker) return window._piPricesByTicker;
-    var out = {};
-    var arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+  function ppiPricesLookup() {
+    if (window._ppiPricesByTicker) return window._ppiPricesByTicker;
+    var out = {}, arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
     for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
-    window._piPricesByTicker = out;
-    return out;
+    return (window._ppiPricesByTicker = out);
   }
-  function piLiveTickers() {
-    var out = {};
-    var inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
+  function ppiLiveTickers() {
+    var out = {}, inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
     for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
     return out;
   }
-  function piLiveSectors() {
-    var out = {}, t, prices = piPricesLookup(), tickers = piLiveTickers();
-    for (t in tickers) { var p = prices[t]; if (p && p.sector) out[p.sector] = true; }
+  function ppiLiveSectors() {
+    var out = {}, prices = ppiPricesLookup(), tickers = ppiLiveTickers();
+    for (var t in tickers) { var p = prices[t]; if (p && p.sector) out[p.sector] = true; }
     return out;
   }
-  function piLiveIndustries() {
-    var out = {}, t, prices = piPricesLookup(), tickers = piLiveTickers();
-    for (t in tickers) { var p = prices[t]; if (p && p.industry) out[p.industry] = true; }
+  function ppiLiveIndustries() {
+    var out = {}, prices = ppiPricesLookup(), tickers = ppiLiveTickers();
+    for (var t in tickers) { var p = prices[t]; if (p && p.industry) out[p.industry] = true; }
     return out;
   }
 
-  function piPatternRec(row, patternKey) {
+  function ppiPatternRec(row, patternKey) {
     var pi = row.md_v2 && row.md_v2.pre_indicators;
     return (pi && pi[patternKey]) || null;
   }
-  function piEvalTest(row, patternKey, testKey) {
-    var rec = piPatternRec(row, patternKey);
-    if (!rec || !rec.tests) return false;
-    return !!rec.tests[testKey];
+  function ppiEvalTest(row, patternKey, testKey) {
+    var rec = ppiPatternRec(row, patternKey);
+    return !!(rec && rec.tests && rec.tests[testKey]);
   }
-  function piRowRating(row, patternKey) {
-    var rec = piPatternRec(row, patternKey);
+  function ppiRowRating(row, patternKey) {
+    var rec = ppiPatternRec(row, patternKey);
     return rec ? (rec.rating || 'None') : 'None';
   }
 
-  function piGetRows() {
+  function ppiGetRows() {
     var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
-    var prices = piPricesLookup();
-    var live = piLiveTickers(), liveS = piLiveSectors(), liveI = piLiveIndustries();
+    var prices = ppiPricesLookup();
+    var live = ppiLiveTickers(), liveS = ppiLiveSectors(), liveI = ppiLiveIndustries();
     var rows = [];
     for (var i = 0; i < raw.length; i++) {
       var s = raw[i];
-      if (!s || !s.md_v2 || !s.md_v2.pre_indicators) continue;
+      if (!s || !s.md_v2 || !s.md_v2.pre_indicators || !s.md_v2.stage_2) continue;
       var p = prices[s.ticker] || {};
-      var mas = p.mas || {};
+      var s2 = s.md_v2.stage_2;
+      var pers = (s.md_v2.persistence && s.md_v2.persistence.stage_2_persistence) || [];
+      var s2grps = {}, s2gsrc = s2.groups || {};
+      for (var _k in s2gsrc) s2grps[_k] = s2gsrc[_k];
+      if (s2.gates) s2grps._gates = s2.gates;
       rows.push({
         ticker: s.ticker, company: p.company_name || s.ticker,
         sector: p.sector || '', industry: p.industry || '',
-        price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
-        recent_pullback: p.recent_pullback_pct,
-        swing_high: p.swing_high,
-        ma_150: mas['150D'], ma_200: mas['200D'],
+        price: p.price, recent_pullback: p.recent_pullback_pct,
         md_v2: s.md_v2,
+        s2rating: s2.rating, s2count: s2.count,
+        s2tests: s2.tests || {}, s2groups: s2grps, s2persistence: pers,
+        sectors_in_industry: (s.md_v2.sectors_in_industry_count || 0),
+        companies_in_sector: (s.md_v2.companies_in_sector_count || 0),
         is_live: !!live[s.ticker],
         sector_in_portfolio: !!liveS[p.sector],
         industry_in_portfolio: !!liveI[p.industry]
@@ -9481,511 +9518,1033 @@ function SUM_renderQualifiedStocks() {
     return rows;
   }
 
-  // Per-pattern qualifying count (all tests pass).
-  function piPatternCounts(rows) {
-    var c = {};
-    for (var pi = 0; pi < PI_PATTERNS.length; pi++) c[PI_PATTERNS[pi].key] = 0;
-    for (var i = 0; i < rows.length; i++) {
-      for (var p = 0; p < PI_PATTERNS.length; p++) {
-        var rec = piPatternRec(rows[i], PI_PATTERNS[p].key);
-        if (rec && rec.qualifies) c[PI_PATTERNS[p].key]++;
-      }
-    }
-    return c;
-  }
-  // Per-pattern histogram of how many stocks pass exactly k tests (D-MD-V2-57).
-  function piPassHistogram(rows, patternKey, total) {
-    var h = [];
-    for (var k = 0; k <= total; k++) h[k] = 0;
-    for (var i = 0; i < rows.length; i++) {
-      var rec = piPatternRec(rows[i], patternKey);
-      var cnt = rec ? (rec.count || 0) : 0;
-      if (cnt >= 0 && cnt <= total) h[cnt]++;
-    }
-    return h;
-  }
-  // MD-V2-PI-CHIPS-S25-MARKER: per-pattern, per-tier live counts (D-MD-V2-59).
-  // Counted against the SCOPE-filtered row set (passed in) so chip counts
-  // reflect what is currently in play, not the whole universe.
-  function piTierCounts(rows, patternKey) {
-    var c = { 'Possible':0, 'Plausible':0, 'Probable':0, 'None':0 };
-    for (var i = 0; i < rows.length; i++) {
-      var r = piRowRating(rows[i], patternKey);
-      if (c[r] != null) c[r]++;
-    }
-    return c;
-  }
-
-  function piFmtNum(n) {
-    if (n == null || isNaN(n)) return '-';
+  function ppiFmtNum(n) {
+    if (n == null || isNaN(n)) return '—';
     var abs = Math.abs(n);
     var dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
-    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0; /* MD-V2-S40-FMTNUM-INT-FIX-pi; S41 tolerance */
-    var f = abs.toLocaleString('en-GB', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0;
+    var f = abs.toLocaleString('en-GB', { minimumFractionDigits:dp, maximumFractionDigits:dp });
     return n < 0 ? '(' + f + ')' : f;
   }
-  function piFmtPct(p) {
-    if (p == null || isNaN(p)) return '-';
+  function ppiFmtPct(p) {
+    if (p == null || isNaN(p)) return '—';
     var r = Math.round(p), abs = Math.abs(r);
     return r < 0 ? '(' + abs + ')%' : r + '%';
   }
-  function piColourForIntensity(i) {
-    if (i >= 0.6) return '#0F6E56';
-    if (i >= 0.25) return '#1D9E75';
-    if (i >= 0.05) return '#5DCAA5';
-    if (i <= -0.6) return '#A32D2D';
-    if (i <= -0.25) return '#E24B4A';
-    if (i <= -0.05) return '#F09595';
+  function ppiColour(i) {
+    if (i >= 0.6) return '#0F6E56'; if (i >= 0.25) return '#1D9E75'; if (i >= 0.05) return '#5DCAA5';
+    if (i <= -0.6) return '#A32D2D'; if (i <= -0.25) return '#E24B4A'; if (i <= -0.05) return '#F09595';
     return '#888';
   }
-  function piInputCell(row, key, extraCls) {
-    extraCls = extraCls || '';
-    var v = row[key];
-    if (key === 'price') return '<td class="num ' + extraCls + '">' + piFmtNum(v) + '</td>';
-    if (key === 'recent_pullback') {
-      if (v == null || isNaN(v)) return '<td class="num ' + extraCls + '">-</td>';
-      var pctVal = v * 100;
-      var pi_intensity = Math.max(-1, Math.min(1, (pctVal - 5) / 20));
-      var col = piColourForIntensity(-pi_intensity);
-      return '<td class="num ' + extraCls + '" style="color:' + col + '">' + Math.round(pctVal) + '%</td>';
+  function ppiInputCell(row, id) {
+    var v = row[id];
+    if (id === 'price') return '<td class="num">' + ppiFmtNum(v) + '</td>';
+    if (id === 'recent_pullback') {
+      if (v == null || isNaN(v)) return '<td class="num">—</td>';
+      var pv = v * 100, col = ppiColour(-Math.max(-1, Math.min(1, (pv - 5) / 20)));
+      return '<td class="num" style="color:' + col + '">' + Math.round(pv) + '%</td>';
     }
-    if (v == null || row.price == null) return '<td class="num ' + extraCls + '">-</td>';
-    var pct = (row.price - v) / v * 100;
-    var intensity = 0;
-    if (key === 'high_52w') intensity = Math.max(-1, Math.min(1, (-pct - 5) / 20));
-    else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
-    else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
-    var colour = piColourForIntensity(intensity);
-    var text = (piState.mode.inputs === 'pct') ? piFmtPct(pct) : piFmtNum(v);
-    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+    return '<td class="num">—</td>';
   }
 
-  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
-  function piTestValueFor(row, col) {
-    var rec = piPatternRec(row, col.patternKey);
+  function ppiTestValueFor(row, col) {
+    var rec = ppiPatternRec(row, col.patternKey);
     var tv = rec && rec.test_values;
-    if (!tv || !(col.testKey in tv)) return '\u2014';
+    if (!tv || !(col.testKey in tv)) return '—';
     var v = tv[col.testKey];
-    if (v === null || v === undefined) return '\u2014';
+    if (v == null) return '—';
     if (typeof v === 'string') return v;
     if (typeof v === 'number') {
-      if (isNaN(v)) return '\u2014';
-      if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return piFmtPct(v * 100);
-      return piFmtNum(v);
+      if (isNaN(v)) return '—';
+      if (Math.abs(v) <= 1.5 && v !== Math.round(v)) return ppiFmtPct(v * 100);
+      return ppiFmtNum(v);
     }
     return String(v);
   }
-  function piTestCell(row, col) {
-    var pass = piEvalTest(row, col.patternKey, col.testKey);
+  function ppiTestCell(row, col) {
+    var pass = ppiEvalTest(row, col.patternKey, col.testKey);
     var extra = col.cls || '';
-    if (piState.mode.tests === 'val') {
-      var v = piTestValueFor(row, col);
-      var colour = pass ? piColourForIntensity(0.7) : piColourForIntensity(-0.4);
+    if (ppiState.mode.tests === 'val') {
+      var v = ppiTestValueFor(row, col), colour = ppiColour(pass ? 0.7 : -0.4);
       return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">' + v + '</td>';
     }
     if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
     return '<td class="pi-fail ' + extra + '">.</td>';
   }
-  function piRatingCell(row, col) {
-    var rating = piRowRating(row, col.patternKey);
-    var rcls = PI_RATING_CLS[rating] || 'tint-none';
+  function ppiRatingCell(row, col) {
+    var rating = ppiRowRating(row, col.patternKey);
+    var rcls = PPI_RATING_CLS[rating] || 'tint-none';
     return '<td class="' + (col.cls || '') + ' pi-rating-cell ' + rcls + '"><span class="pi-pill pi-pill-' + rcls + '">' + rating + '</span></td>';
   }
-  function piScoreCell(row, col) {
-    var rec = piPatternRec(row, col.patternKey);
-    var cnt = rec ? (rec.count || 0) : 0;
-    var tot = rec ? (rec.total || 0) : 0;
+  function ppiScoreCell(row, col) {
+    var rec = ppiPatternRec(row, col.patternKey);
+    var cnt = rec ? (rec.count || 0) : 0, tot = rec ? (rec.total || 0) : 0;
     var s = '';
     for (var i = 0; i < tot; i++) s += '<span class="pip ' + (i < cnt ? 'on' : '') + '"></span>';
-    return '<td class="' + (col.cls || '') + ' pi-score-cell"><div class="pi-pip-row">' + s +
-           '<span class="pi-score-num">' + cnt + '/' + tot + '</span></div></td>';
+    return '<td class="' + (col.cls || '') + ' pi-score-cell"><div class="pi-pip-row">' + s + '<span class="pi-score-num">' + cnt + '/' + tot + '</span></div></td>';
   }
 
-  function piHashColor(label, alpha) {
+  function ppiS2PillFor(rating, count) {
+    if (rating === 'Probable') { var c = Math.min(Math.max(count,7),10); return '<span class="pill pill-prob-' + c + '">Probable</span>'; }
+    if (rating === 'Plausible') return '<span class="pill pill-pla">Plausible</span>';
+    if (rating === 'Possible')  return '<span class="pill pill-pos">Possible</span>';
+    return '<span class="pill pill-none">None</span>';
+  }
+  function ppiS2ScorePips(row) {
+    var t = row.s2tests || {}, gates = (row.s2groups && row.s2groups._gates) || {};
+    var passed = [!!t.T5_50D_above_150D, !!t.T6_50D_above_200D, !!t.T7_industry_RS_pct_ge70, !!t.T8_sector_RS_pct_ge70, !!t.T9_stock_RS_vs_industry_ge70];
+    var count = passed.filter(Boolean).length;
+    var s = '<span class="pip ' + (gates.g1_P_above_200D     ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gates.g3_150D_above_200D  ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gates.g2_P_above_150D     ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gates.g4_within_25pct_52WH? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip-div"></span>';
+    var divAfter = {1:true}, rsIdx = {2:true,3:true,4:true};
+    for (var i = 0; i < 5; i++) {
+      var cls = passed[i] ? (rsIdx[i] ? 'rs-on' : 'on') : '';
+      s += '<span class="pip ' + cls + '"></span>';
+      if (divAfter[i]) s += '<span class="pip-div"></span>';
+    }
+    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/5</span></div>';
+  }
+  function ppiS2PersistCells(arr, rating) {
+    var h = '';
+    for (var i = 0; i < 12; i++) {
+      if (i === 11 && arr && arr[11]) {
+        var cls = rating === 'Probable' ? 'r-prob' : rating === 'Plausible' ? 'r-pla' : rating === 'Possible' ? 'r-pos' : 'r-none';
+        h += '<span class="persist-cell ' + cls + '" title="Current month: ' + rating + '"></span>';
+      } else {
+        h += '<span class="persist-cell r-none" title="Month -' + (11 - i) + '"></span>';
+      }
+    }
+    return '<div class="persist-row">' + h + '</div>';
+  }
+  function ppiS2TestCell(row, col) {
+    var grp = (row.s2groups || {})[col.testGroup] || {};
+    var pass = !!grp[col.testKey], extra = col.cls || '';
+    if (ppiState.mode.tests === 'val') {
+      var colour = ppiColour(pass ? 0.7 : -0.4);
+      return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + colour + '">—</td>';
+    }
+    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
+    return '<td class="pi-fail ' + extra + '">.</td>';
+  }
+  function ppiS2CountCell(row, col) {
+    var n = row[col.countKey] || 0, ccls = col.cls || '';
+    var cstyle = n <= col.countRedAt ? 'color:#a83232' : (n <= col.countAmberAt ? 'color:#b45309' : 'color:#555');
+    return '<td class="num ' + ccls + '" style="' + cstyle + '">' + n + '</td>';
+  }
+  function ppiS2RatingCell(row, col) {
+    var r = row.s2rating || 'None', cnt = row.s2count || 0;
+    var tcls = { 'Probable':'tint-prob','Plausible':'tint-pla','Possible':'tint-pos','None':'tint-none' };
+    return '<td class="' + (col.cls || '') + ' ' + (tcls[r]||'tint-none') + '">' + ppiS2PillFor(r, cnt) + '</td>';
+  }
+  function ppiS2ScoreCell(row, col) {
+    return '<td class="' + (col.cls || '') + ' pi-score-cell">' + ppiS2ScorePips(row) + '</td>';
+  }
+
+  function ppiHashColor(label, alpha) {
     if (!label) return null;
     var h = 0;
     for (var i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) & 0xffff;
-    return 'hsla(' + (h % 360) + ', 35%, 55%, ' + alpha + ')';
+    return 'hsla(' + (h % 360) + ',40%,55%,' + alpha + ')';
   }
-  function piPortfolioInfo(row) {
-    if (row.is_live) return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)', bgHover:'rgba(27,94,32,0.14)' };
-    if (row.sector_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)', bgHover:'rgba(27,94,32,0.08)' };
-    if (row.industry_in_portfolio) return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' };
+  function ppiPortfolioInfo(row) {
+    if (row.is_live)              return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)',   bgHover:'rgba(27,94,32,0.14)' };
+    if (row.sector_in_portfolio)  return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)',   bgHover:'rgba(27,94,32,0.08)' };
+    if (row.industry_in_portfolio)return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)',  bgHover:'rgba(27,94,32,0.05)' };
     return null;
   }
 
-  function piGetSortVal(row, key) {
+  function ppiPatternCounts(rows) {
+    var c = {}; for (var p = 0; p < PPI_PATTERNS.length; p++) c[PPI_PATTERNS[p].key] = 0;
+    for (var i = 0; i < rows.length; i++)
+      for (var j = 0; j < PPI_PATTERNS.length; j++) {
+        var rec = ppiPatternRec(rows[i], PPI_PATTERNS[j].key);
+        if (rec && rec.qualifies) c[PPI_PATTERNS[j].key]++;
+      }
+    return c;
+  }
+  function ppiPassHistogram(rows, patternKey, total) {
+    var h = []; for (var k = 0; k <= total; k++) h[k] = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var rec = ppiPatternRec(rows[i], patternKey);
+      var cnt = rec ? (rec.count || 0) : 0;
+      if (cnt >= 0 && cnt <= total) h[cnt]++;
+    }
+    return h;
+  }
+  function ppiTierCounts(rows, patternKey) {
+    var c = { 'Possible':0, 'Plausible':0, 'Probable':0, 'None':0 };
+    for (var i = 0; i < rows.length; i++) { var r = ppiRowRating(rows[i], patternKey); if (c[r] != null) c[r]++; }
+    return c;
+  }
+
+  function ppiApplyScope(all) {
+    if (ppiState.scope === 'live')     return all.filter(function(r){ return r.is_live; });
+    if (ppiState.scope === 'sector')   return all.filter(function(r){ return r.sector_in_portfolio; });
+    if (ppiState.scope === 'industry') return all.filter(function(r){ return r.industry_in_portfolio; });
+    return all.slice();
+  }
+  function ppiApplyTierFilter(rows) {
+    var active = [];
+    for (var p = 0; p < PPI_PATTERNS.length; p++) {
+      var k = PPI_PATTERNS[p].key, sel = ppiState.tierFilter[k] || [];
+      if (sel.length > 0) active.push({ key:k, tiers:sel });
+    }
+    if (active.length === 0) return rows;
+    return rows.filter(function(r) {
+      for (var a = 0; a < active.length; a++) {
+        if (active[a].tiers.indexOf(ppiRowRating(r, active[a].key)) === -1) return false;
+      }
+      return true;
+    });
+  }
+  function ppiUpdateScopeCounts(rows) {
+    function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
+    set('ppi-cnt-all',      rows.length);
+    set('ppi-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
+    set('ppi-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
+    set('ppi-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
+  }
+  function ppiGetSortVal(row, key) {
     if (key.indexOf('__') > 0) {
-      var parts = key.split('__');
-      var patternKey = parts[0], sub = parts[1];
-      var rec = piPatternRec(row, patternKey);
-      if (sub === 'rating') return rec ? (PI_RATING_RANK[rec.rating] || 0) : 0;
+      var parts = key.split('__'), pk = parts[0], sub = parts[1];
+      var rec = ppiPatternRec(row, pk);
+      if (sub === 'rating') return rec ? (PPI_RATING_RANK[rec.rating] || 0) : 0;
       if (sub === 'score')  return rec ? (rec.count || 0) : 0;
-      return piEvalTest(row, patternKey, sub) ? 1 : 0;
+      return ppiEvalTest(row, pk, sub) ? 1 : 0;
     }
-    if (key === 'recent_pullback') {
-      return row.recent_pullback == null ? -Infinity : row.recent_pullback;
+    if (key === 's2_rating_rank') return PPI_RATING_RANK[row.s2rating] || 0;
+    if (key === 's2_count') return row.s2count || 0;
+    if (key === 's2_persist_count') return (row.s2persistence && row.s2persistence.filter(Boolean).length) || 0;
+    if (key === 'sectors_in_industry') return row.sectors_in_industry || 0;
+    if (key === 'companies_in_sector') return row.companies_in_sector || 0;
+    if (key.indexOf('s2_') === 0) {
+      // gate/test sort by pass/fail
+      var gk = key.slice(3);
+      var gmap = { gp200:'_gates.g1_P_above_200D', g1502:'_gates.g3_150D_above_200D',
+                   gp150:'_gates.g2_P_above_150D', g52wh:'_gates.g4_within_25pct_52WH' };
+      if (gmap[gk]) {
+        var gparts = gmap[gk].split('.'), grp = (row.s2groups||{})[gparts[0]]||{};
+        return grp[gparts[1]] ? 1 : 0;
+      }
+      var tmap = { t5:'g1_ma_stack.T5', t6:'g1_ma_stack.T6', t7:'g2_rs.T7', t8:'g2_rs.T8', t9:'g2_rs.T9' };
+      if (tmap[gk]) {
+        var tparts = tmap[gk].split('.'), tgrp = (row.s2groups||{})[tparts[0]]||{};
+        return tgrp[tparts[1]] ? 1 : 0;
+      }
+      return 0;
     }
-    var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
-    if (PCT_KEYS.indexOf(key) > -1 && piState.mode.inputs === 'pct') {
-      var ref = row[key];
-      if (ref == null || row.price == null || ref === 0) return -Infinity;
-      return (row.price - ref) / ref * 100;
-    }
-    if (key in row) return row[key];
-    return 0;
-  }
-  function piOnSort(key) {
-    if (piState.sort.col === key) piState.sort.dir = piState.sort.dir === 'desc' ? 'asc' : 'desc';
-    else piState.sort = { col: key, dir: key === 'company' ? 'asc' : 'desc' };
-    piBuildHeaderRow();
-    piRenderRows();
-  }
-
-  function piBuildHeaderRow() {
-    var tr = document.getElementById('pi-col-header-row');
-    if (!tr) return;
-    var h = '';
-    for (var i = 0; i < PI_COLS.length; i++) {
-      var c = PI_COLS[i];
-      var isSort = piState.sort.col === c.sortKey;
-      var arrow = isSort
-        ? '<span class="sort-arrow">' + (piState.sort.dir === 'desc' ? String.fromCharCode(9660) : String.fromCharCode(9650)) + '</span>'
-        : '<span class="sort-placeholder"></span>';
-      var title = c.tooltip || c.label;
-      h += '<th class="' + (c.cls || '') + '" data-sort-key="' + c.sortKey + '" title="' + title + '">' +
-           '<span class="hd"><span class="lbl">' + c.label + '</span>' + arrow + '</span></th>';
-    }
-    tr.innerHTML = h;
+    return row[key] != null ? row[key] : (typeof row[key] === 'string' ? '' : 0);
   }
 
-  // MD-V2-PI-CHIPS-S25-MARKER: render pattern tiles + the rating-tier chip row.
-  // The `scopeRows` argument is the SCOPE-filtered set (so chip counts and the
-  // pass-count breakdown reflect the active scope), NOT the tier-filtered set.
-  function piPatternTiles(scopeRows) {
-    var tiles = document.getElementById('pi-pattern-tiles');
+  function ppiPatternTiles(scopeRows) {
+    var tiles = document.getElementById('ppi-pattern-tiles');
     if (!tiles) return;
-    var counts = piPatternCounts(scopeRows);
-    var total = scopeRows.length;
-    var tintCls = { 'pulling_back_uptrend':'pi-tile-pullback', 'basing':'pi-tile-basing', 'collapsing':'pi-tile-collapsing' };
-    var stripCls = { 'pulling_back_uptrend':'pi-strip-pullback', 'basing':'pi-strip-basing', 'collapsing':'pi-strip-collapsing' };
+    var counts = ppiPatternCounts(scopeRows), total = scopeRows.length;
+    var tintCls  = { pulling_back_uptrend:'pi-tile-pullback', basing:'pi-tile-basing' };
+    var stripCls = { pulling_back_uptrend:'pi-strip-pullback', basing:'pi-strip-basing' };
     var h = '';
-    for (var i = 0; i < PI_PATTERNS.length; i++) {
-      var pat = PI_PATTERNS[i];
-      var cnt = counts[pat.key] || 0;
+    for (var i = 0; i < PPI_PATTERNS.length; i++) {
+      var pat = PPI_PATTERNS[i], cnt = counts[pat.key] || 0;
       var pct = total > 0 ? Math.round(cnt / total * 100) : 0;
-      var sel = piState.tierFilter[pat.key] || [];
-      var anySel = sel.length > 0;
-      // headline = filtered total when a tier filter is active, else the qualifying count
-      var tierCounts = piTierCounts(scopeRows, pat.key);
-      var headline = cnt, headSub = 'of ' + total.toLocaleString('en-GB') + ' &middot; ' + pct + '%';
+      var sel = ppiState.tierFilter[pat.key] || [], anySel = sel.length > 0;
+      var tierCounts = ppiTierCounts(scopeRows, pat.key);
+      var headline = cnt, headSub = 'of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%';
       if (anySel) {
-        var ft = 0;
-        for (var z = 0; z < sel.length; z++) ft += (tierCounts[sel[z]] || 0);
-        headline = ft;
-        headSub = sel.join(' + ') + ' &middot; filtered';
+        var ft = 0; for (var z = 0; z < sel.length; z++) ft += (tierCounts[sel[z]] || 0);
+        headline = ft; headSub = sel.join(' + ') + ' · filtered';
       }
-      // pass-count breakdown line (D-MD-V2-57)
-      var hist = piPassHistogram(scopeRows, pat.key, pat.total);
+      var hist = ppiPassHistogram(scopeRows, pat.key, pat.total);
       var breakdown = '';
-      for (var k = 1; k <= pat.total; k++) {
-        if (k > 1) breakdown += ' &middot; ';
-        breakdown += k + ' of ' + pat.total + ': ' + (hist[k] || 0).toLocaleString('en-GB');
-      }
-      // rating-tier chip row (D-MD-V2-59)
+      for (var k = 1; k <= pat.total; k++) { if (k > 1) breakdown += ' · '; breakdown += k + ' of ' + pat.total + ': ' + (hist[k] || 0).toLocaleString('en-GB'); }
       var chips = '';
-      for (var c = 0; c < 3; c++) {  /* MD-V2-S37-FOLLOWUP-MARKER: canonical 3-tier chip set */
-        var tier = ['Possible','Plausible','Probable'][c];
-        var on = sel.indexOf(tier) > -1;
-        var tc = tierCounts[tier] || 0;
-        chips += '<span class="pi-tier-chip pi-chip-' + tintCls[pat.key].replace('pi-tile-','') +
-                 (on ? ' on' : '') + '" data-pattern="' + pat.key + '" data-tier="' + tier + '">' +
-                 tier + ' ' + tc.toLocaleString('en-GB') + (on ? ' ' + String.fromCharCode(10003) : '') + '</span>';
+      for (var c = 0; c < 3; c++) {
+        var tier = ['Possible','Plausible','Probable'][c], on = sel.indexOf(tier) > -1, tc = tierCounts[tier] || 0;
+        chips += '<span class="pi-tier-chip pi-chip-' + tintCls[pat.key].replace('pi-tile-','') + (on ? ' on' : '') + '" data-pattern="' + pat.key + '" data-ppi-tier="' + tier + '">' + tier + ' ' + tc.toLocaleString('en-GB') + (on ? ' ' + String.fromCharCode(10003) : '') + '</span>';
       }
-      var activeCls = anySel ? ' active' : '';
-      h += '<div class="rating-tile ' + tintCls[pat.key] + activeCls + '" data-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
+      h += '<div class="rating-tile ' + tintCls[pat.key] + (anySel ? ' active' : '') + '" data-ppi-pattern="' + pat.key + '" title="' + pat.tooltip + '">' +
            '<div class="rt-label">' + pat.shortLabel + '</div>' +
            '<div class="rt-count">' + headline.toLocaleString('en-GB') + '</div>' +
            '<div class="rt-sub">' + headSub + '</div>' +
            '<div class="rt-breakdown">' + breakdown + '</div>' +
-           '<div class="pi-tier-chips" data-pattern="' + pat.key + '">' + chips + '</div>' +
+           '<div class="pi-tier-chips">' + chips + '</div>' +
            '<div class="rt-strip ' + stripCls[pat.key] + '"></div>' +
            '</div>';
     }
     tiles.innerHTML = h;
   }
 
-  function piUpdateScopeCounts(rows) {
-    function set(id, n) { var el = document.getElementById(id); if (el) el.textContent = '(' + n + ')'; }
-    set('pi-cnt-all',      rows.length);
-    set('pi-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
-    set('pi-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
-    set('pi-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
-  }
-
-  // MD-V2-PI-CHIPS-S25-MARKER: apply scope, then the rating-tier filter.
-  // Tier filter: for each pattern with a non-empty selected-tier list, the
-  // row's rating for that pattern must be in the list (intra-pattern OR).
-  // Patterns with non-empty lists AND-combine. Empty list = pattern ignored.
-  function piApplyScope(all) {
-    var rows = all.slice();
-    if (piState.scope === 'live') rows = rows.filter(function(r){ return r.is_live; });
-    else if (piState.scope === 'sector') rows = rows.filter(function(r){ return r.sector_in_portfolio; });
-    else if (piState.scope === 'industry') rows = rows.filter(function(r){ return r.industry_in_portfolio; });
-    return rows;
-  }
-  function piApplyTierFilter(rows) {
-    var active = [];
-    for (var p = 0; p < PI_PATTERNS.length; p++) {
-      var k = PI_PATTERNS[p].key;
-      var sel = piState.tierFilter[k] || [];
-      if (sel.length > 0) active.push({ key: k, tiers: sel });
+  function ppiBuildHeaderRow() {
+    var tr = document.getElementById('ppi-col-header-row');
+    if (!tr) return;
+    var h = '';
+    for (var i = 0; i < PPI_COLS.length; i++) {
+      var c = PPI_COLS[i];
+      var isSort = ppiState.sort.col === c.sortKey;
+      var arrow = isSort ? '<span class="sort-arrow">' + (ppiState.sort.dir === 'desc' ? String.fromCharCode(9660) : String.fromCharCode(9650)) + '</span>' : '<span class="sort-placeholder"></span>';
+      h += '<th class="' + (c.cls || '') + '" data-sort-key="' + c.sortKey + '" title="' + (c.tooltip || c.label) + '">' + c.label + arrow + '</th>';
     }
-    if (active.length === 0) return rows;
-    return rows.filter(function(r) {
-      for (var a = 0; a < active.length; a++) {
-        var rating = piRowRating(r, active[a].key);
-        if (active[a].tiers.indexOf(rating) === -1) return false;
-      }
-      return true;
-    });
+    tr.innerHTML = h;
   }
 
-  function piRenderRows() {
-    var tbody = document.getElementById('pi-tbody');
+  function ppiRenderRows() {
+    var tbody = document.getElementById('ppi-tbody');
     if (!tbody) return;
-    var all = piGetRows();
-    var scopeRows = piApplyScope(all);
-    piUpdateScopeCounts(all);
-    piPatternTiles(scopeRows);
-    var rows = piApplyTierFilter(scopeRows);
+    var all = ppiGetRows(), scopeRows = ppiApplyScope(all);
+    ppiUpdateScopeCounts(all);
+    ppiPatternTiles(scopeRows);
+    var rows = ppiApplyTierFilter(scopeRows);
     rows.sort(function(a,b) {
-      var va = piGetSortVal(a, piState.sort.col), vb = piGetSortVal(b, piState.sort.col);
-      var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va || 0) - (vb || 0);
+      var va = ppiGetSortVal(a, ppiState.sort.col), vb = ppiGetSortVal(b, ppiState.sort.col);
+      var cmp = (typeof va === 'string') ? va.localeCompare(vb) : (va||0)-(vb||0);
       if (cmp === 0) cmp = a.ticker.localeCompare(b.ticker);
-      return piState.sort.dir === 'desc' ? -cmp : cmp;
+      return ppiState.sort.dir === 'desc' ? -cmp : cmp;
     });
     var html = '';
     for (var i = 0; i < rows.length; i++) {
-      var s = rows[i];
-      var styles = [], cls = [];
-      if (piState.tint === 'industry') { styles.push('--tint-bg: ' + piHashColor(s.industry, 0.16)); cls.push('tint-row'); }
-      else if (piState.tint === 'sector') { styles.push('--tint-bg: ' + piHashColor(s.sector, 0.16)); cls.push('tint-row'); }
-      if (piState.port === 'on') {
-        var pinf = piPortfolioInfo(s);
-        if (pinf) {
-          styles.push('--portfolio-color: ' + pinf.color);
-          styles.push('--portfolio-bg: ' + pinf.bg);
-          styles.push('--portfolio-bg-hover: ' + pinf.bgHover);
-          cls.push('portfolio-band'); cls.push('portfolio-tint');
-        }
+      var s = rows[i], styles = [], cls = [];
+      if (ppiState.tint === 'industry') { styles.push('--tint-bg: ' + ppiHashColor(s.industry,0.16)); cls.push('tint-row'); }
+      else if (ppiState.tint === 'sector') { styles.push('--tint-bg: ' + ppiHashColor(s.sector,0.16)); cls.push('tint-row'); }
+      if (ppiState.port === 'on') {
+        var pinfo = ppiPortfolioInfo(s);
+        if (pinfo) { styles.push('--portfolio-color:'+pinfo.color,'--portfolio-bg:'+pinfo.bg,'--portfolio-bg-hover:'+pinfo.bgHover); cls.push('portfolio-band','portfolio-tint'); }
       }
-      var styleAttr = styles.length ? ' style="' + styles.join(';') + '"' : '';
-      var clsAttr = cls.length ? ' class="' + cls.join(' ') + '"' : '';
-      var liveDot = s.is_live ? '<span class="live-dot">' + String.fromCharCode(9679) + '</span>' : '';
-      html += '<tr' + clsAttr + styleAttr + '>' +
-        '<td class="name-cell"><div class="co">' + liveDot + (s.company || s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>' +
-        '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
-        piInputCell(s, 'price') + piInputCell(s, 'high_52w') + piInputCell(s, 'low_52w') +
-        piInputCell(s, 'ma_150') + piInputCell(s, 'ma_200') + piInputCell(s, 'recent_pullback');
-      for (var j = 8; j < PI_COLS.length; j++) {
-        var col = PI_COLS[j];
-        if (col.kind === 'rating') html += piRatingCell(s, col);
-        else if (col.kind === 'score') html += piScoreCell(s, col);
-        else html += piTestCell(s, col);
+      var sa = styles.length ? ' style="' + styles.join(';') + '"' : '';
+      var ca = cls.length ? ' class="' + cls.join(' ') + '"' : '';
+      var ld = s.is_live ? '<span class="live-dot">' + String.fromCharCode(9679) + '</span>' : '';
+      html += '<tr' + ca + sa + '>';
+      for (var j = 0; j < PPI_COLS.length; j++) {
+        var col = PPI_COLS[j];
+        if (col.id === 'name') {
+          html += '<td class="name-cell"><div class="co">' + ld + (s.company||s.ticker) + '</div><div class="tk">' + s.ticker + '</div></td>';
+        } else if (col.id === 'taxon') {
+          html += '<td class="taxon"><div class="ind">' + (s.industry||'') + '</div><div class="sec">' + (s.sector||'') + '</div></td>';
+        } else if (col.kind === 'input')     { html += ppiInputCell(s, col.id);
+        } else if (col.kind === 'pi_rating') { html += ppiRatingCell(s, col);
+        } else if (col.kind === 'pi_score')  { html += ppiScoreCell(s, col);
+        } else if (col.kind === 'pi_test')   { html += ppiTestCell(s, col);
+        } else if (col.kind === 's2_pill')   { html += ppiS2RatingCell(s, col);
+        } else if (col.kind === 's2_score')  { html += ppiS2ScoreCell(s, col);
+        } else if (col.kind === 's2_test')   { html += ppiS2TestCell(s, col);
+        } else if (col.kind === 's2_count')  { html += ppiS2CountCell(s, col);
+        } else if (col.kind === 's2_persist'){ html += '<td class="' + (col.cls||'') + '">' + ppiS2PersistCells(s.s2persistence, s.s2rating) + '</td>';
+        } else { html += '<td>—</td>'; }
       }
       html += '</tr>';
     }
     tbody.innerHTML = html;
   }
 
-  function piSetMode(kind, val) {
-    piState.mode[kind] = val;
-    var btns = document.querySelectorAll('button[data-pi-grp="' + kind + '"]');
-    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-pi-val') === val);
-    piRenderRows();
-  }
-  function piSetScope(s) {
-    piState.scope = s;
-    var btns = document.querySelectorAll('button[data-pi-scope]');
-    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-pi-scope') === s);
-    piRenderRows();
-  }
-  function piSetTint(t) {
-    piState.tint = t;
-    var btns = document.querySelectorAll('button[data-pi-tint]');
-    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-pi-tint') === t);
-    piRenderRows();
-  }
-  function piSetPort(p) {
-    piState.port = p;
-    var btns = document.querySelectorAll('button[data-pi-port]');
-    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-pi-port') === p);
-    piRenderRows();
-  }
-  // MD-V2-PI-CHIPS-S25-MARKER: toggle a single rating tier for a pattern.
-  function piToggleTier(patternKey, tier) {
-    var sel = piState.tierFilter[patternKey] || [];
-    var idx = sel.indexOf(tier);
-    if (idx > -1) sel.splice(idx, 1);
-    else sel.push(tier);
-    piState.tierFilter[patternKey] = sel;
-    piRenderRows();
-  }
-  // MD-V2-PI-CHIPS-S25-MARKER: tile-body click selects ALL tiers for a pattern
-  // (D-MD-V2-59 Option A). If all are already selected, clear them (toggle off).
-  function piSelectAllTiers(patternKey) {
-    // MD-V2-WAVE1-FROZEN-HEADERS-MARKER: tile-body click selects ONLY the Probable tier
-    // (D-MD-V2-74). If exactly ['Probable'] is already selected,
-    // clear it (toggle off). Tier chips remain direct multi-select.
-    var pat = null;
-    for (var p = 0; p < PI_PATTERNS.length; p++) if (PI_PATTERNS[p].key === patternKey) pat = PI_PATTERNS[p];
-    if (!pat) return;
-    var sel = piState.tierFilter[patternKey] || [];
-    var probable = (pat.tierLadder.indexOf('Probable') > -1) ? 'Probable'
-                   : pat.tierLadder[pat.tierLadder.length - 1];
-    var onlyProbable = (sel.length === 1 && sel[0] === probable);
-    piState.tierFilter[patternKey] = onlyProbable ? [] : [probable];
-    piRenderRows();
-  }
-  window.piSetMode = piSetMode;
-  window.piSetScope = piSetScope;
-  window.piSetTint = piSetTint;
-  window.piSetPort = piSetPort;
-  window.piToggleTier = piToggleTier;
-  window.piSelectAllTiers = piSelectAllTiers;
-  window.piOnSort = piOnSort;
-
-  function piBuildScaffold() {
-    var host = document.getElementById('tab-pre_indicators');
+  function ppiBuildScaffold() {
+    var host = document.getElementById('tab-pos_pre_indicators');
     if (!host) return false;
-    if (host.querySelector('#pi-main-table')) return true;
-
-    var colgroupHtml = '<col class="c-name"><col class="c-taxon">' +
-                       '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
-                       '<col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
-    var inputsColspan = 8;
-
-    var superHtml = '<th class="gh-inputs sg-spacer" colspan="' + inputsColspan + '"></th>';
-    var groupHtml = '<th class="gh-inputs" colspan="' + inputsColspan + '">Inputs</th>';
-
-    var posCols = 0, negCols = 0;
-    for (var sp = 0; sp < PI_PATTERNS.length; sp++) {
-      var cspan = 2 + PI_PATTERNS[sp].tests.length;
-      if (PI_PATTERNS[sp].supergroup === 'positive') posCols += cspan;
-      else negCols += cspan;
+    if (host.querySelector('#ppi-main-table')) return true;
+    var posCols = 0;
+    for (var p = 0; p < PPI_PATTERNS.length; p++) posCols += 2 + PPI_PATTERNS[p].tests.length;
+    var cgHtml = '<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-pullback">';
+    for (var ci = 4; ci < PPI_COLS.length; ci++) {
+      var ck = PPI_COLS[ci].kind;
+      if (ck === 'pi_rating' || ck === 's2_pill') cgHtml += '<col class="c-rating">';
+      else if (ck === 'pi_score' || ck === 's2_score') cgHtml += '<col class="c-score">';
+      else if (ck === 's2_persist') cgHtml += '<col class="c-persist">';
+      else cgHtml += '<col class="c-test">';
     }
-    superHtml += '<th class="sg-positive" colspan="' + posCols + '">Positive pre-test indicators</th>';
-    superHtml += '<th class="sg-negative" colspan="' + negCols + '">Negative pre-test indicators</th>';
-
-    for (var p = 0; p < PI_PATTERNS.length; p++) {
-      var pat = PI_PATTERNS[p];
-      var gi = p + 1;
-      var n = pat.tests.length;
-      colgroupHtml += '<col class="c-rating"><col class="c-score">';
-      for (var t = 0; t < n; t++) colgroupHtml += '<col class="c-test">';
-      groupHtml += '<th class="gh-g' + gi + ' grp-start-g' + gi + '" colspan="' + (n + 2) + '">' + pat.label + '</th>';
+    var superHtml = '<th class="gh-inputs sg-spacer" colspan="4"></th>' +
+                    '<th class="sg-stage2" colspan="14">Stage 2 quality</th>' +
+                    '<th class="sg-positive" colspan="' + posCols + '">Positive pre-setup/test indicators</th>';
+    var groupHtml = '<th class="gh-inputs" colspan="4">Inputs</th>' +
+                    '<th class="gh-g1 grp-start-g1" colspan="14">Group 1 — Stage 2 quality?</th>';
+    for (var gp = 0; gp < PPI_PATTERNS.length; gp++) {
+      var gpat = PPI_PATTERNS[gp], gspan = 2 + gpat.tests.length, grpNum = gp + 2;
+      groupHtml += '<th class="gh-g' + (gp+4) + ' grp-start-g' + (gp+4) + '" colspan="' + gspan + '">Group ' + grpNum + ' — ' + gpat.label + '?</th>';
     }
-
-    var captionsHtml = '';
-    for (var cp = 0; cp < PI_PATTERNS.length; cp++) {
-      var cpat = PI_PATTERNS[cp];
-      captionsHtml += '<div class="gcap gcap-g' + (cp+1) + '"><b>' + cpat.label + '</b>' + cpat.caption + '</div>';
+    var captionsHtml = '<div class="gcap gcap-g1"><b>Group 1 — Stage 2 quality?</b>Quality of the Stage 2 uptrend for each stock. Tests 1–4: hard gates (all four MA position gates must pass). Tests 5–6: MA stack (50D above 150D and 200D). Tests 7–9: Relative strength ≥70th percentile (industry, sector, stock).</div>';
+    for (var cp = 0; cp < PPI_PATTERNS.length; cp++) {
+      var cpat = PPI_PATTERNS[cp], grpN = cp + 2;
+      captionsHtml += '<div class="gcap gcap-g' + (cp+4) + '"><b>Group ' + grpN + ' — ' + cpat.label + '?</b>' + cpat.caption + '</div>';
     }
-
-    var html = '' +
-      '<div class="s1-intro">Pre-test indicators are three leading price-action patterns drawn directly from price and moving-average data. Each pattern is the AND of its named constituent tests, shown below as individual tick columns alongside a per-pattern rating and score. The two positive patterns (Pulling back within a medium/long-term uptrend, and Basing) sit under one super-group; Collapsing sits under the negative super-group. Each tile has a rating-tier filter row: click a tier chip to show only stocks at that tier, or click the tile body to select all tiers. Tier selections within a pattern combine as OR; selections across patterns combine as AND.</div>' +
+    var html =
+      '<div class="s1-intro">Positive pre-setup indicators: stocks in a medium/long-term uptrend either pulling back or forming a base. Stage 2 quality is shown first (Group 1), then Pulling back (Group 2) and Basing (Group 3) pattern tests, numbered sequentially.</div>' +
       '<div class="controls s1-controls">' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
-          '<button class="toggle-btn active" data-pi-grp="inputs" data-pi-val="pct" onclick="piSetMode(\'inputs\',\'pct\')">show as %</button>' +
-          '<button class="toggle-btn" data-pi-grp="inputs" data-pi-val="raw" onclick="piSetMode(\'inputs\',\'raw\')">show as numbers</button>' +
-        '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +  /* MD-V2-WAVE4-TEST-VALUES-TOGGLE-MARKER */
-          '<button class="toggle-btn active" data-pi-grp="tests" data-pi-val="tick" onclick="piSetMode(\'tests\',\'tick\')">show ticks</button>' +
-          '<button class="toggle-btn" data-pi-grp="tests" data-pi-val="val" onclick="piSetMode(\'tests\',\'val\')">show test values</button>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +
+          '<button class="toggle-btn active" data-ppi-grp="tests" data-ppi-val="tick" onclick="ppiSetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-ppi-grp="tests" data-ppi-val="val" onclick="ppiSetMode(\'tests\',\'val\')">show test values</button>' +
         '</div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
-          '<button class="toggle-btn active" data-pi-scope="all" onclick="piSetScope(\'all\')">All <span id="pi-cnt-all"></span></button>' +
-          '<button class="toggle-btn" data-pi-scope="live" onclick="piSetScope(\'live\')">Live <span id="pi-cnt-live"></span></button>' +
-          '<button class="toggle-btn" data-pi-scope="sector" onclick="piSetScope(\'sector\')">Sectors <span id="pi-cnt-sector"></span></button>' +
-          '<button class="toggle-btn" data-pi-scope="industry" onclick="piSetScope(\'industry\')">Industries <span id="pi-cnt-industry"></span></button>' +
-          '<button class="toggle-btn disabled" title="Definition pending">Peers</button>' +
-          '<button class="toggle-btn disabled" title="Definition pending">Cohorts</button>' +
+          '<button class="toggle-btn active" data-ppi-scope="all" onclick="ppiSetScope(\'all\')">All <span id="ppi-cnt-all"></span></button>' +
+          '<button class="toggle-btn" data-ppi-scope="live" onclick="ppiSetScope(\'live\')">Live <span id="ppi-cnt-live"></span></button>' +
+          '<button class="toggle-btn" data-ppi-scope="sector" onclick="ppiSetScope(\'sector\')">Sectors <span id="ppi-cnt-sector"></span></button>' +
+          '<button class="toggle-btn" data-ppi-scope="industry" onclick="ppiSetScope(\'industry\')">Industries <span id="ppi-cnt-industry"></span></button>' +
         '</div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span>' +
-          '<button class="toggle-btn active" data-pi-tint="none" onclick="piSetTint(\'none\')">Off</button>' +
-          '<button class="toggle-btn" data-pi-tint="industry" onclick="piSetTint(\'industry\')">Industry</button>' +
-          '<button class="toggle-btn" data-pi-tint="sector" onclick="piSetTint(\'sector\')">Sector</button>' +
+          '<button class="toggle-btn active" data-ppi-tint="none" onclick="ppiSetTint(\'none\')">Off</button>' +
+          '<button class="toggle-btn" data-ppi-tint="industry" onclick="ppiSetTint(\'industry\')">Industry</button>' +
+          '<button class="toggle-btn" data-ppi-tint="sector" onclick="ppiSetTint(\'sector\')">Sector</button>' +
         '</div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
-          '<button class="toggle-btn active" data-pi-port="off" onclick="piSetPort(\'off\')">Off</button>' +
-          '<button class="toggle-btn" data-pi-port="on" onclick="piSetPort(\'on\')">On</button>' +
+          '<button class="toggle-btn active" data-ppi-port="off" onclick="ppiSetPort(\'off\')">Off</button>' +
+          '<button class="toggle-btn" data-ppi-port="on" onclick="ppiSetPort(\'on\')">On</button>' +
         '</div>' +
       '</div>' +
-      '<div class="rating-tiles s1-rating-tiles" id="pi-pattern-tiles"></div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="ppi-pattern-tiles"></div>' +
       '<div class="group-captions">' + captionsHtml + '</div>' +
-      '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
-        '<table class="data-table" id="pi-main-table">' +
-          '<colgroup>' + colgroupHtml + '</colgroup>' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +
+        '<table class="data-table" id="ppi-main-table">' +
+          '<colgroup>' + cgHtml + '</colgroup>' +
           '<thead>' +
             '<tr class="super-group-row">' + superHtml + '</tr>' +
             '<tr class="group-header-row">' + groupHtml + '</tr>' +
-            '<tr class="col-header-row" id="pi-col-header-row"></tr>' +
+            '<tr class="col-header-row" id="ppi-col-header-row"></tr>' +
           '</thead>' +
-          '<tbody id="pi-tbody"></tbody>' +
+          '<tbody id="ppi-tbody"></tbody>' +
         '</table>' +
-      '</div></div>';  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
+      '</div></div>';
     host.innerHTML = html;
-    // MD-V2-PI-CHIPS-S25-MARKER: tile click delegation - a chip click toggles
-    // that tier; a click anywhere else on the tile selects all tiers (Option A).
-    var tiles = document.getElementById('pi-pattern-tiles');
-    if (tiles) {
-      tiles.addEventListener('click', function(e) {
+    var tilesEl = document.getElementById('ppi-pattern-tiles');
+    if (tilesEl) {
+      tilesEl.addEventListener('click', function(e) {
         var chip = e.target.closest('.pi-tier-chip');
-        if (chip) {
-          var cp = chip.getAttribute('data-pattern');
-          var ct = chip.getAttribute('data-tier');
-          if (cp && ct) piToggleTier(cp, ct);
-          return;
-        }
+        if (chip) { var cp = chip.getAttribute('data-pattern'), ct = chip.getAttribute('data-ppi-tier'); if (cp && ct) ppiToggleTier(cp, ct); return; }
         var tile = e.target.closest('.rating-tile');
-        if (!tile) return;
-        var k = tile.getAttribute('data-pattern');
-        if (k) piSelectAllTiers(k);
+        if (tile) { var k = tile.getAttribute('data-ppi-pattern'); if (k) ppiSelectAllTiers(k); }
       });
     }
-    var hdr = document.getElementById('pi-col-header-row');
-    if (hdr) {
-      hdr.addEventListener('click', function(e) {
-        var th = e.target.closest('th');
-        if (!th) return;
-        var key = th.getAttribute('data-sort-key');
-        if (key) piOnSort(key);
-      });
-    }
+    var hdr = document.getElementById('ppi-col-header-row');
+    if (hdr) { hdr.addEventListener('click', function(e) { var th = e.target.closest('th'); if (th) { var key = th.getAttribute('data-sort-key'); if (key) ppiOnSort(key); } }); }
     return true;
   }
 
-  function renderPreIndicators() {
-    // MD-V2-MDJUMP-CONSUMER-S27-MARKER: Master Overview cell-click handoff. Read
-    // window._mdJump once; if it targets this tab, arm the chip filter
-    // for the named pattern, then clear it so it fires exactly once.
+  function ppiSetMode(kind, val) {
+    ppiState.mode[kind] = val;
+    document.querySelectorAll('button[data-ppi-grp="' + kind + '"]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-ppi-val') === val); });
+    ppiRenderRows();
+  }
+  function ppiSetScope(s) {
+    ppiState.scope = s;
+    document.querySelectorAll('button[data-ppi-scope]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-ppi-scope') === s); });
+    ppiRenderRows();
+  }
+  function ppiSetTint(t) {
+    ppiState.tint = t;
+    document.querySelectorAll('button[data-ppi-tint]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-ppi-tint') === t); });
+    ppiRenderRows();
+  }
+  function ppiSetPort(p) {
+    ppiState.port = p;
+    document.querySelectorAll('button[data-ppi-port]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-ppi-port') === p); });
+    ppiRenderRows();
+  }
+  function ppiOnSort(key) {
+    if (ppiState.sort.col === key) ppiState.sort.dir = ppiState.sort.dir === 'desc' ? 'asc' : 'desc';
+    else ppiState.sort = { col:key, dir:key==='company'?'asc':'desc' };
+    ppiBuildHeaderRow(); ppiRenderRows();
+  }
+  function ppiToggleTier(patternKey, tier) {
+    var sel = ppiState.tierFilter[patternKey] || [], idx = sel.indexOf(tier);
+    if (idx > -1) sel.splice(idx,1); else sel.push(tier);
+    ppiState.tierFilter[patternKey] = sel; ppiRenderRows();
+  }
+  function ppiSelectAllTiers(patternKey) {
+    var pat = null;
+    for (var p = 0; p < PPI_PATTERNS.length; p++) if (PPI_PATTERNS[p].key === patternKey) pat = PPI_PATTERNS[p];
+    if (!pat) return;
+    var sel = ppiState.tierFilter[patternKey] || [];
+    var probable = pat.tierLadder.indexOf('Probable') > -1 ? 'Probable' : pat.tierLadder[pat.tierLadder.length-1];
+    ppiState.tierFilter[patternKey] = (sel.length === 1 && sel[0] === probable) ? [] : [probable];
+    ppiRenderRows();
+  }
+
+  function renderPosPreIndicators() {
     (function(){
       var j = window._mdJump;
-      if (j && j.tab === 'pre_indicators') {
-        if (j.patternKey && j.tier && piState.tierFilter &&
-            piState.tierFilter.hasOwnProperty(j.patternKey)) {
-          piState.tierFilter[j.patternKey] = [j.tier];
+      if (j && j.tab === 'pos_pre_indicators') {
+        if (j.patternKey && j.tier && ppiState.tierFilter && ppiState.tierFilter.hasOwnProperty(j.patternKey)) {
+          ppiState.tierFilter[j.patternKey] = [j.tier];
         }
         window._mdJump = null;
       }
     })();
-    if (!piBuildScaffold()) return;
-    piBuildHeaderRow();
-    piRenderRows();
-    if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
+    if (!ppiBuildScaffold()) return;
+    ppiBuildHeaderRow();
+    ppiRenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();
   }
-  window.renderPreIndicators = renderPreIndicators;
+
+  window.ppiSetMode = ppiSetMode; window.ppiSetScope = ppiSetScope;
+  window.ppiSetTint = ppiSetTint; window.ppiSetPort = ppiSetPort;
+  window.ppiToggleTier = ppiToggleTier; window.ppiSelectAllTiers = ppiSelectAllTiers;
+  window.ppiOnSort = ppiOnSort;
+  window.renderPosPreIndicators = renderPosPreIndicators;
+
+})();
+
+// =============================================================================
+// NEGATIVE PRE-INDICATORS TAB MODULE (neg_pre_indicators)
+// Pattern: collapsing. Plus full Stage 2 columns + Stage 3 Groups 3 and 4.
+// =============================================================================
+(function() {
+  'use strict';
+
+  var npiState = {
+    mode: { inputs: 'pct', tests: 'tick' },
+    scope: 'all',
+    tierFilter: { collapsing: [] },
+    tint: 'none',
+    port: 'off',
+    sort: { col: 'company', dir: 'asc' }
+  };
+
+  var NPI_PATTERNS = [
+    {
+      key: 'collapsing', label: 'Collapsing', shortLabel: 'Collapsing', supergroup: 'negative',
+      tierLadder: ['Possible','Probable'],
+      tooltip: 'Price is 30%+ below its 52-week high AND has fallen at least 20% from its recent high.',
+      caption: 'A stock in <span class="db">genuine breakdown</span>.<span class="intro">Two tests:</span><span class="tline"><span class="tnum">(1)</span> <u>Price 30%+ below 52W high</u></span><span class="tline"><span class="tnum">(2)</span> <u>Pullback at least 20%</u></span>',
+      total: 2,
+      tests: [
+        { key: 't1_price_le_70pct_52wh', label: 'Price 30%+ below 52W high', tooltip: 'Current price is 30% or more below the 52-week high' },
+        { key: 't2_pullback_ge20',       label: 'Pullback at least 20%',     tooltip: 'Recent pullback from the recent high is at least 20%' }
+      ]
+    }
+  ];
+
+  var NPI_RATING_RANK = { 'Probable':4, 'Plausible':3, 'Possible':2, 'None':1 };
+  var NPI_RATING_CLS  = { 'Probable':'tint-prob', 'Plausible':'tint-pla', 'Possible':'tint-pos', 'None':'tint-none' };
+
+  function npiBuildCols() {
+    var cols = [
+      { id:'name',     label:'Company · Ticker',  sortKey:'company',         cls:'name-cell', kind:'input' },
+      { id:'taxon',    label:'Industry · Sector', sortKey:'sector',          cls:'taxon',     kind:'input' },
+      { id:'price',    label:'Price',                  sortKey:'price',           cls:'num',       kind:'input' },
+      { id:'pullback', label:'Recent pullback',        sortKey:'recent_pullback', cls:'num',       kind:'input' }
+    ];
+    // Group 1: Stage 2 quality (g1=S2-start, g2=MA sub-group, g3=context sub-group, persist)
+    cols.push({ id:'s2_rat',   label:'Rating', sortKey:'s2_rating_rank', cls:'grp-start-g1', kind:'s2_pill' });
+    cols.push({ id:'s2_scr',   label:'Score',  sortKey:'s2_count',       cls:'',             kind:'s2_score' });
+    cols.push({ id:'s2_gp200', label:'1. Price above 200D MA (gate)',          sortKey:'s2_gp200',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g1_P_above_200D' });
+    cols.push({ id:'s2_g1502', label:'2. 150D MA above 200D MA (gate)',        sortKey:'s2_g1502',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g3_150D_above_200D' });
+    cols.push({ id:'s2_gp150', label:'3. Price above 150D MA (gate)',          sortKey:'s2_gp150',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g2_P_above_150D' });
+    cols.push({ id:'s2_g52wh', label:'4. Within 25% of 52w high (gate)',       sortKey:'s2_g52wh',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g4_within_25pct_52WH' });
+    // g2: S2 MA+RS (5 cols)
+    cols.push({ id:'s2_t5', label:'5. 50D MA above 150D MA',               sortKey:'s2_t5', cls:'grp-start-g2', kind:'s2_test', testGroup:'g1_ma_stack', testKey:'T5' });
+    cols.push({ id:'s2_t6', label:'6. 50D MA above 200D MA',               sortKey:'s2_t6', cls:'',             kind:'s2_test', testGroup:'g1_ma_stack', testKey:'T6' });
+    cols.push({ id:'s2_t7', label:'7. Industry pct. ≥70',            sortKey:'s2_t7', cls:'',             kind:'s2_test', testGroup:'g2_rs', testKey:'T7' });
+    cols.push({ id:'s2_t8', label:'8. Sector pct. in industry ≥70',  sortKey:'s2_t8', cls:'',             kind:'s2_test', testGroup:'g2_rs', testKey:'T8' });
+    cols.push({ id:'s2_t9', label:'9. Stock vs industry pct. ≥70',   sortKey:'s2_t9', cls:'',             kind:'s2_test', testGroup:'g2_rs', testKey:'T9' });
+    // g3: S2 context counts (2 cols)
+    cols.push({ id:'s2_sii', label:'# sectors in industry', sortKey:'sectors_in_industry', cls:'grp-start-g3', kind:'s2_count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 });
+    cols.push({ id:'s2_cis', label:'# companies in sector', sortKey:'companies_in_sector',  cls:'',            kind:'s2_count', countKey:'companies_in_sector',  countRedAt:2, countAmberAt:5 });
+    // Persistence (end of Group 1)
+    cols.push({ id:'persist', label:'Last 12 months', sortKey:'s2_persist_count', cls:'grp-start-persist', kind:'s2_persist' });
+    // Group 2: Collapsing (g4 = rating + score + tests 10–11)
+    var pat = NPI_PATTERNS[0];
+    cols.push({ id:'p1_rat', label:'Rating', sortKey:pat.key+'__rating', cls:'grp-start-g4 pi-rating-col', kind:'pi_rating', patternKey:pat.key });
+    cols.push({ id:'p1_scr', label:'Score',  sortKey:pat.key+'__score',  cls:'pi-score-col',               kind:'pi_score',  patternKey:pat.key });
+    for (var t = 0; t < pat.tests.length; t++) {
+      var tst = pat.tests[t], tNum = 10 + t;
+      cols.push({ id:'p1t'+(t+1), label:(tNum + '. ' + tst.label), sortKey:pat.key+'__'+tst.key, cls:'', tooltip:tst.tooltip, kind:'pi_test', patternKey:pat.key, testKey:tst.key });
+    }
+    // Group 3: Stage 3 breakdown signals (g5 = T3–T8, tests 12–17)
+    cols.push({ id:'s3_t3', label:'12. 2+ bases (504d window)',          sortKey:'s3_t3', cls:'grp-start-g5', kind:'s3_test', testGroup:'g1_base_deterioration', testKey:'T3' });
+    cols.push({ id:'s3_t4', label:'13. 50D MA ≤ 150D MA',          sortKey:'s3_t4', cls:'',             kind:'s3_test', testGroup:'g1_base_deterioration', testKey:'T4' });
+    cols.push({ id:'s3_t5', label:'14. Down vol > up vol (L20d)',        sortKey:'s3_t5', cls:'',             kind:'s3_test', testGroup:'g2_distribution_signals', testKey:'T5' });
+    cols.push({ id:'s3_t6', label:'15. L1M volatility > P4M',           sortKey:'s3_t6', cls:'',             kind:'s3_test', testGroup:'g2_distribution_signals', testKey:'T6' });
+    cols.push({ id:'s3_t7', label:'16. ≥2 lower lows in last 2 months', sortKey:'s3_t7', cls:'', kind:'s3_test', testGroup:'g2_distribution_signals', testKey:'T7' });
+    cols.push({ id:'s3_t8', label:'17. 10%+ lower sector RS L3M',       sortKey:'s3_t8', cls:'',             kind:'s3_test', testGroup:'g3_rs_degradation', testKey:'T8' });
+    return cols;
+  }
+  var NPI_COLS = npiBuildCols();
+
+  function npiPricesLookup() {
+    if (window._npiPricesByTicker) return window._npiPricesByTicker;
+    var out = {}, arr = (window.MASTER_DATA && MASTER_DATA.prices) || [];
+    for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].ticker) out[arr[i].ticker] = arr[i];
+    return (window._npiPricesByTicker = out);
+  }
+  function npiLiveTickers() {
+    var out = {}, inv = (window.MASTER_DATA && MASTER_DATA.positions && MASTER_DATA.positions.investments) || [];
+    for (var i = 0; i < inv.length; i++) if (inv[i].ticker) out[inv[i].ticker] = true;
+    return out;
+  }
+  function npiLiveSectors() {
+    var out = {}, prices = npiPricesLookup(), tickers = npiLiveTickers();
+    for (var t in tickers) { var p = prices[t]; if (p && p.sector) out[p.sector] = true; }
+    return out;
+  }
+  function npiLiveIndustries() {
+    var out = {}, prices = npiPricesLookup(), tickers = npiLiveTickers();
+    for (var t in tickers) { var p = prices[t]; if (p && p.industry) out[p.industry] = true; }
+    return out;
+  }
+
+  function npiPatternRec(row, patternKey) {
+    var pi = row.md_v2 && row.md_v2.pre_indicators;
+    return (pi && pi[patternKey]) || null;
+  }
+  function npiEvalTest(row, patternKey, testKey) {
+    var rec = npiPatternRec(row, patternKey);
+    return !!(rec && rec.tests && rec.tests[testKey]);
+  }
+  function npiRowRating(row, patternKey) {
+    var rec = npiPatternRec(row, patternKey);
+    return rec ? (rec.rating || 'None') : 'None';
+  }
+
+  function npiGetRows() {
+    var raw = (window.MASTER_DATA && MASTER_DATA.filters) || [];
+    var prices = npiPricesLookup();
+    var live = npiLiveTickers(), liveS = npiLiveSectors(), liveI = npiLiveIndustries();
+    var rows = [];
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i];
+      if (!s || !s.md_v2 || !s.md_v2.pre_indicators || !s.md_v2.stage_2 || !s.md_v2.stage_3) continue;
+      var p = prices[s.ticker] || {};
+      var s2 = s.md_v2.stage_2;
+      var s3 = s.md_v2.stage_3;
+      var pers = (s.md_v2.persistence && s.md_v2.persistence.stage_2_persistence) || [];
+      // Merge S2 gates
+      var s2grps = {}, s2gsrc = s2.groups || {};
+      for (var _k2 in s2gsrc) s2grps[_k2] = s2gsrc[_k2];
+      if (s2.gates) s2grps._gates = s2.gates;
+      // Merge S3 groups + compute T3
+      var s3grps = {}, s3gsrc = s3.groups || {};
+      for (var _k3 in s3gsrc) s3grps[_k3] = s3gsrc[_k3];
+      var _s3tv = s3.test_values || {};
+      if (_s3tv.T3_base_count_504d != null && s3grps.g1_base_deterioration) {
+        s3grps.g1_base_deterioration.T3 = (_s3tv.T3_base_count_504d >= 2);
+      }
+      rows.push({
+        ticker: s.ticker, company: p.company_name || s.ticker,
+        sector: p.sector || '', industry: p.industry || '',
+        price: p.price, recent_pullback: p.recent_pullback_pct,
+        md_v2: s.md_v2,
+        s2rating: s2.rating, s2count: s2.count,
+        s2tests: s2.tests || {}, s2groups: s2grps, s2persistence: pers,
+        s3groups: s3grps,
+        sectors_in_industry: (s.md_v2.sectors_in_industry_count || 0),
+        companies_in_sector: (s.md_v2.companies_in_sector_count || 0),
+        is_live: !!live[s.ticker],
+        sector_in_portfolio: !!liveS[p.sector],
+        industry_in_portfolio: !!liveI[p.industry]
+      });
+    }
+    return rows;
+  }
+
+  function npiFmtNum(n) {
+    if (n == null || isNaN(n)) return '—';
+    var abs = Math.abs(n), dp = abs >= 100 ? 0 : (abs >= 20 ? 1 : 2);
+    if (Math.abs(n - Math.round(n)) < 1e-9) dp = 0;
+    var f = abs.toLocaleString('en-GB', { minimumFractionDigits:dp, maximumFractionDigits:dp });
+    return n < 0 ? '(' + f + ')' : f;
+  }
+  function npiColour(i) {
+    if (i >= 0.6) return '#0F6E56'; if (i >= 0.25) return '#1D9E75'; if (i >= 0.05) return '#5DCAA5';
+    if (i <= -0.6) return '#A32D2D'; if (i <= -0.25) return '#E24B4A'; if (i <= -0.05) return '#F09595';
+    return '#888';
+  }
+  function npiInputCell(row, id) {
+    var v = row[id];
+    if (id === 'price') return '<td class="num">' + npiFmtNum(v) + '</td>';
+    if (id === 'recent_pullback') {
+      if (v == null || isNaN(v)) return '<td class="num">—</td>';
+      var pv = v * 100, col = npiColour(-Math.max(-1, Math.min(1, (pv - 5) / 20)));
+      return '<td class="num" style="color:' + col + '">' + Math.round(pv) + '%</td>';
+    }
+    return '<td class="num">—</td>';
+  }
+
+  function npiTestCell(row, col) {
+    var pass = npiEvalTest(row, col.patternKey, col.testKey), extra = col.cls || '';
+    if (npiState.mode.tests === 'val') {
+      return '<td class="test-val pi-' + (pass ? 'pass' : 'fail') + ' ' + extra + '" style="color:' + npiColour(pass?0.7:-0.4) + '">—</td>';
+    }
+    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
+    return '<td class="pi-fail ' + extra + '">.</td>';
+  }
+  function npiRatingCell(row, col) {
+    var rating = npiRowRating(row, col.patternKey), rcls = NPI_RATING_CLS[rating] || 'tint-none';
+    return '<td class="' + (col.cls||'') + ' pi-rating-cell ' + rcls + '"><span class="pi-pill pi-pill-' + rcls + '">' + rating + '</span></td>';
+  }
+  function npiScoreCell(row, col) {
+    var rec = npiPatternRec(row, col.patternKey);
+    var cnt = rec ? (rec.count||0) : 0, tot = rec ? (rec.total||0) : 0;
+    var s = '';
+    for (var i = 0; i < tot; i++) s += '<span class="pip ' + (i < cnt ? 'on' : '') + '"></span>';
+    return '<td class="' + (col.cls||'') + ' pi-score-cell"><div class="pi-pip-row">' + s + '<span class="pi-score-num">' + cnt + '/' + tot + '</span></div></td>';
+  }
+
+  function npiS2PillFor(rating, count) {
+    if (rating === 'Probable') { var c = Math.min(Math.max(count,7),10); return '<span class="pill pill-prob-' + c + '">Probable</span>'; }
+    if (rating === 'Plausible') return '<span class="pill pill-pla">Plausible</span>';
+    if (rating === 'Possible')  return '<span class="pill pill-pos">Possible</span>';
+    return '<span class="pill pill-none">None</span>';
+  }
+  function npiS2ScorePips(row) {
+    var t = row.s2tests || {}, gates = (row.s2groups && row.s2groups._gates) || {};
+    var passed = [!!t.T5_50D_above_150D, !!t.T6_50D_above_200D, !!t.T7_industry_RS_pct_ge70, !!t.T8_sector_RS_pct_ge70, !!t.T9_stock_RS_vs_industry_ge70];
+    var count = passed.filter(Boolean).length;
+    var s = '<span class="pip ' + (gates.g1_P_above_200D     ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gates.g3_150D_above_200D  ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gates.g2_P_above_150D     ? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip ' + (gates.g4_within_25pct_52WH? 'gate-ok' : 'gate-x') + '"></span>' +
+            '<span class="pip-div"></span>';
+    var divAfter = {1:true}, rsIdx = {2:true,3:true,4:true};
+    for (var i = 0; i < 5; i++) {
+      var cls = passed[i] ? (rsIdx[i] ? 'rs-on' : 'on') : '';
+      s += '<span class="pip ' + cls + '"></span>';
+      if (divAfter[i]) s += '<span class="pip-div"></span>';
+    }
+    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/5</span></div>';
+  }
+  function npiS2PersistCells(arr, rating) {
+    var h = '';
+    for (var i = 0; i < 12; i++) {
+      if (i === 11 && arr && arr[11]) {
+        var cls = rating === 'Probable' ? 'r-prob' : rating === 'Plausible' ? 'r-pla' : rating === 'Possible' ? 'r-pos' : 'r-none';
+        h += '<span class="persist-cell ' + cls + '" title="Current: ' + rating + '"></span>';
+      } else {
+        h += '<span class="persist-cell r-none" title="Month -' + (11-i) + '"></span>';
+      }
+    }
+    return '<div class="persist-row">' + h + '</div>';
+  }
+  function npiS2TestCell(row, col) {
+    var grp = (row.s2groups||{})[col.testGroup]||{}, pass = !!grp[col.testKey], extra = col.cls||'';
+    if (npiState.mode.tests === 'val') return '<td class="test-val pi-' + (pass?'pass':'fail') + ' ' + extra + '" style="color:' + npiColour(pass?0.7:-0.4) + '">—</td>';
+    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
+    return '<td class="pi-fail ' + extra + '">.</td>';
+  }
+  function npiS3TestCell(row, col) {
+    var grp = (row.s3groups||{})[col.testGroup]||{}, pass = !!grp[col.testKey], extra = col.cls||'';
+    if (npiState.mode.tests === 'val') return '<td class="test-val pi-' + (pass?'pass':'fail') + ' ' + extra + '" style="color:' + npiColour(pass?0.7:-0.4) + '">—</td>';
+    if (pass) return '<td class="pi-pass ' + extra + '"><span class="tick">' + String.fromCharCode(10003) + '</span></td>';
+    return '<td class="pi-fail ' + extra + '">.</td>';
+  }
+  function npiS2CountCell(row, col) {
+    var n = row[col.countKey]||0, ccls = col.cls||'';
+    var cstyle = n <= col.countRedAt ? 'color:#a83232' : (n <= col.countAmberAt ? 'color:#b45309' : 'color:#555');
+    return '<td class="num ' + ccls + '" style="' + cstyle + '">' + n + '</td>';
+  }
+  function npiS2RatingCell(row, col) {
+    var r = row.s2rating||'None', cnt = row.s2count||0;
+    var tcls = { 'Probable':'tint-prob','Plausible':'tint-pla','Possible':'tint-pos','None':'tint-none' };
+    return '<td class="' + (col.cls||'') + ' ' + (tcls[r]||'tint-none') + '">' + npiS2PillFor(r,cnt) + '</td>';
+  }
+  function npiS2ScoreCell(row, col) {
+    return '<td class="' + (col.cls||'') + ' pi-score-cell">' + npiS2ScorePips(row) + '</td>';
+  }
+
+  function npiHashColor(label, alpha) {
+    if (!label) return null;
+    var h = 0; for (var i = 0; i < label.length; i++) h = (h*31+label.charCodeAt(i))&0xffff;
+    return 'hsla(' + (h%360) + ',40%,55%,' + alpha + ')';
+  }
+  function npiPortfolioInfo(row) {
+    if (row.is_live)              return { color:'#1b5e20', bg:'rgba(27,94,32,0.10)',  bgHover:'rgba(27,94,32,0.14)' };
+    if (row.sector_in_portfolio)  return { color:'#1b5e20', bg:'rgba(27,94,32,0.05)',  bgHover:'rgba(27,94,32,0.08)' };
+    if (row.industry_in_portfolio)return { color:'#1b5e20', bg:'rgba(27,94,32,0.025)', bgHover:'rgba(27,94,32,0.05)' };
+    return null;
+  }
+
+  function npiPatternCounts(rows) {
+    var c = {}; for (var p = 0; p < NPI_PATTERNS.length; p++) c[NPI_PATTERNS[p].key] = 0;
+    for (var i = 0; i < rows.length; i++)
+      for (var j = 0; j < NPI_PATTERNS.length; j++) {
+        var rec = npiPatternRec(rows[i], NPI_PATTERNS[j].key);
+        if (rec && rec.qualifies) c[NPI_PATTERNS[j].key]++;
+      }
+    return c;
+  }
+  function npiPassHistogram(rows, patternKey, total) {
+    var h = []; for (var k = 0; k <= total; k++) h[k] = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var rec = npiPatternRec(rows[i], patternKey), cnt = rec ? (rec.count||0) : 0;
+      if (cnt >= 0 && cnt <= total) h[cnt]++;
+    }
+    return h;
+  }
+  function npiTierCounts(rows, patternKey) {
+    var c = { 'Possible':0,'Plausible':0,'Probable':0,'None':0 };
+    for (var i = 0; i < rows.length; i++) { var r = npiRowRating(rows[i], patternKey); if (c[r]!=null) c[r]++; }
+    return c;
+  }
+
+  function npiApplyScope(all) {
+    if (npiState.scope === 'live')     return all.filter(function(r){ return r.is_live; });
+    if (npiState.scope === 'sector')   return all.filter(function(r){ return r.sector_in_portfolio; });
+    if (npiState.scope === 'industry') return all.filter(function(r){ return r.industry_in_portfolio; });
+    return all.slice();
+  }
+  function npiApplyTierFilter(rows) {
+    var k = 'collapsing', sel = npiState.tierFilter[k]||[];
+    if (sel.length === 0) return rows;
+    return rows.filter(function(r){ return sel.indexOf(npiRowRating(r,k)) > -1; });
+  }
+  function npiUpdateScopeCounts(rows) {
+    function set(id,n){ var el=document.getElementById(id); if(el) el.textContent='('+n+')'; }
+    set('npi-cnt-all', rows.length);
+    set('npi-cnt-live',     rows.filter(function(r){ return r.is_live; }).length);
+    set('npi-cnt-sector',   rows.filter(function(r){ return r.sector_in_portfolio; }).length);
+    set('npi-cnt-industry', rows.filter(function(r){ return r.industry_in_portfolio; }).length);
+  }
+  function npiGetSortVal(row, key) {
+    if (key.indexOf('__') > 0) {
+      var parts = key.split('__'), pk = parts[0], sub = parts[1];
+      var rec = npiPatternRec(row, pk);
+      if (sub==='rating') return rec ? (NPI_RATING_RANK[rec.rating]||0) : 0;
+      if (sub==='score')  return rec ? (rec.count||0) : 0;
+      return npiEvalTest(row,pk,sub) ? 1 : 0;
+    }
+    if (key==='s2_rating_rank') return NPI_RATING_RANK[row.s2rating]||0;
+    if (key==='s2_count') return row.s2count||0;
+    if (key==='s2_persist_count') return (row.s2persistence&&row.s2persistence.filter(Boolean).length)||0;
+    if (key==='sectors_in_industry') return row.sectors_in_industry||0;
+    if (key==='companies_in_sector') return row.companies_in_sector||0;
+    if (key.indexOf('s2_')===0 || key.indexOf('s3_')===0) {
+      var colObj = null;
+      for (var ci = 0; ci < NPI_COLS.length; ci++) if (NPI_COLS[ci].sortKey === key) { colObj = NPI_COLS[ci]; break; }
+      if (colObj && colObj.kind === 's2_test') {
+        var g2 = (row.s2groups||{})[colObj.testGroup]||{};
+        return g2[colObj.testKey] ? 1 : 0;
+      }
+      if (colObj && colObj.kind === 's3_test') {
+        var g3 = (row.s3groups||{})[colObj.testGroup]||{};
+        return g3[colObj.testKey] ? 1 : 0;
+      }
+      return 0;
+    }
+    return row[key] != null ? row[key] : (typeof row[key]==='string' ? '' : 0);
+  }
+
+  function npiPatternTiles(scopeRows) {
+    var tiles = document.getElementById('npi-pattern-tiles');
+    if (!tiles) return;
+    var counts = npiPatternCounts(scopeRows), total = scopeRows.length;
+    var h = '', pat = NPI_PATTERNS[0];
+    var cnt = counts[pat.key]||0, pct = total > 0 ? Math.round(cnt/total*100) : 0;
+    var sel = npiState.tierFilter[pat.key]||[], anySel = sel.length > 0;
+    var tierCounts = npiTierCounts(scopeRows, pat.key);
+    var headline = cnt, headSub = 'of ' + total.toLocaleString('en-GB') + ' · ' + pct + '%';
+    if (anySel) {
+      var ft = 0; for (var z = 0; z < sel.length; z++) ft += (tierCounts[sel[z]]||0);
+      headline = ft; headSub = sel.join(' + ') + ' · filtered';
+    }
+    var hist = npiPassHistogram(scopeRows, pat.key, pat.total);
+    var breakdown = '1 of 2: ' + (hist[1]||0).toLocaleString('en-GB') + ' · 2 of 2: ' + (hist[2]||0).toLocaleString('en-GB');
+    // collapsing has only Possible and Probable tiers
+    var chips = '';
+    for (var c = 0; c < 2; c++) {
+      var tier = ['Possible','Probable'][c], on = sel.indexOf(tier) > -1, tc = tierCounts[tier]||0;
+      chips += '<span class="pi-tier-chip pi-chip-collapsing' + (on?' on':'') + '" data-pattern="collapsing" data-npi-tier="' + tier + '">' + tier + ' ' + tc.toLocaleString('en-GB') + (on?' '+String.fromCharCode(10003):'') + '</span>';
+    }
+    h = '<div class="rating-tile pi-tile-collapsing' + (anySel?' active':'') + '" data-npi-pattern="collapsing" title="' + pat.tooltip + '">' +
+        '<div class="rt-label">' + pat.shortLabel + '</div>' +
+        '<div class="rt-count">' + headline.toLocaleString('en-GB') + '</div>' +
+        '<div class="rt-sub">' + headSub + '</div>' +
+        '<div class="rt-breakdown">' + breakdown + '</div>' +
+        '<div class="pi-tier-chips">' + chips + '</div>' +
+        '<div class="rt-strip pi-strip-collapsing"></div>' +
+        '</div>';
+    tiles.innerHTML = h;
+  }
+
+  function npiBuildHeaderRow() {
+    var tr = document.getElementById('npi-col-header-row');
+    if (!tr) return;
+    var h = '';
+    for (var i = 0; i < NPI_COLS.length; i++) {
+      var c = NPI_COLS[i];
+      var isSort = npiState.sort.col === c.sortKey;
+      var arrow = isSort ? '<span class="sort-arrow">' + (npiState.sort.dir==='desc'?String.fromCharCode(9660):String.fromCharCode(9650)) + '</span>' : '<span class="sort-placeholder"></span>';
+      h += '<th class="' + (c.cls||'') + '" data-sort-key="' + c.sortKey + '" title="' + (c.tooltip||c.label) + '">' + c.label + arrow + '</th>';
+    }
+    tr.innerHTML = h;
+  }
+
+  function npiRenderRows() {
+    var tbody = document.getElementById('npi-tbody');
+    if (!tbody) return;
+    var all = npiGetRows(), scopeRows = npiApplyScope(all);
+    npiUpdateScopeCounts(all);
+    npiPatternTiles(scopeRows);
+    var rows = npiApplyTierFilter(scopeRows);
+    rows.sort(function(a,b) {
+      var va = npiGetSortVal(a, npiState.sort.col), vb = npiGetSortVal(b, npiState.sort.col);
+      var cmp = (typeof va==='string') ? va.localeCompare(vb) : (va||0)-(vb||0);
+      if (cmp===0) cmp = a.ticker.localeCompare(b.ticker);
+      return npiState.sort.dir==='desc' ? -cmp : cmp;
+    });
+    var html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var s = rows[i], styles = [], cls = [];
+      if (npiState.tint==='industry') { styles.push('--tint-bg: '+npiHashColor(s.industry,0.16)); cls.push('tint-row'); }
+      else if (npiState.tint==='sector') { styles.push('--tint-bg: '+npiHashColor(s.sector,0.16)); cls.push('tint-row'); }
+      if (npiState.port==='on') {
+        var pinfo = npiPortfolioInfo(s);
+        if (pinfo) { styles.push('--portfolio-color:'+pinfo.color,'--portfolio-bg:'+pinfo.bg,'--portfolio-bg-hover:'+pinfo.bgHover); cls.push('portfolio-band','portfolio-tint'); }
+      }
+      var sa = styles.length?' style="'+styles.join(';')+'"':'';
+      var ca = cls.length?' class="'+cls.join(' ')+'"':'';
+      var ld = s.is_live ? '<span class="live-dot">'+String.fromCharCode(9679)+'</span>' : '';
+      html += '<tr'+ca+sa+'>';
+      for (var j = 0; j < NPI_COLS.length; j++) {
+        var col = NPI_COLS[j];
+        if (col.id==='name') {
+          html += '<td class="name-cell"><div class="co">'+ld+(s.company||s.ticker)+'</div><div class="tk">'+s.ticker+'</div></td>';
+        } else if (col.id==='taxon') {
+          html += '<td class="taxon"><div class="ind">'+(s.industry||'')+'</div><div class="sec">'+(s.sector||'')+'</div></td>';
+        } else if (col.kind==='input')     { html += npiInputCell(s, col.id);
+        } else if (col.kind==='pi_rating') { html += npiRatingCell(s, col);
+        } else if (col.kind==='pi_score')  { html += npiScoreCell(s, col);
+        } else if (col.kind==='pi_test')   { html += npiTestCell(s, col);
+        } else if (col.kind==='s2_pill')   { html += npiS2RatingCell(s, col);
+        } else if (col.kind==='s2_score')  { html += npiS2ScoreCell(s, col);
+        } else if (col.kind==='s2_test')   { html += npiS2TestCell(s, col);
+        } else if (col.kind==='s3_test')   { html += npiS3TestCell(s, col);
+        } else if (col.kind==='s2_count')  { html += npiS2CountCell(s, col);
+        } else if (col.kind==='s2_persist'){ html += '<td class="'+(col.cls||'')+'">'+npiS2PersistCells(s.s2persistence,s.s2rating)+'</td>';
+        } else { html += '<td>—</td>'; }
+      }
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  function npiBuildScaffold() {
+    var host = document.getElementById('tab-neg_pre_indicators');
+    if (!host) return false;
+    if (host.querySelector('#npi-main-table')) return true;
+    var cgHtml = '<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-pullback">';
+    for (var ci = 4; ci < NPI_COLS.length; ci++) {
+      var ck = NPI_COLS[ci].kind;
+      if (ck==='pi_rating'||ck==='s2_pill') cgHtml += '<col class="c-rating">';
+      else if (ck==='pi_score'||ck==='s2_score') cgHtml += '<col class="c-score">';
+      else if (ck==='s2_persist') cgHtml += '<col class="c-persist">';
+      else cgHtml += '<col class="c-test">';
+    }
+    var superHtml = '<th class="gh-inputs sg-spacer" colspan="4"></th>' +
+                    '<th class="sg-stage2" colspan="14">Stage 2 quality</th>' +
+                    '<th class="sg-negative" colspan="4">Negative pre-setup/test indicators</th>' +
+                    '<th class="sg-stage3" colspan="6">Stage 3 signals</th>';
+    var groupHtml = '<th class="gh-inputs" colspan="4">Inputs</th>' +
+                    '<th class="gh-g1 grp-start-g1" colspan="14">Group 1 — Stage 2 quality?</th>' +
+                    '<th class="gh-g4 grp-start-g4" colspan="4">Group 2 — Collapsing?</th>' +
+                    '<th class="gh-g5 grp-start-g5" colspan="6">Group 3 — Stage 3 breakdown signals?</th>';
+    var captionsHtml = '<div class="gcap gcap-g1"><b>Group 1 — Stage 2 quality?</b>Quality of the Stage 2 uptrend for each stock. Tests 1–4: hard gates (all four MA position gates must pass). Tests 5–6: MA stack (50D above 150D and 200D). Tests 7–9: Relative strength ≥70th percentile (industry, sector, stock).</div>' +
+                       '<div class="gcap gcap-g4"><b>Group 2 — Collapsing?</b>' + NPI_PATTERNS[0].caption + '</div>' +
+                       '<div class="gcap gcap-g5"><b>Group 3 — Stage 3 breakdown signals?</b>Early breakdown signals from the Stage 3 pipeline. Tests 12–17: base deterioration (2+ bases in 504d window), MA cross (50D ≤ 150D), vol distribution, lower lows, sector RS degradation.</div>';
+    var html =
+      '<div class="s1-intro">Negative pre-setup indicators: stocks showing signs of a breakdown (Collapsing pattern). Stage 2 quality is shown first (Group 1), then Collapsing pattern tests (Group 2), then Stage 3 breakdown signals (Group 3), all numbered sequentially.</div>' +
+      '<div class="controls s1-controls">' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Tests</span>' +
+          '<button class="toggle-btn active" data-npi-grp="tests" data-npi-val="tick" onclick="npiSetMode(\'tests\',\'tick\')">show ticks</button>' +
+          '<button class="toggle-btn" data-npi-grp="tests" data-npi-val="val" onclick="npiSetMode(\'tests\',\'val\')">show test values</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Scope</span>' +
+          '<button class="toggle-btn active" data-npi-scope="all" onclick="npiSetScope(\'all\')">All <span id="npi-cnt-all"></span></button>' +
+          '<button class="toggle-btn" data-npi-scope="live" onclick="npiSetScope(\'live\')">Live <span id="npi-cnt-live"></span></button>' +
+          '<button class="toggle-btn" data-npi-scope="sector" onclick="npiSetScope(\'sector\')">Sectors <span id="npi-cnt-sector"></span></button>' +
+          '<button class="toggle-btn" data-npi-scope="industry" onclick="npiSetScope(\'industry\')">Industries <span id="npi-cnt-industry"></span></button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span>' +
+          '<button class="toggle-btn active" data-npi-tint="none" onclick="npiSetTint(\'none\')">Off</button>' +
+          '<button class="toggle-btn" data-npi-tint="industry" onclick="npiSetTint(\'industry\')">Industry</button>' +
+          '<button class="toggle-btn" data-npi-tint="sector" onclick="npiSetTint(\'sector\')">Sector</button>' +
+        '</div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+          '<button class="toggle-btn active" data-npi-port="off" onclick="npiSetPort(\'off\')">Off</button>' +
+          '<button class="toggle-btn" data-npi-port="on" onclick="npiSetPort(\'on\')">On</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rating-tiles s1-rating-tiles" id="npi-pattern-tiles"></div>' +
+      '<div class="group-captions">' + captionsHtml + '</div>' +
+      '<div class="table-wrap"><div class="v2-hscroll">' +
+        '<table class="data-table" id="npi-main-table">' +
+          '<colgroup>' + cgHtml + '</colgroup>' +
+          '<thead>' +
+            '<tr class="super-group-row">' + superHtml + '</tr>' +
+            '<tr class="group-header-row">' + groupHtml + '</tr>' +
+            '<tr class="col-header-row" id="npi-col-header-row"></tr>' +
+          '</thead>' +
+          '<tbody id="npi-tbody"></tbody>' +
+        '</table>' +
+      '</div></div>';
+    host.innerHTML = html;
+    var tilesEl = document.getElementById('npi-pattern-tiles');
+    if (tilesEl) {
+      tilesEl.addEventListener('click', function(e) {
+        var chip = e.target.closest('.pi-tier-chip');
+        if (chip) { var ct = chip.getAttribute('data-npi-tier'); if (ct) npiToggleTier('collapsing', ct); return; }
+        var tile = e.target.closest('.rating-tile');
+        if (tile && tile.getAttribute('data-npi-pattern')) npiSelectAllTiers('collapsing');
+      });
+    }
+    var hdr = document.getElementById('npi-col-header-row');
+    if (hdr) { hdr.addEventListener('click', function(e){ var th=e.target.closest('th'); if(th){ var key=th.getAttribute('data-sort-key'); if(key) npiOnSort(key); } }); }
+    return true;
+  }
+
+  function npiSetMode(kind, val) {
+    npiState.mode[kind] = val;
+    document.querySelectorAll('button[data-npi-grp="'+kind+'"]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-npi-val')===val); });
+    npiRenderRows();
+  }
+  function npiSetScope(s) {
+    npiState.scope = s;
+    document.querySelectorAll('button[data-npi-scope]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-npi-scope')===s); });
+    npiRenderRows();
+  }
+  function npiSetTint(t) {
+    npiState.tint = t;
+    document.querySelectorAll('button[data-npi-tint]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-npi-tint')===t); });
+    npiRenderRows();
+  }
+  function npiSetPort(p) {
+    npiState.port = p;
+    document.querySelectorAll('button[data-npi-port]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-npi-port')===p); });
+    npiRenderRows();
+  }
+  function npiOnSort(key) {
+    if (npiState.sort.col===key) npiState.sort.dir = npiState.sort.dir==='desc'?'asc':'desc';
+    else npiState.sort = { col:key, dir:key==='company'?'asc':'desc' };
+    npiBuildHeaderRow(); npiRenderRows();
+  }
+  function npiToggleTier(patternKey, tier) {
+    var sel = npiState.tierFilter[patternKey]||[], idx = sel.indexOf(tier);
+    if (idx>-1) sel.splice(idx,1); else sel.push(tier);
+    npiState.tierFilter[patternKey] = sel; npiRenderRows();
+  }
+  function npiSelectAllTiers(patternKey) {
+    var sel = npiState.tierFilter[patternKey]||[];
+    var probable = 'Probable';
+    npiState.tierFilter[patternKey] = (sel.length===1 && sel[0]===probable) ? [] : [probable];
+    npiRenderRows();
+  }
+
+  function renderNegPreIndicators() {
+    (function(){
+      var j = window._mdJump;
+      if (j && j.tab === 'neg_pre_indicators') {
+        if (j.patternKey && j.tier && npiState.tierFilter && npiState.tierFilter.hasOwnProperty(j.patternKey)) {
+          npiState.tierFilter[j.patternKey] = [j.tier];
+        }
+        window._mdJump = null;
+      }
+    })();
+    if (!npiBuildScaffold()) return;
+    npiBuildHeaderRow();
+    npiRenderRows();
+    if (window.measureV2Ribbon) measureV2Ribbon();
+  }
+
+  window.npiSetMode = npiSetMode; window.npiSetScope = npiSetScope;
+  window.npiSetTint = npiSetTint; window.npiSetPort = npiSetPort;
+  window.npiToggleTier = npiToggleTier; window.npiSelectAllTiers = npiSelectAllTiers;
+  window.npiOnSort = npiOnSort;
+  window.renderNegPreIndicators = renderNegPreIndicators;
 
 })();
 
@@ -14861,9 +15420,9 @@ window.TAB_LABELS = TAB_LABELS;
     { section:'Stages', key:'stage_3', label:'Stage 3 - Topping', short:'S3 Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
     { section:'Stages', key:'stage_4', label:'Stage 4 - Decline', short:'S4 Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
     // -- Pre-test indicators --
-    { section:'Pre-farfalle indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', short:'Pulling back', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pre_indicators', patternKey:'pulling_back_uptrend' },
-    { section:'Pre-farfalle indicators', key:'basing', label:'Basing in a MT/LT uptrend', short:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pre_indicators', patternKey:'basing' },
-    { section:'Pre-farfalle indicators', key:'collapsing', label:'Collapsing', short:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'pre_indicators', patternKey:'collapsing' },
+    { section:'Positive pre-setup/test indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', short:'Pulling back', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pos_pre_indicators', patternKey:'pulling_back_uptrend' },
+    { section:'Positive pre-setup/test indicators', key:'basing', label:'Basing in a MT/LT uptrend', short:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pos_pre_indicators', patternKey:'basing' },
+    { section:'Negative pre-setup/test indicators', key:'collapsing', label:'Collapsing', short:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'neg_pre_indicators', patternKey:'collapsing' },
     // -- Post-test indicators (ratingPath -> md_v2.post_indicators.<k>.rating;
     //    md_v2.indicators.<k> is a bare boolean and has no .rating - Request 1) --
     { section:'Post-farfalle indicators', key:'breakout', label:'Breakout', short:'Breakout', ratingPath:'group:post_indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
@@ -14892,7 +15451,8 @@ window.TAB_LABELS = TAB_LABELS;
   // section -> group-band colour-hook class (shared by both tables)
   var MO_GROUP_CLS = {
     'Stages': 'mo-mx-g-stages',
-    'Pre-farfalle indicators': 'mo-mx-g-pretest',
+    'Positive pre-setup/test indicators': 'mo-mx-g-pos-pretest',
+    'Negative pre-setup/test indicators': 'mo-mx-g-neg-pretest',
     'Post-farfalle indicators': 'mo-mx-g-posttest',
     'Capital qualification setups': 'mo-mx-g-setups',
     'Capital deployment tests': 'mo-mx-g-tests'
@@ -14901,7 +15461,8 @@ window.TAB_LABELS = TAB_LABELS;
   // grouping border (CSS rule #mo-matrix-table tbody td.mo-sec-start-*).
   var MO_SECTION_BORDER_CLS = {
     'Stages': 'mo-sec-start-stages',
-    'Pre-farfalle indicators': 'mo-sec-start-pretest',
+    'Positive pre-setup/test indicators': 'mo-sec-start-pos-pretest',
+    'Negative pre-setup/test indicators': 'mo-sec-start-neg-pretest',
     'Post-farfalle indicators': 'mo-sec-start-posttest',
     'Capital qualification setups': 'mo-sec-start-setups',
     'Capital deployment tests': 'mo-sec-start-tests'
@@ -14909,7 +15470,8 @@ window.TAB_LABELS = TAB_LABELS;
   // MD-V2-S38-SECTIONS-OVERVIEW-MARKER: matching end-of-section map.
   var MO_SECTION_END_BORDER_CLS = {
     'Stages': 'mo-sec-end-stages',
-    'Pre-farfalle indicators': 'mo-sec-end-pretest',
+    'Positive pre-setup/test indicators': 'mo-sec-end-pos-pretest',
+    'Negative pre-setup/test indicators': 'mo-sec-end-neg-pretest',
     'Post-farfalle indicators': 'mo-sec-end-posttest',
     'Capital qualification setups': 'mo-sec-end-setups',
     'Capital deployment tests': 'mo-sec-end-tests'
@@ -14934,7 +15496,8 @@ window.TAB_LABELS = TAB_LABELS;
   // short section labels for the group band - the full names are long.
   var MO_GROUP_LABEL = {
     'Stages': 'Stages',
-    'Pre-farfalle indicators': 'Pre-farfalle',
+    'Positive pre-setup/test indicators': 'Positive pre-farfalle',
+    'Negative pre-setup/test indicators': 'Negative pre-farfalle',
     'Post-farfalle indicators': 'Post-farfalle',
     'Capital qualification setups': 'Qualification setups',
     'Capital deployment tests': 'Deployment tests'
@@ -15326,7 +15889,8 @@ function renderTab(id){
   else if(id==="stage_2")renderStage2();  /* MD-V2-STAGE2-MARKER */
   else if(id==="stage_3")renderStage3();  /* MD-V2-STAGE3-MARKER */
   else if(id==="stage_4")renderStage4();  /* MD-V2-STAGE4-MARKER */
-  else if(id==="pre_indicators")renderPreIndicators();  /* MD-V2-PRE-INDICATORS-MARKER */
+  else if(id==="pos_pre_indicators")renderPosPreIndicators();  /* MD-V2-PRE-INDICATORS-MARKER-POSITIVE */
+  else if(id==="neg_pre_indicators")renderNegPreIndicators();  /* MD-V2-PRE-INDICATORS-MARKER-NEGATIVE */
   else if(id==="post_indicators")renderPostIndicators();  /* MD-V2-POST-INDICATORS-MARKER */
   else if(id==="setups_s1pb")renderSetupsS1PB();  /* MD-V2-SETUPS-MARKER */
   else if(id==="setups_s2vcp")renderSetupsS2VCP();  /* MD-V2-SETUPS-MARKER */

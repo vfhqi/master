@@ -13471,7 +13471,7 @@ window.TAB_LABELS = TAB_LABELS;
   function hashColor(lbl,alpha){if(!lbl)return null;var h=0;for(var i=0;i<lbl.length;i++)h=(h*31+lbl.charCodeAt(i))&0xffff;return'hsla('+(h%360)+',35%,55%,'+alpha+')';}
   function portInfo(row){if(row.is_live)return{color:'#1b5e20',bg:'rgba(27,94,32,0.10)',bgHover:'rgba(27,94,32,0.14)'};if(row.sector_in_portfolio)return{color:'#1b5e20',bg:'rgba(27,94,32,0.05)',bgHover:'rgba(27,94,32,0.08)'};if(row.industry_in_portfolio)return{color:'#1b5e20',bg:'rgba(27,94,32,0.025)',bgHover:'rgba(27,94,32,0.05)'};return null;}
 
-  function priceCell(row,cls){return'<td class="num '+(cls||'")>'+fmtNum(row.price)+'</td>';}
+  function priceCell(row,cls){return'<td class="num '+(cls||'')+'">'  +fmtNum(row.price)+'</td>';}
   function pullbackCell(row,cls){var v=row.recent_pullback;if(v==null||isNaN(v))return'<td class="num '+(cls||'')+'">-</td>';var pv=v*100,i=Math.max(-1,Math.min(1,(pv-5)/20));return'<td class="num '+(cls||'')+'" style="color:'+colGreen(-i)+'">'+Math.round(pv)+'%</td>';}
   function s1RatingCell(row,cls){var r=stageRating(row);var pc=r==='Probable'?'s1ctx-pill-prob':r==='Plausible'?'s1ctx-pill-pla':r==='Possible'?'s1ctx-pill-pos':'s1ctx-pill-none';return'<td class="'+(cls||'')+'"><span class="'+CTX_PILL_CLS+' '+pc+'">'+r+'</span></td>';}
   function s1GateCell(row,key,cls){var p=s1Gate(row,key);return p?'<td class="'+CTX_PASS_CLS+' '+(cls||'')+'"><span class="tick">&#10003;</span></td>':'<td class="'+CTX_FAIL_CLS+' '+(cls||'')+'">.</td>';}

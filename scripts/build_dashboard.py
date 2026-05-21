@@ -775,7 +775,6 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s1-main-table col.c-ma150 { width: 54px; }
 #s1-main-table col.c-ma200 { width: 54px; }
 #s1-main-table col.c-rating { width: 100px; }
-#s1-main-table col.c-score { width: 120px; }
 #s1-main-table col.c-test { width: 50px; }
 #s1-main-table col.c-persist { width: 110px; }
 
@@ -7115,7 +7114,6 @@ function SUM_renderQualifiedStocks() {
     { id:'ma_150',    label:'150D MA',        sortKey:'ma_150', cls:'num' },
     { id:'ma_200',    label:'200D MA',        sortKey:'ma_200', cls:'num' },
     { id:'rating',    label:'Rating',                        sortKey:'rating_rank', cls:'grp-start-rating' },
-    { id:'streak',    label:'Stack streak (days)',      sortKey:'streak', cls:'' },
     { id:'g200D',     label:'1. 200D MA still declining (gate)',sortKey:'gate_200D', cls:'grp-start-g1 grp-end-g1', colType:'gate', gateField:'gate_200D' },
     { id:'gp150',     label:'2. Price above 150D MA (gate)',sortKey:'gate_p150', cls:'grp-start-g2', colType:'gate', gateField:'gate_p150' },
     { id:'stack_1m',  label:'3. 50D > 150D and 150D > 200D for 1M',sortKey:'stack_1m_pass', cls:'', colType:'streak_thresh', threshold:21 },
@@ -7174,7 +7172,6 @@ function SUM_renderQualifiedStocks() {
         sector_in_portfolio: !!liveSectors[p.sector],
         industry_in_portfolio: !!liveIndustries[p.industry],
         // MD-V2-S54 new fields
-        streak: s1.streak || 0,
         gate_200D: !!(s1.gate_200D_declining_vs_80d),
         gate_p150: !!(s1.gate_price_above_150D),
         sectors_in_industry: (s.md_v2.sectors_in_industry_count || 0),
@@ -7576,10 +7573,9 @@ function SUM_renderQualifiedStocks() {
         s1InputCell(s, 'ma_150') +
         s1InputCell(s, 'ma_200') +
         '<td class="grp-start-rating">' + s1PillFor(s.rating, s.count) + '</td>' +
-        '<td class="num">' + (s.streak || 0) + '</td>' +
-        s1TestCell(s, S1_COLS[9])  + s1TestCell(s, S1_COLS[10]) +
-        s1TestCell(s, S1_COLS[11]) + s1TestCell(s, S1_COLS[12]) +
-        s1TestCell(s, S1_COLS[13]) + s1TestCell(s, S1_COLS[14]) +
+        s1TestCell(s, S1_COLS[8])  + s1TestCell(s, S1_COLS[9]) +
+        s1TestCell(s, S1_COLS[10]) + s1TestCell(s, S1_COLS[11]) +
+        s1TestCell(s, S1_COLS[12]) + s1TestCell(s, S1_COLS[13]) +
         '<td class="grp-start-persist">' + s1PersistCells(s.persistence, s.rating) + '</td>' +
         '</tr>';
     }
@@ -7679,7 +7675,7 @@ function SUM_renderQualifiedStocks() {
             '<col class="c-name"><col class="c-taxon">' +
             '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
             '<col class="c-ma150"><col class="c-ma200">' +
-            '<col class="c-rating"><col class="c-score">' +
+            '<col class="c-rating">' +
             '<col class="c-test">' +
             '<col class="c-test"><col class="c-test"><col class="c-test">' +
             '<col class="c-test"><col class="c-test">' +
@@ -7688,7 +7684,7 @@ function SUM_renderQualifiedStocks() {
           '<thead>' +
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
-              '<th class="gh-rating grp-start-rating" colspan="2">Stage 1 rating</th>' /* MD-V2-S55-gh-s1 */ +
+              '<th class="gh-rating grp-start-rating" colspan="1">Stage 1 rating</th>' /* MD-V2-S55-gh-s1 */ +
               '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Group 1 — Longer-term trend downwards?</th>' +
               '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="3">Group 2 — Short-term trend troughed?</th>' +
               '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 — Taxonomy context?</th>' +
@@ -9376,11 +9372,8 @@ function SUM_renderQualifiedStocks() {
       + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="neg_pre_indicators" onclick="switchTab(\'neg_pre_indicators\')">Negative pre-setup/test indicators</button>'
       + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators" onclick="switchTab(\'post_indicators\')">Post-farfalle indicators</button>'
       + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Late-stage capital qualification</span>'
-      + '<button class="v2-nav-btn v2-grp-setups" data-v2-tab="setups_s1pb" onclick="switchTab(\'setups_s1pb\')">Stage 1 and Stage N PBs</button>'
-      + '<button class="v2-nav-btn v2-grp-setups" data-v2-tab="setups_s2vcp" onclick="switchTab(\'setups_s2vcp\')">Stage 2 VCPs and retests</button>'
       + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Capital deployment</span>'
+      + '<span class="v2-nav-grp-label">Late-stage capital qualification setups and tests</span>'
       + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests" onclick="switchTab(\'tests\')">Capital deployment tests</button>'
       + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">Healthy Retest</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
       + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">S1 Probing Bet</button>'
@@ -13172,6 +13165,7 @@ window.TAB_LABELS = TAB_LABELS;
 window.loadChartData = loadChartData;
 window._dashChartZoom = function(){ return chartZoom; };
 window._dashSetChartZoom = function(z){ chartZoom=z; };
+window._dashChartScaleMode = function(){ return chartScaleMode; };
             window.drawMasterChart = drawMasterChart;
 })();  /* close main IIFE */
 
@@ -13642,7 +13636,7 @@ window._dashSetChartZoom = function(z){ chartZoom=z; };
       else if (c.kind === 's2rating'){ label = 'S2 Rating'; title = 'Stage 2 uptrend rating'; cls = 'grp-start-g1'; }
       else if (c.kind === 's2gate')  { label = c.label; title = c.tooltip; }
       else if (c.kind === 's2test')  { label = c.label; title = c.tooltip; }
-      else if (c.kind === 'rating')  { label = 'HR Rating'; title = 'Healthy Retest rating'; cls = 'grp-start-rating'; }
+      else if (c.kind === 'rating')  { label = 'Rating'; title = 'Healthy Retest rating'; cls = 'grp-start-rating'; }
       else if (c.kind === 'score')   { label = 'Score'; title = 'Pass count / 13'; }
       else if (c.kind === 'hrtest') {
         label = c.label; title = c.tooltip;
@@ -14245,7 +14239,7 @@ window._dashSetChartZoom = function(z){ chartZoom=z; };
       +'<div class="rt-sub">'+headSub+'</div><div class="rt-breakdown">'+breakdown+'</div>'
       +'<div class="pi-tier-chips">'+chips+'</div>'
       +'<div class="rt-strip '+STRIP_CLS+'"></div></div>';
-    el.addEventListener('click',function(e){var chip=e.target.closest('.pi-tier-chip');if(chip){var t=chip.getAttribute('data-tier');if(t)window.pbs1ToggleTier(t);}});
+    el.onclick=function(e){var chip=e.target.closest('.pi-tier-chip');if(chip){var t=chip.getAttribute('data-tier');if(t)window.pbs1ToggleTier(t);}};
   }
 
   function renderRows(){
@@ -14517,7 +14511,7 @@ window._dashSetChartZoom = function(z){ chartZoom=z; };
       +'<div class="rt-sub">'+headSub+'</div><div class="rt-breakdown">'+breakdown+'</div>'
       +'<div class="pi-tier-chips">'+chips+'</div>'
       +'<div class="rt-strip '+STRIP_CLS+'"></div></div>';
-    el.addEventListener('click',function(e){var chip=e.target.closest('.pi-tier-chip');if(chip){var t=chip.getAttribute('data-tier');if(t)window.pbs2ToggleTier(t);}});
+    el.onclick=function(e){var chip=e.target.closest('.pi-tier-chip');if(chip){var t=chip.getAttribute('data-tier');if(t)window.pbs2ToggleTier(t);}};
   }
 
   function renderRows(){
@@ -16751,6 +16745,8 @@ document.addEventListener('click', function(e){
   }
 });
 
+  window.sspSetChartZoom = sspSetChartZoom;
+  window.sspSetStock = sspSetStock;
 })();
 /* MD-V2-S63-STOCK-VIEW-MARKER-END */
 
@@ -16849,7 +16845,7 @@ renderTab("mm99");
         '        <button class="ssp-czb" id="ssp-z-5y" onclick="sspSetChartZoom(1260)">5Y</button>\n'
         '        <button class="ssp-czb" id="ssp-z-all" onclick="sspSetChartZoom(99999)">All</button>\n'
         '        <span class="ssp-csep"></span>\n'
-        '        <button class="ssp-cvb" onclick="setChartScaleMode(chartScaleMode===\'lin\'?\'log\':\'lin\')">Log</button>\n'
+        '        <button class="ssp-cvb" onclick="setChartScaleMode((window._dashChartScaleMode?window._dashChartScaleMode():\'lin\')=== \'lin\'?\'log\':\'lin\')">Log</button>\n'
         '        <span class="ssp-csep"></span>\n'
         '        <button class="ssp-cvb on" onclick="toggleChartLayer(\'ma20\')">20d</button>\n'
         '        <button class="ssp-cvb on" onclick="toggleChartLayer(\'ma50\')">50d</button>\n'

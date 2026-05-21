@@ -2238,7 +2238,7 @@ col.mo-cg-screen { width: 76px; }
 .ctrl-btn.ssp-btn:hover{background:rgba(180,100,0,0.18);border-color:#b45309;color:#78350f}
 
 /* Full-screen overlay */
-.ssp-overlay{position:fixed;inset:0;z-index:9900;background:var(--bg);display:none;flex-direction:column;overflow:hidden}
+.ssp-overlay{position:fixed;top:var(--header-height);left:0;right:0;bottom:0;z-index:9900;background:var(--bg);display:none;flex-direction:column;overflow:hidden}
 .ssp-overlay.open{display:flex}
 
 /* Overlay header row */
@@ -13154,6 +13154,9 @@ window.buildHeaderControls = buildHeaderControls;
 window.renderPlaceholder = renderPlaceholder;
 window.TAB_IDS = TAB_IDS;
 window.TAB_LABELS = TAB_LABELS;
+/* MD-V2-S63A: expose chart loader + zoom for SSP overlay */
+window.loadChartData = loadChartData;
+window._dashChartZoom = function(){ return chartZoom; };
 })();  /* close main IIFE */
 
 /* MD-V2-TESTS-MARKER-END */
@@ -16289,7 +16292,7 @@ function _sspRowCls(md2){
   if(rankOf(npiR)>=2 || s3r==='Probable' || s4r==='Probable') return 'ssp-row-red';
   /* Green: S2 Probable AND any setup/test probable */
   if(s2r==='Probable'){
-    var setups=['healthy_retest','probing_bet_s1','probing_bet_s2','vcp_deploy_s2'];
+    var setups=['ma_retest_upwards','probing_bet_s1','probing_bet_s2','vcp_deploy_s2'];
     for(var si=0;si<setups.length;si++) if(_sspTestRating(md2,setups[si])==='Probable') return 'ssp-row-green';
     if(_sspSbRating(md2)==='Probable') return 'ssp-row-green';
   }
@@ -16326,7 +16329,7 @@ function sspRenderTable(ticker, p, md2){
   var npiO=_sspPreRating(md2,'collapsing'), npiC=_sspPreCount(md2,'collapsing');
 
   /* Setups/Tests */
-  var hrO=_sspTestRating(md2,'healthy_retest'),   hrC=_sspTestCount(md2,'healthy_retest');
+  var hrO=_sspTestRating(md2,'ma_retest_upwards'), hrC=_sspTestCount(md2,'ma_retest_upwards');
   var pb1O=_sspTestRating(md2,'probing_bet_s1'),  pb1C=_sspTestCount(md2,'probing_bet_s1');
   var pb2O=_sspTestRating(md2,'probing_bet_s2'),  pb2C=_sspTestCount(md2,'probing_bet_s2');
   var sbO=_sspSbRating(md2),                      sbC=_sspSbCount(md2);
@@ -16528,7 +16531,9 @@ function sspRenderChart(ticker, company){
   loading.textContent='Loading chart data for '+ticker+'...';
   canvas.style.display='none';
 
-  loadChartData(ticker, function(data){
+  var _lc = window.loadChartData;
+  if(!_lc){ loading.textContent='Chart loader unavailable'; return; }
+  _lc(ticker, function(data){
     if(!data){
       loading.textContent='No chart data available for '+ticker;
       return;
@@ -16554,7 +16559,7 @@ function _sspDrawChart(data, canvas, W, H, ticker){
   ctx.clearRect(0,0,W,H);
 
   /* Use same zoom/filter as user last used (chartZoom global) */
-  var zoom = (typeof chartZoom !== 'undefined') ? chartZoom : '1Y';
+  var zoom = (typeof window._dashChartZoom === 'function') ? window._dashChartZoom() : '1Y';
   var cutMs = _sspZoomCutMs(zoom);
   var rows = data.filter(function(r){ return !cutMs || (new Date(r.d)).getTime() >= cutMs; });
   if(!rows.length) rows = data;

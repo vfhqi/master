@@ -13830,17 +13830,17 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
                  '<th class="sub-g grp-start-context" colspan="2">Context</th>';
 
     var captionHtml =
-      '<div class="gcap gcap-g1"><b>Group 1 — Upwards long-term trend (Stage)</b>' +
-        '<span class="db">Is this stock in a confirmed Stage 2 uptrend? Four hard gates (price above both long MAs, 150D above 200D, within 25% of 52-week high) plus five tests deepening conviction: MA stack and relative strength vs industry, sector, and the broader market. The S2 rating shown is the existing Stage 2 tab rating for this stock.</span>' +
+      '<div class="gcap gcap-g1"><b>Group 1 — Upwards long-term trend?</b>' +
+        '<span class="db">The stock must be in a confirmed Stage 2 uptrend. Four hard gate tests: price above 200D MA, price above 150D MA, 150D MA above 200D MA, and within 25% of the 52-week high. Five supporting tests: 50D above 150D MA, 50D above 200D MA, industry RS percentile ≥70, sector RS percentile ≥70, stock RS percentile ≥70.</span>' +
       '</div>' +
-      '<div class="gcap gcap-g2"><b>Group 2 — Pulling back mid-term trend (Indicator)</b>' +
-        '<span class="db">The short-term trend must be rolling over — a genuine pullback within the longer uptrend. Both the 5-day and 10-day MAs must be declining day-over-day. Pullback depth is shown for context. Both tests must pass for any Healthy Retest rating to fire.</span>' +
+      '<div class="gcap gcap-g2"><b>Group 2 — Pulling back within the uptrend?</b>' +
+        '<span class="db">Three tests checking the stock is in a genuine pullback rather than a reversal: 5D MA declining, 10D MA declining, pullback % from recent high.</span>' +
       '</div>' +
-      '<div class="gcap gcap-g3"><b>Group 3 — Healthy retest of rising MA (Setup)</b>' +
-        '<span class="db">Quality of the pullback. Volume should be drying up (not panic selling), up-day volume should dominate, distribution days should be few, and volatility should be contracting. The MA test column shows the % distance to whichever of the 50/100/150/200-day MAs price is nearest to. Daily close in upper candle checks that at least half the last 10 days closed in the upper 40% of their high-low range.</span>' +
+      '<div class="gcap gcap-g3"><b>Group 3 — Healthy retest of a rising moving average?</b>' +
+        '<span class="db">Seven tests confirming the pullback is orderly and healthy: volume contracting, up-volume exceeds down-volume, few distribution days, volume reducing trend, price testing a rising MA (shown as % distance and which MA), and daily closes in the upper portion of candles over the last 10 days.</span>' +
       '</div>' +
-      '<div class="gcap gcap-g4"><b>Group 4 — Successful test (Trigger)</b>' +
-        '<span class="db">The deployment trigger. Price has pulled back to a rising MA and is now reclaiming it. Two tests: price must have crossed back above the tested MA in the last 10 trading days, and today\'s close must be at least 2% above yesterday\'s confirming follow-through buying.</span>' +
+      '<div class="gcap gcap-g4"><b>Group 4 — Successful test confirmed?</b>' +
+        '<span class="db">Two tests confirming the retest has held: price has reclaimed the MA, and a 2%+ up-close has confirmed buyers stepped in.</span>' +
       '</div>';
 
     var html = '' +
@@ -15131,9 +15131,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 <style>
 /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER-CSS-START */
 /* Healthy VCP (Core MM Trade #2) -- single 7-criterion test tab (S48) */
-#tab-tests_healthy_vcp .group-captions { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 16px 0 14px 0; }
-#tab-tests_healthy_vcp .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #1565C0; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
-#tab-tests_healthy_vcp .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; color: #1565C0; font-size: 11px; letter-spacing: 0.2px; }
+#tab-tests_healthy_vcp .group-captions { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 16px 0 14px 0; }
+#tab-tests_healthy_vcp .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #aaa; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
+#tab-tests_healthy_vcp .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; font-size: 11px; letter-spacing: 0.2px; }
+#tab-tests_healthy_vcp .group-captions .gcap-g1 { border-left-color: #b08a4e; } #tab-tests_healthy_vcp .group-captions .gcap-g1 b { color: #b08a4e; }
+#tab-tests_healthy_vcp .group-captions .gcap-g2 { border-left-color: #5a8a6a; } #tab-tests_healthy_vcp .group-captions .gcap-g2 b { color: #5a8a6a; }
+#tab-tests_healthy_vcp .group-captions .gcap-g3 { border-left-color: #4a6a8a; } #tab-tests_healthy_vcp .group-captions .gcap-g3 b { color: #4a6a8a; }
 #tab-tests_healthy_vcp .s1-rating-tiles { display: grid; grid-template-columns: 1fr; gap: 8px; }
 #tab-tests_healthy_vcp .s1-rating-tiles .pi-tile-hvcp { background: rgba(21,101,192,0.10); border: 1px solid rgba(21,101,192,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
 #tab-tests_healthy_vcp .s1-rating-tiles .pi-tile-hvcp.active { background: rgba(21,101,192,0.22); border: 1.5px solid #1565C0; }
@@ -15156,6 +15159,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #hvcp-main-table thead .gh-inputs { color: #555; }
 #hvcp-main-table thead .gh-stageinfo { color: #7a6a3a; }
 #hvcp-main-table thead .gh-g1 { color: #1565C0; }
+#hvcp-main-table thead .gh-g2 { color: #5a8a6a; }
+#hvcp-main-table thead .gh-g3 { color: #4a6a8a; }
+#hvcp-main-table thead .gh-context { color: #888; }
 #hvcp-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
 #hvcp-main-table .hd .lbl { white-space: normal; word-break: break-word; }
 #hvcp-main-table .hd .sort-arrow { font-size: 9px; color: #1565C0; flex: 0 0 auto; line-height: 1; }
@@ -15164,6 +15170,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #hvcp-main-table tr:hover { background: rgba(21,101,192,0.05); }
 #hvcp-main-table td.grp-start-stageinfo, #hvcp-main-table th.grp-start-stageinfo { border-left: 2px solid rgba(122,106,58,0.40); }
 #hvcp-main-table td.grp-start-g1, #hvcp-main-table th.grp-start-g1 { border-left: 2px solid rgba(21,101,192,0.40); }
+#hvcp-main-table td.grp-start-g2, #hvcp-main-table th.grp-start-g2 { border-left: 2px solid rgba(90,138,106,0.40); }
+#hvcp-main-table td.grp-start-g3, #hvcp-main-table th.grp-start-g3 { border-left: 2px solid rgba(74,106,138,0.40); }
+#hvcp-main-table td.grp-start-context, #hvcp-main-table th.grp-start-context { border-left: 2px solid rgba(136,136,136,0.35); }
 #hvcp-main-table td.pi-pass { background: rgba(21,101,192,0.12); color: #1565C0; font-weight: 700; }
 #hvcp-main-table td.pi-fail { color: #999; }
 #hvcp-main-table td.pi-rating-cell { padding: 3px 4px; }
@@ -15378,6 +15387,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var INPUT_LABELS = ['Company - Ticker','Industry - Sector','Price','52wk high','52wk low','150D MA','200D MA','Pullback'];
     var STAGE_LABELS = ['Stage 1','Stage 2','Stage 3','Stage 4'];
     var h = '';
+    var grpTestNum = {};
     for (var i = 0; i < HVCP_COLS.length; i++) {
       var c = HVCP_COLS[i];
       var isSort = hvcpState.sort.col === c.sortKey;
@@ -15387,8 +15397,15 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       else if (c.kind === 'stageinfo') { label = STAGE_LABELS[i - HVCP_INPUT_COUNT]; title = label + ' rating'; cls = (i === HVCP_INPUT_COUNT ? 'grp-start-stageinfo ' : ''); }
       else if (c.kind === 'rating') { label = 'Rating'; title = 'Healthy VCP rating'; cls = 'grp-start-g1 '; }
       else if (c.kind === 'score') { label = 'Score'; title = 'Pass count out of 7'; }
-      else if (c.kind === 'test') { label = c.label; title = c.tooltip || c.label; }
-      else if (c.kind === 'window') { label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label; cls = 'ct-window-col '; }
+      else if (c.kind === 'test') {
+        var grp = c.group || 'other';
+        grpTestNum[grp] = (grpTestNum[grp] || 0) + 1;
+        label = grpTestNum[grp] + '. ' + c.label;
+        title = c.tooltip || c.label;
+        if (grp === 'vcp' && grpTestNum[grp] === 1) cls = 'grp-start-g2 ';
+        else if (grp === 'trigger' && grpTestNum[grp] === 1) cls = 'grp-start-g3 ';
+      }
+      else if (c.kind === 'window') { label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label; cls = 'ct-window-col ' + (c.windowKey === 'l5d' ? 'grp-start-context ' : ''); }
       else { label = '?'; title = ''; }
       h += '<th class="' + cls + '" data-sort-key="' + c.sortKey + '" title="' + title + '"><span class="hd"><span class="lbl">' + label + '</span>' + arrow + '</span></th>';
     }
@@ -15454,8 +15471,11 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       html += hvcpRatingCell(s, 'grp-start-g1');
       html += hvcpScoreCell(s, '');
       var TESTS = HVCP_PATTERN.tests;
-      for (var ti = 0; ti < TESTS.length; ti++) html += hvcpTestCell(s, TESTS[ti].key, '');
-      html += hvcpWindowCell(s, 'l5d', 'ct-window-col');
+      for (var ti = 0; ti < TESTS.length; ti++) {
+        var tcls = TESTS[ti].key === 'v1_narrowing_contractions' ? 'grp-start-g2' : TESTS[ti].key === 'x1_breakout' ? 'grp-start-g3' : '';
+        html += hvcpTestCell(s, TESTS[ti].key, tcls);
+      }
+      html += hvcpWindowCell(s, 'l5d', 'ct-window-col grp-start-context');
       html += hvcpWindowCell(s, 'l20d', 'ct-window-col');
       html += '</tr>';
     }
@@ -15485,15 +15505,27 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     cg += '<col class="c-window"><col class="c-window">';
     var groupHtml = '<th class="gh-inputs" colspan="' + HVCP_INPUT_COUNT + '">Inputs</th>' +
       '<th class="gh-stageinfo grp-start-stageinfo" colspan="' + HVCP_STAGEINFO_COUNT + '">Stage ratings</th>' +
-      '<th class="gh-g1 grp-start-g1" colspan="' + totalSpan + '">Healthy VCP</th>';
+      '<th class="gh-g1 grp-start-g1" colspan="' + (2 + gateCount) + '">Group 1 — Stage 2 qualifying?</th>' +
+      '<th class="gh-g2 grp-start-g2" colspan="' + vcpCount + '">Group 2 — VCP pattern?</th>' +
+      '<th class="gh-g3 grp-start-g3" colspan="' + trigCount + '">Group 3 — Breakout confirmed?</th>' +
+      '<th class="gh-context grp-start-context" colspan="2">Context</th>';
     var subGroupHtml = '<th class="sg-spacer" colspan="' + HVCP_INPUT_COUNT + '"></th>' +
       '<th class="sg-spacer" colspan="' + HVCP_STAGEINFO_COUNT + '"></th>' +
       '<th class="sub-g sub-g-rating sub-g1" colspan="2">Rating</th>';
     if (gateCount > 0) subGroupHtml += '<th class="sub-g sub-g-gate sub-g1" colspan="' + gateCount + '">Gate</th>';
-    if (vcpCount > 0) subGroupHtml += '<th class="sub-g sub-g-setup sub-g1" colspan="' + vcpCount + '">VCP pattern</th>';
-    if (trigCount > 0) subGroupHtml += '<th class="sub-g sub-g-trigger sub-g1" colspan="' + trigCount + '">Trigger</th>';
-    subGroupHtml += '<th class="sub-g sub-g-context sub-g1" colspan="2">Context</th>';
-    var captionsHtml = '<div class="gcap gcap-g1"><b>' + HVCP_PATTERN.shortLabel + '</b>' + HVCP_PATTERN.caption + '</div>';
+    if (vcpCount > 0) subGroupHtml += '<th class="sub-g sub-g-setup grp-start-g2" colspan="' + vcpCount + '">VCP pattern</th>';
+    if (trigCount > 0) subGroupHtml += '<th class="sub-g sub-g-trigger grp-start-g3" colspan="' + trigCount + '">Trigger</th>';
+    subGroupHtml += '<th class="sub-g sub-g-context grp-start-context" colspan="2">Context</th>';
+    var captionsHtml =
+      '<div class="gcap gcap-g1"><b>Group 1 — Stage 2 qualifying?</b>' +
+        '<span class="db">One hard gate: the stock must be in a confirmed Stage 2 uptrend and in an active basing phase. This is the precondition for the entire VCP trade — no rating fires without it.</span>' +
+      '</div>' +
+      '<div class="gcap gcap-g2"><b>Group 2 — VCP pattern?</b>' +
+        '<span class="db">Four tests confirming a Volatility Contraction Pattern: each contraction is narrower than the previous, at least two contractions have completed, volume is declining through the base, and successive lows are rising.</span>' +
+      '</div>' +
+      '<div class="gcap gcap-g3"><b>Group 3 — Breakout confirmed?</b>' +
+        '<span class="db">Two trigger tests: price has broken above the pivot of the most recent contraction, and today\'s close is at least 2% above yesterday — confirming follow-through buying.</span>' +
+      '</div>';
     var theadRows = '<tr class="group-header-row">' + groupHtml + '</tr><tr class="sub-group-row">' + subGroupHtml + '</tr><tr class="col-header-row" id="hvcp-col-header-row"></tr>';
     var html = '<div class="s1-intro">Healthy VCP \u2014 Core MM Trade #2. A Volatility Contraction Pattern on a Stage 2 stock that is in a basing phase. The stock has been in an uptrend (Stage 2), has consolidated into a base, and the base shows classic VCP characteristics: each contraction is narrower than the last, volume is drying up, and lows are rising. A clean breakout above the pivot with a strong close confirms the pattern. This is the highest-conviction entry in the Minervini methodology: stage qualification, pattern quality, and a confirmed trigger all together.</div>' +
       '<div class="controls s1-controls">' +

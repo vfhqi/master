@@ -777,6 +777,7 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s1-main-table col.c-rating { width: 100px; }
 #s1-main-table col.c-test { width: 50px; }
 #s1-main-table col.c-persist { width: 110px; }
+#s1-main-table col.c-score { width: 96px; }
 
 #s1-main-table .pill { display: inline-block; padding: 3px 9px; border-radius: 11px; font-weight: 700; font-size: 10px; color: white; letter-spacing: 0.3px; white-space: nowrap; }
 #s1-main-table .pill-pl-5 { background: #2e7d32; color: #fff; }
@@ -7114,6 +7115,7 @@ function SUM_renderQualifiedStocks() {
     { id:'ma_150',    label:'150D MA',        sortKey:'ma_150', cls:'num' },
     { id:'ma_200',    label:'200D MA',        sortKey:'ma_200', cls:'num' },
     { id:'rating',    label:'Rating',                        sortKey:'rating_rank', cls:'grp-start-rating' },
+    { id:'score',     label:'Score',                         sortKey:'count',        cls:'grp-start-score' },
     { id:'g200D',     label:'1. 200D MA still declining (gate)',sortKey:'gate_200D', cls:'grp-start-g1 grp-end-g1', colType:'gate', gateField:'gate_200D' },
     { id:'gp150',     label:'2. Price above 150D MA (gate)',sortKey:'gate_p150', cls:'grp-start-g2', colType:'gate', gateField:'gate_p150' },
     { id:'stack_1m',  label:'3. 50D > 150D and 150D > 200D for 1M',sortKey:'stack_1m_pass', cls:'', colType:'streak_thresh', threshold:21 },
@@ -7573,9 +7575,10 @@ function SUM_renderQualifiedStocks() {
         s1InputCell(s, 'ma_150') +
         s1InputCell(s, 'ma_200') +
         '<td class="grp-start-rating">' + s1PillFor(s.rating, s.count) + '</td>' +
-        s1TestCell(s, S1_COLS[8])  + s1TestCell(s, S1_COLS[9]) +
-        s1TestCell(s, S1_COLS[10]) + s1TestCell(s, S1_COLS[11]) +
-        s1TestCell(s, S1_COLS[12]) + s1TestCell(s, S1_COLS[13]) +
+        '<td class="num">' + s1ScorePips(s) + '</td>' +
+        s1TestCell(s, S1_COLS[9])  + s1TestCell(s, S1_COLS[10]) +
+        s1TestCell(s, S1_COLS[11]) + s1TestCell(s, S1_COLS[12]) +
+        s1TestCell(s, S1_COLS[13]) + s1TestCell(s, S1_COLS[14]) +
         '<td class="grp-start-persist">' + s1PersistCells(s.persistence, s.rating) + '</td>' +
         '</tr>';
     }
@@ -7675,7 +7678,7 @@ function SUM_renderQualifiedStocks() {
             '<col class="c-name"><col class="c-taxon">' +
             '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
             '<col class="c-ma150"><col class="c-ma200">' +
-            '<col class="c-rating">' +
+            '<col class="c-rating"><col class="c-score">' +
             '<col class="c-test">' +
             '<col class="c-test"><col class="c-test"><col class="c-test">' +
             '<col class="c-test"><col class="c-test">' +
@@ -7684,7 +7687,7 @@ function SUM_renderQualifiedStocks() {
           '<thead>' +
             '<tr class="group-header-row">' +
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
-              '<th class="gh-rating grp-start-rating" colspan="1">Stage 1 rating</th>' /* MD-V2-S55-gh-s1 */ +
+              '<th class="gh-rating grp-start-rating" colspan="2">Stage 1 rating</th>' /* MD-V2-S55-gh-s1 */ +
               '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Group 1 — Longer-term trend downwards?</th>' +
               '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="3">Group 2 — Short-term trend troughed?</th>' +
               '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group 3 — Taxonomy context?</th>' +
@@ -13247,8 +13250,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #hr-main-table .pi-pill-tint-none { background: #ece9dd; color: #999; }
 #hr-main-table td.pi-score-cell { padding: 4px 3px; background: rgba(46,125,50,0.04); border-right: 1px solid rgba(46,125,50,0.18); }
 #hr-main-table .pi-pip-row { display: inline-flex; align-items: center; gap: 2px; justify-content: center; }
-#hr-main-table .pi-pip-row .pip { width: 6px; height: 6px; border-radius: 50%; background: #d8d4c4; display: inline-block; }
-#hr-main-table .pi-pip-row .pip.on { background: #2E7D32; }
+#hr-main-table .pi-pip-row .pip { width: 7px; height: 7px; border-radius: 50%; background: #ddd; display: inline-block; }
+#hr-main-table .pi-pip-row .pip.on { background: #1b5e20; }
 #hr-main-table .pi-pip-row .pi-score-num { font-size: 9.5px; color: #444; margin-left: 4px; font-weight: 700; }
 #hr-main-table td.pi-pass { background: rgba(46,125,50,0.12); color: #2E7D32; font-weight: 700; }
 #hr-main-table td.pi-fail { color: #999; }
@@ -13281,7 +13284,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #hr-main-table col.c-s2-gate { width: 40px; }
 #hr-main-table col.c-s2-test { width: 40px; }
 #hr-main-table col.c-rating { width: 72px; }
-#hr-main-table col.c-score { width: 56px; }
+#hr-main-table col.c-score { width: 96px; }
 #hr-main-table col.c-test { width: 40px; }
 #hr-main-table col.c-pb-info { width: 52px; }
 #hr-main-table col.c-ma-pct { width: 52px; }
@@ -13565,13 +13568,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       { id:'price',    sortKey:'price',           kind:'price' },
       { id:'pullback', sortKey:'recent_pullback', kind:'pullback' }
     ];
+    cols.push({ id:'hr_rating', sortKey:'hr__rating', kind:'rating' });
+    cols.push({ id:'hr_score',  sortKey:'hr__score',  kind:'score' });
     cols.push({ id:'s2_rating', sortKey:'s2__rating', kind:'s2rating' });
     for (var gi = 0; gi < S2_GATES.length; gi++)
       cols.push({ id:'s2g'+gi, sortKey:'s2g__'+S2_GATES[gi].key, kind:'s2gate', gateKey:S2_GATES[gi].key, label:S2_GATES[gi].label, tooltip:S2_GATES[gi].tooltip });
     for (var ti = 0; ti < S2_TESTS.length; ti++)
       cols.push({ id:'s2t'+ti, sortKey:'s2t__'+S2_TESTS[ti].key, kind:'s2test', testKey:S2_TESTS[ti].key, label:S2_TESTS[ti].label, tooltip:S2_TESTS[ti].tooltip });
-    cols.push({ id:'hr_rating', sortKey:'hr__rating', kind:'rating' });
-    cols.push({ id:'hr_score',  sortKey:'hr__score',  kind:'score' });
     cols.push({ id:'hr_g2_0', sortKey:'hr__'+HR_TESTS_G2[0].key, kind:'hrtest', testKey:HR_TESTS_G2[0].key, label:HR_TESTS_G2[0].label, tooltip:HR_TESTS_G2[0].tooltip, grpStart:'g2' });
     cols.push({ id:'hr_g2_1', sortKey:'hr__'+HR_TESTS_G2[1].key, kind:'hrtest', testKey:HR_TESTS_G2[1].key, label:HR_TESTS_G2[1].label, tooltip:HR_TESTS_G2[1].tooltip });
     cols.push({ id:'g2_pb',   sortKey:'g2__pb_info', kind:'pb_info' });
@@ -13729,13 +13732,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       html += '<td class="taxon"><div class="ind">' + (s.industry||'') + '</div><div class="sec">' + (s.sector||'') + '</div></td>';
       html += hrInputCell(s, 'price');
       html += hrInputCell(s, 'recent_pullback');
+      // Rating + Score (2)
+      html += hrRatingCell(s, 'grp-start-rating');
+      html += hrScoreCell(s, '');
       // G1: S2 rating + 4 gates + 5 tests (10)
       html += hrS2RatingCell(s, 'grp-start-g1');
       for (var gi2 = 0; gi2 < S2_GATES.length; gi2++) html += hrS2GateCell(s, S2_GATES[gi2].key);
       for (var ti2 = 0; ti2 < S2_TESTS.length; ti2++) html += hrS2TestCell(s, S2_TESTS[ti2].key);
-      // Rating + Score (2)
-      html += hrRatingCell(s, 'grp-start-rating');
-      html += hrScoreCell(s, '');
       // G2: 5D, 10D, pullback info (3)
       html += hrTestCell(s, HR_TESTS_G2[0].key, 'grp-start-g2');
       html += hrTestCell(s, HR_TESTS_G2[1].key, '');
@@ -13796,9 +13799,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 
     // colgroup: 4 inputs + 10 G1 + 2 rating + 3 G2 + 7 G3 + 2 G4 + 2 context = 30
     var cg = '<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-pullback">' +
+             '<col class="c-rating"><col class="c-score">' +
              '<col class="c-s2-rating"><col class="c-s2-gate"><col class="c-s2-gate"><col class="c-s2-gate"><col class="c-s2-gate">' +
              '<col class="c-s2-test"><col class="c-s2-test"><col class="c-s2-test"><col class="c-s2-test"><col class="c-s2-test">' +
-             '<col class="c-rating"><col class="c-score">' +
              '<col class="c-test"><col class="c-test"><col class="c-pb-info">' +
              '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
              '<col class="c-ma-pct"><col class="c-ma-name"><col class="c-test">' +
@@ -13806,18 +13809,18 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
              '<col class="c-window"><col class="c-window">';
 
     var gHdr = '<th class="gh-inputs" colspan="4">Inputs</th>' +
-               '<th class="gh-g1 grp-start-g1" colspan="10">Group 1 — Upwards long-term trend?</th>' +
                '<th class="gh-rating grp-start-rating" colspan="2">Rating</th>' +
+               '<th class="gh-g1 grp-start-g1" colspan="10">Group 1 — Upwards long-term trend?</th>' +
                '<th class="gh-g2 grp-start-g2" colspan="3">Group 2 — Pulling back mid-term trend?</th>' +
                '<th class="gh-g3 grp-start-g3" colspan="7">Group 3 — Healthy retest of rising MA?</th>' +
                '<th class="gh-g4 grp-start-g4" colspan="2">Group 4 — Successful test?</th>' +
                '<th class="gh-context grp-start-context" colspan="2">Context</th>';
 
     var subGrp = '<th class="sg-spacer" colspan="4"></th>' +
+                 '<th class="sub-g grp-start-rating" colspan="2">Rating</th>' +
                  '<th class="sub-g grp-start-g1" colspan="1">Rating</th>' +
                  '<th class="sub-g" colspan="4">Gates</th>' +
                  '<th class="sub-g" colspan="5">Tests</th>' +
-                 '<th class="sub-g grp-start-rating" colspan="2">Rating</th>' +
                  '<th class="sub-g grp-start-g2" colspan="2">Trend</th>' +
                  '<th class="sub-g" colspan="1">Info</th>' +
                  '<th class="sub-g grp-start-g3" colspan="4">Setup</th>' +
@@ -14211,7 +14214,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var COL_TOOLTIPS={s1rating:'Stage 1 rating',s1g0:S1_GATE_DEFS[0].tooltip,s1g1:S1_GATE_DEFS[1].tooltip,s1streak:'Soft-stack streak (days)',
       pbrating:'PB S1 overall rating',pbscore:'Tests passed out of 6'};
     for(var i=0;i<PB_TESTS.length;i++)COL_TOOLTIPS['g'+(i+1)]=PB_TESTS[i].tooltip;
-    var ORDER=['name','taxon','price','pullback','s1rating','s1g0','s1g1','s1streak','pbrating','pbscore','g1','g2','g3','g4','g5','g6','l5d','l20d','rds'];
+    var ORDER=['name','taxon','price','pullback','pbrating','pbscore','s1rating','s1g0','s1g1','s1streak','g1','g2','g3','g4','g5','g6','l5d','l20d','rds'];
     var h='';
     for(var ci=0;ci<ORDER.length;ci++){
       var id=ORDER[ci],sk=COL_KEYS[id],isSort=pbs1State.sort.col===sk;
@@ -14262,12 +14265,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +'<td class="taxon"><div class="ind">'+(s.industry||'')+'</div><div class="sec">'+(s.sector||'')+'</div></td>'
         +priceCell(s,'')
         +pullbackCell(s,'')
+        +pbRatingCell(s,'grp-start-rating')
+        +pbScoreCell(s,'')
         +s1RatingCell(s,'grp-start-g1')
         +s1GateCell(s,S1_GATE_DEFS[0].key,'')
         +s1GateCell(s,S1_GATE_DEFS[1].key,'')
         +s1StreakCell(s,'')
-        +pbRatingCell(s,'grp-start-rating')
-        +pbScoreCell(s,'')
         +pbTestCell(s,'g1_stage_qualifies','grp-start-g2')
         +pbTestCell(s,'g2_5d_rising','')
         +pbTestCell(s,'g3_10d_rising','')
@@ -14293,20 +14296,20 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var host=document.getElementById('tab-'+TAB_ID); if(!host)return false;
     if(host.querySelector('#'+TABLE_ID))return true;
     var cg='<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-pullback">'
-      +'<col class="c-ctx-rating"><col class="c-ctx-gate"><col class="c-ctx-gate"><col class="c-ctx-streak">'
       +'<col class="c-rating"><col class="c-score">'
+      +'<col class="c-ctx-rating"><col class="c-ctx-gate"><col class="c-ctx-gate"><col class="c-ctx-streak">'
       +'<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">'
       +'<col class="c-test"><col class="c-test">'
       +'<col class="c-window"><col class="c-window"><col class="c-rds">';
     var grpRow='<th class="gh-inputs" colspan="4">Inputs</th>'
-      +'<th class="gh-g1 grp-start-g1" colspan="4">Group 1 — Stage 1 qualifying?</th>'
       +'<th class="gh-rating grp-start-rating" colspan="2">Rating</th>'
+      +'<th class="gh-g1 grp-start-g1" colspan="4">Group 1 — Stage 1 qualifying?</th>'
       +'<th class="gh-g2 grp-start-g2" colspan="4">Group 2 — Entry setup?</th>'
       +'<th class="gh-g3 grp-start-g3" colspan="2">Group 3 — Trigger?</th>'
       +'<th class="gh-context grp-start-context" colspan="3">Context</th>';
     var subRow='<th colspan="4"></th>'
-      +'<th colspan="1">Stage rating</th><th colspan="2">Gates</th><th colspan="1">Streak</th>'
       +'<th colspan="1">Rating</th><th colspan="1">Score</th>'
+      +'<th colspan="1">Stage rating</th><th colspan="2">Gates</th><th colspan="1">Streak</th>'
       +'<th colspan="1">Gate</th><th colspan="3">Setup</th>'
       +'<th colspan="2">Trigger</th>'
       +'<th colspan="2">Fired</th><th colspan="1">RDS</th>';
@@ -14333,6 +14336,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +'</div>'
       +'</div>'
       +'<div class="s1-rating-tiles" id="pbs1-tile"></div>'
+      +'<div class="group-captions">'+'<div class="gcap gcap-g1"><b>Group 1 — Stage 1 qualifying?</b>The stock must be in an active Stage 1 base. Two hard gates: 200D MA still declining vs 80 days ago, and price above 150D MA. If either fails, the stock does not qualify for a probing bet.</div>'+'<div class="gcap gcap-g2"><b>Group 2 — Entry setup?</b>Four tests checking whether the stock is in a pullback setup within the base: 5D MA rising, 10D MA rising, price above 20D MA, 20D MA turned up.</div>'+'<div class="gcap gcap-g3"><b>Group 3 — Trigger?</b>One test: the 20D MA has turned up — the short-term trend is reversing upward within the Stage 1 base.</div>'+'<div class="gcap gcap-g4"><b>Group 4 — Confirmation?</b>One test: price has closed more than 2% above the trigger level, confirming the move has conviction rather than stalling.</div>'+'</div>'
       +'<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="'+TABLE_ID+'"><colgroup>'+cg+'</colgroup><thead>'+thead+'</thead><tbody id="pbs1-tbody"></tbody></table></div></div>';
     var hdr=document.getElementById('pbs1-col-header');
     if(hdr)hdr.addEventListener('click',function(e){var th=e.target.closest('th');if(!th)return;var k=th.getAttribute('data-sort-key');if(k)pbs1OnSort(k);});
@@ -14485,7 +14489,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       s2t0:S2_TEST_DEFS[0].tooltip,s2t1:S2_TEST_DEFS[1].tooltip,s2t2:S2_TEST_DEFS[2].tooltip,s2t3:S2_TEST_DEFS[3].tooltip,s2t4:S2_TEST_DEFS[4].tooltip,
       pbrating:'PB S2 overall rating',pbscore:'Tests passed out of 6'};
     for(var i=0;i<PB_TESTS.length;i++)TOOLTIPS['g'+(i+1)]=PB_TESTS[i].tooltip;
-    var ORDER=['name','taxon','price','pullback','s2rating','s2g0','s2g1','s2g2','s2g3','s2t0','s2t1','s2t2','s2t3','s2t4','pbrating','pbscore','g1','g2','g3','g4','g5','g6','l5d','l20d','rds'];
+    var ORDER=['name','taxon','price','pullback','pbrating','pbscore','s2rating','s2g0','s2g1','s2g2','s2g3','s2t0','s2t1','s2t2','s2t3','s2t4','g1','g2','g3','g4','g5','g6','l5d','l20d','rds'];
     var h='';
     for(var ci=0;ci<ORDER.length;ci++){
       var id=ORDER[ci],sk=KEYS[id],isSort=pbs2State.sort.col===sk;
@@ -14533,6 +14537,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +'<td class="taxon"><div class="ind">'+(s.industry||'')+'</div><div class="sec">'+(s.sector||'')+'</div></td>'
         +'<td class="num">'+fmtNum(s.price)+'</td>'
         +pullbackCell(s,'')
+        +pbRatingCell(s,'grp-start-rating')
+        +pbScoreCell(s,'')
         +s2RatingCell(s,'grp-start-g1')
         +s2GateCell(s,S2_GATE_DEFS[0].key,'')
         +s2GateCell(s,S2_GATE_DEFS[1].key,'')
@@ -14543,8 +14549,6 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +s2TestCell(s,S2_TEST_DEFS[2].key,'')
         +s2TestCell(s,S2_TEST_DEFS[3].key,'')
         +s2TestCell(s,S2_TEST_DEFS[4].key,'')
-        +pbRatingCell(s,'grp-start-rating')
-        +pbScoreCell(s,'')
         +pbTestCell(s,'g1_stage_qualifies','grp-start-g2')
         +pbTestCell(s,'g2_5d_rising','')
         +pbTestCell(s,'g3_10d_rising','')
@@ -14569,22 +14573,22 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var host=document.getElementById('tab-'+TAB_ID);if(!host)return false;
     if(host.querySelector('#'+TABLE_ID))return true;
     var cg='<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-pullback">'
+      +'<col class="c-rating"><col class="c-score">'
       +'<col class="c-ctx-rating">'
       +'<col class="c-ctx-gate"><col class="c-ctx-gate"><col class="c-ctx-gate"><col class="c-ctx-gate">'
       +'<col class="c-ctx-test"><col class="c-ctx-test"><col class="c-ctx-test"><col class="c-ctx-test"><col class="c-ctx-test">'
-      +'<col class="c-rating"><col class="c-score">'
       +'<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">'
       +'<col class="c-test"><col class="c-test">'
       +'<col class="c-window"><col class="c-window"><col class="c-rds">';
     var grpRow='<th class="gh-inputs" colspan="4">Inputs</th>'
-      +'<th class="gh-g1 grp-start-g1" colspan="10">Group 1 — Stage 2 qualifying?</th>'
       +'<th class="gh-rating grp-start-rating" colspan="2">Rating</th>'
+      +'<th class="gh-g1 grp-start-g1" colspan="10">Group 1 — Stage 2 qualifying?</th>'
       +'<th class="gh-g2 grp-start-g2" colspan="4">Group 2 — Entry setup?</th>'
       +'<th class="gh-g3 grp-start-g3" colspan="2">Group 3 — Trigger?</th>'
       +'<th class="gh-context grp-start-context" colspan="3">Context</th>';
     var subRow='<th colspan="4"></th>'
-      +'<th colspan="1">Stage rating</th><th colspan="4">Gates</th><th colspan="5">Tests</th>'
       +'<th colspan="1">Rating</th><th colspan="1">Score</th>'
+      +'<th colspan="1">Stage rating</th><th colspan="4">Gates</th><th colspan="5">Tests</th>'
       +'<th colspan="1">Gate</th><th colspan="3">Setup</th>'
       +'<th colspan="2">Trigger</th>'
       +'<th colspan="2">Fired</th><th colspan="1">RDS</th>';
@@ -14611,6 +14615,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +'</div>'
       +'</div>'
       +'<div class="s1-rating-tiles" id="pbs2-tile"></div>'
+      +'<div class="group-captions">'+'<div class="gcap gcap-g1"><b>Group 1 — Stage 2 qualifying?</b>The stock must be in a confirmed Stage 2 uptrend. Four hard gates (price above 200D and 150D MA, 150D above 200D, within 25% of 52-week high) plus five conviction tests on MA stack and relative strength. The S2 rating shown is the Stage 2 screen rating for this stock.</div>'+'<div class="gcap gcap-g2"><b>Group 2 — Entry setup?</b>Four tests checking whether the breakout setup is in place: 5D MA rising, 10D MA rising, price above 50D MA, 50D MA turned up in the last 5 days.</div>'+'<div class="gcap gcap-g3"><b>Group 3 — Trigger?</b>One test: the 50D MA has freshly turned up — the short-term trend is re-accelerating within the Stage 2 uptrend.</div>'+'<div class="gcap gcap-g4"><b>Group 4 — Confirmation?</b>One test: price has closed more than 2% above the trigger level, confirming conviction behind the breakout move.</div>'+'</div>'
       +'<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="'+TABLE_ID+'"><colgroup>'+cg+'</colgroup><thead>'+thead+'</thead><tbody id="pbs2-tbody"></tbody></table></div></div>';
     var hdr=document.getElementById('pbs2-col-header');
     if(hdr)hdr.addEventListener('click',function(e){var th=e.target.closest('th');if(!th)return;var k=th.getAttribute('data-sort-key');if(k)pbs2OnSort(k);});

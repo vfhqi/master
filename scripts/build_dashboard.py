@@ -2238,7 +2238,7 @@ col.mo-cg-screen { width: 76px; }
 .ctrl-btn.ssp-btn:hover{background:rgba(180,100,0,0.18);border-color:#b45309;color:#78350f}
 
 /* Full-screen overlay */
-.ssp-overlay{position:fixed;top:var(--header-height);left:0;right:0;bottom:0;z-index:9900;background:var(--bg);display:none;flex-direction:column;overflow:hidden}
+.ssp-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9900;background:var(--bg);display:none;flex-direction:column;overflow:hidden}
 .ssp-overlay.open{display:flex}
 
 /* Overlay header row */
@@ -2257,7 +2257,7 @@ col.mo-cg-screen { width: 76px; }
 .ssp-close-btn:hover{color:var(--text-bright);border-color:#bbb}
 
 /* Stock info table band */
-.ssp-tbl-band{flex-shrink:0;padding:6px 14px 4px;overflow:hidden}
+.ssp-tbl-band{flex-shrink:0;max-height:200px;overflow-x:auto;overflow-y:auto;padding:0 14px 4px;border-bottom:1px solid var(--border)}
 .ssp-tbl-outer{width:100%;overflow:hidden}
 .ssp-tbl{border-collapse:collapse;width:100%;table-layout:fixed;font-size:10px}
 .ssp-tbl colgroup col{} /* widths set inline */
@@ -2311,6 +2311,11 @@ col.mo-cg-screen { width: 76px; }
 .ssp-chart-hdr{padding:5px 10px;font-size:11px;font-weight:700;color:var(--text-bright);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:6px}
 .ssp-chart-body{flex:1;min-height:0;overflow:hidden;position:relative;padding:6px}
 #ssp-chart-canvas{width:100%;height:100%;display:block}
+.ssp-chart-controls{display:flex;align-items:center;gap:5px;padding:4px 12px;background:var(--bg);border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0}
+.ssp-czb,.ssp-cvb{padding:2px 7px;font-size:11px;border:1px solid var(--border);border-radius:3px;background:var(--bg-alt);color:var(--text);cursor:pointer}
+.ssp-czb.on,.ssp-cvb.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ssp-czb:hover,.ssp-cvb:hover{opacity:0.8}
+.ssp-csep{width:1px;height:14px;background:var(--border);flex-shrink:0}
 .ssp-chart-loading{padding:20px;color:var(--text-dim);font-size:11px;text-align:center}
 /* Cohort pane */
 .ssp-cohort-pane{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden}
@@ -2605,8 +2610,11 @@ function getChartSlice(chart,zoom){
 }
 window.toggleChartLayer=function(layer){
   chartVis[layer]=!chartVis[layer];
-  drawMasterChart(chartTicker);
-  // Update legend opacity
+  if(window._sspOpen&&window._sspTicker){
+    drawMasterChart(window._sspTicker,{canvasId:'ssp-chart-canvas',containerId:'ssp-chart-body'});
+  } else {
+    drawMasterChart(chartTicker);
+  }
   var el=document.getElementById("legend-"+layer);
   if(el)el.style.opacity=chartVis[layer]?"1":"0.3";
 };
@@ -2670,8 +2678,10 @@ function loadChartData(ticker, callback){
 }
 // === END LAZY CHART LOADER ===
 
-function drawMasterChart(ticker){
-  var canvas=document.getElementById("chart-canvas");
+function drawMasterChart(ticker,_sspo){
+  var _cid=(_sspo&&_sspo.canvasId)||"chart-canvas";
+  var _did=(_sspo&&_sspo.containerId)||"chart-container";
+  var canvas=document.getElementById(_cid);
   if(!canvas)return;
   // Use lazy-loaded registry data, fall back to legacy CHART_DATA for compatibility
   var chartAll=null;
@@ -2682,10 +2692,10 @@ function drawMasterChart(ticker){
   }
   if(!chartAll||chartAll.length===0){
     // Try lazy-loading — show loading message, then redraw on completion
-    document.getElementById("chart-container").innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">Loading chart data for '+ticker+'...</div>';
+    document.getElementById(_did).innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">Loading chart data for '+ticker+'...</div>';
     loadChartData(ticker,function(data){
-      if(data&&data.length>0){drawMasterChart(ticker)}
-      else{document.getElementById("chart-container").innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">No chart data for '+ticker+'</div>'}
+      if(data&&data.length>0){drawMasterChart(ticker,_sspo)}
+      else{document.getElementById(_did).innerHTML='<div style="text-align:center;padding:40px;color:var(--text-dim)">No chart data for '+ticker+'</div>'}
     });
     return;
   }
@@ -3044,13 +3054,17 @@ window.openChart=function(t){
 };
 window.setChartZoom=function(z){
   chartZoom=z;
-  if(chartTicker)openChart(chartTicker);
+  if(window._sspOpen&&window._sspTicker){
+    drawMasterChart(window._sspTicker,{canvasId:'ssp-chart-canvas',containerId:'ssp-chart-body'});
+  } else if(chartTicker){ openChart(chartTicker); }
 };
 // PHASE-4C 2026-05-04: set price-axis scale mode and re-render.
 window.setChartScaleMode=function(m){
   if(m!=="lin"&&m!=="log")return;
   chartScaleMode=m;
-  if(chartTicker)openChart(chartTicker);
+  if(window._sspOpen&&window._sspTicker){
+    drawMasterChart(window._sspTicker,{canvasId:'ssp-chart-canvas',containerId:'ssp-chart-body'});
+  } else if(chartTicker){ openChart(chartTicker); }
 };
 // MD-CHART-V2-WIRING-MARKER: V2 tabs - clicking a company/ticker name-cell opens that stock's chart.
 // This is the only chart entry point on V2 tabs (the header "Chart" button is hidden there via CSS).
@@ -13157,6 +13171,7 @@ window.TAB_LABELS = TAB_LABELS;
 /* MD-V2-S63A: expose chart loader + zoom for SSP overlay */
 window.loadChartData = loadChartData;
 window._dashChartZoom = function(){ return chartZoom; };
+            window.drawMasterChart = drawMasterChart;
 })();  /* close main IIFE */
 
 /* MD-V2-TESTS-MARKER-END */
@@ -14372,8 +14387,8 @@ window._dashChartZoom = function(){ return chartZoom; };
     {key:'g1_stage_qualifies',           label:'1. Stage 2 qualifies', grp:'gate',    tooltip:'Stage 2 rating is Probable or Plausible'},
     {key:'g2_5d_rising',                 label:'2. 5D MA rising',       grp:'setup',   tooltip:'5-day MA rising DoD'},
     {key:'g3_10d_rising',                label:'3. 10D MA rising',      grp:'setup',   tooltip:'10-day MA rising DoD'},
-    {key:'g4_price_gt_20d',              label:'4. P &gt; 20D MA',      grp:'setup',   tooltip:'Price above 20-day MA'},
-    {key:'g5_20d_turn_last_5d',          label:'5. 20D MA turned up',   grp:'trigger', tooltip:'20D MA rising now, was falling 5d ago'},
+    {key:'g4_price_gt_50d',              label:'4. P &gt; 50D MA',      grp:'setup',   tooltip:'Price above 50-day MA'},
+    {key:'g5_50d_turn_last_5d',          label:'5. 50D MA turned up',   grp:'trigger', tooltip:'50D MA rising now, was falling 5d ago'},
     {key:'g6_followthrough_close_ge2pct',label:'6. Close 2%+',          grp:'trigger', tooltip:'Close at least 2% above yesterday'}
   ];
 
@@ -14457,8 +14472,8 @@ window._dashChartZoom = function(){ return chartZoom; };
       s2g0:S2_GATE_DEFS[0].label,s2g1:S2_GATE_DEFS[1].label,s2g2:S2_GATE_DEFS[2].label,s2g3:S2_GATE_DEFS[3].label,
       s2t0:S2_TEST_DEFS[0].label,s2t1:S2_TEST_DEFS[1].label,s2t2:S2_TEST_DEFS[2].label,s2t3:S2_TEST_DEFS[3].label,s2t4:S2_TEST_DEFS[4].label,
       pbrating:'Rating',pbscore:'Score',
-      g1:'1. Gate: stage',g2:'2. 5D rising',g3:'3. 10D rising',g4:'4. P&gt;20D',
-      g5:'5. 20D turned up',g6:'6. Close 2%+',
+      g1:'1. Gate: stage',g2:'2. 5D rising',g3:'3. 10D rising',g4:'4. P&gt;50D',
+      g5:'5. 50D turned up',g6:'6. Close 2%+',
       l5d:'Fired 5d',l20d:'Fired 20d',rds:'RDS'
     };
     var KEYS={name:'company',taxon:'sector',price:'price',pullback:'recent_pullback',
@@ -14466,8 +14481,8 @@ window._dashChartZoom = function(){ return chartZoom; };
       s2g0:'s2g__'+S2_GATE_DEFS[0].key,s2g1:'s2g__'+S2_GATE_DEFS[1].key,s2g2:'s2g__'+S2_GATE_DEFS[2].key,s2g3:'s2g__'+S2_GATE_DEFS[3].key,
       s2t0:'s2t__'+S2_TEST_DEFS[0].key,s2t1:'s2t__'+S2_TEST_DEFS[1].key,s2t2:'s2t__'+S2_TEST_DEFS[2].key,s2t3:'s2t__'+S2_TEST_DEFS[3].key,s2t4:'s2t__'+S2_TEST_DEFS[4].key,
       pbrating:'pb__rating',pbscore:'pb__score',
-      g1:'pb__g1_stage_qualifies',g2:'pb__g2_5d_rising',g3:'pb__g3_10d_rising',g4:'pb__g4_price_gt_20d',
-      g5:'pb__g5_20d_turn_last_5d',g6:'pb__g6_followthrough_close_ge2pct',
+      g1:'pb__g1_stage_qualifies',g2:'pb__g2_5d_rising',g3:'pb__g3_10d_rising',g4:'pb__g4_price_gt_50d',
+      g5:'pb__g5_50d_turn_last_5d',g6:'pb__g6_followthrough_close_ge2pct',
       l5d:'pb__l5d',l20d:'pb__l20d',rds:'rds__date'};
     var GRP_START={s2rating:'grp-start-g1',pbrating:'grp-start-rating',g1:'grp-start-g2',g5:'grp-start-g3',l5d:'grp-start-context'};
     var TOOLTIPS={s2rating:'Stage 2 rating',
@@ -14538,8 +14553,8 @@ window._dashChartZoom = function(){ return chartZoom; };
         +pbTestCell(s,'g1_stage_qualifies','grp-start-g2')
         +pbTestCell(s,'g2_5d_rising','')
         +pbTestCell(s,'g3_10d_rising','')
-        +pbTestCell(s,'g4_price_gt_20d','')
-        +pbTestCell(s,'g5_20d_turn_last_5d','grp-start-g3')
+        +pbTestCell(s,'g4_price_gt_50d','')
+        +pbTestCell(s,'g5_50d_turn_last_5d','grp-start-g3')
         +pbTestCell(s,'g6_followthrough_close_ge2pct','')
         +windowCell(s,'l5d','ct-window-col grp-start-context')
         +windowCell(s,'l20d','ct-window-col')
@@ -14582,7 +14597,7 @@ window._dashChartZoom = function(){ return chartZoom; };
       +'<tr class="sub-group-row">'+subRow+'</tr>'
       +'<tr class="col-header-row" id="pbs2-col-header"></tr>';
     host.innerHTML=
-      '<div class="s1-intro">S2 Probing Bet — a small starter position on a Stage 2 (uptrend) stock that breaks out without first completing a standard pullback or basing pattern. Often event-driven or idiosyncratic. The Stage 2 qualifying group (G1) shows the underlying uptrend state: 4 gates and 5 tests from the Stage 2 screen. Same 6-criterion breakout test as S1 PB: stage gate + 5D/10D MA rising + price above 20D + 20D MA freshly turned up + 2%+ close.</div>'
+      '<div class="s1-intro">S2 Probing Bet — a small starter position on a Stage 2 (uptrend) stock that breaks out without first completing a standard pullback or basing pattern. Often event-driven or idiosyncratic. The Stage 2 qualifying group (G1) shows the underlying uptrend state: 4 gates and 5 tests from the Stage 2 screen. Same 6-criterion breakout test as S1 PB: stage gate + 5D/10D MA rising + price above 50D + 50D MA freshly turned up + 2%+ close.</div>'
       +'<div class="controls s1-controls">'
         +'<div class="ctrl-grp"><span class="ctrl-label">Scope</span>'
           +'<button class="toggle-btn active" data-pbs2-scope="all" onclick="pbs2SetScope(\'all\')">All <span id="pbs2-cnt-all"></span></button>'
@@ -16309,7 +16324,51 @@ function _sspRowCls(md2){
 function sspRenderTable(ticker, p, md2){
   var band = document.getElementById('ssp-tbl-band');
   if(!band) return;
-
+  /* --- ALL STOCKS table (S64 fix) --- */
+  var univArr = (window.MASTER_DATA&&MASTER_DATA.universe)||[];
+  var filters = _sspFilters();
+  var prices  = _sspPrices();
+  var H = '<table style="border-collapse:collapse;width:100%;font-size:11px;white-space:nowrap"><thead><tr>';
+  ['Ticker','Company','S1','S2','S3','S4','PPI','NPI','Price','PB%','Setup'].forEach(function(c){
+    H+='<th style="padding:3px 8px;text-align:left;background:var(--bg-alt);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2">'+c+'</th>';
+  });
+  H+='</tr></thead><tbody>';
+  var rows='';
+  for(var _i=0;_i<univArr.length;_i++){
+    var _u=univArr[_i]; if(!_u||!_u.ticker) continue;
+    var _tk=_u.ticker;
+    var _f=filters[_tk]||{}; var _md=_f.md_v2||{};
+    var _pr=prices[_tk]||{};
+    var _sel=(_tk===ticker);
+    var _bg=_sel?'background:var(--accent-muted);font-weight:600;':''
+    var _s1=_md.stage_1?(_md.stage_1.rating||'—'):'—';
+    var _s2=_md.stage_2?(_md.stage_2.rating||'—'):'—';
+    var _s3=_md.stage_3?(_md.stage_3.rating||'—'):'—';
+    var _s4=_md.stage_4?(_md.stage_4.rating||'—'):'—';
+    var _ppi1=_md.pulling_back_uptrend?(_md.pulling_back_uptrend.rating||'—'):'—';
+    var _ppi2=_md.basing?(_md.basing.rating||'—'):'—';
+    var _ppi=(_ppi1!=='None'&&_ppi1!=='—')?_ppi1:_ppi2;
+    var _npi=_md.collapsing?(_md.collapsing.rating||'—'):'—';
+    var _price=_pr.price!=null?_pr.price.toFixed(2):'—';
+    var _pb=_pr.recent_pullback_pct!=null?Math.round(_pr.recent_pullback_pct*100)+'%':'—';
+    var _hr=_md.ma_retest_upwards?(_md.ma_retest_upwards.rating||'—'):'—';
+    var _co=_pr.company_name||_u.company_name||'';
+    var _tke=_tk.replace(/'/g,"\\'");
+    rows+='<tr style="cursor:pointer;'+_bg+'" onclick="sspSetStock(\''+_tke+'\')">';
+    rows+='<td style="padding:3px 8px;border-bottom:1px solid var(--border-faint)">'+_tk+'</td>';
+    rows+='<td style="padding:3px 8px;border-bottom:1px solid var(--border-faint);max-width:160px;overflow:hidden;text-overflow:ellipsis">'+_co+'</td>';
+    [_s1,_s2,_s3,_s4,_ppi,_npi,_price,_pb,_hr].forEach(function(v){
+      rows+='<td style="padding:3px 8px;border-bottom:1px solid var(--border-faint)">'+v+'</td>';
+    });
+    rows+='</tr>';
+  }
+  band.innerHTML=H+rows+'</tbody></table>';
+  /* scroll selected row into view */
+  setTimeout(function(){
+    var sel=band.querySelector('tr[style*="accent-muted"]');
+    if(sel) sel.scrollIntoView({block:'nearest'});
+  },50);
+  return; /* single-row render below replaced */
   var price = p.price!=null ? p.price.toFixed(2) : '—';
   var pbPct = p.recent_pullback_pct!=null ? Math.round(p.recent_pullback_pct*100)+'%' : '—';
   var company = p.company_name || ticker;
@@ -16518,6 +16577,12 @@ function sspRenderCohort(ticker, p){
 
 /* ---- render chart ---- */
 function sspRenderChart(ticker, company){
+  window._sspTicker = ticker;
+  /* sync zoom-button active state */
+  var _zm={126:'ssp-z-6m',252:'ssp-z-1y',504:'ssp-z-2y',756:'ssp-z-3y',1260:'ssp-z-5y',99999:'ssp-z-all'};
+  document.querySelectorAll('.ssp-czb').forEach(function(b){b.classList.remove('on');});
+  var _zb=document.getElementById(_zm[chartZoom]); if(_zb)_zb.classList.add('on');
+
   var body = document.getElementById('ssp-chart-body');
   var loading = document.getElementById('ssp-chart-loading');
   var canvas  = document.getElementById('ssp-chart-canvas');
@@ -16540,19 +16605,17 @@ function sspRenderChart(ticker, company){
     }
     loading.style.display='none';
     canvas.style.display='block';
-
-    /* Size canvas to container */
-    var rect = body.getBoundingClientRect();
-    var W = Math.floor(rect.width) - 12;
-    var H = Math.floor(rect.height) - 12;
-    if(W<100||H<60){ W=600; H=320; }
-    canvas.width  = W;
-    canvas.height = H;
-
-    _sspDrawChart(data, canvas, W, H, ticker);
+    drawMasterChart(ticker,{canvasId:'ssp-chart-canvas',containerId:'ssp-chart-body'});
   });
 }
 
+function sspSetChartZoom(z){
+  chartZoom=z;
+  var _zm={126:'ssp-z-6m',252:'ssp-z-1y',504:'ssp-z-2y',756:'ssp-z-3y',1260:'ssp-z-5y',99999:'ssp-z-all'};
+  document.querySelectorAll('.ssp-czb').forEach(function(b){b.classList.remove('on');});
+  var _zb=document.getElementById(_zm[z]); if(_zb)_zb.classList.add('on');
+  if(window._sspTicker) drawMasterChart(window._sspTicker,{canvasId:'ssp-chart-canvas',containerId:'ssp-chart-body'});
+}
 function _sspDrawChart(data, canvas, W, H, ticker){
   var ctx = canvas.getContext('2d');
   if(!ctx) return;
@@ -16759,8 +16822,6 @@ renderTab("mm99");
         '        oninput="sspOnInput(this.value)" onkeydown="sspKeydown(event)">\n'
         '      <div class="ssp-dropdown" id="ssp-dropdown" style="display:none"></div>\n'
         '    </div>\n'
-        '    <span class="ssp-hdr-stock" id="ssp-hdr-ticker"></span>\n'
-        '    <span class="ssp-hdr-company" id="ssp-hdr-company"></span>\n'
         '    <button class="ssp-close-btn" onclick="closeStockView()" title="Close Stock View">&times;</button>\n'
         '  </div>\n'
         '  <div class="ssp-tbl-band" id="ssp-tbl-band"></div>\n'
@@ -16774,6 +16835,25 @@ renderTab("mm99");
         '  <div class="ssp-lower">\n'
         '    <div class="ssp-chart-pane">\n'
         '      <div class="ssp-chart-hdr" id="ssp-chart-hdr">Chart</div>\n'
+        '      <div class="ssp-chart-controls">\n'
+        '        <button class="ssp-czb on" id="ssp-z-1y" onclick="sspSetChartZoom(252)">1Y</button>\n'
+        '        <button class="ssp-czb" id="ssp-z-6m" onclick="sspSetChartZoom(126)">6M</button>\n'
+        '        <button class="ssp-czb" id="ssp-z-2y" onclick="sspSetChartZoom(504)">2Y</button>\n'
+        '        <button class="ssp-czb" id="ssp-z-3y" onclick="sspSetChartZoom(756)">3Y</button>\n'
+        '        <button class="ssp-czb" id="ssp-z-5y" onclick="sspSetChartZoom(1260)">5Y</button>\n'
+        '        <button class="ssp-czb" id="ssp-z-all" onclick="sspSetChartZoom(99999)">All</button>\n'
+        '        <span class="ssp-csep"></span>\n'
+        '        <button class="ssp-cvb" onclick="setChartScaleMode(chartScaleMode===\'lin\'?\'log\':\'lin\')">Log</button>\n'
+        '        <span class="ssp-csep"></span>\n'
+        '        <button class="ssp-cvb on" onclick="toggleChartLayer(\'ma20\')">20d</button>\n'
+        '        <button class="ssp-cvb on" onclick="toggleChartLayer(\'ma50\')">50d</button>\n'
+        '        <button class="ssp-cvb on" onclick="toggleChartLayer(\'ma100\')">100d</button>\n'
+        '        <button class="ssp-cvb on" onclick="toggleChartLayer(\'ma150\')">150d</button>\n'
+        '        <button class="ssp-cvb on" onclick="toggleChartLayer(\'ma200\')">200d</button>\n'
+        '        <span class="ssp-csep"></span>\n'
+        '        <button class="ssp-cvb on" onclick="toggleChartLayer(\'vol\')">Vol</button>\n'
+        '        <button class="ssp-cvb on" onclick="toggleChartLayer(\'obv\')">OBV</button>\n'
+        '      </div>\n'
         '      <div class="ssp-chart-body" id="ssp-chart-body">\n'
         '        <div class="ssp-chart-loading" id="ssp-chart-loading">Select a stock to view chart</div>\n'
         '        <canvas id="ssp-chart-canvas" style="display:none"></canvas>\n'

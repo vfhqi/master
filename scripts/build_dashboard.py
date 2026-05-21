@@ -1164,7 +1164,7 @@ body[data-active-tab="tests_speculative_bet"] .header-tabs-row,
 body[data-active-tab="tests_probing_bet_s1"] .header-tabs-row,
 body[data-active-tab="tests_probing_bet_s2"] .header-tabs-row,
 body[data-active-tab="setups_healthy_retest"] .header-tabs-row,
-body[data-active-tab="master_overview"] .header-tabs-row { display: none !important; }
+body[data-active-tab="master_overview"] .header-tabs-row,body[data-active-tab="ssem"] .header-tabs-row,body[data-active-tab="val"] .header-tabs-row { display: none !important; }
 
 /* V2 mini nav strip - visible only on V2 tabs */
 .v2-nav { display: none; padding: 8px 12px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 6px; align-items: center; }
@@ -1178,7 +1178,7 @@ body[data-active-tab="tests_speculative_bet"] .v2-nav,
 body[data-active-tab="tests_probing_bet_s1"] .v2-nav,
 body[data-active-tab="tests_probing_bet_s2"] .v2-nav,
 body[data-active-tab="setups_healthy_retest"] .v2-nav,
-body[data-active-tab="master_overview"] .v2-nav { display: flex; }
+body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2-nav,body[data-active-tab="val"] .v2-nav { display: flex; }
 .v2-nav-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; margin-right: 8px; }
 .v2-nav-btn { display: inline-block; padding: 5px 11px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
 .v2-nav-btn:hover { background: #f3efe2; border-color: #b0ac98; }
@@ -1298,7 +1298,7 @@ body[data-active-tab="tests_speculative_bet"] .header-controls-row,
 body[data-active-tab="tests_probing_bet_s1"] .header-controls-row,
 body[data-active-tab="tests_probing_bet_s2"] .header-controls-row,
 body[data-active-tab="setups_healthy_retest"] .header-controls-row,
-body[data-active-tab="master_overview"] .header-controls-row { display: none !important; }
+body[data-active-tab="master_overview"] .header-controls-row,body[data-active-tab="ssem"] .header-controls-row,body[data-active-tab="val"] .header-controls-row { display: none !important; }
 /* MD-V2-PI-V2-S25-MARKER: EDIT 1 - Block A header chrome shrink on V2 tabs (D-MD-V2-47).
    Legacy header is sized for 3 rows; V2 tabs show only header-top + v2-nav.
    Shrink the fixed header + override --header-height so the table does not
@@ -9413,7 +9413,9 @@ function SUM_renderQualifiedStocks() {
       + '<button class="v2-nav-btn v2-grp-post-bear" data-v2-tab="post_indicators_bear" onclick="switchTab(\'post_indicators_bear\')">Breaking the ST (50D), MT (150D) and LT (200D) MAs</button>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Summary</span>'
-      + '<button class="v2-nav-btn v2-grp-summary" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Overview</button>';  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
+      + '<button class="v2-nav-btn v2-grp-summary" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Overview</button>'  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
+      + '<button class="v2-nav-btn v2-grp-summary" data-v2-tab="ssem" onclick="switchTab(\'ssem\')">SS Earnings Momentum</button>'
+      + '<button class="v2-nav-btn v2-grp-summary" data-v2-tab="val" onclick="switchTab(\'val\')">Valuation</button>';
     hdr.appendChild(nav);
   }
   function syncV2State(id) {

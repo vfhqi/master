@@ -25,6 +25,12 @@ OUTPUT_PATH = PROJECT_DIR / "index.html"
 COWORK_ROOT = PROJECT_DIR.parent
 POSITIONS_PATH = COWORK_ROOT / "positions.json"
 
+# Dashboard version -- bump with each shipped session
+DASHBOARD_VERSION = "S65 -- 21 May 2026"
+DASHBOARD_DESC    = "Group 4 Confirmation split; S1 cols on S1PB; HVCP 3-group format; HR/PB tile rewrites"
+CHANGELOG_PATH    = PROJECT_DIR / "changelog.html"
+STATE_MD_PATH     = COWORK_ROOT / "projects/SA - Master Dashboard/state.md"
+
 
 def safe_json_load(path):
     """Load JSON, handling files with multiple concatenated docs."""
@@ -95,6 +101,8 @@ def load_data():
             "source": prices["_meta"]["source"],
             "stock_count": prices["_meta"]["count"],
             "universe_updated": _universe_updated,
+            "dashboard_version": DASHBOARD_VERSION,
+            "dashboard_desc": DASHBOARD_DESC,
         },
         "universe": universe["stocks"],
         "prices": prices["stocks"],
@@ -2482,6 +2490,7 @@ document.getElementById("stat-count").textContent=D.meta.stock_count;
 document.getElementById("stat-source").textContent=D.meta.source;
 document.getElementById("stat-updated").textContent=D.meta.generated;
 var _stUni=document.getElementById("stat-universe-updated");if(_stUni)_stUni.textContent=D.meta.universe_updated||"\u2014";  /* MD-V2-S36-BRIEF-MARKER */
+var _stVer=document.getElementById("stat-dashboard-version");if(_stVer&&D.meta.dashboard_version)_stVer.textContent="Dashboard: "+D.meta.dashboard_version;
 
 // ---- Key panel column descriptions per tab ----
 var KEY_DEFS={
@@ -16831,6 +16840,7 @@ renderTab("mm99");
         '      <span>Data: <span class="stat-value" id="stat-source">&mdash;</span></span>\n'
         '      <span>Price data updated: <span class="stat-value" id="stat-updated">&mdash;</span></span>\n'
         '      <span>Stock universe updated: <span class="stat-value" id="stat-universe-updated">&mdash;</span></span>\n'
+        '      <a href="changelog.html" target="_blank" style="text-decoration:none;"><span id="stat-dashboard-version" style="font-size:10px;color:#999;border-bottom:1px dotted #bbb;display:inline-block;margin-left:8px;" title="View changelog"></span></a>\n'
         '    </div>\n'
         '    <div class="header-right-btns">\n'
         # MD-V2-S41-REMOVE-KEY-BUTTON-MARKER -- "Key" button removed per S41 brief (16-May-26)
@@ -16944,6 +16954,67 @@ renderTab("mm99");
     return html
 
 
+
+def generate_changelog():
+    import html as _html
+    sessions = []
+    if STATE_MD_PATH.exists():
+        with open(STATE_MD_PATH, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        current_title = None
+        current_body = []
+        for line in lines:
+            stripped = line.rstrip()
+            if stripped.startswith('## Session ') or (stripped.startswith('## S') and '(' in stripped and '--' in stripped):
+                if current_title:
+                    sessions.append((current_title, ' '.join(current_body[:12])))
+                current_title = stripped.lstrip('#').strip()
+                current_body = []
+            elif current_title and stripped and not stripped.startswith('#'):
+                current_body.append(stripped.replace('**',''))
+        if current_title:
+            sessions.append((current_title, ' '.join(current_body[:12])))
+
+    font = "system-ui, -apple-system, 'Segoe UI', sans-serif"
+    bg = '#faf9f5'; fg = '#2a2a2a'; dim = '#666'; bdr = '#e0dcc8'
+    entry_html = ''
+    for title, body in sessions:
+        safe_title = _html.escape(title)
+        safe_body = _html.escape((body or '')[:500])
+        entry_html += (
+            '<div class="entry">'
+            '<div class="entry-title">' + safe_title + '</div>'
+            '<div class="entry-body">' + safe_body + '</div>'
+            '</div>\n'
+        )
+
+    no_entries = '<p style="color:#888;font-size:11px;">No session entries found.</p>'
+    body_content = entry_html if sessions else no_entries
+    current_ts = datetime.now().strftime('%Y-%m-%d %H:%M')
+    ver_esc = _html.escape(DASHBOARD_VERSION)
+    desc_esc = _html.escape(DASHBOARD_DESC)
+
+    css = (
+        'body{margin:0;padding:24px 32px;font-family:' + font + ';background:' + bg + ';color:' + fg + ';font-size:13px;line-height:1.5}'
+        'h1{font-size:20px;font-weight:700;color:#1a1a1a;margin:0 0 4px 0}'
+        '.meta{font-size:11px;color:' + dim + ';margin-bottom:28px}'
+        '.entry{border:1px solid ' + bdr + ';border-left:3px solid #b08a4e;border-radius:4px;padding:12px 16px;margin-bottom:12px;background:#fff}'
+        '.entry-title{font-weight:700;font-size:13px;color:#1a1a1a;margin-bottom:4px}'
+        '.entry-body{font-size:11.5px;color:' + dim + ';line-height:1.55}'
+    )
+    page = (
+        '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
+        '<title>Dashboard Changelog</title>'
+        '<style>' + css + '</style></head><body>'
+        '<h1>Dashboard Changelog</h1>'
+        '<div class="meta">Current version: <strong>' + ver_esc + '</strong> &mdash; ' + desc_esc + '<br>Generated: ' + current_ts + '</div>'
+        + body_content +
+        '</body></html>'
+    )
+    with open(CHANGELOG_PATH, 'w', encoding='utf-8') as f:
+        f.write(page)
+    print('  Changelog: {} ({} entries)'.format(CHANGELOG_PATH, len(sessions)))
+
 def main():
     print("Loading data...")
     data_js = load_data()
@@ -16975,6 +17046,7 @@ def main():
     backup_path = backup_dir / "index_post_{}.html".format(ts)
     shutil.copy2(OUTPUT_PATH, backup_path)
     print("  Post-write backup: {}".format(backup_path))
+    generate_changelog()
     print("Done.")
 
 

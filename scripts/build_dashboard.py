@@ -2337,7 +2337,7 @@ col.mo-cg-screen { width: 76px; }
 .ssp-cohort-name:hover{background:rgba(180,100,0,0.06);color:var(--text-bright)}
 .ssp-cohort-name.self{font-weight:700;color:var(--text-bright);background:rgba(180,100,0,0.06)}
 .ssp-cohort-name.self:hover{background:rgba(180,100,0,0.12)}
-.ssp-cohort-group-hdr{display:block;padding:3px 8px;font-size:8.5px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.04em;margin-top:4px}
+.ssp-cohort-group-hdr{display:block;padding:3px 8px;font-size:8.5px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.04em;margin-top:4px;border-top:1px solid var(--col-accent,transparent)}
 /* MD-V2-S63-STOCK-VIEW-CSS-END */
 
 /* MD-V2-REMOVE-SUMMARY-MARKER applied 20260513-184203 */
@@ -16415,8 +16415,12 @@ function sspRenderTable(ticker, p, md2){
   var filters = _sspFilters();
   var prices  = _sspPrices();
   var H = '<table style="border-collapse:collapse;width:100%;font-size:11px;white-space:nowrap"><thead><tr>';
-  ['Ticker','Company','S1','S2','S3','S4','PPI','NPI','Price','PB%','Setup'].forEach(function(c){
-    H+='<th style="padding:3px 8px;text-align:left;background:var(--bg-alt);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2">'+c+'</th>';
+  /* S-SSV-04 Part A: per-column accent border-top */
+  var SSV_TH_DEFS04=[['Ticker',''],['Company',''],['S1','#1b5e20'],['S2','#2e7d32'],['S3','#b45309'],['S4','#991b1b'],['PPI','#0F6E56'],['NPI','#A32D2D'],['Price',''],['PB%',''],['Setup','#2E7D32']];
+  SSV_TH_DEFS04.forEach(function(ca){
+    var c=ca[0],a=ca[1];
+    var bTop=a?'border-top:2px solid '+a+';':'';
+    H+='<th style="padding:3px 8px;text-align:left;background:var(--bg-alt);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;'+bTop+'">'+c+'</th>';
   });
   H+='</tr></thead><tbody>';
   var rows='';
@@ -16716,6 +16720,16 @@ function sspRenderCohort(ticker, p){
     }
     geoEl.innerHTML = h03||'<span class="ssp-cohort-name" style="color:#aaa;cursor:default">—</span>';
   })();
+  /* S-SSV-04 Part B+C: accent colours on cohort col headers; --col-accent for group hdr borders */
+  var SSV_COL_ACCENTS04=[{id:'ssp-col-industry',accent:'#1b5e20'},{id:'ssp-col-sector',accent:'#1565C0'},{id:'ssp-col-cohort',accent:'#4a5568'},{id:'ssp-col-geo',accent:'#b45309'}];
+  for(var ci04=0;ci04<SSV_COL_ACCENTS04.length;ci04++){
+    var ca04=SSV_COL_ACCENTS04[ci04];
+    var colNames04=document.getElementById(ca04.id); if(!colNames04) continue;
+    var colCont04=colNames04.closest('.ssp-cohort-col');
+    if(colCont04) colCont04.style.setProperty('--col-accent',ca04.accent);
+    var colHdr04=colCont04&&colCont04.querySelector('.ssp-cohort-col-hdr');
+    if(colHdr04) colHdr04.style.color=ca04.accent;
+  }
 }
 
 /* ---- render chart ---- */

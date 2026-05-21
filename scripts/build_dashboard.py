@@ -1198,7 +1198,13 @@ body[data-active-tab="master_overview"] .v2-nav { display: flex; }
 .v2-nav-btn.v2-grp-tests { border-bottom: 2px solid rgba(180,83,9,0.55); }
 .v2-nav-btn.v2-grp-indicators:hover { background: #e8f2ee; }
 .v2-nav-btn.v2-grp-setups:hover { background: #efecf6; }
-.v2-nav-btn.v2-grp-tests:hover { background: #f6efe6; }
+.v2-nav-btn.v2-grp-tests:hover    { background: #f6efe6; }
+.v2-nav-btn.v2-grp-post-bull { border-bottom: 2px solid rgba(15,110,86,0.45); }
+.v2-nav-btn.v2-grp-post-bear { border-bottom: 2px solid rgba(163,45,45,0.50); }
+.v2-nav-btn.v2-grp-summary   { border-bottom: 2px solid rgba(60,60,100,0.30); }
+.v2-nav-btn.v2-grp-post-bull:hover { background: #e8f2ee; }
+.v2-nav-btn.v2-grp-post-bear:hover { background: #f9ecec; }
+.v2-nav-btn.v2-grp-summary:hover   { background: #f2f2f6; }
 /* MD-V2-S40-ANDROID-NAV-OVERFLOW-FIX: shrink v2-nav components on tablet widths so all
    group labels (incl. 'Capital deployment') and buttons fit on one row
    within the 70px fixed header without overflowing horizontally. */
@@ -9382,33 +9388,32 @@ function SUM_renderQualifiedStocks() {
     // internal tab keys unchanged (display-only rename).
     nav.innerHTML = ''
       + '<span class="v2-nav-label">MD V2</span>'
-      + '<span class="v2-nav-grp-label">Stages - MT/LT trends</span>'
-      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_1" onclick="switchTab(\'stage_1\')">Stage 1 (Basing)</button>'
-      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_2" onclick="switchTab(\'stage_2\')">Stage 2 (Uptrend)</button>'
-      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_3" onclick="switchTab(\'stage_3\')">Stage 3 (Topping)</button>'
-      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_4" onclick="switchTab(\'stage_4\')">Stage 4 (Decline)</button>'
+      + '<span class="v2-nav-grp-label">Stages</span>'
+      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_1" onclick="switchTab(\'stage_1\')">Stage 1</button>'
+      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_2" onclick="switchTab(\'stage_2\')">Stage 2</button>'
+      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_3" onclick="switchTab(\'stage_3\')">Stage 3</button>'
+      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_4" onclick="switchTab(\'stage_4\')">Stage 4</button>'
       + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Early-stage indicators</span>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="pos_pre_indicators" onclick="switchTab(\'pos_pre_indicators\')">Positive pre-setup/test indicators</button>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="neg_pre_indicators" onclick="switchTab(\'neg_pre_indicators\')">Negative pre-setup/test indicators</button>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators" onclick="switchTab(\'post_indicators\')">Post-farfalle indicators</button>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators_bull" onclick="switchTab(\'post_indicators_bull\')">Bullish post-setup/tests technical behaviour</button>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators_bear" onclick="switchTab(\'post_indicators_bear\')">Negative breaking through key MAs</button>'
-      + '<span class="v2-nav-sep"></span>'
+      + '<span class="v2-nav-grp-label">Early-stage pre-test indicators</span>'
+      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="pos_pre_indicators" onclick="switchTab(\'pos_pre_indicators\')">Positive (&ldquo;Basing&rdquo; and &ldquo;Pulling Back&rdquo;)</button>'
+      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="neg_pre_indicators" onclick="switchTab(\'neg_pre_indicators\')">Negative (&ldquo;Collapsing&rdquo; share price)</button>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Late-stage capital qualification setups and tests</span>'
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests" onclick="switchTab(\'tests\')">Capital deployment tests</button>'
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">Healthy Retest</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">S1 Probing Bet</button>'
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">S2 Probing Bet</button>'  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet" onclick="switchTab(\'tests_speculative_bet\')">Speculative Bets</button>'  /* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER */
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet_s3" onclick="switchTab(\'tests_speculative_bet_s3\')">SB — Stage 3</button>'
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet_s4" onclick="switchTab(\'tests_speculative_bet_s4\')">SB — Stage 4</button>'
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_healthy_vcp" onclick="switchTab(\'tests_healthy_vcp\')">Healthy VCP</button>'  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">Stage 1 - Probing bet</button>'
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">Stage 2 - Probing bet</button>'  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">Stage 2 - Healthy &ldquo;retest&rdquo; and &ldquo;breakout&rdquo; of an upwards moving average</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_healthy_vcp" onclick="switchTab(\'tests_healthy_vcp\')">Stage 2 - Healthy &ldquo;VCP&rdquo; and &ldquo;breakout&rdquo; after &ldquo;basing&rdquo;</button>'  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet_s3" onclick="switchTab(\'tests_speculative_bet_s3\')">Stage 3 - Speculative bet</button>'
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet_s4" onclick="switchTab(\'tests_speculative_bet_s4\')">Stage 4 - Speculative bet</button>'
       + '<span class="v2-nav-sep"></span>'
+      + '<span class="v2-nav-grp-label">Bullish post-setup/tests technical behaviour</span>'
+      + '<button class="v2-nav-btn v2-grp-post-bull" data-v2-tab="post_indicators_bull" onclick="switchTab(\'post_indicators_bull\')">&#8220;Breaking out&#8221; and &#8220;Advancing&#8221; indicators</button>'
       + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Overview</span>'
-      + '<button class="v2-nav-btn v2-grp-overview" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Overview</button>';  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
+      + '<span class="v2-nav-grp-label">Negative breaking through key MAs</span>'
+      + '<button class="v2-nav-btn v2-grp-post-bear" data-v2-tab="post_indicators_bear" onclick="switchTab(\'post_indicators_bear\')">Breaking the ST (50D), MT (150D) and LT (200D) MAs</button>'
+      + '<span class="v2-nav-sep"></span>'
+      + '<span class="v2-nav-grp-label">Summary</span>'
+      + '<button class="v2-nav-btn v2-grp-summary" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Overview</button>';  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
     hdr.appendChild(nav);
   }
   function syncV2State(id) {

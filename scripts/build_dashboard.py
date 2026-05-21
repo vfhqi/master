@@ -177,6 +177,8 @@ TABS = [
     {"id": "neg_pre_indicators", "label": "Negative pre-setup/test indicators", "accent": "#A32D2D"},
     # MD-V2-POST-INDICATORS-MARKER - Post-indicators (5 trailing binary patterns)
     {"id": "post_indicators", "label": "Post-Indicators", "accent": "#A32D2D"},
+    {"id": "post_indicators_bull", "label": "Post — Bullish", "accent": "#0F6E56"},  # MD-V2-POST-INDICATORS-BULL-MARKER
+    {"id": "post_indicators_bear", "label": "Post — Negative", "accent": "#A32D2D"},  # MD-V2-POST-INDICATORS-BEAR-MARKER
     # MD-V2-SETUPS-MARKER - Setups (4 capital-deployment-eligibility patterns)
     {"id": "setups_s1pb", "label": "S1 Basing Setups", "accent": "#BA7517"},
     {"id": "setups_s2vcp", "label": "S2 VCP Setups", "accent": "#BA7517"},
@@ -189,6 +191,8 @@ TABS = [
     {"id": "tests_probing_bet_s2", "label": "S2 Probing Bet", "accent": "#2e7d32"},
     # MD-V2-S47-TAB-SPECULATIVE-BET-MARKER - Speculative Bets S3+S4 (6-criterion x2)
     {"id": "tests_speculative_bet", "label": "Speculative Bets", "accent": "#c62828"},
+    {"id": "tests_speculative_bet_s3", "label": "SB — Stage 3", "accent": "#c62828"},  # MD-V2-SB-S3-MARKER
+    {"id": "tests_speculative_bet_s4", "label": "SB — Stage 4", "accent": "#e65100"},  # MD-V2-SB-S4-MARKER
     # MD-V2-S48-TAB-HEALTHY-VCP-MARKER - Healthy VCP (Core MM Trade #2: Stage 2 basing + VCP + breakout)
     {"id": "tests_healthy_vcp", "label": "Healthy VCP", "accent": "#1565C0"},
     # MD-V2-MASTER-OVERVIEW-S27-MARKER - synoptic rating matrix, default landing tab
@@ -209,13 +213,13 @@ IMPLEMENTED_TABS = [
     "stage_4",  # MD-V2-STAGE4-MARKER
     "pos_pre_indicators",  # MD-V2-PRE-INDICATORS-MARKER-POSITIVE
     "neg_pre_indicators",  # MD-V2-PRE-INDICATORS-MARKER-NEGATIVE
-    "post_indicators",  # MD-V2-POST-INDICATORS-MARKER
+    "post_indicators", "post_indicators_bull", "post_indicators_bear",  # MD-V2-POST-INDICATORS-MARKER
     "setups_s1pb", "setups_s2vcp",  # MD-V2-SETUPS-MARKER
     "tests",  # MD-V2-TESTS-MARKER
     "setups_healthy_retest",  # MD-V2-S47-TAB-HEALTHY-RETEST-MARKER
     "tests_probing_bet_s1",  # MD-V2-S59-TAB-PB-SPLIT-MARKER
     "tests_probing_bet_s2",  # MD-V2-S59-TAB-PB-SPLIT-MARKER
-    "tests_speculative_bet",  # MD-V2-S47-TAB-SPECULATIVE-BET-MARKER
+    "tests_speculative_bet", "tests_speculative_bet_s3", "tests_speculative_bet_s4",  # MD-V2-S47-TAB-SPECULATIVE-BET-MARKER
     "tests_healthy_vcp",  # MD-V2-S48-TAB-HEALTHY-VCP-MARKER
     "master_overview",  # MD-V2-MASTER-OVERVIEW-S27-MARKER
     "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
@@ -1540,6 +1544,8 @@ body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; p
 #po-main-table td.grp-start-g1, #po-main-table th.grp-start-g1 { border-left: 2px solid rgba(15,110,86,0.40); }
 #po-main-table td.grp-start-g2, #po-main-table th.grp-start-g2 { border-left: 2px solid rgba(29,122,78,0.40); }
 #po-main-table td.grp-start-g3, #po-main-table th.grp-start-g3 { border-left: 2px solid rgba(163,45,45,0.40); }
+#po-main-table td.grp-start-sr, #po-main-table th.grp-start-sr { border-left: 2px solid rgba(80,80,80,0.30); }
+#po-main-table thead .gh-stage-ratings { color: #555; }
 #po-main-table td.pi-pass { background: rgba(15,110,86,0.12); color: #0F6E56; font-weight: 700; }
 #po-main-table td.pi-fail { color: #999; }
 /* Rating + score column group per pattern (D-MD-V2-55) */
@@ -2987,7 +2993,7 @@ window.openChart=function(t){
   chartTicker=t;
   var p=document.getElementById("chart-panel");
   // MD-CHART-V2-WIRING-MARKER: V2 tabs slide the chart panel in from the LEFT; legacy keeps the right.
-  var _v2chartTabs={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pos_pre_indicators:1,neg_pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet_s1:1,tests_probing_bet_s2:1,tests_speculative_bet:1,tests_healthy_vcp:1,master_overview:1};  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
+  var _v2chartTabs={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pos_pre_indicators:1,neg_pre_indicators:1,post_indicators:1,post_indicators_bull:1,post_indicators_bear:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet_s1:1,tests_probing_bet_s2:1,tests_speculative_bet:1,tests_speculative_bet_s3:1,tests_speculative_bet_s4:1,tests_healthy_vcp:1,master_overview:1};  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
   var _isV2chart=!!_v2chartTabs[currentTab];
   var _isStageChart=/^stage_[1-4]$/.test(currentTab);
   var _wasChartOpen=p.classList.contains("open");
@@ -3015,7 +3021,7 @@ window.openChart=function(t){
   // Fresh open from a V2 tab resets zoom + the always-on series to the per-tab defaults.
   if(_freshChart&&_isV2chart){
     // MD-V2-CHART-ZOOM-PER-TAB-OVERRIDE-S42-MARKER: per-tab zoom override layered above the two-tier default. 200D break-down on post_indicators; vcp_after_s1_plateau on setups_s1pb; vcp_after_s2_base on setups_s2vcp.
-    var _zoomByTabS42={post_indicators:"2Y",setups_s1pb:"3M",setups_s2vcp:"3M",setups_healthy_retest:"6M",stage_3:"6M"};
+    var _zoomByTabS42={post_indicators:"2Y",post_indicators_bull:"2Y",post_indicators_bear:"2Y",setups_s1pb:"3M",setups_s2vcp:"3M",setups_healthy_retest:"6M",stage_3:"6M"};
     chartZoom=_zoomByTabS42[currentTab]||(_isStageChart?"2Y":"6M");
     chartVis.ma20=true;chartVis.ma50=true;chartVis.ma100=true;chartVis.ma150=true;chartVis.ma200=true;
     chartVis.obv=true;chartVis.vol=true;chartVis.vol20=true;chartVis.vol50=true;
@@ -3078,7 +3084,7 @@ window.setChartScaleMode=function(m){
 // MD-CHART-V2-WIRING-MARKER: V2 tabs - clicking a company/ticker name-cell opens that stock's chart.
 // This is the only chart entry point on V2 tabs (the header "Chart" button is hidden there via CSS).
 document.addEventListener("click",function(e){
-  var _v2ct={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pos_pre_indicators:1,neg_pre_indicators:1,post_indicators:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet_s1:1,tests_probing_bet_s2:1,tests_speculative_bet:1,tests_healthy_vcp:1,master_overview:1};  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
+  var _v2ct={stage_1:1,stage_2:1,stage_3:1,stage_4:1,pos_pre_indicators:1,neg_pre_indicators:1,post_indicators:1,post_indicators_bull:1,post_indicators_bear:1,setups_s1pb:1,setups_s2vcp:1,tests:1,setups_healthy_retest:1,tests_probing_bet_s1:1,tests_probing_bet_s2:1,tests_speculative_bet:1,tests_speculative_bet_s3:1,tests_speculative_bet_s4:1,tests_healthy_vcp:1,master_overview:1};  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
   if(!_v2ct[document.body.getAttribute("data-active-tab")])return;
   var _nameCell=e.target.closest("td.name-cell, td.mo-mx-name-cell");
   if(!_nameCell)return;
@@ -9338,7 +9344,7 @@ function SUM_renderQualifiedStocks() {
   function measureV2Ribbon() {
     var active = document.body.getAttribute('data-active-tab') || '';
     var v2 = (active.indexOf('stage_') === 0 || active === 'pos_pre_indicators' || active === 'neg_pre_indicators' ||
-              active === 'post_indicators' || active.indexOf('setups') === 0 ||
+              active.indexOf('post_indicators') === 0 || active.indexOf('setups') === 0 || active.indexOf('tests_') === 0 ||
               active === 'tests' || active === 'master_overview');
     if (!v2) return;
     var pane = document.getElementById('tab-' + active);
@@ -9383,6 +9389,8 @@ function SUM_renderQualifiedStocks() {
       + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="pos_pre_indicators" onclick="switchTab(\'pos_pre_indicators\')">Positive pre-setup/test indicators</button>'
       + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="neg_pre_indicators" onclick="switchTab(\'neg_pre_indicators\')">Negative pre-setup/test indicators</button>'
       + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators" onclick="switchTab(\'post_indicators\')">Post-farfalle indicators</button>'
+      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators_bull" onclick="switchTab(\'post_indicators_bull\')">Bullish post-setup/tests technical behaviour</button>'
+      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="post_indicators_bear" onclick="switchTab(\'post_indicators_bear\')">Negative breaking through key MAs</button>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-grp-label">Late-stage capital qualification setups and tests</span>'
@@ -9391,6 +9399,8 @@ function SUM_renderQualifiedStocks() {
       + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">S1 Probing Bet</button>'
       + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">S2 Probing Bet</button>'  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
       + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet" onclick="switchTab(\'tests_speculative_bet\')">Speculative Bets</button>'  /* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER */
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet_s3" onclick="switchTab(\'tests_speculative_bet_s3\')">SB — Stage 3</button>'
+      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet_s4" onclick="switchTab(\'tests_speculative_bet_s4\')">SB — Stage 4</button>'
       + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_healthy_vcp" onclick="switchTab(\'tests_healthy_vcp\')">Healthy VCP</button>'  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
       + '<span class="v2-nav-sep"></span>'
       + '<span class="v2-nav-sep"></span>'
@@ -10720,7 +10730,7 @@ function SUM_renderQualifiedStocks() {
     sort: { col: 'company', dir: 'asc' }
   };
 
-  var PO_PATTERNS = [
+  var PO_PATTERNS_ALL = [
   {
     "key": "breakout",
     "label": "Breakout",
@@ -10849,6 +10859,26 @@ function SUM_renderQualifiedStocks() {
   }
 ];
   var PO_SUPERGROUPS = [{"key": "bull", "label": "Bullish post-test indicators", "cls": "sg-positive"}, {"key": "bear", "label": "Bearish post-test indicators", "cls": "sg-negative"}];
+  /* S-POST-01: module-level tab routing + pattern filter */
+  var PO_PATTERNS = PO_PATTERNS_ALL;
+  var _poTabId = 'post_indicators';
+  var _poActiveSupergroups = PO_SUPERGROUPS;
+  function _poSetup(tabId, supergroup) {
+    _poTabId = tabId;
+    if (supergroup) {
+      PO_PATTERNS = PO_PATTERNS_ALL.filter(function(p){ return p.supergroup === supergroup; });
+      _poActiveSupergroups = PO_SUPERGROUPS.filter(function(sg){ return sg.key === supergroup; });
+    } else {
+      PO_PATTERNS = PO_PATTERNS_ALL;
+      _poActiveSupergroups = PO_SUPERGROUPS;
+    }
+    /* clear ALL post_indicators panes to avoid duplicate DOM IDs */
+    ['post_indicators', 'post_indicators_bull', 'post_indicators_bear'].forEach(function(tid) {
+      var h = document.getElementById('tab-' + tid);
+      if (h) h.innerHTML = '';
+    });
+  }
+  window._poSetup = _poSetup;  /* S-POST-01: expose for global dispatch */
   var PO_TONE = {"breakout": "pi-tile-pullback", "advancing": "pi-tile-basing", "breakdown_50D": "pi-tile-collapsing", "breakdown_150D": "pi-tile-amber", "breakdown_200D": "pi-tile-navy"};
   var PO_STRIP = {"breakout": "pi-strip-pullback", "advancing": "pi-strip-basing", "breakdown_50D": "pi-strip-collapsing", "breakdown_150D": "pi-strip-amber", "breakdown_200D": "pi-strip-navy"};
   var PO_CHIP = {"breakout": "pullback", "advancing": "basing", "breakdown_50D": "collapsing", "breakdown_150D": "amber", "breakdown_200D": "navy"};
@@ -10872,6 +10902,10 @@ function SUM_renderQualifiedStocks() {
       { id:'ma_200',   label:'200D MA', sortKey:'ma_200',          cls:'num',       kind:'input' },
       { id:'pullback', label:'Recent pullback',        sortKey:'recent_pullback', cls:'num',       kind:'input' }
     ];
+    cols.push({ id:'s1_rat', label:'S1', sortKey:'s1_rating', cls:'grp-start-sr', kind:'stage_rating', stageKey:'stage_1' });
+    cols.push({ id:'s2_rat', label:'S2', sortKey:'s2_rating', cls:'',             kind:'stage_rating', stageKey:'stage_2' });
+    cols.push({ id:'s3_rat', label:'S3', sortKey:'s3_rating', cls:'',             kind:'stage_rating', stageKey:'stage_3' });
+    cols.push({ id:'s4_rat', label:'S4', sortKey:'s4_rating', cls:'',             kind:'stage_rating', stageKey:'stage_4' });
     for (var p = 0; p < PO_PATTERNS.length; p++) {
       var pat = PO_PATTERNS[p];
       var gi = p + 1;
@@ -11041,6 +11075,14 @@ function SUM_renderQualifiedStocks() {
     }
     return String(v);
   }
+  function poStageRatingCell(row, col) {
+    var sd = row.md_v2 && row.md_v2[col.stageKey];
+    var r = (sd && sd.rating) || 'None';
+    var rcls = PO_RATING_CLS[r] || 'tint-none';
+    return '<td class="' + (col.cls||'')
+      + ' pi-rating-cell ' + rcls
+      + '"><span class="pi-pill pi-pill-' + rcls + '">' + r + '</span></td>';
+  }
   function poTestCell(row, col) {
     var pass = poEvalTest(row, col.patternKey, col.testKey);
     var extra = col.cls || '';
@@ -11088,6 +11130,11 @@ function SUM_renderQualifiedStocks() {
       return poEvalTest(row, patternKey, sub) ? 1 : 0;
     }
     if (key === 'recent_pullback') return row.recent_pullback == null ? -Infinity : row.recent_pullback;
+    var SR_RANK = {'Probable':4,'Plausible':3,'Possible':2,'None':1};
+    if (key === 's1_rating') { var _s1=row.md_v2&&row.md_v2.stage_1; return SR_RANK[(_s1&&_s1.rating)||'None']||1; }
+    if (key === 's2_rating') { var _s2=row.md_v2&&row.md_v2.stage_2; return SR_RANK[(_s2&&_s2.rating)||'None']||1; }
+    if (key === 's3_rating') { var _s3=row.md_v2&&row.md_v2.stage_3; return SR_RANK[(_s3&&_s3.rating)||'None']||1; }
+    if (key === 's4_rating') { var _s4=row.md_v2&&row.md_v2.stage_4; return SR_RANK[(_s4&&_s4.rating)||'None']||1; }
     var PCT_KEYS = ['high_52w','low_52w','ma_150','ma_200'];
     if (PCT_KEYS.indexOf(key) > -1 && poState.mode.inputs === 'pct') {
       var ref = row[key];
@@ -11237,6 +11284,7 @@ function SUM_renderQualifiedStocks() {
         var col = PO_COLS[j];
         if (col.kind === 'rating') html += poRatingCell(s, col);
         else if (col.kind === 'score') html += poScoreCell(s, col);
+        else if (col.kind === 'stage_rating') html += poStageRatingCell(s, col);
         else html += poTestCell(s, col);
       }
       html += '</tr>';
@@ -11298,27 +11346,31 @@ function SUM_renderQualifiedStocks() {
   window.poOnSort = poOnSort;
 
   function poBuildScaffold() {
-    var host = document.getElementById('tab-post_indicators');
+    var host = document.getElementById('tab-' + _poTabId);
     if (!host) return false;
     if (host.querySelector('#po-main-table')) return true;
 
     var colgroupHtml = '<col class="c-name"><col class="c-taxon">' +
                        '<col class="c-price"><col class="c-52wh"><col class="c-52wl">' +
-                       '<col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
+                       '<col class="c-ma150"><col class="c-ma200"><col class="c-pullback">' +
+                       '<col class="c-rating"><col class="c-rating"><col class="c-rating"><col class="c-rating">';
     var inputsColspan = 8;
-    var hasSuper = PO_SUPERGROUPS.length > 0;
-    var superHtml = '<th class="gh-inputs sg-spacer" colspan="' + inputsColspan + '"></th>';
-    var groupHtml = '<th class="gh-inputs" colspan="' + inputsColspan + '">Inputs</th>';
+    var hasSuper = _poActiveSupergroups.length > 0;
+    var superHtml = '<th class="gh-inputs sg-spacer" colspan="' + inputsColspan + '"></th>'
+                  + '<th class="gh-stage-ratings sg-spacer" colspan="4"></th>';
+    var groupHtml = '<th class="gh-inputs" colspan="' + inputsColspan + '">Inputs</th>'
+                  + '<th class="gh-stage-ratings grp-start-sr" colspan="4">Stage Ratings</th>';
 
     if (hasSuper) {
       var sgCols = {};
-      for (var sgi = 0; sgi < PO_SUPERGROUPS.length; sgi++) sgCols[PO_SUPERGROUPS[sgi].key] = 0;
+      for (var sgi = 0; sgi < _poActiveSupergroups.length; sgi++) sgCols[_poActiveSupergroups[sgi].key] = 0;
       for (var sp = 0; sp < PO_PATTERNS.length; sp++) {
         var cspan = 2 + PO_PATTERNS[sp].tests.length;
-        sgCols[PO_PATTERNS[sp].supergroup] += cspan;
+        if (sgCols.hasOwnProperty(PO_PATTERNS[sp].supergroup)) sgCols[PO_PATTERNS[sp].supergroup] += cspan;
       }
-      for (var sgj = 0; sgj < PO_SUPERGROUPS.length; sgj++) {
-        var sg = PO_SUPERGROUPS[sgj];
+      for (var sgj = 0; sgj < _poActiveSupergroups.length; sgj++) {
+        var sg = _poActiveSupergroups[sgj];
+        if (!sgCols[sg.key]) continue; /* zero-colspan guard */
         superHtml += '<th class="' + sg.cls + '" colspan="' + sgCols[sg.key] + '">' + sg.label + '</th>';
       }
     }
@@ -11416,7 +11468,7 @@ function SUM_renderQualifiedStocks() {
     // for the named pattern, then clear it so it fires exactly once.
     (function(){
       var j = window._mdJump;
-      if (j && j.tab === 'post_indicators') {
+      if (j && j.tab === _poTabId) {
         if (j.patternKey && j.tier && poState.tierFilter &&
             poState.tierFilter.hasOwnProperty(j.patternKey)) {
           poState.tierFilter[j.patternKey] = [j.tier];
@@ -11430,6 +11482,18 @@ function SUM_renderQualifiedStocks() {
     if (window.measureV2Ribbon) measureV2Ribbon();  /* MD-V2-WAVE1B-STICKY-CORRECTIVE-MARKER */
   }
   window.renderPostIndicators = renderPostIndicators;
+
+  function renderPostIndicatorsBull() {
+    _poSetup('post_indicators_bull', 'bull');
+    renderPostIndicators();
+  }
+  window.renderPostIndicatorsBull = renderPostIndicatorsBull;
+
+  function renderPostIndicatorsBear() {
+    _poSetup('post_indicators_bear', 'bear');
+    renderPostIndicators();
+  }
+  window.renderPostIndicatorsBear = renderPostIndicatorsBear;
 
 })();
 
@@ -14802,7 +14866,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 (function() {
   'use strict';
 
-  var SB_PATTERNS = [
+  var SB_PATTERNS_ALL = [
     {
       key: 'speculative_bet_s3',
       label: 'Stage 3 topping/declining trend + breakout ⇒ S3 speculative bet',
@@ -14844,6 +14908,24 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   var SB_TONE_TILE  = { s3:'pi-tile-s3', s4:'pi-tile-s4' };
   var SB_TONE_STRIP = { s3:'pi-strip-s3', s4:'pi-strip-s4' };
   var SB_TONE_CHIP  = { s3:'s3', s4:'s4' };
+
+  /* S-SB-01: module-level tab routing + pattern filter */
+  var SB_PATTERNS = SB_PATTERNS_ALL;
+  var _sbTabId = 'tests_speculative_bet';
+  function _sbSetup(tabId, patternKey) {
+    _sbTabId = tabId;
+    if (patternKey) {
+      SB_PATTERNS = SB_PATTERNS_ALL.filter(function(p){ return p.key === patternKey; });
+    } else {
+      SB_PATTERNS = SB_PATTERNS_ALL;
+    }
+    /* clear ALL SB panes to avoid duplicate DOM IDs */
+    ['tests_speculative_bet', 'tests_speculative_bet_s3', 'tests_speculative_bet_s4'].forEach(function(tid) {
+      var h = document.getElementById('tab-' + tid);
+      if (h) h.innerHTML = '';
+    });
+  }
+  window._sbSetup = _sbSetup;  /* expose for global dispatch */
 
   var sbState = {
     mode: { inputs: 'pct', tests: 'tick' },
@@ -15108,7 +15190,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   // --- scaffold ---
   function sbPatternBlockSpan(pat) { return 2 + pat.tests.length + 2; }
   function sbBuildScaffold() {
-    var host = document.getElementById('tab-tests_speculative_bet');
+    var host = document.getElementById('tab-' + _sbTabId);
     if (!host) return false;
     if (host.querySelector('#sb-main-table')) return true;
     var cg = '<col class="c-name"><col class="c-taxon"><col class="c-price"><col class="c-52wh"><col class="c-52wl"><col class="c-ma150"><col class="c-ma200"><col class="c-pullback">';
@@ -15154,6 +15236,18 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if (window.measureV2Ribbon) measureV2Ribbon();
   }
   window.renderSpeculativeBet = renderSpeculativeBet;
+
+  function renderSpeculativeBetS3() {
+    _sbSetup('tests_speculative_bet_s3', 'speculative_bet_s3');
+    renderSpeculativeBet();
+  }
+  window.renderSpeculativeBetS3 = renderSpeculativeBetS3;
+
+  function renderSpeculativeBetS4() {
+    _sbSetup('tests_speculative_bet_s4', 'speculative_bet_s4');
+    renderSpeculativeBet();
+  }
+  window.renderSpeculativeBetS4 = renderSpeculativeBetS4;
 
 })();
 
@@ -16100,7 +16194,9 @@ function renderTab(id){
   else if(id==="stage_4")renderStage4();  /* MD-V2-STAGE4-MARKER */
   else if(id==="pos_pre_indicators")renderPosPreIndicators();  /* MD-V2-PRE-INDICATORS-MARKER-POSITIVE */
   else if(id==="neg_pre_indicators")renderNegPreIndicators();  /* MD-V2-PRE-INDICATORS-MARKER-NEGATIVE */
-  else if(id==="post_indicators")renderPostIndicators();  /* MD-V2-POST-INDICATORS-MARKER */
+  else if(id==="post_indicators"){_poSetup('post_indicators',null);renderPostIndicators();}  /* MD-V2-POST-INDICATORS-MARKER */
+  else if(id==="post_indicators_bull")renderPostIndicatorsBull();
+  else if(id==="post_indicators_bear")renderPostIndicatorsBear();
   else if(id==="setups_s1pb")renderSetupsS1PB();  /* MD-V2-SETUPS-MARKER */
   else if(id==="setups_s2vcp")renderSetupsS2VCP();  /* MD-V2-SETUPS-MARKER */
   else if(id==="master_overview")renderMasterOverview();  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
@@ -16108,7 +16204,9 @@ function renderTab(id){
   else if(id==="setups_healthy_retest")renderHealthyRetest();  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
   else if(id==="tests_probing_bet_s1")renderProbingBetS1();  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
   else if(id==="tests_probing_bet_s2")renderProbingBetS2();  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
-  else if(id==="tests_speculative_bet")renderSpeculativeBet();  /* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER */
+  else if(id==="tests_speculative_bet"){_sbSetup('tests_speculative_bet',null);renderSpeculativeBet();}  /* MD-V2-S47-TAB-SPECULATIVE-BET-MARKER */
+  else if(id==="tests_speculative_bet_s3")renderSpeculativeBetS3();
+  else if(id==="tests_speculative_bet_s4")renderSpeculativeBetS4();
   else if(id==="tests_healthy_vcp")renderHealthyVCP();  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
   else if(id==="mm99")renderMM99();
   else if(id==="bp")renderBP();

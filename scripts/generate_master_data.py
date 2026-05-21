@@ -2057,7 +2057,7 @@ def compute_master_dashboard_screens(prices, filter_results):
             _sec_pct_now = _sec_pct_in_ind.get(_stock_sector, 0)
             _sec_pct_m3v = _sec_m3_pct_in_ind.get(_stock_sector, 0)
             s3_t8 = (_sec_pct_now < _sec_pct_m3v - 10)
-            s3["tests"]["T3_base_count_504d_ge3"] = s3_t3
+            s3["tests"]["T3_base_count_504d_ge2"] = s3_t3
             s3["tests"]["T4_50D_below_103pct_150D"] = s3_t4
             s3["tests"]["T5_down_vol_exceeds_up_vol"] = s3_t5
             s3["tests"]["T6_ATR_expansion_ge110"] = s3_t6

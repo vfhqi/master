@@ -13171,6 +13171,7 @@ window.TAB_LABELS = TAB_LABELS;
 /* MD-V2-S63A: expose chart loader + zoom for SSP overlay */
 window.loadChartData = loadChartData;
 window._dashChartZoom = function(){ return chartZoom; };
+window._dashSetChartZoom = function(z){ chartZoom=z; };
             window.drawMasterChart = drawMasterChart;
 })();  /* close main IIFE */
 
@@ -16581,7 +16582,8 @@ function sspRenderChart(ticker, company){
   /* sync zoom-button active state */
   var _zm={126:'ssp-z-6m',252:'ssp-z-1y',504:'ssp-z-2y',756:'ssp-z-3y',1260:'ssp-z-5y',99999:'ssp-z-all'};
   document.querySelectorAll('.ssp-czb').forEach(function(b){b.classList.remove('on');});
-  var _zb=document.getElementById(_zm[chartZoom]); if(_zb)_zb.classList.add('on');
+  var _sspcz=window._sspChartZoom||252;
+  var _zb=document.getElementById(_zm[_sspcz]); if(_zb)_zb.classList.add('on');
 
   var body = document.getElementById('ssp-chart-body');
   var loading = document.getElementById('ssp-chart-loading');
@@ -16610,7 +16612,9 @@ function sspRenderChart(ticker, company){
 }
 
 function sspSetChartZoom(z){
-  chartZoom=z;
+  window._sspChartZoom=z;
+  var _n2s={126:'6M',252:'1Y',504:'2Y',756:'3Y',1260:'5Y',99999:'All'};
+  if(window._dashSetChartZoom) window._dashSetChartZoom(_n2s[z]||'1Y');
   var _zm={126:'ssp-z-6m',252:'ssp-z-1y',504:'ssp-z-2y',756:'ssp-z-3y',1260:'ssp-z-5y',99999:'ssp-z-all'};
   document.querySelectorAll('.ssp-czb').forEach(function(b){b.classList.remove('on');});
   var _zb=document.getElementById(_zm[z]); if(_zb)_zb.classList.add('on');

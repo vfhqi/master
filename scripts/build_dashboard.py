@@ -1181,7 +1181,7 @@ body[data-active-tab="setups_healthy_retest"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2-nav,body[data-active-tab="val"] .v2-nav { display: flex; }
 /* Group container */
 .v2-nav-group { display: flex; flex-direction: column; border-radius: 5px; padding: 4px 6px 5px; min-width: 0; }
-.v2-nav-group-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.45px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; line-height: 1; }
+.v2-nav-group-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.45px; font-weight: 700; margin-bottom: 4px; white-space: normal; word-break: break-word; line-height: 1.2; overflow: hidden; max-width: 100%; }
 .v2-nav-group-btns { display: flex; flex-wrap: nowrap; gap: 3px; align-items: stretch; }
 /* Buttons: uniform 50px height, centred text */
 .v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; white-space: normal; word-break: break-word; flex: 1 1 0; min-width: 0; min-height: 42px; height: auto; padding: 4px 9px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; }

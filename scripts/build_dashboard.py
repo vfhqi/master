@@ -15767,36 +15767,32 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   //     'group:<g>:<k>' -> md_v2[<g>][<k>].rating
   //       (pre_indicators / post_indicators / setups / tests)
   //   tabId - the tab a screen-name click opens.
+  /* S66c: MO_ROWS aligned with nav groups (5 groups = 5 sections; section names match nav labels exactly) */
   var MO_ROWS = [
-    // -- Stages --
-    /* MD-V2-S51-OVERVIEW-STAGE1-UNIFIED: Stage 1 single row — Probable/Plausible/Possible/None tiers (replaces S41 Early/Late split). */
-    { section:'Stages', key:'stage_1', label:'Stage 1 - Basing', short:'S1 Basing', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
-    { section:'Stages', key:'stage_2', label:'Stage 2 - Uptrend', short:'S2 Uptrend', ratingPath:'stage:stage_2', tabId:'stage_2', patternKey:null },
-    { section:'Stages', key:'stage_3', label:'Stage 3 - Topping', short:'S3 Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
-    { section:'Stages', key:'stage_4', label:'Stage 4 - Decline', short:'S4 Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
-    // -- Pre-test indicators --
-    { section:'Positive pre-setup/test indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', short:'Pulling back', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pos_pre_indicators', patternKey:'pulling_back_uptrend' },
-    { section:'Positive pre-setup/test indicators', key:'basing', label:'Basing in a MT/LT uptrend', short:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pos_pre_indicators', patternKey:'basing' },
-    { section:'Negative pre-setup/test indicators', key:'collapsing', label:'Collapsing', short:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'neg_pre_indicators', patternKey:'collapsing' },
-    // -- Post-test indicators (ratingPath -> md_v2.post_indicators.<k>.rating;
-    //    md_v2.indicators.<k> is a bare boolean and has no .rating - Request 1) --
-    { section:'Post-farfalle indicators', key:'breakout', label:'Breakout', short:'Breakout', ratingPath:'group:post_indicators:breakout', tabId:'post_indicators', patternKey:'breakout' },
-    { section:'Post-farfalle indicators', key:'advancing', label:'Advancing', short:'Advancing', ratingPath:'group:post_indicators:advancing', tabId:'post_indicators', patternKey:'advancing' },
-    { section:'Post-farfalle indicators', key:'breakdown_50D', label:'Negatively breaking through ST trend (50D MA)', short:'Breaking 50D', ratingPath:'group:post_indicators:breakdown_50D', tabId:'post_indicators', patternKey:'breakdown_50D' },
-    { section:'Post-farfalle indicators', key:'breakdown_150D', label:'Negatively breaking through MT trend (150D MA)', short:'Breaking 150D', ratingPath:'group:post_indicators:breakdown_150D', tabId:'post_indicators', patternKey:'breakdown_150D' },
-    { section:'Post-farfalle indicators', key:'breakdown_200D', label:'Negatively breaking through LT trend (200D MA)', short:'Breaking 200D', ratingPath:'group:post_indicators:breakdown_200D', tabId:'post_indicators', patternKey:'breakdown_200D' },
-    // -- Capital qualification setups --
-    { section:'Capital qualification setups', key:'probing_bet', label:'Probing bet', short:'Probing bet', ratingPath:'group:setups:probing_bet', tabId:'setups_s1pb', patternKey:'probing_bet' },
-    { section:'Capital qualification setups', key:'vcp_after_s1_plateau', label:'VCP after Stage 1->2 plateau', short:'VCP S1 plateau', ratingPath:'group:setups:vcp_after_s1_plateau', tabId:'setups_s1pb', patternKey:'vcp_after_s1_plateau' },
-    { section:'Capital qualification setups', key:'setup_healthy_retest', label:'Healthy retest within MT/LT uptrend', short:'Healthy retest', ratingPath:'group:setups:healthy_retest', tabId:'setups_s2vcp', patternKey:'healthy_retest' },
-    { section:'Capital qualification setups', key:'vcp_after_s2_base', label:'VCP after Stage 2 base', short:'VCP S2 base', ratingPath:'group:setups:vcp_after_s2_base', tabId:'setups_s2vcp', patternKey:'vcp_after_s2_base' },
-    // -- Capital deployment tests --
-    { section:'Capital deployment tests', key:'ma_retest_upwards', label:'Upwards moving average retest', short:'MA retest', ratingPath:'group:tests:ma_retest_upwards', tabId:'tests', patternKey:'ma_retest_upwards' },
-    { section:'Capital deployment tests', key:'vcp_deploy_s1', label:'VCP after Stage 1->2', short:'VCP S1 deploy', ratingPath:'group:tests:vcp_deploy_s1', tabId:'tests', patternKey:'vcp_deploy_s1' },
-    { section:'Capital deployment tests', key:'vcp_deploy_s2_hvcp', label:'Healthy VCP (Trade 2)', short:'VCP S2', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests_healthy_vcp', patternKey:'vcp_deploy_s2' },
-    { section:'Capital deployment tests', key:'vcp_deploy_s2', label:'VCP after Stage 2 base', short:'VCP S2 deploy', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests', patternKey:'vcp_deploy_s2' },
-    { section:'Capital deployment tests', key:'probing_bet_test', label:'Probing bet', short:'PB deploy', ratingPath:'group:tests:probing_bet', tabId:'tests', patternKey:'probing_bet' }
-  ]; /* MD-V2-S40-RESPONSIVE-SHORT-HEADERS — short forms added */
+    // -- Group 1: Stages --
+    { section:'Stages', key:'stage_1', label:'Stage 1 — Basing', short:'S1 Basing', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
+    { section:'Stages', key:'stage_2', label:'Stage 2 — Uptrend', short:'S2 Uptrend', ratingPath:'stage:stage_2', tabId:'stage_2', patternKey:null },
+    { section:'Stages', key:'stage_3', label:'Stage 3 — Topping', short:'S3 Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
+    { section:'Stages', key:'stage_4', label:'Stage 4 — Decline', short:'S4 Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
+    // -- Group 2: Early-stage pre-test indicators --
+    { section:'Early-stage pre-test indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', short:'Pulling back', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pos_pre_indicators', patternKey:'pulling_back_uptrend' },
+    { section:'Early-stage pre-test indicators', key:'basing', label:'Basing in a MT/LT uptrend', short:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pos_pre_indicators', patternKey:'basing' },
+    { section:'Early-stage pre-test indicators', key:'collapsing', label:'Collapsing', short:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'neg_pre_indicators', patternKey:'collapsing' },
+    // -- Group 3: Late-stage capital qualification setups and tests (one row per nav button) --
+    { section:'Late-stage capital qualification setups and tests', key:'probing_bet_s1', label:'Stage 1 — Probing bet', short:'S1 PB', ratingPath:'group:tests:probing_bet_s1', tabId:'tests_probing_bet_s1', patternKey:'probing_bet_s1' },
+    { section:'Late-stage capital qualification setups and tests', key:'probing_bet_s2', label:'Stage 2 — Probing bet', short:'S2 PB', ratingPath:'group:tests:probing_bet_s2', tabId:'tests_probing_bet_s2', patternKey:'probing_bet_s2' },
+    { section:'Late-stage capital qualification setups and tests', key:'healthy_retest', label:'S2 — Retest setup', short:'S2 Retest', ratingPath:'group:setups:healthy_retest', tabId:'setups_healthy_retest', patternKey:'healthy_retest' },
+    { section:'Late-stage capital qualification setups and tests', key:'vcp_deploy_s2', label:'S2 — VCP deploy', short:'S2 VCP', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests_healthy_vcp', patternKey:'vcp_deploy_s2' },
+    { section:'Late-stage capital qualification setups and tests', key:'speculative_bet_s3', label:'Stage 3 — Speculative bet', short:'S3 SB', ratingPath:'group:tests:speculative_bet_s3', tabId:'tests_speculative_bet_s3', patternKey:'speculative_bet_s3' },
+    { section:'Late-stage capital qualification setups and tests', key:'speculative_bet_s4', label:'Stage 4 — Speculative bet', short:'S4 SB', ratingPath:'group:tests:speculative_bet_s4', tabId:'tests_speculative_bet_s4', patternKey:'speculative_bet_s4' },
+    // -- Group 4: Bullish post-setup/tests technical behaviour --
+    { section:'Bullish post-setup/tests technical behaviour', key:'breakout', label:'Breakout', short:'Breakout', ratingPath:'group:post_indicators:breakout', tabId:'post_indicators_bull', patternKey:'breakout' },
+    { section:'Bullish post-setup/tests technical behaviour', key:'advancing', label:'Advancing', short:'Advancing', ratingPath:'group:post_indicators:advancing', tabId:'post_indicators_bull', patternKey:'advancing' },
+    // -- Group 5: Negative breaking through key MAs --
+    { section:'Negative breaking through key MAs', key:'breakdown_50D', label:'Breaking through 50D MA', short:'Breaking 50D', ratingPath:'group:post_indicators:breakdown_50D', tabId:'post_indicators_bear', patternKey:'breakdown_50D' },
+    { section:'Negative breaking through key MAs', key:'breakdown_150D', label:'Breaking through 150D MA', short:'Breaking 150D', ratingPath:'group:post_indicators:breakdown_150D', tabId:'post_indicators_bear', patternKey:'breakdown_150D' },
+    { section:'Negative breaking through key MAs', key:'breakdown_200D', label:'Breaking through 200D MA', short:'Breaking 200D', ratingPath:'group:post_indicators:breakdown_200D', tabId:'post_indicators_bear', patternKey:'breakdown_200D' }
+  ]; /* S66c: 18 rows, 5 sections aligned with nav groups */
 
   // The 4 rating tiers (Stage 1 splits Probable into Early/Late upstream; the
   // normaliser folds both into Probable).
@@ -15806,30 +15802,27 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   // section -> group-band colour-hook class (shared by both tables)
   var MO_GROUP_CLS = {
     'Stages': 'mo-mx-g-stages',
-    'Positive pre-setup/test indicators': 'mo-mx-g-pos-pretest',
-    'Negative pre-setup/test indicators': 'mo-mx-g-neg-pretest',
-    'Post-farfalle indicators': 'mo-mx-g-posttest',
-    'Capital qualification setups': 'mo-mx-g-setups',
-    'Capital deployment tests': 'mo-mx-g-tests'
+    'Early-stage pre-test indicators': 'mo-mx-g-pretest',
+    'Late-stage capital qualification setups and tests': 'mo-mx-g-setups',
+    'Bullish post-setup/tests technical behaviour': 'mo-mx-g-pos-pretest',
+    'Negative breaking through key MAs': 'mo-mx-g-neg-pretest'
   };
   // MD-V2-S36-BRIEF-MARKER: per-section class suffix for the body-cell visual
   // grouping border (CSS rule #mo-matrix-table tbody td.mo-sec-start-*).
   var MO_SECTION_BORDER_CLS = {
     'Stages': 'mo-sec-start-stages',
-    'Positive pre-setup/test indicators': 'mo-sec-start-pos-pretest',
-    'Negative pre-setup/test indicators': 'mo-sec-start-neg-pretest',
-    'Post-farfalle indicators': 'mo-sec-start-posttest',
-    'Capital qualification setups': 'mo-sec-start-setups',
-    'Capital deployment tests': 'mo-sec-start-tests'
+    'Early-stage pre-test indicators': 'mo-sec-start-pretest',
+    'Late-stage capital qualification setups and tests': 'mo-sec-start-setups',
+    'Bullish post-setup/tests technical behaviour': 'mo-sec-start-pos-pretest',
+    'Negative breaking through key MAs': 'mo-sec-start-neg-pretest'
   };
   // MD-V2-S38-SECTIONS-OVERVIEW-MARKER: matching end-of-section map.
   var MO_SECTION_END_BORDER_CLS = {
     'Stages': 'mo-sec-end-stages',
-    'Positive pre-setup/test indicators': 'mo-sec-end-pos-pretest',
-    'Negative pre-setup/test indicators': 'mo-sec-end-neg-pretest',
-    'Post-farfalle indicators': 'mo-sec-end-posttest',
-    'Capital qualification setups': 'mo-sec-end-setups',
-    'Capital deployment tests': 'mo-sec-end-tests'
+    'Early-stage pre-test indicators': 'mo-sec-end-pretest',
+    'Late-stage capital qualification setups and tests': 'mo-sec-end-setups',
+    'Bullish post-setup/tests technical behaviour': 'mo-sec-end-pos-pretest',
+    'Negative breaking through key MAs': 'mo-sec-end-neg-pretest'
   };
   function moIsSectionStart(idx){
     if (idx === 0) return MO_ROWS[0].section;
@@ -15851,11 +15844,10 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   // short section labels for the group band - the full names are long.
   var MO_GROUP_LABEL = {
     'Stages': 'Stages',
-    'Positive pre-setup/test indicators': 'Positive pre-farfalle',
-    'Negative pre-setup/test indicators': 'Negative pre-farfalle',
-    'Post-farfalle indicators': 'Post-farfalle',
-    'Capital qualification setups': 'Qualification setups',
-    'Capital deployment tests': 'Deployment tests'
+    'Early-stage pre-test indicators': 'Pre-test indicators',
+    'Late-stage capital qualification setups and tests': 'Capital setups & tests',
+    'Bullish post-setup/tests technical behaviour': 'Bullish post indicators',
+    'Negative breaking through key MAs': 'Negative MA breaks'
   };
   var MO_MX_TIER_PILL = {
     'None': 'mo-mx-p-none', 'Possible': 'mo-mx-p-pos',

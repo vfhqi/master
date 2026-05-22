@@ -16557,6 +16557,7 @@ function sspRenderTable(ticker, p, md2){
   for(var _i=0;_i<univArr.length;_i++){
     var _u=univArr[_i]; if(!_u||!_u.ticker) continue;
     var _tk=_u.ticker;
+    if(_tk!==ticker) continue; /* SSV: show only selected stock */
     var _f=filters[_tk]||{}; var _md=_f.md_v2||{};
     var _pr=prices[_tk]||{};
     var _sel=(_tk===ticker);

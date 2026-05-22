@@ -16222,6 +16222,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function renderMasterOverview() {
     moRenderTable();
     moRenderMatrix();
+    if (window.measureV2Ribbon) measureV2Ribbon();  /* S72: fix frozen header on initial Overview load */
   }
   window.renderMasterOverview = renderMasterOverview;
 

@@ -1166,8 +1166,8 @@ body[data-active-tab="tests_probing_bet_s2"] .header-tabs-row,
 body[data-active-tab="setups_healthy_retest"] .header-tabs-row,
 body[data-active-tab="master_overview"] .header-tabs-row,body[data-active-tab="ssem"] .header-tabs-row,body[data-active-tab="val"] .header-tabs-row { display: none !important; }
 
-/* V2 mini nav strip - visible only on V2 tabs */
-.v2-nav { display: none; padding: 8px 12px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 6px; align-items: center; }
+/* V2 mini nav strip - visible only on V2 tabs — S66b group-redesign */
+.v2-nav { display: none; flex-wrap: nowrap; padding: 5px 12px 6px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 5px; align-items: flex-start; overflow-x: auto; }
 body[data-active-tab^="stage_"] .v2-nav,
 body[data-active-tab="pos_pre_indicators"] .v2-nav,body[data-active-tab="neg_pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
@@ -1179,42 +1179,39 @@ body[data-active-tab="tests_probing_bet_s1"] .v2-nav,
 body[data-active-tab="tests_probing_bet_s2"] .v2-nav,
 body[data-active-tab="setups_healthy_retest"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2-nav,body[data-active-tab="val"] .v2-nav { display: flex; }
-.v2-nav-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; margin-right: 8px; }
-.v2-nav-btn { display: inline-block; padding: 5px 11px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+/* Group container */
+.v2-nav-group { display: flex; flex-direction: column; border-radius: 5px; padding: 4px 6px 5px; flex-shrink: 0; }
+.v2-nav-group-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.45px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; line-height: 1; }
+.v2-nav-group-btns { display: flex; flex-wrap: nowrap; gap: 3px; align-items: stretch; }
+/* Buttons: uniform 50px height, centred text */
+.v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; height: 50px; min-width: 56px; padding: 4px 9px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; }
 .v2-nav-btn:hover { background: #f3efe2; border-color: #b0ac98; }
 .v2-nav-btn.v2-active { background: #1b3d5c; border-color: #1b3d5c; color: #fff; }
 .v2-nav-btn.v2-active-s1 { background: #1b5e20; border-color: #1b5e20; color: #fff; }
 .v2-nav-btn.v2-active-s2 { background: #2e7d32; border-color: #2e7d32; color: #fff; }
 .v2-nav-btn.v2-active-s3 { background: #b45309; border-color: #b45309; color: #fff; }
 .v2-nav-btn.v2-active-s4 { background: #991b1b; border-color: #991b1b; color: #fff; }
-.v2-nav-placeholder { display: inline-block; padding: 5px 11px; font-size: 11px; color: #aaa; background: #f0ece0; border: 1px dashed #d0ccb8; border-radius: 4px; cursor: default; }
-/* MD-V2-PI-V2-S25-MARKER: EDIT 3 - Block B nav tier-grouping CSS (D-MD-V2-48). */
-.v2-nav-grp-label { font-size: 9px; color: #8a8674; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin: 0 4px 0 0; }
-.v2-nav-sep { display: inline-block; width: auto; height: auto; background: none; margin: 0 6px; color: #8a8674; font-size: 13px; font-weight: 600; line-height: 1; vertical-align: middle; }
-.v2-nav-sep::before { content: "\2192"; }  /* MD-V2-S36-BRIEF-MARKER right-arrow */
-.v2-nav-btn.v2-grp-stages { border-bottom: 2px solid rgba(27,61,92,0.30); }
-.v2-nav-btn.v2-grp-indicators { border-bottom: 2px solid rgba(15,110,86,0.45); }
-.v2-nav-btn.v2-grp-setups { border-bottom: 2px solid rgba(123,104,174,0.55); }
-.v2-nav-btn.v2-grp-tests { border-bottom: 2px solid rgba(180,83,9,0.55); }
-.v2-nav-btn.v2-grp-indicators:hover { background: #e8f2ee; }
-.v2-nav-btn.v2-grp-setups:hover { background: #efecf6; }
-.v2-nav-btn.v2-grp-tests:hover    { background: #f6efe6; }
-.v2-nav-btn.v2-grp-post-bull { border-bottom: 2px solid rgba(15,110,86,0.45); }
-.v2-nav-btn.v2-grp-post-bear { border-bottom: 2px solid rgba(163,45,45,0.50); }
-.v2-nav-btn.v2-grp-summary   { border-bottom: 2px solid rgba(60,60,100,0.30); }
-.v2-nav-btn.v2-grp-post-bull:hover { background: #e8f2ee; }
-.v2-nav-btn.v2-grp-post-bear:hover { background: #f9ecec; }
-.v2-nav-btn.v2-grp-summary:hover   { background: #f2f2f6; }
-/* MD-V2-S40-ANDROID-NAV-OVERFLOW-FIX: shrink v2-nav components on tablet widths so all
-   group labels (incl. 'Capital deployment') and buttons fit on one row
-   within the 70px fixed header without overflowing horizontally. */
-@media (max-width: 1024px) {
-  .v2-nav { gap: 4px; padding: 6px 8px; }
-  .v2-nav-grp-label { font-size: 8px; letter-spacing: 0.2px; margin: 0 2px 0 0; }
-  .v2-nav-btn { padding: 4px 8px; font-size: 10px; }
-  .v2-nav-sep { margin: 0 3px; font-size: 11px; }
-  .v2-nav-label { font-size: 9px; margin-right: 4px; }
-}
+.v2-nav-placeholder { display: inline-flex; align-items: center; justify-content: center; height: 50px; padding: 4px 9px; font-size: 11px; color: #aaa; background: #f0ece0; border: 1px dashed #d0ccb8; border-radius: 4px; cursor: default; }
+/* Group border + label colours */
+.v2-nav-group.v2-grp-stages       { border: 1px solid rgba(27,61,92,0.28); }
+.v2-nav-group.v2-grp-indicators   { border: 1px solid rgba(15,110,86,0.32); }
+.v2-nav-group.v2-grp-setups       { border: 1px solid rgba(123,104,174,0.38); }
+.v2-nav-group.v2-grp-post-bull    { border: 1px solid rgba(15,110,86,0.32); }
+.v2-nav-group.v2-grp-post-bear    { border: 1px solid rgba(163,45,45,0.38); }
+.v2-nav-group.v2-grp-summary      { border: 1px solid rgba(60,60,100,0.26); }
+.v2-nav-group.v2-grp-stages .v2-nav-group-label     { color: rgba(27,61,92,0.72); }
+.v2-nav-group.v2-grp-indicators .v2-nav-group-label { color: rgba(15,110,86,0.78); }
+.v2-nav-group.v2-grp-setups .v2-nav-group-label     { color: rgba(100,80,160,0.82); }
+.v2-nav-group.v2-grp-post-bull .v2-nav-group-label  { color: rgba(15,110,86,0.78); }
+.v2-nav-group.v2-grp-post-bear .v2-nav-group-label  { color: rgba(163,45,45,0.78); }
+.v2-nav-group.v2-grp-summary .v2-nav-group-label    { color: rgba(60,60,100,0.68); }
+/* Per-group button hover tints */
+.v2-nav-group.v2-grp-stages .v2-nav-btn:hover     { background: #e8eef4; border-color: rgba(27,61,92,0.35); }
+.v2-nav-group.v2-grp-indicators .v2-nav-btn:hover { background: #e8f2ee; border-color: rgba(15,110,86,0.38); }
+.v2-nav-group.v2-grp-setups .v2-nav-btn:hover     { background: #efecf6; border-color: rgba(123,104,174,0.48); }
+.v2-nav-group.v2-grp-post-bull .v2-nav-btn:hover  { background: #e8f2ee; border-color: rgba(15,110,86,0.38); }
+.v2-nav-group.v2-grp-post-bear .v2-nav-btn:hover  { background: #f9ecec; border-color: rgba(163,45,45,0.42); }
+.v2-nav-group.v2-grp-summary .v2-nav-btn:hover    { background: #f2f2f6; border-color: rgba(60,60,100,0.32); }
 
 /* MD-V2-S40-RESPONSIVE-SHORT-HEADERS: at narrow viewports (tablet + smaller), hide the long
    column-header label and show the short form via attr(data-short).
@@ -1313,7 +1310,7 @@ body[data-active-tab="tests_speculative_bet"] .header,
 body[data-active-tab="tests_probing_bet_s1"] .header,
 body[data-active-tab="tests_probing_bet_s2"] .header,
 body[data-active-tab="setups_healthy_retest"] .header,
-body[data-active-tab="master_overview"] .header { padding-bottom: 0 !important; }
+body[data-active-tab="master_overview"] .header { height: auto !important; padding-bottom: 0 !important; }
 body[data-active-tab^="stage_"],
 body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
@@ -1325,16 +1322,7 @@ body[data-active-tab="tests_probing_bet_s1"],
 body[data-active-tab="tests_probing_bet_s2"],
 body[data-active-tab="setups_healthy_retest"],
 body[data-active-tab="master_overview"] { --header-height: 70px; }
-body[data-active-tab^="stage_"] .v2-nav,
-body[data-active-tab="pos_pre_indicators"] .v2-nav,body[data-active-tab="neg_pre_indicators"] .v2-nav,
-body[data-active-tab="post_indicators"] .v2-nav,
-body[data-active-tab^="setups"] .v2-nav,
-body[data-active-tab="tests"] .v2-nav,
-body[data-active-tab="tests_speculative_bet"] .v2-nav,
-body[data-active-tab="tests_probing_bet_s1"] .v2-nav,
-body[data-active-tab="tests_probing_bet_s2"] .v2-nav,
-body[data-active-tab="setups_healthy_retest"] .v2-nav,
-body[data-active-tab="master_overview"] .v2-nav { padding-top: 4px !important; padding-bottom: 4px !important; }
+/* S66b: v2-nav padding override removed — padding now set directly on .v2-nav */
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
 
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-START */
@@ -9356,6 +9344,13 @@ function SUM_renderQualifiedStocks() {
               active.indexOf('post_indicators') === 0 || active.indexOf('setups') === 0 || active.indexOf('tests_') === 0 ||
               active === 'tests' || active === 'master_overview');
     if (!v2) return;
+    /* S66b: measure the actual rendered header height (header-top + nav groups) and
+       publish as --header-height so .main margin-top and all frozen top: offsets are correct */
+    var hdr = document.querySelector('.header');
+    if (hdr) {
+      var hdrH = Math.ceil(hdr.getBoundingClientRect().height);
+      if (hdrH > 0) document.body.style.setProperty('--header-height', hdrH + 'px');
+    }
     var pane = document.getElementById('tab-' + active);
     var ribbon = pane && pane.querySelector('.controls.s1-controls');
     if (!ribbon) return;
@@ -9386,36 +9381,61 @@ function SUM_renderQualifiedStocks() {
     // MD-V2-PI-V2-S25-MARKER: EDIT 2 - Block B nav tier grouping + terminology
     // (D-MD-V2-48 + D-MD-V2-46). Group labels + separators between tiers;
     // internal tab keys unchanged (display-only rename).
+    /* S66b: group-structured nav — labels above buttons, coloured group borders */
     nav.innerHTML = ''
-      + '<span class="v2-nav-label">MD V2</span>'
-      + '<span class="v2-nav-grp-label">Stages</span>'
-      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_1" onclick="switchTab(\'stage_1\')">Stage 1</button>'
-      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_2" onclick="switchTab(\'stage_2\')">Stage 2</button>'
-      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_3" onclick="switchTab(\'stage_3\')">Stage 3</button>'
-      + '<button class="v2-nav-btn v2-grp-stages" data-v2-tab="stage_4" onclick="switchTab(\'stage_4\')">Stage 4</button>'
-      + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Early-stage pre-test indicators</span>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="pos_pre_indicators" onclick="switchTab(\'pos_pre_indicators\')">Positive (&ldquo;Basing&rdquo; and &ldquo;Pulling Back&rdquo;)</button>'
-      + '<button class="v2-nav-btn v2-grp-indicators" data-v2-tab="neg_pre_indicators" onclick="switchTab(\'neg_pre_indicators\')">Negative (&ldquo;Collapsing&rdquo; share price)</button>'
-      + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Late-stage capital qualification setups and tests</span>'
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">Stage 1 - Probing bet</button>'
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">Stage 2 - Probing bet</button>'  /* MD-V2-S59-TAB-PB-SPLIT-MARKER */
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">Stage 2 - Healthy &ldquo;retest&rdquo; and &ldquo;breakout&rdquo; of an upwards moving average</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_healthy_vcp" onclick="switchTab(\'tests_healthy_vcp\')">Stage 2 - Healthy &ldquo;VCP&rdquo; and &ldquo;breakout&rdquo; after &ldquo;basing&rdquo;</button>'  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet_s3" onclick="switchTab(\'tests_speculative_bet_s3\')">Stage 3 - Speculative bet</button>'
-      + '<button class="v2-nav-btn v2-grp-tests" data-v2-tab="tests_speculative_bet_s4" onclick="switchTab(\'tests_speculative_bet_s4\')">Stage 4 - Speculative bet</button>'
-      + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Bullish post-setup/tests technical behaviour</span>'
-      + '<button class="v2-nav-btn v2-grp-post-bull" data-v2-tab="post_indicators_bull" onclick="switchTab(\'post_indicators_bull\')">&#8220;Breaking out&#8221; and &#8220;Advancing&#8221; indicators</button>'
-      + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Negative breaking through key MAs</span>'
-      + '<button class="v2-nav-btn v2-grp-post-bear" data-v2-tab="post_indicators_bear" onclick="switchTab(\'post_indicators_bear\')">Breaking the ST (50D), MT (150D) and LT (200D) MAs</button>'
-      + '<span class="v2-nav-sep"></span>'
-      + '<span class="v2-nav-grp-label">Summary</span>'
-      + '<button class="v2-nav-btn v2-grp-summary" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Overview</button>'  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
-      + '<button class="v2-nav-btn v2-grp-summary" data-v2-tab="ssem" onclick="switchTab(\'ssem\')">SS Earnings Momentum</button>'
-      + '<button class="v2-nav-btn v2-grp-summary" data-v2-tab="val" onclick="switchTab(\'val\')">Valuation</button>';
+      /* Group 1: Stages */
+      + '<div class="v2-nav-group v2-grp-stages">'
+      +   '<div class="v2-nav-group-label">Stages</div>'
+      +   '<div class="v2-nav-group-btns">'
+      +     '<button class="v2-nav-btn" data-v2-tab="stage_1" onclick="switchTab(\'stage_1\')">Stage 1</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="stage_2" onclick="switchTab(\'stage_2\')">Stage 2</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="stage_3" onclick="switchTab(\'stage_3\')">Stage 3</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="stage_4" onclick="switchTab(\'stage_4\')">Stage 4</button>'
+      +   '</div>'
+      + '</div>'
+      /* Group 2: Early-stage pre-test indicators */
+      + '<div class="v2-nav-group v2-grp-indicators">'
+      +   '<div class="v2-nav-group-label">Early-stage pre-test indicators</div>'
+      +   '<div class="v2-nav-group-btns">'
+      +     '<button class="v2-nav-btn" data-v2-tab="pos_pre_indicators" onclick="switchTab(\'pos_pre_indicators\')">Positive (&ldquo;Basing&rdquo; and &ldquo;Pulling Back&rdquo;)</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="neg_pre_indicators" onclick="switchTab(\'neg_pre_indicators\')">Negative (&ldquo;Collapsing&rdquo; share price)</button>'
+      +   '</div>'
+      + '</div>'
+      /* Group 3: Late-stage capital qualification setups and tests */
+      + '<div class="v2-nav-group v2-grp-setups">'
+      +   '<div class="v2-nav-group-label">Late-stage capital qualification setups and tests</div>'
+      +   '<div class="v2-nav-group-btns">'
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">Stage 1 &mdash; Probing bet</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">Stage 2 &mdash; Probing bet</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">S2 &mdash; &ldquo;Retest&rdquo; and &ldquo;breakout&rdquo; of upwards MA</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_healthy_vcp" onclick="switchTab(\'tests_healthy_vcp\')">S2 &mdash; &ldquo;VCP&rdquo; and &ldquo;breakout&rdquo; of upwards MA</button>'  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s3" onclick="switchTab(\'tests_speculative_bet_s3\')">Stage 3 &mdash; Speculative bet</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s4" onclick="switchTab(\'tests_speculative_bet_s4\')">Stage 4 &mdash; Speculative bet</button>'
+      +   '</div>'
+      + '</div>'
+      /* Group 4: Bullish post-setup/tests technical behaviour */
+      + '<div class="v2-nav-group v2-grp-post-bull">'
+      +   '<div class="v2-nav-group-label">Bullish post-setup/tests technical behaviour</div>'
+      +   '<div class="v2-nav-group-btns">'
+      +     '<button class="v2-nav-btn" data-v2-tab="post_indicators_bull" onclick="switchTab(\'post_indicators_bull\')">&#8220;Breaking out&#8221; and &#8220;Advancing&#8221; indicators</button>'
+      +   '</div>'
+      + '</div>'
+      /* Group 5: Negative breaking through key MAs */
+      + '<div class="v2-nav-group v2-grp-post-bear">'
+      +   '<div class="v2-nav-group-label">Negative breaking through key MAs</div>'
+      +   '<div class="v2-nav-group-btns">'
+      +     '<button class="v2-nav-btn" data-v2-tab="post_indicators_bear" onclick="switchTab(\'post_indicators_bear\')">Breaking 50D, 150D and 200D MAs</button>'
+      +   '</div>'
+      + '</div>'
+      /* Group 6: Summary */
+      + '<div class="v2-nav-group v2-grp-summary">'
+      +   '<div class="v2-nav-group-label">Summary</div>'
+      +   '<div class="v2-nav-group-btns">'
+      +     '<button class="v2-nav-btn" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Overview</button>'  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
+      +     '<button class="v2-nav-btn" data-v2-tab="ssem" onclick="switchTab(\'ssem\')">SS Earnings Momentum</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="val" onclick="switchTab(\'val\')">Valuation</button>'
+      +   '</div>'
+      + '</div>';
     hdr.appendChild(nav);
   }
   function syncV2State(id) {

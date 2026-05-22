@@ -1167,7 +1167,7 @@ body[data-active-tab="setups_healthy_retest"] .header-tabs-row,
 body[data-active-tab="master_overview"] .header-tabs-row,body[data-active-tab="ssem"] .header-tabs-row,body[data-active-tab="val"] .header-tabs-row { display: none !important; }
 
 /* V2 mini nav strip - visible only on V2 tabs — S66b group-redesign */
-.v2-nav { display: none; flex-wrap: nowrap; padding: 5px 12px 6px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 5px; align-items: flex-start; overflow-x: auto; }
+.v2-nav { display: none; flex-wrap: wrap; padding: 5px 12px 6px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 5px; align-items: flex-start; overflow-x: hidden; }
 body[data-active-tab^="stage_"] .v2-nav,
 body[data-active-tab="pos_pre_indicators"] .v2-nav,body[data-active-tab="neg_pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
@@ -1182,16 +1182,16 @@ body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2
 /* Group container */
 .v2-nav-group { display: flex; flex-direction: column; border-radius: 5px; padding: 4px 6px 5px; flex-shrink: 0; }
 .v2-nav-group-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.45px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; line-height: 1; }
-.v2-nav-group-btns { display: flex; flex-wrap: nowrap; gap: 3px; align-items: stretch; }
+.v2-nav-group-btns { display: flex; flex-wrap: wrap; gap: 3px; align-items: stretch; }
 /* Buttons: uniform 50px height, centred text */
-.v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; height: 50px; min-width: 56px; padding: 4px 9px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; }
+.v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; min-height: 42px; height: auto; min-width: 56px; padding: 4px 9px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; }
 .v2-nav-btn:hover { background: #f3efe2; border-color: #b0ac98; }
 .v2-nav-btn.v2-active { background: #1b3d5c; border-color: #1b3d5c; color: #fff; }
 .v2-nav-btn.v2-active-s1 { background: #1b5e20; border-color: #1b5e20; color: #fff; }
 .v2-nav-btn.v2-active-s2 { background: #2e7d32; border-color: #2e7d32; color: #fff; }
 .v2-nav-btn.v2-active-s3 { background: #b45309; border-color: #b45309; color: #fff; }
 .v2-nav-btn.v2-active-s4 { background: #991b1b; border-color: #991b1b; color: #fff; }
-.v2-nav-placeholder { display: inline-flex; align-items: center; justify-content: center; height: 50px; padding: 4px 9px; font-size: 11px; color: #aaa; background: #f0ece0; border: 1px dashed #d0ccb8; border-radius: 4px; cursor: default; }
+.v2-nav-placeholder { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; height: auto; padding: 4px 9px; font-size: 11px; color: #aaa; background: #f0ece0; border: 1px dashed #d0ccb8; border-radius: 4px; cursor: default; }
 /* Group border + label colours */
 .v2-nav-group.v2-grp-stages       { border: 1px solid rgba(27,61,92,0.28); }
 .v2-nav-group.v2-grp-indicators   { border: 1px solid rgba(15,110,86,0.32); }
@@ -16578,13 +16578,13 @@ function sspRenderTable(ticker, p, md2){
     var _s2=_md.stage_2?(_md.stage_2.rating||'—'):'—';
     var _s3=_md.stage_3?(_md.stage_3.rating||'—'):'—';
     var _s4=_md.stage_4?(_md.stage_4.rating||'—'):'—';
-    var _ppi1=_md.pulling_back_uptrend?(_md.pulling_back_uptrend.rating||'—'):'—';
-    var _ppi2=_md.basing?(_md.basing.rating||'—'):'—';
+    var _ppi1=(_md.pre_indicators&&_md.pre_indicators.pulling_back_uptrend)?(_md.pre_indicators.pulling_back_uptrend.rating||'—'):'—';
+    var _ppi2=(_md.pre_indicators&&_md.pre_indicators.basing)?(_md.pre_indicators.basing.rating||'—'):'—';
     var _ppi=(_ppi1!=='None'&&_ppi1!=='—')?_ppi1:_ppi2;
-    var _npi=_md.collapsing?(_md.collapsing.rating||'—'):'—';
+    var _npi=(_md.pre_indicators&&_md.pre_indicators.collapsing)?(_md.pre_indicators.collapsing.rating||'—'):'—';
     var _price=_pr.price!=null?_pr.price.toFixed(2):'—';
     var _pb=_pr.recent_pullback_pct!=null?Math.round(_pr.recent_pullback_pct*100)+'%':'—';
-    var _hr=_md.ma_retest_upwards?(_md.ma_retest_upwards.rating||'—'):'—';
+    var _hr=(_md.tests&&_md.tests.ma_retest_upwards)?(_md.tests.ma_retest_upwards.rating||'—'):'—';
     var _co=_pr.company_name||_u.company_name||'';
     var _tke=_tk.replace(/'/g,"\\'");
     rows+='<tr style="cursor:pointer;'+_bg+'" onclick="sspSetStock(\''+_tke+'\')">';

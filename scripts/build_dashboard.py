@@ -1314,6 +1314,7 @@ body[data-active-tab="master_overview"] .header { height: auto !important; paddi
 body[data-active-tab^="stage_"],
 body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
+body[data-active-tab="post_indicators_bull"],body[data-active-tab="post_indicators_bear"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
 body[data-active-tab="tests_healthy_vcp"],
@@ -1856,6 +1857,7 @@ body[data-active-tab="master_overview"] { --header-height: 70px; }
 body[data-active-tab^="stage_"],
 body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
+body[data-active-tab="post_indicators_bull"],body[data-active-tab="post_indicators_bear"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
 body[data-active-tab="tests_healthy_vcp"],
@@ -2023,6 +2025,7 @@ body[data-active-tab="master_overview"] .v2-hscroll {
 body[data-active-tab^="stage_"],
 body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
+body[data-active-tab="post_indicators_bull"],body[data-active-tab="post_indicators_bear"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
 body[data-active-tab="tests_healthy_vcp"],
@@ -9415,14 +9418,14 @@ function SUM_renderQualifiedStocks() {
       + '</div>'
       /* Group 4: Bullish post-setup/tests technical behaviour */
       + '<div class="v2-nav-group v2-grp-post-bull">'
-      +   '<div class="v2-nav-group-label">Bullish post-setup/tests technical behaviour</div>'
+      +   '<div class="v2-nav-group-label">Bullish post-setup</div>'
       +   '<div class="v2-nav-group-btns">'
       +     '<button class="v2-nav-btn" data-v2-tab="post_indicators_bull" onclick="switchTab(\'post_indicators_bull\')">&#8220;Breaking out&#8221; and &#8220;Advancing&#8221; indicators</button>'
       +   '</div>'
       + '</div>'
       /* Group 5: Negative breaking through key MAs */
       + '<div class="v2-nav-group v2-grp-post-bear">'
-      +   '<div class="v2-nav-group-label">Negative breaking through key MAs</div>'
+      +   '<div class="v2-nav-group-label">Negative post-setup</div>'
       +   '<div class="v2-nav-group-btns">'
       +     '<button class="v2-nav-btn" data-v2-tab="post_indicators_bear" onclick="switchTab(\'post_indicators_bear\')">Breaking 50D, 150D and 200D MAs</button>'
       +   '</div>'

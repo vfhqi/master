@@ -9418,14 +9418,14 @@ function SUM_renderQualifiedStocks() {
       + '</div>'
       /* Group 4: Bullish post-setup/tests technical behaviour */
       + '<div class="v2-nav-group v2-grp-post-bull">'
-      +   '<div class="v2-nav-group-label">Bullish post-setup</div>'
+      +   '<div class="v2-nav-group-label">Bull signals</div>'
       +   '<div class="v2-nav-group-btns">'
       +     '<button class="v2-nav-btn" data-v2-tab="post_indicators_bull" onclick="switchTab(\'post_indicators_bull\')">&#8220;Breaking out&#8221; and &#8220;Advancing&#8221; indicators</button>'
       +   '</div>'
       + '</div>'
       /* Group 5: Negative breaking through key MAs */
       + '<div class="v2-nav-group v2-grp-post-bear">'
-      +   '<div class="v2-nav-group-label">Negative post-setup</div>'
+      +   '<div class="v2-nav-group-label">Bear signals</div>'
       +   '<div class="v2-nav-group-btns">'
       +     '<button class="v2-nav-btn" data-v2-tab="post_indicators_bear" onclick="switchTab(\'post_indicators_bear\')">Breaking 50D, 150D and 200D MAs</button>'
       +   '</div>'

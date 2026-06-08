@@ -107,12 +107,18 @@ def load_data():
         _universe_updated = datetime.fromtimestamp(_u_mtime).strftime("%Y-%m-%d %H:%M")
     except Exception:
         _universe_updated = "—"
+    try:
+        _cf = safe_json_load(DATA_DIR / "chart-freshness.json") or {}
+    except Exception:
+        _cf = {}
+    _chart_fresh = {"total": _cf.get("total", 0), "current": _cf.get("current", 0), "stale": _cf.get("stale_count", 0), "reference": _cf.get("reference_date", "")}
     master = {
         "meta": {
             "generated": prices["_meta"]["generated"],
             "source": prices["_meta"]["source"],
             "stock_count": prices["_meta"]["count"],
             "universe_updated": _universe_updated,
+            "chart_freshness": _chart_fresh,
             "dashboard_version": DASHBOARD_VERSION,
             "dashboard_desc": DASHBOARD_DESC,
         },
@@ -2702,6 +2708,7 @@ if(D.positions&&D.positions.investments){
 document.getElementById("stat-count").textContent=D.meta.stock_count;
 (function(){var _src=(D.meta.source||"unknown");var _el=document.getElementById("stat-source");if(!_el)return;var _low=(""+_src).toLowerCase();var _fakeToks=["sample","synthetic","random","test","fake","mock","dummy"];var _isFake=_fakeToks.some(function(t){return _low.indexOf(t)>=0;});var _isReal=(_low.indexOf("yfinance")>=0);var _isLagged=(_src==="chart-data (lagged)");if(_isFake||(!_isReal&&!_isLagged)){_el.textContent="\u26A0 "+_src+" \u2014 NOT REAL DATA";_el.style.color="#c0211f";_el.style.fontWeight="800";_el.title="Price data is fabricated/test data, NOT real market data. Do not trust ratings.";}else if(_isLagged){_el.textContent=_src+" (real, lagged)";_el.style.color="#b8860b";_el.style.fontWeight="700";_el.title="Real OHLCV but lagged vs real-time (in-sandbox rebuild). Live data resumes on the next scheduled yfinance refresh.";}else{_el.textContent=_src;_el.style.color="";_el.style.fontWeight="";_el.title="Live Yahoo Finance market data.";}})();
 document.getElementById("stat-updated").textContent=D.meta.generated;
+(function(){var cf=D.meta.chart_freshness;var el=document.getElementById("stat-charts-fresh");if(!el||!cf||!cf.total){return;}el.textContent=cf.current+" / "+cf.total+" current"+(cf.stale>0?(", "+cf.stale+" stale"):"");if(cf.stale>0){el.style.color="#b8860b";el.style.fontWeight="700";el.title="Charts more than 5 days behind "+cf.reference+" (mostly delisted or renamed tickers) - see chart-freshness-report.txt";}else{el.style.color="";el.title="All per-stock charts current to "+cf.reference;}})();
 var _stUni=document.getElementById("stat-universe-updated");if(_stUni)_stUni.textContent=D.meta.universe_updated||"\u2014";  /* MD-V2-S36-BRIEF-MARKER */
 var _stVer=document.getElementById("stat-dashboard-version");if(_stVer&&D.meta.dashboard_version)_stVer.textContent="Dashboard: "+D.meta.dashboard_version;
 
@@ -17999,6 +18006,7 @@ renderTab("mm99");
         '      <span>Stocks: <span class="stat-value" id="stat-count">&mdash;</span></span>\n'
         '      <span>Price data source: <span class="stat-value" id="stat-source">&mdash;</span></span>\n'
         '      <span>Price data updated: <span class="stat-value" id="stat-updated">&mdash;</span></span>\n'
+        '      <span>Charts: <span class="stat-value" id="stat-charts-fresh">&mdash;</span></span>\n'
         '      <span>Stock universe updated: <span class="stat-value" id="stat-universe-updated">&mdash;</span></span>\n'
         '      <a href="changelog.html" target="_blank" style="text-decoration:none;"><span id="stat-dashboard-version" style="font-size:10px;color:#999;border-bottom:1px dotted #bbb;display:inline-block;margin-left:8px;" title="View changelog"></span></a>\n'
         '    </div>\n'

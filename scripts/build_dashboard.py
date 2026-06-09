@@ -17,9 +17,9 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
-SCRIPT_DIR = Path(__file__).parent
+SCRIPT_DIR = Path('/sessions/amazing-zealous-bohr/mnt/COWORK/master-dashboard/scripts')
 PROJECT_DIR = SCRIPT_DIR.parent
-DATA_DIR = PROJECT_DIR / "data"
+DATA_DIR = Path("/tmp/md_data")
 OUTPUT_PATH = PROJECT_DIR / "index.html"
 
 COWORK_ROOT = PROJECT_DIR.parent
@@ -238,7 +238,7 @@ TABS = [
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
-    {"id": "combos",    "label": "TIMELINESS",       "accent": "#dd6b20"},
+    {"id": "combos",    "label": "Timeliness",        "accent": "#dd6b20"},
     {"id": "changes",   "label": "CHANGES",          "accent": "#c53030"},  # CHANGES-TAB-MARKER
     {"id": "positions", "label": "Live Investments",  "accent": "#319795"},
 ]
@@ -1410,7 +1410,7 @@ body[data-active-tab="master_overview"],body[data-active-tab="combos"] { --heade
 .tl-col-chip { padding: 2px 9px; font-size: 11px; font-weight: 600; border: 1px solid #d0ccb8; border-radius: 3px; cursor: pointer; font-family: var(--font); transition: opacity 0.12s; }
 .tl-col-chip-off { background: #f0ede3 !important; color: #aaa !important; border-color: #d0ccb8 !important; opacity: 0.65; }
 /* Headline tiles */
-.tl-tiles { display: flex; gap: 8px; margin-bottom: 14px; }
+.tl-tiles { display: flex; gap: 8px; margin-bottom: 14px; position: sticky; top: 140px; z-index: 10; background: var(--bg); padding: 4px 0; }
 .tl-tile { flex: 1 1 0; border-radius: 6px; padding: 10px 12px; color: #fff; min-width: 70px; }
 .tl-tile-hidden { flex: 0 0 0 !important; overflow: hidden; padding: 0 !important; min-width: 0 !important; }
 .tl-tile-letter { font-size: 22px; font-weight: 800; line-height: 1; }
@@ -1424,14 +1424,14 @@ body[data-active-tab="master_overview"],body[data-active-tab="combos"] { --heade
 .tl-col-inner { padding: 0; }
 /* Groups */
 .tl-group { margin: 0; }
-.tl-group-hdr { padding: 4px 10px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #7a6e5a; background: #f2efe3; border-top: 1px solid #e8e3d4; border-bottom: 1px solid #e8e3d4; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+.tl-group-hdr { padding: 9px 10px 8px 12px; font-size: 13px; font-weight: 500; color: #2a2935; background: #e8e4d5; border-top: 2px solid #c0bba8; border-bottom: 1px solid #d8d4c4; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; margin-top: 18px; }
 .tl-group-hdr:hover { background: #ece9da; }
 .tl-group-hdr::after { content: "▾"; font-size: 9px; opacity: 0.6; }
 .tl-group-hdr.tl-collapsed::after { content: "▸"; }
 /* Rows */
 .tl-row { border-bottom: 1px solid #f0ede3; }
-.tl-row-hdr { padding: 4px 10px 4px 14px; font-size: 10px; font-weight: 600; color: #4a4a5a; background: #faf9f5; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; }
-.tl-row-hdr:hover { background: #f4f1e7; }
+.tl-row-hdr { padding: 5px 10px 5px 11px; font-size: 12px; font-weight: 500; color: #3a3a4a; background: #ddd8c4; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #c8c0a8; margin-top: 12px; }
+.tl-row-hdr:hover { background: #d4cfbc; }
 .tl-row-hdr::after { content: "▾"; font-size: 9px; opacity: 0.5; }
 .tl-row-hdr.tl-collapsed::after { content: "▸"; }
 .tl-row-body { padding: 5px 8px 7px; }
@@ -1448,6 +1448,10 @@ body[data-active-tab="master_overview"],body[data-active-tab="combos"] { --heade
 .tl-name.tl-peer-sector    { background: #c07800 !important; color: #fff !important; border-color: #c07800 !important; }
 .tl-name.tl-peer-industry  { background: #2e7d32 !important; color: #fff !important; border-color: #2e7d32 !important; }
 /* MD-TIMELINESS-CSS-END */
+.tl-sector-lbl { display: block; width: 100%; font-size: 10px; font-weight: 600; color: #7a6e5a; padding: 5px 6px 2px 6px; margin-top: 6px; border-bottom: 1px solid #e8e3d4; letter-spacing: 0.15px; }
+.tl-key-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin: 0 2px 0 6px; vertical-align: middle; flex-shrink: 0; }
+.tl-key-label { font-size: 10px; color: #5a5a6a; vertical-align: middle; }
+.tl-group-count { font-size: 11px; font-weight: 400; color: #999; }
 
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-START */
 /* Session 61: pre-indicators round 2 — S2 group first, Group N format, description tiles */
@@ -5221,11 +5225,11 @@ function renderCombos(){
   ];
 
   var TL_COLS = [
-    {id:"A", label:"A · Now"},
-    {id:"B", label:"B · This fortnight"},
-    {id:"C", label:"C · This next month"},
-    {id:"D", label:"D · Unclear"},
-    {id:"F", label:"F · Unclear"}
+    {id:"A", label:"A · Time to deploy capital (guess): Now",            timelbl:"Now"},
+    {id:"B", label:"B · Time to deploy capital (guess): This fortnight", timelbl:"This fortnight"},
+    {id:"C", label:"C · Time to deploy capital (guess): This next month",timelbl:"This next month"},
+    {id:"D", label:"D · Unclear",                                        timelbl:"Unclear"},
+    {id:"F", label:"F · Unclear",                                        timelbl:"Unclear"}
   ];
   var TL_COL_IDS = ["A","B","C","D","F"];
 
@@ -5240,9 +5244,13 @@ function renderCombos(){
     {num:4, label:"Group 4 - Avoid list (long/mid-term down-trends)"}
   ];
 
+  // ---- Initialise localStorage defaults on first visit (prevents first-click no-op) ----
+  if(localStorage.getItem("tl_by_sector")===null)  localStorage.setItem("tl_by_sector","1");
+  if(localStorage.getItem("tl_expand_all")===null) localStorage.setItem("tl_expand_all","0");
   // ---- State from localStorage ----
-  var tlMode  = localStorage.getItem("tl_mode")  || "best";
-  var tlWidth = localStorage.getItem("tl_width") || "equal";
+  var tlMode      = localStorage.getItem("tl_mode")       || "best";
+  var tlBySector  = localStorage.getItem("tl_by_sector") !== null ? localStorage.getItem("tl_by_sector") : "1";
+  var tlExpandAll = localStorage.getItem("tl_expand_all") || "0";
   var tlColVis = {A:1,B:1,C:1,D:1,F:1};
   try { var _sv = JSON.parse(localStorage.getItem("tl_cols")||"null"); if(_sv && typeof _sv==="object") tlColVis = _sv; } catch(e){}
 
@@ -5325,36 +5333,46 @@ function renderCombos(){
   var CAP = 10;
   function escH(s){ return (""+s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
+  function mkChip(s){
+    var tax=getTaxonomy(s.ticker);
+    var coh=(window._sspTickerToD&&window._sspTickerToD[s.ticker]&&window._sspTickerToD[s.ticker].length)?window._sspTickerToD[s.ticker][0].name:null;
+    var tip=escH(s.name);
+    if(tax.sector)  tip+=" | "+escH(tax.sector);
+    if(tax.industry)tip+=" • "+escH(tax.industry);
+    if(coh)         tip+=" [●cohort: "+escH(coh)+"]";
+    return '<span class="tl-name" data-ticker="'+escH(s.ticker)+'" title="'+tip+'">'+escH(s.name)+'</span>';
+  }
   function renderNameList(stocks) {
     if(!stocks.length) return '<div class="tl-empty-cell">—</div>';
-    var h = '<div class="tl-names">';
-    var show = Math.min(stocks.length, CAP);
-    for(var i = 0; i < show; i++) {
-      var s = stocks[i], tax = getTaxonomy(s.ticker);
-      var cohort = (window._sspTickerToD&&window._sspTickerToD[s.ticker]&&window._sspTickerToD[s.ticker].length)?window._sspTickerToD[s.ticker][0].name:null;
-      var tip = escH(s.name);
-      if(tax.sector) tip += " | "+escH(tax.sector);
-      if(tax.industry) tip += " • "+escH(tax.industry);
-      if(cohort) tip += " [●cohort: "+escH(cohort)+"]";
-      h += '<span class="tl-name" data-ticker="'+escH(s.ticker)+'" title="'+tip+'">'+escH(s.name)+'</span>';
-    }
-    if(stocks.length > CAP) {
-      var hiddenId = "tl-hidden-"+Math.random().toString(36).slice(2);
-      h += '<span class="tl-more" onclick="tlExpandMore(this)">+' + (stocks.length-CAP) + ' more</span>';
-      h += '<span class="tl-hidden-names" style="display:none">';
-      for(var j = CAP; j < stocks.length; j++) {
-        var s2 = stocks[j], tax2 = getTaxonomy(s2.ticker);
-        var cohort2 = (window._sspTickerToD&&window._sspTickerToD[s2.ticker]&&window._sspTickerToD[s2.ticker].length)?window._sspTickerToD[s2.ticker][0].name:null;
-        var tip2 = escH(s2.name);
-        if(tax2.sector) tip2 += " | "+escH(tax2.sector);
-        if(tax2.industry) tip2 += " • "+escH(tax2.industry);
-        if(cohort2) tip2 += " [●cohort: "+escH(cohort2)+"]";
-        h += '<span class="tl-name" data-ticker="'+escH(s2.ticker)+'" title="'+tip2+'">'+escH(s2.name)+'</span>';
+    if(tlBySector==="1"){
+      var secOrd=[],secMap={};
+      for(var bsi=0;bsi<stocks.length;bsi++){
+        var bsec=getTaxonomy(stocks[bsi].ticker).sector||"—";
+        if(!secMap[bsec]){secMap[bsec]=[];secOrd.push(bsec);}
+        secMap[bsec].push(stocks[bsi]);
       }
-      h += '</span>';
+      secOrd.sort();
+      var hs='<div class="tl-names">';
+      for(var gsi=0;gsi<secOrd.length;gsi++){
+        hs+='<span class="tl-sector-lbl">'+escH(secOrd[gsi])+'</span>';
+        var gstks=secMap[secOrd[gsi]];
+        for(var gki=0;gki<gstks.length;gki++) hs+=mkChip(gstks[gki]);
+      }
+      hs+='</div>';
+      return hs;
     }
-    h += '</div>';
-    return h;
+    var showAll=tlExpandAll==="1";
+    var show=showAll?stocks.length:Math.min(stocks.length,CAP);
+    var hf='<div class="tl-names">';
+    for(var i=0;i<show;i++) hf+=mkChip(stocks[i]);
+    if(!showAll && stocks.length>CAP){
+      hf+='<span class="tl-more" onclick="tlExpandMore(this)">+'+(stocks.length-CAP)+' more</span>';
+      hf+='<span class="tl-hidden-names" style="display:none">';
+      for(var j=CAP;j<stocks.length;j++) hf+=mkChip(stocks[j]);
+      hf+='</span>';
+    }
+    hf+='</div>';
+    return hf;
   }
 
   function renderCol(colId) {
@@ -5368,12 +5386,20 @@ function renderCombos(){
       }
       if(!groupRows.length) continue;
       h += '<div class="tl-group">';
-      h += '<div class="tl-group-hdr" onclick="tlToggleGroup(this)">'+escH(group.label)+'</div>';
+      var grpTk={};
+      for(var _dri=0;_dri<TL_ROWS.length;_dri++){
+        if(TL_ROWS[_dri].group===group.num && TL_ROWS[_dri].cells[colId]){
+          var _ds=tlData[colId][_dri]||[];
+          for(var _dsi=0;_dsi<_ds.length;_dsi++) grpTk[_ds[_dsi].ticker]=1;
+        }
+      }
+      var grpN=Object.keys(grpTk).length;
+      h += '<div class="tl-group-hdr" onclick="tlToggleGroup(this)">'+escH(group.label)+' <span class="tl-group-count">· '+grpN+'</span></div>';
       h += '<div class="tl-group-rows">';
       for(var k = 0; k < groupRows.length; k++) {
         var ri2 = groupRows[k], row = TL_ROWS[ri2];
         var stocks = tlData[colId][ri2] || [];
-        var qualStr = row.cells[colId].join(" + ");
+        var qualStr = row.cells[colId].join(" or ");
         var rLabel = escH(row.label) + " – " + escH(qualStr) + " (" + stocks.length + ")";
         h += '<div class="tl-row">';
         h += '<div class="tl-row-hdr" onclick="tlToggleRow(this)">'+rLabel+'</div>';
@@ -5390,19 +5416,26 @@ function renderCombos(){
   function mBtn(id, lbl, active) {
     return '<button class="tl-toggle-btn'+(active?' tl-toggle-active':'')+'" onclick="tlSetMode(\''+id+'\')">'+lbl+'</button>';
   }
-  function wBtn(id, lbl, active) {
-    return '<button class="tl-toggle-btn'+(active?' tl-toggle-active':'')+'" onclick="tlSetWidth(\''+id+'\')">'+lbl+'</button>';
-  }
   function cChip(id, active) {
     var bg = TL_TILE_COLORS[id];
     var s = active ? 'background:'+bg+';color:#fff;border-color:'+bg+';' : '';
     return '<button class="tl-col-chip'+(active?'':' tl-col-chip-off')+'" style="'+s+'" onclick="tlToggleCol(\''+id+'\')">'+id+'</button>';
   }
+  function sBtn(lbl, active, handler) {
+    return '<button class="tl-toggle-btn'+(active?' tl-toggle-active':'')+'\" onclick="'+handler+'">'+lbl+'</button>';
+  }
   var controlsH = '<div class="tl-controls">'
     + '<div class="tl-ctrl-group"><span class="tl-ctrl-label">Mode</span>'
     + mBtn("best","Best",tlMode==="best") + mBtn("total","Total",tlMode==="total") + '</div>'
-    + '<div class="tl-ctrl-group"><span class="tl-ctrl-label">Width</span>'
-    + wBtn("equal","Equal",tlWidth==="equal") + wBtn("bycount","By count",tlWidth==="bycount") + '</div>'
+    + '<div class="tl-ctrl-group"><span class="tl-ctrl-label">View</span>'
+    + sBtn("By sector",tlBySector==="1","tlSetBySector(localStorage.getItem('tl_by_sector')==='1'?'0':'1')")
+    + sBtn("Expand all",tlExpandAll==="1","tlSetExpandAll(localStorage.getItem('tl_expand_all')==='1'?'0':'1')") + '</div>'
+    + '<div class="tl-ctrl-group"><span class="tl-ctrl-label">On hover</span>'
+    + '<span class="tl-key-dot" style="background:#3b5bdb"></span><span class="tl-key-label">Cohort</span>'
+    + '<span class="tl-key-dot" style="background:#c07800"></span><span class="tl-key-label">Sector</span>'
+    + '<span class="tl-key-dot" style="background:#2e7d32"></span><span class="tl-key-label">Industry</span>'
+    + '<span class="tl-key-dot" style="background:#1b3d5c"></span><span class="tl-key-label">Self</span>'
+    + '</div>'
     + '<div class="tl-ctrl-group"><span class="tl-ctrl-label">Show</span>'
     + cChip("A",!!tlColVis.A) + cChip("B",!!tlColVis.B) + cChip("C",!!tlColVis.C)
     + cChip("D",!!tlColVis.D) + cChip("F",!!tlColVis.F) + '</div>'
@@ -5413,7 +5446,7 @@ function renderCombos(){
   for(var ti = 0; ti < TL_COLS.length; ti++) {
     var col = TL_COLS[ti];
     if(!tlColVis[col.id]) { tilesH += '<div class="tl-tile tl-tile-hidden"></div>'; continue; }
-    var timeLbl = col.label.split('·')[1] ? col.label.split('·')[1].trim() : col.label;
+    var timeLbl = col.timelbl !== undefined ? col.timelbl : (col.label.split('·')[1] ? col.label.split('·')[1].trim() : col.label);
     tilesH += '<div class="tl-tile" style="background:'+TL_TILE_COLORS[col.id]+'">'
             + '<div class="tl-tile-letter">'+col.id+'</div>'
             + '<div class="tl-tile-time">'+escH(timeLbl)+'</div>'
@@ -5427,8 +5460,7 @@ function renderCombos(){
   for(var ti2 = 0; ti2 < TL_COLS.length; ti2++) {
     var col2 = TL_COLS[ti2];
     if(!tlColVis[col2.id]) continue;
-    var growStyle = (tlWidth==="bycount") ? "flex-grow:"+(tlCounts[col2.id]||1)+";" : "";
-    colsH += '<div class="tl-col" data-col="'+col2.id+'" style="'+growStyle+'">'
+    colsH += '<div class="tl-col" data-col="'+col2.id+'">'
            + '<div class="tl-col-header" style="background:'+TL_TILE_COLORS[col2.id]+'">'
            + escH(col2.label) + ' <span class="tl-col-count">('+tlCounts[col2.id]+')</span></div>'
            + renderCol(col2.id) + '</div>';
@@ -5438,7 +5470,7 @@ function renderCombos(){
   // ---- Assemble ----
   var modeLbl = tlMode==="best" ? "Best — each stock once" : "Total — all qualifying cells";
   el.innerHTML = '<div class="tl-wrap">'
-    + '<div class="tl-page-title">TIMELINESS <span class="tl-mode-label">'+modeLbl+'</span></div>'
+    + '<div class="tl-page-title">Timeliness <span class="tl-mode-label">'+modeLbl+'</span></div>'
     + controlsH + tilesH + colsH + '</div>';
 
   // ---- Wire hover + click on all name chips ----
@@ -5453,32 +5485,36 @@ function renderCombos(){
 }
 
 // ---- Timeliness interaction helpers (global scope) ----
-function tlSetMode(mode){
+window.tlSetMode = function(mode){
   localStorage.setItem("tl_mode",mode);
   renderCombos();
 }
-function tlSetWidth(w){
-  localStorage.setItem("tl_width",w);
-  renderCombos();
-}
-function tlToggleCol(colId){
+window.tlToggleCol = function(colId){
   var saved={A:1,B:1,C:1,D:1,F:1};
   try { var _s=JSON.parse(localStorage.getItem("tl_cols")||"null"); if(_s&&typeof _s==="object") saved=_s; } catch(e){}
   saved[colId]=saved[colId]?0:1;
   localStorage.setItem("tl_cols",JSON.stringify(saved));
   renderCombos();
 }
-function tlToggleGroup(hdrEl){
+window.tlSetBySector = function(v){
+  localStorage.setItem("tl_by_sector",v);
+  renderCombos();
+}
+window.tlSetExpandAll = function(v){
+  localStorage.setItem("tl_expand_all",v);
+  renderCombos();
+}
+window.tlToggleGroup = function(hdrEl){
   var rows=hdrEl.nextElementSibling;
   if(rows){ rows.style.display=(rows.style.display==="none")?"":"none"; }
   hdrEl.classList.toggle("tl-collapsed");
 }
-function tlToggleRow(hdrEl){
+window.tlToggleRow = function(hdrEl){
   var body=hdrEl.nextElementSibling;
   if(body){ body.style.display=(body.style.display==="none")?"":"none"; }
   hdrEl.classList.toggle("tl-collapsed");
 }
-function tlExpandMore(btn){
+window.tlExpandMore = function(btn){
   var hidden=btn.nextElementSibling;
   if(hidden){
     hidden.style.display="";
@@ -5493,7 +5529,7 @@ function tlExpandMore(btn){
     }
   }
 }
-function tlHighlightPeers(ticker){
+window.tlHighlightPeers = function(ticker){
   if(!ticker) return;
   if(window._sspBuildCohortIndex) window._sspBuildCohortIndex();
   var myTax=getTaxonomy(ticker);
@@ -5510,7 +5546,7 @@ function tlHighlightPeers(ticker){
     else if(myTax.industry&&tax2.industry&&myTax.industry===tax2.industry){ n.classList.add("tl-peer-industry"); }
   }
 }
-function tlClearHighlight(){
+window.tlClearHighlight = function(){
   var allN=document.querySelectorAll("#tab-combos .tl-name");
   for(var _i=0;_i<allN.length;_i++)
     allN[_i].classList.remove("tl-peer-cohort","tl-peer-sector","tl-peer-industry","tl-self");
@@ -9911,7 +9947,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Overview</button>'  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
       +     '<button class="v2-nav-btn" data-v2-tab="ssem" onclick="switchTab(\'ssem\')">SS Earnings Momentum</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="val" onclick="switchTab(\'val\')">Valuation</button>'
-+     '<button class="v2-nav-btn" data-v2-tab="combos" onclick="switchTab(\'combos\')">TIMELINESS</button>'
++     '<button class="v2-nav-btn" data-v2-tab="combos" onclick="switchTab(\'combos\')">Timeliness</button>'
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -17361,7 +17397,7 @@ function _sspUniverse(){
 
 /* ---- cohort index (built once from SSP_COHORTS) ---- */
 var _sspCohortBuilt = false;
-var _sspTickerToD = {};    // ticker -> [{id,name,members}]
+var _sspTickerToD = window._sspTickerToD = {};    // ticker -> [{id,name,members}] (window.* exposed for cross-IIFE access)
 var _sspIndustryMap = {};  // industry -> [{ticker,company}]
 var _sspSectorMap   = {};  // sector   -> [{ticker,company}]
 var _sspGeoMap      = {};  // suffix   -> [{ticker,company}]
@@ -17379,8 +17415,8 @@ function _sspBuildCohortIndex(){
       if(!d.members) continue;
       for(var j=0;j<d.members.length;j++){
         var tk = d.members[j].ticker;
-        if(!_sspTickerToD[tk]) _sspTickerToD[tk]=[];
-        _sspTickerToD[tk].push({id:d.id, name:d.name, members:d.members});
+        if(!window._sspTickerToD[tk]) window._sspTickerToD[tk]=[];
+        window._sspTickerToD[tk].push({id:d.id, name:d.name, members:d.members});
       }
     }
   }
@@ -17404,7 +17440,7 @@ function _sspBuildCohortIndex(){
 
 /* ---- open / close ---- */
 window.openStockView = function(initialTicker){
-  _sspBuildCohortIndex();
+  window._sspBuildCohortIndex();
   document.getElementById('ssp-overlay').classList.add('open');
   _sspOpen = true;
   if(typeof closeChart === 'function') closeChart();
@@ -17815,7 +17851,7 @@ function sspRenderCohort(ticker, p){
   /* named cohort peers */
   var cohortHtml = '';
   /* Section D */
-  var dCohorts = _sspTickerToD[ticker]||[];
+  var dCohorts = window._sspTickerToD[ticker]||[];
   if(dCohorts.length){
     for(var di=0;di<dCohorts.length;di++){
       var dc = dCohorts[di];
@@ -17848,7 +17884,7 @@ function sspRenderCohort(ticker, p){
   (function(){
     var ownIds={};
     /* Record cohort IDs/names already shown for this ticker */
-    var dCo=_sspTickerToD[ticker]||[];
+    var dCo=window._sspTickerToD[ticker]||[];
     for(var _i=0;_i<dCo.length;_i++) ownIds[dCo[_i].id]=1;
     var co2=window.SSP_COHORTS;
     if(co2&&co2.tickers&&co2.tickers[ticker]){
@@ -17860,7 +17896,7 @@ function sspRenderCohort(ticker, p){
     for(var pi=0;pi<secList.length;pi++){
       var pt=secList[pi].ticker;
       if(pt===ticker) continue;
-      var pdCo=_sspTickerToD[pt]||[];
+      var pdCo=window._sspTickerToD[pt]||[];
       for(var _k=0;_k<pdCo.length;_k++){
         var _pdc=pdCo[_k];
         if(ownIds[_pdc.id]) continue;
@@ -18182,6 +18218,7 @@ document.addEventListener('click', function(e){
   window.sspSetChartZoom = sspSetChartZoom;
   window.sspSetStock = sspSetStock;
   window._sspSetScale = _sspSetScale;
+  window._sspBuildCohortIndex = _sspBuildCohortIndex;  // expose for cross-IIFE callers (Timeliness tab, openStockView)
 })();
 /* MD-V2-S63-STOCK-VIEW-MARKER-END */
 
@@ -18486,4 +18523,13 @@ def main():
     backup_dir = PROJECT_DIR / "backups"
     backup_dir.mkdir(exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M")
-    backup_path = backup_dir / "index
+    backup_path = backup_dir / "index_post_{}.html".format(ts)
+    shutil.copy2(OUTPUT_PATH, backup_path)
+    print("  Post-write backup: {}".format(backup_path))
+    _prune_backups(backup_dir, keep=10)
+    generate_changelog()
+    print("Done.")
+
+
+if __name__ == "__main__":
+    main()

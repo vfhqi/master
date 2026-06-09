@@ -5247,7 +5247,7 @@ function renderCombos(){
   try { var _sv = JSON.parse(localStorage.getItem("tl_cols")||"null"); if(_sv && typeof _sv==="object") tlColVis = _sv; } catch(e){}
 
   // ---- Data helpers ----
-  _sspBuildCohortIndex();
+  if(window._sspBuildCohortIndex) window._sspBuildCohortIndex();
 
   function tlGetRating(md, pathArr) {
     var obj = md;
@@ -5331,7 +5331,7 @@ function renderCombos(){
     var show = Math.min(stocks.length, CAP);
     for(var i = 0; i < show; i++) {
       var s = stocks[i], tax = getTaxonomy(s.ticker);
-      var cohort = (_sspTickerToD[s.ticker]&&_sspTickerToD[s.ticker].length)?_sspTickerToD[s.ticker][0].name:null;
+      var cohort = (window._sspTickerToD&&window._sspTickerToD[s.ticker]&&window._sspTickerToD[s.ticker].length)?window._sspTickerToD[s.ticker][0].name:null;
       var tip = escH(s.name);
       if(tax.sector) tip += " | "+escH(tax.sector);
       if(tax.industry) tip += " • "+escH(tax.industry);
@@ -5344,7 +5344,7 @@ function renderCombos(){
       h += '<span class="tl-hidden-names" style="display:none">';
       for(var j = CAP; j < stocks.length; j++) {
         var s2 = stocks[j], tax2 = getTaxonomy(s2.ticker);
-        var cohort2 = (_sspTickerToD[s2.ticker]&&_sspTickerToD[s2.ticker].length)?_sspTickerToD[s2.ticker][0].name:null;
+        var cohort2 = (window._sspTickerToD&&window._sspTickerToD[s2.ticker]&&window._sspTickerToD[s2.ticker].length)?window._sspTickerToD[s2.ticker][0].name:null;
         var tip2 = escH(s2.name);
         if(tax2.sector) tip2 += " | "+escH(tax2.sector);
         if(tax2.industry) tip2 += " • "+escH(tax2.industry);
@@ -5495,16 +5495,16 @@ function tlExpandMore(btn){
 }
 function tlHighlightPeers(ticker){
   if(!ticker) return;
-  _sspBuildCohortIndex();
+  if(window._sspBuildCohortIndex) window._sspBuildCohortIndex();
   var myTax=getTaxonomy(ticker);
-  var myCohort=(_sspTickerToD[ticker]&&_sspTickerToD[ticker].length)?_sspTickerToD[ticker][0].name:null;
+  var myCohort=(window._sspTickerToD&&window._sspTickerToD[ticker]&&window._sspTickerToD[ticker].length)?window._sspTickerToD[ticker][0].name:null;
   var allN=document.querySelectorAll("#tab-combos .tl-name");
   for(var _i=0;_i<allN.length;_i++){
     var n=allN[_i], t=n.getAttribute("data-ticker");
     n.classList.remove("tl-peer-cohort","tl-peer-sector","tl-peer-industry","tl-self");
     if(t===ticker){ n.classList.add("tl-self"); continue; }
     var tax2=getTaxonomy(t);
-    var cohort2=(_sspTickerToD[t]&&_sspTickerToD[t].length)?_sspTickerToD[t][0].name:null;
+    var cohort2=(window._sspTickerToD&&window._sspTickerToD[t]&&window._sspTickerToD[t].length)?window._sspTickerToD[t][0].name:null;
     if(myCohort&&cohort2&&myCohort===cohort2){ n.classList.add("tl-peer-cohort"); }
     else if(myTax.sector&&tax2.sector&&myTax.sector===tax2.sector){ n.classList.add("tl-peer-sector"); }
     else if(myTax.industry&&tax2.industry&&myTax.industry===tax2.industry){ n.classList.add("tl-peer-industry"); }
@@ -18486,13 +18486,4 @@ def main():
     backup_dir = PROJECT_DIR / "backups"
     backup_dir.mkdir(exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M")
-    backup_path = backup_dir / "index_post_{}.html".format(ts)
-    shutil.copy2(OUTPUT_PATH, backup_path)
-    print("  Post-write backup: {}".format(backup_path))
-    _prune_backups(backup_dir, keep=10)
-    generate_changelog()
-    print("Done.")
-
-
-if __name__ == "__main__":
-    main()
+    backup_path = backup_dir / "index

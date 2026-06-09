@@ -1210,7 +1210,7 @@ body[data-active-tab="tests_speculative_bet_s4"] .header-tabs-row,
 body[data-active-tab="tests_probing_bet_s1"] .header-tabs-row,
 body[data-active-tab="tests_probing_bet_s2"] .header-tabs-row,
 body[data-active-tab="setups_healthy_retest"] .header-tabs-row,
-body[data-active-tab="master_overview"] .header-tabs-row,body[data-active-tab="ssem"] .header-tabs-row,body[data-active-tab="val"] .header-tabs-row { display: none !important; }
+body[data-active-tab="master_overview"] .header-tabs-row,body[data-active-tab="ssem"] .header-tabs-row,body[data-active-tab="val"] .header-tabs-row,body[data-active-tab="combos"] .header-tabs-row { display: none !important; }
 
 /* V2 mini nav strip - visible only on V2 tabs — S66b group-redesign */
 .v2-nav { display: none; flex-wrap: nowrap; padding: 5px 12px 6px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 5px; align-items: flex-start; overflow-x: hidden; }
@@ -1226,7 +1226,7 @@ body[data-active-tab="tests_speculative_bet_s4"] .v2-nav,
 body[data-active-tab="tests_probing_bet_s1"] .v2-nav,
 body[data-active-tab="tests_probing_bet_s2"] .v2-nav,
 body[data-active-tab="setups_healthy_retest"] .v2-nav,
-body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2-nav,body[data-active-tab="val"] .v2-nav { display: flex; }
+body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2-nav,body[data-active-tab="val"] .v2-nav,body[data-active-tab="combos"] .v2-nav { display: flex; }
 /* Group container */
 .v2-nav-group { display: flex; flex-direction: column; border-radius: 5px; padding: 4px 6px 5px; flex-shrink: 0; }
 .v2-nav-group-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.45px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; line-height: 1; }
@@ -1345,7 +1345,7 @@ body[data-active-tab="tests_speculative_bet_s4"] .header-controls-row,
 body[data-active-tab="tests_probing_bet_s1"] .header-controls-row,
 body[data-active-tab="tests_probing_bet_s2"] .header-controls-row,
 body[data-active-tab="setups_healthy_retest"] .header-controls-row,
-body[data-active-tab="master_overview"] .header-controls-row,body[data-active-tab="ssem"] .header-controls-row,body[data-active-tab="val"] .header-controls-row { display: none !important; }
+body[data-active-tab="master_overview"] .header-controls-row,body[data-active-tab="ssem"] .header-controls-row,body[data-active-tab="val"] .header-controls-row,body[data-active-tab="combos"] .header-controls-row { display: none !important; }
 /* MD-V2-PI-V2-S25-MARKER: EDIT 1 - Block A header chrome shrink on V2 tabs (D-MD-V2-47).
    Legacy header is sized for 3 rows; V2 tabs show only header-top + v2-nav.
    Shrink the fixed header + override --header-height so the table does not
@@ -1362,7 +1362,7 @@ body[data-active-tab="tests_speculative_bet_s4"] .header,
 body[data-active-tab="tests_probing_bet_s1"] .header,
 body[data-active-tab="tests_probing_bet_s2"] .header,
 body[data-active-tab="setups_healthy_retest"] .header,
-body[data-active-tab="master_overview"] .header { height: auto !important; padding-bottom: 0 !important; }
+body[data-active-tab="master_overview"] .header,body[data-active-tab="combos"] .header { height: auto !important; padding-bottom: 0 !important; }
 body[data-active-tab^="stage_"],
 body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
@@ -1375,7 +1375,7 @@ body[data-active-tab="tests_speculative_bet_s4"],
 body[data-active-tab="tests_probing_bet_s1"],
 body[data-active-tab="tests_probing_bet_s2"],
 body[data-active-tab="setups_healthy_retest"],
-body[data-active-tab="master_overview"] { --header-height: 70px; }
+body[data-active-tab="master_overview"],body[data-active-tab="combos"] { --header-height: 70px; }
 /* S66b: v2-nav padding override removed — padding now set directly on .v2-nav */
 /* MD-V2-CHROME-PARITY-FOLLOWUP-MARKER-CSS-END */
 /* MD-S77-SPEC-S3-RISK-CSS — Stage 3 Speculative bet: risk banner + Stage-3 context pill */
@@ -1394,6 +1394,60 @@ body[data-active-tab="master_overview"] { --header-height: 70px; }
 .sbs4-spill-pos{background:rgba(220,38,38,0.12);color:#b91c1c;}
 .sbs4-spill-pla{background:rgba(220,38,38,0.18);color:#991b1b;}
 .sbs4-spill-prob{background:rgba(153,27,27,0.24);color:#7f1d1d;}
+
+/* MD-TIMELINESS-CSS-START 2026-06-09 */
+#tab-combos { padding: 14px 16px; }
+.tl-wrap { max-width: 100%; }
+.tl-page-title { font-size: 13px; font-weight: 700; color: #1b3d5c; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 10px; }
+.tl-mode-label { font-size: 11px; font-weight: 400; color: #888; text-transform: none; margin-left: 8px; }
+/* Controls */
+.tl-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+.tl-ctrl-group { display: flex; align-items: center; gap: 3px; background: #f5f3ec; border: 1px solid #e0dcc8; border-radius: 5px; padding: 3px 8px; }
+.tl-ctrl-label { font-size: 9px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.4px; margin-right: 3px; white-space: nowrap; }
+.tl-toggle-btn { padding: 2px 9px; font-size: 11px; font-weight: 500; background: #fff; border: 1px solid #d0ccb8; border-radius: 3px; cursor: pointer; color: #555; font-family: var(--font); transition: background 0.12s; }
+.tl-toggle-btn:hover { background: #f0ede3; }
+.tl-toggle-active { background: #1b3d5c !important; color: #fff !important; border-color: #1b3d5c !important; font-weight: 600 !important; }
+.tl-col-chip { padding: 2px 9px; font-size: 11px; font-weight: 600; border: 1px solid #d0ccb8; border-radius: 3px; cursor: pointer; font-family: var(--font); transition: opacity 0.12s; }
+.tl-col-chip-off { background: #f0ede3 !important; color: #aaa !important; border-color: #d0ccb8 !important; opacity: 0.65; }
+/* Headline tiles */
+.tl-tiles { display: flex; gap: 8px; margin-bottom: 14px; }
+.tl-tile { flex: 1 1 0; border-radius: 6px; padding: 10px 12px; color: #fff; min-width: 70px; }
+.tl-tile-hidden { flex: 0 0 0 !important; overflow: hidden; padding: 0 !important; min-width: 0 !important; }
+.tl-tile-letter { font-size: 22px; font-weight: 800; line-height: 1; }
+.tl-tile-time { font-size: 10px; font-weight: 500; opacity: 0.85; margin-top: 3px; line-height: 1.2; }
+.tl-tile-count { font-size: 18px; font-weight: 700; margin-top: 6px; }
+/* Detail columns */
+.tl-cols { display: flex; gap: 8px; align-items: flex-start; }
+.tl-col { flex: 1 1 0; min-width: 0; border: 1px solid #e0dcc8; border-radius: 6px; overflow: hidden; background: #fbfaf5; }
+.tl-col-header { padding: 7px 10px; font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.2px; }
+.tl-col-count { font-weight: 400; opacity: 0.85; font-size: 11px; }
+.tl-col-inner { padding: 0; }
+/* Groups */
+.tl-group { margin: 0; }
+.tl-group-hdr { padding: 4px 10px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #7a6e5a; background: #f2efe3; border-top: 1px solid #e8e3d4; border-bottom: 1px solid #e8e3d4; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+.tl-group-hdr:hover { background: #ece9da; }
+.tl-group-hdr::after { content: "▾"; font-size: 9px; opacity: 0.6; }
+.tl-group-hdr.tl-collapsed::after { content: "▸"; }
+/* Rows */
+.tl-row { border-bottom: 1px solid #f0ede3; }
+.tl-row-hdr { padding: 4px 10px 4px 14px; font-size: 10px; font-weight: 600; color: #4a4a5a; background: #faf9f5; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+.tl-row-hdr:hover { background: #f4f1e7; }
+.tl-row-hdr::after { content: "▾"; font-size: 9px; opacity: 0.5; }
+.tl-row-hdr.tl-collapsed::after { content: "▸"; }
+.tl-row-body { padding: 5px 8px 7px; }
+/* Name chips */
+.tl-names { display: flex; flex-wrap: wrap; gap: 3px; }
+.tl-empty-cell { color: #bbb; font-size: 10px; font-style: italic; padding: 2px 0; }
+.tl-name { display: inline-block; padding: 2px 6px; background: #f0ede3; border: 1px solid #e0dcc8; border-radius: 3px; font-size: 11px; color: #333; cursor: pointer; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; transition: background 0.1s, color 0.1s; }
+.tl-name:hover { background: #e8e3d0; border-color: #c0bca8; }
+.tl-more { display: inline-block; padding: 2px 7px; background: transparent; border: 1px dashed #b0ac98; border-radius: 3px; font-size: 11px; color: #888; cursor: pointer; font-family: var(--font); }
+.tl-more:hover { background: #f0ede3; color: #555; }
+/* Hover peer highlights — priority: cohort > sector > industry */
+.tl-name.tl-self           { background: #1b3d5c !important; color: #fff !important; border-color: #1b3d5c !important; font-weight: 700; }
+.tl-name.tl-peer-cohort    { background: #3b5bdb !important; color: #fff !important; border-color: #3b5bdb !important; }
+.tl-name.tl-peer-sector    { background: #c07800 !important; color: #fff !important; border-color: #c07800 !important; }
+.tl-name.tl-peer-industry  { background: #2e7d32 !important; color: #fff !important; border-color: #2e7d32 !important; }
+/* MD-TIMELINESS-CSS-END */
 
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-START */
 /* Session 61: pre-indicators round 2 — S2 group first, Group N format, description tiles */
@@ -5136,164 +5190,330 @@ function renderTech(){
 }
 
 // ================================================================
-// COMBINATIONS TAB
+// TIMELINESS TAB — md_v2 build 2026-06-09
+// Replaces the old legacy-field COMBINATIONS tab implementation.
+// Design spec: master-dashboard/TIMELINESS-BUILD-SPEC-2026-06-08.md
+// Session notes: master-dashboard/SESSION-TIMELINESS-BUILD-2026-06-09.md
 // ================================================================
 function renderCombos(){
-  buildHeaderControls("combos");
-  var allRows=baseRows();
-  var rows=[];
-  // Stage rank for AND'd toggle logic: stage S "active" means stock has reached at least S.
-  // Filter shows a stock if EXISTS (setup F, stage S) such that comboSetupFilters[F] && comboStageFilters[S]
-  //   && stockReachedAtLeast(F, S). Per D-MD-UI-7 sticky AND semantics.
-  var stageRank={"Early":1,"Late":2,"Capital":3};
-  function reaches(stockStage,toggleStage){
-    if(!stockStage)return false;
-    return stageRank[stockStage]>=stageRank[toggleStage];
-  }
-  for(var j=0;j<allRows.length;j++){
-    var r=allRows[j];
-    r.bp_stage=r.f.basing_plateau?r.f.basing_plateau.stage:"";
-    r.pb_stage=r.f.probing_bet?r.f.probing_bet.stage:"";
-    r.vcp_stage=r.f.vcp?r.f.vcp.stage:"";
-    r.mm_stage=r.f.mm99?r.f.mm99.stage:"";
-    r.utr_stage=r.f.uptrend_retest?r.f.uptrend_retest.stage:"";
-    r.tm_grade=timeliness(r);
-    r.tm_key=timelinessSortKey(r.tm_grade);
-    // SESSION 9 Pass 1.2 D-MD-UI-11: Apply grade filter (AND with stage/setup toggles).
-    var gKeyR=r.tm_grade==="-"?"N":r.tm_grade;
-    if(!comboGradeFilters[gKeyR])continue;
-    // Apply header toggles. AND semantics: at least one (setup,stage) pair active AND stock matches.
-    var keep=false;
-    var pairs=[
-      {f:"bp",s:r.bp_stage},{f:"pb",s:r.pb_stage},{f:"vcp",s:r.vcp_stage},
-      {f:"mm99",s:r.mm_stage},{f:"utr",s:r.utr_stage}
-    ];
-    for(var p=0;p<pairs.length;p++){
-      if(!comboSetupFilters[pairs[p].f])continue;
-      if(comboStageFilters.capital&&reaches(pairs[p].s,"Capital")){keep=true;break}
-      if(comboStageFilters.late&&reaches(pairs[p].s,"Late")){keep=true;break}
-      if(comboStageFilters.early&&reaches(pairs[p].s,"Early")){keep=true;break}
-    }
-    if(keep)rows.push(r);
-  }
-  // D-MD-UI-8: default sort = TIMELINESS desc (best first); user can override by clicking columns.
-  if(currentSort.col!=="tm_key"&&currentSort.col!=="mm99_score"){
-    // first-visit default: tm_key desc
-    rows=sortData(rows,"tm_key","desc");
-  } else {
-    rows=sortData(rows,currentSort.col,currentSort.dir);
-  }
-  var totalCount=allRows.length;
-  // SESSION 9 Pass 1.1: Summary recut — 2 panes side by side.
-  // Pane 1: Filter (Y) x Stage (X) cumulative counts grid.
-  //   Cumulative = stocks reaching at least that stage on that filter (D-MD-UI-7 stage semantics).
-  //   Denominator = total universe (allRows.length), independent of header toggles (Q-PG3).
-  // Pane 2: TIMELINESS grade distribution (A/B/C/D/F/-).
-  //   Computed from allRows (full universe per D-MD-FILTER-10), not from filtered rows.
-  var stageCounts={
-    bp:{e:0,l:0,c:0},col:{e:0,l:0,c:0},pb:{e:0,l:0,c:0},vcp:{e:0,l:0,c:0},
-    s3:{e:0,l:0,c:0},s4:{e:0,l:0,c:0},mm99:{e:0,l:0,c:0},utr:{e:0,l:0,c:0}
-  };
-  var gA=0,gB=0,gC=0,gD=0,gF=0,gN=0;
-  function bump(obj,stg){
-    if(stg==="Capital"){obj.c++;obj.l++;obj.e++;}
-    else if(stg==="Late"){obj.l++;obj.e++;}
-    else if(stg==="Early"){obj.e++;}
-  }
-  for(var j2=0;j2<allRows.length;j2++){
-    var rA=allRows[j2];
-    bump(stageCounts.bp,rA.f.basing_plateau?rA.f.basing_plateau.stage:"");
-    bump(stageCounts.pb,rA.f.probing_bet?rA.f.probing_bet.stage:"");
-    bump(stageCounts.vcp,rA.f.vcp?rA.f.vcp.stage:"");
-    bump(stageCounts.mm99,rA.f.mm99?rA.f.mm99.stage:"");
-    bump(stageCounts.utr,rA.f.uptrend_retest?rA.f.uptrend_retest.stage:"");
-    // Pass 2 placeholders: col/s3/s4 stay at 0 until Collapse/S3/S4 logic lands.
-    var gA2=timeliness(rA);
-    if(gA2==="A")gA++;else if(gA2==="B")gB++;else if(gA2==="C")gC++;
-    else if(gA2==="D")gD++;else if(gA2==="F")gF++;else gN++;
-  }
-  var totalDen=allRows.length;
-  function gridCell(n){return'<td class="combo-grid-cell">'+(n>0?n+'<span class="combo-grid-den"> / '+totalDen+'</span>':'<span class="combo-grid-zero">&mdash;</span>')+'</td>'}
-  function gridRow(label,key,note){
-    var pendingCls=(key==="col"||key==="s3"||key==="s4")?" combo-grid-row-pending":"";
-    return'<tr class="'+pendingCls+'"><th class="combo-grid-rowlabel">'+label+(note?' <span class="combo-grid-note">'+note+'</span>':'')+'</th>'
-      +gridCell(stageCounts[key].e)+gridCell(stageCounts[key].l)+gridCell(stageCounts[key].c)+'</tr>';
-  }
-  var gridHtml=''
-    +'<table class="combo-grid"><thead><tr>'
-    +'<th class="combo-grid-corner">FILTER</th>'
-    +'<th class="combo-grid-colhdr">EARLY</th>'
-    +'<th class="combo-grid-colhdr">LATE</th>'
-    +'<th class="combo-grid-colhdr">CAPITAL</th>'
-    +'</tr></thead><tbody>'
-    +gridRow("Collapse","col","P2")
-    +gridRow("Basing Plateau","bp","")
-    +gridRow("Probing Bet","pb","")
-    +gridRow("VCP","vcp","")
-    +gridRow("Stage 3 Topping","s3","P2")
-    +gridRow("Stage 4 Declining","s4","P2")
-    +gridRow("MM 99","mm99","")
-    +gridRow("Uptrend Retest","utr","")
-    +'</tbody></table>';
-  function gradePill(letter,n){
-    var clsKey=letter==="-"?"N":letter;
-    return'<div class="combo-grade-row"><span class="tm-grade tm-'+clsKey+'">'+(letter==="-"?"&mdash;":letter)+'</span>'
-      +'<span class="combo-grade-count">'+n+'</span><span class="combo-grade-den"> / '+totalDen+'</span></div>';
-  }
-  var gradeHtml=''
-    +'<div class="combo-grade-block"><div class="combo-grade-title">TIMELINESS GRADE DISTRIBUTION</div>'
-    +gradePill("A",gA)+gradePill("B",gB)+gradePill("C",gC)
-    +gradePill("D",gD)+gradePill("F",gF)+gradePill("-",gN)
-    +'<div class="combo-grade-foot">Shown after toggles: '+xyFmt(rows.length,totalDen)+'</div></div>';
-  var h='<div class="summary-tile" id="section-summary"><h3>TIMELINESS &mdash; Decision Lens</h3>'
-    +'<div class="sub">Per-stock A/B/C/D/F grade collapsing 8 setup filters via priority ladder. Header toggles slice by stage &times; setup (AND). Grid below shows full-universe stage counts (cumulative — stocks reaching at least that stage). Distribution panel shows grade frequency.</div>'
-    +'<div class="combo-summary-grid">'
-    +'<div class="combo-summary-left">'+gridHtml+'</div>'
-    +'<div class="combo-summary-right">'+gradeHtml+'</div>'
-    +'</div></div>';
+  var el = document.getElementById("tab-combos");
+  if(!el) return;
 
-  h+=buildPortfolioTile(currentTab);
-  rows=applyIndSecFilter(rows);
-  h+='<h3 class="qualified-title" id="section-stocks">Qualified Stocks ('+xyFmt(rows.length,totalCount)+')</h3>';
-  h+='<div class="data-table-wrap"><table class="data-table"><thead>';
-  // TIMELINESS-GROUP-HEADER (D-MD-UI-17)
-  h+='<tr class="group-header-row">';
-  h+='<th colspan="10" style="background:rgba(100,100,100,0.06)">Inputs</th>';
-  h+='<th colspan="1" style="background:rgba(221,107,32,0.12)">Master</th>';
-  h+='<th colspan="8" style="background:rgba(120,80,200,0.08)">Qualification Screens</th>';
-  h+=ratingsColHeaders().length>0?'<th colspan="8" class="col-ratings">Ratings</th>':'';
-  h+='</tr><tr>';
-  // SESSION 9 Pass 1.1: Final col order per D-MD-FILTER-8: TIMELINESS | Collapse | BP | PB | VCP | S3 Top | S4 Dec | MM99 | UTR.
-  // Collapse/S3/S4 are Pass 2 placeholders — render — badge with title tooltip until Pass 2 lands.
-  h+=commonCols()
-    +th("Timeliness","tm_key","col-txt col-filter")
-    +th("Collapse","_collapse_stage","col-txt col-filter combo-col-pending")
-    +th("Basing Plateau","bp_stage","col-txt col-filter")
-    +th("Probing Bet","pb_stage","col-txt col-filter")
-    +th("VCP","vcp_stage","col-txt col-filter")
-    +th("S3 Topping","_s3_stage","col-txt col-filter combo-col-pending")
-    +th("S4 Declining","_s4_stage","col-txt col-filter combo-col-pending")
-    +th("MM 99","mm_stage","col-txt col-filter")
-    +th("Uptrend Retest","utr_stage","col-txt col-filter")
-    +ratingsColHeaders();
-  h+='</tr></thead><tbody>';
-  var pendBadge='<span class="badge badge-fail" title="Pass 2 — pending">&mdash;</span>';
-  for(var j=0;j<rows.length;j++){
-    var r=rows[j];
-    h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">'+commonTds(r)
-      +'<td class="col-txt col-filter">'+timelinessBadge(r.tm_grade)+'</td>'
-      +'<td class="col-txt col-filter combo-col-pending">'+pendBadge+'</td>'
-      +'<td class="col-txt col-filter">'+navBadge(r.bp_stage,r.ticker,"bp")+'</td>'
-      +'<td class="col-txt col-filter">'+navBadge(r.pb_stage,r.ticker,"pb")+'</td>'
-      +'<td class="col-txt col-filter">'+navBadge(r.vcp_stage,r.ticker,"vcp")+'</td>'
-      +'<td class="col-txt col-filter combo-col-pending">'+pendBadge+'</td>'
-      +'<td class="col-txt col-filter combo-col-pending">'+pendBadge+'</td>'
-      +'<td class="col-txt col-filter">'+navBadge(r.mm_stage,r.ticker,"mm99")+'</td>'
-      +'<td class="col-txt col-filter">'+navBadge(r.utr_stage,r.ticker,"utr")+'</td>'
-      +ratingsColTds(r)+'</tr>';
+  // ---- Row definitions (spec §3 + §4) ----
+  var TL_ROWS = [
+    // GROUP 1 - Capital qualification tests (A=Qualified|Probable, B=Plausible, C=Possible)
+    {id:"pb_s1",      label:"Stage 1 probing bet",           path:["tests","probing_bet_s1"],                  stageNum:1, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
+    {id:"pb_s2",      label:"Stage 2 probing bet",           path:["tests","probing_bet_s2"],                  stageNum:2, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
+    {id:"retest",     label:"Stage 2 - Retest",              path:["tests","healthy_retest"],                  stageNum:2, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
+    {id:"vcp",        label:"Stage 2 - VCP",                 path:["tests","vcp_deploy_s2"],                   stageNum:2, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
+    {id:"spec_s3",    label:"Stage 3 - Speculative Bet",     path:["tests","speculative_bet_s3"],              stageNum:3, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
+    {id:"spec_s4",    label:"Stage 4 - Speculative bet",     path:["tests","speculative_bet_s4"],              stageNum:4, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
+    // GROUP 2 - Early stage indicators [S2-GATED] (B=Probable, C=Plausible)
+    {id:"pull_back",  label:"Stage 2 pulling back",          path:["pre_indicators","pulling_back_uptrend"],   stageNum:2, group:2, cells:{B:["Probable"],C:["Plausible"]}, s2gate:true},
+    {id:"basing",     label:"Stage 2 basing",                path:["pre_indicators","basing"],                 stageNum:2, group:2, cells:{B:["Probable"],C:["Plausible"]}, s2gate:true},
+    // GROUP 3 - Long/mid-term up-trends
+    {id:"stage2_ctx", label:"Stage 2",                       path:["stage_2"],                                 stageNum:2, group:3, cells:{C:["Probable","Plausible"]}},
+    {id:"s1_late",    label:"Stage 1 - late (probable)",     path:["stage_1"],                                 stageNum:1, group:3, cells:{B:["Probable"]}},
+    {id:"s1_early",   label:"Stage 1 - early (plausible)",   path:["stage_1"],                                 stageNum:1, group:3, cells:{B:["Plausible"],C:["Possible"]}},
+    // GROUP 4 - Avoid list (long/mid-term down-trends)
+    {id:"stage3_ctx", label:"Stage 3",                       path:["stage_3"],                                 stageNum:3, group:4, cells:{C:["Plausible"],D:["Probable"]}},
+    {id:"stage4_ctx", label:"Stage 4",                       path:["stage_4"],                                 stageNum:4, group:4, cells:{C:["Possible"],D:["Plausible"],F:["Probable"]}}
+  ];
+
+  var TL_COLS = [
+    {id:"A", label:"A · Now"},
+    {id:"B", label:"B · This fortnight"},
+    {id:"C", label:"C · This next month"},
+    {id:"D", label:"D · Unclear"},
+    {id:"F", label:"F · Unclear"}
+  ];
+  var TL_COL_IDS = ["A","B","C","D","F"];
+
+  var TL_TILE_COLORS = {A:"#1a5e2a",B:"#2e6e50",C:"#b36200",D:"#8b3a10",F:"#7b1111"};
+  var TL_LETTER_RANK = {A:5,B:4,C:3,D:2,F:1};
+  var TL_STAGE_RANK  = {2:4,1:3,3:2,4:1};
+
+  var TL_GROUPS = [
+    {num:1, label:"Group 1 - Capital qualification tests"},
+    {num:2, label:"Group 2 - Early stage indicators"},
+    {num:3, label:"Group 3 - Long/mid-term up-trends"},
+    {num:4, label:"Group 4 - Avoid list (long/mid-term down-trends)"}
+  ];
+
+  // ---- State from localStorage ----
+  var tlMode  = localStorage.getItem("tl_mode")  || "best";
+  var tlWidth = localStorage.getItem("tl_width") || "equal";
+  var tlColVis = {A:1,B:1,C:1,D:1,F:1};
+  try { var _sv = JSON.parse(localStorage.getItem("tl_cols")||"null"); if(_sv && typeof _sv==="object") tlColVis = _sv; } catch(e){}
+
+  // ---- Data helpers ----
+  _sspBuildCohortIndex();
+
+  function tlGetRating(md, pathArr) {
+    var obj = md;
+    for(var _p = 0; _p < pathArr.length; _p++) { obj = obj ? obj[pathArr[_p]] : null; }
+    return (obj && obj.rating && obj.rating !== "None") ? obj.rating : null;
   }
-  h+='</tbody></table></div>';
-  document.getElementById("tab-combos").innerHTML=h;
+  function tlIsS2PP(md) {
+    var r = md && md.stage_2 ? md.stage_2.rating : null;
+    return r === "Plausible" || r === "Probable";
+  }
+  function tlGetCells(md) {
+    if(!md) return [];
+    var result = [], s2pp = tlIsS2PP(md);
+    for(var ri = 0; ri < TL_ROWS.length; ri++) {
+      var row = TL_ROWS[ri];
+      if(row.s2gate && !s2pp) continue;
+      var rating = tlGetRating(md, row.path);
+      if(!rating) continue;
+      for(var col in row.cells) {
+        if(row.cells[col].indexOf(rating) >= 0) {
+          result.push({col:col, rowIdx:ri, stageNum:row.stageNum});
+        }
+      }
+    }
+    return result;
+  }
+  function tlBestCell(cells) {
+    if(!cells.length) return null;
+    var best = cells[0];
+    for(var i = 1; i < cells.length; i++) {
+      var c = cells[i], lrd = (TL_LETTER_RANK[c.col]||0) - (TL_LETTER_RANK[best.col]||0);
+      if(lrd > 0) { best = c; continue; }
+      if(lrd < 0) continue;
+      var srd = (TL_STAGE_RANK[c.stageNum]||0) - (TL_STAGE_RANK[best.stageNum]||0);
+      if(srd > 0) { best = c; continue; }
+      if(srd < 0) continue;
+      if(c.rowIdx < best.rowIdx) best = c;
+    }
+    return best;
+  }
+
+  // ---- Build data tables ----
+  // tlData[colId][rowIdx] = [{ticker, name}]
+  var tlData = {};
+  for(var _ci = 0; _ci < TL_COL_IDS.length; _ci++) {
+    tlData[TL_COL_IDS[_ci]] = {};
+    for(var _ri = 0; _ri < TL_ROWS.length; _ri++) tlData[TL_COL_IDS[_ci]][_ri] = [];
+  }
+  var tlCounts = {A:0,B:0,C:0,D:0,F:0};
+
+  for(var fi = 0; fi < D.filters.length; fi++) {
+    var fEntry = D.filters[fi];
+    var ticker = fEntry.ticker;
+    var md = fEntry.md_v2;
+    var pEntry = priceMap[ticker];
+    var name = (pEntry && pEntry.company_name) ? pEntry.company_name : ticker;
+    var allCells = tlGetCells(md);
+    if(!allCells.length) continue;
+    if(tlMode === "best") {
+      var bc = tlBestCell(allCells);
+      if(bc) { tlData[bc.col][bc.rowIdx].push({ticker:ticker,name:name}); tlCounts[bc.col]++; }
+    } else {
+      for(var ai = 0; ai < allCells.length; ai++) {
+        var ac = allCells[ai];
+        tlData[ac.col][ac.rowIdx].push({ticker:ticker,name:name}); tlCounts[ac.col]++;
+      }
+    }
+  }
+  // Sort each cell alphabetically by name
+  for(var _ci2=0;_ci2<TL_COL_IDS.length;_ci2++)
+    for(var _ri2=0;_ri2<TL_ROWS.length;_ri2++)
+      tlData[TL_COL_IDS[_ci2]][_ri2].sort(function(a,b){return a.name<b.name?-1:a.name>b.name?1:0;});
+
+  // ---- Render helpers ----
+  var CAP = 10;
+  function escH(s){ return (""+s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+  function renderNameList(stocks) {
+    if(!stocks.length) return '<div class="tl-empty-cell">—</div>';
+    var h = '<div class="tl-names">';
+    var show = Math.min(stocks.length, CAP);
+    for(var i = 0; i < show; i++) {
+      var s = stocks[i], tax = getTaxonomy(s.ticker);
+      var cohort = (_sspTickerToD[s.ticker]&&_sspTickerToD[s.ticker].length)?_sspTickerToD[s.ticker][0].name:null;
+      var tip = escH(s.name);
+      if(tax.sector) tip += " | "+escH(tax.sector);
+      if(tax.industry) tip += " • "+escH(tax.industry);
+      if(cohort) tip += " [●cohort: "+escH(cohort)+"]";
+      h += '<span class="tl-name" data-ticker="'+escH(s.ticker)+'" title="'+tip+'">'+escH(s.name)+'</span>';
+    }
+    if(stocks.length > CAP) {
+      var hiddenId = "tl-hidden-"+Math.random().toString(36).slice(2);
+      h += '<span class="tl-more" onclick="tlExpandMore(this)">+' + (stocks.length-CAP) + ' more</span>';
+      h += '<span class="tl-hidden-names" style="display:none">';
+      for(var j = CAP; j < stocks.length; j++) {
+        var s2 = stocks[j], tax2 = getTaxonomy(s2.ticker);
+        var cohort2 = (_sspTickerToD[s2.ticker]&&_sspTickerToD[s2.ticker].length)?_sspTickerToD[s2.ticker][0].name:null;
+        var tip2 = escH(s2.name);
+        if(tax2.sector) tip2 += " | "+escH(tax2.sector);
+        if(tax2.industry) tip2 += " • "+escH(tax2.industry);
+        if(cohort2) tip2 += " [●cohort: "+escH(cohort2)+"]";
+        h += '<span class="tl-name" data-ticker="'+escH(s2.ticker)+'" title="'+tip2+'">'+escH(s2.name)+'</span>';
+      }
+      h += '</span>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  function renderCol(colId) {
+    var h = '<div class="tl-col-inner">';
+    for(var gi = 0; gi < TL_GROUPS.length; gi++) {
+      var group = TL_GROUPS[gi];
+      // Collect rows in this group that have a cell definition for this column
+      var groupRows = [];
+      for(var ri = 0; ri < TL_ROWS.length; ri++) {
+        if(TL_ROWS[ri].group === group.num && TL_ROWS[ri].cells[colId]) groupRows.push(ri);
+      }
+      if(!groupRows.length) continue;
+      h += '<div class="tl-group">';
+      h += '<div class="tl-group-hdr" onclick="tlToggleGroup(this)">'+escH(group.label)+'</div>';
+      h += '<div class="tl-group-rows">';
+      for(var k = 0; k < groupRows.length; k++) {
+        var ri2 = groupRows[k], row = TL_ROWS[ri2];
+        var stocks = tlData[colId][ri2] || [];
+        var qualStr = row.cells[colId].join(" + ");
+        var rLabel = escH(row.label) + " – " + escH(qualStr) + " (" + stocks.length + ")";
+        h += '<div class="tl-row">';
+        h += '<div class="tl-row-hdr" onclick="tlToggleRow(this)">'+rLabel+'</div>';
+        h += '<div class="tl-row-body">'+renderNameList(stocks)+'</div>';
+        h += '</div>';
+      }
+      h += '</div></div>'; // tl-group-rows + tl-group
+    }
+    h += '</div>';
+    return h;
+  }
+
+  // ---- Controls ----
+  function mBtn(id, lbl, active) {
+    return '<button class="tl-toggle-btn'+(active?' tl-toggle-active':'')+'" onclick="tlSetMode(\''+id+'\')">'+lbl+'</button>';
+  }
+  function wBtn(id, lbl, active) {
+    return '<button class="tl-toggle-btn'+(active?' tl-toggle-active':'')+'" onclick="tlSetWidth(\''+id+'\')">'+lbl+'</button>';
+  }
+  function cChip(id, active) {
+    var bg = TL_TILE_COLORS[id];
+    var s = active ? 'background:'+bg+';color:#fff;border-color:'+bg+';' : '';
+    return '<button class="tl-col-chip'+(active?'':' tl-col-chip-off')+'" style="'+s+'" onclick="tlToggleCol(\''+id+'\')">'+id+'</button>';
+  }
+  var controlsH = '<div class="tl-controls">'
+    + '<div class="tl-ctrl-group"><span class="tl-ctrl-label">Mode</span>'
+    + mBtn("best","Best",tlMode==="best") + mBtn("total","Total",tlMode==="total") + '</div>'
+    + '<div class="tl-ctrl-group"><span class="tl-ctrl-label">Width</span>'
+    + wBtn("equal","Equal",tlWidth==="equal") + wBtn("bycount","By count",tlWidth==="bycount") + '</div>'
+    + '<div class="tl-ctrl-group"><span class="tl-ctrl-label">Show</span>'
+    + cChip("A",!!tlColVis.A) + cChip("B",!!tlColVis.B) + cChip("C",!!tlColVis.C)
+    + cChip("D",!!tlColVis.D) + cChip("F",!!tlColVis.F) + '</div>'
+    + '</div>';
+
+  // ---- Headline tiles ----
+  var tilesH = '<div class="tl-tiles">';
+  for(var ti = 0; ti < TL_COLS.length; ti++) {
+    var col = TL_COLS[ti];
+    if(!tlColVis[col.id]) { tilesH += '<div class="tl-tile tl-tile-hidden"></div>'; continue; }
+    var timeLbl = col.label.split('·')[1] ? col.label.split('·')[1].trim() : col.label;
+    tilesH += '<div class="tl-tile" style="background:'+TL_TILE_COLORS[col.id]+'">'
+            + '<div class="tl-tile-letter">'+col.id+'</div>'
+            + '<div class="tl-tile-time">'+escH(timeLbl)+'</div>'
+            + '<div class="tl-tile-count">'+tlCounts[col.id]+'</div>'
+            + '</div>';
+  }
+  tilesH += '</div>';
+
+  // ---- Detail columns ----
+  var colsH = '<div class="tl-cols" id="tl-cols-wrap">';
+  for(var ti2 = 0; ti2 < TL_COLS.length; ti2++) {
+    var col2 = TL_COLS[ti2];
+    if(!tlColVis[col2.id]) continue;
+    var growStyle = (tlWidth==="bycount") ? "flex-grow:"+(tlCounts[col2.id]||1)+";" : "";
+    colsH += '<div class="tl-col" data-col="'+col2.id+'" style="'+growStyle+'">'
+           + '<div class="tl-col-header" style="background:'+TL_TILE_COLORS[col2.id]+'">'
+           + escH(col2.label) + ' <span class="tl-col-count">('+tlCounts[col2.id]+')</span></div>'
+           + renderCol(col2.id) + '</div>';
+  }
+  colsH += '</div>';
+
+  // ---- Assemble ----
+  var modeLbl = tlMode==="best" ? "Best — each stock once" : "Total — all qualifying cells";
+  el.innerHTML = '<div class="tl-wrap">'
+    + '<div class="tl-page-title">TIMELINESS <span class="tl-mode-label">'+modeLbl+'</span></div>'
+    + controlsH + tilesH + colsH + '</div>';
+
+  // ---- Wire hover + click on all name chips ----
+  var allNames = el.querySelectorAll(".tl-name");
+  for(var ni = 0; ni < allNames.length; ni++) {
+    (function(n){
+      n.addEventListener("mouseenter",function(){ tlHighlightPeers(n.getAttribute("data-ticker")); });
+      n.addEventListener("mouseleave",function(){ tlClearHighlight(); });
+      n.addEventListener("click",function(){ var t=n.getAttribute("data-ticker"); if(t)window.openStockView(t); });
+    })(allNames[ni]);
+  }
+}
+
+// ---- Timeliness interaction helpers (global scope) ----
+function tlSetMode(mode){
+  localStorage.setItem("tl_mode",mode);
+  renderCombos();
+}
+function tlSetWidth(w){
+  localStorage.setItem("tl_width",w);
+  renderCombos();
+}
+function tlToggleCol(colId){
+  var saved={A:1,B:1,C:1,D:1,F:1};
+  try { var _s=JSON.parse(localStorage.getItem("tl_cols")||"null"); if(_s&&typeof _s==="object") saved=_s; } catch(e){}
+  saved[colId]=saved[colId]?0:1;
+  localStorage.setItem("tl_cols",JSON.stringify(saved));
+  renderCombos();
+}
+function tlToggleGroup(hdrEl){
+  var rows=hdrEl.nextElementSibling;
+  if(rows){ rows.style.display=(rows.style.display==="none")?"":"none"; }
+  hdrEl.classList.toggle("tl-collapsed");
+}
+function tlToggleRow(hdrEl){
+  var body=hdrEl.nextElementSibling;
+  if(body){ body.style.display=(body.style.display==="none")?"":"none"; }
+  hdrEl.classList.toggle("tl-collapsed");
+}
+function tlExpandMore(btn){
+  var hidden=btn.nextElementSibling;
+  if(hidden){
+    hidden.style.display="";
+    btn.style.display="none";
+    var newNames=hidden.querySelectorAll(".tl-name");
+    for(var _i=0;_i<newNames.length;_i++){
+      (function(n){
+        n.addEventListener("mouseenter",function(){ tlHighlightPeers(n.getAttribute("data-ticker")); });
+        n.addEventListener("mouseleave",function(){ tlClearHighlight(); });
+        n.addEventListener("click",function(){ var t=n.getAttribute("data-ticker"); if(t)window.openStockView(t); });
+      })(newNames[_i]);
+    }
+  }
+}
+function tlHighlightPeers(ticker){
+  if(!ticker) return;
+  _sspBuildCohortIndex();
+  var myTax=getTaxonomy(ticker);
+  var myCohort=(_sspTickerToD[ticker]&&_sspTickerToD[ticker].length)?_sspTickerToD[ticker][0].name:null;
+  var allN=document.querySelectorAll("#tab-combos .tl-name");
+  for(var _i=0;_i<allN.length;_i++){
+    var n=allN[_i], t=n.getAttribute("data-ticker");
+    n.classList.remove("tl-peer-cohort","tl-peer-sector","tl-peer-industry","tl-self");
+    if(t===ticker){ n.classList.add("tl-self"); continue; }
+    var tax2=getTaxonomy(t);
+    var cohort2=(_sspTickerToD[t]&&_sspTickerToD[t].length)?_sspTickerToD[t][0].name:null;
+    if(myCohort&&cohort2&&myCohort===cohort2){ n.classList.add("tl-peer-cohort"); }
+    else if(myTax.sector&&tax2.sector&&myTax.sector===tax2.sector){ n.classList.add("tl-peer-sector"); }
+    else if(myTax.industry&&tax2.industry&&myTax.industry===tax2.industry){ n.classList.add("tl-peer-industry"); }
+  }
+}
+function tlClearHighlight(){
+  var allN=document.querySelectorAll("#tab-combos .tl-name");
+  for(var _i=0;_i<allN.length;_i++)
+    allN[_i].classList.remove("tl-peer-cohort","tl-peer-sector","tl-peer-industry","tl-self");
 }
 
 // ================================================================
@@ -9691,6 +9911,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="master_overview" onclick="switchTab(\'master_overview\')">Overview</button>'  /* MD-V2-MASTER-OVERVIEW-S27-MARKER */
       +     '<button class="v2-nav-btn" data-v2-tab="ssem" onclick="switchTab(\'ssem\')">SS Earnings Momentum</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="val" onclick="switchTab(\'val\')">Valuation</button>'
++     '<button class="v2-nav-btn" data-v2-tab="combos" onclick="switchTab(\'combos\')">TIMELINESS</button>'
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);

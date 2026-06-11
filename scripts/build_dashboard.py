@@ -17,9 +17,9 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
-SCRIPT_DIR = Path('/sessions/amazing-zealous-bohr/mnt/COWORK/master-dashboard/scripts')
+SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = SCRIPT_DIR.parent
-DATA_DIR = Path("/tmp/md_data")
+DATA_DIR = PROJECT_DIR / "data"
 OUTPUT_PATH = PROJECT_DIR / "index.html"
 
 COWORK_ROOT = PROJECT_DIR.parent
@@ -1430,10 +1430,28 @@ body[data-active-tab="master_overview"],body[data-active-tab="combos"] { --heade
 .tl-group-hdr.tl-collapsed::after { content: "▸"; }
 /* Rows */
 .tl-row { border-bottom: 1px solid #f0ede3; }
-.tl-row-hdr { padding: 5px 10px 5px 11px; font-size: 12px; font-weight: 500; color: #3a3a4a; background: #ddd8c4; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #c8c0a8; margin-top: 12px; }
-.tl-row-hdr:hover { background: #d4cfbc; }
+.tl-row-hdr { padding: 5px 10px 5px 11px; font-size: 12px; font-weight: 500; color: #3a3a4a; background: #ddd8c4; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #c8c0a8; margin-top: 12px; transition: filter 0.12s; }
+.tl-row-hdr:hover { filter: brightness(0.93); }
 .tl-row-hdr::after { content: "▾"; font-size: 9px; opacity: 0.5; }
 .tl-row-hdr.tl-collapsed::after { content: "▸"; }
+/* Per-row-id colours — group-themed */
+/* Group 1: capital qualification — steel blues */
+.tl-row-hdr[data-row-id="pb_s1"]       { background: #d8e8f5; border-left-color: #8ab4d0; }
+.tl-row-hdr[data-row-id="pb_s2"]       { background: #cfe3f2; border-left-color: #80aecb; }
+.tl-row-hdr[data-row-id="retest"]      { background: #c8dcee; border-left-color: #76a8c6; }
+.tl-row-hdr[data-row-id="vcp"]         { background: #c2d8eb; border-left-color: #6ea2c1; }
+.tl-row-hdr[data-row-id="spec_s3"]     { background: #bdd2e8; border-left-color: #669cbb; }
+.tl-row-hdr[data-row-id="spec_s4"]     { background: #b8cee5; border-left-color: #5e96b6; }
+/* Group 2: early stage — sage greens */
+.tl-row-hdr[data-row-id="pull_back"]   { background: #d6ebd6; border-left-color: #8aba8a; }
+.tl-row-hdr[data-row-id="basing"]      { background: #cce6ce; border-left-color: #82b285; }
+/* Group 3: uptrends — warm creams */
+.tl-row-hdr[data-row-id="stage2_ctx"]  { background: #ece9cc; border-left-color: #c0b87e; }
+.tl-row-hdr[data-row-id="s1_late"]     { background: #e8e4c4; border-left-color: #bab272; }
+.tl-row-hdr[data-row-id="s1_early"]    { background: #e4dfbc; border-left-color: #b6ac66; }
+/* Group 4: avoid — warm terracotta */
+.tl-row-hdr[data-row-id="stage3_ctx"]  { background: #f2ddd0; border-left-color: #d4a080; }
+.tl-row-hdr[data-row-id="stage4_ctx"]  { background: #f0d4c4; border-left-color: #ce9470; }
 .tl-row-body { padding: 5px 8px 7px; }
 /* Name chips */
 .tl-names { display: flex; flex-wrap: wrap; gap: 3px; }
@@ -5243,6 +5261,39 @@ function renderCombos(){
     {num:3, label:"Group 3 - Long/mid-term up-trends"},
     {num:4, label:"Group 4 - Avoid list (long/mid-term down-trends)"}
   ];
+  // ---- Sector label colour palette (industry-keyed hues, built once per render) ----
+  var _tlSecBg = {};
+  (function(){
+    var indHue = {
+      'A. Consumer staples': 100,
+      'B. Healthcare': 168,
+      'C. Telecoms': 198,
+      'D. Infrastructure': 220,
+      'E. Utilities': 272,
+      'F. Defence': 72,
+      'G. Financials': 240,
+      'H. Consumer discretionary': 28,
+      'I. Transportation': 200,
+      'J. Technology': 218,
+      'K. Professional, business and consumer services': 185,
+      'M. Materials': 55,
+      'O. Industrials and capital goods': 205,
+      'P. Energy, commodities and metals mining': 22
+    };
+    var indSecIdx = {};
+    for(var _tsk in tmMap) {
+      var _tsv = tmMap[_tsk];
+      var _tind = _tsv ? (_tsv.industry || '') : '';
+      var _tsec = _tsv ? (_tsv.sector || '') : '';
+      if(!_tind || !_tsec || _tlSecBg[_tsec]) continue;
+      var _thue = (indHue[_tind] !== undefined) ? indHue[_tind] : 210;
+      if(!indSecIdx[_tind]) indSecIdx[_tind] = 0;
+      var _tidx = indSecIdx[_tind]++;
+      var _ts = 18 + (_tidx % 3) * 7;
+      var _tl = 92 - (_tidx % 4) * 2;
+      _tlSecBg[_tsec] = 'hsl(' + _thue + ',' + _ts + '%,' + _tl + '%)';
+    }
+  })();
 
   // ---- Initialise localStorage defaults on first visit (prevents first-click no-op) ----
   if(localStorage.getItem("tl_by_sector")===null)  localStorage.setItem("tl_by_sector","1");
@@ -5354,7 +5405,7 @@ function renderCombos(){
       secOrd.sort();
       var hs='<div class="tl-names">';
       for(var gsi=0;gsi<secOrd.length;gsi++){
-        hs+='<span class="tl-sector-lbl">'+escH(secOrd[gsi])+'</span>';
+        hs+='<span class="tl-sector-lbl" style="background:'+(_tlSecBg[secOrd[gsi]]||'#f0ede3')+'">'+escH(secOrd[gsi])+'</span>';
         var gstks=secMap[secOrd[gsi]];
         for(var gki=0;gki<gstks.length;gki++) hs+=mkChip(gstks[gki]);
       }
@@ -5402,7 +5453,7 @@ function renderCombos(){
         var qualStr = row.cells[colId].join(" or ");
         var rLabel = escH(row.label) + " – " + escH(qualStr) + " (" + stocks.length + ")";
         h += '<div class="tl-row">';
-        h += '<div class="tl-row-hdr" onclick="tlToggleRow(this)">'+rLabel+'</div>';
+        h += '<div class="tl-row-hdr" data-row-id="'+escH(row.id)+'" onclick="tlToggleRow(this)">'+rLabel+'</div>';
         h += '<div class="tl-row-body">'+renderNameList(stocks)+'</div>';
         h += '</div>';
       }
@@ -5479,7 +5530,7 @@ function renderCombos(){
     (function(n){
       n.addEventListener("mouseenter",function(){ tlHighlightPeers(n.getAttribute("data-ticker")); });
       n.addEventListener("mouseleave",function(){ tlClearHighlight(); });
-      n.addEventListener("click",function(){ var t=n.getAttribute("data-ticker"); if(t)window.openStockView(t); });
+      n.addEventListener("click",function(){ var t=n.getAttribute("data-ticker"); if(t)window.open(window.location.pathname+'?stock='+encodeURIComponent(t),'_blank'); });
     })(allNames[ni]);
   }
 }
@@ -5524,7 +5575,7 @@ window.tlExpandMore = function(btn){
       (function(n){
         n.addEventListener("mouseenter",function(){ tlHighlightPeers(n.getAttribute("data-ticker")); });
         n.addEventListener("mouseleave",function(){ tlClearHighlight(); });
-        n.addEventListener("click",function(){ var t=n.getAttribute("data-ticker"); if(t)window.openStockView(t); });
+        n.addEventListener("click",function(){ var t=n.getAttribute("data-ticker"); if(t)window.open(window.location.pathname+'?stock='+encodeURIComponent(t),'_blank'); });
       })(newNames[_i]);
     }
   }
@@ -18533,3 +18584,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+                                           

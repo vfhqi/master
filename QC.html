@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pipeline Status &mdash; Viewforth</title>
+<style>
+:root{--bg:#f7f5ef;--paper:#ffffff;--border:#e8e3d4;--text:#333;--text-dim:#6b6b6b;
+  --text-bright:#1a1a1a;--green:#2e7d32;--green-dim:#e8f5e9;--green-bd:#7fb285;
+  --red:#c0392b;--red-dim:#ffebee;--red-bd:#e08585;
+  --amber:#b8860b;--amber-dim:#fff8e1;--amber-bd:#d7b85a;
+  --font:'Aptos','Segoe UI',system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;line-height:1.45}
+.shell{max-width:860px;margin:0 auto;padding:22px 24px 60px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:18px;gap:14px;flex-wrap:wrap}
+.head h1{margin:0;font-size:22px;font-weight:600;color:var(--text-bright)}
+.head .sub{margin:3px 0 0;font-size:11px;color:var(--text-dim)}
+.head a{color:var(--green);text-decoration:none;font-size:11px;font-weight:600}
+.head a:hover{text-decoration:underline}
+.head .nav-links{display:flex;gap:14px;align-items:center}
+
+.banner{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:6px;
+  margin:0 0 22px;font-size:14px;font-weight:700;border:1px solid}
+
+.pipe-row{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;
+  border-radius:6px;margin-bottom:10px;border:1px solid transparent}
+.pipe-status{min-width:90px;font-size:13px;padding-top:2px;white-space:nowrap}
+.pipe-info{flex:1;min-width:0}
+.pipe-name{font-size:14px;font-weight:700;color:var(--text-bright);margin-bottom:2px}
+.pipe-sched{font-size:11px;color:var(--text-dim);margin-bottom:3px}
+.pipe-last{font-size:11px;color:var(--text-dim);font-family:Menlo,Consolas,monospace;margin-bottom:3px}
+.pipe-msg{font-size:12px;color:var(--text)}
+
+.section-hd{border-bottom:2px solid var(--border);padding-bottom:6px;margin:20px 0 10px}
+.section-hd h2{margin:0;font-size:14px;font-weight:700;color:var(--text-bright);
+  text-transform:uppercase;letter-spacing:0.5px}
+
+.foot{font-size:10px;color:var(--text-dim);text-align:right;margin-top:22px;border-top:1px solid var(--border);padding-top:8px}
+.refresh-note{font-size:11px;color:var(--text-dim);margin:0 0 18px;padding:6px 10px;
+  background:var(--paper);border:1px solid var(--border);border-radius:4px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <div>
+      <h1>Pipeline Status</h1>
+      <div class="sub">Automated health check of Viewforth data pipelines. Generated 11 Jun 2026, 08:08 UK time.</div>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">&larr; Master Dashboard</a>
+      <a href="https://vfhqi.github.io/repository/qc-centre.html" target="_blank" rel="noopener">QC Centre</a>
+    </div>
+  </div>
+
+  <div class="banner" style="background:#ffebee;color:#c0392b;border-color:#e08585;">
+    &#10007; One or more pipelines have failed
+  </div>
+
+  <p class="refresh-note">
+    Checks run at 07:00 and 19:00 UK daily. Status is updated each run.
+    Alert banner also injected into the <a href="index.html">Master Dashboard</a> header when any pipeline is non-green.
+  </p>
+
+  <div class="section-hd"><h2>Pipeline Status</h2></div>
+  <div class='pipe-row' style='border-left:4px solid #e08585;background:#ffebee;'><div class='pipe-status' style='color:#c0392b;'>&#10007; <strong>RED</strong></div><div class='pipe-info'><div class='pipe-name'>Master Dashboard</div><div class='pipe-sched'>Nightly 18:00 UK — refresh-dashboard-silent.bat</div><div class='pipe-last'>Last run: 10 Jun 2026, 18:00 UK</div><div class='pipe-msg'>Build did not complete — failed at build_dashboard.py</div></div></div>
+<div class='pipe-row' style='border-left:4px solid #e08585;background:#ffebee;'><div class='pipe-status' style='color:#c0392b;'>&#10007; <strong>RED</strong></div><div class='pipe-info'><div class='pipe-name'>IC Ratings Dashboard</div><div class='pipe-sched'>Nightly ~17:09 UK — dashboard_push_wrapper.py</div><div class='pipe-last'>Last run: 2026-06-10 16:09 UTC</div><div class='pipe-msg'>Pipeline aborted at step 3</div></div></div>
+<div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>Canonical Extract</div><div class='pipe-sched'>Daily 05:30 UK — extract-canonical-silent.bat</div><div class='pipe-last'>Last run: 11 Jun 2026, 05:30 UK</div><div class='pipe-msg'>Extract completed successfully</div></div></div>
+
+
+  <div class="foot">
+    Generated 11 Jun 2026, 08:08 UK time &middot;
+    <a href="index.html">Master Dashboard</a> &middot;
+    <a href="https://vfhqi.github.io/repository/qc-centre.html" target="_blank">QC Centre</a>
+  </div>
+</div>
+<script>
+// Embedded data for any future programmatic use
+var PIPELINE_STATUS = {
+  "generated": "2026-06-11T07:08:24Z",
+  "overall": "RED",
+  "pipelines": [
+    {
+      "name": "Master Dashboard",
+      "pipeline": "Nightly 18:00 UK — refresh-dashboard-silent.bat",
+      "status": "RED",
+      "message": "Build did not complete — failed at build_dashboard.py",
+      "last_run": "10 Jun 2026, 18:00 UK"
+    },
+    {
+      "name": "IC Ratings Dashboard",
+      "pipeline": "Nightly ~17:09 UK — dashboard_push_wrapper.py",
+      "status": "RED",
+      "message": "Pipeline aborted at step 3",
+      "last_run": "2026-06-10 16:09 UTC"
+    },
+    {
+      "name": "Canonical Extract",
+      "pipeline": "Daily 05:30 UK — extract-canonical-silent.bat",
+      "status": "GREEN",
+      "message": "Extract completed successfully",
+      "last_run": "11 Jun 2026, 05:30 UK"
+    }
+  ]
+};
+</script>
+</body>
+</html>

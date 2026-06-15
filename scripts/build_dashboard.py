@@ -2646,7 +2646,7 @@ var D=MASTER_DATA;
 var priceMap={},filterMap={},tmMap=D.ticker_mapping||{};
 var currentTab="master_overview",currentSort={col:"chg_qual_count",dir:"desc"}; /* SUMMARY-TAB-DEFAULT MD-V2-DEFAULT-TAB-FIX-S27-MARKER: was stage_1, Master Overview is the default landing tab */
 /* BOOTSTRAP-DEFAULT-TAB-FIX-1 */
-if(typeof window!=="undefined"){window.__chgBootstrapDone=window.__chgBootstrapDone||false;var __chgBoot=function(){if(window.__chgBootstrapDone)return;if(typeof window.switchTab!=="function"){setTimeout(__chgBoot,30);return;}window.__chgBootstrapDone=true;try{window.switchTab(currentTab);}catch(e){console.error("bootstrap switchTab failed",e);}};if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",__chgBoot);}else{setTimeout(__chgBoot,30);}}
+if(typeof window!=="undefined"){window.__chgBootstrapDone=window.__chgBootstrapDone||false;var __chgBoot=function(){if(window.__chgBootstrapDone)return;if(typeof window.switchTab!=="function"){setTimeout(__chgBoot,30);return;}window.__chgBootstrapDone=true;var _initHash=window.location.hash?window.location.hash.slice(1):"";if(_initHash&&TAB_IDS.indexOf(_initHash)>=0){currentTab=_initHash;}try{window.switchTab(currentTab);}catch(e){console.error("bootstrap switchTab failed",e);}};if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",__chgBoot);}else{setTimeout(__chgBoot,30);}}
 var mm99MinScore=0;
 var utrMinCap=0;
 var utrStageFilter="";  // ""=all, "early"=Early+, "late"=Late+, "capital"=Capital only
@@ -2856,6 +2856,7 @@ window.switchTab=function(id){
   if(el){
     el.style.display="block";
     currentTab=id;
+    history.replaceState(null,"",window.location.pathname+"#"+id);
     // Only render if tab is empty (first visit) or needs refresh
     if(!el.innerHTML||el.getAttribute("data-stale")==="1"){
       el.removeAttribute("data-stale");
@@ -18584,4 +18585,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-                                           

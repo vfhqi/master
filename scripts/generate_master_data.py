@@ -1907,7 +1907,7 @@ def compute_master_dashboard_screens(prices, filter_results):
         _ii = _pp.get("industry", "")
         _ss = _pp.get("sector", "")
         _rem = _pp.get("rs_excess_market")
-        if _ii and _rem is not None:
+        if _ii and _rem is not None and not (isinstance(_rem, float) and math.isnan(_rem)):
             _ind_excess_mkt[_ii].append(_rem)
         if _ss and _ii:
             _sec_to_ind[_ss] = _ii
@@ -1921,7 +1921,7 @@ def compute_master_dashboard_screens(prices, filter_results):
     for _pp in prices:
         _ss = _pp.get("sector", "")
         _rei = _pp.get("rs_excess_industry")
-        if _ss and _rei is not None:
+        if _ss and _rei is not None and not (isinstance(_rei, float) and math.isnan(_rei)):
             _sec_excess_ind[_ss].append(_rei)
     _sec_mean_excess = {s: sum(v)/len(v) for s, v in _sec_excess_ind.items() if v}
     _sec_pct_in_ind = {}
@@ -1932,7 +1932,11 @@ def compute_master_dashboard_screens(prices, filter_results):
         _secs_sorted = sorted(_secs_in, key=lambda x: _sec_mean_excess[x])
         _n_s = len(_secs_sorted)
         for _si, _sec in enumerate(_secs_sorted):
-            _sec_pct_in_ind[_sec] = int(round(_si / max(_n_s - 1, 1) * 99))
+            # Edge case: sole sector in an industry is by definition #1 → assign 99
+            if _n_s == 1:
+                _sec_pct_in_ind[_sec] = 99
+            else:
+                _sec_pct_in_ind[_sec] = int(round(_si / (_n_s - 1) * 99))
 
     # M-3 sector-within-industry rank (for Stage 3 T8: sector RS drift > 10 pts vs 3M ago)
     _sec_m3_rs = defaultdict(list)

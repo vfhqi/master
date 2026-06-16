@@ -8436,9 +8436,10 @@ function SUM_renderQualifiedStocks() {
 
   function s2TestValueFor(row, col) {
     var k = col.testKey;
-    if (k === 'T1') return row.price != null && row.ma_200 != null ? s2FmtPct((row.price - row.ma_200) / row.ma_200 * 100) : '—';
-    if (k === 'T3') return row.price != null && row.ma_150 != null ? s2FmtPct((row.price - row.ma_150) / row.ma_150 * 100) : '—';
-    if (k === 'T4') return row.ma_150 != null && row.ma_200 != null ? s2FmtPct((row.ma_150 - row.ma_200) / row.ma_200 * 100) : '—';
+    if (k === 'g1_P_above_200D') return row.price != null && row.ma_200 != null ? s2FmtPct((row.price - row.ma_200) / row.ma_200 * 100) : '—';
+    if (k === 'g3_150D_above_200D') return row.ma_150 != null && row.ma_200 != null ? s2FmtPct((row.ma_150 - row.ma_200) / row.ma_200 * 100) : '—';
+    if (k === 'g2_P_above_150D') return row.price != null && row.ma_150 != null ? s2FmtPct((row.price - row.ma_150) / row.ma_150 * 100) : '—';
+    if (k === 'g4_within_25pct_52WH') return row.price != null && row.high_52w != null ? s2FmtPct((row.price - row.high_52w) / row.high_52w * 100) : '—';
     if (k === 'T5') return row.ma_50 != null && row.ma_150 != null ? s2FmtPct((row.ma_50 - row.ma_150) / row.ma_150 * 100) : '—';
     if (k === 'T6') return row.ma_50 != null && row.ma_200 != null ? s2FmtPct((row.ma_50 - row.ma_200) / row.ma_200 * 100) : '—';
     if (k === 'T7') return row.t7_val != null ? Math.round(row.t7_val) + '' : '—';

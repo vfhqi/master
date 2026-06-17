@@ -5673,7 +5673,7 @@ function renderPositions(){
 var ssemRatingMap = {};   // ticker -> A/B/C/D/F/- — populated by renderSSEM, read by buildPortfolioTile
 var ssemColMode = "TYPE";       // "TYPE" or "TIME"
 var ssemValueMode = "CUMUL";    // "CUMUL" or "PERIOD"
-var ssemDimFilters = {eps: true, ebitda: true, sales: true, tp: true, buy: true};
+var ssemDimFilters = {eps: false, ebitda: false, sales: false, tp: false, buy: false};
 var ssemRatingFilters = {A: true, B: true, C: true, D: true, F: true, N: true};
 
 // SESSION 12 — D-MD-SSEM-5..7 helpers

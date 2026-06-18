@@ -4155,7 +4155,7 @@ function buildPortfolioTile(tabId){
   // SESSION 9 Pass 1.2: D-MD-UI-9 — Live Portfolio columns mirror Qualified Stocks per tab.
   // SESSION 9 Pass 1.2: D-MD-UI-10 — data-table-portfolio class disables sticky thead.
   var h='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRows.length+')</h3>';
-  h+='<div class="data-table-wrap"><table class="data-table data-table-portfolio"><thead><tr>';
+  h+='<div class="data-table-wrap"><table class="data-table data-table-portfolio"><thead>';
   // Tab-aware column structure — TIMELINESS gets full filter columns + grade.
   if(tabId==="combos"){
     // Enrich rows with filter stage data + tm_grade (mirrors renderCombos enrichment).
@@ -4177,7 +4177,7 @@ function buildPortfolioTile(tabId){
     }
     posRows=posRowsGF;
     // TIMELINESS-GROUP-HEADER LP (D-MD-UI-17)
-    h+='</tr><tr class="group-header-row">';
+    h+='<tr class="group-header-row">';
     h+='<th colspan="10" style="background:rgba(100,100,100,0.06)">Inputs</th>';
     h+='<th colspan="1" style="background:rgba(221,107,32,0.12)">Master</th>';
     h+='<th colspan="8" style="background:rgba(120,80,200,0.08)">Qualification Screens</th>';
@@ -4236,13 +4236,12 @@ function buildPortfolioTile(tabId){
       }
     }
     // Use ssemRowHTML helper (defined inside renderSSEM scope — duplicate inline to keep buildPortfolioTile self-contained)
-    h+='</tr></thead>'; // close orphan <tr> + outer <thead>; ssemHeadersHTML emits its own <thead>
+    h+='</thead>'; // close outer <thead>; ssemHeadersHTML emits its own <thead>
     h+=ssemHeadersHTML()+'<tbody>';
     for(var jr2=0;jr2<posRows.length;jr2++){
       h+=ssemRowHTML(posRows[jr2]);
     }
   } else if(tabId==="val"){
-    h+='</tr>'; // close unconditionally-opened <tr> from header setup
     // FIX-4c: Val LP -- identical columns to all-stocks table
     h+='<tr class="group-header-row"><th colspan="3"></th><th colspan="4" style="background:rgba(50,150,50,0.08)">P/E Valuation</th></tr>';
     h+='<tr class="col-header-row">';
@@ -4278,7 +4277,7 @@ function buildPortfolioTile(tabId){
     }
   } else {
     // Other tabs: keep existing behaviour (commonCols + ratings).
-    h+=commonCols()+ratingsColHeaders()+'</tr></thead><tbody>';
+    h+='<tr>'+commonCols()+ratingsColHeaders()+'</tr></thead><tbody>';
     for(var j=0;j<posRows.length;j++){
       h+='<tr onclick="openChart(\''+posRows[j].ticker+'\')" style="cursor:pointer" data-ticker="'+posRows[j].ticker+'">'+commonTds(posRows[j])+ratingsColTds(posRows[j])+'</tr>';
     }

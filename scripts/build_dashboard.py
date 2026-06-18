@@ -1346,6 +1346,13 @@ body[data-active-tab="tests_probing_bet_s1"] .header-controls-row,
 body[data-active-tab="tests_probing_bet_s2"] .header-controls-row,
 body[data-active-tab="setups_healthy_retest"] .header-controls-row,
 body[data-active-tab="master_overview"] .header-controls-row,body[data-active-tab="val"] .header-controls-row,body[data-active-tab="combos"] .header-controls-row { display: none !important; }
+/* FIX-1-SSEM-ORDER: header is display:flex flex-direction:column. On SSEM, header-tabs-row is
+   hidden so header-controls-row jumps above v2-nav. order:10 pushes it back below v2-nav. */
+body[data-active-tab="ssem"] .header-controls-row { order: 10; }
+/* FIX-2-INDPANEL: remove blank space below industry panel on SSEM+val.
+   align-items:flex-start lets each half-table size to its own content height. */
+body[data-active-tab="ssem"] .ind-sec-wrap,
+body[data-active-tab="val"] .ind-sec-wrap { align-items: flex-start; }
 /* MD-V2-PI-V2-S25-MARKER: EDIT 1 - Block A header chrome shrink on V2 tabs (D-MD-V2-47).
    Legacy header is sized for 3 rows; V2 tabs show only header-top + v2-nav.
    Shrink the fixed header + override --header-height so the table does not
@@ -3695,7 +3702,7 @@ function fpcRaw(v){
 function pf(v){if(v==null)return"&mdash;";return fpc(v)}
 function nf(v,d){if(v==null)return"&mdash;";return addCommas(Number(v).toFixed(d||0))}
 // FIX-3b: P/E format -- positive: 14.2x  negative: (72.8)x
-function fpe(v){if(v==null)return"&mdash;";var n=Number(v);if(n<0)return"("+addCommas(Math.abs(n).toFixed(1))+")x";return addCommas(n.toFixed(1))+"x";}
+function fpe(v){if(v==null)return"&mdash;";var n=Number(v);if(n<0)return"("+addCommas(Math.abs(n).toFixed(0))+")x";return addCommas(n.toFixed(0))+"x";}/* FIX-3-PE-0DP */
 // FIX-3c: currency symbol from ticker exchange suffix
 function getCurrSym(ticker){
   var exch=(ticker||"").split("-").pop();
@@ -4244,37 +4251,45 @@ function buildPortfolioTile(tabId){
       h+=ssemRowHTML(posRows[jr2]);
     }
   } else if(tabId==="val"){
-    // FIX-4c: Val LP -- identical columns to all-stocks table
+    // FIX-4: Val LP — fully identical to All Stocks table (enriched rows + th() sort headers)
+    // Enrich LP rows with valuation data (mirrors renderVal enrichment)
+    var _vrsV={A:5,B:4,C:3,D:2,F:1};
+    for(var jV=0;jV<posRows.length;jV++){
+      var rV=posRows[jV];
+      var vlV=D.valuation?D.valuation[rV.ticker]||null:null;
+      rV.pe_cur=vlV?vlV.pe_current:null;
+      rV.pe_pctile=vlV?vlV.pe_percentile:null;
+      rV.eps_24mf=(vlV&&vlV.eps_24mf!=null)?vlV.eps_24mf:null;
+      rV.val_rating=valRatingMap[rV.ticker]||"-";
+      rV.val_rating_sort=_vrsV[rV.val_rating]||0;
+    }
+    // FIX-4-SORT: re-sort after val enrichment so pe_cur/pe_pctile/val_rating_sort/eps_24mf fields are available
+    posRows=sortData(posRows,currentSort.col,currentSort.dir);
     h+='<tr class="group-header-row"><th colspan="3"></th><th colspan="4" style="background:rgba(50,150,50,0.08)">P/E Valuation</th></tr>';
     h+='<tr class="col-header-row">';
-    h+='<th class="col-txt col-identity" style="width:120px">Name</th>';
-    h+='<th class="col-txt col-identity" style="width:200px">Sector</th>';
-    h+='<th class="col-num col-price" style="width:52px">Price</th>';
-    h+='<th style="width:54px;text-align:center">Rating</th>';
-    h+='<th class="col-num grp-pe-first" style="width:90px;font-weight:600">P/E</th>';
-    h+='<th class="col-num" style="width:80px">Pctile</th>';
-    h+='<th class="col-num grp-pe-last" style="width:120px">EPS 24MF</th>';
+    h+=th("Ticker","_display_name","col-txt col-identity","","width:120px")
+      +th("Sector","_tax_sector","col-txt col-identity","","width:200px")
+      +th("Price","price","col-num col-price","","width:52px")
+      +th("Rating","val_rating_sort","col-txt","","width:54px;text-align:center")
+      +th("P/E","pe_cur","col-num col-filter grp-pe-first","","width:90px")
+      +th("Pctile","pe_pctile","col-num col-filter","","width:80px")
+      +th("EPS 24MF","eps_24mf","col-num col-filter grp-pe-last","","width:120px");
     h+='</tr></thead><tbody>';
-    for(var j=0;j<posRows.length;j++){
-      var pr=posRows[j];
-      var pr_tax=getTaxonomy(pr.ticker);
-      var pr_dn=(displayMode==="company")?(pr.company||pr.ticker):pr.ticker;
-      var pr_vl=D.valuation?D.valuation[pr.ticker]||null:null;
-      var pr_pe=pr_vl?pr_vl.pe_current:null;
-      var pr_pctile=pr_vl?pr_vl.pe_percentile:null;
-      var pr_eps=(pr_vl&&pr_vl.eps_24mf!=null)?pr_vl.eps_24mf:null;
-      var pr_rating=valRatingMap[pr.ticker]||"-";
-      var pr_pillKey=(pr_rating==="-")?"N":pr_rating;
-      var pr_pillLabel=(pr_rating==="-")?"&mdash;":pr_rating;
-      h+='<tr onclick="openChart(\''+pr.ticker+'\')" style="cursor:pointer" data-ticker="'+pr.ticker+'">';
-      h+='<td class="col-txt col-identity" style="font-weight:600;color:var(--text-bright)">'+pr_dn+'</td>';
-      h+='<td class="col-txt col-identity" style="font-size:11px">'+pr_tax.sector+'</td>';
-      h+='<td class="col-num col-price">'+(pr.price!=null?fpCurr(pr.price,pr.ticker):'\u2014')+'</td>';
-      h+='<td style="text-align:center"><span class="rating-pill pill-'+pr_pillKey+'">'+pr_pillLabel+'</span></td>';
-      h+='<td class="col-num grp-pe-first" style="font-weight:600">'+(pr_pe!=null?fpe(pr_pe):'\u2014')+'</td>';
-      h+='<td class="col-num '+(pr_pctile!=null?pctileClass(pr_pctile):'')+'">'
-        +(pr_pctile!=null?nf(pr_pctile):'\u2014')+'</td>';
-      h+='<td class="col-num grp-pe-last">'+(pr_eps!=null?fpCurr(pr_eps,pr.ticker):'\u2014')+'</td>';
+    for(var jR=0;jR<posRows.length;jR++){
+      var r=posRows[jR];
+      var tax=getTaxonomy(r.ticker);
+      var dn=(displayMode==="company")?(r.company||r.ticker):r.ticker;
+      var vr=r.val_rating||"-";
+      var pillKey=(vr==="-")?"N":vr;
+      var pillLabel=(vr==="-")?"&mdash;":vr;
+      h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">';
+      h+='<td class="col-txt col-identity" style="font-weight:600;color:var(--text-bright)">'+dn+'</td>';
+      h+='<td class="col-txt col-identity" style="font-size:11px">'+tax.sector+'</td>';
+      h+='<td class="col-num col-price">'+fpCurr(r.price,r.ticker)+'</td>';
+      h+='<td style="text-align:center"><span class="rating-pill pill-'+pillKey+'">'+pillLabel+'</span></td>';
+      h+='<td class="col-num col-filter grp-pe-first" style="font-weight:600">'+fpe(r.pe_cur)+'</td>';
+      h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+nf(r.pe_pctile)+'</td>';
+      h+='<td class="col-num col-filter grp-pe-last">'+fpCurr(r.eps_24mf,r.ticker)+'</td>';
       h+='</tr>';
     }
   } else {

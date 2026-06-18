@@ -4236,11 +4236,13 @@ function buildPortfolioTile(tabId){
       }
     }
     // Use ssemRowHTML helper (defined inside renderSSEM scope — duplicate inline to keep buildPortfolioTile self-contained)
+    h+='</tr></thead>'; // close orphan <tr> + outer <thead>; ssemHeadersHTML emits its own <thead>
     h+=ssemHeadersHTML()+'<tbody>';
     for(var jr2=0;jr2<posRows.length;jr2++){
       h+=ssemRowHTML(posRows[jr2]);
     }
   } else if(tabId==="val"){
+    h+='</tr>'; // close unconditionally-opened <tr> from header setup
     // FIX-4c: Val LP -- identical columns to all-stocks table
     h+='<tr class="group-header-row"><th colspan="3"></th><th colspan="4" style="background:rgba(50,150,50,0.08)">P/E Valuation</th></tr>';
     h+='<tr class="col-header-row">';

@@ -4236,8 +4236,10 @@ function buildPortfolioTile(tabId){
       }
     }
     // Use ssemRowHTML helper (defined inside renderSSEM scope — duplicate inline to keep buildPortfolioTile self-contained)
-    h+='</thead>'; // close outer <thead>; ssemHeadersHTML emits its own <thead>
-    h+=ssemHeadersHTML()+'<tbody>';
+    // ssemHeadersHTML returns a complete <thead>...</thead>.
+    // The outer table already has <thead> open; strip the wrapper and inject just the rows.
+    var _sh=ssemHeadersHTML();
+    h+=_sh.slice(7,_sh.length-8)+'</thead><tbody>';
     for(var jr2=0;jr2<posRows.length;jr2++){
       h+=ssemRowHTML(posRows[jr2]);
     }

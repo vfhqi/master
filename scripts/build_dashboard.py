@@ -593,10 +593,10 @@ table.data-table td.col-identity{white-space:nowrap}
 .combo-cell{text-align:center;font-weight:600}
 
 /* Industry/Sector tiles */
-.ind-sec-wrap{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
+.ind-sec-wrap{display:flex;gap:12px;margin-bottom:12px;align-items:stretch}
 .ind-sec-wrap .half-table{flex:1;min-width:0;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--card)}
 .half-table .half-title{font-size:13px;font-weight:600;color:var(--text-bright);margin-bottom:6px;flex-shrink:0}
-/*HALF-TABLE-MAX-HEIGHT*/.half-table .data-table-wrap{overflow-y:auto;overflow-x:hidden;min-height:450px;max-height:600px}
+/*HALF-TABLE-MAX-HEIGHT*/.half-table .data-table-wrap{overflow-y:auto;overflow-x:hidden;min-height:0;max-height:600px}
 .half-table table.data-table th{font-size:11px;text-transform:none;letter-spacing:0;white-space:normal;word-wrap:break-word}
 
 .qual-tile{padding:12px 0;margin-bottom:8px;margin-top:24px}
@@ -1345,7 +1345,7 @@ body[data-active-tab="tests_speculative_bet_s4"] .header-controls-row,
 body[data-active-tab="tests_probing_bet_s1"] .header-controls-row,
 body[data-active-tab="tests_probing_bet_s2"] .header-controls-row,
 body[data-active-tab="setups_healthy_retest"] .header-controls-row,
-body[data-active-tab="master_overview"] .header-controls-row,body[data-active-tab="ssem"] .header-controls-row,body[data-active-tab="val"] .header-controls-row,body[data-active-tab="combos"] .header-controls-row { display: none !important; }
+body[data-active-tab="master_overview"] .header-controls-row,body[data-active-tab="val"] .header-controls-row,body[data-active-tab="combos"] .header-controls-row { display: none !important; }
 /* MD-V2-PI-V2-S25-MARKER: EDIT 1 - Block A header chrome shrink on V2 tabs (D-MD-V2-47).
    Legacy header is sized for 3 rows; V2 tabs show only header-top + v2-nav.
    Shrink the fixed header + override --header-height so the table does not
@@ -2767,6 +2767,7 @@ var positionTickerSet={};
 if(D.positions&&D.positions.investments){
   for(i=0;i<D.positions.investments.length;i++){
     var pt=D.positions.investments[i].ticker;
+    if(!pt)continue; // skip empty-slot investments
     positionTickerSet[pt]=true;
     // Create stub filter entry if missing
     if(!filterMap[pt]){
@@ -3693,6 +3694,29 @@ function fpcRaw(v){
 }
 function pf(v){if(v==null)return"&mdash;";return fpc(v)}
 function nf(v,d){if(v==null)return"&mdash;";return addCommas(Number(v).toFixed(d||0))}
+// FIX-3b: P/E format -- positive: 14.2x  negative: (72.8)x
+function fpe(v){if(v==null)return"&mdash;";var n=Number(v);if(n<0)return"("+addCommas(Math.abs(n).toFixed(1))+")x";return addCommas(n.toFixed(1))+"x";}
+// FIX-3c: currency symbol from ticker exchange suffix
+function getCurrSym(ticker){
+  var exch=(ticker||"").split("-").pop();
+  var m={"GB":"\u00a3","IE":"\u20ac","DE":"\u20ac","FR":"\u20ac","NL":"\u20ac","IT":"\u20ac",
+    "ES":"\u20ac","BE":"\u20ac","FI":"\u20ac","PT":"\u20ac","AT":"\u20ac","GR":"\u20ac",
+    "LU":"\u20ac","SK":"\u20ac","LT":"\u20ac","EE":"\u20ac","SI":"\u20ac",
+    "SE":"kr","DK":"kr","NO":"kr","CH":"Fr","PL":"z\u0142","HU":"Ft","CZ":"K\u010d","HU":"Ft"};
+  return m[exch]||"";
+}
+// FIX-3c: price/EPS format with currency prefix, parentheses for negatives, adaptive DP
+function fpCurr(v,ticker){
+  if(v==null)return"&mdash;";
+  var sym=getCurrSym(ticker);
+  var n=Number(v);
+  if(isNaN(n))return"&mdash;";
+  var abs=Math.abs(n);
+  var dp=(abs>=100)?0:(abs>=10)?1:2;
+  var s=addCommas(abs.toFixed(dp));
+  if(n<0)return(sym?sym+" ":"")+"("+s+")";
+  return(sym?sym+" ":"")+s;
+}
 function sa(c){
   if(currentSort.col===c)return'<span class="sort-arrow">'+(currentSort.dir==="asc"?"&#9650;":"&#9660;")+'</span>';
   return'<span class="sort-arrow">&#9650;</span>';
@@ -3981,6 +4005,94 @@ function buildIndSecTables(rows,groupDefs){
   return h;
 }
 
+// FIX-3a: Valuation-specific industry/sector tables with 8 stat columns
+// (avg/med/+1SD/-1SD for both pe_pctile and val_rating, val-tab only)
+function buildValIndSecTables(rows){
+  var indMap={},secMap={};
+  var j,ind,sec;
+  for(j=0;j<CANONICAL_INDUSTRIES.length;j++){
+    indMap[CANONICAL_INDUSTRIES[j]]={count:0,pctiles:[],ratings:[]};
+  }
+  for(j=0;j<rows.length;j++){
+    var t=getTaxonomy(rows[j].ticker);
+    ind=t.industry||"Unknown"; sec=t.sector||"Unknown";
+    if(!indMap[ind])indMap[ind]={count:0,pctiles:[],ratings:[]};
+    indMap[ind].count++;
+    if(rows[j].pe_pctile!=null)indMap[ind].pctiles.push(rows[j].pe_pctile);
+    if(rows[j].val_rating_sort>0)indMap[ind].ratings.push(rows[j].val_rating_sort);
+    if(!secMap[sec])secMap[sec]={count:0,industry:ind,pctiles:[],ratings:[]};
+    secMap[sec].count++;
+    if(rows[j].pe_pctile!=null)secMap[sec].pctiles.push(rows[j].pe_pctile);
+    if(rows[j].val_rating_sort>0)secMap[sec].ratings.push(rows[j].val_rating_sort);
+  }
+  function vStats(arr){
+    if(!arr.length)return{avg:null,med:null,p1sd:null,m1sd:null};
+    var n=arr.length,sum=0,i;
+    for(i=0;i<n;i++)sum+=arr[i];
+    var avg=sum/n;
+    var sorted=arr.slice().sort(function(a,b){return a-b;});
+    var med=n%2===1?sorted[Math.floor(n/2)]:(sorted[n/2-1]+sorted[n/2])/2;
+    var vr=0;
+    for(i=0;i<n;i++)vr+=(arr[i]-avg)*(arr[i]-avg);
+    var sd=Math.sqrt(vr/n);
+    return{avg:avg,med:med,p1sd:avg+sd,m1sd:avg-sd};
+  }
+  function rToLtr(v){
+    if(v==null)return"&mdash;";
+    var r=Math.round(v);
+    if(r>=5)return"A";if(r>=4)return"B";if(r>=3)return"C";if(r>=2)return"D";return"F";
+  }
+  // Clamp percentile to [0,100] for display purposes
+  function clampPctile(v){if(v==null)return null;return Math.max(0,Math.min(100,v));}
+  function statCells(entry){
+    var ps=vStats(entry.pctiles); var rs=vStats(entry.ratings);
+    var ap=clampPctile(ps.avg),mp=clampPctile(ps.med),pp=clampPctile(ps.p1sd),lp=clampPctile(ps.m1sd);
+    return "<td class=\"col-num "+pctileClass(ap)+"\">"+(ap!=null?nf(ap,0):"&mdash;")+"</td>"
+      +"<td class=\"col-num "+pctileClass(mp)+"\">"+(mp!=null?nf(mp,0):"&mdash;")+"</td>"
+      +"<td class=\"col-num "+pctileClass(pp)+"\">"+(pp!=null?nf(pp,0):"&mdash;")+"</td>"
+      +"<td class=\"col-num "+pctileClass(lp)+"\">"+(lp!=null?nf(lp,0):"&mdash;")+"</td>"
+      +"<td class=\"col-num\">"+rToLtr(rs.avg)+"</td>"
+      +"<td class=\"col-num\">"+rToLtr(rs.med)+"</td>"
+      +"<td class=\"col-num\">"+rToLtr(rs.p1sd)+"</td>"
+      +"<td class=\"col-num\">"+rToLtr(rs.m1sd)+"</td>";
+  }
+  var statHdr='<th class="col-num" onclick="tileSortTable(this)" style="cursor:pointer;font-size:10px">Avg Pctile</th>'
+    +'<th class="col-num" onclick="tileSortTable(this)" style="cursor:pointer;font-size:10px">Med Pctile</th>'
+    +'<th class="col-num" onclick="tileSortTable(this)" style="cursor:pointer;font-size:10px">+1SD Pctile</th>'
+    +'<th class="col-num" onclick="tileSortTable(this)" style="cursor:pointer;font-size:10px">-1SD Pctile</th>'
+    +'<th class="col-num" onclick="tileSortTable(this)" style="cursor:pointer;font-size:10px">Avg Rtg</th>'
+    +'<th class="col-num" onclick="tileSortTable(this)" style="cursor:pointer;font-size:10px">Med Rtg</th>'
+    +'<th class="col-num" onclick="tileSortTable(this)" style="cursor:pointer;font-size:10px">+1SD Rtg</th>'
+    +'<th class="col-num" onclick="tileSortTable(this)" style="cursor:pointer;font-size:10px">-1SD Rtg</th>';
+  var indKeys=Object.keys(indMap).filter(function(k){return /^[A-Z]\.\s/.test(k)}).sort();
+  var secKeys=Object.keys(secMap).filter(function(k){return /^[A-Z]+\.\d+\.\s/.test(k)}).sort();
+  var h='<div class="ind-sec-wrap" id="section-industries">';
+  h+='<div class="half-table"><div class="half-title">Industries</div>';
+  h+='<div class="data-table-wrap"><table class="data-table data-table-tile"><thead><tr>';
+  h+='<th class="col-txt" onclick="tileSortTable(this)" style="cursor:pointer">Industry</th>';
+  h+='<th class="col-num" onclick="tileSortTable(this)" style="cursor:pointer"># Stocks</th>';
+  h+=statHdr+'</tr></thead><tbody>';
+  for(j=0;j<indKeys.length;j++){
+    var ik=indKeys[j],iv=indMap[ik];
+    var ia=indFilter[ik]?' style="font-size:11px;background:#e8f5e9;font-weight:700"':'style="font-size:11px"';
+    h+='<tr onclick="toggleIndFilter(\''+ik.replace(/'/g,"\\'")+"\')\" style=\"cursor:pointer\"><td class=\"col-txt\" "+ia+">"+ik+"</td><td class=\"col-num\" style=\"font-weight:600\">"+iv.count+"</td>"+statCells(iv)+"</tr>";
+  }
+  h+='</tbody></table></div></div>';
+  h+='<div class="half-table" id="section-sectors"><div class="half-title">Sectors</div>';
+  h+='<div class="data-table-wrap"><table class="data-table data-table-tile"><thead><tr>';
+  h+='<th class="col-txt" style="width:35%;cursor:pointer" onclick="tileSortTable(this)">Sector</th>';
+  h+='<th class="col-txt" style="width:20%;cursor:pointer" onclick="tileSortTable(this)">Industry</th>';
+  h+='<th class="col-num" style="width:30px;cursor:pointer" onclick="tileSortTable(this)">#</th>';
+  h+=statHdr+'</tr></thead><tbody>';
+  for(j=0;j<secKeys.length;j++){
+    var sk=secKeys[j],sv=secMap[sk];
+    var sa2=secFilter[sk]?' style="font-size:11px;background:#e8f5e9;font-weight:700"':'style="font-size:11px"';
+    h+='<tr onclick="toggleSecFilter(\''+sk.replace(/'/g,"\\'")+"\')\" style=\"cursor:pointer\"><td class=\"col-txt\" "+sa2+">"+sk+"</td><td class=\"col-txt\" style=\"font-size:10px;color:var(--text-dim)\">"+sv.industry+"</td><td class=\"col-num\" style=\"font-weight:600\">"+sv.count+"</td>"+statCells(sv)+"</tr>";
+  }
+  h+='</tbody></table></div></div></div>';
+  return h;
+}
+
 // Qualification group tiles — same columns as main table, filtered per group
 // headersFn: function returning thead HTML (same as main table)
 // rowFn: function(r) returning tr HTML (same as main table)
@@ -4020,7 +4132,7 @@ function getPositionTickers(){
   if(!D.positions||!D.positions.investments)return{};
   var pt={};
   var invs=D.positions.investments;
-  for(var j=0;j<invs.length;j++)pt[invs[j].ticker]=true;
+  for(var j=0;j<invs.length;j++){if(invs[j].ticker)pt[invs[j].ticker]=true;}
   return pt;
 }
 // Filter enriched rows to positions only
@@ -4127,6 +4239,40 @@ function buildPortfolioTile(tabId){
     h+=ssemHeadersHTML()+'<tbody>';
     for(var jr2=0;jr2<posRows.length;jr2++){
       h+=ssemRowHTML(posRows[jr2]);
+    }
+  } else if(tabId==="val"){
+    // FIX-4c: Val LP -- identical columns to all-stocks table
+    h+='<tr class="group-header-row"><th colspan="3"></th><th colspan="4" style="background:rgba(50,150,50,0.08)">P/E Valuation</th></tr>';
+    h+='<tr class="col-header-row">';
+    h+='<th class="col-txt col-identity" style="width:120px">Name</th>';
+    h+='<th class="col-txt col-identity" style="width:200px">Sector</th>';
+    h+='<th class="col-num col-price" style="width:52px">Price</th>';
+    h+='<th style="width:54px;text-align:center">Rating</th>';
+    h+='<th class="col-num grp-pe-first" style="width:90px;font-weight:600">P/E</th>';
+    h+='<th class="col-num" style="width:80px">Pctile</th>';
+    h+='<th class="col-num grp-pe-last" style="width:120px">EPS 24MF</th>';
+    h+='</tr></thead><tbody>';
+    for(var j=0;j<posRows.length;j++){
+      var pr=posRows[j];
+      var pr_tax=getTaxonomy(pr.ticker);
+      var pr_dn=(displayMode==="company")?(pr.company||pr.ticker):pr.ticker;
+      var pr_vl=D.valuation?D.valuation[pr.ticker]||null:null;
+      var pr_pe=pr_vl?pr_vl.pe_current:null;
+      var pr_pctile=pr_vl?pr_vl.pe_percentile:null;
+      var pr_eps=(pr_vl&&pr_vl.eps_24mf!=null)?pr_vl.eps_24mf:null;
+      var pr_rating=valRatingMap[pr.ticker]||"-";
+      var pr_pillKey=(pr_rating==="-")?"N":pr_rating;
+      var pr_pillLabel=(pr_rating==="-")?"&mdash;":pr_rating;
+      h+='<tr onclick="openChart(\''+pr.ticker+'\')" style="cursor:pointer" data-ticker="'+pr.ticker+'">';
+      h+='<td class="col-txt col-identity" style="font-weight:600;color:var(--text-bright)">'+pr_dn+'</td>';
+      h+='<td class="col-txt col-identity" style="font-size:11px">'+pr_tax.sector+'</td>';
+      h+='<td class="col-num col-price">'+(pr.price!=null?fpCurr(pr.price,pr.ticker):'\u2014')+'</td>';
+      h+='<td style="text-align:center"><span class="rating-pill pill-'+pr_pillKey+'">'+pr_pillLabel+'</span></td>';
+      h+='<td class="col-num grp-pe-first" style="font-weight:600">'+(pr_pe!=null?fpe(pr_pe):'\u2014')+'</td>';
+      h+='<td class="col-num '+(pr_pctile!=null?pctileClass(pr_pctile):'')+'">'
+        +(pr_pctile!=null?nf(pr_pctile):'\u2014')+'</td>';
+      h+='<td class="col-num grp-pe-last">'+(pr_eps!=null?fpCurr(pr_eps,pr.ticker):'\u2014')+'</td>';
+      h+='</tr>';
     }
   } else {
     // Other tabs: keep existing behaviour (commonCols + ratings).
@@ -5671,6 +5817,7 @@ function renderPositions(){
 // Filter state — sticky across tab switches per D-MD-UI-7 pattern.
 // SESSION 12 — D-MD-SSEM-5/6/7: column-order mode (TYPE=dim-grouped, TIME=timeframe-grouped) + value mode (CUMUL=raw FactSet, PERIOD=net-of-prior).
 var ssemRatingMap = {};   // ticker -> A/B/C/D/F/- — populated by renderSSEM, read by buildPortfolioTile
+var valRatingMap = {};    // ticker -> A/B/C/D/F/- populated by renderVal
 var ssemColMode = "TYPE";       // "TYPE" or "TIME"
 var ssemValueMode = "CUMUL";    // "CUMUL" or "PERIOD"
 var ssemDimFilters = {eps: false, ebitda: false, sales: false, tp: false, buy: false};
@@ -6206,6 +6353,7 @@ function renderVal(){
     else{gr="F";gF++;}
     var _vrs={A:5,B:4,C:3,D:2,F:1};
     eligible[i].val_rating=gr; eligible[i].val_rating_sort=_vrs[gr]||0;
+    valRatingMap[eligible[i].ticker]=gr;
   }
   for(var k=0;k<ineligible.length;k++){ineligible[k].val_rating="-";ineligible[k].val_rating_sort=0;gN++;}
 
@@ -6223,7 +6371,7 @@ function renderVal(){
     +sumStat("F (most exp.)",String(gF),"red")
     +'</div></div>';
 
-  h+=buildIndSecTables(rows,null);
+  h+=buildValIndSecTables(rows);
 
   h+=buildPortfolioTile(currentTab);
   rows=applyIndSecFilter(rows);
@@ -6253,11 +6401,11 @@ function renderVal(){
     h+='<tr onclick="openChart(\''+r.ticker+'\')" style="cursor:pointer" data-ticker="'+r.ticker+'">';
     h+='<td class="col-txt col-identity" style="font-weight:600;color:var(--text-bright)">'+dn+'</td>';
     h+='<td class="col-txt col-identity" style="font-size:11px">'+tax.sector+'</td>';
-    h+='<td class="col-num col-price">'+fp(r.price)+'</td>';
+    h+='<td class="col-num col-price">'+fpCurr(r.price,r.ticker)+'</td>';
     h+='<td style="text-align:center"><span class="rating-pill pill-'+pillKey+'">'+pillLabel+'</span></td>';
-    h+='<td class="col-num col-filter grp-pe-first" style="font-weight:600">'+nf(r.pe_cur,1)+'</td>';
+    h+='<td class="col-num col-filter grp-pe-first" style="font-weight:600">'+fpe(r.pe_cur)+'</td>';
     h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+nf(r.pe_pctile)+'</td>';
-    h+='<td class="col-num col-filter grp-pe-last">'+nf(r.eps_24mf,2)+'</td>';
+    h+='<td class="col-num col-filter grp-pe-last">'+fpCurr(r.eps_24mf,r.ticker)+'</td>';
     h+='</tr>';
   }
   h+='</tbody></table></div>';

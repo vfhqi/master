@@ -266,6 +266,7 @@ def advance(batch_id: str, writer_mode: str = "prompt", do_warm: bool = False) -
     st = ms.read_state(path)
     stage = st.get("stage", "triaging")
     log = []
+    needs_agent: dict = {}  # populated when Station 4 materialises judge prompt but cannot dispatch
     if do_warm:
         log.append("WARM: " + warm_renderer(R))
     for ticker, blk in list(st["stocks"].items()):
@@ -343,22 +344,37 @@ def advance(batch_id: str, writer_mode: str = "prompt", do_warm: bool = False) -
                     log.append(f"{ticker}: render-QC FAIL (attempt {n}/3) -- {detail[:120]}")
             continue
         # --- Station 4: Judge -- materialise + K9 auto-advance if verdict in sidecar (K8+K9) ---
+        # Dispatch model: advance() materialises the judge prompt + spawn config, emits
+        # needs_agent["judge"] in its return dict, and sets the log line with exact paths.
+        # The calling SA session reads needs_agent and dispatches a Sonnet sub-agent.
+        # Re-running advance() after the judge writes its verdict auto-advances to "judged".
         if s == "rendered":
             p = materialize_judge_prompt(ticker, R, stage, sidecar_rel=blk.get("sidecar_file", ""))
-            log.append(f"{ticker}: judge prompt materialised; AWAITING JUDGE AGENT ({stage.upper()} rubric)")
             sc_path = R / blk["sidecar_file"]
+            _judge_done = False
             if sc_path.exists():
                 try:
                     sc = json.load(open(sc_path))
                     jv = sc.get("judge_result")
                     if jv == "PASS":
                         ms.set_status(path, ticker, "judged")
-                        log[-1] = f"{ticker}: judge PASS (read from sidecar) -> judged"
+                        log.append(f"{ticker}: judge PASS (read from sidecar) -> judged")
+                        _judge_done = True
                     elif jv in ("REVISE", "ESCALATE"):
                         ms.add_flag(path, ticker, f"JUDGE: {jv} -- see sidecar judge_defects")
-                        log[-1] = f"{ticker}: judge {jv} (read from sidecar) -- writer fix needed"
+                        log.append(f"{ticker}: judge {jv} (read from sidecar) -- writer fix needed")
+                        _judge_done = True
                 except Exception:
                     pass
+            if not _judge_done:
+                spawn_cfg = p.parent / "judge-spawn-config.json"
+                log.append(
+                    f"{ticker}: judge prompt materialised at {p.relative_to(R)}; "
+                    f"spawn config at {spawn_cfg.relative_to(R)}; "
+                    f"DISPATCH JUDGE AGENT (Sonnet medium non-deep {stage.upper()} rubric) "
+                    f"then re-run advance('{batch_id}') to auto-advance"
+                )
+                needs_agent["judge"] = str(p.relative_to(R))
             continue
         # --- Station 5: Publish + close (K9 auto-advance) ---
         if s == "judged":
@@ -368,7 +384,7 @@ def advance(batch_id: str, writer_mode: str = "prompt", do_warm: bool = False) -
             log.append(f"{ticker}: -> published -> closed. {pub_msg}")
             continue
         log.append(f"{ticker}: status={s} gate_state={gs} (no handler)")
-    return {"log": log}
+    return {"log": log, "needs_agent": needs_agent}
 
 
 # ------------------------------------------------------------------
@@ -580,17 +596,31 @@ def _gate_state_surface(ticker: str, blk: dict) -> str:
 
 
 def auto_publish(ticker: str, R: Path, stage: str) -> str:
-    """Station 5 publish handler (K9). Generates viewer HTML; git push is manual for now (doc 09)."""
+    """Station 5 publish handler (K9 doc 09).
+
+    triaging: generates per-stock viewer HTML; defers full deploy to nightly refresh_repository.py.
+    esa/dd:   generates viewer HTML then runs refresh_repository.py (full build + deploy + git push)
+              so the memo is visible on GitHub Pages immediately after close.
+    """
+    BUILD_SCRIPTS = R / "projects" / "SA - Reports & Memos Repository" / "build-scripts"
+    gen_viewer = BUILD_SCRIPTS / "gen_memo_viewer.py"
+    refresh_repo = BUILD_SCRIPTS / "refresh_repository.py"
+    memo = R / "Files" / ticker / "A-J-memo" / "memo.md"
     try:
-        gen_viewer = (R / "projects" / "SA - Reports & Memos Repository" /
-                      "build-scripts" / "gen_memo_viewer.py")
-        memo = R / "Files" / ticker / "A-J-memo" / "memo.md"
-        if gen_viewer.exists() and memo.exists():
-            _run(["python3", str(gen_viewer), ticker, stage, str(memo)], R)
-            return "viewer generated; git push deferred to manual publish step (Station 5 doc 09)"
-        return "viewer generator absent -- skip viewer; state advanced to published"
+        if not gen_viewer.exists() or not memo.exists():
+            return "viewer generator or memo absent -- skip viewer; state advanced to published"
+        # Step 1: generate per-stock viewer HTML (all stages)
+        _run(["python3", str(gen_viewer), ticker, stage, str(memo)], R)
+        if stage == "triaging":
+            # Triaging memos are swept up by the nightly refresh_repository.py scheduled task.
+            return "viewer generated; full deploy deferred to nightly refresh_repository.py (triaging)"
+        # Step 2: ESA/DD — run full refresh + git push immediately (doc 09 §5-6)
+        if not refresh_repo.exists():
+            return f"viewer generated; refresh_repository.py absent -- deploy manually ({stage.upper()})"
+        _run(["python3", str(refresh_repo)], R)
+        return f"viewer generated; refresh_repository.py complete; deployed to GitHub Pages ({stage.upper()})"
     except Exception as e:
-        return f"auto_publish error: {e}"
+        return f"auto_publish error ({stage}): {e}"
 
 
 if __name__ == "__main__":

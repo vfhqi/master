@@ -56,19 +56,36 @@ def load_json(path):
     except Exception:
         return None
 
+def _cohorts_v3_identity(cowork, ticker):
+    """Cohort SSoT per IA SOP + generate_cohort_pack.resolve_cohort: cohorts-v3.json."""
+    cv = load_json(os.path.join(cowork, "databases", "data", "cohorts-v3.json"))
+    if not cv:
+        return {}
+    rec = (cv.get("tickers") or {}).get(ticker)
+    if not rec:
+        return {}
+    info = rec[0] if isinstance(rec, list) else rec
+    return {"cohort_id": info.get("cohort_id"), "cohort_full": info.get("cohort"), "zone": info.get("zone")}
+
 def classify(cowork, ticker):
     uni = load_json(os.path.join(cowork, "master-dashboard", "data", "universe.json"))
-    if not uni:
-        return None
-    for s in uni.get("stocks", []):
-        if s.get("ticker") == ticker:
-            return {
-                "industry": s.get("industry"),
-                "sector": s.get("sector"),
-                "cohort": s.get("cohort"),
-                "cohort_name": s.get("cohort_name"),
-            }
-    return None
+    out = None
+    if uni:
+        for s in uni.get("stocks", []):
+            if s.get("ticker") == ticker:
+                out = {
+                    "industry": s.get("industry"),
+                    "sector": s.get("sector"),
+                    "universe_cohort_code": s.get("cohort"),
+                    "cohort_name": s.get("cohort_name"),
+                }
+                break
+    cv = _cohorts_v3_identity(cowork, ticker)
+    if out is None:
+        out = {} if cv else None
+    if out is not None and cv:
+        out.update(cv)  # cohort_id (SSoT), cohort_full, zone
+    return out
 
 def exec_region(memo_text):
     a = memo_text.find("## Section A")

@@ -164,8 +164,10 @@ def main():
     labels = {"industry": {}, "sector": {}, "cohort": {}}
     for c in cards:
         cl = c.get("classification") or {}
-        keymap = {"industry": cl.get("industry"), "sector": cl.get("sector"), "cohort": cl.get("cohort")}
-        labmap = {"industry": cl.get("industry"), "sector": cl.get("sector"), "cohort": cl.get("cohort_name") or cl.get("cohort")}
+        keymap = {"industry": cl.get("industry"), "sector": cl.get("sector"),
+                  "cohort": cl.get("cohort_id") or cl.get("universe_cohort_code")}
+        labmap = {"industry": cl.get("industry"), "sector": cl.get("sector"),
+                  "cohort": cl.get("cohort_full") or cl.get("cohort_name") or cl.get("cohort_id")}
         for lvl, key in keymap.items():
             if not key:
                 continue

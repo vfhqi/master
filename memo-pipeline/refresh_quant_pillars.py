@@ -2,28 +2,27 @@
 """
 refresh_quant_pillars.py -- B7b: daily quant pillar refresh for p1/p5/p6.
 
-Reads three master-dashboard data files and writes letter grades (A-F) for the
-quantitative pillars to databases/master/ic-ratings-current.json:
+Reads master-dashboard data files and writes letter grades to
+databases/master/ic-ratings-current.json:
 
-  p1_technical_momentum  ← s3_aligned_results.json (Minervini criteria score)
-                           + tab9_data.json (Stage 2 classification)
+  p1_technical_momentum   ← filter-results.json md_v2 (timeliness grade)
+                            Uses canonical TL_ROWS logic from generate-timeliness-page.py.
+                            Returns A/B/C for timeliness-qualified stocks, "—" if absent.
   p5_ss_earnings_momentum ← factset-ssem.json (SSEM momentum score)
-  p6_valuation           ← factset-valuation.json (PE percentile vs history)
+  p6_valuation            ← factset-valuation.json (PE percentile vs history)
 
-GRADE THRESHOLDS (v1, provisional — tune via P1/P5/P6_THRESHOLDS constants):
+GRADE THRESHOLDS:
 
-  p1 (Minervini score 0-6 criteria, Stage 2 classification):
-    A: Stage2=Probable AND score >= 4
-    B: Stage2=Probable OR (Stage2=Plausible AND score >= 3)
-    C: Stage2=Plausible OR score >= 3
-    D: Stage2=Possible OR score >= 1
-    F: Stage2=None AND score == 0
-    —: data absent
+  p1 (timeliness grade from md_v2 TL_ROWS):
+    A: Qualified or Probable on a group-1 TL row (probing bet, retest, VCP, spec)
+    B: Plausible on a group-1 row, OR Probable on a group-2 row (pull_back/basing, s2gate)
+    C: Possible on a group-1 row, OR Plausible on a group-2 row
+    —: not in filter-results, or no qualifying TL cell
 
   p5 (SSEM momentum — signed weighted-revision score):
     A: >= 15   (strong positive — broad upgrades)
     B: >= 5    (moderate positive)
-    C: >= -3   (flat or mild negative, majority buy)
+    C: >= -3   (flat or mild negative)
     D: >= -15  (meaningful negative)
     F: < -15   (broad downgrades)
     —: data absent
@@ -37,17 +36,16 @@ GRADE THRESHOLDS (v1, provisional — tune via P1/P5/P6_THRESHOLDS constants):
     —: data absent or no PE data
 
 OVERRIDE PROTECTION:
-  If an entry was last_updated_by != "quant_refresh" AND p1/p5/p6 are already
-  set to non-"—" values, the existing grades are NOT overwritten.
-  Use --force to override all.
+  If last_updated_by != "quant_refresh" AND p1/p5/p6 already set to non-"—",
+  existing grades are NOT overwritten. Use --force to override.
 
 Usage:
   python3 scripts/memo-pipeline/refresh_quant_pillars.py
   python3 scripts/memo-pipeline/refresh_quant_pillars.py --dry-run
-  python3 scripts/memo-pipeline/refresh_quant_pillars.py --force  # overwrite APM grades
+  python3 scripts/memo-pipeline/refresh_quant_pillars.py --force
   python3 scripts/memo-pipeline/refresh_quant_pillars.py --ticker BRAV-SE
 
-Author: Watson (Sonnet, SA role), 2026-06-26 (Block B7b).
+Author: Watson (Sonnet, SA role), 2026-06-26 (Block B7b, OQ-2 p1→timeliness).
 """
 
 import os, sys, json, argparse, tempfile
@@ -58,14 +56,28 @@ HERE = Path(__file__).resolve().parent
 IC_RATINGS_PATH = "databases/master/ic-ratings-current.json"
 
 # ---------------------------------------------------------------------------
-# Grade thresholds — tune these without code changes
+# Timeliness grade constants — canonical copy from generate-timeliness-page.py
 # ---------------------------------------------------------------------------
 
-# p1: (min_minervini_score, stage2_classification) → grade
-# Stage 2 classifications: "Probable" > "Plausible" > "Possible" > "None"
-STAGE2_RANK = {"Probable": 3, "Plausible": 2, "Possible": 1, "None": 0}
+TL_ROWS = [
+    {"id":"pb_s1",     "path":["tests","probing_bet_s1"],                "stageNum":1, "cells":{"A":["Qualified","Probable"],"B":["Plausible"],"C":["Possible"]}},
+    {"id":"pb_s2",     "path":["tests","probing_bet_s2"],                "stageNum":2, "cells":{"A":["Qualified","Probable"],"B":["Plausible"],"C":["Possible"]}},
+    {"id":"retest",    "path":["tests","healthy_retest"],                "stageNum":2, "cells":{"A":["Qualified","Probable"],"B":["Plausible"],"C":["Possible"]}},
+    {"id":"vcp",       "path":["tests","vcp_deploy_s2"],                 "stageNum":2, "cells":{"A":["Qualified","Probable"],"B":["Plausible"],"C":["Possible"]}},
+    {"id":"spec_s3",   "path":["tests","speculative_bet_s3"],            "stageNum":3, "cells":{"A":["Qualified","Probable"],"B":["Plausible"],"C":["Possible"]}},
+    {"id":"spec_s4",   "path":["tests","speculative_bet_s4"],            "stageNum":4, "cells":{"A":["Qualified","Probable"],"B":["Plausible"],"C":["Possible"]}},
+    {"id":"pull_back", "path":["pre_indicators","pulling_back_uptrend"], "stageNum":2, "cells":{"B":["Probable"],"C":["Plausible"]}, "s2gate":True},
+    {"id":"basing",    "path":["pre_indicators","basing"],               "stageNum":2, "cells":{"B":["Probable"],"C":["Plausible"]}, "s2gate":True},
+    {"id":"s1_late",   "path":["stage_1"],                               "stageNum":1, "cells":{"B":["Probable"]}},
+    {"id":"s1_early",  "path":["stage_1"],                               "stageNum":1, "cells":{"B":["Plausible"],"C":["Possible"]}},
+]
+TL_LETTER_RANK = {"A": 5, "B": 4, "C": 3, "D": 2, "F": 1}
+TL_STAGE_RANK  = {2: 4, 1: 3, 3: 2, 4: 1}
 
-# p5 SSEM momentum score → letter grade
+# ---------------------------------------------------------------------------
+# p5/p6 thresholds
+# ---------------------------------------------------------------------------
+
 P5_THRESHOLDS = [
     (15,  "A"),
     ( 5,  "B"),
@@ -73,7 +85,6 @@ P5_THRESHOLDS = [
     (-15, "D"),
 ]  # below -15 → F
 
-# p6 PE percentile (lower = cheaper = better)
 P6_THRESHOLDS = [
     (20, "A"),
     (40, "B"),
@@ -94,48 +105,84 @@ def cowork_root() -> Path:
     return Path(".").resolve()
 
 # ---------------------------------------------------------------------------
+# Timeliness helper functions — exact port from generate-timeliness-page.py
+# ---------------------------------------------------------------------------
+
+def _tl_get_rating(md, path):
+    obj = md
+    for p in path:
+        obj = obj.get(p) if isinstance(obj, dict) else None
+    if isinstance(obj, dict) and obj.get("rating") and obj["rating"] != "None":
+        return obj["rating"]
+    return None
+
+def _tl_is_s2pp(md):
+    """True if stock is in Stage 2 price position (stage_2.rating Plausible or Probable)."""
+    r = (md.get("stage_2") or {}).get("rating")
+    return r in ("Plausible", "Probable")
+
+def _tl_get_cells(md):
+    result, s2pp = [], _tl_is_s2pp(md)
+    for ri, row in enumerate(TL_ROWS):
+        if row.get("s2gate") and not s2pp:
+            continue
+        rating = _tl_get_rating(md, row["path"])
+        if not rating:
+            continue
+        for col, vals in row["cells"].items():
+            if rating in vals:
+                result.append({"col": col, "rowIdx": ri, "stageNum": row["stageNum"]})
+    return result
+
+def _tl_best_cell(cells):
+    if not cells:
+        return None
+    best = cells[0]
+    for c in cells[1:]:
+        lrd = TL_LETTER_RANK.get(c["col"], 0) - TL_LETTER_RANK.get(best["col"], 0)
+        if lrd > 0:   best = c; continue
+        if lrd < 0:   continue
+        srd = TL_STAGE_RANK.get(c["stageNum"], 0) - TL_STAGE_RANK.get(best["stageNum"], 0)
+        if srd > 0:   best = c; continue
+        if srd < 0:   continue
+        if c["rowIdx"] < best["rowIdx"]:
+            best = c
+    return best
+
+# ---------------------------------------------------------------------------
 # Data loaders
 # ---------------------------------------------------------------------------
 
-def load_quant_data(R: Path) -> dict:
-    """Load all three quant source files. Returns dict keyed by ticker."""
+def load_filter_results_index(R: Path) -> dict:
+    """Returns {ticker: stock_entry} from filter-results.json."""
+    path = R / "master-dashboard" / "data" / "filter-results.json"
+    if not path.exists():
+        print(f"  WARNING: filter-results.json not found at {path}", file=sys.stderr)
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return {s["ticker"]: s for s in raw.get("stocks", []) if s.get("ticker")}
+
+
+def load_p5p6_data(R: Path) -> dict:
+    """Load p5 (SSEM) and p6 (valuation) source files. Returns dict keyed by ticker."""
     data_dir = R / "master-dashboard" / "data"
-    
-    # p1 source 1: Minervini criteria scores
-    s3 = {}
-    s3_path = data_dir / "s3_aligned_results.json"
-    if s3_path.exists():
-        raw = json.loads(s3_path.read_text(encoding="utf-8"))
-        s3 = raw.get("results", {})
-    
-    # p1 source 2: Stage 2 classification
-    stage2 = {}
-    tab9_path = data_dir / "tab9_data.json"
-    if tab9_path.exists():
-        raw = json.loads(tab9_path.read_text(encoding="utf-8"))
-        stage2 = raw.get("all_ratings", {})
-    
-    # p5 source: SSEM
+
     ssem = {}
     ssem_path = data_dir / "factset-ssem.json"
     if ssem_path.exists():
         raw = json.loads(ssem_path.read_text(encoding="utf-8"))
         ssem = {k: v for k, v in raw.items() if k != "_meta"}
-    
-    # p6 source: valuation
+
     val = {}
     val_path = data_dir / "factset-valuation.json"
     if val_path.exists():
         raw = json.loads(val_path.read_text(encoding="utf-8"))
         val = {k: v for k, v in raw.items() if k != "_meta"}
-    
-    # Merge by ticker
-    all_tickers = set(s3) | set(stage2) | set(ssem) | set(val)
+
+    all_tickers = set(ssem) | set(val)
     merged = {}
     for t in all_tickers:
         merged[t] = {
-            "s3_score": s3.get(t, {}).get("score"),
-            "stage2":   stage2.get(t, {}).get("s2"),
             "ssem_momentum": ssem.get(t, {}).get("momentum"),
             "pe_percentile": val.get(t, {}).get("pe_percentile"),
         }
@@ -145,21 +192,20 @@ def load_quant_data(R: Path) -> dict:
 # Grade computation
 # ---------------------------------------------------------------------------
 
-def grade_p1(s3_score, stage2_str) -> str:
-    """Technical momentum grade from Minervini criteria + Stage 2."""
-    if s3_score is None and stage2_str is None:
+def grade_p1_timeliness(ticker: str, fr_idx: dict) -> str:
+    """TL grade (A/B/C) from filter-results.json md_v2, or '—' if absent."""
+    entry = fr_idx.get(ticker)
+    if entry is None:
         return "—"
-    score = s3_score or 0
-    s2r = STAGE2_RANK.get(stage2_str or "None", 0)
-    if s2r >= 3 and score >= 4:      return "A"
-    if s2r >= 3 or (s2r == 2 and score >= 3):  return "B"
-    if s2r == 2 or score >= 3:       return "C"
-    if s2r >= 1 or score >= 1:       return "D"
-    return "F"
+    md = entry.get("md_v2", {})
+    cells = _tl_get_cells(md)
+    best = _tl_best_cell(cells)
+    if best is None:
+        return "—"
+    return best["col"]
 
 
 def grade_p5(momentum) -> str:
-    """SSEM grade from momentum score."""
     if momentum is None:
         return "—"
     for threshold, grade in P5_THRESHOLDS:
@@ -169,7 +215,6 @@ def grade_p5(momentum) -> str:
 
 
 def grade_p6(pe_percentile) -> str:
-    """Valuation grade from PE percentile."""
     if pe_percentile is None:
         return "—"
     for threshold, grade in P6_THRESHOLDS:
@@ -178,19 +223,16 @@ def grade_p6(pe_percentile) -> str:
     return "F"
 
 # ---------------------------------------------------------------------------
-# Ticker lookup (handles both suffixed BRAV-SE and bare BRAV)
+# Ticker lookup (handles suffixed BRAV-SE and bare BRAV for p5/p6 data)
 # ---------------------------------------------------------------------------
 
-def _quant_key(ic_ticker: str, quant_data: dict) -> str:
-    """Find the quant data key for an ic-ratings ticker (may be bare or suffixed)."""
-    # Direct match
-    if ic_ticker in quant_data:
+def _p5p6_key(ic_ticker: str, p5p6_data: dict) -> str:
+    if ic_ticker in p5p6_data:
         return ic_ticker
-    # Try common suffix combinations
     for suffix in ["-SE", "-GB", "-DK", "-DE", "-FR", "-IT", "-BE", "-NL",
                    "-CH", "-AT", "-FI", "-NO", "-IE", "-ES", "-PT", "-PL"]:
         candidate = ic_ticker + suffix
-        if candidate in quant_data:
+        if candidate in p5p6_data:
             return candidate
     return None
 
@@ -198,53 +240,54 @@ def _quant_key(ic_ticker: str, quant_data: dict) -> str:
 # Main refresh
 # ---------------------------------------------------------------------------
 
-def refresh_ticker(entry: dict, quant_data: dict, force: bool = False) -> tuple:
+def refresh_ticker(entry: dict, fr_idx: dict, p5p6_data: dict,
+                   force: bool = False) -> tuple:
     """Update p1/p5/p6 for one entry. Returns (changed: bool, log_line: str)."""
     ticker = entry.get("ticker", "?")
-    
-    # Find quant data
-    qk = _quant_key(ticker, quant_data)
-    if not qk:
-        return False, f"{ticker}: no quant data found"
-    q = quant_data[qk]
-    
-    # Compute grades
-    new_p1 = grade_p1(q.get("s3_score"), q.get("stage2"))
-    new_p5 = grade_p5(q.get("ssem_momentum"))
-    new_p6 = grade_p6(q.get("pe_percentile"))
-    
+
+    # p1: timeliness grade
+    new_p1 = grade_p1_timeliness(ticker, fr_idx)
+
+    # p5/p6: from FactSet data
+    pk = _p5p6_key(ticker, p5p6_data)
+    if pk:
+        q = p5p6_data[pk]
+        new_p5 = grade_p5(q.get("ssem_momentum"))
+        new_p6 = grade_p6(q.get("pe_percentile"))
+    else:
+        new_p5 = "—"
+        new_p6 = "—"
+
     pillars = entry.setdefault("pillars", {})
     old_p1 = pillars.get("p1_technical_momentum", "—")
     old_p5 = pillars.get("p5_ss_earnings_momentum", "—")
     old_p6 = pillars.get("p6_valuation", "—")
-    
+
     # Override protection: don't overwrite APM-set grades unless --force
     is_quant_managed = entry.get("last_updated_by") == "quant_refresh"
     if not force and not is_quant_managed:
-        # Only update "—" slots
         if old_p1 != "—":
             new_p1 = old_p1
         if old_p5 != "—":
             new_p5 = old_p5
         if old_p6 != "—":
             new_p6 = old_p6
-    
+
     if new_p1 == old_p1 and new_p5 == old_p5 and new_p6 == old_p6:
         return False, f"{ticker}: no change (p1={old_p1}, p5={old_p5}, p6={old_p6})"
-    
+
     pillars["p1_technical_momentum"] = new_p1
     pillars["p5_ss_earnings_momentum"] = new_p5
     pillars["p6_valuation"] = new_p6
     entry["last_updated"] = str(date.today())
     entry["last_updated_by"] = "quant_refresh"
     entry["_quant_refresh_at"] = str(date.today())
-    entry["_quant_source_ticker"] = qk
-    
+
     changes = []
     if new_p1 != old_p1: changes.append(f"p1 {old_p1}→{new_p1}")
     if new_p5 != old_p5: changes.append(f"p5 {old_p5}→{new_p5}")
     if new_p6 != old_p6: changes.append(f"p6 {old_p6}→{new_p6}")
-    
+
     return True, f"{ticker}: {', '.join(changes)}"
 
 
@@ -254,20 +297,21 @@ def run_refresh(R: Path, dry_run: bool = False, force: bool = False,
     ic_path = R / IC_RATINGS_PATH
     data = json.loads(ic_path.read_text(encoding="utf-8"))
     stocks = data.get("stocks", [])
-    
-    quant_data = load_quant_data(R)
-    
+
+    fr_idx   = load_filter_results_index(R)
+    p5p6_data = load_p5p6_data(R)
+
     results = []
     changed_count = 0
     for entry in stocks:
         t = entry.get("ticker", "")
         if ticker_filter and t != ticker_filter:
             continue
-        changed, log = refresh_ticker(entry, quant_data, force=force)
+        changed, log = refresh_ticker(entry, fr_idx, p5p6_data, force=force)
         if changed:
             changed_count += 1
         results.append(f"  {'CHANGED' if changed else 'skip   '} {log}")
-    
+
     if not dry_run and changed_count > 0:
         data["stocks"] = stocks
         new_content = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
@@ -283,19 +327,21 @@ def run_refresh(R: Path, dry_run: bool = False, force: bool = False,
             except Exception:
                 pass
             raise RuntimeError(f"write failed: {e}") from e
-    
-    results.append(f"\n  Total: {changed_count} updated, {len(stocks) - changed_count} unchanged"
-                   f"{' (DRY-RUN — not written)' if dry_run else ''}")
+
+    results.append(
+        f"\n  Total: {changed_count} updated, {len(stocks) - changed_count} unchanged"
+        f"{' (DRY-RUN — not written)' if dry_run else ''}"
+    )
     return results
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(
-        description="B7b: daily quant pillar refresh — p1/p5/p6 → ic-ratings-current.json"
+        description="B7b: daily quant pillar refresh — p1 (timeliness) / p5 / p6 → ic-ratings-current.json"
     )
     ap.add_argument("--dry-run", action="store_true", help="Preview without writing")
-    ap.add_argument("--force", action="store_true", help="Overwrite APM-set grades")
-    ap.add_argument("--ticker", help="Refresh a single ticker only")
+    ap.add_argument("--force",   action="store_true", help="Overwrite APM-set grades")
+    ap.add_argument("--ticker",  help="Refresh a single ticker only")
     args = ap.parse_args()
 
     R = cowork_root()

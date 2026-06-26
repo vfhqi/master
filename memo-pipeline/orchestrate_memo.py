@@ -613,6 +613,14 @@ def emit_peer_artifacts(ticker: str, R: Path, stage: str) -> str:
         if roll.exists():
             _run(["python3", str(roll), "--cowork", str(R), "--quiet"], R)
             msgs.append("summaries refreshed")
+        # B7a: sync memo ratings (MR3→p2, MR4→p3, MR5→p4) to ic-ratings-current.json
+        ic_sync = here / "update_ic_ratings.py"
+        if ic_sync.exists():
+            try:
+                _run(["python3", str(ic_sync), "--ticker", ticker], R)
+                msgs.append("ic-ratings synced")
+            except Exception as _e_ic:
+                msgs.append(f"ic-ratings skip ({_e_ic})")
         return "; ".join(msgs) if msgs else "peer scripts absent -- skipped"
     except Exception as e:
         return f"peer-artifacts error (non-blocking): {e}"

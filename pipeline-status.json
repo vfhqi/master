@@ -1,21 +1,21 @@
 {
-  "generated": "2026-06-26T06:13:29Z",
-  "generated_uk": "26 Jun 2026, 07:13 UK time",
-  "overall": "GREEN",
+  "generated": "2026-06-26T18:17:32Z",
+  "generated_uk": "26 Jun 2026, 19:17 UK time",
+  "overall": "AMBER",
   "pipelines": [
     {
       "name": "Master Dashboard",
       "pipeline": "Nightly 18:00 UK — refresh-dashboard-silent.bat",
-      "status": "GREEN",
-      "message": "Build and push completed",
-      "last_run": "25 Jun 2026, 18:00 UK"
+      "status": "AMBER",
+      "message": "Build and push completed | Prices one day behind expected",
+      "last_run": "26 Jun 2026, 18:00 UK"
     },
     {
       "name": "IC Ratings Dashboard",
       "pipeline": "Nightly ~17:09 UK — dashboard_push_wrapper.py",
       "status": "GREEN",
       "message": "Push completed successfully",
-      "last_run": "2026-06-24 16:09 UTC"
+      "last_run": "2026-06-26 16:09 UTC"
     },
     {
       "name": "Canonical Extract",

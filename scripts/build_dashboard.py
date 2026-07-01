@@ -18600,23 +18600,41 @@ renderTab("mm99");
 
 def generate_changelog():
     import html as _html
-    sessions = []
-    if STATE_MD_PATH.exists():
-        with open(STATE_MD_PATH, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
+    def _parse_sessions(_lines, stop_at_index=False):
+        _out = []
         current_title = None
         current_body = []
-        for line in lines:
+        for line in _lines:
             stripped = line.rstrip()
+            if stop_at_index and stripped.startswith('## Archived sessions index'):
+                break
             if stripped.startswith('## Session ') or (stripped.startswith('## S') and '(' in stripped and '--' in stripped):
                 if current_title:
-                    sessions.append((current_title, ' '.join(current_body[:12])))
+                    _out.append((current_title, ' '.join(current_body[:12])))
                 current_title = stripped.lstrip('#').strip()
                 current_body = []
             elif current_title and stripped and not stripped.startswith('#'):
                 current_body.append(stripped.replace('**',''))
         if current_title:
-            sessions.append((current_title, ' '.join(current_body[:12])))
+            _out.append((current_title, ' '.join(current_body[:12])))
+        return _out
+    sessions = []
+    if STATE_MD_PATH.exists():
+        with open(STATE_MD_PATH, 'r', encoding='utf-8') as f:
+            sessions.extend(_parse_sessions(f.readlines(), stop_at_index=True))
+    _archive_dir = STATE_MD_PATH.parent / 'archive'
+    if _archive_dir.exists():
+        for _af in sorted(_archive_dir.glob('state-archive-*.md')):
+            with open(_af, 'r', encoding='utf-8') as f:
+                sessions.extend(_parse_sessions(f.readlines()))
+    _seen = set()
+    _dedup = []
+    for _t, _b in sessions:
+        if _t in _seen:
+            continue
+        _seen.add(_t)
+        _dedup.append((_t, _b))
+    sessions = _dedup
 
     font = "system-ui, -apple-system, 'Segoe UI', sans-serif"
     bg = '#faf9f5'; fg = '#2a2a2a'; dim = '#666'; bdr = '#e0dcc8'

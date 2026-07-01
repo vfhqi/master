@@ -46,7 +46,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
   <div class="head">
     <div>
       <h1>Pipeline Status</h1>
-      <div class="sub">Automated health check of Viewforth data pipelines. Generated 01 Jul 2026, 07:03 UK time.</div>
+      <div class="sub">Automated health check of Viewforth data pipelines. Generated 01 Jul 2026, 19:01 UK time.</div>
     </div>
     <div class="nav-links">
       <a href="index.html">&larr; Master Dashboard</a>
@@ -64,13 +64,13 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
   </p>
 
   <div class="section-hd"><h2>Pipeline Status</h2></div>
-  <div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>Master Dashboard</div><div class='pipe-sched'>Nightly 18:00 UK — refresh-dashboard-silent.bat</div><div class='pipe-last'>Last run: 30 Jun 2026, 18:00 UK</div><div class='pipe-msg'>Build and push completed | (price-date check error: Unterminated string starting at: line 430768 column 9 (char 8807355))</div></div></div>
-<div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>IC Ratings Dashboard</div><div class='pipe-sched'>Nightly ~17:09 UK — dashboard_push_wrapper.py</div><div class='pipe-last'>Last run: 2026-06-29 16:09 UTC</div><div class='pipe-msg'>Push completed successfully</div></div></div>
+  <div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>Master Dashboard</div><div class='pipe-sched'>Nightly 18:00 UK — refresh-dashboard-silent.bat</div><div class='pipe-last'>Last run: 01 Jul 2026, 18:00 UK</div><div class='pipe-msg'>Build and push completed | (price-date check error: Expecting property name enclosed in double quotes: line 431240 column 2 (char 8816075))</div></div></div>
+<div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>IC Ratings Dashboard</div><div class='pipe-sched'>Nightly ~17:09 UK — dashboard_push_wrapper.py</div><div class='pipe-last'>Last run: 2026-06-30 16:09 UTC</div><div class='pipe-msg'>Push completed successfully</div></div></div>
 <div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>Canonical Extract</div><div class='pipe-sched'>Daily 05:30 UK — extract-canonical-silent.bat</div><div class='pipe-last'>Last run: 01 Jul 2026, 05:30 UK</div><div class='pipe-msg'>Extract completed successfully</div></div></div>
 
 
   <div class="foot">
-    Generated 01 Jul 2026, 07:03 UK time &middot;
+    Generated 01 Jul 2026, 19:01 UK time &middot;
     <a href="index.html">Master Dashboard</a> &middot;
     <a href="https://vfhqi.github.io/repository/qc-centre.html" target="_blank">QC Centre</a>
   </div>
@@ -78,22 +78,22 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 <script>
 // Embedded data for any future programmatic use
 var PIPELINE_STATUS = {
-  "generated": "2026-07-01T06:03:28Z",
+  "generated": "2026-07-01T18:01:27Z",
   "overall": "GREEN",
   "pipelines": [
     {
       "name": "Master Dashboard",
       "pipeline": "Nightly 18:00 UK — refresh-dashboard-silent.bat",
       "status": "GREEN",
-      "message": "Build and push completed | (price-date check error: Unterminated string starting at: line 430768 column 9 (char 8807355))",
-      "last_run": "30 Jun 2026, 18:00 UK"
+      "message": "Build and push completed | (price-date check error: Expecting property name enclosed in double quotes: line 431240 column 2 (char 8816075))",
+      "last_run": "01 Jul 2026, 18:00 UK"
     },
     {
       "name": "IC Ratings Dashboard",
       "pipeline": "Nightly ~17:09 UK — dashboard_push_wrapper.py",
       "status": "GREEN",
       "message": "Push completed successfully",
-      "last_run": "2026-06-29 16:09 UTC"
+      "last_run": "2026-06-30 16:09 UTC"
     },
     {
       "name": "Canonical Extract",

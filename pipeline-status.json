@@ -1,13 +1,13 @@
 {
-  "generated": "2026-07-04T18:03:37Z",
-  "generated_uk": "04 Jul 2026, 19:03 UK time",
+  "generated": "2026-07-05T18:01:25Z",
+  "generated_uk": "05 Jul 2026, 19:01 UK time",
   "overall": "GREEN",
   "pipelines": [
     {
       "name": "Master Dashboard",
       "pipeline": "Nightly 18:00 UK — refresh-dashboard-silent.bat",
       "status": "GREEN",
-      "message": "Build and push completed | (price-date check error: Expecting property name enclosed in double quotes: line 409421 column 3 (char 8372294))",
+      "message": "Build and push completed",
       "last_run": "04 Jul 2026, 18:00 UK"
     },
     {
@@ -15,14 +15,14 @@
       "pipeline": "Nightly ~17:09 UK — dashboard_push_wrapper.py",
       "status": "GREEN",
       "message": "Push completed successfully",
-      "last_run": "2026-07-04 16:09 UTC"
+      "last_run": "2026-07-05 16:09 UTC"
     },
     {
       "name": "Canonical Extract",
       "pipeline": "Daily 05:30 UK — extract-canonical-silent.bat",
       "status": "GREEN",
       "message": "Extract completed successfully",
-      "last_run": "04 Jul 2026, 05:30 UK"
+      "last_run": "05 Jul 2026, 05:30 UK"
     }
   ]
 }

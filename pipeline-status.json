@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-05T18:01:25Z",
-  "generated_uk": "05 Jul 2026, 19:01 UK time",
+  "generated": "2026-07-06T06:06:07Z",
+  "generated_uk": "06 Jul 2026, 07:06 UK time",
   "overall": "GREEN",
   "pipelines": [
     {
@@ -22,7 +22,7 @@
       "pipeline": "Daily 05:30 UK — extract-canonical-silent.bat",
       "status": "GREEN",
       "message": "Extract completed successfully",
-      "last_run": "05 Jul 2026, 05:30 UK"
+      "last_run": "06 Jul 2026, 05:30 UK"
     }
   ]
 }

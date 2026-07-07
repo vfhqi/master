@@ -1,14 +1,14 @@
 {
-  "generated": "2026-07-06T06:06:07Z",
-  "generated_uk": "06 Jul 2026, 07:06 UK time",
+  "generated": "2026-07-07T06:06:19Z",
+  "generated_uk": "07 Jul 2026, 07:06 UK time",
   "overall": "GREEN",
   "pipelines": [
     {
       "name": "Master Dashboard",
       "pipeline": "Nightly 18:00 UK — refresh-dashboard-silent.bat",
       "status": "GREEN",
-      "message": "Build and push completed",
-      "last_run": "04 Jul 2026, 18:00 UK"
+      "message": "Build and push completed | (price-date check error: Extra data: line 429102 column 2 (char 8776915))",
+      "last_run": "06 Jul 2026, 18:00 UK"
     },
     {
       "name": "IC Ratings Dashboard",
@@ -22,7 +22,7 @@
       "pipeline": "Daily 05:30 UK — extract-canonical-silent.bat",
       "status": "GREEN",
       "message": "Extract completed successfully",
-      "last_run": "06 Jul 2026, 05:30 UK"
+      "last_run": "07 Jul 2026, 05:30 UK"
     }
   ]
 }

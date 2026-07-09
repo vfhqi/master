@@ -1,14 +1,14 @@
 {
-  "generated": "2026-07-09T06:06:27Z",
-  "generated_uk": "09 Jul 2026, 07:06 UK time",
-  "overall": "GREEN",
+  "generated": "2026-07-09T18:02:00Z",
+  "generated_uk": "09 Jul 2026, 19:02 UK time",
+  "overall": "RED",
   "pipelines": [
     {
       "name": "Master Dashboard",
       "pipeline": "Nightly 18:00 UK — refresh-dashboard-silent.bat",
-      "status": "GREEN",
-      "message": "Build and push completed | (price-date check error: Extra data: line 428871 column 2 (char 8774190))",
-      "last_run": "08 Jul 2026, 18:00 UK"
+      "status": "RED",
+      "message": "Build did not complete — failed at unknown step | (price-date check error: Expecting ':' delimiter: line 429100 column 20 (char 8776135))",
+      "last_run": "09 Jul 2026, 18:00 UK"
     },
     {
       "name": "IC Ratings Dashboard",

@@ -1,13 +1,13 @@
 {
-  "generated": "2026-07-10T18:02:01Z",
-  "generated_uk": "10 Jul 2026, 19:02 UK time",
-  "overall": "AMBER",
+  "generated": "2026-07-11T06:05:49Z",
+  "generated_uk": "11 Jul 2026, 07:05 UK time",
+  "overall": "GREEN",
   "pipelines": [
     {
       "name": "Master Dashboard",
       "pipeline": "Nightly 18:00 UK — refresh-dashboard-silent.bat",
-      "status": "AMBER",
-      "message": "Build and push completed | Prices one day behind expected",
+      "status": "GREEN",
+      "message": "Build and push completed",
       "last_run": "10 Jul 2026, 18:00 UK"
     },
     {
@@ -22,7 +22,7 @@
       "pipeline": "Daily 05:30 UK — extract-canonical-silent.bat",
       "status": "GREEN",
       "message": "Extract completed successfully",
-      "last_run": "10 Jul 2026, 05:30 UK"
+      "last_run": "11 Jul 2026, 05:30 UK"
     }
   ]
 }

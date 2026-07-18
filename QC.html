@@ -46,7 +46,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
   <div class="head">
     <div>
       <h1>Pipeline Status</h1>
-      <div class="sub">Automated health check of Viewforth data pipelines. Generated 17 Jul 2026, 07:06 UK time.</div>
+      <div class="sub">Automated health check of Viewforth data pipelines. Generated 18 Jul 2026, 07:01 UK time.</div>
     </div>
     <div class="nav-links">
       <a href="index.html">&larr; Master Dashboard</a>
@@ -54,8 +54,8 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
     </div>
   </div>
 
-  <div class="banner" style="background:#ffebee;color:#c0392b;border-color:#e08585;">
-    &#10007; One or more pipelines have failed
+  <div class="banner" style="background:#fff8e1;color:#b8860b;border-color:#d7b85a;">
+    &#9888; One or more pipelines need attention
   </div>
 
   <p class="refresh-note">
@@ -64,15 +64,15 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
   </p>
 
   <div class="section-hd"><h2>Pipeline Status</h2></div>
-  <div class='pipe-row' style='border-left:4px solid #d7b85a;background:#fff8e1;'><div class='pipe-status' style='color:#b8860b;'>&#9888; <strong>AMBER</strong></div><div class='pipe-info'><div class='pipe-name'>Master Dashboard</div><div class='pipe-sched'>Nightly 18:00 UK — refresh-dashboard-silent.bat</div><div class='pipe-last'>Last run: 16 Jul 2026, 18:00 UK</div><div class='pipe-msg'>Build and push completed | AMBER: prices.json integrity check failed (Extra data: line 431386 column 2 (char 8819935))</div></div></div>
-<div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>IC Ratings Dashboard</div><div class='pipe-sched'>Nightly ~17:09 UK — dashboard_push_wrapper.py</div><div class='pipe-last'>Last run: 2026-07-15 16:09 UTC</div><div class='pipe-msg'>Push completed successfully</div></div></div>
-<div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>Canonical Extract</div><div class='pipe-sched'>Daily 05:30 UK — extract-canonical-silent.bat</div><div class='pipe-last'>Last run: 17 Jul 2026, 05:30 UK</div><div class='pipe-msg'>Extract completed successfully</div></div></div>
-<div class='pipe-row' style='border-left:4px solid #e08585;background:#ffebee;'><div class='pipe-status' style='color:#c0392b;'>&#10007; <strong>RED</strong></div><div class='pipe-info'><div class='pipe-name'>Data Integrity Guard</div><div class='pipe-sched'>Post-build -- data_integrity_guard.py</div><div class='pipe-last'>Last run: 2026-07-16 19:06:35</div><div class='pipe-msg'>filter-results.json: CORRUPT confirmed on two reads: &#x27;JSON parse error: Unterminated string starting at: line 576912 column 13 (char 16777986)&#x27; / &#x27;JSON parse error: Unterminated string starting at: line 576912 column 13 (char 16777986)&#x27; -- and LKG is missing/corrupt: MANUAL ATTENTION.; universe.json: CORRUPT confirmed on two reads: &#x27;JSON parse error: Unterminated string starting at: line 11063 column 17 (char 406679)&#x27; / &#x27;JSON parse error: Unterminated string starting at: line 11063 column 17 (char 406679)&#x27; -- and LKG is missing/corrupt: MANUAL ATTENTION.; prices.json: CORRUPT confirmed on two reads: &#x27;trailing NUL bytes (26497)&#x27; / &#x27;trailing NUL bytes (26497)&#x27; -- and LKG is missing/corrupt: MANUAL ATTENTION.; stage-snapshots.json: CORRUPT confirmed on two reads: &#x27;JSON parse error: Expecting property name enclosed in double quotes: line 1 column 1451939 (char 1451938)&#x27; / &#x27;JSON parse error: Expecting property name enclosed in double quotes: line 1 column 1451939 (char 1451938)&#x27; -- and LKG is missing/corrupt: MANUAL ATTENTION.</div></div></div>
-<div class='pipe-row' style='border-left:4px solid #d7b85a;background:#fff8e1;'><div class='pipe-status' style='color:#b8860b;'>&#9888; <strong>AMBER</strong></div><div class='pipe-info'><div class='pipe-name'>Universe Completeness</div><div class='pipe-sched'>Data-quality -- unpriced / missing yfinance symbols</div><div class='pipe-last'>Last run: &mdash;</div><div class='pipe-msg'>completeness check error: Expecting &#x27;,&#x27; delimiter: line 11057 column 36 (char 395655)</div></div></div>
+  <div class='pipe-row' style='border-left:4px solid #d7b85a;background:#fff8e1;'><div class='pipe-status' style='color:#b8860b;'>&#9888; <strong>AMBER</strong></div><div class='pipe-info'><div class='pipe-name'>Master Dashboard</div><div class='pipe-sched'>Nightly 18:00 UK — refresh-dashboard-silent.bat</div><div class='pipe-last'>Last run: 17 Jul 2026, 18:00 UK</div><div class='pipe-msg'>Build and push completed | Prices 1 trading day behind (normal yfinance lag; RED at 2+)</div></div></div>
+<div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>IC Ratings Dashboard</div><div class='pipe-sched'>Nightly ~17:09 UK — dashboard_push_wrapper.py</div><div class='pipe-last'>Last run: 2026-07-17 16:09 UTC</div><div class='pipe-msg'>Push completed successfully</div></div></div>
+<div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>Canonical Extract</div><div class='pipe-sched'>Daily 05:30 UK — extract-canonical-silent.bat</div><div class='pipe-last'>Last run: 18 Jul 2026, 05:30 UK</div><div class='pipe-msg'>Extract completed successfully</div></div></div>
+<div class='pipe-row' style='border-left:4px solid #7fb285;background:#e8f5e9;'><div class='pipe-status' style='color:#2e7d32;'>&#10003; <strong>GREEN</strong></div><div class='pipe-info'><div class='pipe-name'>Data Integrity Guard</div><div class='pipe-sched'>Post-build -- data_integrity_guard.py</div><div class='pipe-last'>Last run: 2026-07-17 18:13:46</div><div class='pipe-msg'>All 11 critical data files healthy</div></div></div>
+<div class='pipe-row' style='border-left:4px solid #d7b85a;background:#fff8e1;'><div class='pipe-status' style='color:#b8860b;'>&#9888; <strong>AMBER</strong></div><div class='pipe-info'><div class='pipe-name'>Universe Completeness</div><div class='pipe-sched'>Data-quality -- unpriced / missing yfinance symbols</div><div class='pipe-last'>Last run: &mdash;</div><div class='pipe-msg'>37 of 991 stocks unpriced -- 14 have no Yahoo symbol (add one), 23 have a symbol that fails (verify/delisted). See dead-ticker-audit.</div></div></div>
 
 
   <div class="foot">
-    Generated 17 Jul 2026, 07:06 UK time &middot;
+    Generated 18 Jul 2026, 07:01 UK time &middot;
     <a href="index.html">Master Dashboard</a> &middot;
     <a href="https://vfhqi.github.io/repository/qc-centre.html" target="_blank">QC Centre</a>
   </div>
@@ -80,42 +80,42 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 <script>
 // Embedded data for any future programmatic use
 var PIPELINE_STATUS = {
-  "generated": "2026-07-17T06:06:06Z",
-  "overall": "RED",
+  "generated": "2026-07-18T06:01:30Z",
+  "overall": "AMBER",
   "pipelines": [
     {
       "name": "Master Dashboard",
       "pipeline": "Nightly 18:00 UK — refresh-dashboard-silent.bat",
       "status": "AMBER",
-      "message": "Build and push completed | AMBER: prices.json integrity check failed (Extra data: line 431386 column 2 (char 8819935))",
-      "last_run": "16 Jul 2026, 18:00 UK"
+      "message": "Build and push completed | Prices 1 trading day behind (normal yfinance lag; RED at 2+)",
+      "last_run": "17 Jul 2026, 18:00 UK"
     },
     {
       "name": "IC Ratings Dashboard",
       "pipeline": "Nightly ~17:09 UK — dashboard_push_wrapper.py",
       "status": "GREEN",
       "message": "Push completed successfully",
-      "last_run": "2026-07-15 16:09 UTC"
+      "last_run": "2026-07-17 16:09 UTC"
     },
     {
       "name": "Canonical Extract",
       "pipeline": "Daily 05:30 UK — extract-canonical-silent.bat",
       "status": "GREEN",
       "message": "Extract completed successfully",
-      "last_run": "17 Jul 2026, 05:30 UK"
+      "last_run": "18 Jul 2026, 05:30 UK"
     },
     {
       "name": "Data Integrity Guard",
       "pipeline": "Post-build -- data_integrity_guard.py",
-      "status": "RED",
-      "message": "filter-results.json: CORRUPT confirmed on two reads: 'JSON parse error: Unterminated string starting at: line 576912 column 13 (char 16777986)' / 'JSON parse error: Unterminated string starting at: line 576912 column 13 (char 16777986)' -- and LKG is missing/corrupt: MANUAL ATTENTION.; universe.json: CORRUPT confirmed on two reads: 'JSON parse error: Unterminated string starting at: line 11063 column 17 (char 406679)' / 'JSON parse error: Unterminated string starting at: line 11063 column 17 (char 406679)' -- and LKG is missing/corrupt: MANUAL ATTENTION.; prices.json: CORRUPT confirmed on two reads: 'trailing NUL bytes (26497)' / 'trailing NUL bytes (26497)' -- and LKG is missing/corrupt: MANUAL ATTENTION.; stage-snapshots.json: CORRUPT confirmed on two reads: 'JSON parse error: Expecting property name enclosed in double quotes: line 1 column 1451939 (char 1451938)' / 'JSON parse error: Expecting property name enclosed in double quotes: line 1 column 1451939 (char 1451938)' -- and LKG is missing/corrupt: MANUAL ATTENTION.",
-      "last_run": "2026-07-16 19:06:35"
+      "status": "GREEN",
+      "message": "All 11 critical data files healthy",
+      "last_run": "2026-07-17 18:13:46"
     },
     {
       "name": "Universe Completeness",
       "pipeline": "Data-quality -- unpriced / missing yfinance symbols",
       "status": "AMBER",
-      "message": "completeness check error: Expecting ',' delimiter: line 11057 column 36 (char 395655)",
+      "message": "37 of 991 stocks unpriced -- 14 have no Yahoo symbol (add one), 23 have a symbol that fails (verify/delisted). See dead-ticker-audit.",
       "last_run": ""
     }
   ]

@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-23T06:06:25Z",
-  "generated_uk": "23 Jul 2026, 07:06 UK time",
+  "generated": "2026-07-23T14:30:05Z",
+  "generated_uk": "23 Jul 2026, 15:30 UK time",
   "overall": "AMBER",
   "pipelines": [
     {
@@ -35,7 +35,7 @@
       "name": "Universe Completeness",
       "pipeline": "Data-quality -- unpriced / missing yfinance symbols",
       "status": "AMBER",
-      "message": "36 of 991 stocks unpriced -- 14 have no Yahoo symbol (add one), 22 have a symbol that fails (verify/delisted). See dead-ticker-audit. | probe 2026-07-20 18:12: 21 resolvable, 16 delisted",
+      "message": "36 of 991 stocks unpriced -- 0 have no Yahoo symbol (add one), 36 have a symbol that fails (verify/delisted). See dead-ticker-audit. | probe 2026-07-20 18:12: 21 resolvable, 16 delisted",
       "last_run": ""
     }
   ]

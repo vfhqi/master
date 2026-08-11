@@ -38,8 +38,8 @@ except Exception as _e:
 HISTORY_PATH = str(DATA_DIR / ".size-history.json")
 
 # Dashboard version -- bump with each shipped session
-DASHBOARD_VERSION = "S75 -- 22 May 2026"
-DASHBOARD_DESC    = "Group 4 Confirmation split; S1 cols on S1PB; HVCP 3-group format; HR/PB tile rewrites"
+DASHBOARD_VERSION = "S81 -- 11 Aug 2026"
+DASHBOARD_DESC    = "Stage 1 renamed Speculative Bet; 50D-turn test added (7 tests, either MA may turn); 52-week reference columns; 52-week range integrity repair"
 CHANGELOG_PATH    = PROJECT_DIR / "changelog.html"
 STATE_MD_PATH     = COWORK_ROOT / "projects/SA - Master Dashboard/state.md"
 
@@ -15110,7 +15110,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       rows.push({ticker:s.ticker,company:p.company_name||s.ticker,
         sector:p.sector||'',industry:p.industry||'',
         price:p.price,recent_pullback:p.recent_pullback_pct,
-        high_52w:p.high_52w,low_52w:p.low_52w,
+        high_52w:p.high_52w,low_52w:p.low_52w,unit_break_52w:!!p.unit_break_52w,unit_break_date:p.unit_break_date||null,
         md_v2:s.md_v2,is_live:!!live[s.ticker],
         sector_in_portfolio:!!liveS[p.sector],
         industry_in_portfolio:!!liveI[p.industry]});
@@ -15138,13 +15138,32 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
        it were a fact would mislead, so the figure is withheld and the raw numbers
        are put in the tooltip instead. This guard is cosmetic: it does NOT repair
        the underlying data, which needs fixing in the price pipeline. */
+    /* S81b, three cases, in order of severity:
+       1. the range is missing outright, because a unit break left too few
+          comparable rows to define one. Say so.
+       2. the range survives but was measured only since a unit break. The number
+          is sound, so show it, and say what window it came from.
+       3. (below) the rollback fallback. */
+    if(row.unit_break_52w && (row.high_52w==null||row.low_52w==null)){
+      return'<td class="num '+(cls||'')+'" style="color:#999;font-style:italic" title="No 52-week range. This price series steps by about 100x'+(row.unit_break_date?' on '+row.unit_break_date:'')+' (a redenomination or venue change), and too few comparable rows survive since then to measure a range. Withheld rather than shown wrong.">n/a</td>';
+    }
+    /* Fallback, kept deliberately: if the data layer is ever rolled back to a build
+       without the S81b repair, a 52-week high more than 50x the low is impossible
+       and the figure is still withheld rather than shown wrong. */
     if(row.high_52w!=null&&row.low_52w!=null&&row.low_52w>0&&row.high_52w>50*row.low_52w){
       return'<td class="num '+(cls||'')+'" style="color:#999;font-style:italic" title="52-week range looks corrupted in the source data (high '+fmtNum(row.high_52w)+' vs low '+fmtNum(row.low_52w)+', a ratio of '+Math.round(row.high_52w/row.low_52w)+'x). Figure withheld rather than shown wrong.">n/a</td>';
     }
     var pct=(row.price-v)/v*100;
     var i=(key==='high_52w')?Math.max(-1,Math.min(1,(pct+20)/20)):Math.max(-1,Math.min(1,(pct-20)/30));
-    var txt=(pct>=0?'+':'')+Math.round(pct)+'%';
-    return'<td class="num '+(cls||'')+'" style="color:'+colGreen(i)+'" title="Price '+txt+' vs the 52-week '+(key==='high_52w'?'high':'low')+' of '+fmtNum(v)+'">'+txt+'</td>';
+    var _r=Math.round(pct); if(Object.is(_r,-0))_r=0;   /* S81b: -0.4% was rendering as a bare "0%" */
+    var txt=(_r>0?'+':'')+_r+'%';
+    var ttl='Price '+txt+' vs the 52-week '+(key==='high_52w'?'high':'low')+' of '+fmtNum(v);
+    var mark='';
+    if(row.unit_break_52w){
+      ttl+='. Measured only since '+(row.unit_break_date||'a unit break')+', because this series steps by about 100x at that point (a redenomination or venue change) and the earlier rows are not comparable with today\'s price.';
+      mark='<span style="color:#b45309" title="Range measured from a shortened window">\u2020</span>';
+    }
+    return'<td class="num '+(cls||'')+'" style="color:'+colGreen(i)+'" title="'+ttl+'">'+txt+mark+'</td>';
   }
   function pullbackCell(row,cls){var v=row.recent_pullback;if(v==null||isNaN(v))return'<td class="num '+(cls||'')+'">-</td>';var pv=v*100,i=Math.max(-1,Math.min(1,(pv-5)/20));return'<td class="num '+(cls||'')+'" style="color:'+colGreen(-i)+'">'+Math.round(pv)+'%</td>';}
   function s1RatingCell(row,cls){var r=stageRating(row);var pc=r==='Probable'?'s1ctx-pill-prob':r==='Plausible'?'s1ctx-pill-pla':r==='Possible'?'s1ctx-pill-pos':'s1ctx-pill-none';return'<td class="'+(cls||'')+'"><span class="'+CTX_PILL_CLS+' '+pc+'">'+r+'</span></td>';}
@@ -16016,7 +16035,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if (c.kind === 'input') { label = INPUT_LABELS[i]; title = label; }
       else if (c.kind === 'stageinfo') { label = STAGE_LABELS[i - SB_INPUT_COUNT]; title = label + ' rating'; cls = (i === SB_INPUT_COUNT ? 'grp-start-stageinfo ' : ''); }
       else if (c.kind === 'rating') { label = 'Rating'; title = c.patternKey + ' rating'; cls = 'grp-start-g' + (SB_PATTERNS.indexOf(SB_PATTERNS.filter(function(p){return p.key===c.patternKey})[0]) + 1) + ' '; }
-      else if (c.kind === 'score') { label = 'Score'; title = 'Pass count out of 6'; }
+      else if (c.kind === 'score') { label = 'Score'; title = 'Pass count out of 7'; }
       else if (c.kind === 'test') { label = c.label; title = c.tooltip || c.label; }
       else if (c.kind === 'window') { label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label; cls = 'ct-window-col'; }
       else { label = '?'; title = ''; }
@@ -17124,7 +17143,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     { section:'Early-stage pre-test indicators', key:'basing', label:'Basing in a MT/LT uptrend', short:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pos_pre_indicators', patternKey:'basing', s2gated:true },  /* MD-V2-PULLING-BACK-BASING-SPLIT-V1 */
     { section:'Early-stage pre-test indicators', key:'collapsing', label:'Collapsing', short:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'neg_pre_indicators', patternKey:'collapsing' },
     // -- Group 3: Late-stage capital qualification setups and tests (one row per nav button) --
-    { section:'Late-stage capital qualification setups and tests', key:'probing_bet_s1', label:'Stage 1 — Probing bet', short:'S1 PB', ratingPath:'group:tests:probing_bet_s1', tabId:'tests_probing_bet_s1', patternKey:'probing_bet_s1' },
+    { section:'Late-stage capital qualification setups and tests', key:'probing_bet_s1', label:'Stage 1 — Speculative bet', short:'S1 SB', ratingPath:'group:tests:probing_bet_s1', tabId:'tests_probing_bet_s1', patternKey:'probing_bet_s1' },
     { section:'Late-stage capital qualification setups and tests', key:'probing_bet_s2', label:'Stage 2 — Probing bet', short:'S2 PB', ratingPath:'group:tests:probing_bet_s2', tabId:'tests_probing_bet_s2', patternKey:'probing_bet_s2' },
     { section:'Late-stage capital qualification setups and tests', key:'healthy_retest', label:'S2 — Retest setup', short:'S2 Retest', ratingPath:'group:tests:healthy_retest', tabId:'setups_healthy_retest', patternKey:'healthy_retest' },
     { section:'Late-stage capital qualification setups and tests', key:'vcp_deploy_s2', label:'S2 — VCP deploy', short:'S2 VCP', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests_healthy_vcp', patternKey:'vcp_deploy_s2' },

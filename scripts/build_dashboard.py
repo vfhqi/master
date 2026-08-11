@@ -224,7 +224,7 @@ TABS = [
     # MD-V2-S47-TAB-HEALTHY-RETEST-MARKER - Healthy Retest of MA (13-criterion standalone)
     {"id": "setups_healthy_retest", "label": "Healthy Retest", "accent": "#2E7D32"},
     # MD-V2-S59-TAB-PB-SPLIT-MARKER - S1 + S2 Probing Bet (separate pages)
-    {"id": "tests_probing_bet_s1", "label": "S1 Probing Bet", "accent": "#1b5e20"},
+    {"id": "tests_probing_bet_s1", "label": "S1 Speculative Bet", "accent": "#1b5e20"},  # S81 rename (id kept)
     {"id": "tests_probing_bet_s2", "label": "S2 Probing Bet", "accent": "#2e7d32"},
     # MD-V2-S47-TAB-SPECULATIVE-BET-MARKER - Speculative Bets S3+S4 (6-criterion x2)
     {"id": "tests_speculative_bet", "label": "Speculative Bets", "accent": "#c62828"},
@@ -5390,7 +5390,7 @@ function renderCombos(){
   // ---- Row definitions (spec §3 + §4) ----
   var TL_ROWS = [
     // GROUP 1 - Capital qualification tests (A=Qualified|Probable, B=Plausible, C=Possible)
-    {id:"pb_s1",      label:"Stage 1 probing bet",           path:["tests","probing_bet_s1"],                  stageNum:1, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
+    {id:"pb_s1",      label:"Stage 1 speculative bet",       path:["tests","probing_bet_s1"],                  stageNum:1, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
     {id:"pb_s2",      label:"Stage 2 probing bet",           path:["tests","probing_bet_s2"],                  stageNum:2, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
     {id:"retest",     label:"Stage 2 - Retest",              path:["tests","healthy_retest"],                  stageNum:2, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
     {id:"vcp",        label:"Stage 2 - VCP",                 path:["tests","vcp_deploy_s2"],                   stageNum:2, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
@@ -10138,7 +10138,7 @@ function SUM_renderQualifiedStocks() {
       + '<div class="v2-nav-group v2-grp-setups">'
       +   '<div class="v2-nav-group-label">Late-stage capital qualification setups and tests</div>'
       +   '<div class="v2-nav-group-btns">'
-      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">Stage 1 &mdash; Probing bet</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">Stage 1 &mdash; Speculative bet</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">Stage 2 &mdash; Probing bet</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">S2 &mdash; &ldquo;Retest&rdquo; and &ldquo;breakout&rdquo; of upwards MA</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
       +     '<button class="v2-nav-btn" data-v2-tab="tests_healthy_vcp" onclick="switchTab(\'tests_healthy_vcp\')">S2 &mdash; &ldquo;VCP&rdquo; and &ldquo;breakout&rdquo; of upwards MA</button>'  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
@@ -11553,7 +11553,7 @@ function SUM_renderQualifiedStocks() {
     cols.push({ id:'s2_rat', label:'S2', sortKey:'s2_rating', cls:'',             kind:'stage_rating', stageKey:'stage_2' });
     cols.push({ id:'s3_rat', label:'S3', sortKey:'s3_rating', cls:'',             kind:'stage_rating', stageKey:'stage_3' });
     cols.push({ id:'s4_rat',   label:'S4',   sortKey:'s4_rating',   cls:'',             kind:'stage_rating', stageKey:'stage_4' });
-    cols.push({ id:'s1pb_rat', label:'S1PB', sortKey:'s1pb_rating', cls:'grp-start-tr', kind:'setup_rating',  testKey:'probing_bet_s1' });
+    cols.push({ id:'s1pb_rat', label:'S1SB', sortKey:'s1pb_rating', cls:'grp-start-tr', kind:'setup_rating',  testKey:'probing_bet_s1' });  /* S81: Stage 1 is now the Speculative bet */
     cols.push({ id:'s2pb_rat', label:'S2PB', sortKey:'s2pb_rating', cls:'',             kind:'setup_rating',  testKey:'probing_bet_s2' });
     cols.push({ id:'s3sb_rat', label:'S3SB', sortKey:'s3sb_rating', cls:'',             kind:'setup_rating',  testKey:'speculative_bet_s3' });
     cols.push({ id:'s4sb_rat', label:'S4SB', sortKey:'s4sb_rating', cls:'',             kind:'setup_rating',  testKey:'speculative_bet_s4' });
@@ -14722,7 +14722,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 </script>
 <style>
 /* MD-V2-S59-TAB-PB-SPLIT-MARKER-CSS-START */
-/* ── S1 Probing Bet ─────────────────────────────────────── */
+/* ── S1 Speculative Bet (tab id is still tests_probing_bet_s1) ── */
 #tab-tests_probing_bet_s1 .group-captions { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: 16px 0 14px 0; }
 #tab-tests_probing_bet_s1 .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #aaa; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
 #tab-tests_probing_bet_s1 .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; font-size: 11px; letter-spacing: 0.2px; }
@@ -14872,7 +14872,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #sbs3-table col.c-pullback { width: 56px; }
 #sbs3-table col.c-ctx-rating { width: 70px; }
 #sbs3-table col.c-rating { width: 70px; }
-#sbs3-table col.c-score { width: 54px; }
+#sbs3-table col.c-score { width: 76px; }  /* S81: 7 pips */
 #sbs3-table col.c-test { width: 40px; }
 #sbs3-table col.c-rds { width: 60px; }
 /* Frozen header re-anchor below fixed nav + ribbon (mirror pb tables) */
@@ -14932,7 +14932,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #sbs4-table col.c-pullback { width: 56px; }
 #sbs4-table col.c-ctx-rating { width: 70px; }
 #sbs4-table col.c-rating { width: 70px; }
-#sbs4-table col.c-score { width: 54px; }
+#sbs4-table col.c-score { width: 76px; }  /* S81: 7 pips */
 #sbs4-table col.c-test { width: 40px; }
 #sbs4-table col.c-rds { width: 60px; }
 /* Frozen header re-anchor below fixed nav + ribbon (mirror pb tables) */
@@ -15009,7 +15009,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #pb-s1-table td.taxon .ind, #pb-s2-table td.taxon .ind { color: #666; font-weight: 500; }
 #pb-s1-table td.taxon .sec, #pb-s2-table td.taxon .sec { color: #999; }
 #pb-s1-table col.c-name, #pb-s2-table col.c-name { width: 124px; }
-#pb-s1-table col.c-taxon, #pb-s2-table col.c-taxon { width: 148px; }
+/* S81: measured at 222px of content; 148px was clipping the longer industry
+   and sector names mid-word on both tabs. */
+#pb-s1-table col.c-taxon, #pb-s2-table col.c-taxon { width: 222px; }
 #pb-s1-table col.c-price, #pb-s2-table col.c-price { width: 50px; }
 #pb-s1-table col.c-pullback, #pb-s2-table col.c-pullback { width: 56px; }
 #pb-s1-table col.c-ctx-rating, #pb-s2-table col.c-ctx-rating { width: 70px; }
@@ -15018,7 +15020,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #pb-s1-table col.c-ctx-score { width: 80px; }
 #pb-s1-table col.c-ctx-count { width: 44px; }
 #pb-s1-table col.c-rating, #pb-s2-table col.c-rating { width: 70px; }
-#pb-s1-table col.c-score, #pb-s2-table col.c-score { width: 54px; }
+#pb-s2-table col.c-score { width: 76px; }  /* S81: 54px clipped the "n/6" label */
+/* S81: the Stage 1 score row carries 7 pips, not 6, so the column is widened to
+   stop the pip row and its "n/7" label running past the cell edge. */
+#pb-s1-table col.c-score { width: 100px; }
+/* S81: 52-week reference columns (context group, not scored). */
+#pb-s1-table col.c-ref { width: 58px; }
 #pb-s1-table col.c-test, #pb-s2-table col.c-test { width: 40px; }
 #pb-s1-table col.c-window, #pb-s2-table col.c-window { width: 50px; }
 #pb-s1-table col.c-rds, #pb-s2-table col.c-rds { width: 60px; }
@@ -15035,7 +15042,10 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 
 /* MD-V2-S59-TAB-PB-SPLIT-MARKER-MODULE-START */
 // =============================================================================
-// S1 PROBING BET — TAB MODULE (S59)
+// S1 SPECULATIVE BET — TAB MODULE (S59; renamed from Probing Bet + 50D turn test, S81)
+// MD-V2-S81-SB-50D-TURN-MARKER
+// Visible name only: the data key (probing_bet_s1), the tab id and the DOM ids are
+// deliberately unchanged, so no stored state, deep link or data path breaks.
 // =============================================================================
 (function() {
   'use strict';
@@ -15052,7 +15062,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   var CTX_PASS_CLS = 's1ctx-pass'; var CTX_FAIL_CLS = 's1ctx-fail';
 
   var S1_GATE_DEFS = [
-    {key:'gate_200D_declining_vs_150d', label:'#1 — 200D MA lower than 150D ago', tooltip:'200-day MA is lower than it was 150 trading days ago — downtrend gate'}
+    {key:'gate_200D_declining_vs_150d', label:'#1 — 200D &lt; 150D ago', tooltip:'The 200-day moving average is lower than it was 150 trading days ago — the downtrend gate'}
   ];
 
   var PB_TESTS = [
@@ -15061,7 +15071,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {key:'g3_10d_rising',                label:'3. 10D MA rising',       grp:'setup',   tooltip:'10-day moving average is rising DoD'},
     {key:'g4_price_gt_20d',              label:'4. Price &gt; 20D MA',   grp:'setup',   tooltip:'Current price above the 20-day MA'},
     {key:'g5_20d_turn_last_5d',          label:'5. 20D MA turned up',    grp:'trigger', tooltip:'20D MA rising now AND was falling 5 days ago'},
-    {key:'g6_followthrough_close_ge2pct',label:'6. Confirm: close 2%+', grp:'trigger', tooltip:'Close at least 2% above yesterday'}
+    {key:'g6_50d_turn_last_5d',          label:'6. 50D MA turned up',    grp:'trigger', tooltip:'50D MA rising now AND was falling 5 days ago \u2014 the slower turn (S81)'},
+    {key:'g7_followthrough_close_ge2pct',label:'7. Confirm: close 2%+', grp:'trigger', tooltip:'Close at least 2% above yesterday'}
   ];
 
   var pbs1State = {
@@ -15099,6 +15110,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       rows.push({ticker:s.ticker,company:p.company_name||s.ticker,
         sector:p.sector||'',industry:p.industry||'',
         price:p.price,recent_pullback:p.recent_pullback_pct,
+        high_52w:p.high_52w,low_52w:p.low_52w,
         md_v2:s.md_v2,is_live:!!live[s.ticker],
         sector_in_portfolio:!!liveS[p.sector],
         industry_in_portfolio:!!liveI[p.industry]});
@@ -15113,6 +15125,27 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function portInfo(row){if(row.is_live)return{color:'#1b5e20',bg:'rgba(27,94,32,0.10)',bgHover:'rgba(27,94,32,0.14)'};if(row.sector_in_portfolio)return{color:'#1b5e20',bg:'rgba(27,94,32,0.05)',bgHover:'rgba(27,94,32,0.08)'};if(row.industry_in_portfolio)return{color:'#1b5e20',bg:'rgba(27,94,32,0.025)',bgHover:'rgba(27,94,32,0.05)'};return null;}
 
   function priceCell(row,cls){return'<td class="num '+(cls||'')+'">'  +fmtNum(row.price)+'</td>';}
+  /* S81 reference columns: share price against its own 52-week range, shown as the
+     percentage gap. Reference only - neither column is scored or gated. The colour
+     bands are the SAME ones the Stage 1 screen uses, so the two tabs read alike. */
+  function ref52Cell(row,key,cls){
+    var v=row[key];
+    if(v==null||isNaN(v)||row.price==null||v===0)return'<td class="num '+(cls||'')+'">-</td>';
+    /* S81 integrity guard. A 52-week high more than 50x the 52-week low is not a
+       price move, it is a broken series: either a single corrupt tick or a pence/
+       pounds redenomination partway through the year. Six stocks in the universe
+       are in that state today. Printing "+9,930% above the 52-week low" as though
+       it were a fact would mislead, so the figure is withheld and the raw numbers
+       are put in the tooltip instead. This guard is cosmetic: it does NOT repair
+       the underlying data, which needs fixing in the price pipeline. */
+    if(row.high_52w!=null&&row.low_52w!=null&&row.low_52w>0&&row.high_52w>50*row.low_52w){
+      return'<td class="num '+(cls||'')+'" style="color:#999;font-style:italic" title="52-week range looks corrupted in the source data (high '+fmtNum(row.high_52w)+' vs low '+fmtNum(row.low_52w)+', a ratio of '+Math.round(row.high_52w/row.low_52w)+'x). Figure withheld rather than shown wrong.">n/a</td>';
+    }
+    var pct=(row.price-v)/v*100;
+    var i=(key==='high_52w')?Math.max(-1,Math.min(1,(pct+20)/20)):Math.max(-1,Math.min(1,(pct-20)/30));
+    var txt=(pct>=0?'+':'')+Math.round(pct)+'%';
+    return'<td class="num '+(cls||'')+'" style="color:'+colGreen(i)+'" title="Price '+txt+' vs the 52-week '+(key==='high_52w'?'high':'low')+' of '+fmtNum(v)+'">'+txt+'</td>';
+  }
   function pullbackCell(row,cls){var v=row.recent_pullback;if(v==null||isNaN(v))return'<td class="num '+(cls||'')+'">-</td>';var pv=v*100,i=Math.max(-1,Math.min(1,(pv-5)/20));return'<td class="num '+(cls||'')+'" style="color:'+colGreen(-i)+'">'+Math.round(pv)+'%</td>';}
   function s1RatingCell(row,cls){var r=stageRating(row);var pc=r==='Probable'?'s1ctx-pill-prob':r==='Plausible'?'s1ctx-pill-pla':r==='Possible'?'s1ctx-pill-pos':'s1ctx-pill-none';return'<td class="'+(cls||'')+'"><span class="'+CTX_PILL_CLS+' '+pc+'">'+r+'</span></td>';}
   function s1GateCell(row,key,cls){var p=s1Gate(row,key);return p?'<td class="'+CTX_PASS_CLS+' '+(cls||'')+'"><span class="tick">&#10003;</span></td>':'<td class="'+CTX_FAIL_CLS+' '+(cls||'')+'">.</td>';}
@@ -15147,6 +15180,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(key==='sector')return row.sector||'';
     if(key==='price')return row.price||0;
     if(key==='recent_pullback')return row.recent_pullback==null?-Infinity:row.recent_pullback;
+    if(key==='vs_52wh'||key==='vs_52wl'){var _rf=(key==='vs_52wh')?row.high_52w:row.low_52w;if(_rf==null||row.price==null||_rf===0)return-Infinity;return(row.price-_rf)/_rf*100;}
     if(key==='pb__rating')return TIER_RANK[pbRating(row)]||0;
     if(key==='pb__score'){var r=getPbRec(row);return r?(r.count||0):0;}
     if(key==='s1__rating')return TIER_RANK[stageRating(row)]||0;
@@ -15170,7 +15204,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       s1stack1m:'3. Stack 1M+',s1stack3m:'4. Stack 3M+',s1secinind:'Sectors in ind.',s1cosinsec:'Cos in sector',
       pbrating:'Rating',pbscore:'Score',
       g1:'1. Gate: stage',g2:'2. 5D rising',g3:'3. 10D rising',g4:'4. P&gt;20D',
-      g5:'5. 20D turned up',g6:'6. Close 2%+',
+      g5:'5. 20D turned up',g6:'6. 50D turned up',g7:'7. Close 2%+',
+      vs52wh:'vs 52W high',vs52wl:'vs 52W low',
       l5d:'Fired 5d',l20d:'Fired 20d',rds:'RDS'
     };
     var COL_KEYS={name:'company',taxon:'sector',price:'price',pullback:'recent_pullback',
@@ -15178,15 +15213,21 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       s1stack1m:'s1__stack1m',s1stack3m:'s1__stack3m',s1secinind:'s1__sec_in_ind',s1cosinsec:'s1__co_in_sec',
       pbrating:'pb__rating',pbscore:'pb__score',
       g1:'pb__g1_stage_qualifies',g2:'pb__g2_5d_rising',g3:'pb__g3_10d_rising',g4:'pb__g4_price_gt_20d',
-      g5:'pb__g5_20d_turn_last_5d',g6:'pb__g6_followthrough_close_ge2pct',
+      g5:'pb__g5_20d_turn_last_5d',g6:'pb__g6_50d_turn_last_5d',g7:'pb__g7_followthrough_close_ge2pct',
+      vs52wh:'vs_52wh',vs52wl:'vs_52wl',
       l5d:'pb__l5d',l20d:'pb__l20d',rds:'rds__date'};
-    var COL_GRP_START={s1rating:'grp-start-g1',pbrating:'grp-start-rating',g1:'grp-start-g2',g5:'grp-start-g3',g6:'grp-start-g4',l5d:'grp-start-context'};
-    var COL_TOOLTIPS={s1rating:'Stage 1 rating',s1score:'S1 tests passed (of 8)',s1g0:S1_GATE_DEFS[0].tooltip,
+    var COL_GRP_START={s1rating:'grp-start-g1',pbrating:'grp-start-rating',g1:'grp-start-g2',g5:'grp-start-g3',g7:'grp-start-g4',vs52wh:'grp-start-context'};
+    var COL_TOOLTIPS={s1rating:'Stage 1 screen rating',s1score:'Stage 1 tests passed, out of 4',s1g0:S1_GATE_DEFS[0].tooltip,
       s1stack1m:'MA stack held \u226521 days (1 month+)',s1stack3m:'MA stack held \u226563 days (3 months+)',
       s1secinind:'Sectors in industry (context)',s1cosinsec:'Companies in sector (context)',
-      pbrating:'PB S1 overall rating',pbscore:'Tests passed out of 6'};
+      vs52wh:'Reference only: share price against its 52-week high, as a percentage gap',
+      vs52wl:'Reference only: share price against its 52-week low, as a percentage gap',
+      l5d:'Whether the test fired at any point in the last 5 trading days',
+      l20d:'Whether the test fired at any point in the last 20 trading days',
+      rds:'Most recent research note for this stock in the repository',
+      pbrating:'Stage 1 speculative bet overall rating',pbscore:'Tests passed out of 7'};
     for(var i=0;i<PB_TESTS.length;i++)COL_TOOLTIPS['g'+(i+1)]=PB_TESTS[i].tooltip;
-    var ORDER=['name','taxon','price','pullback','pbrating','pbscore','s1rating','s1score','s1g0','s1stack1m','s1stack3m','s1secinind','s1cosinsec','g1','g2','g3','g4','g5','g6','l5d','l20d','rds'];
+    var ORDER=['name','taxon','price','pullback','pbrating','pbscore','s1rating','s1score','s1g0','s1stack1m','s1stack3m','s1secinind','s1cosinsec','g1','g2','g3','g4','g5','g6','g7','vs52wh','vs52wl','l5d','l20d','rds'];
     var h='';
     for(var ci=0;ci<ORDER.length;ci++){
       var id=ORDER[ci],sk=COL_KEYS[id],isSort=pbs1State.sort.col===sk;
@@ -15205,10 +15246,10 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var tint={'Possible':'tint-pos','Plausible':'tint-pla','Probable':'tint-pe','Qualified':'tint-pl'};
     var strip={'Possible':'pos','Plausible':'pla','Probable':'prob','Qualified':'pl'};
     var PB1_THRESH={
-      'Possible':  'Stage 1 ✓ · 5D+10D rising ✓ · price not above 20D MA; 20D MA not yet turned',
-      'Plausible': 'Stage 1 ✓ · 5D+10D rising ✓ · price above 20D MA or 20D MA turned (one of two)',
-      'Probable':  'Stage 1 ✓ · 5D+10D rising ✓ · price>20D + 20D turned ✓ · no 2%+ up-close yet',
-      'Qualified': 'All 6 criteria pass · price>20D MA · 20D MA turned · 2%+ up-close ✓'
+      'Possible':  'Stage 1 qualifies · 5D and 10D MAs rising · price still below the 20D MA and neither the 20D nor the 50D MA has turned up',
+      'Plausible': 'Stage 1 qualifies · 5D and 10D MAs rising · EITHER price above the 20D MA OR the 20D or 50D MA has turned up, but not both',
+      'Probable':  'Stage 1 qualifies · 5D and 10D MAs rising · price above the 20D MA AND the 20D or 50D MA has turned up · no 2%+ up-close yet',
+      'Qualified': 'Everything Probable requires, plus the confirming close at least 2% above yesterday'
     };
     var sel=pbs1State.tierFilter||[],h='';
     for(var i=0;i<order.length;i++){
@@ -15261,8 +15302,11 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +pbTestCell(s,'g3_10d_rising','')
         +pbTestCell(s,'g4_price_gt_20d','')
         +pbTestCell(s,'g5_20d_turn_last_5d','grp-start-g3')
-        +pbTestCell(s,'g6_followthrough_close_ge2pct','grp-start-g4')
-        +windowCell(s,'l5d','ct-window-col grp-start-context')
+        +pbTestCell(s,'g6_50d_turn_last_5d','')
+        +pbTestCell(s,'g7_followthrough_close_ge2pct','grp-start-g4')
+        +ref52Cell(s,'high_52w','grp-start-context')
+        +ref52Cell(s,'low_52w','')
+        +windowCell(s,'l5d','ct-window-col')
         +windowCell(s,'l20d','ct-window-col')
         +rdsCell(s,'')
         +'</tr>';
@@ -15285,26 +15329,28 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<col class="c-ctx-rating"><col class="c-ctx-score"><col class="c-ctx-gate"><col class="c-ctx-test"><col class="c-ctx-test"><col class="c-ctx-count"><col class="c-ctx-count">'
       +'<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">'
       +'<col class="c-test"><col class="c-test">'
+      +'<col class="c-test">'
+      +'<col class="c-ref"><col class="c-ref">'
       +'<col class="c-window"><col class="c-window"><col class="c-rds">';
     var grpRow='<th class="gh-inputs" colspan="4">Inputs</th>'
       +'<th class="gh-rating grp-start-rating" colspan="2">Rating</th>'
       +'<th class="gh-g1 grp-start-g1" colspan="7">Group 1 — Stage 1 qualifying?</th>'
       +'<th class="gh-g2 grp-start-g2" colspan="4">Group 2 — Entry setup?</th>'
-      +'<th class="gh-g3 grp-start-g3" colspan="1">Group 3 — Trigger?</th>'
+      +'<th class="gh-g3 grp-start-g3" colspan="2">Group 3 — Trigger?</th>'
       +'<th class="gh-g4 grp-start-g4" colspan="1">Group 4 — Confirmation?</th>'
-      +'<th class="gh-context grp-start-context" colspan="3">Context</th>';
+      +'<th class="gh-context grp-start-context" colspan="5">Context</th>';
     var subRow='<th colspan="4"></th>'
       +'<th colspan="1">Rating</th><th colspan="1">Score</th>'
       +'<th colspan="1">Stage rating</th><th colspan="1">Score</th><th colspan="1">Gate</th><th colspan="2">Stack</th><th colspan="2">Taxonomy</th>'
       +'<th colspan="1">Gate</th><th colspan="3">Setup</th>'
-      +'<th colspan="1">Trigger</th>'
+      +'<th colspan="2">Trigger</th>'
       +'<th colspan="1">Confirm</th>'
-      +'<th colspan="2">Fired</th><th colspan="1">RDS</th>';
+      +'<th colspan="2">For reference</th><th colspan="2">Fired</th><th colspan="1">RDS</th>';
     var thead='<tr class="group-header-row">'+grpRow+'</tr>'
       +'<tr class="sub-group-row">'+subRow+'</tr>'
       +'<tr class="col-header-row" id="pbs1-col-header"></tr>';
     host.innerHTML=
-      '<div class="s1-intro">S1 Probing Bet — a small starter position on a Stage 1 (troughing/basing) stock that breaks out positively. Probes whether the trend is turning before committing a full position. The Stage 1 qualifying group shows context for the underlying trend state. Gate confirms stage qualifies; Setup checks MAs are rising and price is above 20D; Trigger requires the 20D MA to have freshly turned up, with a 2%+ follow-through close.</div>'
+      '<div class="s1-intro">Stage 1 Speculative Bet — a small starter position in a Stage 1 (troughing or basing) stock that is breaking out positively. It probes whether the downtrend is turning, before committing a full position, so size small and keep the stop tight. Seven criteria: the stock must qualify as Stage 1, the 5D and 10D moving averages must be rising, price must be back above the 20D moving average, EITHER the 20D or the 50D moving average must have freshly turned up, and the move must be confirmed by a close at least 2% above yesterday. The Stage 1 qualifying group to the left is context on the underlying trend, not part of the seven.</div>'
       +'<div class="controls s1-controls">'
         +'<div class="ctrl-grp"><span class="ctrl-label">Scope</span>'
           +'<button class="toggle-btn active" data-pbs1-scope="all" onclick="pbs1SetScope(\'all\')">All <span id="pbs1-cnt-all"></span></button>'
@@ -15323,7 +15369,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +'</div>'
       +'</div>'
       +'<div class="s1-rating-tiles" id="pbs1-tile" style="grid-template-columns: repeat(4, 1fr);"></div>'
-      +'<div class="group-captions">'+'<div class="gcap gcap-g1"><b>Group 1 — Stage 1 qualifying?</b>The stock must be in an active Stage 1 base. One gate: 200D MA still declining vs 150 trading days ago. If the gate fails, the stock does not qualify for a probing bet.</div>'+'<div class="gcap gcap-g2"><b>Group 2 — Entry setup?</b>Four tests checking whether the stock is in a pullback setup within the base: 5D MA rising, 10D MA rising, price above 20D MA, 20D MA turned up.</div>'+'<div class="gcap gcap-g3"><b>Group 3 — Trigger?</b>One test: the 20D MA has turned up — the short-term trend is reversing upward within the Stage 1 base.</div>'+'<div class="gcap gcap-g4"><b>Group 4 — Confirmation?</b>One test: price has closed more than 2% above the trigger level, confirming the move has conviction rather than stalling.</div>'+'</div>'
+      +'<div class="group-captions">'+'<div class="gcap gcap-g1"><b>Group 1 — Stage 1 qualifying?</b>Context on the underlying base, drawn from the Stage 1 screen: its rating and score, the 200D MA gate (still lower than it was 150 trading days ago), how long the moving-average stack has held, and how crowded the industry and sector are. These columns inform the read; they are not among the seven tests.</div>'+'<div class="gcap gcap-g2"><b>Group 2 — Entry setup?</b>One gate and three tests. The gate: the stock must rate Plausible or Probable on the Stage 1 screen. The tests: the 5D MA rising, the 10D MA rising, and price back above the 20D MA.</div>'+'<div class="gcap gcap-g3"><b>Group 3 — Trigger?</b>Two tests, and EITHER one satisfies the trigger: the 20D MA has freshly turned up, or the slower 50D MA has. Freshly turned up means rising today and still falling five days ago. Passing either says the short-term trend is reversing upward inside the Stage 1 base.</div>'+'<div class="gcap gcap-g4"><b>Group 4 — Confirmation?</b>One test: price has closed at least 2% above yesterday, confirming the move has conviction rather than stalling.</div>'+'</div>'
       +'<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="'+TABLE_ID+'"><colgroup>'+cg+'</colgroup><thead>'+thead+'</thead><tbody id="pbs1-tbody"></tbody></table></div></div>';
     var hdr=document.getElementById('pbs1-col-header');
     if(hdr)hdr.addEventListener('click',function(e){var th=e.target.closest('th');if(!th)return;var k=th.getAttribute('data-sort-key');if(k)pbs1OnSort(k);});
@@ -15755,16 +15801,17 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       shortLabel: 'S3 Speculative',
       tone: 's3',
       tierLadder: ['Possible', 'Plausible', 'Probable', 'Qualified'],
-      total: 6,
+      total: 7,
       tooltip: 'A breakout on a Stage 3 (topping/early decline) stock — a speculative position, often contrarian or short-side.',
-      caption: '<span class="db">A positive breakout on a Stage 3 stock.</span> The 5D and 10D MAs must be rising. Price must be above the 20D MA, and the 20D MA must have turned up in the last 5 days. Confirmation requires a close 2%+ above yesterday. Stage 3 context makes this inherently speculative.',
+      caption: '<span class="db">A positive breakout on a Stage 3 stock.</span> The 5D and 10D MAs must be rising. Price must be above the 20D MA, and EITHER the 20D or the 50D MA must have freshly turned up. Confirmation requires a close 2%+ above yesterday. Stage 3 context makes this inherently speculative.',
       tests: [
         { key: 'g1_stage_qualifies',            label: 'Stage 3 qualifies',    group: 'gate',    tooltip: 'Stage 3 rating is Probable or Plausible — hard precondition' },
         { key: 'g2_5d_rising',                   label: '5D MA rising',         group: 'setup',   tooltip: '5-day moving average is rising day-over-day' },
         { key: 'g3_10d_rising',                  label: '10D MA rising',        group: 'setup',   tooltip: '10-day moving average is rising day-over-day' },
         { key: 'g4_price_gt_20d',                label: 'Price > 20D MA',       group: 'trigger', tooltip: 'Current price is above the 20-day moving average' },
         { key: 'g5_20d_turn_last_5d',            label: '20D MA turned up',     group: 'trigger', tooltip: '20D MA is rising now AND was falling 5 days ago — the turn' },
-        { key: 'g6_followthrough_close_ge2pct',  label: 'Confirm: close 2%+',   group: 'trigger', tooltip: 'Today close at least 2% above yesterday — follow-through confirmation' }
+        { key: 'g6_50d_turn_last_5d',            label: '50D MA turned up',     group: 'trigger', tooltip: '50D MA is rising now AND was falling 5 days ago — the slower turn' },
+        { key: 'g7_followthrough_close_ge2pct',  label: 'Confirm: close 2%+',   group: 'trigger', tooltip: 'Today close at least 2% above yesterday — follow-through confirmation' }
       ]
     },
     {
@@ -15773,7 +15820,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       shortLabel: 'S4 Speculative',
       tone: 's4',
       tierLadder: ['Possible', 'Plausible', 'Probable', 'Qualified'],
-      total: 6,
+      total: 7,
       tooltip: 'A breakout on a Stage 4 (declining/bottoming) stock — a speculative early turnaround bet before the stage flips.',
       caption: '<span class="db">A positive breakout on a Stage 4 stock that has not yet transitioned to Stage 1.</span> Same criteria as S3 speculative bet, but the stock is in a confirmed decline or bottoming phase. These are the highest-risk bets — the trend is still against you.',
       tests: [
@@ -15782,7 +15829,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         { key: 'g3_10d_rising',                  label: '10D MA rising',        group: 'setup',   tooltip: '10-day moving average is rising day-over-day' },
         { key: 'g4_price_gt_20d',                label: 'Price > 20D MA',       group: 'trigger', tooltip: 'Current price is above the 20-day moving average' },
         { key: 'g5_20d_turn_last_5d',            label: '20D MA turned up',     group: 'trigger', tooltip: '20D MA is rising now AND was falling 5 days ago — the turn' },
-        { key: 'g6_followthrough_close_ge2pct',  label: 'Confirm: close 2%+',   group: 'trigger', tooltip: 'Today close at least 2% above yesterday — follow-through confirmation' }
+        { key: 'g6_50d_turn_last_5d',            label: '50D MA turned up',     group: 'trigger', tooltip: '50D MA is rising now AND was falling 5 days ago — the slower turn' },
+        { key: 'g7_followthrough_close_ge2pct',  label: 'Confirm: close 2%+',   group: 'trigger', tooltip: 'Today close at least 2% above yesterday — follow-through confirmation' }
       ]
     }
   ];
@@ -16219,14 +16267,15 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {label:'Price',key:'price'},
     {label:'vs 20D',key:'vs20d',tip:'Price vs 20-day MA (% above or below)'},
     {label:'Rating',key:'spec__rating',grp:'grp-start-rating',tip:'Speculative bet overall rating'},
-    {label:'Score',key:'spec__score',tip:'Tests passed out of 6'},
+    {label:'Score',key:'spec__score',tip:'Tests passed out of 7'},
     {label:'S3 Rating',key:'s3__rating',grp:'grp-start-g1',tip:'Stage 3 (topping) screen rating - the risk backdrop'},
     {label:'1. Stage qualifies',key:'spec__g1_stage_qualifies',tip:'Stock genuinely in Stage 3'},
     {label:'2. 5D rising',key:'spec__g2_5d_rising',grp:'grp-start-g2',tip:'5-day MA rising'},
     {label:'3. 10D rising',key:'spec__g3_10d_rising',tip:'10-day MA rising'},
     {label:'4. P&gt;20D',key:'spec__g4_price_gt_20d',tip:'Price above 20-day MA'},
     {label:'5. 20D turned up',key:'spec__g5_20d_turn_last_5d',grp:'grp-start-g3',tip:'20D MA freshly turned up in the last 5 days'},
-    {label:'6. Close 2%+',key:'spec__g6_followthrough_close_ge2pct',grp:'grp-start-g4',tip:'Close at least 2% above yesterday'},
+    {label:'6. 50D turned up',key:'spec__g6_50d_turn_last_5d',tip:'50D MA freshly turned up in the last 5 days — the slower turn (S81)'},
+    {label:'7. Close 2%+',key:'spec__g7_followthrough_close_ge2pct',grp:'grp-start-g4',tip:'Close at least 2% above yesterday'},
     {label:'RDS',key:'rds__date',grp:'grp-start-context',tip:'Latest research note in the repository'}
   ];
   function buildHeader(){
@@ -16243,10 +16292,10 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var tint={'Possible':'tint-pos','Plausible':'tint-pla','Probable':'tint-pe','Qualified':'tint-pl'};
     var strip={'Possible':'pos','Plausible':'pla','Probable':'prob','Qualified':'pl'};
     var THR={
-      'Possible':'In Stage 3 + 5D/10D rising; not yet above the 20D and 20D not yet turned',
-      'Plausible':'In Stage 3 + 5D/10D rising; price above 20D or 20D turned (one of two)',
-      'Probable':'In Stage 3 + price above 20D + 20D turned; awaiting a 2%+ confirmation close',
-      'Qualified':'All six criteria pass: price above 20D, 20D turned up, 2%+ confirmation close'
+      'Possible':'In Stage 3 + 5D/10D rising; price still below the 20D and neither the 20D nor the 50D has turned up',
+      'Plausible':'In Stage 3 + 5D/10D rising; EITHER price above the 20D OR the 20D or 50D turned up, but not both',
+      'Probable':'In Stage 3 + price above the 20D AND the 20D or 50D turned up; awaiting a 2%+ confirmation close',
+      'Qualified':'All seven criteria pass, including the confirming close at least 2% above yesterday'
     };
     var sel=st.tierFilter||[],h='';
     for(var i=0;i<order.length;i++){var r=order[i],cnt=tc[r]||0;var act=sel.indexOf(r)>-1?' active':'';var pct=total>0?Math.round(cnt/Math.max(1,total)*100):0;h+='<div class="rating-tile '+tint[r]+act+'" data-tier="'+r+'"><div class="rt-label">'+r+'</div><div class="rt-count">'+cnt.toLocaleString('en-GB')+'</div><div class="rt-sub">of '+total.toLocaleString('en-GB')+' &middot; '+pct+'%</div><div class="rt-thresh">'+(THR[r]||' ')+'</div><div class="rt-strip rt-strip-'+strip[r]+'">&#8203;</div></div>';}
@@ -16281,7 +16330,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +testCell(s,'g3_10d_rising','')
         +testCell(s,'g4_price_gt_20d','')
         +testCell(s,'g5_20d_turn_last_5d','grp-start-g3')
-        +testCell(s,'g6_followthrough_close_ge2pct','grp-start-g4')
+        +testCell(s,'g6_50d_turn_last_5d','')
+        +testCell(s,'g7_followthrough_close_ge2pct','grp-start-g4')
         +rdsCell(s,'grp-start-context')
         +'</tr>';
     }
@@ -16303,26 +16353,26 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<col class="c-ctx-rating">'
       +'<col class="c-test">'
       +'<col class="c-test"><col class="c-test"><col class="c-test">'
-      +'<col class="c-test">'
+      +'<col class="c-test"><col class="c-test">'
       +'<col class="c-test">'
       +'<col class="c-rds">';
     var grpRow='<th class="gh-inputs" colspan="4">Inputs</th>'
       +'<th class="gh-rating grp-start-rating" colspan="2">Rating</th>'
       +'<th class="gh-g1 grp-start-g1" colspan="2">Group 1 &mdash; Stage 3 qualifying?</th>'
       +'<th class="gh-g2 grp-start-g2" colspan="3">Group 2 &mdash; Entry setup?</th>'
-      +'<th class="gh-g3 grp-start-g3" colspan="1">Group 3 &mdash; Trigger?</th>'
+      +'<th class="gh-g3 grp-start-g3" colspan="2">Group 3 &mdash; Trigger?</th>'
       +'<th class="gh-g4 grp-start-g4" colspan="1">Group 4 &mdash; Confirmation?</th>'
       +'<th class="gh-context grp-start-context" colspan="1">Context</th>';
     var subRow='<th colspan="4"></th>'
       +'<th colspan="1">Rating</th><th colspan="1">Score</th>'
       +'<th colspan="1">S3 rating</th><th colspan="1">Gate</th>'
       +'<th colspan="3">Setup</th>'
-      +'<th colspan="1">Trigger</th>'
+      +'<th colspan="2">Trigger</th>'
       +'<th colspan="1">Confirm</th>'
       +'<th colspan="1">RDS</th>';
     var thead='<tr class="group-header-row">'+grpRow+'</tr><tr class="sub-group-row">'+subRow+'</tr><tr class="col-header-row" id="sbs3-col-header"></tr>';
     host.innerHTML=
-      '<div class="s1-intro">Stage 3 Speculative bet &mdash; a small, deliberately-sized starter position in a stock that is breaking out positively while still in Stage 3 (topping). It is a capital-deployment opportunity you take with eyes open and tight risk control: a single small position with a tight stop. This is the highest-risk entry, because the primary long-term trend is likely against you, so size small and treat each as a single probe. The six-criterion test mirrors the probing bets but is built on the faster 20-day moving average: stage gate, 5D and 10D MAs rising, price above the 20D, the 20D freshly turned up, and a 2%+ confirmation close.</div>'
+      '<div class="s1-intro">Stage 3 Speculative bet &mdash; a small, deliberately-sized starter position in a stock that is breaking out positively while still in Stage 3 (topping). It is a capital-deployment opportunity you take with eyes open and tight risk control: a single small position with a tight stop. This is the highest-risk entry, because the primary long-term trend is likely against you, so size small and treat each as a single probe. The seven-criterion test mirrors the Stage 1 speculative bet: stage gate, 5D and 10D MAs rising, price above the 20D, EITHER the 20D or the 50D freshly turned up, and a 2%+ confirmation close.</div>'
       +'<div class="controls s1-controls">'
         +'<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>'
           +'<button class="toggle-btn active" data-sbs3-grp="inputs" data-sbs3-val="pct" onclick="sbs3SetMode(\'inputs\',\'pct\')">show as %</button>'
@@ -16352,7 +16402,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<div class="group-captions">'
         +'<div class="gcap gcap-g1"><b>Group 1 &mdash; Stage 3 qualifying?</b>Confirms the stock is genuinely in Stage 3 (topping). The S3 rating shows how advanced the top is: the more advanced, the more speculative the bet. This is the risk context, not a reason to avoid - it is exactly where a small, tightly-stopped probe can pay.</div>'
         +'<div class="gcap gcap-g2"><b>Group 2 &mdash; Entry setup?</b>Three tests that the breakout setup is in place: the 5-day MA rising, the 10-day MA rising, and price back above the 20-day MA.</div>'
-        +'<div class="gcap gcap-g3"><b>Group 3 &mdash; Trigger?</b>One test: the 20-day MA has freshly turned up in the last 5 days, the short-term trend reasserting against the Stage 3 backdrop.</div>'
+        +'<div class="gcap gcap-g3"><b>Group 3 &mdash; Trigger?</b>Two tests, and EITHER one satisfies the trigger: the 20-day MA has freshly turned up, or the slower 50-day MA has. Freshly turned up means rising today and still falling five days ago. Either way, the short-term trend is reasserting against the Stage 3 backdrop.</div>'
         +'<div class="gcap gcap-g4"><b>Group 4 &mdash; Confirmation?</b>One test: price has closed more than 2% above the trigger level, confirming the move has conviction rather than a failed bounce.</div>'
       +'</div>'
       +'<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="'+TABLE_ID+'"><colgroup>'+cg+'</colgroup><thead>'+thead+'</thead><tbody id="sbs3-tbody"></tbody></table></div></div>';
@@ -16450,14 +16500,15 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {label:'Price',key:'price'},
     {label:'vs 20D',key:'vs20d',tip:'Price vs 20-day MA (% above or below)'},
     {label:'Rating',key:'spec__rating',grp:'grp-start-rating',tip:'Speculative bet overall rating'},
-    {label:'Score',key:'spec__score',tip:'Tests passed out of 6'},
+    {label:'Score',key:'spec__score',tip:'Tests passed out of 7'},
     {label:'S4 Rating',key:'s4__rating',grp:'grp-start-g1',tip:'Stage 4 (declining) screen rating - the risk backdrop'},
     {label:'1. Stage qualifies',key:'spec__g1_stage_qualifies',tip:'Stock genuinely in Stage 4'},
     {label:'2. 5D rising',key:'spec__g2_5d_rising',grp:'grp-start-g2',tip:'5-day MA rising'},
     {label:'3. 10D rising',key:'spec__g3_10d_rising',tip:'10-day MA rising'},
     {label:'4. P&gt;20D',key:'spec__g4_price_gt_20d',tip:'Price above 20-day MA'},
     {label:'5. 20D turned up',key:'spec__g5_20d_turn_last_5d',grp:'grp-start-g3',tip:'20D MA freshly turned up in the last 5 days'},
-    {label:'6. Close 2%+',key:'spec__g6_followthrough_close_ge2pct',grp:'grp-start-g4',tip:'Close at least 2% above yesterday'},
+    {label:'6. 50D turned up',key:'spec__g6_50d_turn_last_5d',tip:'50D MA freshly turned up in the last 5 days — the slower turn (S81)'},
+    {label:'7. Close 2%+',key:'spec__g7_followthrough_close_ge2pct',grp:'grp-start-g4',tip:'Close at least 2% above yesterday'},
     {label:'RDS',key:'rds__date',grp:'grp-start-context',tip:'Latest research note in the repository'}
   ];
   function buildHeader(){
@@ -16474,10 +16525,10 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var tint={'Possible':'tint-pos','Plausible':'tint-pla','Probable':'tint-pe','Qualified':'tint-pl'};
     var strip={'Possible':'pos','Plausible':'pla','Probable':'prob','Qualified':'pl'};
     var THR={
-      'Possible':'In Stage 4 + 5D/10D rising; not yet above the 20D and 20D not yet turned',
-      'Plausible':'In Stage 4 + 5D/10D rising; price above 20D or 20D turned (one of two)',
-      'Probable':'In Stage 4 + price above 20D + 20D turned; awaiting a 2%+ confirmation close',
-      'Qualified':'All six criteria pass: price above 20D, 20D turned up, 2%+ confirmation close'
+      'Possible':'In Stage 4 + 5D/10D rising; price still below the 20D and neither the 20D nor the 50D has turned up',
+      'Plausible':'In Stage 4 + 5D/10D rising; EITHER price above the 20D OR the 20D or 50D turned up, but not both',
+      'Probable':'In Stage 4 + price above the 20D AND the 20D or 50D turned up; awaiting a 2%+ confirmation close',
+      'Qualified':'All seven criteria pass, including the confirming close at least 2% above yesterday'
     };
     var sel=st.tierFilter||[],h='';
     for(var i=0;i<order.length;i++){var r=order[i],cnt=tc[r]||0;var act=sel.indexOf(r)>-1?' active':'';var pct=total>0?Math.round(cnt/Math.max(1,total)*100):0;h+='<div class="rating-tile '+tint[r]+act+'" data-tier="'+r+'"><div class="rt-label">'+r+'</div><div class="rt-count">'+cnt.toLocaleString('en-GB')+'</div><div class="rt-sub">of '+total.toLocaleString('en-GB')+' &middot; '+pct+'%</div><div class="rt-thresh">'+(THR[r]||' ')+'</div><div class="rt-strip rt-strip-'+strip[r]+'">&#8203;</div></div>';}
@@ -16512,7 +16563,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         +testCell(s,'g3_10d_rising','')
         +testCell(s,'g4_price_gt_20d','')
         +testCell(s,'g5_20d_turn_last_5d','grp-start-g3')
-        +testCell(s,'g6_followthrough_close_ge2pct','grp-start-g4')
+        +testCell(s,'g6_50d_turn_last_5d','')
+        +testCell(s,'g7_followthrough_close_ge2pct','grp-start-g4')
         +rdsCell(s,'grp-start-context')
         +'</tr>';
     }
@@ -16534,26 +16586,26 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<col class="c-ctx-rating">'
       +'<col class="c-test">'
       +'<col class="c-test"><col class="c-test"><col class="c-test">'
-      +'<col class="c-test">'
+      +'<col class="c-test"><col class="c-test">'
       +'<col class="c-test">'
       +'<col class="c-rds">';
     var grpRow='<th class="gh-inputs" colspan="4">Inputs</th>'
       +'<th class="gh-rating grp-start-rating" colspan="2">Rating</th>'
       +'<th class="gh-g1 grp-start-g1" colspan="2">Group 1 &mdash; Stage 4 qualifying?</th>'
       +'<th class="gh-g2 grp-start-g2" colspan="3">Group 2 &mdash; Entry setup?</th>'
-      +'<th class="gh-g3 grp-start-g3" colspan="1">Group 3 &mdash; Trigger?</th>'
+      +'<th class="gh-g3 grp-start-g3" colspan="2">Group 3 &mdash; Trigger?</th>'
       +'<th class="gh-g4 grp-start-g4" colspan="1">Group 4 &mdash; Confirmation?</th>'
       +'<th class="gh-context grp-start-context" colspan="1">Context</th>';
     var subRow='<th colspan="4"></th>'
       +'<th colspan="1">Rating</th><th colspan="1">Score</th>'
       +'<th colspan="1">S4 rating</th><th colspan="1">Gate</th>'
       +'<th colspan="3">Setup</th>'
-      +'<th colspan="1">Trigger</th>'
+      +'<th colspan="2">Trigger</th>'
       +'<th colspan="1">Confirm</th>'
       +'<th colspan="1">RDS</th>';
     var thead='<tr class="group-header-row">'+grpRow+'</tr><tr class="sub-group-row">'+subRow+'</tr><tr class="col-header-row" id="sbs4-col-header"></tr>';
     host.innerHTML=
-      '<div class="s1-intro">Stage 4 Speculative bet &mdash; a small, deliberately-sized starter position in a stock that is showing the first signs of turning up while still in Stage 4 (declining). It is a capital-deployment opportunity you take with eyes open and tight risk control: a single small position with a tight stop. This is the highest-risk entry of all, because the stock is in a confirmed downtrend and most attempts to call a bottom fail, so size small, demand the confirmation close, and treat each as a single probe. The six-criterion test mirrors the probing bets but is built on the faster 20-day moving average: stage gate, 5D and 10D MAs rising, price reclaiming the 20D, the 20D freshly turned up, and a 2%+ confirmation close.</div>'
+      '<div class="s1-intro">Stage 4 Speculative bet &mdash; a small, deliberately-sized starter position in a stock that is showing the first signs of turning up while still in Stage 4 (declining). It is a capital-deployment opportunity you take with eyes open and tight risk control: a single small position with a tight stop. This is the highest-risk entry of all, because the stock is in a confirmed downtrend and most attempts to call a bottom fail, so size small, demand the confirmation close, and treat each as a single probe. The seven-criterion test mirrors the Stage 1 speculative bet: stage gate, 5D and 10D MAs rising, price reclaiming the 20D, EITHER the 20D or the 50D freshly turned up, and a 2%+ confirmation close.</div>'
       +'<div class="controls s1-controls">'
         +'<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>'
           +'<button class="toggle-btn active" data-sbs4-grp="inputs" data-sbs4-val="pct" onclick="sbs4SetMode(\'inputs\',\'pct\')">show as %</button>'
@@ -16583,7 +16635,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<div class="group-captions">'
         +'<div class="gcap gcap-g1"><b>Group 1 &mdash; Stage 4 qualifying?</b>Confirms the stock is genuinely in Stage 4 (declining). The S4 rating shows how advanced the downtrend is: the deeper the decline, the more speculative the bet that it is turning. This is the risk context, not a reason to avoid - it is exactly where a small, tightly-stopped probe can pay.</div>'
         +'<div class="gcap gcap-g2"><b>Group 2 &mdash; Entry setup?</b>Three tests that the breakout setup is in place: the 5-day MA rising, the 10-day MA rising, and price back above the 20-day MA.</div>'
-        +'<div class="gcap gcap-g3"><b>Group 3 &mdash; Trigger?</b>One test: the 20-day MA has freshly turned up in the last 5 days, the short-term trend reasserting against the Stage 4 downtrend.</div>'
+        +'<div class="gcap gcap-g3"><b>Group 3 &mdash; Trigger?</b>Two tests, and EITHER one satisfies the trigger: the 20-day MA has freshly turned up, or the slower 50-day MA has. Freshly turned up means rising today and still falling five days ago. Either way, the short-term trend is reasserting against the Stage 4 downtrend.</div>'
         +'<div class="gcap gcap-g4"><b>Group 4 &mdash; Confirmation?</b>One test: price has closed more than 2% above the trigger level, confirming the move has conviction rather than a failed bounce.</div>'
       +'</div>'
       +'<div class="table-wrap"><div class="v2-hscroll"><table class="data-table" id="'+TABLE_ID+'"><colgroup>'+cg+'</colgroup><thead>'+thead+'</thead><tbody id="sbs4-tbody"></tbody></table></div></div>';

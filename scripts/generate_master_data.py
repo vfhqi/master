@@ -23,6 +23,58 @@ from datetime import datetime, timedelta, date
 from collections import defaultdict
 import argparse
 
+
+def _safe_write_json(obj, out_path, min_bytes=1, validate=None,
+                     indent=2, ensure_ascii=True, separators=None):
+    """Disk-full/FUSE-hardened atomic JSON write.
+
+    Write to a temp file on the SAME filesystem as the destination, force it to
+    physical disk with fsync (so a delayed write-back flush cannot silently
+    truncate it, and a full disk raises ENOSPC HERE instead of corrupting the
+    file after the process has already reported success), re-read and validate
+    it from a fresh on-disk read, atomically rename it into place, then re-read
+    and validate the final destination. Raise on any failure. This is the fix
+    for the recurring 'Unterminated string' truncation of universe(-master).json
+    (root cause: writes reported success, then a delayed flush truncated the
+    file on disk; the old verify read the tmp back from page cache, not disk).
+    """
+    import os, json, tempfile, errno
+    out_path = os.fspath(out_path)
+    d = os.path.dirname(os.path.abspath(out_path)) or "."
+    os.makedirs(d, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".safe_", suffix=".json", dir=d)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(obj, f, indent=indent, ensure_ascii=ensure_ascii,
+                      separators=separators)
+            f.flush()
+            try:
+                os.fsync(f.fileno())
+            except OSError as e:
+                if e.errno == errno.ENOSPC:
+                    raise
+        if os.path.getsize(tmp) < min_bytes:
+            raise IOError("safe-write: temp file too small (%d bytes)"
+                          % os.path.getsize(tmp))
+        with open(tmp, "r", encoding="utf-8") as f:
+            v = json.load(f)
+        if validate is not None:
+            validate(v)
+        os.replace(tmp, out_path)
+        tmp = None
+    finally:
+        if tmp is not None:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+    with open(out_path, "r", encoding="utf-8") as f:
+        v2 = json.load(f)
+    if validate is not None:
+        validate(v2)
+    return v2
+
+
 # ── Paths ─────────────────────────────────────────────────────────────────
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_DIR = SCRIPT_DIR.parent
@@ -46,6 +98,36 @@ except Exception as _e:
 HISTORY_PATH = str(DATA_DIR / ".size-history.json")
 
 LOOKBACK_DAYS = 1650  # ~5.5 years for 200D MA warmup + chart display
+
+# D-MD-COVERAGE-2026-08-04.
+# Minimum bars before a stock is emitted to prices.json. Was a hard-coded 200,
+# which silently removed Bally's Intralot (140 bars) from every dashboard while
+# it sat correctly in universe-master.json, universe.json, the watchlist AND the
+# chart files. The 200 protected nothing: every fixed-offset access inside
+# build_prices_json is length-guarded, and running the real pipeline
+# (build_prices_json -> compute_all_filters -> compute_master_dashboard_screens)
+# at a gate of 20 produced correct records with nulls where a window is too
+# short, no exceptions and no NaN/inf values. 60 keeps the 20D and 50D averages
+# meaningful, which are the shortest target MAs in use, and sits inside a natural
+# gap in the data (no stock in the universe has 60-99 bars).
+MIN_HISTORY_ROWS = 60
+
+# Bars below which long-window readings (150D/200D, 12M relative strength) are
+# not computable. Emitted on the record so a consumer can filter deliberately
+# rather than a stock vanishing.
+FULL_HISTORY_ROWS = 200
+
+# Rolling full re-seed. A cache can only ever grow FORWARDS: the incremental
+# fetch starts at last_date - OVERLAP, so (a) history that appears upstream
+# earlier than the cache's first bar is unreachable for ever, and (b) when a
+# stock goes ex-dividend the provider re-scales its ENTIRE history while we
+# rewrite only the last few days, leaving the cache on two different price
+# bases at once. Measured 04-Aug-2026: 6 of 22 randomly sampled caches were
+# mixed-basis, understating 12-month relative strength by 1.9 to 6.0
+# percentage points, always negative, always worst for dividend payers.
+# Re-fetching a deterministic slice each night bounds basis staleness to
+# RESEED_CYCLE_DAYS and repairs truncation without anyone noticing it happened.
+RESEED_CYCLE_DAYS = 20
 SMA_PERIODS = [5, 10, 20, 50, 100, 150, 200]
 BENCHMARK_TICKER = "^STOXX"
 
@@ -59,24 +141,107 @@ def _cache_path(yf_ticker, cache_dir=None):
 
 
 def load_cache(yf_ticker):
-    """Load cached OHLCV rows. Checks project cache first, then legacy."""
-    for cd in [CACHE_DIR, LEGACY_CACHE_DIR]:
+    """Load cached OHLCV rows. Checks project cache first, then legacy.
+
+    Hardened 04-Aug-2026 (D-MD-LEGACY-CACHE). Two problems with the old version,
+    both found by running the real main() offline rather than by reading it:
+
+    1. The legacy store `databases/pullback-cache` is a SECOND, STALER copy of
+       the same data — 995 files, last bars mostly 31-Jul-2026, and 320 of 400
+       sampled carry a NaN close in their final bars. Those are the phantom rows
+       the old exclusive-`end=` fetch produced (see FINDING-2026-08-04). Nothing
+       declared when the fallback was used, and because the incremental path
+       merges whatever load_cache() returns and then save_cache()s it, a NaN
+       could be PROMOTED out of the legacy store into the live cache.
+    2. No caller could tell which store a series came from.
+
+    So: filter non-finite OHLC rows on read, whatever the source, and announce a
+    legacy read with the age of what it served. A fallback must declare itself.
+    """
+    for _idx, cd in enumerate([CACHE_DIR, LEGACY_CACHE_DIR]):
         path = _cache_path(yf_ticker, cd)
-        if path.exists():
-            try:
-                with open(path) as f:
-                    return json.load(f)
-            except (json.JSONDecodeError, IOError):
-                continue
+        if not path.exists():
+            continue
+        try:
+            with open(path) as f:
+                rows = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            continue
+        if not isinstance(rows, list):
+            continue
+
+        def _finite(r):
+            for k in ("open", "high", "low", "close"):
+                v = r.get(k)
+                if not isinstance(v, (int, float)) or math.isnan(v) or math.isinf(v):
+                    return False
+            return True
+
+        clean = [r for r in rows if isinstance(r, dict) and _finite(r)]
+        if len(clean) != len(rows):
+            print("  CACHE-CLEAN %-12s — dropped %d row(s) with non-finite OHLC from %s"
+                  % (yf_ticker, len(rows) - len(clean),
+                     "legacy pullback-cache" if _idx else "project cache"))
+        if _idx == 1:
+            _last = clean[-1]["date"] if clean else "empty"
+            print("  LEGACY-CACHE %-12s — served from databases/pullback-cache, "
+                  "last bar %s. This store is not maintained by the nightly build; "
+                  "treat its age as unknown." % (yf_ticker, _last))
+        return clean or None
     return None
 
 
 def save_cache(yf_ticker, rows):
-    """Save OHLCV rows to project cache."""
+    """Save OHLCV rows to project cache.
+
+    Hardened 2026-07-03 (see reference_master_dashboard_cache_truncation_repair.md):
+    was a raw open()+json.dump() with no fsync and no verify, so a delayed
+    write-back flush (or a FUSE/disk-full interruption) could silently
+    truncate or drop the write after this function had already returned
+    successfully -- exactly the failure that left master-dashboard/cache/
+    (incl. the STOXX benchmark file) stuck on 2026-06-29 data for four
+    nights running while the fetch itself kept succeeding. Uses the same
+    _safe_write_json() atomic-temp-file + fsync + re-read + verify +
+    atomic-rename helper already applied to universe.json on 2026-07-02,
+    plus an extra monotonic-last-date check specific to price series: a
+    successful write must never leave the cache's last date older than
+    it was before the write.
+    """
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = _cache_path(yf_ticker)
-    with open(path, "w") as f:
-        json.dump(rows, f, separators=(",", ":"))
+
+    prev_last_date = None
+    if path.exists():
+        try:
+            with open(path) as f:
+                prev_rows = json.load(f)
+            if prev_rows:
+                prev_last_date = prev_rows[-1].get("date")
+        except Exception:
+            # Existing file unreadable/corrupt -- don't let that block a
+            # good new write; the validator below still protects the new
+            # write's own internal consistency.
+            prev_last_date = None
+
+    def _validate(v, _ticker=yf_ticker, _prev=prev_last_date):
+        assert isinstance(v, list) and len(v) > 0, (
+            "save_cache verify failed for %s: result is empty or not a list"
+            % _ticker
+        )
+        last = v[-1]
+        assert isinstance(last, dict) and "date" in last and "close" in last, (
+            "save_cache verify failed for %s: last row missing date/close"
+            % _ticker
+        )
+        if _prev is not None:
+            assert last["date"] >= _prev, (
+                "save_cache verify failed for %s: new last date %s is "
+                "older than existing cache last date %s -- refusing to "
+                "overwrite good data with stale data"
+                % (_ticker, last["date"], _prev)
+            )
+
+    _safe_write_json(rows, path, min_bytes=1, validate=_validate)
 
 
 def _merge_cached_and_new(cached_rows, new_rows):
@@ -88,25 +253,292 @@ def _merge_cached_and_new(cached_rows, new_rows):
     return sorted(by_date.values(), key=lambda r: r["date"])
 
 
+def _carry_forward_missing(cached, fresh):
+    """Cached bars the provider no longer serves, but ONLY from the point where
+    the two series agree on level.
+
+    Yahoo withdraws recently published European sessions (see
+    FINDING-2026-08-04), so the cache is sometimes the only copy of a real
+    trading day. Those bars must survive a re-seed. Bars from before the
+    agreement point must not: they are on the old, pre-adjustment basis and
+    carrying them across would rebuild the very discontinuity the re-seed exists
+    to remove.
+    """
+    fm = {r["date"]: r["close"] for r in fresh}
+    agree_from = None
+    for c in cached:
+        f = fm.get(c["date"])
+        if f is None or not f:
+            continue
+        if abs(c["close"] - f) / f <= 0.005:   # same tolerance as _reseed_is_safe
+            if agree_from is None:
+                agree_from = c["date"]
+        else:
+            agree_from = None
+    if agree_from is None:
+        # No agreement region: keep nothing rather than guess. Announce it,
+        # because it means a provider-withdrawn bar is being dropped.
+        print("  CARRY-FORWARD: no agreement region found — %d cache-only bar(s) "
+              "not carried into the re-seeded series" % len(
+                  [c for c in cached if c["date"] not in fm]))
+        return []
+    return [c for c in cached
+            if c["date"] not in fm and c["date"] >= agree_from]
+
+
+def _reseed_is_safe(cached, fresh):
+    """Is wholesale replacement of `cached` by `fresh` an improvement?
+
+    Three tests, all on the dates the two series SHARE:
+      * level agreement on the most recent shared bars — pins the instrument to
+        the right price today;
+      * daily-return agreement across the overlap — survives a dividend
+        rescaling (which is a constant multiplier on a prefix and so changes the
+        return on the ex-date only) while catching a genuinely mis-mapped
+        symbol, which disagrees everywhere;
+      * flat-run rate — refuses a fresh series that is more stale-patched than
+        the cache.
+
+    Levels alone are the wrong test: they legitimately differ across a dividend
+    join, which is exactly the drift being repaired.
+    """
+    if not fresh or not cached:
+        return False, "no fresh data returned"
+    cm = {r["date"]: r["close"] for r in cached}
+    fm = {r["date"]: r["close"] for r in fresh}
+    shared = [d for d in (r["date"] for r in fresh) if d in cm]
+    if len(shared) < 20:
+        return False, "only %d shared bars, too few to prove identity" % len(shared)
+    if len(fresh) < len(cached) * 0.9:
+        return False, ("fresh series is shorter than the cache (%d vs %d)"
+                       % (len(fresh), len(cached)))
+    lvl = max(abs(fm[d] - cm[d]) / cm[d] for d in shared[-3:] if cm[d])
+    if lvl > 0.005:
+        return False, "last shared bars differ by %.2f%% — not the same instrument" % (lvl * 100)
+    mism = 0
+    for i in range(1, len(shared)):
+        d0, d1 = shared[i - 1], shared[i]
+        if cm[d0] and fm[d0]:
+            if abs((fm[d1] - fm[d0]) / fm[d0] - (cm[d1] - cm[d0]) / cm[d0]) > 0.005:
+                mism += 1
+    rate = mism / max(1, len(shared) - 1)
+    if rate > 0.03:
+        return False, ("daily returns disagree on %.1f%% of shared bars" % (rate * 100))
+
+    def _flat(seq):
+        return (sum(1 for i in range(1, len(seq)) if seq[i] == seq[i - 1])
+                / max(1, len(seq) - 1))
+    cflat = _flat([cm[d] for d in shared])
+    fflat = _flat([fm[d] for d in shared])
+    if fflat > cflat + 0.05:
+        return False, ("fresh series is flat-lined on %.1f%% of shared bars against "
+                       "%.1f%% in the cache — provider data is degraded"
+                       % (fflat * 100, cflat * 100))
+    return True, ("identity ok, returns match, flat-run %.1f%% vs %.1f%%"
+                  % (fflat * 100, cflat * 100))
+
+
 # ── yfinance Fetch ────────────────────────────────────────────────────────
 
-def _fetch_ticker(yf, ticker, start_date, end_date):
-    """Fetch OHLCV for a single ticker from yfinance."""
+# ── SETTLED-BAR GUARD (D-MD-SETTLED-BAR-2026-08-11) ───────────────────────
+#
+# This REPLACES D-MD-PRICE-FRESH-2026-08-04's two hard-coded heuristics. They are
+# deleted rather than left defined, because a dead constant invites reuse:
+#
+#     LATE_CLOSING_LABEL_SUFFIXES = ("-US",)   # drop today's bar for any -US label
+#     EU_MARKETS_CLOSED_HOUR = 17              # ...and for everyone before 17:00 local
+#
+# Why each had to go:
+#
+#   * The suffix rule keys on the ticker LABEL, not the clock, so it fired at
+#     EVERY hour of the day. A post-US-close pass layered on top of it is a no-op:
+#     the bar it waited all evening for is dropped again the moment it arrives.
+#     That is the whole reason Richard's original brief -- "run the US price data
+#     after the US close so the PMS is right the next morning" -- could not be
+#     satisfied by scheduling alone, and why it stayed open for three sessions.
+#   * The label is an internal taxonomy tag, not a venue. Flutter traded as
+#     FLTR-GB while listed in London and now trades as FLUT-US in New York; for a
+#     while the label and the venue disagreed and the rule was simply wrong.
+#   * A UK-hour constant is wrong for about three weeks each March and again each
+#     late October, when the UK and US daylight-saving switches are out of step
+#     and the US close lands at 20:00 UK rather than 21:00.
+#
+# The replacement asks the VENUE, via scripts/market_session.py. Read that
+# module's docstring for the mechanism (`now >= regular.end`, taken from the
+# provider's own session window), the cost (one probe per VENUE per run, roughly
+# 20 calls for a 987-name universe, not one per ticker) and the live measurement
+# that rules out the `regularMarketTime < end` form.
+#
+# FAILING DIRECTION, unchanged and deliberate: anything that cannot be answered
+# drops today's bar. A dropped bar is recovered by the next run's overlap fetch;
+# a mid-session bar written as a close is permanent and silently wrong, and the
+# Position Management System evaluates stops on closes.
+
+_MS_MODULE = None
+_MS_TRIED = False
+
+
+def _market_session():
+    """Import COWORK/scripts/market_session.py once. Returns the module, or None.
+
+    Loaded by path rather than as a package because master-dashboard/scripts is
+    not a package and the .bat files run it with their own directory as cwd.
+    Same pattern as scripts/check_price_staleness.py.
+    """
+    global _MS_MODULE, _MS_TRIED
+    if _MS_TRIED:
+        return _MS_MODULE
+    _MS_TRIED = True
+    path = SCRIPT_DIR.parent.parent / "scripts" / "market_session.py"
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("_market_session", str(path))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _MS_MODULE = mod
+        print(f"  SETTLED-BAR: venue guard active (market_session.py from {path})")
+    except Exception as e:
+        print("  " + "=" * 62)
+        print(f"  SETTLED-BAR WARNING: could not import market_session.py ({e}).")
+        print(f"    looked for: {path}")
+        print("    Falling back to DROPPING today's bar for EVERY ticker, which is")
+        print("    the safe direction but leaves every price one day behind until")
+        print("    this is fixed. This is loud on purpose.")
+        print("  " + "=" * 62)
+        _MS_MODULE = None
+    return _MS_MODULE
+
+
+def _unsettled_cut(yf_ticker, rows, today_str):
+    """Earliest bar date that is NOT yet settled at this symbol's venue.
+
+    Returns None when every row is settled and nothing should be dropped.
+
+    THE BAR DATE IS PASSED IN, AND THAT IS THE ENTIRE INTEGRATION RISK.
+
+    market_session.should_drop_today() drops UNCONDITIONALLY when it is given no
+    bar date. Wired at the OLD call sites -- before the fetch, where no bar date
+    can exist -- it would have degraded silently into "always drop": the 04-Aug
+    bug wearing a new hat, applied to all 987 names instead of 3, and it would
+    have looked like a working guard. So the decision moved INSIDE _fetch_ticker,
+    after `rows` is built, where the real last bar date is already in hand. The
+    risk is designed out by WHERE the call sits, not merely tested for.
+    `selftest_settled_bar()` pins that the bar date actually arrives.
+    """
+    if not rows:
+        return None
+    ms = _market_session()
+    if ms is None:
+        return today_str                      # fail closed
+    last_bar = rows[-1]["date"]
+    if not ms.should_drop_today(yf_ticker, bar_date=last_bar):
+        return None
+    sess = ms.session_for(yf_ticker)
+    # The venue's own session date, NOT our local "today": at 23:30 UK a US
+    # session dated the previous day is still running, and "today" names the
+    # wrong day. Fall back to today_str only when the probe gave no session.
+    return sess.get("live_date") or today_str
+
+
+def _period_for_gap(days_gap):
+    """Smallest yfinance `period` window that safely spans a cache gap.
+
+    Why `period` and not `start`/`end`: an `end` bound is EXCLUSIVE, so
+    `end=today` can never return today's bar. Worse, yfinance then returns the
+    live session's bar relabelled with the previous trading day and a NaN close
+    (proven 04-Aug-2026 by volume fingerprint: the identical volume 10,831 came
+    back labelled 03-Aug under `end=04-Aug` and 04-Aug under `end=05-Aug`).
+    The `period=` form returns the current session correctly and is the call
+    generate_chart_data.py has run successfully 977 times a night for months.
+    The two forms were verified value-identical on every overlapping settled
+    day (4 tickers x 9 days, 0 mismatches).
+    """
+    if days_gap <= 25:
+        return "1mo"
+    if days_gap <= 80:
+        return "3mo"
+    if days_gap <= 170:
+        return "6mo"
+    if days_gap <= 350:
+        return "1y"
+    if days_gap <= 700:
+        return "2y"
+    if days_gap <= 1800:
+        return "5y"
+    return "10y"
+
+
+def _last_expected_trading_day(now):
+    """Most recent weekday on or before `now`, as a date.
+
+    Public holidays are deliberately NOT modelled. Erring towards one extra
+    fetch is the safe direction: a wasted call costs a second, a missed session
+    can be permanent (Yahoo withdrew 31-Jul-2026 from every continental
+    European listing within three days).
+    """
+    d = now.date()
+    while d.weekday() >= 5:
+        d -= timedelta(days=1)
+    return d
+
+
+def _fetch_ticker(yf, ticker, period, label=None, today_str=None, drop_today=None):
+    """Fetch OHLCV for a single ticker from yfinance.
+
+    NaN guard added 2026-07-03 (see ROOT-CAUSE-price-nan-2026-07-03.md): yfinance
+    can return a row where Open/High/Low/Close is NaN (a transient exchange-
+    settlement data quirk, confirmed on this date concentrated in DE/IT/PT
+    listings around 2026-07-01/02, gone on re-fetch). A NaN is a valid Python
+    float, so it silently passed every prior "is this a number" check and
+    poisoned price/prices.json (NaN is truthy -- `not float('nan')` is False --
+    the same failure class already fixed in build_rs_dashboard_data.py earlier
+    today). Any row with a NaN OHLC value is dropped here, at the point of
+    ingestion, before it can reach the cache or prices.json.
+    """
     try:
         t = yf.Ticker(ticker)
-        hist = t.history(start=start_date.strftime("%Y-%m-%d"),
-                        end=end_date.strftime("%Y-%m-%d"))
+        hist = t.history(period=period)
         if len(hist) > 0:
             rows = []
+            skipped_nan = 0
             for idx, row in hist.iterrows():
+                _o, _h, _l, _c = (float(row["Open"]), float(row["High"]),
+                                   float(row["Low"]), float(row["Close"]))
+                if any(math.isnan(v) for v in (_o, _h, _l, _c)):
+                    skipped_nan += 1
+                    continue
                 rows.append({
                     "date": idx.strftime("%Y-%m-%d"),
-                    "open": round(float(row["Open"]), 4),
-                    "high": round(float(row["High"]), 4),
-                    "low": round(float(row["Low"]), 4),
-                    "close": round(float(row["Close"]), 4),
+                    "open": round(_o, 4),
+                    "high": round(_h, 4),
+                    "low": round(_l, 4),
+                    "close": round(_c, 4),
                     "volume": int(row["Volume"]),
                 })
+            if skipped_nan:
+                print(f"  NAN-SKIP {ticker:12s} — {skipped_nan} row(s) with NaN OHLC dropped")
+            # D-MD-SETTLED-BAR-2026-08-11 (supersedes F3's label/hour rule). A
+            # bar from a session that has not closed yet is a mid-session
+            # snapshot, not a close, and the PMS evaluates stops on closes.
+            # Dropping it is safe: the OVERLAP re-fetch on the next run picks the
+            # settled bar up -- and the 22:15 post-US-close pass exists precisely
+            # so that "next run" is the SAME EVENING for the US tape, which is
+            # what makes the price right in the PMS the next morning.
+            #
+            # drop_today=None is the default and the production path: ASK THE
+            # VENUE. True/False are still honoured so the self-test can pin
+            # behaviour without a network call.
+            if drop_today is None:
+                cut = _unsettled_cut(ticker, rows, today_str)
+            else:
+                cut = today_str if drop_today else None
+            if cut:
+                _before = len(rows)
+                rows = [r for r in rows if r["date"] < cut]
+                if len(rows) < _before:
+                    print(f"  UNSETTLED-SKIP {ticker:12s} — dropped {_before - len(rows)} "
+                          f"bar(s) dated {cut} or later; {label or ticker}'s venue "
+                          f"session had not closed at fetch time")
             return rows
         return []
     except Exception as e:
@@ -114,57 +546,246 @@ def _fetch_ticker(yf, ticker, start_date, end_date):
         return []
 
 
-def fetch_all_data(universe, full_refresh=False):
+def _flag_fetch_failures(failures):
+    """Record tickers whose yfinance_ticker IS populated but yfinance still
+    returned zero rows on a from-scratch fetch (no cache to fall back on).
+
+    Added 23-Jul-26 as a direct amendment from the Liberty Global / blank-
+    yfinance-ticker incident: a stress-test re-check that day found that a
+    *correct, verified* mapping (PHNX-GB -> PHNX.L, Phoenix Group Holdings,
+    confirmed live via web search to be a normally-traded FTSE 100 stock) can
+    still silently vanish from prices.json if the Yahoo/yfinance backend
+    itself refuses that one specific symbol (reproduced consistently across
+    two separate sessions; quoteSummary 404 + no-timezone error; adjacent GB
+    tickers fetched fine in the same call, ruling out a general outage). The
+    original blank-ticker guards would never have caught this, because the
+    mapping itself is correct -- the failure happens one step later, at
+    fetch time. This writes to the SAME needs-attention-yfinance.json file
+    the resolver uses, under a distinct reason string, so both failure modes
+    (bad mapping vs. bad fetch) surface in one place without being confused
+    for each other. Never raises -- must not be allowed to break the run."""
+    if not failures:
+        return
+    try:
+        needs_attention_path = SCRIPT_DIR.parent.parent / "databases" / "needs-attention-yfinance.json"
+        d = {}
+        if needs_attention_path.exists():
+            try:
+                with open(needs_attention_path, encoding="utf-8") as f:
+                    d = json.load(f)
+            except Exception:
+                d = {}
+        now = datetime.now().isoformat() + "Z"
+        for label, yf_ticker in failures:
+            d[label] = {
+                "reason": ("yfinance fetch returned 0 rows for mapped ticker %s "
+                           "despite no prior cache -- mapping may be correct but "
+                           "the Yahoo/yfinance backend is refusing this symbol; "
+                           "re-check manually, do not assume it is delisted "
+                           "without independent verification" % yf_ticker),
+                "flagged_at": now,
+            }
+        tmp = str(needs_attention_path) + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(d, f, indent=2, sort_keys=True)
+        os.replace(tmp, needs_attention_path)
+    except Exception as e:
+        print("WARNING: could not write needs-attention file: %s" % e)
+
+
+def fetch_all_data(universe, full_refresh=False, no_reseed=False):
     """Fetch OHLCV for all universe stocks + benchmark."""
     import yfinance as yf
+
+    # D-MD-PRICE-FRESH-2026-08-04: record the library version in every run log.
+    # yfinance is unpinned on the build machine and its date-window semantics are
+    # what this whole path depends on. On 04-Aug-2026 nobody could answer "which
+    # version does production run?" from any artefact. Now the log answers it.
+    try:
+        print(f"  yfinance version: {getattr(yf, '__version__', 'unknown')}")
+    except Exception:
+        pass
 
     end_date = datetime.now()
     full_start = end_date - timedelta(days=LOOKBACK_DAYS + 250)
     OVERLAP = 5
+    today_str = end_date.strftime("%Y-%m-%d")
+    expected_day = _last_expected_trading_day(end_date)
+
+    # D-MD-COVERAGE-2026-08-04 (G1): today's re-seed slice. Deterministic from
+    # the ordinal date, so every ticker is fully re-fetched once per cycle
+    # regardless of run history, with no state to keep and no drift.
+    _reseed_bucket = end_date.toordinal() % RESEED_CYCLE_DAYS
+    reseed_labels = {s["ticker"] for i, s in enumerate(universe["stocks"])
+                     if i % RESEED_CYCLE_DAYS == _reseed_bucket}
+    # The benchmark is appended to the ticker list AFTER the universe, so an
+    # index built off enumerate(universe["stocks"]) never selects it and it would
+    # never be re-based. It drives every relative-strength figure in the system,
+    # so it gets its own slot in the rotation. (Checked 04-Aug-2026: ^STOXX is a
+    # price index with no dividend adjustment, 0.0000% drift over 1,307 shared
+    # bars, so this is a hole being closed, not a live defect.)
+    if _reseed_bucket == 0:
+        reseed_labels.add("BENCHMARK")
+    if no_reseed:
+        # The rotation is keyed on the calendar DATE, so a second run on the same
+        # date would re-fetch five years of history for the same ~46 tickers all
+        # over again. The 22:15 post-US-close pass is exactly that second run.
+        print(f"  RE-SEED: SKIPPED (--no-reseed). Bucket {_reseed_bucket} of "
+              f"{RESEED_CYCLE_DAYS} ({len(reseed_labels)} ticker(s)) was already "
+              f"re-seeded by today's earlier build; repeating it would double the "
+              f"deep-fetch load for no gain.")
+        reseed_labels = set()
+    else:
+        print(f"  RE-SEED: bucket {_reseed_bucket} of {RESEED_CYCLE_DAYS} — "
+              f"{len(reseed_labels)} ticker(s) get a full re-fetch tonight "
+              f"(bounds dividend-basis drift and repairs truncated caches)")
+    # D-MD-SETTLED-BAR-2026-08-11: the "is this session settled?" question is no
+    # longer answered here from a UK-hour constant. It is answered per VENUE,
+    # inside _fetch_ticker, at the moment the bars are in hand. Warming the probe
+    # cache here means the one-probe-per-venue cost is paid visibly, in one place,
+    # rather than appearing as scattered latency during the fetch loop.
+    _ms_boot = _market_session()
+    if _ms_boot is not None:
+        print(f"  SETTLED-BAR: build started {end_date:%H:%M} local; each venue is asked "
+              f"whether its session has closed, once per venue.")
 
     tickers = [(s["yfinance_ticker"], s["ticker"]) for s in universe["stocks"]]
     tickers.append((BENCHMARK_TICKER, "BENCHMARK"))
 
     data = {}
-    stats = {"full": 0, "incr": 0, "cache": 0, "err": 0}
+    stats = {"full": 0, "incr": 0, "cache": 0, "err": 0, "save_err": 0}
+    fetch_failures = []
 
     for yf_ticker, label in tickers:
         cached = None if full_refresh else load_cache(yf_ticker)
 
+        # G1: a re-seeded ticker takes the full path, which REPLACES rather than
+        # merges. Merging is what welds two price bases together.
+        #
+        # But a fresh deep fetch is NOT automatically better than the cache, and
+        # a blind nightly replacement would eventually destroy good history.
+        # Proven 04-Aug-2026 on TEMN.SW, whose long history from the provider is
+        # partly flat-lined: 67 of 321 shared bars repeat the previous close
+        # against 4 in our cache. Re-seeding it would have overwritten genuine
+        # daily closes with a stale-patched series. So the replacement is gated
+        # on _reseed_is_safe() and silently falls back to the incremental path
+        # when the fresh series does not clear it.
+        _reseed = (label in reseed_labels) and not full_refresh and bool(cached)
+        _reseed_rows = None
+        if _reseed:
+            _reseed_rows = _fetch_ticker(
+                yf, yf_ticker, _period_for_gap(LOOKBACK_DAYS + 250), label, today_str)
+            _safe, _why = _reseed_is_safe(cached, _reseed_rows)
+            if _safe:
+                print(f"  RESEED {yf_ticker:12s} — {len(cached)} -> {len(_reseed_rows)} rows "
+                      f"({_why})")
+                _carried = _carry_forward_missing(cached, _reseed_rows)
+                _merged = sorted(_reseed_rows + _carried, key=lambda r: r["date"])
+                _cut = (end_date - timedelta(days=LOOKBACK_DAYS + 250)).strftime("%Y-%m-%d")
+                _merged = [r for r in _merged if r["date"] >= _cut]
+                try:
+                    save_cache(yf_ticker, _merged)
+                    data[yf_ticker] = _merged
+                    stats["reseed"] = stats.get("reseed", 0) + 1
+                    continue
+                except Exception as e:
+                    print(f"  RESEED-SAVE-ERR {yf_ticker:12s} — {e} (keeping prior cache)")
+            else:
+                stats["reseed_rejected"] = stats.get("reseed_rejected", 0) + 1
+                print(f"  RESEED-REJECT {yf_ticker:12s} — {_why}; keeping the cached "
+                      f"series and falling back to the incremental fetch")
+
         if cached and not full_refresh:
             last_date = datetime.strptime(cached[-1]["date"], "%Y-%m-%d")
             days_stale = (end_date - last_date).days
-            if days_stale <= 1:
+            # D-MD-PRICE-FRESH-2026-08-04 (F2): skip ONLY when the cache already
+            # holds the last expected trading day. The former `days_stale <= 1`
+            # meant "yesterday is good enough", which on every normal weekday
+            # skipped the fetch that would have captured today -- and a session
+            # not captured on the day can be withdrawn by the provider and lost
+            # for good. F2 is not optional alongside F1: without it, F1 cancels
+            # itself out from the second night onwards.
+            if last_date.date() >= expected_day:
                 data[yf_ticker] = cached
                 stats["cache"] += 1
-                print(f"  CACHE {yf_ticker:12s} — {len(cached)} days")
+                print(f"  CACHE {yf_ticker:12s} — {len(cached)} days (holds {expected_day})")
                 continue
 
-            new_rows = _fetch_ticker(yf, yf_ticker, last_date - timedelta(days=OVERLAP), end_date)
+            new_rows = _fetch_ticker(yf, yf_ticker,
+                                     _period_for_gap(days_stale + OVERLAP),
+                                     label, today_str)
             if new_rows:
                 merged = _merge_cached_and_new(cached, new_rows)
                 cutoff = (end_date - timedelta(days=LOOKBACK_DAYS + 250)).strftime("%Y-%m-%d")
                 merged = [r for r in merged if r["date"] >= cutoff]
-                save_cache(yf_ticker, merged)
-                data[yf_ticker] = merged
-                stats["incr"] += 1
-                print(f"  INCR  {yf_ticker:12s} — {len(new_rows)} new, {len(merged)} total")
+                try:
+                    save_cache(yf_ticker, merged)
+                    data[yf_ticker] = merged
+                    stats["incr"] += 1
+                    print(f"  INCR  {yf_ticker:12s} — {len(new_rows)} new, {len(merged)} total")
+                except Exception as e:
+                    # save_cache() rejected this write (regressive data,
+                    # disk-full, etc.) -- keep the last known-good cache for
+                    # this ticker rather than dropping it, and flag loudly.
+                    data[yf_ticker] = cached
+                    stats["save_err"] += 1
+                    print(f"  SAVE-ERR {yf_ticker:12s} — {e} (kept prior {len(cached)}-day cache)")
             else:
                 data[yf_ticker] = cached
                 stats["cache"] += 1
                 print(f"  STALE {yf_ticker:12s} — using {len(cached)}-day cache")
         else:
-            new_rows = _fetch_ticker(yf, yf_ticker, full_start, end_date)
+            new_rows = _fetch_ticker(yf, yf_ticker,
+                                     _period_for_gap((end_date - full_start).days),
+                                     label, today_str)
             if new_rows:
-                save_cache(yf_ticker, new_rows)
-                data[yf_ticker] = new_rows
-                stats["full"] += 1
-                print(f"  FULL  {yf_ticker:12s} — {len(new_rows)} days")
+                _cut = (end_date - timedelta(days=LOOKBACK_DAYS + 250)).strftime("%Y-%m-%d")
+                new_rows = [r for r in new_rows if r["date"] >= _cut]
+            if new_rows:
+                try:
+                    save_cache(yf_ticker, new_rows)
+                    data[yf_ticker] = new_rows
+                    stats["full"] += 1
+                    print(f"  FULL  {yf_ticker:12s} — {len(new_rows)} days")
+                except Exception as e:
+                    stats["save_err"] += 1
+                    print(f"  SAVE-ERR {yf_ticker:12s} — {e} (no prior cache to fall back to)")
             else:
                 stats["err"] += 1
                 print(f"  FAIL  {yf_ticker:12s}")
+                if label != "BENCHMARK":
+                    fetch_failures.append((label, yf_ticker))
 
-    print(f"\n  Summary: {stats['full']} full, {stats['incr']} incr, {stats['cache']} cached, {stats['err']} errors\n")
+    _ms = _market_session()
+    if _ms is not None:
+        try:
+            _rep = _ms.cache_report()
+            if _rep:
+                print("\n  SETTLED-BAR: venue verdicts this run (one probe each)")
+                print(_rep)
+        except Exception as _e:
+            print(f"  SETTLED-BAR: venue report unavailable ({_e})")
+
+    _flag_fetch_failures(fetch_failures)
+    print(f"\n  Summary: {stats['full']} full, {stats['incr']} incr, {stats['cache']} cached, "
+          f"{stats.get('reseed', 0)} re-seeded, {stats.get('reseed_rejected', 0)} re-seed-rejected, "
+          f"{stats['err']} fetch-errors, {stats['save_err']} save-errors\n")
+
+    # D-MD-PRICE-FRESH-2026-08-04: self-check. yfinance is unpinned on the build
+    # machine, so this run must prove for itself that the fetch actually reached
+    # the current session rather than assume the library behaves as tested.
+    _exp = expected_day.isoformat()
+    _n_fresh = sum(1 for rows in data.values() if rows and rows[-1]["date"] == _exp)
+    _n_tot = max(1, len(data))
+    _pct = 100.0 * _n_fresh / _n_tot
+    print(f"  FRESHNESS: {_n_fresh}/{_n_tot} tickers carry a {_exp} bar ({_pct:.1f}%)")
+    if _pct < 50.0:
+        print("  *** FRESHNESS WARNING: fewer than half the universe carries the last")
+        print("      expected trading day. The fetch is NOT capturing the current")
+        print("      session. Do not trust today's prices, moving averages or stages.")
+        print("      See projects/SA - Position Management System/")
+        print("      FINDING-2026-08-04-price-path-cannot-capture-the-current-session.md")
+    print("")
     return data
 
 
@@ -252,10 +873,200 @@ def compute_rs_percentiles(rs_values):
     return percentiles
 
 
+_PROBE_CACHE = {}
+
+
+def _load_probe_verdicts():
+    """Verdicts from probe_dead_tickers.py, keyed by internal ticker.
+
+    D-MD-COVERAGE-2026-08-04. The Monday probe has been recording which
+    unpriced symbols still resolve at the provider, and NOTHING read the file.
+    On 03-Aug it was reporting 21 resolvable tickers, five of them absent from
+    prices.json, including Bally's Intralot. A detector with no reachable remedy
+    is just a slower silence. Reading it here puts the verdict next to the drop.
+    Never raises: a missing or malformed probe file must not break the build.
+    """
+    if _PROBE_CACHE:
+        return _PROBE_CACHE.get("verdicts", {})
+    verdicts = {}
+    try:
+        _p = DATA_DIR / "dead-ticker-probe-result.json"
+        if _p.exists():
+            with open(_p, encoding="utf-8") as _f:
+                _d = json.load(_f)
+            for _r in _d.get("resolves") or []:
+                if isinstance(_r, dict) and _r.get("internal"):
+                    verdicts[_r["internal"]] = _r
+    except Exception as _e:
+        print(f"  NOTE: could not read the dead-ticker probe result: {_e}")
+    _PROBE_CACHE["verdicts"] = verdicts
+    return verdicts
+
+
 # ── prices.json Builder ──────────────────────────────────────────────────
 
-def build_prices_json(universe, raw_data, benchmark_rows):
-    """Build prices.json with per-stock price data, MAs, 52W stats, RS."""
+# ── MD-S81B-52W-INTEGRITY-MARKER ─────────────────────────────────────────────
+# Two distinct faults corrupt the 52-week window. Both were measured across all
+# 997 cached series on 11-Aug-26 before these rules were written; neither rule is
+# a guess, and the counts below are what the measurement returned.
+#
+# FAULT 1 — a single absurd intraday tick. The row's own open and close are sound
+#   but its low or high is out by roughly 100x. Four rows in the entire cache:
+#   EXPN-GB 29-Jul-26 (low 30.34 against a close of 3,077), HSBA-GB 13-Apr-26
+#   (low 15.20 against a close of 1,332), VOD-GB 30-Jul-26 (high 12,047 against a
+#   close of 119) and the STOXX benchmark 14-May-26 (a low of exactly 0.0).
+#   Repaired from the row's OWN open and close, the most conservative source
+#   available: the repair can only narrow the range, never invent a wider one.
+#
+# FAULT 2 — a unit discontinuity. The close series itself steps by about 100x
+#   because the listing redenominated or moved venue. Pre-break rows are quoted in
+#   a different unit and are NOT comparable with today's price, so they must not
+#   contribute to the 52-week extrema. Four series: ROSE-GB (a 100x round trip
+#   over one week in Feb-26), AHT-GB and JUST-GB (a step on the final row of a
+#   series that then stops), and IDOX (no longer in the universe).
+#
+#   Where too little post-break history survives to define a 52-week range, emit
+#   None rather than a fake one. This matters: a one-row "range" makes price equal
+#   the 52-week high, which would let a dead series PASS the Stage 2 "within 25%
+#   of the 52-week high" gate. A missing range fails that gate honestly.
+#
+# Thresholds are deliberately loose so they catch only the impossible: a real
+# stock does not halve intraday and close unchanged, nor does it double.
+
+_S81B_TICK_LOW_FRAC  = 0.5   # low below half that row's own close = impossible
+_S81B_TICK_HIGH_MULT = 2.0   # high above twice that row's own close = impossible
+_S81B_UNIT_BREAK_X   = 20.0  # close-to-close step of 20x or more = a unit change
+_S81B_MIN_POST_BREAK = 20    # fewer post-break rows than this = no usable range
+
+# build_prices_json runs four times per pipeline run (today plus the T-1/T-5/T-22
+# historical slices for the CHANGES tab), so without this every repair would print
+# up to four times and read like the fix was failing to stick. It is not: the repair
+# is re-derived in memory on each pass by design. Report each one once per run.
+_S81B_REPORTED = set()
+
+
+def _s81b_repair_ticks(rows):
+    """FAULT 1. Repair an absurd low/high from that row's own open and close.
+
+    Mutates in memory only; the on-disk cache keeps the raw vendor record, so the
+    repair is re-derived every run and never becomes an unauditable edit.
+    Returns a list of (date, field, was, now) for logging.
+    """
+    fixed = []
+    for r in rows:
+        o, h, l, c = r.get("open"), r.get("high"), r.get("low"), r.get("close")
+        if c is None or c <= 0:
+            continue
+        ref = [x for x in (o, c) if x is not None and x > 0]
+        if not ref:
+            continue
+        # S81c. The original rule compared the low against the CLOSE alone. Run over
+        # the full 1.27m-row history it produced three FALSE POSITIVES on genuine
+        # extreme-move days: Atos 28-Nov-24 (opened 14,300, closed 7,814 — a real
+        # 45% collapse, so a 17,300 high is legitimate), MFE-B 23-Oct-23 (-80% in a
+        # day) and Nanobiotix 5-May-23 (+89% in a day, so a low below half the close
+        # is real). Repairing those would have silently flattened real intraday
+        # extremes on two universe stocks.
+        #
+        # Comparing against BOTH open and close removes all three, because open and
+        # close are two independent observations of the same session: a genuine
+        # extreme sits within a plausible multiple of at least one of them, whereas
+        # a corrupt tick is absurd against both.
+        lo_ref = min(ref)
+        hi_ref = max(ref)
+        if l is not None and l < _S81B_TICK_LOW_FRAC * lo_ref:
+            fixed.append((r.get("date"), "low", l, lo_ref))
+            r["low"] = lo_ref
+        if h is not None and h > _S81B_TICK_HIGH_MULT * hi_ref:
+            fixed.append((r.get("date"), "high", h, hi_ref))
+            r["high"] = hi_ref
+    return fixed
+
+
+def _s81b_last_unit_break(rows):
+    """FAULT 2. Index of the row at which the close series LAST stepped by >=20x.
+
+    Returns None when the series is continuous. The last break is the one that
+    matters: everything before it is in a superseded unit.
+    """
+    idx = None
+    prev = None
+    for i, r in enumerate(rows):
+        c = r.get("close")
+        if prev and c and (c / prev >= _S81B_UNIT_BREAK_X or prev / c >= _S81B_UNIT_BREAK_X):
+            idx = i
+        if c:
+            prev = c
+    return idx
+
+
+def _s81b_52w_window(lookback, ticker=""):
+    """Return (high, low, window_rows, kind) for the 52-week extrema.
+
+    kind is None for a clean series, "excursion" where a temporary off-scale block
+    was excluded, or "rebased" where the series stepped and did not come back.
+    high and low are None when a rebasing leaves too little comparable history.
+    """
+    ticks = _s81b_repair_ticks(lookback)
+    for d, field, was, now in ticks:
+        _key = (ticker, d, field)
+        if _key not in _S81B_REPORTED:
+            _S81B_REPORTED.add(_key)
+            print(f"  52W-TICK-REPAIR {ticker:12s} {d} {field}: {was} -> {now}")
+    brk = _s81b_last_unit_break(lookback)
+    if brk is None:
+        return max(r["high"] for r in lookback), min(r["low"] for r in lookback), lookback, None
+
+    # S81c. Two very different things produce a 100x step, and trimming everything
+    # before it is only right for one of them.
+    #
+    #   EXCURSION — the series wanders off scale and comes back (ROSE-GB spent five
+    #     days at 1/100 in Feb-26 and returned). Only those rows are wrong. Trimming
+    #     to post-break threw away 131 rows of perfectly good history to fix five.
+    #   REBASED  — the series steps and stays there, or simply stops (AHT-GB,
+    #     JUST-GB). Everything before the step is in a superseded unit.
+    #
+    # The window median is a robust anchor for telling them apart: if the LAST row
+    # is itself off-scale against the median, the series has rebased; otherwise the
+    # off-scale rows are an excursion. This branch only ever runs on a series that
+    # has already tripped the 20x step test, so a genuine multi-bagger cannot reach it.
+    closes = [r["close"] for r in lookback if r.get("close")]
+    if not closes:
+        return None, None, lookback[brk:], "rebased"
+    med = sorted(closes)[len(closes) // 2]
+    last = lookback[-1].get("close")
+    last_off_scale = bool(last and (last < med / 20.0 or last > med * 20.0))
+
+    if not last_off_scale:
+        clean = [r for r in lookback
+                 if r.get("close") and med / 20.0 <= r["close"] <= med * 20.0]
+        dropped = len(lookback) - len(clean)
+        if clean:
+            _k = (ticker, "excursion")
+            if _k not in _S81B_REPORTED:
+                _S81B_REPORTED.add(_k)
+                print(f"  52W-EXCURSION {ticker:12s} — {dropped} off-scale row(s) excluded "
+                      f"around {lookback[brk].get('date')}; range from the remaining {len(clean)}")
+            return max(r["high"] for r in clean), min(r["low"] for r in clean), clean, "excursion"
+
+    window = lookback[brk:]
+    if len(window) < _S81B_MIN_POST_BREAK:
+        print(f"  52W-REBASED {ticker:12s} at {lookback[brk].get('date')} — only "
+              f"{len(window)} comparable row(s) since; 52-week range withheld")
+        return None, None, window, "rebased"
+    print(f"  52W-REBASED {ticker:12s} at {lookback[brk].get('date')} — 52-week "
+          f"range computed from the {len(window)} rows since")
+    return max(r["high"] for r in window), min(r["low"] for r in window), window, "rebased"
+
+
+def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
+    """Build prices.json with per-stock price data, MAs, 52W stats, RS.
+
+    `dropped` (optional list) collects a dict per excluded stock so the caller
+    can reconcile the universe against what was actually emitted. Before
+    04-Aug-2026 an exclusion was a printed line in a 161KB log and nothing else,
+    which is how a live holding stayed missing from every dashboard unnoticed.
+    """
     prices = []
     rs_composites = {}
 
@@ -275,11 +1086,78 @@ def build_prices_json(universe, raw_data, benchmark_rows):
         yf = stock["yfinance_ticker"]
         ticker = stock["ticker"]
 
-        if yf not in raw_data or len(raw_data[yf]) < 200:
-            print(f"  SKIP {ticker} — insufficient data ({len(raw_data.get(yf, []))} rows)")
+        _n_rows = len(raw_data.get(yf, []))
+        if yf not in raw_data or _n_rows < MIN_HISTORY_ROWS:
+            # Row count alone CANNOT tell a genuine young listing from a broken
+            # symbol: RICHT-HU (Gedeon Richter, listed for decades) and
+            # VSURE-SE both sit at ~24 bars because their symbol has stopped
+            # returning data, which looks identical to a recent IPO. So say so
+            # honestly, and cross-reference probe_dead_tickers.py, which already
+            # knows which symbols resolve and whose output nothing consumed
+            # before 04-Aug-2026.
+            _probe = _load_probe_verdicts()
+            _resolves = _probe.get(ticker)
+            if not (yf or "").strip():
+                _reason, _cat = "no yfinance ticker mapped", "blank-symbol"
+            elif _n_rows < 5:
+                _reason, _cat = ("provider returned %d bar(s) — almost certainly "
+                                 "delisted, renamed or a wrong symbol"
+                                 % _n_rows), "no-data"
+            else:
+                _reason, _cat = ("only %d bars, below the %d-bar minimum — a young "
+                                 "listing, or a symbol that has stopped returning "
+                                 "history" % (_n_rows, MIN_HISTORY_ROWS)), "short-history"
+            if _resolves:
+                _reason += (" [weekly probe says %s RESOLVES at the provider as of %s, "
+                            "so this is worth fixing, not ignoring]"
+                            % (_resolves.get("symbol", yf), _resolves.get("last_date", "?")))
+            print(f"  SKIP {ticker} — {_reason}")
+            if dropped is not None:
+                dropped.append({"ticker": ticker, "yfinance_ticker": yf,
+                                "company_name": stock.get("company_name", ""),
+                                "rows": _n_rows, "category": _cat, "reason": _reason})
             continue
 
         rows_with_sma = compute_smas(raw_data[yf])
+        _short_history = _n_rows < FULL_HISTORY_ROWS
+        if _short_history:
+            # D-MD-COVERAGE-2026-08-04, amendment after testing the screens.
+            # Lowering the gate let young listings in, but a missing long-window
+            # average makes every test that needs it evaluate to pass=False —
+            # INDISTINGUISHABLE from a genuine failure. Measured on TKMS-DE
+            # (197 bars, no 200D): 13 pass-flags, 5 True / 8 False / 0 None,
+            # identical in shape to SAP-DE which has 1,325 bars. A stock the
+            # system cannot yet judge would have been silently ranked as a stock
+            # that had been judged and failed. That is worse than the absence it
+            # replaced, so say so loudly on the record and in the log.
+            print("  SHORT-HISTORY %s — %d bars, below %d. Long-window readings "
+                  "(150D/200D, 12M relative strength) are NOT computable, and any "
+                  "screen test needing them will read as a FAILURE rather than an "
+                  "unknown. Treat this stock's stage verdicts as provisional."
+                  % (ticker, _n_rows, FULL_HISTORY_ROWS))
+
+        # Defensive NaN fallback (2026-07-03): _fetch_ticker() now drops NaN
+        # rows at ingestion (see NAN-SKIP above), so this should never trigger
+        # against a fresh fetch. It stays as a second, independent layer of
+        # defence against a NaN entering via any other path -- e.g. a cache
+        # file written before this fix, or a future code path that bypasses
+        # _fetch_ticker. Walk backwards from the tail and use the most recent
+        # row whose close is a real, non-NaN number for latest/prev; never
+        # silently serve a NaN price to the dashboard.
+        def _clean_tail(rows):
+            for i in range(len(rows) - 1, -1, -1):
+                c = rows[i].get("close")
+                if isinstance(c, (int, float)) and not math.isnan(c):
+                    return i
+            return None
+        _clean_idx = _clean_tail(rows_with_sma)
+        if _clean_idx is None:
+            print(f"  SKIP {ticker} — no row with a valid (non-NaN) close")
+            continue
+        if _clean_idx != len(rows_with_sma) - 1:
+            print(f"  NAN-FALLBACK {ticker} — tail row(s) had NaN close, "
+                  f"using last valid close from {rows_with_sma[_clean_idx]['date']}")
+            rows_with_sma = rows_with_sma[:_clean_idx + 1]
 
         # Latest row + previous day
         latest = rows_with_sma[-1]
@@ -287,13 +1165,25 @@ def build_prices_json(universe, raw_data, benchmark_rows):
 
         # 52-week high/low (last 252 trading days)
         lookback_252 = rows_with_sma[-252:] if len(rows_with_sma) >= 252 else rows_with_sma
-        high_52w = max(r["high"] for r in lookback_252)
-        low_52w = min(r["low"] for r in lookback_252)
+        # MD-S81B-52W-INTEGRITY-MARKER: tick repair + unit-break-aware window.
+        high_52w, low_52w, _lb52, _s81b_kind = _s81b_52w_window(lookback_252, ticker)
+        _unit_break_52w = _s81b_kind is not None
+        _unit_break_date = (_lb52[0].get("date") if (_s81b_kind == "rebased" and _lb52) else None)
 
         # Swing high detection (Q8, 23-Apr-26): most recent local peak
         # A swing high = a day whose high is higher than the 5 days before and after it
-        swing_high = high_52w  # fallback to 52W high
+        swing_high = high_52w  # fallback to 52W high (may be None after S81b)
         lookback_for_swing = rows_with_sma[-126:] if len(rows_with_sma) >= 126 else rows_with_sma  # 6 months
+        # S81b: a swing high taken from pre-break rows is quoted in a superseded
+        # unit, which would read as a ~99% pullback against today's price and feed
+        # straight into the uptrend-retest depth calculation. Restrict the swing
+        # search to rows that are comparable with the current price.
+        if _s81b_kind == "rebased" and _lb52:
+            _swing_floor = _lb52[0].get("date")
+            if _swing_floor:
+                _trimmed = [r for r in lookback_for_swing if r.get("date") >= _swing_floor]
+                if _trimmed:
+                    lookback_for_swing = _trimmed
         swing_window = 5  # days on each side
         swing_high_global_idx = None  # MD-V2-PIPELINE-FIELDS-S25-MARKER: index into rows_with_sma of the swing high
         for si in range(len(lookback_for_swing) - 1, swing_window - 1, -1):
@@ -1140,6 +2030,18 @@ def build_prices_json(universe, raw_data, benchmark_rows):
         entry = {
             "ticker": ticker,
             "yf_ticker": yf,
+            # D-MD-COVERAGE-2026-08-04: state the depth of history behind every
+            # record. A young listing now APPEARS with honest nulls in its long
+            # windows rather than vanishing, and any consumer can filter on this
+            # deliberately instead of a stock silently not existing.
+            "history_rows": _n_rows,
+            "insufficient_history": _short_history,
+            # Names the readings that cannot exist yet, so a consumer can show
+            # "not yet" instead of a false negative. Empty for a normal stock.
+            "unavailable_readings": ([] if not _short_history else
+                                     [k for k, need in (("150D", 150), ("200D", 200),
+                                                        ("rs_12m", 252))
+                                      if _n_rows < need]),
             "company_name": stock["company_name"],
             "sector": stock["sector"],
             "industry": stock["industry"],
@@ -1152,9 +2054,15 @@ def build_prices_json(universe, raw_data, benchmark_rows):
             "mm99_monthly_history": mm99_monthly_history,
             "bp_duration": bp_duration,
             "bp_extras": bp_extras,
-            "high_52w": round(high_52w, 4),
-            "swing_high": round(swing_high, 4),
-            "low_52w": round(low_52w, 4),
+            "high_52w": (round(high_52w, 4) if high_52w is not None else None),
+            "swing_high": (round(swing_high, 4) if swing_high is not None else None),
+            "low_52w": (round(low_52w, 4) if low_52w is not None else None),
+            # S81b: True when a ~100x unit discontinuity sits inside the 52-week
+            # window, so the range above is either trimmed to post-break rows or
+            # withheld entirely. Downstream should not present a range for these.
+            "unit_break_52w": bool(_unit_break_52w),
+            "unit_break_date": _unit_break_date,
+            "unit_break_kind": _s81b_kind,
             "adv_1m": adv_1m,
             "adv_3m": adv_3m,
             "adv_1m_up": adv_1m_up,
@@ -1402,9 +2310,14 @@ def compute_all_filters(prices):
         pb["group_b"] = {"pass": b_met >= 1, "met": b_met, "required": 1, "tests": b_tests}
 
         # Group C — Dead Cat (price ≥30% below 52W high)
-        pct_below_52wh = (h52 - p) / h52 if h52 > 0 else 0
-        pb_t8 = pct_below_52wh >= 0.30
-        pb["group_c"] = {"pass": pb_t8, "tests": {"T8": pb_t8}, "pct_below_52wh": round(pct_below_52wh, 4)}
+        # S81b: h52 can now be None when a unit break leaves no comparable
+        # history. None must not be compared with 0 — that raises in Python 3.
+        # S81c: None, not 0. Zero renders on the probing-bet tab as "0% below the
+        # 52-week high", i.e. AT the high, which is the opposite of what we know.
+        pct_below_52wh = (h52 - p) / h52 if (h52 is not None and h52 > 0) else None
+        pb_t8 = bool(pct_below_52wh is not None and pct_below_52wh >= 0.30)
+        pb["group_c"] = {"pass": pb_t8, "tests": {"T8": pb_t8},
+                         "pct_below_52wh": (round(pct_below_52wh, 4) if pct_below_52wh is not None else None)}
 
         # Group D — Capital PB1 (P>20D + 20D rising)
         pb_t9 = above(p, ma(20))
@@ -1876,6 +2789,137 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
                 result[ticker][mi] = 'None'
 
     return result
+
+
+# ── MD-V2-S81-SB-50D-TURN-MARKER ─────────────────────────────────────────────
+# Single source of truth for the Stage 1 / Stage 3 / Stage 4 speculative-bet test.
+#
+# S81 (11-Aug-26, Richard's brief). Two changes from the S46 six-criterion test:
+#   1. A SIXTH test — the 50-day MA freshly turning up — joins the 20-day turn in
+#      the trigger group. The confirmation test renumbers to #7; total 6 -> 7.
+#   2. The turn leg of the rating ladder is satisfied by EITHER the 20-day OR the
+#      50-day MA having turned up, so a slower turn no longer disqualifies.
+# The price leg is unchanged and still reads against the 20-day MA.
+#
+# The Stage 2 probing bet has its own 50D-only builder (_ps_build_50d) and is
+# deliberately NOT routed through here.
+#
+# These functions are module-level so the nightly pipeline and any one-off
+# recompute call the SAME code. Do not re-implement this ladder anywhere else.
+
+PS_TEST_TOTAL = 7
+
+
+def ps_round(x, nd=4):
+    try:
+        if x is None:
+            return None
+        return round(float(x), nd)
+    except (TypeError, ValueError):
+        return None
+
+
+def ps_pct_gap(a, b):
+    try:
+        if a is None or b is None or b == 0:
+            return None
+        return round((float(a) - float(b)) / float(b), 4)
+    except (TypeError, ValueError):
+        return None
+
+
+def ps_signals(price, mas, close_pct_change_today):
+    """Primitive booleans behind the speculative-bet test, from one price row.
+
+    A "turn" is: the MA is rising day-over-day now AND was falling 5 days ago.
+    Missing inputs degrade to False rather than raising.
+    """
+    mas = mas or {}
+    ma5_now, ma5_prev = mas.get("5D"), mas.get("5D_prev")
+    ma10_now, ma10_prev = mas.get("10D"), mas.get("10D_prev")
+    ma20_now, ma20_prev = mas.get("20D"), mas.get("20D_prev")
+    ma20_5, ma20_6 = mas.get("20D_5d_ago"), mas.get("20D_6d_ago")
+    ma50_now, ma50_prev = mas.get("50D"), mas.get("50D_prev")
+    ma50_5, ma50_6 = mas.get("50D_5d_ago"), mas.get("50D_6d_ago")
+
+    ma20_now_rising = bool(ma20_now is not None and ma20_prev is not None and ma20_now > ma20_prev)
+    ma20_was_falling = bool(ma20_5 is not None and ma20_6 is not None and ma20_5 < ma20_6)
+    ma50_now_rising = bool(ma50_now is not None and ma50_prev is not None and ma50_now > ma50_prev)
+    ma50_was_falling = bool(ma50_5 is not None and ma50_6 is not None and ma50_5 < ma50_6)
+
+    return {
+        "ma20_now": ma20_now,
+        "ma50_now": ma50_now,
+        "close_pct_change_today": close_pct_change_today,
+        "price": price,
+        "b1_5d_rising": bool(ma5_now is not None and ma5_prev is not None and ma5_now > ma5_prev),
+        "b2_10d_rising": bool(ma10_now is not None and ma10_prev is not None and ma10_now > ma10_prev),
+        "c1_price_gt_20d": bool(price is not None and ma20_now is not None and price > ma20_now),
+        "c1_price_gt_50d": bool(price is not None and ma50_now is not None and price > ma50_now),
+        "c2_ma20_now_rising": ma20_now_rising,
+        "c2_ma20_turn": bool(ma20_now_rising and ma20_was_falling),
+        "c2_ma50_now_rising": ma50_now_rising,
+        "c2_ma50_turn": bool(ma50_now_rising and ma50_was_falling),
+        "c3_followthrough": bool(close_pct_change_today is not None and close_pct_change_today >= 0.02),
+    }
+
+
+def ps_turn(sig):
+    """The trigger leg: EITHER moving average having freshly turned up (S81)."""
+    return bool(sig["c2_ma20_turn"] or sig["c2_ma50_turn"])
+
+
+def ps_rating(sig, stage_qualifies):
+    if not stage_qualifies:
+        return "None"
+    if not (sig["b1_5d_rising"] and sig["b2_10d_rising"]):
+        return "None"
+    turn = ps_turn(sig)
+    if sig["c1_price_gt_20d"] and turn and sig["c3_followthrough"]:
+        return "Qualified"
+    if sig["c1_price_gt_20d"] and turn:
+        return "Probable"
+    if sig["c1_price_gt_20d"] or turn:
+        return "Plausible"
+    return "Possible"
+
+
+def _ps_turn_label(turned, rising):
+    if turned:
+        return "turn (rising now, falling 5d ago)"
+    if rising:
+        return "rising but no recent turn"
+    return "not rising"
+
+
+def ps_build(sig, stage_qualifies, variant_key, stage_rating_value):
+    tests = {
+        "g1_stage_qualifies": bool(stage_qualifies),
+        "g2_5d_rising": sig["b1_5d_rising"],
+        "g3_10d_rising": sig["b2_10d_rising"],
+        "g4_price_gt_20d": sig["c1_price_gt_20d"],
+        "g5_20d_turn_last_5d": sig["c2_ma20_turn"],
+        "g6_50d_turn_last_5d": sig["c2_ma50_turn"],
+        "g7_followthrough_close_ge2pct": sig["c3_followthrough"],
+    }
+    count = sum(1 for v in tests.values() if v)
+    rating = ps_rating(sig, stage_qualifies)
+    return {
+        "tests": tests, "count": count, "total": PS_TEST_TOTAL,
+        "rating": rating,
+        "qualifies": bool(rating == "Qualified"),
+        "info_variant": variant_key,
+        "info_stage_rating": stage_rating_value,
+        "test_values": {
+            "g1_stage_qualifies": (stage_rating_value if stage_qualifies else "not in stage"),
+            "g2_5d_rising": ("rising" if sig["b1_5d_rising"] else "not rising"),
+            "g3_10d_rising": ("rising" if sig["b2_10d_rising"] else "not rising"),
+            "g4_price_gt_20d": ps_pct_gap(sig["price"], sig["ma20_now"]),
+            "g5_20d_turn_last_5d": _ps_turn_label(sig["c2_ma20_turn"], sig["c2_ma20_now_rising"]),
+            "g6_50d_turn_last_5d": _ps_turn_label(sig["c2_ma50_turn"], sig["c2_ma50_now_rising"]),
+            "g7_followthrough_close_ge2pct": ps_round(sig["close_pct_change_today"]),
+        },
+    }
 
 
 def compute_master_dashboard_screens(prices, filter_results):
@@ -2950,76 +3994,18 @@ def compute_master_dashboard_screens(prices, filter_results):
         # for mas["20D_5d_ago"] / mas["20D_6d_ago"]. Without Patcher C, the
         # 20D turn check reads None and is always False (degrades gracefully;
         # tests still compute but never reach Probable+).
-        ps_ma5_now = mas.get("5D")
-        ps_ma5_prev = mas.get("5D_prev")
-        ps_ma10_now = mas.get("10D")
-        ps_ma10_prev = mas.get("10D_prev")
-        ps_ma20_now = mas.get("20D")
-        ps_ma20_prev = mas.get("20D_prev")
-        ps_ma20_5d_ago = mas.get("20D_5d_ago")
-        ps_ma20_6d_ago = mas.get("20D_6d_ago")
-        ps_b1_5d_rising = bool(ps_ma5_now is not None and ps_ma5_prev is not None and ps_ma5_now > ps_ma5_prev)
-        ps_b2_10d_rising = bool(ps_ma10_now is not None and ps_ma10_prev is not None and ps_ma10_now > ps_ma10_prev)
-        ps_c1_price_gt_20d = bool(price is not None and ps_ma20_now is not None and price > ps_ma20_now)
-        ps_c2_ma20_now_rising = bool(ps_ma20_now is not None and ps_ma20_prev is not None and ps_ma20_now > ps_ma20_prev)
-        ps_c2_ma20_was_falling_5d_ago = bool(ps_ma20_5d_ago is not None and ps_ma20_6d_ago is not None and ps_ma20_5d_ago < ps_ma20_6d_ago)
-        ps_c2_ma20_turn = bool(ps_c2_ma20_now_rising and ps_c2_ma20_was_falling_5d_ago)
-        ps_c3_followthrough = bool(close_pct_change_today is not None and close_pct_change_today >= 0.02)
-
-        # Group E -- 50D MA variant (S2 Probing Bet).  Uses same lookback structure as 20D.
-        # D-MD-FILTER-1 (22-Apr-26): S2PB Group E = T11 (P>50D MA) + T12 (50D MA rising DoD).
-        ps_ma50_now  = mas.get("50D")
-        ps_ma50_prev = mas.get("50D_prev")
-        ps_ma50_5d_ago = mas.get("50D_5d_ago")
-        ps_ma50_6d_ago = mas.get("50D_6d_ago")
-        ps_c1_price_gt_50d = bool(price is not None and ps_ma50_now is not None and price > ps_ma50_now)
-        ps_c2_ma50_now_rising = bool(ps_ma50_now is not None and ps_ma50_prev is not None and ps_ma50_now > ps_ma50_prev)
-        ps_c2_ma50_was_falling_5d_ago = bool(ps_ma50_5d_ago is not None and ps_ma50_6d_ago is not None and ps_ma50_5d_ago < ps_ma50_6d_ago)
-        ps_c2_ma50_turn = bool(ps_c2_ma50_now_rising and ps_c2_ma50_was_falling_5d_ago)
-
-        def _ps_rating(stage_qualifies):
-            if not stage_qualifies:
-                return "None"
-            if not (ps_b1_5d_rising and ps_b2_10d_rising):
-                return "None"
-            if ps_c1_price_gt_20d and ps_c2_ma20_turn and ps_c3_followthrough:
-                return "Qualified"
-            if ps_c1_price_gt_20d and ps_c2_ma20_turn:
-                return "Probable"
-            if ps_c1_price_gt_20d or ps_c2_ma20_turn:
-                return "Plausible"
-            return "Possible"
-
-        def _ps_build(stage_qualifies, variant_key, stage_rating_value):
-            ps_tests = {
-                "g1_stage_qualifies": stage_qualifies,
-                "g2_5d_rising": ps_b1_5d_rising,
-                "g3_10d_rising": ps_b2_10d_rising,
-                "g4_price_gt_20d": ps_c1_price_gt_20d,
-                "g5_20d_turn_last_5d": ps_c2_ma20_turn,
-                "g6_followthrough_close_ge2pct": ps_c3_followthrough,
-            }
-            ps_count = sum(1 for v in ps_tests.values() if v)
-            ps_rating = _ps_rating(stage_qualifies)
-            return {
-                "tests": ps_tests, "count": ps_count, "total": 6,
-                "rating": ps_rating,
-                "qualifies": bool(ps_rating == "Qualified"),
-                "info_variant": variant_key,
-                "info_stage_rating": stage_rating_value,
-                "test_values": {
-                    "g1_stage_qualifies": (stage_rating_value if stage_qualifies else "not in stage"),
-                    "g2_5d_rising": ("rising" if ps_b1_5d_rising else "not rising"),
-                    "g3_10d_rising": ("rising" if ps_b2_10d_rising else "not rising"),
-                    "g4_price_gt_20d": _md_v2_pct_gap(price, ps_ma20_now),
-                    "g5_20d_turn_last_5d": (
-                        "turn (rising now, falling 5d ago)" if ps_c2_ma20_turn
-                        else "rising but no recent turn" if ps_c2_ma20_now_rising
-                        else "not rising"
-                    ),
-                    "g6_followthrough_close_ge2pct": _md_v2_round(close_pct_change_today),
-                },
-            }
+        # MD-V2-S81-SB-50D-TURN-MARKER: the primitive signals and the S1/S3/S4
+        # builder now live at module level (see ps_signals / ps_build above) so
+        # the nightly pipeline and any one-off recompute share one implementation.
+        # The names below are kept because the Stage 2 50D-only builder reads them.
+        _ps_sig = ps_signals(price, mas, close_pct_change_today)
+        ps_ma50_now = _ps_sig["ma50_now"]
+        ps_b1_5d_rising = _ps_sig["b1_5d_rising"]
+        ps_b2_10d_rising = _ps_sig["b2_10d_rising"]
+        ps_c1_price_gt_50d = _ps_sig["c1_price_gt_50d"]
+        ps_c2_ma50_now_rising = _ps_sig["c2_ma50_now_rising"]
+        ps_c2_ma50_turn = _ps_sig["c2_ma50_turn"]
+        ps_c3_followthrough = _ps_sig["c3_followthrough"]
 
         # 50D variant rating + builder (S2 Probing Bet only).
         def _ps_rating_50d(stage_qualifies):
@@ -3093,10 +4079,10 @@ def compute_master_dashboard_screens(prices, filter_results):
             elif _pb_stage == "Capital" and not _s2_in:
                 _pb["stage"] = None
 
-        tests["probing_bet_s1"] = _ps_build(_s1_in, "probing_bet_s1", _s1_rating_val)
+        tests["probing_bet_s1"] = ps_build(_ps_sig, _s1_in, "probing_bet_s1", _s1_rating_val)  # S81: 7 tests, OR-turn
         tests["probing_bet_s2"] = _ps_build_50d(_s2_in, "probing_bet_s2", _s2_rating_val)  # D-MD-FILTER-1: Group E (50D)
-        tests["speculative_bet_s3"] = _ps_build(_s3_in, "speculative_bet_s3", _s3_rating_val)
-        tests["speculative_bet_s4"] = _ps_build(_s4_in, "speculative_bet_s4", _s4_rating_val)
+        tests["speculative_bet_s3"] = ps_build(_ps_sig, _s3_in, "speculative_bet_s3", _s3_rating_val)  # S81
+        tests["speculative_bet_s4"] = ps_build(_ps_sig, _s4_in, "speculative_bet_s4", _s4_rating_val)  # S81
 
         md["tests"] = tests
 
@@ -3300,8 +4286,12 @@ def _save_test_history(history):
         for old in dates[:-TEST_HISTORY_MAX_KEEP]:
             del history[old]
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    with open(TEST_HISTORY_PATH, "w", encoding="utf-8") as f:
-        json.dump(history, f, separators=(",", ":"))
+    # Hardened write (14-Jul-26 SA): atomic tmp+fsync+verify+os.replace instead
+    # of a raw open()+json.dump that a delayed FUSE flush could truncate.
+    def _v_th(d):
+        assert isinstance(d, dict), "test-history verify: not a dict"
+    _safe_write_json(history, TEST_HISTORY_PATH, min_bytes=2, validate=_v_th,
+                     indent=None, separators=(",", ":"))
 
 
 def _extract_today_test_row(fr):
@@ -3582,15 +4572,200 @@ def _save_daily_snapshot(filter_results):
 
     # Write back
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    with open(snapshot_path, "w") as f:
-        json.dump(existing, f, separators=(",", ":"))
+    # Hardened write (14-Jul-26 SA): atomic instead of raw open()+json.dump.
+    def _v_snap(d):
+        assert isinstance(d, dict), "stage-snapshots verify: not a dict"
+    _safe_write_json(existing, snapshot_path, min_bytes=2, validate=_v_snap,
+                     indent=None, separators=(",", ":"))
 
     print(f"  Daily snapshot saved: {today} ({len(today_stages)} stocks, {len(existing)} total days)")
+
+
+# ── Stage history delta log (D-MD-V2-STAGEHIST, 17-Jul-26) ───────────────
+#
+# Richard's ask (17-Jul-26): a permanent, uncapped, delta-only log of every
+# stage/gate/test/rating field produced by compute_master_dashboard_screens
+# + compute_all_filters, so "which stocks moved into Stage 2 Probable/
+# Plausible, and when" can be answered by querying a file instead of
+# re-deriving it from memory each time.
+#
+# Design:
+#   - _flatten_stage_fields() walks one ticker's filter-result record and
+#     keeps only boolean / rating / stage / tri-state test-outcome leaves
+#     (plus a small allowlist of gate-relevant scalar scores, e.g. MM99's
+#     score_8pt). Raw numeric test_values and the pipeline's own internal
+#     rolling-history arrays (basing_plateau.history, mm99.monthly_history,
+#     stage_N_persistence) are deliberately excluded — they are noise for
+#     a day-over-day CHANGE log and are already tracked elsewhere.
+#   - data/stage-history-20d.json is the permanent, uncapped log. Entry 0
+#     (or the oldest entry after a seed) is a full baseline; every entry
+#     after that is delta-only: {ticker: {changed_field: new_value}}, and a
+#     ticker with zero changed fields on a given day is omitted from that
+#     day's "data" dict entirely.
+#   - data/.stage-history-latest.json is a small internal cache holding the
+#     most recently logged day's FULL flattened state, used only as the
+#     diff base for the next day's delta. It is not one of the protected
+#     production files (universe.json / filter-results.json / prices.json)
+#     — it is new, created by this feature, and safe to overwrite each run
+#     via the same atomic _safe_write_json() helper used everywhere else.
+#   - compute_and_append_stage_history_delta() is idempotent per calendar
+#     date: re-running the pipeline twice on the same day replaces that
+#     day's entry rather than appending a duplicate.
+
+STAGE_HISTORY_LOG_PATH = DATA_DIR / "stage-history-20d.json"
+STAGE_HISTORY_LATEST_PATH = DATA_DIR / ".stage-history-latest.json"
+
+FLATTEN_SKIP_KEYS = {
+    "test_values", "history", "monthly_history",
+    "stage_1_persistence", "stage_2_persistence",
+    "stage_3_persistence", "stage_4_persistence",
+    "_note", "note", "retest_counts",
+}
+FLATTEN_SCALAR_ALLOW_KEYS = {"score_8pt", "score_11", "months_passing", "current_retest_num"}
+
+
+def _flatten_stage_fields(value, path="", parent_key=None, out=None):
+    """Recursively flatten one ticker's filter-result record (the dict that
+    holds basing_plateau/probing_bet/mm99/vcp/uptrend_retest + md_v2) down
+    to {dotted.path: value} for boolean / rating / stage / test-outcome
+    leaves only. See module comment above for what's excluded and why."""
+    if out is None:
+        out = {}
+    if isinstance(value, dict):
+        for k, v in value.items():
+            if k in FLATTEN_SKIP_KEYS:
+                continue
+            newpath = f"{path}.{k}" if path else k
+            _flatten_stage_fields(v, newpath, parent_key=k, out=out)
+        return out
+    if isinstance(value, list):
+        # No expected list leaves survive FLATTEN_SKIP_KEYS; ignore defensively.
+        return out
+    if isinstance(value, bool):
+        out[path] = value
+    elif isinstance(value, str):
+        if parent_key in ("rating", "stage", "tests") or path.endswith((".stage", ".rating")):
+            out[path] = value
+    elif value is None:
+        if parent_key == "stage" or path.endswith(".stage"):
+            out[path] = value
+    elif isinstance(value, (int, float)):
+        if parent_key in FLATTEN_SCALAR_ALLOW_KEYS:
+            out[path] = value
+    return out
+
+
+def _flatten_all_tickers(filter_results):
+    """Return {ticker: {dotted.path: value}} for every stock in filter_results."""
+    flat_all = {}
+    for fr in filter_results:
+        flat_all[fr["ticker"]] = _flatten_stage_fields(fr)
+    return flat_all
+
+
+def _diff_flat_states(prev, now):
+    """Compare two {ticker: {path: value}} snapshots. Returns
+    {ticker: {path: new_value}} containing ONLY changed/added fields.
+    A field present in prev but absent in now is recorded as null
+    (path removed / ticker dropped out of a filter this run). A ticker
+    with zero differences is omitted entirely."""
+    delta = {}
+    all_tickers = set(prev.keys()) | set(now.keys())
+    for tk in all_tickers:
+        p = prev.get(tk, {})
+        n = now.get(tk, {})
+        changed = {}
+        for k in set(p.keys()) | set(n.keys()):
+            pv, nv = p.get(k), n.get(k)
+            if pv != nv:
+                changed[k] = nv if k in n else None
+        if changed:
+            delta[tk] = changed
+    return delta
+
+
+def _load_stage_history_doc():
+    if STAGE_HISTORY_LOG_PATH.exists():
+        try:
+            with open(STAGE_HISTORY_LOG_PATH, encoding="utf-8") as f:
+                d = json.load(f)
+            if isinstance(d, dict) and isinstance(d.get("days"), list):
+                return d
+        except (json.JSONDecodeError, IOError):
+            pass
+    return {"_meta": {"description": "Permanent uncapped day-over-day delta "
+                       "log of every stage/gate/test/rating field. Entry 0 "
+                       "is a full baseline; all later entries are delta-only "
+                       "(changed fields per ticker vs the prior logged day)."},
+            "days": []}
+
+
+def _load_latest_full_state():
+    if not STAGE_HISTORY_LATEST_PATH.exists():
+        return None
+    try:
+        with open(STAGE_HISTORY_LATEST_PATH, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else None
+    except (json.JSONDecodeError, IOError):
+        return None
+
+
+def _save_latest_full_state(flat_all):
+    def _v(d):
+        assert isinstance(d, dict), "stage-history-latest verify: not a dict"
+    _safe_write_json(flat_all, STAGE_HISTORY_LATEST_PATH, min_bytes=2,
+                     validate=_v, indent=None, separators=(",", ":"))
+
+
+def compute_and_append_stage_history_delta(filter_results, today_str=None):
+    """Flatten today's filter_results, diff against the last logged day's
+    full state, and append a delta (or baseline, if no prior state exists)
+    entry to data/stage-history-20d.json. Also refreshes the small
+    .stage-history-latest.json cache used as tomorrow's diff base.
+
+    Idempotent per calendar date — safe to call more than once on the same
+    day (replaces that day's entry rather than duplicating it).
+    """
+    if today_str is None:
+        today_str = date.today().strftime("%Y-%m-%d")
+
+    flat_now = _flatten_all_tickers(filter_results)
+    prev = _load_latest_full_state()
+    doc = _load_stage_history_doc()
+
+    if prev is None:
+        entry = {"date": today_str, "type": "baseline", "data": flat_now}
+    else:
+        delta = _diff_flat_states(prev, flat_now)
+        entry = {"date": today_str, "type": "delta", "data": delta}
+
+    # Idempotent replace-if-present.
+    doc["days"] = [d for d in doc.get("days", []) if d.get("date") != today_str]
+    doc["days"].append(entry)
+
+    def _v_doc(d):
+        assert isinstance(d.get("days"), list) and len(d["days"]) >= 1, \
+            "stage-history-20d verify: no days recorded"
+    _safe_write_json(doc, STAGE_HISTORY_LOG_PATH, min_bytes=2, validate=_v_doc,
+                     indent=None, separators=(",", ":"))
+    _save_latest_full_state(flat_now)
+
+    n_changed_tickers = len(entry["data"])
+    print(f"  stage-history-20d.json: appended {entry['type']} entry for "
+          f"{today_str} ({n_changed_tickers} ticker(s) with changes, "
+          f"{len(doc['days'])} day(s) total in log)")
+    return entry
 
 
 def main():
     parser = argparse.ArgumentParser(description="Master Dashboard data pipeline")
     parser.add_argument("--full-refresh", action="store_true", help="Force full re-pull from yfinance")
+    parser.add_argument("--no-reseed", action="store_true",
+                        help="Skip tonight's re-seed rotation. For a SECOND run on "
+                             "the same calendar date (the 22:15 post-US-close pass), "
+                             "where the rotation has already been done by the 18:00 "
+                             "build and repeating it only doubles provider load.")
     parser.add_argument("--full-universe", action="store_true", help="Use full 976-stock watchlist instead of alpha universe")
     parser.add_argument("--with-history", action="store_true", help="Compute historical stages at T-1/T-5/T-22 for CHANGES tab")
     parser.add_argument("--allow-unmapped", action="store_true", help="Allow watchlist stocks with no canonical taxonomy (default: abort)")
@@ -3664,10 +4839,44 @@ def main():
             wl = json.load(f)
         universe = {"stocks": wl["stocks"]}
         print(f"Loaded FULL watchlist: {len(universe['stocks'])} stocks")
+        # Shape stability (14-Jul-26 SA): the 05:30 extract writes universe.json
+        # WITH cohort/cohort_name (derive_universe.py, from canonical
+        # universe-master.json); this 18:00 build rewrote it from the
+        # pullback-watchlist, which lacks those two fields, silently dropping
+        # cohort every evening. Join them back from the canonical source so
+        # universe.json carries a single stable 10-field shape whichever job ran
+        # last. Non-fatal: proceed without enrichment if the master is unreadable.
+        try:
+            _umj = SCRIPT_DIR.parent.parent / "databases" / "universe-master.json"
+            _cohort_by_ticker = {}
+            if _umj.exists():
+                with open(_umj, encoding="utf-8") as _f:
+                    for _s in json.load(_f).get("stocks", []):
+                        _cohort_by_ticker[_s.get("ticker")] = (
+                            _s.get("cohort_number", ""), _s.get("cohort_name", ""))
+            _enriched = 0
+            for _st in universe["stocks"]:
+                _c = _cohort_by_ticker.get(_st.get("ticker"))
+                if _c is not None:
+                    _st.setdefault("cohort", _c[0])
+                    _st.setdefault("cohort_name", _c[1])
+                    _enriched += 1
+                else:
+                    _st.setdefault("cohort", "")
+                    _st.setdefault("cohort_name", "")
+            print(f"  Cohort enrichment: {_enriched}/{len(universe['stocks'])} matched to universe-master")
+        except Exception as _coh_err:
+            print(f"  WARNING: cohort enrichment skipped (non-fatal): {_coh_err}")
         DATA_DIR.mkdir(parents=True, exist_ok=True)
-        with open(UNIVERSE_PATH, "w") as f:
-            json.dump(universe, f, indent=2)
-        print(f"  Saved as universe.json ({len(universe['stocks'])} stocks)")
+        # Hardened write (fix 02-Jul-26): was a raw open()+json.dump with no
+        # verify and an unconditional success message; a delayed flush could
+        # truncate universe.json after this reported "Saved".
+        _n = len(universe["stocks"])
+        def _verify(d, _n=_n):
+            assert isinstance(d.get("stocks"), list) and len(d["stocks"]) == _n, \
+                "universe.json verify failed: expected %d stocks" % _n
+        _safe_write_json(universe, UNIVERSE_PATH, min_bytes=1000, validate=_verify)
+        print(f"  Saved as universe.json ({_n} stocks) -- fsync+atomic+verified")
     else:
         with open(UNIVERSE_PATH) as f:
             universe = json.load(f)
@@ -3713,6 +4922,62 @@ def main():
     else:
         print(f"WARNING: stock_mapping_final.json not found at {sm_path} — using raw watchlist taxonomy")
 
+    # ── Self-healing exclusion: every watchlist ticker must have a yfinance ticker ──
+    # Added 23-Jul-26, revised same day (SA session) after the Liberty Global incident:
+    # fetch_all_data() keys entirely off yfinance_ticker, so a blank value means the
+    # ticker is passed to yfinance as "", the fetch returns 0 rows, and
+    # build_prices_json's "SKIP {ticker} — insufficient data (0 rows)" line silently
+    # drops the stock from prices.json and every file derived from it, with no error
+    # anywhere. 14 stocks (incl. Liberty Global / LBTYA-US) were missing from the
+    # dashboard for this exact reason, undetected until Richard noticed by inspection.
+    #
+    # The first version of this check hard-aborted the whole build on any blank
+    # ticker. Richard correctly pointed out that just trades a silent failure for a
+    # bigger one: one incomplete new stock added to Notion would stop the ENTIRE
+    # dashboard refreshing for all 990 other stocks too. The actual structural fix is
+    # resolve_missing_yfinance_tickers.py, which runs earlier in the daily chain and
+    # auto-resolves the large majority of blanks against live yfinance data (verified
+    # by both a real price-history check and a company-name match, not guessed
+    # blindly), writing the fix back to Notion so it is permanent. What follows here
+    # is the belt-and-braces safety net for anything that resolver could not fix (or
+    # if it did not run): those tickers are EXCLUDED from this run's fetch only, the
+    # gap is flagged to the shared needs-attention file so it stays visible, and the
+    # rest of the build proceeds normally for every other stock.
+    no_yf = [s for s in universe["stocks"] if not (s.get("yfinance_ticker") or "").strip()]
+    if no_yf:
+        tickers = [s["ticker"] for s in no_yf]
+        print()
+        print("=" * 60)
+        print(f"WARNING: {len(tickers)} watchlist ticker(s) have no yfinance_ticker set:")
+        for tk in tickers:
+            print(f"  - {tk}")
+        print("  Excluding from this run's price fetch (everything else proceeds).")
+        print("  Run resolve_missing_yfinance_tickers.py, or fix the 'yfinance_ticker'")
+        print("  property on each page in the Notion Stocks DB directly.")
+        print("=" * 60)
+        try:
+            needs_attention_path = SCRIPT_DIR.parent.parent / "databases" / "needs-attention-yfinance.json"
+            na = {}
+            if needs_attention_path.exists():
+                try:
+                    with open(needs_attention_path, encoding="utf-8") as f:
+                        na = json.load(f)
+                except Exception:
+                    na = {}
+            now = datetime.now().isoformat() + "Z"
+            for tk in tickers:
+                na[tk] = {"reason": "blank yfinance_ticker survived the auto-resolver (or resolver "
+                                    "did not run) -- excluded from generate_master_data.py's price "
+                                    "fetch this run", "flagged_at": now}
+            tmp = str(needs_attention_path) + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(na, f, indent=2, sort_keys=True)
+            os.replace(tmp, needs_attention_path)
+        except Exception as e:
+            print(f"WARNING: could not write needs-attention file: {e}")
+        exclude = {s["ticker"] for s in no_yf}
+        universe["stocks"] = [s for s in universe["stocks"] if s["ticker"] not in exclude]
+
     # Fetch data — REAL market data only. No synthetic fallback (D-PRICE-INTEGRITY, 22-May-26).
     print("\n── Fetching yfinance data ──")
     try:
@@ -3728,7 +4993,8 @@ def main():
         print("     (lagged) chart data.")
         print("=" * 64)
         sys.exit(3)
-    raw_data = fetch_all_data(universe, full_refresh=args.full_refresh)
+    raw_data = fetch_all_data(universe, full_refresh=args.full_refresh,
+                              no_reseed=args.no_reseed)
     data_source = "yfinance"
 
     # Guard: a near-empty fetch must never overwrite good data.
@@ -3747,8 +5013,63 @@ def main():
 
     # Build prices.json
     print("\n── Building prices.json ──")
-    prices = build_prices_json(universe, raw_data, benchmark_rows)
+    _dropped = []
+    prices = build_prices_json(universe, raw_data, benchmark_rows, dropped=_dropped)
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    # ── D-MD-COVERAGE-2026-08-04 (G3): universe-to-prices reconciliation ──
+    # universe.json held 994 stocks and prices.json held 978, and NOTHING had
+    # ever compared the two. That 16-stock gap hid Bally's Intralot from every
+    # dashboard while it sat correctly in the source of record, the universe
+    # file, the watchlist and the chart files. This closes it permanently: the
+    # gap is now named, categorised, written to disk and printed on every run,
+    # and it catches drop causes nobody has thought of yet.
+    _emitted = {p["ticker"] for p in prices}
+    _wanted = [s["ticker"] for s in universe["stocks"]]
+    _accounted = {d["ticker"] for d in _dropped}
+    for _tk in _wanted:
+        if _tk not in _emitted and _tk not in _accounted:
+            _dropped.append({"ticker": _tk, "yfinance_ticker": "", "company_name": "",
+                             "rows": None, "category": "unexplained",
+                             "reason": "absent from prices.json with no recorded reason — "
+                                       "a drop path exists that this guard does not know about"})
+    _by_cat = {}
+    for _d in _dropped:
+        _by_cat.setdefault(_d["category"], []).append(_d)
+    _coverage = {
+        "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "universe_count": len(_wanted),
+        "emitted_count": len(_emitted),
+        "dropped_count": len(_dropped),
+        "coverage_pct": round(100.0 * len(_emitted) / max(1, len(_wanted)), 2),
+        "by_category": {k: len(v) for k, v in sorted(_by_cat.items())},
+        "dropped": sorted(_dropped, key=lambda d: (d["category"], d["ticker"])),
+    }
+    try:
+        _safe_write_json(_coverage, DATA_DIR / "universe-coverage.json", min_bytes=50)
+    except Exception as _e:
+        print(f"  WARNING: could not write universe-coverage.json: {_e}")
+
+    print()
+    print("=" * 70)
+    print("UNIVERSE COVERAGE — %d of %d stocks reached prices.json (%.1f%%)"
+          % (len(_emitted), len(_wanted), _coverage["coverage_pct"]))
+    print("=" * 70)
+    if _dropped:
+        for _cat in sorted(_by_cat):
+            print("  %s (%d):" % (_cat.upper(), len(_by_cat[_cat])))
+            for _d in sorted(_by_cat[_cat], key=lambda d: d["ticker"]):
+                print("    %-12s %-14s %s"
+                      % (_d["ticker"], _d.get("yfinance_ticker") or "-", _d["reason"]))
+        if _by_cat.get("unexplained"):
+            print()
+            print("  *** UNEXPLAINED DROPS PRESENT. A stock left the pipeline by a route")
+            print("      this guard does not model. Investigate before trusting today's")
+            print("      screens: the same silence hid Bally's Intralot for months.")
+        print("  Full detail: data/universe-coverage.json")
+    else:
+        print("  No stock was dropped. Universe and prices.json agree exactly.")
+    print()
 
     # PRICE-INTEGRITY GATE (22-May-26): provenance + sanity-vs-prior + atomic write.
     import importlib as _il
@@ -3766,11 +5087,18 @@ def main():
         except Exception:
             _prior = None
     _ok, _reasons = _pi.sanity_check(prices, _prior)
+    # Print INFO notes (large date-gap warnings) even on success.
+    _info_notes = [r for r in _reasons if r.startswith("INFO:")]
+    if _info_notes:
+        print("PRICE-INTEGRITY NOTES:")
+        for _n in _info_notes:
+            print(f"    {_n}")
     if not _ok:
         print("=" * 64)
         print("PRICE-INTEGRITY FATAL: new prices failed sanity vs prior real data:")
         for _r in _reasons:
-            print(f"    - {_r}")
+            if not _r.startswith("INFO:"):
+                print(f"    - {_r}")
         print("  Keeping the existing prices.json untouched. Nothing overwritten.")
         print("=" * 64)
         sys.exit(3)
@@ -3826,17 +5154,38 @@ def main():
         universe=universe,
         benchmark_rows=benchmark_rows,
     )
-    with open(DATA_DIR / "filter-results.json", "w") as f:
-        json.dump({
-            "_meta": {
-                "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                "count": len(filter_results),
-                "filters": ["basing_plateau", "probing_bet", "mm99", "vcp", "uptrend_retest"],
-                "notes": "VCP pattern detection pending Phase 2. UTR V2 lifecycle stages live (27-Apr-26)."
-            },
-            "stocks": filter_results
-        }, f, indent=2)
-    print(f"  Written {len(filter_results)} stocks to data/filter-results.json")
+    # Hardened write (fix 09-Jul-26): was a raw open()+json.dump with no fsync
+    # and only a post-hoc verify. filter-results.json is the largest raw writer
+    # and truncated near-completion on nearly every nightly run (16/26/29/30-Jun,
+    # 1/2/4/6/7/8-Jul) via delayed FUSE flush of the unflushed tail. Every writer
+    # already converted to _safe_write_json (universe, universe-master, prices)
+    # stopped truncating; this was the one still raw. Now atomic tmp+fsync+verify
+    # +os.replace, matching the universe.json write above.
+    _fr_payload = {
+        "_meta": {
+            "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "count": len(filter_results),
+            "filters": ["basing_plateau", "probing_bet", "mm99", "vcp", "uptrend_retest"],
+            "notes": "VCP pattern detection pending Phase 2. UTR V2 lifecycle stages live (27-Apr-26)."
+        },
+        "stocks": filter_results
+    }
+    _fr_n = len(filter_results)
+    def _verify_fr(d, _n=_fr_n):
+        assert isinstance(d.get("stocks"), list) and len(d["stocks"]) == _n, \
+            "filter-results.json verify failed: expected %d stocks" % _n
+    _safe_write_json(_fr_payload, DATA_DIR / "filter-results.json",
+                     min_bytes=1_000_000, validate=_verify_fr)
+    print(f"  Written {len(filter_results)} stocks to data/filter-results.json -- fsync+atomic+verified")
+
+    # Stage history delta log (D-MD-V2-STAGEHIST, 17-Jul-26) — called right
+    # after filter-results.json is written, per Richard's spec. Non-fatal:
+    # a failure here must never block the main pipeline output.
+    print("\n── Stage history delta log ──")
+    try:
+        compute_and_append_stage_history_delta(filter_results)
+    except Exception as _sh_err:
+        print(f"  WARNING: stage-history-20d.json update failed (non-fatal): {_sh_err}")
 
     # Bucket 2: verify-after-write on filter-results.json (kind=json + regression band).
     if _pg is not None:
@@ -3885,17 +5234,21 @@ def main():
         changes = _extract_change_summary(history)
 
         # Write filter-history.json — per-ticker stages at each time point
-        with open(DATA_DIR / "filter-history.json", "w") as f:
-            json.dump({
-                "_meta": {
-                    "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    "offsets": [0, 1, 5, 22],
-                    "offset_labels": ["T-0", "T-1", "T-5", "T-22"],
-                    "description": "Stage assignments at 4 time points for CHANGES tab",
-                },
-                "stages": history,
-                "changes": changes,
-            }, f, indent=2)
+        # Hardened write (14-Jul-26 SA): atomic instead of raw open()+json.dump.
+        _fh_payload = {
+            "_meta": {
+                "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "offsets": [0, 1, 5, 22],
+                "offset_labels": ["T-0", "T-1", "T-5", "T-22"],
+                "description": "Stage assignments at 4 time points for CHANGES tab",
+            },
+            "stages": history,
+            "changes": changes,
+        }
+        def _v_fh(d):
+            assert isinstance(d.get("stages"), dict), "filter-history verify"
+        _safe_write_json(_fh_payload, DATA_DIR / "filter-history.json",
+                         min_bytes=2, validate=_v_fh)
         print(f"\n  Written filter-history.json — {len(history)} time points")
         print(f"  Total changes detected: {len(changes)}")
 
@@ -3909,5 +5262,202 @@ def main():
     print("\nDone.")
 
 
+# ── SETTLED-BAR SELF-TEST (D-MD-SETTLED-BAR-2026-08-11) ───────────────────
+#
+# Run with:  python generate_master_data.py --selftest-settled-bar
+#
+# It makes NO network call. Every venue answer is injected, so the test pins the
+# WIRING -- does the real last bar date actually reach the rule, and does the
+# rule's answer actually reach the row filter -- rather than pinning whatever the
+# market happened to be doing when it ran. market_session.py has its own
+# self-test for the rule itself; this one exists because the rule being right and
+# the rule being reached are different claims, and only the second one failed
+# three handoffs in a row.
+
+
+class _FakeMS(object):
+    """Stands in for market_session. Records every call it receives."""
+
+    def __init__(self, open_, live_date):
+        self._open = open_
+        self._live = live_date
+        self.calls = []
+
+    def should_drop_today(self, yf_ticker, bar_date=None, timeout=15):
+        self.calls.append((yf_ticker, bar_date))
+        if not self._open:
+            return False
+        if bar_date is None:
+            return True
+        return self._live is None or bar_date >= self._live
+
+    def session_for(self, yf_ticker, timeout=15):
+        return {"open": self._open, "live_date": self._live}
+
+    def cache_report(self):
+        return ""
+
+
+class _FakeYF(object):
+    """Minimal yfinance stand-in returning a fixed OHLCV frame."""
+
+    def __init__(self, dates):
+        self._dates = dates
+
+    def Ticker(self, symbol):
+        outer = self
+
+        class _T(object):
+            def history(self, period=None):
+                return _FakeHist(outer._dates)
+        return _T()
+
+
+class _FakeHist(object):
+    def __init__(self, dates):
+        self._dates = dates
+
+    def __len__(self):
+        return len(self._dates)
+
+    def iterrows(self):
+        import datetime as _dt
+        for d in self._dates:
+            class _Idx(object):
+                def __init__(self, s):
+                    self._s = s
+
+                def strftime(self, fmt):
+                    return self._s
+            yield _Idx(d), {"Open": 10.0, "High": 11.0, "Low": 9.0,
+                            "Close": 10.5, "Volume": 1000}
+
+
+def _install_fake_ms(fake):
+    global _MS_MODULE, _MS_TRIED
+    _MS_MODULE = fake
+    _MS_TRIED = True
+
+
+def selftest_settled_bar():
+    global _MS_MODULE, _MS_TRIED
+    fails = []
+
+    def ck(name, cond):
+        print("  %-70s %s" % (name, "ok" if cond else "FAIL"))
+        if not cond:
+            fails.append(name)
+
+    DATES = ["2026-08-07", "2026-08-10", "2026-08-11"]
+    TODAY = "2026-08-11"
+
+    print("the wiring: does the REAL last bar date reach the rule?")
+    fake = _FakeMS(open_=True, live_date="2026-08-11")
+    _install_fake_ms(fake)
+    rows = _fetch_ticker(_FakeYF(DATES), "FLUT", "1mo", "FLUT-US", TODAY)
+    ck("should_drop_today was called at all", len(fake.calls) == 1)
+    ck("it was called with the symbol, not the label",
+       fake.calls and fake.calls[0][0] == "FLUT")
+    ck("it was called with the REAL last bar date, not None",
+       fake.calls and fake.calls[0][1] == "2026-08-11")
+    ck("the unsettled bar was dropped", [r["date"] for r in rows] == DATES[:-1])
+
+    print("an open venue whose unsettled date is NOT our today")
+    # 23:30 UK: the running US session is still dated the previous day.
+    fake = _FakeMS(open_=True, live_date="2026-08-10")
+    _install_fake_ms(fake)
+    rows = _fetch_ticker(_FakeYF(DATES), "FLUT", "1mo", "FLUT-US", "2026-08-11")
+    ck("both the 10th and the 11th are dropped, keyed on the VENUE date",
+       [r["date"] for r in rows] == ["2026-08-07"])
+
+    print("a closed venue keeps everything")
+    fake = _FakeMS(open_=False, live_date=None)
+    _install_fake_ms(fake)
+    rows = _fetch_ticker(_FakeYF(DATES), "AZA.ST", "1mo", "AZA-SE", TODAY)
+    ck("a settled series is not trimmed", [r["date"] for r in rows] == DATES)
+    ck("and the bar date still reached the rule",
+       fake.calls and fake.calls[0][1] == "2026-08-11")
+
+    print("MUTATION: break the wiring and the test must NOTICE")
+    # If the bar date stopped being passed, _FakeMS returns True unconditionally
+    # for an open venue -- and, critically, ALSO for a closed one under the real
+    # module. Prove the closed-venue case is the one that catches it.
+    fake = _FakeMS(open_=False, live_date=None)
+    _install_fake_ms(fake)
+    ck("a closed venue with NO bar date would still not drop (rule is short-circuit)",
+       fake.should_drop_today("AZA.ST", bar_date=None) is False)
+    fake_open = _FakeMS(open_=True, live_date="2026-08-11")
+    ck("an OPEN venue with no bar date drops UNCONDITIONALLY -- the named risk",
+       fake_open.should_drop_today("FLUT", bar_date=None) is True)
+    ck("...and with a settled bar date it does NOT drop, which is the whole point",
+       fake_open.should_drop_today("FLUT", bar_date="2026-08-10") is False)
+
+    print("failing direction: no market_session module at all")
+    _MS_MODULE = None
+    _MS_TRIED = True
+    rows = _fetch_ticker(_FakeYF(DATES), "FLUT", "1mo", "FLUT-US", TODAY)
+    ck("an unimportable guard drops today's bar rather than trusting it",
+       [r["date"] for r in rows] == DATES[:-1])
+
+    print("explicit overrides still honoured (used by nothing in production)")
+    _install_fake_ms(_FakeMS(open_=False, live_date=None))
+    rows = _fetch_ticker(_FakeYF(DATES), "FLUT", "1mo", "FLUT-US", TODAY,
+                         drop_today=True)
+    ck("drop_today=True drops today regardless of the venue",
+       [r["date"] for r in rows] == DATES[:-1])
+    _install_fake_ms(_FakeMS(open_=True, live_date="2026-08-11"))
+    rows = _fetch_ticker(_FakeYF(DATES), "FLUT", "1mo", "FLUT-US", TODAY,
+                         drop_today=False)
+    ck("drop_today=False keeps today regardless of the venue",
+       [r["date"] for r in rows] == DATES)
+
+    print("the REAL market_session, venue cache seeded by hand, still no network")
+    # A fake that I wrote can only ever confirm my model of the rule. This phase
+    # runs the SHIPPED rule, with its per-venue cache pre-seeded so session_for()
+    # never reaches the network. It is the difference between "my stand-in behaves
+    # as I expect" and "the code that actually runs behaves as I expect".
+    _MS_MODULE = None
+    _MS_TRIED = False
+    real = _market_session()
+    if real is None:
+        print("    SKIPPED — market_session.py is not importable from this path.")
+        print("    Run this self-test from master-dashboard/scripts/ to exercise it.")
+    else:
+        real._CACHE.clear()
+        real._CACHE[""] = {"ok": True, "open": True, "live_date": "2026-08-11",
+                           "exchange": "NYSE (seeded)", "currency": "USD",
+                           "detail": "seeded by selftest"}
+        real._CACHE["ST"] = {"ok": True, "open": False, "live_date": None,
+                             "exchange": "Stockholm (seeded)", "currency": "SEK",
+                             "detail": "seeded by selftest"}
+        rows = _fetch_ticker(_FakeYF(DATES), "FLUT", "1mo", "FLUT-US", TODAY)
+        ck("REAL rule: an open US tape drops the unsettled bar",
+           [r["date"] for r in rows] == DATES[:-1])
+        rows = _fetch_ticker(_FakeYF(DATES), "AZA.ST", "1mo", "AZA-SE", TODAY)
+        ck("REAL rule: a closed Stockholm keeps every bar",
+           [r["date"] for r in rows] == DATES)
+        ck("no venue was probed over the network (cache untouched by new keys)",
+           set(real._CACHE) == {"", "ST"})
+        ck("REAL rule: the unconditional-drop trap is real, so the wiring matters",
+           real.should_drop_today("FLUT", bar_date=None) is True
+           and real.should_drop_today("FLUT", bar_date="2026-08-10") is False)
+        real._CACHE.clear()
+
+    print("the retired heuristics are GONE, not merely unused")
+    ck("LATE_CLOSING_LABEL_SUFFIXES no longer exists",
+       "LATE_CLOSING_LABEL_SUFFIXES" not in globals())
+    ck("EU_MARKETS_CLOSED_HOUR no longer exists",
+       "EU_MARKETS_CLOSED_HOUR" not in globals())
+
+    _MS_MODULE = None
+    _MS_TRIED = False
+    print()
+    print("SETTLED-BAR SELF-TEST %s"
+          % ("PASSED" if not fails else "FAILED: %s" % fails))
+    return 0 if not fails else 1
+
+
 if __name__ == "__main__":
+    if "--selftest-settled-bar" in sys.argv:
+        sys.exit(selftest_settled_bar())
     main()

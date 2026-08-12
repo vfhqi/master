@@ -15110,7 +15110,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       rows.push({ticker:s.ticker,company:p.company_name||s.ticker,
         sector:p.sector||'',industry:p.industry||'',
         price:p.price,recent_pullback:p.recent_pullback_pct,
-        high_52w:p.high_52w,low_52w:p.low_52w,unit_break_52w:!!p.unit_break_52w,unit_break_date:p.unit_break_date||null,
+        high_52w:p.high_52w,low_52w:p.low_52w,unit_break_52w:!!p.unit_break_52w,unit_break_date:p.unit_break_date||null,unit_break_kind:p.unit_break_kind||null,
         md_v2:s.md_v2,is_live:!!live[s.ticker],
         sector_in_portfolio:!!liveS[p.sector],
         industry_in_portfolio:!!liveI[p.industry]});
@@ -15144,7 +15144,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
        2. the range survives but was measured only since a unit break. The number
           is sound, so show it, and say what window it came from.
        3. (below) the rollback fallback. */
-    if(row.unit_break_52w && (row.high_52w==null||row.low_52w==null)){
+    if(row.high_52w==null||row.low_52w==null){
       return'<td class="num '+(cls||'')+'" style="color:#999;font-style:italic" title="No 52-week range. This price series steps by about 100x'+(row.unit_break_date?' on '+row.unit_break_date:'')+' (a redenomination or venue change), and too few comparable rows survive since then to measure a range. Withheld rather than shown wrong.">n/a</td>';
     }
     /* Fallback, kept deliberately: if the data layer is ever rolled back to a build
@@ -15159,7 +15159,10 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var txt=(_r>0?'+':'')+_r+'%';
     var ttl='Price '+txt+' vs the 52-week '+(key==='high_52w'?'high':'low')+' of '+fmtNum(v);
     var mark='';
-    if(row.unit_break_52w){
+    if(row.unit_break_kind==='excursion'){
+      ttl+='. A short run of off-scale rows (about 100x out) was excluded from this series before the range was measured; the rest of the year is intact.';
+      mark='<span style="color:#b45309" title="Anomalous rows excluded before measuring">\u2020</span>';
+    } else if(row.unit_break_52w){
       ttl+='. Measured only since '+(row.unit_break_date||'a unit break')+', because this series steps by about 100x at that point (a redenomination or venue change) and the earlier rows are not comparable with today\'s price.';
       mark='<span style="color:#b45309" title="Range measured from a shortened window">\u2020</span>';
     }

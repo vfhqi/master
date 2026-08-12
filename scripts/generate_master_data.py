@@ -130,6 +130,30 @@ FULL_HISTORY_ROWS = 200
 RESEED_CYCLE_DAYS = 20
 SMA_PERIODS = [5, 10, 20, 50, 100, 150, 200]
 BENCHMARK_TICKER = "^STOXX"
+# Cached for scripts/pms_historical_performance.py only; NOT the relative-strength
+# benchmark, which stays BENCHMARK_TICKER.
+BENCHMARK_50_TICKER = "^STOXX50E"
+
+
+def _updown_note(avg_up, avg_dn, n_rows, label):
+    """Explain a null or zero up/down volume ratio instead of leaving it bare.
+
+    Returns None when the ratio is an ordinary number. The three explained cases:
+      no down days  -> ratio is undefined, and the reading is maximally BULLISH
+      no up days    -> ratio is 0.0, and the reading is maximally BEARISH
+      too few rows  -> genuinely insufficient history, the only real 'missing'
+    """
+    if n_rows < 2:
+        return f"{label} up/down volume: insufficient history ({n_rows} bar(s))"
+    if avg_dn == 0 and avg_up == 0:
+        return f"{label} up/down volume: no volume recorded in the window"
+    if avg_dn == 0:
+        return (f"{label} up/down volume: NO down-volume days in the window, so the ratio "
+                f"is undefined. This is the STRONGEST bullish reading, not missing data.")
+    if avg_up == 0:
+        return (f"{label} up/down volume: NO up-volume days in the window. The 0.0 is the "
+                f"STRONGEST bearish reading, not a neutral one.")
+    return None
 
 # ── Cache System (reused from pullback monitor) ──────────────────────────
 
@@ -651,6 +675,19 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
 
     tickers = [(s["yfinance_ticker"], s["ticker"]) for s in universe["stocks"]]
     tickers.append((BENCHMARK_TICKER, "BENCHMARK"))
+    # 12-Aug-2026: cache the Euro Stoxx 50 too. scripts/pms_historical_performance.py
+    # reads Euro Stoxx 600 from this cache but fetched ^STOXX50E LIVE via yfinance at
+    # run time -- and that script only ever runs inside the Cowork sandbox, which has
+    # no yfinance. So the Euro Stoxx 50 column had never once worked since it was added
+    # on 07-Aug; it degraded to a warning every run. Production has yfinance, so caching
+    # it here is the fix, and the reader needs no network at all.
+    #
+    # Deliberately labelled "BENCHMARK", reusing the already-proven non-fatal path: that
+    # label is excluded from fetch_failures (so a bad index fetch can never fail the
+    # nightly build) and is not in universe["stocks"], so it can never appear as a stock
+    # row. The RS benchmark is still keyed on BENCHMARK_TICKER by ticker, not by label,
+    # so ^STOXX remains the relative-strength reference and is unaffected.
+    tickers.append((BENCHMARK_50_TICKER, "BENCHMARK"))
 
     data = {}
     stats = {"full": 0, "incr": 0, "cache": 0, "err": 0, "save_err": 0}
@@ -1524,7 +1561,10 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
         utr_vol_trend = round(adv_10d / adv_50d, 4) if adv_50d > 0 else None
 
         # S4: Up/down volume ratio (1-month) — already have adv_1m_up / adv_1m_dn
+        # Same zero-denominator semantics as the 5-day field below: a null here means
+        # "no down-volume days in the window", which is maximally bullish, not absent.
         utr_updown_ratio = round(adv_1m_up / adv_1m_dn, 4) if adv_1m_dn > 0 else None
+        utr_updown_ratio_note = _updown_note(adv_1m_up, adv_1m_dn, len(recent_20), "20-day")
 
         # S5: Candle quality — % of last 20 days where close is in upper 40% of daily range
         # Upper 40% means close >= low + 0.6 * (high - low). This signals accumulation.
@@ -1886,9 +1926,32 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
 
         # utr_updown_ratio_5d (D-MD-V2-52 t4): up-day vol / down-day vol over the
         # last 5 trading days only. Reuses the existing _split_vol helper.
+        #
+        # NOTE ON THE WINDOW, deliberately left alone (12-Aug-2026): _split_vol compares
+        # row i against row i-1, so 5 rows yield 4 day-over-day comparisons, not 5. That
+        # off-by-one is the HOUSE CONVENTION -- the 20-day and 10-day siblings do exactly
+        # the same. Fixing it here alone would make one member of the family disagree with
+        # the others and would silently shift a number Richard reads every evening, so it
+        # is documented rather than "corrected".
+        #
+        # WHY THE ZERO-DENOMINATOR CASE IS NOT A GAP (12-Aug-2026). `dn == 0` means there
+        # were NO down-volume days in the window. That is not missing data: it is the
+        # strongest possible up/down reading, and returning a bare None made it
+        # indistinguishable from a computation failure. On 11-Aug it fired on three live
+        # holdings at once -- Hilton Food (four straight up days), Theon (+9%) and Xvivo
+        # (+15.5%) -- and the alignment note reported all three as a defect. Universe-wide
+        # it was null on 63 of 982 names, 6.4%.
+        #
+        # The mirror case is just as misleading: `up == 0` yields a clean-looking 0.0,
+        # which is the maximally BEARISH reading, not a neutral one.
+        #
+        # The ratio itself keeps its type (number or None) so no consumer breaks; the
+        # REASON now travels beside it. Missing data must never read as healthy, and
+        # healthy data must never read as missing.
         _recent_5 = rows_with_sma[-5:] if len(rows_with_sma) >= 5 else rows_with_sma
         _adv_5d_up, _adv_5d_dn = _split_vol(_recent_5)
         utr_updown_ratio_5d = round(_adv_5d_up / _adv_5d_dn, 4) if _adv_5d_dn > 0 else None
+        utr_updown_ratio_5d_note = _updown_note(_adv_5d_up, _adv_5d_dn, len(_recent_5), "5-day")
 
         # close_pct_change_today (D-MD-V2-52 t5 confirmation): today's close vs
         # yesterday's close as a fraction. >= 0.02 satisfies the confirmation test.
@@ -2109,6 +2172,8 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             "utr_candle_quality_10d": utr_candle_quality_10d,
             "utr_candle_quality_3d": utr_candle_quality_3d,
             "utr_updown_ratio_5d": utr_updown_ratio_5d,
+            "utr_updown_ratio_5d_note": utr_updown_ratio_5d_note,
+            "utr_updown_ratio_note": utr_updown_ratio_note,
             "close_pct_change_today": close_pct_change_today,
             # MD-V2-SCREENS-S26-MARKER: VCP contraction sequence
             "vcp_contractions": vcp_contractions,

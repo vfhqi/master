@@ -38,8 +38,8 @@ except Exception as _e:
 HISTORY_PATH = str(DATA_DIR / ".size-history.json")
 
 # Dashboard version -- bump with each shipped session
-DASHBOARD_VERSION = "S81 -- 11 Aug 2026"
-DASHBOARD_DESC    = "Stage 1 renamed Speculative Bet; 50D-turn test added (7 tests, either MA may turn); 52-week reference columns; 52-week range integrity repair"
+DASHBOARD_VERSION = "S82 -- 14 Aug 2026"
+DASHBOARD_DESC    = "Ratings Dashboard filter bridge: header toggle narrows every tab to the stock list saved on the IC Ratings Dashboard"
 CHANGELOG_PATH    = PROJECT_DIR / "changelog.html"
 STATE_MD_PATH     = COWORK_ROOT / "projects/SA - Master Dashboard/state.md"
 
@@ -360,6 +360,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13
 .header-right-btns{display:flex;gap:6px;margin-left:auto}
 .header-right-btns .ctrl-btn{background:var(--card);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font);font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
 .header-right-btns .ctrl-btn:hover{color:var(--text-bright);border-color:#bbb;background:var(--card-hover)}
+.header-right-btns .ctrl-btn.rdf-on{background:#22c55e;border-color:#15803d;color:#06280f;font-weight:700}
+.header-right-btns .ctrl-btn.rdf-on:hover{background:#16a34a;border-color:#15803d;color:#ffffff}
 /* FIX-5 Row 2: TABS label + tab nav */
 .header-tabs-row{display:flex;align-items:center;padding:0 16px 2px;gap:8px}
 .header-tabs-row .row-label{font-size:11px;font-weight:700;color:var(--text-bright);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
@@ -4153,7 +4155,7 @@ function filterToPositions(rows){
 // FIX-S4-PORTFOLIO: Generic portfolio tile for tabs without custom portfolio rendering
 function buildPortfolioTile(tabId){
   var pt=getPositionTickers();
-  var allR=baseRows();
+  var allR=baseRows(1);  /* MD-S82-RDF: rank on full universe */
   var posRows=[];
   for(var j=0;j<allR.length;j++){if(pt[allR[j].ticker]&&passIndSecFilter(allR[j]))posRows.push(allR[j])}
   // FIX-INPUTSORT 2026-05-04: generic LP tile rows now respect currentSort like QS rows.
@@ -4448,7 +4450,90 @@ function ratingsColTds(r){
     +'<td class="col-ratings col-txt">'+badge(stg)+'</td>';
 }
 
-function baseRows(){
+/* ===== MD-S82-RDF-MARKER -- Ratings Dashboard filter bridge =================
+   Reads the stock list saved by the IC Ratings Dashboard. Both dashboards are
+   served from the same site (vfhqi.github.io), so browser storage is shared and
+   no file or server round-trip is needed.
+
+   Design rules, deliberate:
+   - The ON/OFF state is NEVER persisted. Every new window starts OFF.
+   - The saved list is a frozen snapshot of tickers, re-read on every toggle so a
+     re-save in the other tab is picked up without a reload.
+   - Ranking maths (SSEM bell curve, Valuation percentiles, Summary master
+     ratings) always runs on the FULL universe; only the DISPLAY narrows. A grade
+     must never change meaning because a filter is on.
+   - Live Investments and the Live Portfolio tiles are exempt: holdings are never
+     hidden by a screening filter.
+   ========================================================================== */
+var RDF_KEY = "vf-ratings-filter-list";
+var RDF = { on:false, set:null, count:0, savedAt:null, bad:false };
+
+function RDF_load(){
+  RDF.set=null; RDF.count=0; RDF.savedAt=null; RDF.bad=false;
+  try{
+    var raw = (typeof localStorage!=="undefined") ? localStorage.getItem(RDF_KEY) : null;
+    if(!raw) return;
+    var o = JSON.parse(raw);
+    var list = (o && o.tickers && o.tickers.length) ? o.tickers : null;
+    if(!list) return;
+    var s = {}, nn = 0;
+    for(var i=0;i<list.length;i++){ if(list[i]){ s[String(list[i])]=1; nn++; } }
+    if(!nn) return;
+    RDF.set = s; RDF.count = nn; RDF.savedAt = o.saved_at || null;
+  }catch(e){ RDF.bad = true; RDF.set = null; }
+}
+function RDF_isOn(){ return !!(RDF.on && RDF.set); }
+function RDF_ok(t){ return !RDF_isOn() || RDF.set[t] === 1; }
+function RDF_apply(rows){
+  if(!RDF_isOn() || !rows || !rows.length) return rows;
+  var out=[];
+  for(var i=0;i<rows.length;i++){ var r=rows[i]; if(r && RDF.set[r.ticker]===1) out.push(r); }
+  return out;
+}
+/* Same idea for a ticker-keyed OBJECT (the Changes tab's stage snapshots). */
+function RDF_pick(map){
+  if(!RDF_isOn() || !map) return map;
+  var out={};
+  for(var k in map){ if(map.hasOwnProperty(k) && RDF.set[k]===1) out[k]=map[k]; }
+  return out;
+}
+function RDF_syncBtn(){
+  var b=document.getElementById("hdr-rdf-btn");
+  if(!b) return;
+  b.textContent = "Ratings filter (" + (RDF.set ? RDF.count : "none") + ")";
+  if(RDF_isOn()) b.classList.add("rdf-on"); else b.classList.remove("rdf-on");
+  var t = "Narrow every stock table, count and rating tile to the list saved from the IC Ratings Dashboard. ";
+  if(RDF.set) t += "Saved list: " + RDF.count + " stocks" + (RDF.savedAt ? ", saved " + RDF.savedAt : "") + ".";
+  else t += "No list saved yet. Open the IC Ratings Dashboard, set your filters, then press SAVE LIST.";
+  t += " Live Investments is never filtered.";
+  b.title = t;
+}
+function RDF_flash(msg){
+  var b=document.getElementById("hdr-rdf-btn"); if(!b) return;
+  b.textContent = msg;
+  setTimeout(RDF_syncBtn, 2600);
+}
+function RDF_rerender(){
+  var c=document.querySelectorAll(".tab-content");
+  for(var i=0;i<c.length;i++){ c[i].innerHTML=""; c[i].setAttribute("data-stale","1"); }
+  try{ if(typeof currentTab!=="undefined" && currentTab) switchTab(currentTab); }
+  catch(e){ console.error("RDF_rerender failed", e); }
+}
+function RDF_toggle(){
+  var wasOn = RDF.on;
+  RDF_load();
+  if(!RDF.set){ RDF.on=false; RDF_syncBtn(); RDF_flash(RDF.bad ? "Saved list unreadable" : "No saved list"); return; }
+  RDF.on = !wasOn;
+  RDF_syncBtn();
+  RDF_rerender();
+}
+window.RDF_toggle=RDF_toggle; window.RDF_syncBtn=RDF_syncBtn; window.RDF_load=RDF_load;
+window.RDF_apply=RDF_apply; window.RDF_pick=RDF_pick; window.RDF_ok=RDF_ok; window.RDF_isOn=RDF_isOn; window.RDF=RDF;
+RDF_load();
+if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded", RDF_syncBtn); }
+else { RDF_syncBtn(); }
+/* ===== end MD-S82-RDF-MARKER ===== */
+function baseRows(_rdfBypass){
   var rows=[];
   for(var j=0;j<D.prices.length;j++){
     var p=D.prices[j],f=filterMap[p.ticker];
@@ -4477,7 +4562,7 @@ function baseRows(){
       f:f
     });
   }
-  return rows;
+  return _rdfBypass ? rows : RDF_apply(rows);  /* MD-S82-RDF */
 }
 
 // Build header tab controls (score filter + group toggles)
@@ -5526,6 +5611,7 @@ function renderCombos(){
   for(var fi = 0; fi < D.filters.length; fi++) {
     var fEntry = D.filters[fi];
     var ticker = fEntry.ticker;
+    if(!RDF_ok(ticker)) continue;  /* MD-S82-RDF */
     var md = fEntry.md_v2;
     var pEntry = priceMap[ticker];
     var name = (pEntry && pEntry.company_name) ? pEntry.company_name : ticker;
@@ -6216,7 +6302,7 @@ function ssemRowHTML(r) {
 // in renderSSEM() up to the rating assignment, then populates the global map.
 function precomputeSsemRatings(){
   if(!D.ssem) return;
-  var allRows = baseRows();
+  var allRows = baseRows(1);  /* MD-S82-RDF: rank on full universe */
   var rowsAll = [];
   for(var j=0;j<allRows.length;j++){
     var r = allRows[j];
@@ -6249,7 +6335,7 @@ function renderSSEM(){
     container.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>SS Earnings Momentum</h3><p style="color:var(--text-dim);margin-top:8px">factset-ssem.json not loaded.</p></div>';
     return;
   }
-  var allRows=baseRows();
+  var allRows=baseRows(1);  /* MD-S82-RDF: rank on full universe */
   var rowsAll=[];
   for(var j=0;j<allRows.length;j++){
     var r=allRows[j];
@@ -6274,6 +6360,7 @@ function renderSSEM(){
   // Populate global ticker->rating lookup so buildPortfolioTile (LP branch) shows the same rating.
   ssemRatingMap = {};
   for(var rk=0;rk<rowsAll.length;rk++){ssemRatingMap[rowsAll[rk].ticker]=rowsAll[rk].ssem_rating;}
+  rowsAll = RDF_apply(rowsAll);  /* MD-S82-RDF: ratings graded on the full universe above; from here the tile counts, industry/sector tables and rows all narrow together. */
   // Apply header filters
   var rows=[];
   for(var rj=0;rj<rowsAll.length;rj++){
@@ -6334,7 +6421,7 @@ function renderVal(){
     container.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>Valuation</h3><p style="color:var(--text-dim);margin-top:8px">factset-valuation.json not loaded.</p></div>';
     return;
   }
-  var allRows=baseRows();
+  var allRows=baseRows(1);  /* MD-S82-RDF: rank on full universe */
   var totalCount=allRows.length;
 
   // Attach valuation fields to every row (null where no data)
@@ -6377,6 +6464,11 @@ function renderVal(){
   for(var k=0;k<ineligible.length;k++){ineligible[k].val_rating="-";ineligible[k].val_rating_sort=0;gN++;}
 
   var rows=eligible.concat(ineligible);
+  /* MD-S82-RDF: percentiles graded on the full universe above. Narrow the display, then recount the tiles so the A-F numbers match the rows shown. */
+  if(RDF_isOn()){ rows=RDF_apply(rows); gA=0;gB=0;gC=0;gD=0;gF=0;gN=0;n=0;
+    for(var _vi=0;_vi<rows.length;_vi++){ var _vg=rows[_vi].val_rating;
+      if(_vg==='A'){gA++;n++;} else if(_vg==='B'){gB++;n++;} else if(_vg==='C'){gC++;n++;}
+      else if(_vg==='D'){gD++;n++;} else if(_vg==='F'){gF++;n++;} else {gN++;} } }
   rows=sortData(rows,currentSort.col,currentSort.dir);
 
   var h='<div class="summary-tile" id="section-summary"><h3>Valuation -- P/E Rating</h3>'
@@ -6465,6 +6557,7 @@ function renderChanges(){
   var t1=stages["T-1"]||{};
   var t5=stages["T-5"]||{};
   var t22=stages["T-22"]||{};
+  if(RDF_isOn()){ t0=RDF_pick(t0); t1=RDF_pick(t1); t5=RDF_pick(t5); t22=RDF_pick(t22); }  /* MD-S82-RDF: the in/out tiles and the table all count from these four snapshots */
   var allRows=baseRows();
   var h='';
 
@@ -7524,8 +7617,8 @@ function renderSummary() {
 
 function SUM_renderWaterfall() {
   var tickers = [];
-  for (var pi = 0; pi < D.prices.length; pi++) tickers.push(D.prices[pi].ticker);
-  var Y = (D.meta && D.meta.stock_count) ? D.meta.stock_count : tickers.length;
+  for (var pi = 0; pi < D.prices.length; pi++) { if(!RDF_ok(D.prices[pi].ticker)) continue; tickers.push(D.prices[pi].ticker); }  /* MD-S82-RDF */
+  var Y = RDF_isOn() ? tickers.length : ((D.meta && D.meta.stock_count) ? D.meta.stock_count : tickers.length);  /* MD-S82-RDF: denominator follows the filter */
   var THR = [
     {key:"A",   label:"A only",      passSet:{A:1}},
     {key:"AB",  label:"A or B",      passSet:{A:1,B:1}},
@@ -7579,6 +7672,7 @@ function SUM_buildGroupAggregates(groupKey) {
   var groups = {};
   for (var pi = 0; pi < D.prices.length; pi++) {
     var p = D.prices[pi], tax = SUM_getTaxonomy(p.ticker), gn = tax[groupKey];
+    if(!RDF_ok(p.ticker)) continue;  /* MD-S82-RDF */
     if (!gn) continue;
     if (!groups[gn]) {
       groups[gn] = {groupName:gn, total:0, perRating:{}};
@@ -7662,6 +7756,7 @@ function SUM_renderQualifiedStocks() {
   var rows = [];
   for (var pi = 0; pi < D.prices.length; pi++) {
     var p = D.prices[pi];
+    if(!RDF_ok(p.ticker)) continue;  /* MD-S82-RDF */
     var mr = masterRatingsMap[p.ticker];
     if (!mr) continue;
     // Apply 6 master rating filters AND-combined
@@ -7982,7 +8077,7 @@ function SUM_renderQualifiedStocks() {
         companies_in_sector: (s.md_v2.companies_in_sector_count  || 0)
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function s1LiveTickers() {
@@ -8556,7 +8651,7 @@ function SUM_renderQualifiedStocks() {
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
   function s2UniverseCounts(rows) {
     var c = {'Probable':0,'Plausible':0,'Possible':0,'None':0};
@@ -9115,7 +9210,7 @@ function SUM_renderQualifiedStocks() {
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
   function s3UniverseCounts(rows) {
     // MD-V2-S55: unify old + new labels into the new buckets for counting
@@ -9654,7 +9749,7 @@ function SUM_renderQualifiedStocks() {
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
   // MD-V2-S54-S4-UNIVERSE: new data emits plain Probable only
   function s4UniverseCounts(rows) {
@@ -10416,7 +10511,7 @@ function SUM_renderQualifiedStocks() {
         is_live:!!lv[s.ticker], sect_port:!!lS[p.sector], ind_port:!!lI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function filterRows(rows,tabId){
@@ -10880,7 +10975,7 @@ function SUM_renderQualifiedStocks() {
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function npiFmtNum(n) {
@@ -11635,7 +11730,7 @@ function SUM_renderQualifiedStocks() {
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function poPatternCounts(rows) {
@@ -12505,7 +12600,7 @@ function SUM_renderQualifiedStocks() {
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function stPatternCounts(rows) {
@@ -13300,7 +13395,7 @@ function SUM_renderQualifiedStocks() {
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   // --- counts / histograms / tier counts ---
@@ -14194,7 +14289,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function hrTierCounts(rows) {
@@ -15115,7 +15210,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         sector_in_portfolio:!!liveS[p.sector],
         industry_in_portfolio:!!liveI[p.industry]});
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function fmtNum(n){if(n==null||isNaN(n))return'-';var abs=Math.abs(n),dp=abs>=100?0:(abs>=20?1:2);if(Math.abs(n-Math.round(n))<1e-9)dp=0;var f=abs.toLocaleString('en-GB',{minimumFractionDigits:dp,maximumFractionDigits:dp});return n<0?'('+f+')':f;}
@@ -15479,7 +15574,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         sector_in_portfolio:!!liveS[p.sector],
         industry_in_portfolio:!!liveI[p.industry]});
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function fmtNum(n){if(n==null||isNaN(n))return'-';var abs=Math.abs(n),dp=abs>=100?0:(abs>=20?1:2);if(Math.abs(n-Math.round(n))<1e-9)dp=0;var f=abs.toLocaleString('en-GB',{minimumFractionDigits:dp,maximumFractionDigits:dp});return n<0?'('+f+')':f;}
@@ -15930,7 +16025,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   // --- counts ---
@@ -16251,7 +16346,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         industry_in_portfolio:!!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function test(row,key){return !!(row.t&&row.t[key]);}
@@ -16484,7 +16579,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         industry_in_portfolio:!!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function test(row,key){return !!(row.t&&row.t[key]);}
@@ -16849,7 +16944,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         industry_in_portfolio: !!liveI[p.industry]
       });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
 
   function hvcpTierCounts(rows) { var c = { 'Qualified':0, 'Probable':0, 'Plausible':0, 'Possible':0, 'None':0 }; for (var i = 0; i < rows.length; i++) { var r = hvcpRowRating(rows[i]); if (c[r] != null) c[r]++; } return c; }
@@ -17289,7 +17384,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       var p = prices[s.ticker] || {};
       rows.push({ ticker: s.ticker, company: p.company_name || s.ticker, md_v2: s.md_v2, is_live: !!live[s.ticker] });
     }
-    return rows;
+    return RDF_apply(rows);  /* MD-S82-RDF */
   }
   function moApplyScope(all) {
     if (moState.scope === 'live') return all.filter(function(r){ return r.is_live; });
@@ -18565,6 +18660,7 @@ renderTab("mm99");
         '    <div class="header-right-btns">\n'
         # MD-V2-S41-REMOVE-KEY-BUTTON-MARKER -- "Key" button removed per S41 brief (16-May-26)
         '      <button class="ctrl-btn" id="hdr-copy-btn" onclick="copyVisibleStocks()">Copy</button>\n'
+        '      <button class="ctrl-btn" id="hdr-rdf-btn" onclick="RDF_toggle()">Ratings filter</button>\n'
         '      <button class="ctrl-btn" id="hdr-chart-btn" onclick="openChart(\'Overview\')">Chart</button>\n'
         '      <a class="ctrl-btn" href="../../databases/soi-list.html" title="Standardised Stocks of Interest list">SOI List</a>\n'
         '      <button class="ctrl-btn ssp-btn" onclick="openStockView()" title="Single stock view — all ratings at a glance">Stock View</button>\n'

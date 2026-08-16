@@ -38,8 +38,8 @@ except Exception as _e:
 HISTORY_PATH = str(DATA_DIR / ".size-history.json")
 
 # Dashboard version -- bump with each shipped session
-DASHBOARD_VERSION = "S82 -- 14 Aug 2026"
-DASHBOARD_DESC    = "Ratings Dashboard filter bridge: header toggle narrows every tab to the stock list saved on the IC Ratings Dashboard"
+DASHBOARD_VERSION = "S82b -- 16 Aug 2026"
+DASHBOARD_DESC    = "Ratings-filter bridge (S82) plus two hostile-review fixes: the SAVE and COPY buttons on the ratings dashboard now refuse to run while the table is still loading (they could silently capture a partial list), and the header stock count now reads 'N of 982' while the filter is on"
 CHANGELOG_PATH    = PROJECT_DIR / "changelog.html"
 STATE_MD_PATH     = COWORK_ROOT / "projects/SA - Master Dashboard/state.md"
 
@@ -4497,16 +4497,33 @@ function RDF_pick(map){
   for(var k in map){ if(map.hasOwnProperty(k) && RDF.set[k]===1) out[k]=map[k]; }
   return out;
 }
+/* MD-S82B-STATCOUNT-MARKER: how many of the saved list this dashboard actually prices.
+   A saved ticker can be absent here (delisted, unpriced, or dropped from the universe since the
+   list was saved), so the saved count and the shown count are not always the same number. */
+function RDF_matchCount(){
+  if(!RDF.set || typeof D === "undefined" || !D || !D.prices) return 0;
+  var n = 0;
+  for(var i=0;i<D.prices.length;i++){ if(RDF.set[D.prices[i].ticker] === 1) n++; }
+  return n;
+}
+function RDF_syncStatCount(){
+  var sc = document.getElementById("stat-count");
+  if(!sc || typeof D === "undefined" || !D || !D.meta) return;
+  sc.textContent = RDF_isOn() ? (RDF_matchCount() + " of " + D.meta.stock_count)
+                              : D.meta.stock_count;
+}
 function RDF_syncBtn(){
   var b=document.getElementById("hdr-rdf-btn");
   if(!b) return;
   b.textContent = "Ratings filter (" + (RDF.set ? RDF.count : "none") + ")";
   if(RDF_isOn()) b.classList.add("rdf-on"); else b.classList.remove("rdf-on");
   var t = "Narrow every stock table, count and rating tile to the list saved from the IC Ratings Dashboard. ";
-  if(RDF.set) t += "Saved list: " + RDF.count + " stocks" + (RDF.savedAt ? ", saved " + RDF.savedAt : "") + ".";
+  if(RDF.set) t += "Saved list: " + RDF.count + " stocks" + (RDF.savedAt ? ", saved " + RDF.savedAt : "") + ". " +
+    RDF_matchCount() + " of them are priced in this dashboard's universe.";  /* MD-S82B-STATCOUNT */
   else t += "No list saved yet. Open the IC Ratings Dashboard, set your filters, then press SAVE LIST.";
   t += " Live Investments is never filtered.";
   b.title = t;
+  RDF_syncStatCount();  /* MD-S82B-STATCOUNT */
 }
 function RDF_flash(msg){
   var b=document.getElementById("hdr-rdf-btn"); if(!b) return;
@@ -14469,8 +14486,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     cols.push({ id:'g2_pb',   sortKey:'g2__pb_info', kind:'pb_info', sgEdge:true });
     for (var g3i = 0; g3i < HR_TESTS_G3.length; g3i++)
       cols.push({ id:'hr_g3_'+g3i, sortKey:'hr__'+HR_TESTS_G3[g3i].key, kind:'hrtest', testKey:HR_TESTS_G3[g3i].key, label:HR_TESTS_G3[g3i].label, tooltip:HR_TESTS_G3[g3i].tooltip, grpStart: g3i===0?'g3':null });
-    cols.push({ id:'g3_ma_pct',  sortKey:'g3__ma_pct',  kind:'ma_pct', sgEdge:true });
-    cols.push({ id:'g3_ma_name', sortKey:'g3__ma_name', kind:'ma_name' });
+    cols.push({ id:'g3_ma_name', sortKey:'g3__ma_name', kind:'ma_name', sgEdge:true });
+    cols.push({ id:'g3_ma_pct',  sortKey:'g3__ma_pct',  kind:'ma_pct' });
     cols.push({ id:'hr_g3_c6', sortKey:'hr__g3_c6_buying_through_l10d', kind:'hrtest', testKey:'g3_c6_buying_through_l10d', label:'10. Buying through 10 days', tooltip:'At least half of last 10 days closed in upper 40% of daily range', sgEdge:true });
     cols.push({ id:'hr_g4_0', sortKey:'hr__'+HR_TESTS_G4[0].key, kind:'hrtest', testKey:HR_TESTS_G4[0].key, label:HR_TESTS_G4[0].label, tooltip:HR_TESTS_G4[0].tooltip, grpStart:'g4' });
     cols.push({ id:'hr_g4_1', sortKey:'hr__'+HR_TESTS_G4[1].key, kind:'hrtest', testKey:HR_TESTS_G4[1].key, label:HR_TESTS_G4[1].label, tooltip:HR_TESTS_G4[1].tooltip });
@@ -14531,9 +14548,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       else if (c.kind === 'score')   { label = 'Score'; title = 'Test pass count / 8; the 4 gates show as pips'; }
       else if (c.kind === 'hrgate')  { label = c.label; title = c.tooltip; }
       else if (c.kind === 'hrtest')  { label = c.label; title = c.tooltip; }
-      else if (c.kind === 'pb_info') { label = 'Pullback'; title = 'Pullback depth (% from recent swing high)'; }
-      else if (c.kind === 'ma_pct')  { label = '9. Testing MA'; title = 'Criterion 9: % distance from price to the tested MA'; }
-      else if (c.kind === 'ma_name') { label = 'Which MA'; title = 'Which MA is being tested (50D/100D/150D/200D)'; }
+      else if (c.kind === 'pb_info') { label = '% from swing high'; title = 'Current distance below the recent swing high (a 6-month local peak, or the 52-week high if none found)'; }
+      else if (c.kind === 'ma_name') { label = 'MA being tested'; title = 'Which moving average price is testing: scans 50D, then 100D, 150D, 200D, and takes the first one price sits within -2% to +10% of'; }
+      else if (c.kind === 'ma_pct')  { label = '9. Distance from MA'; title = 'Criterion 9: % distance from price to the MA being tested'; }
       else if (c.kind === 'window')  { label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label; }
       else { label = '?'; title = ''; }
       var GRPCLS = { rating:'grp-start-rating', g1new:'grp-start-g1new', g2:'grp-start-g2', g3:'grp-start-g3', g4:'grp-start-g4', context:'grp-start-context' };
@@ -14556,10 +14573,10 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var tint  = {'Possible':'tint-pos','Plausible':'tint-pla','Probable':'tint-pe','Qualified':'tint-pl'};
     var strip = {'Possible':'pos','Plausible':'pla','Probable':'prob','Qualified':'pl'};
     var HR_THRESH = {
-      'Possible':  'Stage 2 + all 4 gates pass, but fewer than 3 of the 6 setup tests',
-      'Plausible': 'Stage 2 + 4 gates + 3 or more of the 6 setup tests; MA not yet reclaimed',
-      'Probable':  'All gates + setup tests + MA reclaimed; no 2%+ confirmation up-close yet',
-      'Qualified': 'All 4 gates + all 6 setup tests + MA reclaimed + a 2%+ confirmation up-close'
+      'Possible':  'Stage 2 rating is Possible or better (Gate #1: all 4 hard gates; Gate #2: 2+ of 5 strength tests). This page’s own Gate #3 (50D and 150D MA both rising) and Gate #4 (5D and 10D MA both declining) also pass. But fewer than 3 of the 6 Group 3 setup tests confirm the pullback looks orderly yet.',
+      'Plausible': 'All of the above, plus 3 or more of the 6 Group 3 setup tests confirm the pullback is orderly (volume contracting, few distribution days, volatility easing, and so on). Price has not yet closed back above the moving average it is testing.',
+      'Probable':  'All of the above, plus price has closed back above the tested moving average within the last 10 trading days (Group 4’s first trigger). No 2%+ up-close has yet confirmed buyers stepping back in.',
+      'Qualified': 'All of the above, plus a 2%+ up-close has confirmed buyers are back (Group 4’s second trigger). Note: this does NOT require all 6 Group 3 tests — only the same 3-of-6 threshold as Plausible and Probable. The extra bar versus Probable is purely the 2%+ close.'
     };
     var sel = hrState.tierFilter, h = '';
     for (var i = 0; i < order.length; i++) {
@@ -14641,8 +14658,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       // Group 3 - Healthy retest (4 tests + MA% + MA name + candle)
       html += hrTestCell(s, HR_TESTS_G3[0].key, 'grp-start-g3');
       for (var g3j = 1; g3j < HR_TESTS_G3.length; g3j++) html += hrTestCell(s, HR_TESTS_G3[g3j].key, '');
-      html += hrMaPctCell(s, 'sg-edge');
-      html += hrMaNameCell(s, '');
+      html += hrMaNameCell(s, 'sg-edge');
+      html += hrMaPctCell(s, '');
       html += hrTestCell(s, 'g3_c6_buying_through_l10d', 'sg-edge');
       // Group 4 - Successful test (2)
       html += hrTestCell(s, HR_TESTS_G4[0].key, 'grp-start-g4');
@@ -14700,13 +14717,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
              '<col class="c-s2-gate"><col class="c-s2-gate">' +
              '<col class="c-test"><col class="c-test"><col class="c-pb-info">' +
              '<col class="c-test"><col class="c-test"><col class="c-test"><col class="c-test">' +
-             '<col class="c-ma-pct"><col class="c-ma-name"><col class="c-test">' +
+             '<col class="c-ma-name"><col class="c-ma-pct"><col class="c-test">' +
              '<col class="c-test"><col class="c-test">' +
              '<col class="c-window"><col class="c-window">';
 
     var gHdr = '<th class="gh-inputs" colspan="3">Inputs</th>' +
                '<th class="gh-rating grp-start-rating" colspan="2">Rating</th>' +
-               '<th class="gh-forref grp-start-forref" colspan="10">For reference — Stage 2 Upwards long-term trend?</th>' +
+               '<th class="gh-forref grp-start-forref" colspan="10" title="Not decorative: Stage 2 rating of Possible or better is a hard precondition (Gate #1 + Gate #2) for every tier below">For reference — Stage 2 (Gate #1 + Gate #2)</th>' +
                '<th class="gh-g1 grp-start-g1new" colspan="2">Group 1 — Upwards long-term trend?</th>' +
                '<th class="gh-g2 grp-start-g2" colspan="3">Group 2 — Pulling back within the uptrend?</th>' +
                '<th class="gh-g3 grp-start-g3" colspan="7">Group 3 — Healthy retest of a rising MA?</th>' +
@@ -14716,26 +14733,26 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var subGrp = '<th class="sg-spacer" colspan="3"></th>' +
                  '<th class="sub-g grp-start-rating" colspan="2">Rating</th>' +
                  '<th class="sub-g grp-start-forref" colspan="1">Rating</th>' +
-                 '<th class="sub-g sg-edge" colspan="4">Gates</th>' +
-                 '<th class="sub-g sg-edge" colspan="5">Tests</th>' +
-                 '<th class="sub-g grp-start-g1new" colspan="2">Rising MAs</th>' +
-                 '<th class="sub-g grp-start-g2" colspan="2">Trend</th>' +
+                 '<th class="sub-g sg-edge" colspan="4" title="Gate #1 -- Long-Term (LT): all 4 Stage 2 hard gates required, no exceptions">Gate #1 - LT - 4/4 required</th>' +
+                 '<th class="sub-g sg-edge" colspan="5" title="Gate #2 -- Long-Term (LT): 2 or more of the 5 Stage 2 strength tests required -- the same bar as a Stage 2 rating of Possible or better">Gate #2 - LT - 2+ of 5 required</th>' +
+                 '<th class="sub-g grp-start-g1new" colspan="2" title="Gate #3 -- Medium-Term (MT): both the 50-day and 150-day MA must be rising">GATE #3 - MT</th>' +
+                 '<th class="sub-g grp-start-g2" colspan="2" title="Gate #4 -- Near-Term (NT): both the 5-day and 10-day MA must be declining -- confirms the pullback itself">GATE #4 - NT</th>' +
                  '<th class="sub-g sg-edge" colspan="1">Info</th>' +
                  '<th class="sub-g grp-start-g3" colspan="4">Setup</th>' +
                  '<th class="sub-g sg-edge" colspan="2">MA test</th>' +
-                 '<th class="sub-g sg-edge" colspan="1">Candle</th>' +
+                 '<th class="sub-g sg-edge" colspan="1" title="Candle quality: at least half of the last 10 days closed in the upper 40% of their daily range">Cdl.</th>' +
                  '<th class="sub-g grp-start-g4" colspan="2">Trigger</th>' +
                  '<th class="sub-g grp-start-context" colspan="2">Context</th>';
 
     var captionHtml =
-      '<div class="gcap gcap-forref"><b>For reference — Stage 2</b>' +
-        '<span class="db">Shown for context, not scored here. The stock\'s Stage 2 status: its rating, four gates (price above 200D MA, price above 150D MA, 150D above 200D MA, within 25% of the 52-week high) and five tests (50D above 150D, 50D above 200D, and the industry, sector and stock relative-strength percentiles).</span>' +
+      '<div class="gcap gcap-forref"><b>For reference — Stage 2 (Gate #1 + Gate #2)</b>' +
+        '<span class="db">Despite the "for reference" label, this is a hard precondition, not decoration: a stock must hold a Stage 2 rating of Possible or better before any of Group 1-4 below is even evaluated. That rating is built from Gate #1 (all 4 hard gates: price above 200D MA, price above 150D MA, 150D above 200D MA, within 25% of the 52-week high — all 4 required) and Gate #2 (2 or more of 5 strength tests: 50D above 150D, 50D above 200D, and the industry, sector and stock relative-strength percentiles). Full detail shown here for reference.</span>' +
       '</div>' +
-      '<div class="gcap gcap-g1"><b>Group 1 — Upwards long-term trend?</b>' +
-        '<span class="db">Two long-term-trend gates confirming the medium and long moving averages are still rising: (1) Is the 50-day MA rising? (2) Is the 150-day MA rising?</span>' +
+      '<div class="gcap gcap-g1"><b>Group 1 — Upwards long-term trend? (Gate #3 · MT)</b>' +
+        '<span class="db">Two long-term-trend gates confirming the medium and long moving averages are still rising: (1) Is the 50-day MA rising? (2) Is the 150-day MA rising? Both required.</span>' +
       '</div>' +
-      '<div class="gcap gcap-g2"><b>Group 2 — Pulling back within the uptrend?</b>' +
-        '<span class="db">Two pullback gates confirming a genuine short-term pullback, not a reversal: (3) Is the 5-day MA declining? (4) Is the 10-day MA declining? Pullback depth is shown alongside for context.</span>' +
+      '<div class="gcap gcap-g2"><b>Group 2 — Pulling back within the uptrend? (Gate #4 · NT)</b>' +
+        '<span class="db">Two pullback gates confirming a genuine short-term pullback, not a reversal: (3) Is the 5-day MA declining? (4) Is the 10-day MA declining? Both required. Pullback depth (% from swing high) is shown alongside for context.</span>' +
       '</div>' +
       '<div class="gcap gcap-g3"><b>Group 3 — Healthy retest of a rising MA?</b>' +
         '<span class="db">Six setup tests confirming the pullback is orderly and healthy: (5) Volume contracting? (6) Up-volume above down-volume? (7) Few distribution days? (8) Volatility reducing? (9) Testing a rising MA (% distance and which MA shown)? (10) Closing in the upper part of the daily range over the last 10 days?</span>' +
@@ -14745,7 +14762,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       '</div>';
 
     var html = '' +
-      '<div class="s1-intro">Healthy Retest of a rising moving average — the test for a Core Minervini “buy the pullback” trade. The stock must already be in a confirmed Stage 2 uptrend (shown for reference), with its long-term moving averages still rising (Group 1) while pulling back over the short term (Group 2). Group 3 checks the pullback is orderly and healthy; Group 4 confirms the retest has held and buyers have stepped back in. Twelve scored criteria: four gates (all required) plus eight tests. Rating tiers: Gate fail (a required gate is missing), Possible, Plausible, Probable, and Qualified (every gate and test passing, with a confirmed 2%+ up-close).</div>' +
+      '<div class="s1-intro">Healthy Retest of a rising moving average — the test for a Core Minervini “buy the pullback” trade. Entry requires a Stage 2 rating of Possible or better (Gate #1: all 4 hard gates; Gate #2: 2 or more of 5 strength tests — shown for reference), plus its own long-term moving averages still rising (Group 1 / Gate #3) while pulling back over the short term (Group 2 / Gate #4). Four gates in total, all required just to be in the running. From there, Group 3’s six setup tests decide whether the pullback looks orderly and healthy, and Group 4’s two triggers confirm the retest has actually held. Rating tiers: Gate fail (Stage 2 qualifies but one of the four gates does not), Possible (gates pass, fewer than 3 of 6 Group 3 tests), Plausible (3 or more of 6 Group 3 tests, MA not yet reclaimed), Probable (MA reclaimed, no 2%+ confirmation close yet), Qualified (MA reclaimed and a 2%+ confirmation close has fired). Note: the tier ladder from Plausible upward is driven by Group 4, not by passing more of the 6 Group 3 tests — 3 of 6 and 6 of 6 score identically once Gate #1-4 are clear.</div>' +
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-hr-grp="inputs" data-hr-val="pct" onclick="hrSetMode(\'inputs\',\'pct\')">show as %</button>' +

@@ -3875,7 +3875,10 @@ def compute_master_dashboard_screens(prices, filter_results):
         # v1: criterion 12 (reclaim) uses mr_trig_reclaim ("price > MA now");
         # the 10-day window enhancement is a follow-up patcher (needs new
         # upstream field in uptrend_retest filter).
-        hr_stage_qualifies = bool(s2.get("rating") in ("Probable", "Plausible"))
+        # D-MD-V2-HR-S2GATE-16Aug26: Richard's ruling — the Stage 2 precondition
+        # (rendered as "Gate #1" + "Gate #2" on the page) now accepts Possible as
+        # well as Plausible/Probable. Was ("Probable","Plausible") only.
+        hr_stage_qualifies = bool(s2.get("rating") in ("Probable", "Plausible", "Possible"))
         hr_b1_50d_rising = bool(pb_t1_50d_rising)
         hr_b2_150d_rising = bool(pb_t2_150d_rising)
         hr_b3_5d_declining = bool(pb_t3_5d_rolling)
@@ -3927,7 +3930,7 @@ def compute_master_dashboard_screens(prices, filter_results):
             "info_retest_count": (utr_retest_counts.get(utr_test_ma) if utr_test_ma else None),
             "info_window_note": "v2: criterion 12 uses 10-day crossover lookback (price crossed above test MA in last 10 trading days)",
             "test_values": {
-                "g1_stage_2_qualifies": (s2.get("rating") if hr_stage_qualifies else "not S2 P/P"),
+                "g1_stage_2_qualifies": (s2.get("rating") if hr_stage_qualifies else "not S2 Possible+"),
                 "g2_b1_50d_rising": ("rising" if hr_b1_50d_rising else "not rising"),
                 "g2_b2_150d_rising": ("rising" if hr_b2_150d_rising else "not rising"),
                 "g2_b3_5d_declining": ("declining" if hr_b3_5d_declining else "not declining"),

@@ -111,7 +111,13 @@ def load_data():
         _cf = safe_json_load(DATA_DIR / "chart-freshness.json") or {}
     except Exception:
         _cf = {}
-    _chart_fresh = {"total": _cf.get("total", 0), "current": _cf.get("current", 0), "stale": _cf.get("stale_count", 0), "reference": _cf.get("reference_date", "")}
+    _chart_fresh = {"total": _cf.get("total", 0), "current": _cf.get("current", 0),
+                    "stale": _cf.get("stale_count", 0), "reference": _cf.get("reference_date", ""),
+                    # 18-Aug-26: the middle band. Absent from an older audit file,
+                    # in which case the header falls back to its previous wording
+                    # rather than printing "undefined lagging".
+                    "fresh": _cf.get("fresh_count"), "lagging": _cf.get("lagging_count"),
+                    "lagFloor": _cf.get("lagging_floor_days"), "threshold": _cf.get("threshold_days")}
     master = {
         "meta": {
             "generated": prices["_meta"]["generated"],
@@ -1215,7 +1221,15 @@ body[data-active-tab="setups_healthy_retest"] .header-tabs-row,
 body[data-active-tab="master_overview"] .header-tabs-row,body[data-active-tab="ssem"] .header-tabs-row,body[data-active-tab="val"] .header-tabs-row,body[data-active-tab="combos"] .header-tabs-row { display: none !important; }
 
 /* V2 mini nav strip - visible only on V2 tabs — S66b group-redesign */
-.v2-nav { display: none; flex-wrap: nowrap; padding: 5px 12px 6px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 5px; align-items: flex-start; overflow-x: hidden; }
+/* MD-NAV-NO-CLIP-18Aug26. Was flex-wrap:nowrap with overflow-x:hidden, so on any
+   window narrower than the nav's natural width the right-hand buttons were cut off
+   with no way to reach them. Measured at 1700px: content 1896px, 196px hidden, and
+   the "Valuation" and "Timeliness" buttons ran past the edge. Hidden rather than
+   scrollable means genuinely unreachable, not merely awkward. Wrapping is preferred
+   over overflow-x:auto because a wrapped second row stays clean and readable,
+   whereas a horizontal scrollbar inside a header strip is both scruffy and easy to
+   miss. On a window wide enough for the full strip nothing changes at all. */
+.v2-nav { display: none; flex-wrap: wrap; row-gap: 6px; padding: 5px 12px 6px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 5px; align-items: flex-start; overflow-x: visible; }
 body[data-active-tab^="stage_"] .v2-nav,
 body[data-active-tab="pos_pre_indicators"] .v2-nav,body[data-active-tab="pulling_back"] .v2-nav,body[data-active-tab="neg_pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
@@ -2795,7 +2809,20 @@ if(D.positions&&D.positions.investments){
 document.getElementById("stat-count").textContent=D.meta.stock_count;
 (function(){var _src=(D.meta.source||"unknown");var _el=document.getElementById("stat-source");if(!_el)return;var _low=(""+_src).toLowerCase();var _fakeToks=["sample","synthetic","random","test","fake","mock","dummy"];var _isFake=_fakeToks.some(function(t){return _low.indexOf(t)>=0;});var _isReal=(_low.indexOf("yfinance")>=0);var _isLagged=(_src==="chart-data (lagged)");if(_isFake||(!_isReal&&!_isLagged)){_el.textContent="\u26A0 "+_src+" \u2014 NOT REAL DATA";_el.style.color="#c0211f";_el.style.fontWeight="800";_el.title="Price data is fabricated/test data, NOT real market data. Do not trust ratings.";}else if(_isLagged){_el.textContent=_src+" (real, lagged)";_el.style.color="#b8860b";_el.style.fontWeight="700";_el.title="Real OHLCV but lagged vs real-time (in-sandbox rebuild). Live data resumes on the next scheduled yfinance refresh.";}else{_el.textContent=_src;_el.style.color="";_el.style.fontWeight="";_el.title="Live Yahoo Finance market data.";}})();
 document.getElementById("stat-updated").textContent=D.meta.generated;
-(function(){var cf=D.meta.chart_freshness;var el=document.getElementById("stat-charts-fresh");if(!el||!cf||!cf.total){return;}el.textContent=cf.current+" / "+cf.total+" current"+(cf.stale>0?(", "+cf.stale+" stale"):"");if(cf.stale>0){el.style.color="#b8860b";el.style.fontWeight="700";el.title="Charts more than 5 days behind "+cf.reference+" (mostly delisted or renamed tickers) - see chart-freshness-report.txt";}else{el.style.color="";el.title="All per-stock charts current to "+cf.reference;}})();
+/* MD-CHART-FRESHNESS-LAGGING-18Aug26: the header used to call a chart "current"
+   whenever it was inside the 5-day stale threshold, so a chart three days behind
+   its own table row was reported as fine. Now shows the middle band separately. */
+(function(){var cf=D.meta.chart_freshness;var el=document.getElementById("stat-charts-fresh");if(!el||!cf||!cf.total){return;}
+var hasLag=(typeof cf.fresh==="number"&&typeof cf.lagging==="number");var fresh=hasLag?cf.fresh:cf.current;var lag=hasLag?cf.lagging:0;var stale=cf.stale||0;
+var parts=[fresh+" / "+cf.total+" current"];if(lag>0)parts.push(lag+" lagging");if(stale>0)parts.push(stale+" stale");
+el.textContent=parts.join(" · ");
+if(lag>0||stale>0){el.style.color="#b8860b";el.style.fontWeight="700";
+el.title="Newest price bar in each per-stock chart, against the universe's newest bar ("+cf.reference+")."
++"\ncurrent  — less than "+(cf.lagFloor||2)+" days behind"
++"\nlagging  — "+(cf.lagFloor||2)+" to "+(cf.threshold||5)+" days behind: the venue's own series has not moved, not a broken chart"
++"\nstale    — more than "+(cf.threshold||5)+" days behind: almost always delisted or renamed"
++"\nNames listed in chart-freshness-report.txt.";}
+else{el.style.color="";el.style.fontWeight="";el.title="Every per-stock chart carries a bar dated "+cf.reference+".";}})();
 var _stUni=document.getElementById("stat-universe-updated");if(_stUni)_stUni.textContent=D.meta.universe_updated||"\u2014";  /* MD-V2-S36-BRIEF-MARKER */
 var _stVer=document.getElementById("stat-dashboard-version");if(_stVer&&D.meta.dashboard_version)_stVer.textContent="Dashboard: "+D.meta.dashboard_version;
 
@@ -18681,8 +18708,14 @@ renderTab("mm99");
         '      <button class="ctrl-btn" id="hdr-chart-btn" onclick="openChart(\'Overview\')">Chart</button>\n'
         '      <a class="ctrl-btn" href="../../databases/soi-list.html" title="Standardised Stocks of Interest list">SOI List</a>\n'
         '      <button class="ctrl-btn ssp-btn" onclick="openStockView()" title="Single stock view — all ratings at a glance">Stock View</button>\n'
-        '      <a class="ctrl-btn" href="../../landing-page.html" title="Operating system landing page">Home</a>\n'
-        '      <a class="ctrl-btn" href="../../reports-memos-repository.html" title="Research repository">Repository</a>\n'
+        # MD-HEADER-LINKS-ABSOLUTE-18Aug26. These were relative paths written for a
+        # local file:// layout. On the deployed site "../../" climbs above the site
+        # root, so from vfhqi.github.io/master/index.html they resolved to
+        # vfhqi.github.io/landing-page.html and 404'd. Verified live, not assumed:
+        # both returned HTTP 404 while the sibling Pages sites they should point at
+        # returned 200. Absolute URLs to those sites work from every context.
+        '      <a class="ctrl-btn" href="https://vfhqi.github.io/landing/" title="Operating system landing page">Home</a>\n'
+        '      <a class="ctrl-btn" href="https://vfhqi.github.io/repository/" title="Research repository">Repository</a>\n'
         '    </div>\n'
         '  </div>\n'
         '  <!-- Row 2: #1 TABS (left) + #2 JUMP TO (right) -->\n'

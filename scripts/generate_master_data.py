@@ -128,6 +128,46 @@ FULL_HISTORY_ROWS = 200
 # Re-fetching a deterministic slice each night bounds basis staleness to
 # RESEED_CYCLE_DAYS and repairs truncation without anyone noticing it happened.
 RESEED_CYCLE_DAYS = 20
+
+
+def _load_forced_reseeds(path):
+    """Tickers to re-fetch in full tonight regardless of the rotation, then clear the request.
+
+    Written by scripts/apm_pms_alignment.py when it finds a stock whose moving averages differ
+    between the two price stores, which is the signature of a cache stranded on a stale dividend
+    basis. Returns a set of ticker labels; returns an empty set on ANY problem, because a repair
+    channel that can break a build is worse than the drift it repairs.
+
+    The file is consumed (deleted) on read. If the underlying basis problem is still there
+    tomorrow, tomorrow's alignment run writes it again -- self-limiting rather than self-repeating.
+    """
+    try:
+        if not os.path.exists(path):
+            return set()
+        with open(path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        tickers = doc.get("tickers") if isinstance(doc, dict) else doc
+        if not isinstance(tickers, list):
+            return set()
+        out = {str(t) for t in tickers if isinstance(t, str) and t.strip()}
+        if len(out) > 200:
+            # A request to re-fetch a fifth of the universe is not a repair, it is a symptom of
+            # something else being wrong. Refuse it rather than turning one night's build into a
+            # multi-hour deep fetch that nobody asked for.
+            print(f"  FORCED RE-SEED: REFUSED -- {len(out)} tickers requested, cap is 200. "
+                  f"Something upstream is wrong; investigate rather than re-fetching.")
+            return set()
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+        if out:
+            print(f"  FORCED RE-SEED: {len(out)} ticker(s) requested by the alignment run "
+                  f"(stale dividend basis): {', '.join(sorted(out))}")
+        return out
+    except Exception as exc:              # noqa: BLE001 - deliberately total
+        print(f"  FORCED RE-SEED: skipped, could not read the request file ({exc})")
+        return set()
 SMA_PERIODS = [5, 10, 20, 50, 100, 150, 200]
 BENCHMARK_TICKER = "^STOXX"
 # Cached for scripts/pms_historical_performance.py only; NOT the relative-strength
@@ -650,6 +690,25 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
     # bars, so this is a hole being closed, not a live defect.)
     if _reseed_bucket == 0:
         reseed_labels.add("BENCHMARK")
+    # FORCED RE-SEEDS, ON TOP OF THE ROTATION (02-Sep-2026).
+    #
+    # The rotation buckets a stock by its INDEX POSITION in universe.json, and that file is
+    # rebuilt from Notion every day. A stock therefore changes bucket whenever names are added,
+    # removed or re-sorted above it, so it can be skipped for an unbounded number of cycles with
+    # nothing recording that it was missed. Measured on ART-ES: twenty consecutive builds, every
+    # one incremental, so bars written before its 13-Apr-2026 ex-dividend date still carried the
+    # old unadjusted basis. Its 200-day average came out 0.42% too high, which moved the stop and
+    # reported a live tranche as breached when it was not.
+    #
+    # This list is the repair channel. scripts/apm_pms_alignment.py writes any ticker whose two
+    # price stores disagree about a moving average, and the next build re-fetches those tickers in
+    # full, which is the only operation that puts a whole history back on one dividend basis.
+    # Consumed once and cleared, so a repaired ticker does not re-fetch for ever.
+    #
+    # FAIL-SAFE BY CONSTRUCTION: any problem reading the file leaves the set untouched and the
+    # build behaves exactly as it did before. A repair channel must never be able to stop a build.
+    for _forced in _load_forced_reseeds(DATA_DIR / "force-reseed.json"):
+        reseed_labels.add(_forced)
     if no_reseed:
         # The rotation is keyed on the calendar DATE, so a second run on the same
         # date would re-fetch five years of history for the same ~46 tickers all

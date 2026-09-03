@@ -130,6 +130,57 @@ FULL_HISTORY_ROWS = 200
 RESEED_CYCLE_DAYS = 20
 
 
+def _reseed_ledger_path():
+    return DATA_DIR / ".reseed-ledger.json"
+
+
+def _load_reseed_ledger():
+    """{ticker: 'YYYY-MM-DD'} — when each ticker was last SUCCESSFULLY re-fetched in full.
+
+    Replaces the index-position rotation that let ART-ES go twenty consecutive builds without a
+    full re-fetch and left its history on a pre-dividend basis (D-PMS-248). A missing entry sorts
+    first, so a ticker that has never been re-seeded is always picked before one that has.
+
+    Returns {} on any problem. A missing or unreadable ledger degrades to "everything looks
+    equally old", which re-seeds the alphabetically-first slice — wasteful for one night, but it
+    can never stop a build or skip a ticker for ever.
+    """
+    try:
+        p = _reseed_ledger_path()
+        if not p.exists():
+            return {}
+        with open(p, encoding="utf-8") as fh:
+            d = json.load(fh)
+        return {str(k): str(v) for k, v in d.items()} if isinstance(d, dict) else {}
+    except Exception as exc:                      # noqa: BLE001 - deliberately total
+        print(f"  RE-SEED LEDGER: unreadable, treating every ticker as unseeded ({exc})")
+        return {}
+
+
+def _save_reseed_ledger(ledger, marks, today_str):
+    """Record today's SUCCESSFUL re-seeds. Never called when --no-reseed skipped the rotation.
+
+    Only tickers whose re-seed actually landed are marked. A rejected re-seed (`RESEED-REJECT`,
+    where the fresh series failed `_reseed_is_safe`) or a failed save must leave the ticker looking
+    as old as it really is — otherwise the oldest-first rule would consider it fresh and never come
+    back to it, which is exactly the silent-miss failure this replaced.
+    """
+    if not marks:
+        return
+    try:
+        for label in marks:
+            ledger[label] = today_str
+        def _v(d):
+            assert isinstance(d, dict) and d, "reseed-ledger verify: not a non-empty dict"
+        _safe_write_json(ledger, _reseed_ledger_path(), min_bytes=2, validate=_v,
+                         indent=None, separators=(",", ":"))
+        print(f"  RE-SEED LEDGER: recorded {len(marks)} successful re-seed(s) for {today_str}")
+    except Exception as exc:                      # noqa: BLE001 - deliberately total
+        # A ledger that fails to save means tonight's work is not recorded, so those tickers are
+        # re-seeded again tomorrow. Wasteful, harmless, and must not abort a completed build.
+        print(f"  RE-SEED LEDGER: could not be saved, tonight's re-seeds will repeat ({exc})")
+
+
 def _load_forced_reseeds(path):
     """Tickers to re-fetch in full tonight regardless of the rotation, then clear the request.
 
@@ -679,16 +730,46 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
     # D-MD-COVERAGE-2026-08-04 (G1): today's re-seed slice. Deterministic from
     # the ordinal date, so every ticker is fully re-fetched once per cycle
     # regardless of run history, with no state to keep and no drift.
-    _reseed_bucket = end_date.toordinal() % RESEED_CYCLE_DAYS
-    reseed_labels = {s["ticker"] for i, s in enumerate(universe["stocks"])
-                     if i % RESEED_CYCLE_DAYS == _reseed_bucket}
+    # OLDEST FIRST, NOT POSITION-IN-FILE (02-Sep-2026, D-PMS-248).
+    #
+    # The old rule was `i % 20 == date.toordinal() % 20`, where `i` was the stock's INDEX POSITION
+    # in universe.json — a file rebuilt from Notion every day. A stock therefore changed bucket
+    # whenever names were added, removed or re-sorted above it, so it could be skipped for an
+    # unbounded number of cycles with nothing recording the miss. **Measured on ART-ES: twenty
+    # consecutive builds, every one incremental, no full re-fetch. Its bucket did come up on
+    # 18-Aug and a build did run that day; its index had moved.** Bars before its 13-Apr-2026
+    # ex-dividend date kept the old basis, its 200-day average came out 0.42% too high, and a live
+    # tranche sitting 0.13% ABOVE its stop was reported 0.29% BELOW it.
+    #
+    # Now: a ledger records when each ticker was last successfully re-seeded, and each night takes
+    # the OLDEST slice. Three properties the rotation did not have:
+    #   * self-correcting -- a night missed for any reason leaves a ticker older, so it is picked
+    #     sooner rather than skipped for ever;
+    #   * bounded -- with the universe divided by the cycle length taken per night, the worst-case
+    #     age is one cycle rather than unbounded;
+    #   * observable -- the oldest basis in the universe is a number anyone can read off the
+    #     ledger, instead of something nobody could see.
+    _reseed_ledger = _load_reseed_ledger()
+    _reseed_ledger_marks = []
+    _all_labels = [s["ticker"] for s in universe["stocks"]]
+    _per_night = max(1, -(-len(_all_labels) // RESEED_CYCLE_DAYS))   # ceiling division
+    # Never-seeded tickers sort first: the empty string precedes any ISO date.
+    _by_age = sorted(_all_labels, key=lambda t: (_reseed_ledger.get(t, ""), t))
+    reseed_labels = set(_by_age[:_per_night])
+    _oldest = _reseed_ledger.get(_by_age[0], "") if _by_age else ""
+    print(f"  RE-SEED LEDGER: {sum(1 for t in _all_labels if t not in _reseed_ledger)} of "
+          f"{len(_all_labels)} ticker(s) have never been re-seeded; oldest recorded basis is "
+          f"{_oldest or 'none'}")
     # The benchmark is appended to the ticker list AFTER the universe, so an
     # index built off enumerate(universe["stocks"]) never selects it and it would
     # never be re-based. It drives every relative-strength figure in the system,
     # so it gets its own slot in the rotation. (Checked 04-Aug-2026: ^STOXX is a
     # price index with no dividend adjustment, 0.0000% drift over 1,307 shared
     # bars, so this is a hole being closed, not a live defect.)
-    if _reseed_bucket == 0:
+    # The benchmark drives every relative-strength figure in the system and is appended to the
+    # ticker list AFTER the universe, so it was never selected by the old index-based rotation.
+    # It now sits in the same ledger as everything else and is re-seeded on its own age.
+    if _reseed_ledger.get("BENCHMARK", "") <= _oldest:
         reseed_labels.add("BENCHMARK")
     # FORCED RE-SEEDS, ON TOP OF THE ROTATION (02-Sep-2026).
     #
@@ -710,17 +791,17 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
     for _forced in _load_forced_reseeds(DATA_DIR / "force-reseed.json"):
         reseed_labels.add(_forced)
     if no_reseed:
-        # The rotation is keyed on the calendar DATE, so a second run on the same
-        # date would re-fetch five years of history for the same ~46 tickers all
-        # over again. The 22:15 post-US-close pass is exactly that second run.
-        print(f"  RE-SEED: SKIPPED (--no-reseed). Bucket {_reseed_bucket} of "
-              f"{RESEED_CYCLE_DAYS} ({len(reseed_labels)} ticker(s)) was already "
-              f"re-seeded by today's earlier build; repeating it would double the "
-              f"deep-fetch load for no gain.")
+        # A second run on the same date would select the same oldest slice and re-fetch
+        # five years of history for the same tickers all over again. The 22:15 post-US-close
+        # pass is exactly that second run.
+        print(f"  RE-SEED: SKIPPED (--no-reseed). {len(reseed_labels)} ticker(s) were "
+              f"already re-seeded by today's earlier build; repeating it would double the "
+              f"deep-fetch load for no gain. The ledger is NOT touched, so nothing is "
+              f"recorded as re-seeded that was not.")
         reseed_labels = set()
     else:
-        print(f"  RE-SEED: bucket {_reseed_bucket} of {RESEED_CYCLE_DAYS} — "
-              f"{len(reseed_labels)} ticker(s) get a full re-fetch tonight "
+        print(f"  RE-SEED: {len(reseed_labels)} ticker(s) get a full re-fetch tonight, "
+              f"chosen OLDEST-BASIS-FIRST over a {RESEED_CYCLE_DAYS}-build cycle "
               f"(bounds dividend-basis drift and repairs truncated caches)")
     # D-MD-SETTLED-BAR-2026-08-11: the "is this session settled?" question is no
     # longer answered here from a UK-hour constant. It is answered per VENUE,
@@ -783,6 +864,11 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
                     save_cache(yf_ticker, _merged)
                     data[yf_ticker] = _merged
                     stats["reseed"] = stats.get("reseed", 0) + 1
+                    # Only a re-seed that actually LANDED counts. A rejected or failed one must
+                    # leave the ticker looking as old as it really is, or the oldest-first
+                    # rotation would consider it fresh and never come back to it — which is the
+                    # same silent-miss failure the rotation was rebuilt to remove.
+                    _reseed_ledger_marks.append(label)
                     continue
                 except Exception as e:
                     print(f"  RESEED-SAVE-ERR {yf_ticker:12s} — {e} (keeping prior cache)")
@@ -863,6 +949,10 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
             print(f"  SETTLED-BAR: venue report unavailable ({_e})")
 
     _flag_fetch_failures(fetch_failures)
+    # Record tonight's SUCCESSFUL re-seeds so tomorrow's oldest-first selection can see them.
+    # Deliberately after the whole loop, not inside it: a ticker marked mid-loop by a build that
+    # then died would look fresh while its cache was half-written.
+    _save_reseed_ledger(_reseed_ledger, _reseed_ledger_marks, today_str)
     print(f"\n  Summary: {stats['full']} full, {stats['incr']} incr, {stats['cache']} cached, "
           f"{stats.get('reseed', 0)} re-seeded, {stats.get('reseed_rejected', 0)} re-seed-rejected, "
           f"{stats['err']} fetch-errors, {stats['save_err']} save-errors\n")
@@ -4741,6 +4831,10 @@ def _save_daily_snapshot(filter_results):
 
 STAGE_HISTORY_LOG_PATH = DATA_DIR / "stage-history-20d.json"
 STAGE_HISTORY_LATEST_PATH = DATA_DIR / ".stage-history-latest.json"
+# The state as of the last DIFFERENT date. Needed because the file above is advanced to today's
+# state by the first build of the day, so a second same-day pass had nothing correct to diff
+# against and was overwriting the day's record with a near-empty delta (D-PMS-253, 02-Sep-2026).
+STAGE_HISTORY_PREVDAY_PATH = DATA_DIR / ".stage-history-prevday.json"
 
 FLATTEN_SKIP_KEYS = {
     "test_values", "history", "monthly_history",
@@ -4845,21 +4939,97 @@ def _save_latest_full_state(flat_all):
                      validate=_v, indent=None, separators=(",", ":"))
 
 
-def compute_and_append_stage_history_delta(filter_results, today_str=None):
-    """Flatten today's filter_results, diff against the last logged day's
-    full state, and append a delta (or baseline, if no prior state exists)
-    entry to data/stage-history-20d.json. Also refreshes the small
-    .stage-history-latest.json cache used as tomorrow's diff base.
+def _load_prevday_full_state():
+    """The full state as of the last DIFFERENT calendar date.
 
-    Idempotent per calendar date — safe to call more than once on the same
-    day (replaces that day's entry rather than duplicating it).
+    Exists because `.stage-history-latest.json` is advanced to today's state by the first build of
+    the day, which left a second same-day pass diffing today against itself. See
+    compute_and_append_stage_history_delta() for the full account.
+    """
+    if not STAGE_HISTORY_PREVDAY_PATH.exists():
+        return None
+    try:
+        with open(STAGE_HISTORY_PREVDAY_PATH, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else None
+    except (json.JSONDecodeError, IOError):
+        return None
+
+
+def _save_prevday_full_state(flat_all):
+    def _v(d):
+        assert isinstance(d, dict), "stage-history-prevday verify: not a dict"
+    _safe_write_json(flat_all, STAGE_HISTORY_PREVDAY_PATH, min_bytes=2,
+                     validate=_v, indent=None, separators=(",", ":"))
+
+
+def compute_and_append_stage_history_delta(filter_results, today_str=None):
+    """Flatten today's filter_results, diff against the PREVIOUS DAY's full state, and append a
+    delta (or baseline, if no prior state exists) entry to data/stage-history-20d.json.
+
+    Idempotent per calendar date — safe to call more than once on the same day (replaces that
+    day's entry rather than duplicating it), AND a second call now reproduces the same full
+    delta the first one wrote instead of erasing it.
+
+    THE DEFECT THIS FIXES (02-Sep-2026, D-PMS-253). Richard's Stage 2 monitoring had been blocked
+    for four consecutive runs since 17-Aug-2026, and the cause was here.
+
+    This log is delta-only: each day records what changed since the day before. The diff base was
+    `.stage-history-latest.json`, which this function overwrites with today's state on every call.
+    On any evening the build runs twice — the 18:00 European pass and the 22:15 post-US-close pass:
+
+      * 18:00 diffs today against YESTERDAY, finds ~900 changed tickers, writes them.
+      * 22:15 diffs today against THIS MORNING'S OWN RESULT, finds almost nothing, and the
+        replace-if-present above overwrites the day's entry with that near-empty delta.
+
+    The day's real record was destroyed. Measured 8 for 8 on the historical log: the late pass ran
+    on 12, 13, 14, 17, 18, 19, 20 and 25-Aug, whose stored entries hold 13, 16, 15, 10, 9, 9, 9 and
+    24 tickers; it did not run on 10, 11, 21-Aug or 01-Sep, whose entries hold 897, 983, 931 and
+    974. Then confirmed by PREDICTION: the 01-Sep 15:00 build wrote 974 tickers, the 22:15 pass
+    ran, and the stored entry for that date now holds 24.
+
+    Downstream, `scripts/pms_stage2_transitions.py` needs the Stage 2 rating to have changed on at
+    least 15 of the last 20 days and refuses to report otherwise — correctly, because an empty
+    result would read as "nothing happened on your holdings" when the truth is "we cannot tell".
+
+    THE FIX, and why this shape. Richard approved fixing it and left the method to Watson; two were
+    considered. MERGING the second pass's delta into the first's was rejected: it needs merge logic,
+    and an interrupted pass can leave a half-written record. Instead a second cache holds the
+    previous DAY's state, so a repeat call on the same date diffs from the same base the first call
+    used and simply recomputes the identical delta. No merge, and idempotent by construction.
+
+    NOTE ON RECOVERY: this cannot repair the days already overwritten. The monitoring step stays
+    blocked until a clean 20-day window rebuilds, roughly three weeks from 02-Sep-2026.
     """
     if today_str is None:
         today_str = date.today().strftime("%Y-%m-%d")
 
     flat_now = _flatten_all_tickers(filter_results)
-    prev = _load_latest_full_state()
     doc = _load_stage_history_doc()
+    already_logged_today = any(d.get("date") == today_str for d in doc.get("days", []))
+
+    if already_logged_today:
+        # A SECOND pass on the same date. `latest` was advanced to today's state by the first
+        # pass, so diffing against it would produce the near-empty delta described above.
+        prev = _load_prevday_full_state()
+        if prev is None:
+            # Only reachable on the first build after this fix ships, if that build happens to be
+            # a second pass of the day. Fall back to the old base for one run rather than aborting,
+            # and SAY SO: a silent fallback here would look exactly like the bug it replaced.
+            prev = _load_latest_full_state()
+            print("  stage-history-20d.json: WARNING -- second pass today but no previous-day "
+                  "state cached yet, so this delta is measured from this morning's state and will "
+                  "understate the day. Self-corrects from the next first-pass build onward.")
+        else:
+            print(f"  stage-history-20d.json: second pass for {today_str}; diffing from the "
+                  f"previous day's state so the day's full record is preserved.")
+    else:
+        # FIRST pass for this date. `latest` still holds the previous day's state, which is both
+        # the correct diff base now and the base any second pass today will need, so promote it
+        # BEFORE it gets overwritten below.
+        prev = _load_latest_full_state()
+        if prev is not None:
+            _save_prevday_full_state(prev)
 
     if prev is None:
         entry = {"date": today_str, "type": "baseline", "data": flat_now}

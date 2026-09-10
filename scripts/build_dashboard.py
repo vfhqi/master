@@ -35,6 +35,16 @@ try:
 except Exception as _e:
     _pg = None
     print("[guards] pipeline_guards import failed: {} -- continuing unguarded.".format(_e))
+
+# MD-LIVE-BOOK-2026-09-10: the live book comes from the Position Management System, never
+# from positions.json (which is the slot template -- see live_book_bridge.py's header).
+# Guarded so a bridge fault degrades the portfolio layer honestly rather than killing the
+# nightly build of the whole dashboard.
+try:
+    import live_book_bridge as _lbb
+except Exception as _e:
+    _lbb = None
+    print("[live-book] live_book_bridge import failed: {} -- live holdings UNAVAILABLE.".format(_e))
 HISTORY_PATH = str(DATA_DIR / ".size-history.json")
 
 # Dashboard version -- bump with each shipped session
@@ -96,9 +106,53 @@ def load_data():
         valuation = safe_json_load(val_path)
 
     # Positions
+    # MD-LIVE-BOOK-2026-09-10. positions.json is loaded ONLY for its settings block (stop
+    # buffer, max trade sizes, MA hierarchy). Its `investments` list is the SLOT TEMPLATE and
+    # is REPLACED below by the real live book. On 10-Sep-26 the template gave the dashboard 9
+    # names of which 2 were already sold, while the real book held 16.
     positions = None
     if POSITIONS_PATH.exists():
         positions = safe_json_load(POSITIONS_PATH)
+    if positions is None:
+        positions = {"schema_version": "1.1", "settings": {}, "investments": []}
+    if _lbb is not None:
+        try:
+            _live_inv, _live_meta = _lbb.build_investments()
+        except Exception as _e:
+            _live_inv, _live_meta = [], {"error": "live book resolver raised: {}".format(_e),
+                                         "saved_at": "", "resolved": 0,
+                                         "orphan_slots": [], "unpriced": []}
+    else:
+        _live_inv, _live_meta = [], {"error": "live_book_bridge unavailable", "saved_at": "",
+                                     "resolved": 0, "orphan_slots": [], "unpriced": []}
+    # DELIBERATE: on failure the list goes EMPTY, never back to the slot template. A
+    # confidently wrong holdings list is undiagnosable and is the exact bug being fixed.
+    positions["investments"] = _live_inv
+    positions["_live_meta"] = _live_meta
+    if _live_meta.get("error"):
+        print("  [live-book] ERROR: {}".format(_live_meta["error"]))
+    else:
+        print("  [live-book] {} holdings from the Position Management System (saved {})".format(
+            _live_meta.get("resolved", 0), _live_meta.get("saved_at") or "unknown"))
+    if _live_meta.get("orphan_slots"):
+        print("  [live-book] WARNING: {} slot(s) hold capital with no ticker: {}".format(
+            len(_live_meta["orphan_slots"]), _live_meta["orphan_slots"]))
+    if _live_meta.get("unpriced"):
+        print("  [live-book] WARNING: holding(s) the dashboard cannot price, so they will "
+              "highlight nothing: {}".format(", ".join(_live_meta["unpriced"])))
+
+    # MD-QOT-2026-09-10: Qualification over Time payload. Absent is survivable -- the tab
+    # says so plainly rather than rendering an empty grid that looks like "nothing qualified".
+    qot = None
+    _qot_path = DATA_DIR / "qual-over-time.json"
+    if _qot_path.exists():
+        qot = safe_json_load(_qot_path)
+        if qot:
+            print("  [qot] Qualification over Time: {} stocks, {} days".format(
+                len(qot.get("stocks", {})), (qot.get("_meta") or {}).get("days_carried")))
+    else:
+        print("  [qot] qual-over-time.json missing -- the tab will say so. Run "
+              "scripts/build_qual_over_time.py after the rating index.")
 
     # MD-V2-S36-BRIEF-MARKER: universe_updated = mtime of data/universe.json,
     # formatted as 'YYYY-MM-DD HH:MM'. The file has no _meta field, so we use mtime.
@@ -135,6 +189,11 @@ def load_data():
     }
     if positions:
         master["positions"] = positions
+    # MD-QOT-2026-09-10. Attaching the payload is a SEPARATE step from loading it, and
+    # forgetting it is silent: the build log printed "984 stocks, 40 days" while the page
+    # had no data at all and the tab rendered blank. Caught by browser QC, not by the build.
+    if qot:
+        master["qot"] = qot
     if ssem:
         ssem_data = {k: v for k, v in ssem.items() if k != "_meta"}
         master["ssem"] = ssem_data
@@ -245,6 +304,7 @@ TABS = [
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
     {"id": "combos",    "label": "Timeliness",        "accent": "#dd6b20"},
+    {"id": "qual_over_time", "label": "Qualification over Time", "accent": "#1b5e20"},  # MD-QOT-2026-09-10
     {"id": "changes",   "label": "CHANGES",          "accent": "#c53030"},  # CHANGES-TAB-MARKER
     {"id": "positions", "label": "Live Investments",  "accent": "#319795"},
 ]
@@ -413,6 +473,43 @@ table.data-table{width:100%;border-collapse:collapse;font-size:12px;table-layout
 /* SESSION 10 — D-MD-UI-13: sticky thead replaces per-row top arithmetic. Browser stacks group-header-row and col-header-row natively below the page header. Works on every screen size, every zoom level, every device. Box-shadow gives the freeze-line a visible separator from rows below. background needed so row content scrolling underneath doesn't bleed through cell-border gaps. */
 table.data-table thead{position:sticky;top:var(--header-height);z-index:8;background:#f0ede3;box-shadow:0 2px 4px rgba(0,0,0,0.06)}
 table.data-table th{background:#f0ede3;color:#6b6b6b;font-weight:600;font-size:10px;text-transform:none;letter-spacing:.3px;padding:4px 4px;text-align:left;border-bottom:2px solid var(--border);z-index:5;cursor:pointer;white-space:nowrap;user-select:none;-webkit-user-select:none;overflow:hidden;text-overflow:ellipsis}
+/* MD-QOT-2026-09-10 — Qualification over Time */
+.qot-warn{background:#fdf1f1;border-left:4px solid #A32D2D;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
+.qot-ctrls{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:10px 0 4px}
+.qot-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);margin-left:10px}
+.qot-btn,.qot-chip{font:inherit;font-size:11px;padding:3px 8px;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:3px;cursor:pointer;color:#333}
+.qot-btn:hover,.qot-chip:hover{background:#f0f0ec}
+.qot-btn.on,.qot-chip.on{background:#1b5e20;border-color:#1b5e20;color:#fff}
+.qot-sel{font:inherit;font-size:11px;padding:3px 6px;border:1px solid #cfcfc8;border-radius:3px;background:#fbfbf9}
+.qot-chips{display:flex;flex-wrap:wrap;gap:4px 18px;margin:8px 0 2px;padding-top:8px;border-top:1px solid #eceae4}
+.qot-chiprow{display:flex;align-items:center;gap:3px;width:530px}
+.qot-chiplbl{font-size:11px;color:var(--text-dim);width:184px;min-width:184px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qot-legend{margin-top:10px;padding-top:8px;border-top:1px solid #eceae4;font-size:11px;color:#555}
+.qot-key{display:inline-block;width:12px;height:11px;border:1px solid #d5d5cf;vertical-align:-1px;margin-right:3px}
+.qot-order{margin-top:5px;color:#666;font-size:11px}
+.qot-count{font-size:12px;color:#555;margin:8px 0 5px}
+.qot-wrap{overflow:auto;max-height:74vh;border:1px solid #e6e6e3;background:#fff}
+table.qot-table{border-collapse:separate;border-spacing:0;font-size:11px;width:auto;background:#fff;color:#222}
+table.qot-table th{font-weight:600;border-bottom:1px solid #e0e0da;padding:2px 4px}
+table.qot-table td{border-bottom:1px solid #f0f0ec}
+table.qot-table tbody tr:hover td{background-color:#fafbf9}
+table.qot-table th{position:sticky;top:0;z-index:3;background:#f7f7f5}
+table.qot-table th.qot-name,table.qot-table td.qot-name{position:sticky;left:0;z-index:2;background:#fff;min-width:230px;max-width:230px;text-align:left;padding:2px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+table.qot-table th.qot-name{z-index:4;background:#f7f7f5}
+table.qot-table th.qot-cur,table.qot-table td.qot-cur{position:sticky;left:230px;z-index:2;min-width:52px;max-width:52px;text-align:center;font-size:10px;padding:2px 3px;background:#fff}
+table.qot-table th.qot-cur{z-index:4;background:#f7f7f5}
+table.qot-table th.qot-dh{min-width:26px;max-width:26px;height:46px;padding:3px 0 4px;font-size:9px;color:#666;font-weight:500;text-align:center;vertical-align:bottom}
+table.qot-table th.qot-dh span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;display:inline-block;line-height:26px}
+td.qot-cell{min-width:26px;max-width:26px;height:17px;padding:0;border:1px solid #fff;cursor:pointer}
+td.qot-cell.qot-nm{background-image:repeating-linear-gradient(45deg,#e9e9e6 0 3px,#f7f7f5 3px 6px)!important}
+tr.qot-row:hover td.qot-name{background:#f3f7f2}
+tr.qot-grouphdr td{background:#eef3ec;font-weight:600;color:#1b5e20;padding:4px 8px;font-size:11px;position:sticky;left:0}
+tr.qot-sub td.qot-subname{padding-left:22px;color:#555;font-size:10px;background:#fcfcfa}
+.qot-short{display:inline-block;min-width:26px;font-weight:700;color:#1b5e20}
+td.qot-sc{min-width:26px;max-width:26px;height:15px;padding:0;text-align:center;font-size:9px;border:1px solid #fff}
+table.qot-table td.qot-name .co{font-weight:600}
+table.qot-table td.qot-name .tk{color:var(--text-dim);font-size:10px}
+
 /* SESSION 9 Pass 1.2 — D-MD-UI-10: Live Portfolio table thead is non-sticky (it's short, no need to pin; pinning competes with Qualified Stocks thead) */
 table.data-table.data-table-portfolio thead{position:static;box-shadow:none}
 table.data-table.data-table-portfolio th{position:static}
@@ -4163,6 +4260,16 @@ function buildQualTiles(rows,groups,totalCount){
   );
 }
 
+// MD-LIVE-BOOK-2026-09-10: one place that says how fresh the holdings are. The overlay is
+// written by the position manager in the browser, so it can lag what Richard sees on screen;
+// a silent lag is not acceptable, a visible date is.
+function liveAsAt(){
+  var lm=(window.MASTER_DATA&&MASTER_DATA.positions&&MASTER_DATA.positions._live_meta)||{};
+  if(lm.error)return ' <span style="font-size:11px;font-weight:400;color:#A32D2D">holdings unavailable</span>';
+  if(!lm.saved_at)return '';
+  return ' <span style="font-size:11px;font-weight:400;color:var(--text-dim)">as at '+String(lm.saved_at).replace("T"," ").slice(0,16)+'</span>';
+}
+
 // ORIG-17: Live portfolio tile — appears above Qualified Stocks on every tab
 // Returns set of position tickers for filtering
 function getPositionTickers(){
@@ -4191,7 +4298,7 @@ function buildPortfolioTile(tabId){
   var totalCount=allR.length;
   // SESSION 9 Pass 1.2: D-MD-UI-9 — Live Portfolio columns mirror Qualified Stocks per tab.
   // SESSION 9 Pass 1.2: D-MD-UI-10 — data-table-portfolio class disables sticky thead.
-  var h='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRows.length+')</h3>';
+  var h='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRows.length+')'+liveAsAt()+'</h3>';
   h+='<div class="data-table-wrap"><table class="data-table data-table-portfolio"><thead>';
   // Tab-aware column structure — TIMELINESS gets full filter columns + grade.
   if(tabId==="combos"){
@@ -4860,7 +4967,7 @@ function renderMM99(){
   var posRows=sortData(applyIndSecFilter(filterToPositions(allRows)),currentSort.col,currentSort.dir);
   rows=applyIndSecFilter(rows);
   if(posRows.length>0){
-    h+='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRows.length+')</h3>';
+    h+='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRows.length+')'+liveAsAt()+'</h3>';
     h+='<div class="data-table-wrap" style="margin-bottom:12px"><table class="data-table data-table-portfolio"><thead>'+mm99Headers()+'</thead><tbody>';
     for(var pj=0;pj<posRows.length;pj++)h+=mm99Row(posRows[pj]);
     h+='</tbody></table></div>';
@@ -5088,7 +5195,7 @@ function renderBP(){
   // Enrich position rows with BP data (they may not have been enriched if filtered out)
   for(var pk=0;pk<posRowsBP.length;pk++){var pr=posRowsBP[pk];if(pr.bp_stage===undefined){var bpd=pr.f.basing_plateau;if(!bpd||!bpd.group_a){pr.bp_stage="";pr.ga=false;pr.gc=false;pr.t1=false;pr.t2=false;pr.bp_score=0;pr.bp_flat_pass=false;pr.bp_vol_pass=false;pr.bp_time_pass=false;pr.bp_loose_hist=[];pr.bp_loose_passed=0;pr.bp_loose_total=0;pr.bp_loose_streak=0;pr.bp_loose_pct=0;pr.bp_tight_streak=0;}else{pr.bp_stage=bpd.stage;pr.ga=bpd.group_a.pass;pr.gc=bpd.group_c.pass;pr.t1=bpd.group_a.tests.T1;pr.t2=bpd.group_a.tests.T2;pr.bp_score=bpd.score!=null?bpd.score:0;pr.bp_flat_pass=bpd.flat_mas_pass===true;pr.bp_vol_pass=bpd.vol_contraction_pass===true;pr.bp_time_pass=bpd.time_in_base_pass===true;pr.bp_loose_hist=bpd.group_a.history||[];pr.bp_loose_passed=bpd.group_a.days_passed||0;pr.bp_loose_total=bpd.group_a.days_total||0;pr.bp_loose_streak=bpd.group_a.streak||0;pr.bp_loose_pct=pr.bp_loose_total>0?(pr.bp_loose_passed/pr.bp_loose_total):0;pr.bp_tight_streak=bpd.group_c.streak||0;}var m200b=pr.mas?pr.mas["200D"]:null,m150b=pr.mas?pr.mas["150D"]:null,m50b=pr.mas?pr.mas["50D"]:null;pr.t1_pct=m200b?(pr.price-m200b)/m200b:null;pr.t2_pct=(m50b&&m200b)?(m50b-m200b)/m200b:null;pr.mm_stage=pr.f.mm99?pr.f.mm99.stage:"";pr.pb_stage2=pr.f.probing_bet?pr.f.probing_bet.stage:"";pr.vcp_s2=pr.f.vcp?pr.f.vcp.stage_2_uptrend:false;pr.utr_stage2=pr.f.uptrend_retest?pr.f.uptrend_retest.stage:"";pr.ssem_rating=(typeof ssemRatingMap!=="undefined"&&ssemRatingMap[pr.ticker])?ssemRatingMap[pr.ticker]:"-";var prVl=(typeof D!=="undefined"&&D&&D.valuation)?D.valuation[pr.ticker]:null;pr.pe_pctile=prVl?prVl.pe_percentile:null;pr.ma_map_price=pr.price;pr.ma_map_200=m200b;pr.ma_map_150=m150b;pr.ma_map_50=m50b;}}
   if(posRowsBP.length>0){
-    h+='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRowsBP.length+')</h3>';
+    h+='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRowsBP.length+')'+liveAsAt()+'</h3>';
     h+='<div class="data-table-wrap" style="margin-bottom:12px"><table class="data-table data-table-portfolio"><thead>'+bpHeaders()+'</thead><tbody>';
     for(var pj=0;pj<posRowsBP.length;pj++)h+=bpRow(posRowsBP[pj]);
     h+='</tbody></table></div>';
@@ -5243,7 +5350,7 @@ function renderPB(){
   // FIX-INPUTSORT 2026-05-04: LP rows now respect currentSort like QS rows.
   posRowsPB2f=sortData(posRowsPB2f,currentSort.col,currentSort.dir);
   if(posRowsPB2f.length>0){
-    h+='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRowsPB2f.length+')</h3>';
+    h+='<h3 class="qualified-title" id="section-portfolio">Live Portfolio ('+posRowsPB2f.length+')'+liveAsAt()+'</h3>';
     h+='<div class="data-table-wrap"><table class="data-table data-table-portfolio"><thead>'+pbHeaders()+'</thead><tbody>';
     for(var pj=0;pj<posRowsPB2f.length;pj++)h+=pbRow(posRowsPB2f[pj]);
     h+='</tbody></table></div>';
@@ -5911,29 +6018,50 @@ function renderPositions(){
   }
   var pos=D.positions;
   var invs=pos.investments||[];
-  var totalTrades=0,activeTrades=0;
-  for(var j=0;j<invs.length;j++)for(var k=0;k<invs[j].trades.length;k++){totalTrades++;if(invs[j].trades[k].status!=="planned")activeTrades++}
-
+  // MD-LIVE-BOOK-2026-09-10: holdings now come from the Position Management System.
+  var lm=pos._live_meta||{};
+  var totalTrades=0,activeTrades=0,totalSize=0;
+  for(var j=0;j<invs.length;j++){
+    totalSize+=(invs[j].size_pct||0);
+    for(var k=0;k<invs[j].trades.length;k++){totalTrades++;if(invs[j].trades[k].status!=="planned")activeTrades++}
+  }
+  var srcLine;
+  if(lm.error){
+    srcLine='<span style="color:#A32D2D;font-weight:600">Live holdings could not be read from the Position Management System, so none are shown. Reason: '+lm.error+'</span>';
+  } else {
+    srcLine='Source: the Position Management System (pms-state.json), as saved '+(lm.saved_at?String(lm.saved_at).replace("T"," ").slice(0,16):"date unknown")+'. Trade types: PB1 and PB2 are probing bets; MM1 to MM4 are core position tranches.';
+    if(lm.orphan_slots&&lm.orphan_slots.length)srcLine+=' <span style="color:#A32D2D;font-weight:600">Warning: '+lm.orphan_slots.length+' slot(s) hold capital with no stock assigned.</span>';
+    if(lm.unpriced&&lm.unpriced.length)srcLine+=' <span style="color:#A32D2D;font-weight:600">Warning: no price data for '+lm.unpriced.join(", ")+', so these will not highlight on other tabs.</span>';
+  }
   var h='<div class="summary-tile" id="section-summary"><h3>Position Management</h3>'
-    +'<div class="sub">Schema v'+pos.schema_version+'. Trade types: PB1/PB2 (probing bets), S1-S4 (legacy scaling). V2 migration to PB1/PB2/MM99/UR1-UR3 pending.</div>'
-    +'<div class="summary-stats">'+sumStat("Investments",invs.length)+sumStat("Total Trades",totalTrades)+sumStat("Active",xyFmt(activeTrades,totalTrades),"green")+'</div></div>';
+    +'<div class="sub">'+srcLine+'</div>'
+    +'<div class="summary-stats">'+sumStat("Holdings",invs.length)+sumStat("Tranches",totalTrades)+sumStat("% of fund",(totalSize?totalSize.toFixed(2):"0.00")+"%","green")+'</div></div>';
+  if(!invs.length){
+    container.innerHTML=h;
+    return;
+  }
 
   h+='<div class="data-table-wrap" id="section-stocks"><table class="data-table"><thead><tr>'
     +'<th class="col-txt" style="width:120px">Ticker</th><th class="col-txt" style="width:200px">Company</th><th class="col-txt" style="width:50px">Currency</th>'
-    +'<th>PB1</th><th>PB2</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th>'
+    +'<th title="Probing bet, first tranche">PB1</th><th title="Probing bet, second tranche">PB2</th><th title="Core position, first tranche">MM1</th><th title="Core position, second tranche">MM2</th><th title="Core position, third tranche">MM3</th><th title="Core position, fourth tranche">MM4</th>'
     +'<th class="col-txt">Filter Status</th></tr></thead><tbody>';
 
   for(var j=0;j<invs.length;j++){
     var inv=invs[j];
     var p=priceMap[inv.ticker];
     var f=filterMap[inv.ticker];
+    // MD-LIVE-BOOK-2026-09-10: cells are keyed by TRANCHE TYPE, not by array position, so a
+    // holding with only MM1 can never be drawn under the PB1 column.
     var tradeCells="";
-    var TRADE_SLOTS=6;
-    for(var k=0;k<TRADE_SLOTS;k++){
-      if(k<inv.trades.length){
-        var t2=inv.trades[k];
-        var cls=t2.status==="planned"?"neutral":t2.status==="open"?"pass":"amber";
-        tradeCells+='<td class="'+cls+'" style="text-align:center">'+t2.status.charAt(0).toUpperCase()+'</td>';
+    var TRANCHE_TYPES=["PB1","PB2","MM1","MM2","MM3","MM4"];
+    var byType={};
+    for(var k=0;k<inv.trades.length;k++){byType[inv.trades[k].type]=inv.trades[k];}
+    for(var k=0;k<TRANCHE_TYPES.length;k++){
+      var t2=byType[TRANCHE_TYPES[k]];
+      if(t2){
+        var lbl=(t2.target_size_pct!=null)?(t2.target_size_pct*100).toFixed(2)+"%":"held";
+        var ttl=TRANCHE_TYPES[k]+" held"+(t2.entry_date?", entered "+t2.entry_date:"")+(t2.stop_ma?", stop at the "+t2.stop_ma+" moving average":"");
+        tradeCells+='<td class="pass" style="text-align:center" title="'+ttl+'">'+lbl+'</td>';
       } else {
         tradeCells+='<td class="neutral" style="text-align:center">&mdash;</td>';
       }
@@ -17741,6 +17869,360 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 
 
 
+/* ============================================================================
+   QUALIFICATION OVER TIME  (MD-QOT-2026-09-10)
+   Stocks down the side, one column per recorded trading day, seven tests inside
+   every cell as seven vertical slivers coloured by how far up its own ladder that
+   test stood on that day.
+
+   WHY A GRADIENT, NOT SEVEN ELEMENTS PER CELL: seven elements x 20 days x 984
+   stocks is 137,760 DOM nodes. One element per cell carrying a seven-band
+   linear-gradient is 19,680, which is the same order as every other tab here.
+
+   WHY DAYS WITH NO RUN ARE NOT DRAWN: six weekdays in the record produced no run
+   at all. Drawing them as empty columns would spend a fifth of the width on
+   nothing; hiding the fact would be dishonest. They are named in the header
+   instead. A stock not measured on a day that WAS otherwise measured keeps its
+   own hatched cell.
+   ============================================================================ */
+(function(){
+  var LADDER=["None","Possible","Plausible","Probable","Qualified"];
+  /* colour = HOW FAR UP ITS OWN LADDER. position inside the cell = WHICH TEST.
+     Never both. The deepest colour is reserved for "actually qualified", which is
+     not the same as "top rung": Stage 2's top rung is Probable, while several
+     tests go one higher. */
+  var C_NM="#e9e9e6", C=["#f6f6f4","#dfeeda","#b7dcab","#7fc172","#3f9e5c"], C_Q="#14532d";
+  var st={win:20,group:"none",sortKey:"anchor",sortAsc:false,exp:{},sel:{},only:null};
+
+  /* `D` is a local inside another module's closure, not a global. Reading it from here threw
+     "D is not defined" and blanked the tab (found by browser QC on 10-Sep-26, not by any
+     build check). Read the payload off the window object, which is where it actually lives. */
+  function DD(){return (window.MASTER_DATA)||{};}
+  function meta(){var d=DD();return (d.qot&&d.qot._meta)||null;}
+  function stocks(){var d=DD();return (d.qot&&d.qot.stocks)||{};}
+  function tests(){return meta()?meta().tests:[];}
+  function anchorKey(){return meta()?meta().anchor:"stage_2";}
+
+  function winSlice(s){var m=meta();var n=Math.min(st.win,m.days_carried);return s.slice(s.length-n);}
+  function winDates(){var m=meta();var n=Math.min(st.win,m.days_carried);return m.dates.slice(m.dates.length-n);}
+
+  /* highest rung reached in the window; -1 if never measured */
+  function best(rec,key){
+    var s=winSlice(rec.r[key]||""),b=-1,i,c;
+    for(i=0;i<s.length;i++){c=s.charAt(i);if(c!=="-"&&+c>b)b=+c;}
+    return b;
+  }
+  function everQualified(rec,key){
+    var q=rec.q&&rec.q[key];if(!q)return false;
+    return winSlice(q).indexOf("1")>=0;
+  }
+  function firstLast(rec,key){
+    var s=winSlice(rec.r[key]||""),f=null,l=null,i,c;
+    for(i=0;i<s.length;i++){c=s.charAt(i);if(c==="-")continue;if(f===null)f=+c;l=+c;}
+    return [f,l];
+  }
+  function curRung(rec,key){var fl=firstLast(rec,key);return fl[1];}
+
+  /* ---- selection: within a test the LOWEST chosen rung means "or better";
+     across tests the conditions are combined with AND (Richard, 10-Sep-26). ---- */
+  function lowestSelected(key){
+    var sel=st.sel[key];if(!sel)return null;
+    var lo=null,r;for(r in sel){if(sel[r]&&(lo===null||+r<lo))lo=+r;}
+    return lo;
+  }
+  /* st.only is an explicit ticker allow-list, used by the one preset that is an OR
+     across tests. The chip grid can only express AND (Richard's ruling), so an
+     "any test qualified" view cannot be built from chips and needs this hook. */
+  function passes(rec,tk){
+    if(st.only&&!st.only[tk])return false;
+    var ts=tests(),i,k,lo;
+    for(i=0;i<ts.length;i++){
+      k=ts[i].key;lo=lowestSelected(k);
+      if(lo===null)continue;
+      if(best(rec,k)<lo)return false;
+    }
+    return true;
+  }
+  function anySelected(){var k;if(st.only)return true;for(k in st.sel){if(lowestSelected(k)!==null)return true;}return false;}
+
+  function rows(){
+    var S=stocks(),out=[],t;
+    for(t in S){if(passes(S[t],t))out.push({tk:t,rec:S[t]});}
+    var ak=anchorKey();
+    out.sort(function(a,b){
+      var x,y;
+      /* When grouping is on, the GROUP is the primary key. Without this the rows stayed in
+         rating order and the group header re-emitted every time the group changed, giving
+         272 "groups" for 393 stocks and burying improvements among declines. Found by
+         browser QC on 10-Sep-26. Group order: improvements first, largest gain at the top,
+         then unchanged, then declines. */
+      if(st.group!=="none"){
+        var ga=groupOf(a.rec),gb=groupOf(b.rec);
+        if(ga.o!==gb.o)return ga.o-gb.o;
+        if(ga.k!==gb.k)return ga.k<gb.k?-1:1;
+      }
+      if(st.sortKey==="ticker"){x=a.tk;y=b.tk;return st.sortAsc?(x<y?-1:x>y?1:0):(x>y?-1:x<y?1:0);}
+      if(st.sortKey==="name"){x=a.rec.n||"";y=b.rec.n||"";return st.sortAsc?(x<y?-1:1):(x>y?-1:1);}
+      if(st.sortKey==="move"){x=mv(a.rec,ak);y=mv(b.rec,ak);}
+      else {x=best(a.rec,ak);y=best(b.rec,ak);}
+      if(x===y){return a.tk<b.tk?-1:1;}
+      return st.sortAsc?x-y:y-x;
+    });
+    return out;
+  }
+  function mv(rec,key){var fl=firstLast(rec,key);if(fl[0]===null||fl[1]===null)return -99;return fl[1]-fl[0];}
+
+  /* ---- transition grouping. Integrates the 17-Aug-26 request that was left
+     open on the Stage 2 rating-history grid: first MEASURED rung to last
+     MEASURED rung on the anchor test, improvements first (largest gain at the
+     top), then unchanged, then declines. ---- */
+  function groupOf(rec){
+    var ak=anchorKey(),fl=firstLast(rec,ak);
+    if(st.group==="current"){
+      var c=curRung(rec,ak);
+      return c===null?{k:"zz_nm",l:"Not measured",o:99}:{k:"c"+c,l:"Now "+LADDER[c],o:10-c};
+    }
+    if(fl[0]===null||fl[1]===null)return {k:"zz_nm",l:"Not measured in this window",o:99};
+    var d=fl[1]-fl[0];
+    var lbl=LADDER[fl[0]]+" → "+LADDER[fl[1]];
+    if(d>0)return {k:"up"+d+"_"+fl[0]+fl[1],l:lbl+"  (improved by "+d+")",o:-d};
+    if(d===0)return {k:"flat"+fl[0],l:"Stayed "+LADDER[fl[0]],o:50-fl[0]};
+    return {k:"dn"+d+"_"+fl[0]+fl[1],l:lbl+"  (fell back by "+(-d)+")",o:80-d};
+  }
+
+  /* ---- the seven-band gradient for one stock-day ---- */
+  function cellStyle(rec,di){
+    var ts=tests(),i,k,c,ch,q,col,parts=[],step=100/ts.length,allNM=true;
+    for(i=0;i<ts.length;i++){
+      k=ts[i].key;
+      ch=(winSlice(rec.r[k]||"")).charAt(di);
+      q=rec.q&&rec.q[k]?(winSlice(rec.q[k])).charAt(di):"-";
+      if(ch==="-"){col=C_NM;}
+      else {allNM=false;col=(q==="1")?C_Q:C[+ch];}
+      parts.push(col+" "+(i*step).toFixed(3)+"%",col+" "+((i+1)*step).toFixed(3)+"%");
+    }
+    return {css:"background:linear-gradient(to right,"+parts.join(",")+")",nm:allNM};
+  }
+  function cellTitle(rec,di,date){
+    var ts=tests(),i,k,ch,q,out=[date];
+    for(i=0;i<ts.length;i++){
+      k=ts[i].key;
+      ch=(winSlice(rec.r[k]||"")).charAt(di);
+      q=rec.q&&rec.q[k]?(winSlice(rec.q[k])).charAt(di):"-";
+      out.push(ts[i].label+": "+(ch==="-"?"not measured":LADDER[+ch])+(q==="1"?" (QUALIFIED)":""));
+    }
+    return out.join("\n");
+  }
+
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+  /* ---------------------------------------------------------------- controls */
+  function chips(){
+    var ts=tests(),h="",i,r,sel,on,maxr;
+    h+='<div class="qot-chips">';
+    for(i=0;i<ts.length;i++){
+      maxr=ts[i].key===anchorKey()?3:4;
+      h+='<div class="qot-chiprow"><span class="qot-chiplbl" title="'+esc(ts[i].label)+'">'+esc(ts[i].label)+'</span>';
+      for(r=1;r<=maxr;r++){
+        sel=st.sel[ts[i].key]||{};on=!!sel[r];
+        h+='<button class="qot-chip'+(on?" on":"")+'" data-qot-test="'+ts[i].key+'" data-qot-rung="'+r+'">'+LADDER[r]+'</button>';
+      }
+      h+='</div>';
+    }
+    h+='</div>';
+    return h;
+  }
+  function controls(){
+    var m=meta(),h="",wd=winDates();
+    h+='<div class="summary-tile" id="section-summary"><h3>Qualification over Time</h3>';
+    h+='<div class="sub">Every stock down the side, one column per recorded trading day, and seven tests inside each cell as seven vertical slivers. '
+      +'Colour says how far up its own ladder that test stood that day; position says which test. '
+      +'Showing <b>'+winDates().length+' days</b>, '+esc(wd[0])+' to '+esc(wd[wd.length-1])+'. '
+      +'The full record runs '+esc(m.record_starts)+' to '+esc(m.record_ends)+'.</div>';
+    if(m.damaged_days_in_span&&m.damaged_days_in_span.length){
+      h+='<div class="qot-warn"><b>Reading this grid before '+esc(m.last_clean_from||"2026-09-03")+' understates what moved.</b> '
+        +m.damaged_days_in_span.length+' day(s) in this window have a destroyed record ('+esc(m.damaged_days_in_span.join(", "))
+        +'): a rating change that fell on one of them was never written down, so those cells carry the previous value. '
+        +'Cause: a second nightly pass overwriting the first, fixed 02-Sep-2026; earlier days cannot be repaired. '
+        +'The most recent column is taken from the current build, so <b>today is always right</b>.</div>';
+    }
+    if(m.missing_weekdays_in_span&&m.missing_weekdays_in_span.length){
+      h+='<div class="qot-warn">No measurement was taken at all on '+esc(m.missing_weekdays_in_span.join(", "))
+        +'. Those days are not drawn as columns, because a blank column is not a reading. Nothing is ever guessed to fill one.</div>';
+    }
+    h+='<div class="qot-ctrls">';
+    h+='<span class="qot-lbl">Days</span>';
+    var ws=[10,20,40],i;
+    for(i=0;i<ws.length;i++){
+      if(ws[i]>m.days_carried)continue;
+      h+='<button class="qot-btn'+(st.win===ws[i]?" on":"")+'" data-qot-win="'+ws[i]+'">'+ws[i]+'</button>';
+    }
+    h+='<span class="qot-lbl">Show</span>';
+    h+='<button class="qot-btn" data-qot-preset="default">Stage 2 Plausible+</button>';
+    h+='<button class="qot-btn" data-qot-preset="probable">Stage 2 Probable</button>';
+    h+='<button class="qot-btn" data-qot-preset="qualified">Any test qualified</button>';
+    h+='<button class="qot-btn" data-qot-preset="all">Everything</button>';
+    h+='<span class="qot-lbl">Group by</span>';
+    h+='<select class="qot-sel" id="qot-group">'
+      +'<option value="none"'+(st.group==="none"?" selected":"")+'>Nothing</option>'
+      +'<option value="transition"'+(st.group==="transition"?" selected":"")+'>Stage 2 move over the window</option>'
+      +'<option value="current"'+(st.group==="current"?" selected":"")+'>Current Stage 2 rating</option>'
+      +'</select>';
+    h+='<span class="qot-lbl">Sort</span>';
+    h+='<select class="qot-sel" id="qot-sort">'
+      +'<option value="anchor"'+(st.sortKey==="anchor"?" selected":"")+'>Best Stage 2 in window</option>'
+      +'<option value="move"'+(st.sortKey==="move"?" selected":"")+'>Biggest Stage 2 move</option>'
+      +'<option value="ticker"'+(st.sortKey==="ticker"?" selected":"")+'>Ticker</option>'
+      +'<option value="name"'+(st.sortKey==="name"?" selected":"")+'>Company</option>'
+      +'</select>';
+    h+='</div>';
+    h+=chips();
+    h+='<div class="qot-legend"><b>Legend</b> &nbsp;';
+    var j;for(j=0;j<LADDER.length;j++){h+='<span class="qot-key" style="background:'+C[j]+'"></span>'+LADDER[j]+' &nbsp;';}
+    h+='<span class="qot-key" style="background:'+C_Q+'"></span>fully qualified &nbsp;';
+    h+='<span class="qot-key" style="background:'+C_NM+'"></span>not measured';
+    h+='<div class="qot-order">Sliver order, left to right: ';
+    var ts=tests();for(j=0;j<ts.length;j++){h+='<b>'+esc(ts[j].short)+'</b> '+esc(ts[j].label)+(j<ts.length-1?' &middot; ':'');}
+    h+='</div></div>';
+    h+='</div>';
+    return h;
+  }
+
+  /* ---------------------------------------------------------------- table */
+  function subRows(tk,rec){
+    var ts=tests(),wd=winDates(),h="",i,di,ch,q,col,txt,g;
+    for(i=0;i<ts.length;i++){
+      var k=ts[i].key;
+      h+='<tr class="qot-sub" data-qot-sub="'+esc(tk)+'"><td class="qot-name qot-subname">'
+        +'<span class="qot-short">'+esc(ts[i].short)+'</span> '+esc(ts[i].label)+'</td><td class="qot-cur"></td>';
+      for(di=0;di<wd.length;di++){
+        ch=(winSlice(rec.r[k]||"")).charAt(di);
+        q=rec.q&&rec.q[k]?(winSlice(rec.q[k])).charAt(di):"-";
+        col=ch==="-"?C_NM:((q==="1")?C_Q:C[+ch]);
+        txt=ch==="-"?"":(q==="1"?"Q":String(ch));
+        g="";
+        if(k==="setup_vcp_s2"){
+          var g1=(winSlice(rec.g1||"")).charAt(di),g2=(winSlice(rec.g2||"")).charAt(di);
+          if(g1==="1"||g2==="1")g=' &bull;';
+        }
+        h+='<td class="qot-sc" style="background:'+col+';color:'+((ch!=="-"&&+ch>=3)||q==="1"?"#fff":"#555")+'" title="'
+          +esc(wd[di]+" — "+ts[i].label+": "+(ch==="-"?"not measured":LADDER[+ch])+(q==="1"?" (QUALIFIED)":"")
+               +(g?" — stage gate met":""))+'">'+txt+g+'</td>';
+      }
+      h+='</tr>';
+    }
+    return h;
+  }
+
+  function table(){
+    var rs=rows(),wd=winDates(),ak=anchorKey(),h="",i,di,cs,rec,tk,cur,g,lastG=null;
+    h+='<div class="qot-count">'+rs.length+' of '+Object.keys(stocks()).length+' stocks shown'
+      +(anySelected()?'':' (no filter set)')+'. Click any row to open its seven tests.</div>';
+    /* Deliberately NOT class "data-table"/"data-table-wrap": the shared rules pin thead with a
+       top offset sized for the page's fixed header, which pushed this grid's header 223px DOWN
+       the table, rendering it below eleven data rows. Measured in the browser on 10-Sep-26. */
+    h+='<div class="qot-wrap"><table class="qot-table"><thead><tr>'
+      +'<th class="qot-name">Stock</th><th class="qot-cur" title="Current Stage 2 rating">S2 now</th>';
+    for(di=0;di<wd.length;di++){h+='<th class="qot-dh"><span>'+esc(wd[di].slice(5))+'</span></th>';}
+    h+='</tr></thead><tbody>';
+    if(!rs.length){
+      h+='<tr><td colspan="'+(wd.length+2)+'" style="padding:24px;text-align:center;color:#666">'
+        +'No stock met every condition you have set during this window. Loosen a rung, or press Everything.</td></tr>';
+    }
+    for(i=0;i<rs.length;i++){
+      tk=rs[i].tk;rec=rs[i].rec;
+      if(st.group!=="none"){
+        g=groupOf(rec);
+        if(!lastG||g.k!==lastG){
+          h+='<tr class="qot-grouphdr"><td colspan="'+(wd.length+2)+'">'+esc(g.l)+'</td></tr>';
+          lastG=g.k;
+        }
+      }
+      cur=curRung(rec,ak);
+      h+='<tr class="qot-row" data-qot-tk="'+esc(tk)+'">'
+        +'<td class="qot-name"><span class="co">'+esc(rec.n)+'</span> <span class="tk">'+esc(tk)+'</span></td>'
+        +'<td class="qot-cur" style="background:'+(cur===null?C_NM:C[cur])+';color:'+(cur!==null&&cur>=3?"#fff":"#444")+'">'
+        +(cur===null?"n/m":LADDER[cur].slice(0,4))+'</td>';
+      for(di=0;di<wd.length;di++){
+        cs=cellStyle(rec,di);
+        h+='<td class="qot-cell'+(cs.nm?" qot-nm":"")+'" style="'+cs.css+'" title="'+esc(cellTitle(rec,di,wd[di]))+'"></td>';
+      }
+      h+='</tr>';
+      if(st.exp[tk])h+=subRows(tk,rec);
+    }
+    h+='</tbody></table></div>';
+    return h;
+  }
+
+  function paint(){
+    var c=document.getElementById("tab-qual_over_time");
+    if(!c)return;
+    if(!DD().qot){
+      c.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>Qualification over Time</h3>'
+        +'<p style="color:var(--text-dim);margin-top:8px">qual-over-time.json was not built, so there is nothing to show. '
+        +'Run scripts/md_rating_query.py --rebuild-index then scripts/build_qual_over_time.py.</p></div>';
+      return;
+    }
+    c.innerHTML=controls()+table();
+    wire(c);
+  }
+
+  function wire(c){
+    var i,b;
+    var wb=c.querySelectorAll("[data-qot-win]");
+    for(i=0;i<wb.length;i++)wb[i].onclick=function(){st.win=+this.getAttribute("data-qot-win");paint();};
+    var pb=c.querySelectorAll("[data-qot-preset]");
+    for(i=0;i<pb.length;i++)pb[i].onclick=function(){preset(this.getAttribute("data-qot-preset"));paint();};
+    var cb=c.querySelectorAll("[data-qot-test]");
+    for(i=0;i<cb.length;i++)cb[i].onclick=function(){
+      var k=this.getAttribute("data-qot-test"),r=this.getAttribute("data-qot-rung");
+      if(!st.sel[k])st.sel[k]={};
+      st.sel[k][r]=!st.sel[k][r];
+      st.only=null;   /* a chip choice replaces an OR-preset; compounding them silently would lie */
+      paint();
+    };
+    var gs=document.getElementById("qot-group");
+    if(gs)gs.onchange=function(){st.group=this.value;if(st.group!=="none"&&st.sortKey==="ticker")st.sortKey="anchor";paint();};
+    var ss=document.getElementById("qot-sort");
+    if(ss)ss.onchange=function(){st.sortKey=this.value;paint();};
+    var rr=c.querySelectorAll(".qot-row");
+    for(i=0;i<rr.length;i++)rr[i].onclick=function(){
+      var tk=this.getAttribute("data-qot-tk");
+      st.exp[tk]=!st.exp[tk];paint();
+      var el=document.querySelector('.qot-row[data-qot-tk="'+tk+'"]');
+      if(el&&el.scrollIntoView)el.scrollIntoView({block:"center"});
+    };
+  }
+
+  function preset(p){
+    st.sel={};st.only=null;
+    var ak=anchorKey(),ts=tests();
+    if(p==="default"){st.sel[ak]={2:true};}
+    else if(p==="probable"){st.sel[ak]={3:true};}
+    else if(p==="qualified"){
+      var S=stocks(),keep={},t,j,k;
+      for(t in S){
+        for(j=0;j<ts.length;j++){k=ts[j].key;if(everQualified(S[t],k)){keep[t]=true;break;}}
+      }
+      st.only=keep;
+    }
+    /* "all" leaves both empty, which shows everything. */
+  }
+
+  window.renderQualOverTime=function(){
+    /* A gap in the shared header-control config must never blank this tab: paint() is the
+       deliverable, the controls are decoration. Observed 10-Sep-26 during QC. */
+    try{buildHeaderControls("qual_over_time");}catch(e){}
+    /* Opens on Stage 2 Plausible or better. Measured 10-Sep-26: Richard's stated default
+       ("at least Possible on any shown test") returns 983 of 999 stocks, i.e. it does not
+       filter at all, because Possible is a very low bar on most of these ladders. This is
+       his own worked example toggle and is the only single condition that is both central
+       and selective (387 of 999). Every other view is one click away. */
+    if(!st._init){st._init=true;preset("default");}
+    paint();
+  };
+})();
+
 function renderTab(id){
   try{
   if(id==="summary")renderSummary();
@@ -17772,6 +18254,7 @@ function renderTab(id){
   else if(id==="vcp")renderVCP();
   else if(id==="tech")renderTech();
   else if(id==="combos")renderCombos();
+  else if(id==="qual_over_time")renderQualOverTime();  /* MD-QOT-2026-09-10 */
   else if(id==="changes")renderChanges();
   else if(id==="positions")renderPositions();
   else if(id==="ssem")renderSSEM();

@@ -473,8 +473,13 @@ table.data-table{width:100%;border-collapse:collapse;font-size:12px;table-layout
 /* SESSION 10 — D-MD-UI-13: sticky thead replaces per-row top arithmetic. Browser stacks group-header-row and col-header-row natively below the page header. Works on every screen size, every zoom level, every device. Box-shadow gives the freeze-line a visible separator from rows below. background needed so row content scrolling underneath doesn't bleed through cell-border gaps. */
 table.data-table thead{position:sticky;top:var(--header-height);z-index:8;background:#f0ede3;box-shadow:0 2px 4px rgba(0,0,0,0.06)}
 table.data-table th{background:#f0ede3;color:#6b6b6b;font-weight:600;font-size:10px;text-transform:none;letter-spacing:.3px;padding:4px 4px;text-align:left;border-bottom:2px solid var(--border);z-index:5;cursor:pointer;white-space:nowrap;user-select:none;-webkit-user-select:none;overflow:hidden;text-overflow:ellipsis}
+/* MD-VAL-LINK-VALTAB-2026-09-11 — Valuation tab: link to the valuation range chart */
+.val-chart-link{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border:1px solid #2f855a;color:#276749;background:rgba(56,161,105,0.08);border-radius:3px;text-decoration:none;line-height:1.4}
+.val-chart-link:hover{background:#2f855a;color:#fff}
+
 /* MD-QOT-2026-09-10 — Qualification over Time */
 .qot-warn{background:#fdf1f1;border-left:4px solid #A32D2D;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
+.qot-note{background:#eef3ec;border-left:4px solid #1b5e20;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
 .qot-ctrls{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:10px 0 4px}
 .qot-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);margin-left:10px}
 .qot-btn,.qot-chip{font:inherit;font-size:11px;padding:3px 8px;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:3px;cursor:pointer;color:#333}
@@ -2678,6 +2683,11 @@ col.mo-cg-screen { width: 76px; }
 .ssp-hdr-company{font-size:11px;color:var(--text-dim);white-space:nowrap}
 .ssp-close-btn{margin-left:auto;background:none;border:1px solid var(--border);color:var(--text-dim);font-size:15px;line-height:1;padding:2px 7px;border-radius:4px;cursor:pointer}
 .ssp-close-btn:hover{color:var(--text-bright);border-color:#bbb}
+/* MD-VAL-LINK-SSP-2026-09-11 -- Valuation range chart link (opens valuation.html in a new tab) */
+.ssp-val-link{margin-left:auto;font-size:11px;font-weight:600;padding:3px 9px;border:1px solid #2f855a;color:#276749;background:rgba(56,161,105,0.08);border-radius:4px;text-decoration:none;white-space:nowrap;line-height:1.3}
+.ssp-val-link:hover{background:#2f855a;color:#fff}
+.ssp-val-link+.ssp-close-btn{margin-left:8px}
+@media(max-width:1024px){.ssp-val-link span{display:none}.ssp-val-link:before{content:"Valuation"}}
 
 /* Stock info table band */
 .ssp-tbl-band{flex-shrink:0;max-height:200px;overflow-x:auto;overflow-y:auto;padding:0 14px 4px;border-bottom:1px solid var(--border)}
@@ -2932,7 +2942,7 @@ var KEY_DEFS={
     ["P>200D","Price above 200-day MA"],["200D Up","200-day MA trending upward (month count)"],
     ["P>150D","Price above 150-day MA"],["150>200","150-day MA above 200-day MA"],
     ["50>150","50-day MA above 150-day MA"],["P>50D","Price above 50-day MA"],
-    ["P>20%L","Price at least 20% above 52-week low"],["P<25%H","Price within 25% of 52-week high"],
+    ["P>25%L","Price at least 25% above 52-week low (Minervini 2017; was 20% until 11-Sep-2026)"]/* MM-CROSSWALK-ITEM1-25PCT-MARKER */,["P<25%H","Price within 25% of 52-week high"],
     ["Sector","Relative strength vs sector"],["Industry","Relative strength vs industry"],["Market","Relative strength vs market"]
   ],
   bp:[
@@ -4402,7 +4412,7 @@ function buildPortfolioTile(tabId){
     }
     // FIX-4-SORT: re-sort after val enrichment so pe_cur/pe_pctile/val_rating_sort/eps_24mf fields are available
     posRows=sortData(posRows,currentSort.col,currentSort.dir);
-    h+='<tr class="group-header-row"><th colspan="3"></th><th colspan="4" style="background:rgba(50,150,50,0.08)">P/E Valuation</th></tr>';
+    h+='<tr class="group-header-row"><th colspan="3"></th><th colspan="4" style="background:rgba(50,150,50,0.08)">P/E Valuation</th><th></th></tr>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
     h+='<tr class="col-header-row">';
     h+=th("Ticker","_display_name","col-txt col-identity","","width:120px")
       +th("Sector","_tax_sector","col-txt col-identity","","width:200px")
@@ -4410,7 +4420,8 @@ function buildPortfolioTile(tabId){
       +th("Rating","val_rating_sort","col-txt","","width:54px;text-align:center")
       +th("P/E","pe_cur","col-num col-filter grp-pe-first","","width:90px")
       +th("Pctile","pe_pctile","col-num col-filter","","width:80px")
-      +th("EPS 24MF","eps_24mf","col-num col-filter grp-pe-last","","width:120px");
+      +th("EPS 24MF","eps_24mf","col-num col-filter grp-pe-last","","width:120px")
+      +'<th class="col-txt" style="width:64px;text-align:center" title="Valuation range chart: 24-month forward P/E against ten years of its own history (opens in a new tab)">Chart</th>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
     h+='</tr></thead><tbody>';
     for(var jR=0;jR<posRows.length;jR++){
       var r=posRows[jR];
@@ -4427,6 +4438,7 @@ function buildPortfolioTile(tabId){
       h+='<td class="col-num col-filter grp-pe-first" style="font-weight:600">'+fpe(r.pe_cur)+'</td>';
       h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+nf(r.pe_pctile)+'</td>';
       h+='<td class="col-num col-filter grp-pe-last">'+fpCurr(r.eps_24mf,r.ticker)+'</td>';
+      h+='<td style="text-align:center"><a class="val-chart-link" href="valuation.html?t='+encodeURIComponent(r.ticker)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Valuation range chart for '+r.ticker+' (new tab)">range</a></td>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
       h+='</tr>';
     }
   } else {
@@ -4941,7 +4953,7 @@ function renderMM99(){
       +th("P>200D","t1_pct","col-filter grp-lt-first","Price above 200-day MA")+th("200D Up","ma200_months","col-filter grp-lt-last","200-day MA months rising (of 12)")
       +th("P>150D","t3_pct","col-filter grp-mt-first","Price above 150-day MA")+th("150>200","t4_pct","col-filter grp-mt-last","150-day MA above 200-day MA")
       +th("50>150","t5_pct","col-filter grp-st-first","50-day MA above 150-day MA")+th("P>50D","t6_pct","col-filter grp-st-last","Price above 50-day MA")
-      +th("P>20%L","t7_pct","col-filter grp-lead-first","Price at least 20% above 52-week low")+th("P<25%H","t8_pct","col-filter grp-lead-last","Price within 25% of 52-week high")
+      +th("P>25%L","t7_pct","col-filter grp-lead-first","Price at least 25% above 52-week low (Minervini 2017; was 20% until 11-Sep-2026)")+th("P<25%H","t8_pct","col-filter grp-lead-last","Price within 25% of 52-week high")
       +th("Sector","t9_pct","col-filter grp-rs-first","Relative strength vs sector")+th("Industry","t10_pct","col-filter","Relative strength vs industry")+th("Market","t11_pct","col-filter grp-rs-last","Relative strength vs market")
       +th("Probing","pb_stage","col-txt col-ref","Probing Bet filter stage")+th("Basing","bp_stage","col-txt col-ref","Basing Plateau filter stage")
       +ratingsColHeaders();
@@ -6663,6 +6675,7 @@ function renderVal(){
   h+='<tr class="group-header-row">';
   h+='<th colspan="3"></th>';
   h+='<th colspan="4" style="background:rgba(50,150,50,0.08)">P/E Valuation</th>';
+  h+='<th></th>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
   h+='</tr>';
   h+='<tr class="col-header-row">';
   h+=th("Ticker","_display_name","col-txt col-identity","","width:120px")
@@ -6671,7 +6684,8 @@ function renderVal(){
     +th("Rating","val_rating_sort","col-txt","","width:54px;text-align:center")
     +th("P/E","pe_cur","col-num col-filter grp-pe-first","","width:90px")
     +th("Pctile","pe_pctile","col-num col-filter","","width:80px")
-    +th("EPS 24MF","eps_24mf","col-num col-filter grp-pe-last","","width:120px");
+    +th("EPS 24MF","eps_24mf","col-num col-filter grp-pe-last","","width:120px")
+    +'<th class="col-txt" style="width:64px;text-align:center" title="Valuation range chart: 24-month forward P/E against ten years of its own history (opens in a new tab)">Chart</th>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
   h+='</tr></thead><tbody>';
 
   for(var j=0;j<rows.length;j++){
@@ -6689,6 +6703,8 @@ function renderVal(){
     h+='<td class="col-num col-filter grp-pe-first" style="font-weight:600">'+fpe(r.pe_cur)+'</td>';
     h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+nf(r.pe_pctile)+'</td>';
     h+='<td class="col-num col-filter grp-pe-last">'+fpCurr(r.eps_24mf,r.ticker)+'</td>';
+    /* MD-VAL-LINK-VALTAB-2026-09-11: the row click opens the price chart, so the link stops propagation */
+    h+='<td style="text-align:center"><a class="val-chart-link" href="valuation.html?t='+encodeURIComponent(r.ticker)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Valuation range chart for '+r.ticker+' (new tab)">range</a></td>';
     h+='</tr>';
   }
   h+='</tbody></table></div>';
@@ -9299,7 +9315,7 @@ function SUM_renderQualifiedStocks() {
     { id:'count',     label:'Score',                               sortKey:'count', cls:'' },
     { id:'g200D_r',   label:'1. 200D MA still rising vs 80D (gate)',  sortKey:'gate_g200D_r', cls:'grp-start-g1 grp-end-g1', testGroup:'_gates3', testKey:'gate_200D_still_rising_vs_80d' },
     { id:'gp200',     label:'2. Price above 200D MA (gate)',       sortKey:'gate_gp200_s3', cls:'grp-start-g2 grp-end-g2', testGroup:'_gates3', testKey:'gate_price_above_200D' },
-    { id:'t3',        label:'3. 2+ bases (504d window)',              sortKey:'t3_s3', cls:'grp-start-g3 grp-end-g3', testGroup:'g1_base_deterioration', testKey:'T3' },
+    { id:'t3',        label:'3. Base 4 or later (Minervini count, from 11-Sep-26)', sortKey:'t3_s3', cls:'grp-start-g3 grp-end-g3', testGroup:'g1_base_deterioration', testKey:'T3' },
     { id:'t4',        label:'4. 50D MA ≤ 150D MA',            sortKey:'t4_s3', cls:'grp-start-g4', testGroup:'g1_base_deterioration', testKey:'T4' },
     { id:'t5',        label:'5. Down vol > up vol (L20d)',            sortKey:'t5_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T5' },
     { id:'t6',        label:'6. L1M volatility > P4M',    sortKey:'t6_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T6' },
@@ -9364,7 +9380,10 @@ function SUM_renderQualifiedStocks() {
         gate_price_above_200D: !!(s3.gate_price_above_200D)
       };
       var _s3tv = s3.test_values || {};
-      if (_s3tv.T3_base_count_504d != null && s3grps.g1_base_deterioration) {
+      /* MM-CROSSWALK-ITEM6-MARKER: Stage 3 T3 = base 4 or later on Minervini's count (crosswalk item 6c,
+         11-Sep-2026). The build's own boolean is authoritative; the old re-test at ">= 2" on the swing-high
+         count is kept only for snapshots written before 11-Sep-2026. */
+      if (_s3tv.T3_mm_base_number == null && _s3tv.T3_base_count_504d != null && s3grps.g1_base_deterioration) {
         s3grps.g1_base_deterioration.T3 = (_s3tv.T3_base_count_504d >= 2);
       }
       rows.push({
@@ -9498,7 +9517,7 @@ function SUM_renderQualifiedStocks() {
   // MD-V2-S58-S3-PIPS: gate dots + 6 tests; T3 uses 2+ threshold
   function s3ScorePips(row) {
     var t = row.tests, _tv = row.test_values || {};
-    var t3pass = (_tv.T3_base_count_504d != null) ? (_tv.T3_base_count_504d >= 2) : !!(t.T3_base_count_504d_ge2 || t.T3_base_count_504d_ge3);
+    var t3pass = (t.T3_mm_base_4_or_later != null) ? !!t.T3_mm_base_4_or_later : ((_tv.T3_base_count_504d != null) ? (_tv.T3_base_count_504d >= 2) : !!(t.T3_base_count_504d_ge2 || t.T3_base_count_504d_ge3));  /* crosswalk item 6c, 11-Sep-2026 */
     var passed = [
       t3pass, !!t.T4_50D_below_103pct_150D,
       !!t.T5_down_vol_exceeds_up_vol, !!t.T6_ATR_expansion_ge110, !!t.T7_price_below_50D_and_50D_rolling,
@@ -11064,7 +11083,7 @@ function SUM_renderQualifiedStocks() {
       cols.push({ id:'p1t'+(t+1), label:(tNum + '. ' + tst.label), sortKey:pat.key+'__'+tst.key, cls:'', tooltip:tst.tooltip, kind:'pi_test', patternKey:pat.key, testKey:tst.key });
     }
     // Group 3: Stage 3 breakdown signals (g5 = T3–T8, tests 12–17)
-    cols.push({ id:'s3_t3', label:'12. 2+ bases (504d window)',          sortKey:'s3_t3', cls:'grp-start-g5', kind:'s3_test', testGroup:'g1_base_deterioration', testKey:'T3' });
+    cols.push({ id:'s3_t3', label:'12. Base 4 or later (Minervini count, from 11-Sep-26)', sortKey:'s3_t3', cls:'grp-start-g5', kind:'s3_test', testGroup:'g1_base_deterioration', testKey:'T3' });
     cols.push({ id:'s3_t4', label:'13. 50D MA ≤ 150D MA',          sortKey:'s3_t4', cls:'',             kind:'s3_test', testGroup:'g1_base_deterioration', testKey:'T4' });
     cols.push({ id:'s3_t5', label:'14. Down vol > up vol (L20d)',        sortKey:'s3_t5', cls:'',             kind:'s3_test', testGroup:'g2_distribution_signals', testKey:'T5' });
     cols.push({ id:'s3_t6', label:'15. L1M volatility > P4M',           sortKey:'s3_t6', cls:'',             kind:'s3_test', testGroup:'g2_distribution_signals', testKey:'T6' });
@@ -11129,7 +11148,10 @@ function SUM_renderQualifiedStocks() {
       var s3grps = {}, s3gsrc = s3.groups || {};
       for (var _k3 in s3gsrc) s3grps[_k3] = s3gsrc[_k3];
       var _s3tv = s3.test_values || {};
-      if (_s3tv.T3_base_count_504d != null && s3grps.g1_base_deterioration) {
+      /* crosswalk item 6: Stage 3 T3 = base 4 or later on Minervini's count (crosswalk item 6c,
+         11-Sep-2026). The build's own boolean is authoritative; the old re-test at ">= 2" on the swing-high
+         count is kept only for snapshots written before 11-Sep-2026. */
+      if (_s3tv.T3_mm_base_number == null && _s3tv.T3_base_count_504d != null && s3grps.g1_base_deterioration) {
         s3grps.g1_base_deterioration.T3 = (_s3tv.T3_base_count_504d >= 2);
       }
       rows.push({
@@ -11483,7 +11505,7 @@ function SUM_renderQualifiedStocks() {
                     '<th class="gh-g5 grp-start-g5" colspan="6">Group 3 — Stage 3 breakdown signals?</th>';
     var captionsHtml = '<div class="gcap gcap-g1"><b>Group 1 — Stage 2 quality?</b>Quality of the Stage 2 uptrend for each stock. Tests 1–4: hard gates (all four MA position gates must pass). Tests 5–6: MA stack (50D above 150D and 200D). Tests 7–9: Relative strength ≥70th percentile (industry, sector, stock).</div>' +
                        '<div class="gcap gcap-g4"><b>Group 2 — Collapsing?</b>' + NPI_PATTERNS[0].caption + '</div>' +
-                       '<div class="gcap gcap-g5"><b>Group 3 — Stage 3 breakdown signals?</b>Early breakdown signals from the Stage 3 pipeline. Tests 12–17: base deterioration (2+ bases in 504d window), MA cross (50D ≤ 150D), vol distribution, lower lows, sector RS degradation.</div>';
+                       '<div class="gcap gcap-g5"><b>Group 3 — Stage 3 breakdown signals?</b>Early breakdown signals from the Stage 3 pipeline. Tests 12–17: base deterioration (base 4 or later on the Minervini count; this test changed on 11-Sep-2026, so a Stage 3 rating can step on that day), MA cross (50D ≤ 150D), vol distribution, lower lows, sector RS degradation.</div>';
     var html =
       '<div class="s1-intro">Negative pre-setup indicators: stocks showing signs of a breakdown (Collapsing pattern). Stage 2 quality is shown first (Group 1), then Collapsing pattern tests (Group 2), then Stage 3 breakdown signals (Group 3), all numbered sequentially.</div>' +
       '<div class="controls s1-controls">' +
@@ -18039,12 +18061,17 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'Colour says how far up its own ladder that test stood that day; position says which test. '
       +'Showing <b>'+winDates().length+' days</b>, '+esc(wd[0])+' to '+esc(wd[wd.length-1])+'. '
       +'The full record runs '+esc(m.record_starts)+' to '+esc(m.record_ends)+'.</div>';
-    if(m.damaged_days_in_span&&m.damaged_days_in_span.length){
+    if(m.reconstructed){
+      h+='<div class="qot-note"><b>This grid is rebuilt from price data, not read from the daily log.</b> '
+        +'The daily log had thirteen destroyed days between 20 July and 2 September and the error carried forward, '
+        +'so it missed more than half of the recent Stage 2 moves. Every column here is recomputed from the prices of that day. '
+        +'<b>That means it shows what today\'s rules say about each day, not what the dashboard displayed at the time</b> '
+        +'(the rules changed on 11/12 August). The most recent column comes from the live build and is exact.</div>';
+    } else if(m.damaged_days_in_span&&m.damaged_days_in_span.length){
       h+='<div class="qot-warn"><b>Reading this grid before '+esc(m.last_clean_from||"2026-09-03")+' understates what moved.</b> '
         +m.damaged_days_in_span.length+' day(s) in this window have a destroyed record ('+esc(m.damaged_days_in_span.join(", "))
         +'): a rating change that fell on one of them was never written down, so those cells carry the previous value. '
-        +'Cause: a second nightly pass overwriting the first, fixed 02-Sep-2026; earlier days cannot be repaired. '
-        +'The most recent column is taken from the current build, so <b>today is always right</b>.</div>';
+        +'Rebuild it with master-dashboard/scripts/reconstruct_rating_history.py.</div>';
     }
     if(m.missing_weekdays_in_span&&m.missing_weekdays_in_span.length){
       h+='<div class="qot-warn">No measurement was taken at all on '+esc(m.missing_weekdays_in_span.join(", "))
@@ -18449,6 +18476,9 @@ function sspSetStock(ticker){
   var company = p.company_name || u.company_name || ticker;
   document.getElementById('ssp-hdr-ticker').textContent = ticker;
   document.getElementById('ssp-hdr-company').textContent = company;
+  /* MD-VAL-LINK-SSP-2026-09-11: the chart page is keyed on the canonical TICKER-EXCHANGE form */
+  var _vl = document.getElementById('ssp-val-link');
+  if (_vl) _vl.href = 'valuation.html?t=' + encodeURIComponent(ticker);
 
   sspRenderTable(ticker, p, md2);
   sspRenderCohort(ticker, p);
@@ -18562,7 +18592,7 @@ function sspRenderTable(ticker, p, md2){
   var prices  = _sspPrices();
   var H = '<table style="border-collapse:collapse;width:100%;font-size:11px;white-space:nowrap"><thead><tr>';
   /* S-SSV-04 Part A: per-column accent border-top */
-  var SSV_TH_DEFS04=[['Ticker',''],['Company',''],['S1<br><small style="font-weight:400;opacity:0.75">Basing</small>','#1b5e20'],['S2<br><small style="font-weight:400;opacity:0.75">Uptrend</small>','#2e7d32'],['S3<br><small style="font-weight:400;opacity:0.75">Topping</small>','#b45309'],['S4<br><small style="font-weight:400;opacity:0.75">Decline</small>','#991b1b'],['Pos.<br><small style="font-weight:400;opacity:0.75">Pre-Ind.</small>','#0F6E56'],['Neg.<br><small style="font-weight:400;opacity:0.75">Pre-Ind.</small>','#A32D2D'],['Price',''],['PB%',''],['Setup<br><small style="font-weight:400;opacity:0.75">HR retest</small>','#2E7D32']];
+  var SSV_TH_DEFS04=[['Ticker',''],['Company',''],['S1<br><small style="font-weight:400;opacity:0.75">Basing</small>','#1b5e20'],['S2<br><small style="font-weight:400;opacity:0.75">Uptrend</small>','#2e7d32'],['S3<br><small style="font-weight:400;opacity:0.75">Topping</small>','#b45309'],['S4<br><small style="font-weight:400;opacity:0.75">Decline</small>','#991b1b'],['Pos.<br><small style="font-weight:400;opacity:0.75">Pre-Ind.</small>','#0F6E56'],['Neg.<br><small style="font-weight:400;opacity:0.75">Pre-Ind.</small>','#A32D2D'],['Price',''],['PB%',''],['Setup<br><small style="font-weight:400;opacity:0.75">HR retest</small>','#2E7D32'],['Minervini base<br><small style="font-weight:400;opacity:0.75">his count, v3</small>','#6d28d9']];
   SSV_TH_DEFS04.forEach(function(ca){
     var c=ca[0],a=ca[1];
     var bTop=a?'border-top:2px solid '+a+';':'';
@@ -18599,8 +18629,21 @@ function sspRenderTable(ticker, p, md2){
     rows+='<tr style="cursor:pointer;'+_bg+'" onclick="sspSetStock(\''+_tke+'\')">';
     rows+='<td style="padding:3px 8px;border-bottom:1px solid var(--border-faint)">'+_tk+'</td>';
     rows+='<td style="padding:3px 8px;border-bottom:1px solid var(--border-faint);max-width:160px;overflow:hidden;text-overflow:ellipsis">'+_co+'</td>';
-    var _rVals=[_s1,_s2,_s3,_s4,_ppi,_npi,_price,_pb,_hr];
-    var _rPill=[1,1,1,1,0,1,0,0,1];  /* MD-V2-PBS-SSV-STYLE-V1: _ppi pre-rendered */
+    /* MM-CROSSWALK-ITEM6-MARKER: Minervini base (crosswalk item 6b, 11-Sep-2026): base number, class, depth, advance
+       start, late-stage and caution flags, from the counter the nightly build now runs for every stock. */
+    var _mb=_pr.mm_base, _mbT='—';
+    if(_mb){
+      if(_mb.state==='not_in_stage2') _mbT='not in an advance';
+      else if(_mb.state==='insufficient_history') _mbT='too little history';
+      else {
+        var _cls={constructive:'constructive',wide_and_loose:'wide and loose',correction:'correction'}[_mb['class']]||'';
+        var _st=_mb.state==='base_in_progress'?('Base '+_mb.base_number+' in progress'):(_mb.state==='extension'?('Extension of base '+_mb.base_number):(_mb.state==='correction'?'Correction':('Advancing, '+_mb.completed+' base'+(_mb.completed===1?'':'s')+' done')));
+        _mbT=_st+(_cls&&_mb.depth_pct!=null?(' · '+_cls+' '+_mb.depth_pct+'%'):'')+(_mb.advance_start?(' · since '+_mb.advance_start+(_mb.provisional?' (provisional)':'')):'')
+          +(_mb.late_stage?' · <b style="color:#b45309">LATE STAGE</b>':'')+(_mb.caution?' · <b style="color:#b91c1c">CAUTION</b>':'');
+      }
+    }
+    var _rVals=[_s1,_s2,_s3,_s4,_ppi,_npi,_price,_pb,_hr,_mbT];
+    var _rPill=[1,1,1,1,0,1,0,0,1,0];  /* MD-V2-PBS-SSV-STYLE-V1: _ppi pre-rendered */
     for(var _ri=0;_ri<_rVals.length;_ri++){
       rows+='<td style="padding:3px 8px;border-bottom:1px solid var(--border-faint)">'+(_rPill[_ri]?_sspPill(_rVals[_ri]):_rVals[_ri])+'</td>';
     }
@@ -19242,6 +19285,7 @@ renderTab("mm99");
         '    <span class="ssp-hdr-stock" id="ssp-hdr-ticker"></span>\n'
         '    <span class="ssp-hdr-company" id="ssp-hdr-company"></span>\n'
         '    <span class="ssp-hdr-company" id="ssp-hdr-freshness" style="margin-left:6px"></span>\n'
+        '    <a class="ssp-val-link" id="ssp-val-link" href="valuation.html" target="_blank" rel="noopener" title="Open the valuation range chart: 24-month forward P/E against ten years of its own history, with peers (new tab)"><span>Valuation range chart</span></a>\n'  # MD-VAL-LINK-SSP-2026-09-11
         '    <button class="ssp-close-btn" onclick="closeStockView()" title="Close Stock View">&times;</button>\n'
         '  </div>\n'
         '  <div class="ssp-tbl-band" id="ssp-tbl-band"></div>\n'

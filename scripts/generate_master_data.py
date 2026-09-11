@@ -94,6 +94,15 @@ try:
     import pipeline_guards as _pg
 except Exception as _e:
     _pg = None
+# MM-CROSSWALK-ITEM6-MARKER: the Minervini base counter (crosswalk items 6 and 9, 11-Sep-2026). A failed import
+# is reported loudly and leaves mm_base = None on every stock (the Stage 3 base test then reads False);
+# it never stops the nightly.
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import minervini_base_counter as _mbc
+except Exception as _e:
+    _mbc = None
+    print("[WARN] minervini_base_counter import FAILED: {} -- mm_base will be null for every stock.".format(_e))
     print("[guards] pipeline_guards import failed: {} -- continuing unguarded.".format(_e))
 HISTORY_PATH = str(DATA_DIR / ".size-history.json")
 
@@ -1672,11 +1681,12 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
                 h_t5 = snap_50 > snap_150
                 # T6: Price > 50D MA
                 h_t6 = snap_p > snap_50
-                # T7: Price > 52W Low * 1.20 (at that point in time)
+                # T7: Price > 52W Low * 1.25 (at that point in time). MM-CROSSWALK-ITEM1-25PCT-MARKER:
+                # was 1.20 until 11-Sep-2026; Minervini's 2017 figure is 25% (2013: 30%); Richard ruled 25%.
                 lookback_52w = rows_with_sma[max(0, best_idx - 252):best_idx + 1]
                 h_h52 = max(r["high"] for r in lookback_52w)
                 h_l52 = min(r["low"] for r in lookback_52w)
-                h_t7 = (h_l52 > 0 and snap_p > h_l52 * 1.20)
+                h_t7 = (h_l52 > 0 and snap_p > h_l52 * 1.25)
                 # T8: Price within 25% of 52W High
                 h_t8 = (h_h52 > 0 and snap_p >= h_h52 * 0.75)
 
@@ -1924,44 +1934,37 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             else:
                 ma20_month_detail.append(False)
 
-        # ── Base count since 52W low (15% fall + 20 days below high + breakthrough) ──
-        base_count_since_52wl = 0
-        if len(rows_with_sma) >= 252:
-            last_252 = rows_with_sma[-252:]
-            lows_252 = [r["low"] for r in last_252]
-            min_low_idx_rel = lows_252.index(min(lows_252))
-            start_idx_global = len(rows_with_sma) - 252 + min_low_idx_rel
-            swing_window_bp = 5
-            completed_swing_highs = []
-            for sj in range(start_idx_global + swing_window_bp, len(rows_with_sma) - swing_window_bp):
-                candidate = rows_with_sma[sj]["high"]
-                is_peak = True
-                for sk in range(sj - swing_window_bp, sj + swing_window_bp + 1):
-                    if sk != sj and rows_with_sma[sk]["high"] > candidate:
-                        is_peak = False
-                        break
-                if is_peak:
-                    completed_swing_highs.append((sj, candidate))
-            for sj_idx, sj_high in completed_swing_highs:
-                sub_end = len(rows_with_sma)
-                for nh_idx, _ in completed_swing_highs:
-                    if nh_idx > sj_idx:
-                        sub_end = nh_idx
-                        break
-                sub_window = rows_with_sma[sj_idx + 1:sub_end]
-                if not sub_window:
-                    continue
-                sub_low = min(r["low"] for r in sub_window)
-                if sub_low > sj_high * 0.85:
-                    continue
-                days_below = sum(1 for r in sub_window if r["high"] < sj_high)
-                if days_below < 20:
-                    continue
-                sub_low_idx_in_sub = next(i for i, r in enumerate(sub_window) if r["low"] == sub_low)
-                post_low_window = sub_window[sub_low_idx_in_sub:]
-                breakthrough = any(r["high"] > sj_high for r in post_low_window)
-                if breakthrough:
-                    base_count_since_52wl += 1
+        # ── MINERVINI BASE COUNT (MM-CROSSWALK-ITEM6-MARKER) ───────────────────────────────────────
+        # Crosswalk item 6, ruled by Richard 11-Sep-2026 ("we need to align with MM's approach - that is
+        # the point of the MD"): the two swing-high counts (base_count_since_52wl, base_count_504d) are
+        # REPLACED by the Minervini base counter (minervini_base_counter.py, v3; the anchor is crosswalk
+        # item 9's one meaning of Stage 2). Fields per stock: base number, class, depth, advance start,
+        # late-stage and caution flags (Q6b). The Stage 3 base test reads late_stage (base 4 or later).
+        mm_base = None
+        if _mbc is not None:
+            try:
+                _r = _mbc.analyse_bases(rows_with_sma)
+                _cur = _r.get("current") or {}
+                _state = ("insufficient_history" if _r.get("note") == "insufficient history" else
+                          "not_in_stage2" if not _r.get("stage2_start") else
+                          (_cur.get("kind") or "advancing") if _cur else "advancing")
+                mm_base = {
+                    "counter": "v3",
+                    "state": _state,
+                    "base_number": _r.get("current_base_no") or _r.get("completed") or 0,
+                    "completed": _r.get("completed") or 0,
+                    "class": _cur.get("class") if _cur else None,
+                    "depth_pct": _cur.get("depth_pct") if _cur else None,
+                    "advance_start": _r.get("stage2_start"),
+                    "provisional": bool(_r.get("anchor_provisional")),
+                    "late_stage": bool(_r.get("late_stage")),
+                    "caution": bool(_cur.get("vf_caution")) if _cur else False,
+                    "deteriorating": bool(_r.get("deterioration")),
+                    "depth_sequence": _r.get("depth_sequence") or [],
+                }
+            except Exception as _e:
+                print(f"  [WARN] {ticker}: Minervini base counter failed ({type(_e).__name__}: {_e}); mm_base = None")
+                mm_base = None
 
         # ── Higher-lows / Lower-lows count (last 6 months) ──
         higher_lows_count = 0
@@ -2203,42 +2206,6 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             else:
                 break
 
-        # MD-V2-S54-MARKER: 504-day base count (Stage 3 T3)
-        # Same algorithm as base_count_since_52wl but over 504-day (2-year) lookback window.
-        base_count_504d = 0
-        if len(rows_with_sma) >= 100:
-            _lb504 = rows_with_sma[-504:] if len(rows_with_sma) >= 504 else rows_with_sma
-            _sw504 = 5
-            _shs504 = []
-            for _sj in range(_sw504, len(_lb504) - _sw504):
-                _cand = _lb504[_sj]["high"]
-                _pk = True
-                for _sk in range(_sj - _sw504, _sj + _sw504 + 1):
-                    if _sk != _sj and _lb504[_sk]["high"] > _cand:
-                        _pk = False
-                        break
-                if _pk:
-                    _shs504.append((_sj, _cand))
-            for _sj_idx, _sj_high in _shs504:
-                _sub_end = len(_lb504)
-                for _nh_idx, _ in _shs504:
-                    if _nh_idx > _sj_idx:
-                        _sub_end = _nh_idx
-                        break
-                _sub_w = _lb504[_sj_idx + 1:_sub_end]
-                if not _sub_w:
-                    continue
-                _sub_low = min(r["low"] for r in _sub_w)
-                if _sub_low > _sj_high * 0.85:
-                    continue
-                _days_below = sum(1 for r in _sub_w if r["high"] < _sj_high)
-                if _days_below < 20:
-                    continue
-                _sub_low_i = next(i for i, r in enumerate(_sub_w) if r["low"] == _sub_low)
-                _post_low = _sub_w[_sub_low_i:]
-                if any(r["high"] > _sj_high for r in _post_low):
-                    base_count_504d += 1
-
         entry = {
             "ticker": ticker,
             "yf_ticker": yf,
@@ -2309,7 +2276,7 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             "vol_ma200_months_rising": vol_ma200_months_rising,
             "ma20_month_detail": ma20_month_detail,
             "ma20_months_rising": ma20_months_rising,
-            "base_count_since_52wl": base_count_since_52wl,
+            "mm_base": mm_base,  # replaces base_count_since_52wl and base_count_504d (crosswalk item 6)
             "higher_lows_count": higher_lows_count,
             "lower_lows_count": lower_lows_count,
             "lower_lows_count_42d": lower_lows_count_42d,
@@ -2330,7 +2297,6 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             "short_soft_stack_streak": short_soft_stack_streak,
             "long_soft_stack_streak": long_soft_stack_streak,
             "atr_expansion_ratio": atr_expansion_ratio,
-            "base_count_504d": base_count_504d,
             # Static industry/sector count columns
             "sectors_in_industry_count": _industry_sector_count.get(stock.get("industry", ""), 0),
             "companies_in_sector_count": _pre_sector_companies.get(stock.get("sector", ""), 0),
@@ -2573,7 +2539,9 @@ def compute_all_filters(prices):
         mm["group_c"] = {"pass": mm_t5 and mm_t6, "tests": {"T5": mm_t5, "T6": mm_t6}}
 
         # Group D — 52W Leadership
-        mm_t7 = above(p, l52 * 1.20) if l52 and l52 > 0 else False  # P > 20% above 52W low
+        # MM-CROSSWALK-ITEM1-25PCT-MARKER: 25% above the 52-week low (Minervini 2017; Richard ruled 25%,
+        # 11-Sep-2026, crosswalk item 1). Was 20% (matched neither book) until 11-Sep-2026.
+        mm_t7 = above(p, l52 * 1.25) if l52 and l52 > 0 else False  # P > 25% above 52W low
         mm_t8 = (p >= h52 * 0.75) if h52 and h52 > 0 else False  # P within 25% of 52W high
         mm["group_d"] = {"pass": mm_t7 and mm_t8, "tests": {"T7": mm_t7, "T8": mm_t8}}
 
@@ -2622,6 +2590,10 @@ def compute_all_filters(prices):
             mm["stage"] = None
 
         # ── VCP (simplified — full pattern detection is Phase 2) ─────
+        # LEGACY PLACEHOLDER (crosswalk item 7, ruled 11-Sep-2026): no pattern detection exists here and
+        # none is planned in this file. Kept only because index.html reads vcp.stage_2_uptrend in two
+        # places; do not remove without editing both. Minervini's VCP rules live in the canon
+        # (projects/APM - Mark Minervini Wisdom/deliverables/minervini-canon.json, MM-VCP-*).
         vcp = {}
         # T1: Stage 2 uptrend (require MM Groups A+B pass)
         vcp_t1 = mm["group_a"]["pass"] and mm["group_b"]["pass"]
@@ -3247,7 +3219,7 @@ def compute_master_dashboard_screens(prices, filter_results):
         ma200_mom_rates = p.get("ma200_mom_rates", [None] * 12)
         ma150_samples = p.get("ma150_samples", [None] * 13)
         ma200_samples = p.get("ma200_samples", [None] * 13)
-        base_count = p.get("base_count_since_52wl", 0)
+        mm_base = p.get("mm_base") or {}
         higher_lows = p.get("higher_lows_count", 0)
         lower_lows = p.get("lower_lows_count", 0)
         recent_pullback = p.get("recent_pullback_pct", 0)
@@ -3471,7 +3443,7 @@ def compute_master_dashboard_screens(prices, filter_results):
         # Gate 1: 200D MA today > 200D MA 80 trading days ago (still in uptrend)
         # Gate 2: Price > 200D MA (price above long-term trend)
         # 6 tests T3-T8. Possible=2, Plausible=3, Probable=4+.
-        # T3: base_count_504d >= 3 / T4: 50D < 103% of 150D / T5: down vol > up vol (L20D)
+        # T3: Minervini base 4 or later, since 11-Sep-2026 / T4: 50D < 103% of 150D / T5: down vol > up vol (L20D)
         # T6: ATR expansion ratio >= 1.10 (L20D vs days 21-100)
         # T7: >=2 lower lows in the last ~2 months (42 trading days)
         # T8: sector RS pct-in-industry today dropped > 10 pts vs 3M ago
@@ -3484,8 +3456,11 @@ def compute_master_dashboard_screens(prices, filter_results):
         s3["gate_200D_still_rising_vs_80d"] = s3_gate1
         s3["gate_price_above_200D"] = s3_gate2
         if s3_gate1 and s3_gate2:
-            _bc504 = p.get("base_count_504d", 0) or 0
-            s3_t3 = _bc504 >= 3
+            # T3 (crosswalk item 6c, ruled 11-Sep-2026): base 4 or later on Minervini's count (his late-stage
+            # line, canon MM-BC-03), replacing "base_count_504d >= 2" (the page) / ">= 3" (this file), which
+            # disagreed with each other. The Stage 3 rating series steps on 11-Sep-2026 (Q6d, accepted).
+            _mmb_n = int(mm_base.get("base_number") or 0)
+            s3_t3 = bool(mm_base.get("late_stage"))
             s3_t4 = (ma50 is not None and ma150 is not None and ma50 < ma150 * 1.03)
             s3_t5 = (adv_1m_dn > 0 and adv_1m_up > 0 and adv_1m_dn >= adv_1m_up * 1.10)
             # T6: ATR expansion ratio (L20D vs days 21-100)
@@ -3498,7 +3473,7 @@ def compute_master_dashboard_screens(prices, filter_results):
             _sec_pct_now = _sec_pct_in_ind.get(_stock_sector, 0)
             _sec_pct_m3v = _sec_m3_pct_in_ind.get(_stock_sector, 0)
             s3_t8 = (_sec_pct_now < _sec_pct_m3v - 10)
-            s3["tests"]["T3_base_count_504d_ge2"] = s3_t3
+            s3["tests"]["T3_mm_base_4_or_later"] = s3_t3
             s3["tests"]["T4_50D_below_103pct_150D"] = s3_t4
             s3["tests"]["T5_down_vol_exceeds_up_vol"] = s3_t5
             s3["tests"]["T6_ATR_expansion_ge110"] = s3_t6
@@ -3510,7 +3485,7 @@ def compute_master_dashboard_screens(prices, filter_results):
             s3_count = sum([s3_t3, s3_t4, s3_t5, s3_t6, s3_t7, s3_t8])
             s3["count"] = s3_count
             s3["test_values"] = {
-                "T3_base_count_504d": _bc504,
+                "T3_mm_base_number": _mmb_n,
                 "T4_50D_vs_103pct_150D": _md_v2_pct_gap(ma50, ma150 * 1.03 if ma150 else None),
                 "T5_down_vol_ratio": round(adv_1m_dn / adv_1m_up, 3) if adv_1m_up > 0 else None,
                 "T6_ATR_expansion_ratio": _atr_exp,

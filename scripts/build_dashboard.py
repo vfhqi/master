@@ -760,6 +760,9 @@ body.chart-from-left #mo-matrix-table tbody td.mo-mx-name-cell,body.chart-from-l
 .val-panel-company{font-size:12px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:45%}
 .val-panel a.chart-width-btn{text-decoration:none;line-height:1.4}
 .val-panel .val-close-btn{background:var(--card-hover);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:4px;cursor:pointer;font-size:16px;line-height:1;flex-shrink:0}
+/* MD-VAL-PANEL-QC2-2026-09-16: widths, full-screen link and close button wrap TOGETHER. Left as
+   loose siblings, a quarter-width panel dropped the close button onto a line by itself. */
+.val-panel-ctrls{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
 .val-panel-frame{flex:1;min-height:0;width:100%;border:0;display:block;background:var(--bg)}
 @media (max-width:700px){.val-panel{width:100%!important}.val-panel-company{display:none}}
 
@@ -3207,8 +3210,11 @@ window.toggleChartLayer=function(layer){
   } else {
     drawMasterChart(chartTicker);
   }
-  var el=document.getElementById("legend-"+layer);
-  if(el)el.style.opacity=chartVis[layer]?"1":"0.3";
+  /* MD-SSP-LEGEND-2026-09-16: the same legend markup can now be on the page twice, once in the chart panel and
+     once in the Stock View, so the two share an element id. getElementById would dim only the first.
+     Update every element carrying the id instead. */
+  var els=document.querySelectorAll('[id="legend-'+layer+'"]');
+  for(var _li=0;_li<els.length;_li++)els[_li].style.opacity=chartVis[layer]?"1":"0.3";
 };
 // === LAZY CHART LOADER ===
 // Chart data lives in charts/<TICKER>.js files (~200KB each).
@@ -3556,6 +3562,10 @@ function drawMasterChart(ticker,_sspo){
 }
 
 // Clickable legend HTML with toggle
+/* MD-SSP-LEGEND-2026-09-16 (Watson, SA - Master Dashboard). sspRenderChart guards on
+   `typeof chartLegendHTML==='function'` from ANOTHER script scope, where the bare declaration is not
+   visible, so the guard always failed and the Stock View chart shipped with an EMPTY legend row while
+   the standard chart panel showed the full clickable one. Export it. */
 function chartLegendHTML(){
   var items=[
     {key:"ma5",label:"MA-5D",color:"#8b0000"},{key:"ma10",label:"MA-10D",color:"#e88a9a"},
@@ -3574,6 +3584,7 @@ function chartLegendHTML(){
   }
   return h;
 }
+window.chartLegendHTML=chartLegendHTML;  /* MD-SSP-LEGEND-2026-09-16: the Stock View renders its legend row from this. */
 
 function _setChartFreshness(data,elId){
   var el=document.getElementById(elId||"chart-freshness");
@@ -18423,7 +18434,13 @@ deriveMasterRatings();  /* SUMMARY-TAB-MARKER */
 'use strict';
 
 /* ---- state ---- */
+/* MD-SSP-LEGEND-2026-09-16: three shared chart-control paths (toggleChartLayer, setChartZoom,
+   setChartScaleMode) branch on window._sspOpen so that they redraw the Stock View canvas rather than
+   the hidden chart panel. This was a plain var in this scope only, so window._sspOpen was never
+   defined and all three branches were dead code from the day they were written. Mirrored onto window
+   here and at both assignments below. */
 var _sspOpen = false;
+window._sspOpen = false;
 var _sspTicker = null;
 var _sspDdSel = -1;
 var _sspDdItems = [];
@@ -18495,7 +18512,7 @@ function _sspBuildCohortIndex(){
 window.openStockView = function(initialTicker){
   window._sspBuildCohortIndex();
   document.getElementById('ssp-overlay').classList.add('open');
-  _sspOpen = true;
+  _sspOpen = true; window._sspOpen = true;  /* MD-SSP-LEGEND-2026-09-16 */
   if(typeof closeChart === 'function') closeChart();
   document.body.classList.add('ssp-open');
   if(initialTicker){
@@ -18507,7 +18524,7 @@ window.openStockView = function(initialTicker){
 };
 window.closeStockView = function(){
   document.getElementById('ssp-overlay').classList.remove('open');
-  _sspOpen = false;
+  _sspOpen = false; window._sspOpen = false;  /* MD-SSP-LEGEND-2026-09-16 */
   document.body.classList.remove('ssp-open');
   _sspHideDd();
 };
@@ -19109,7 +19126,7 @@ function sspRenderChart(ticker, company){
   var _zb=document.getElementById(_zm[_sspcz]); if(_zb)_zb.classList.add('on');
   /* populate clickable legend row */
   var _lr=document.getElementById('ssp-legend-row');
-  if(_lr&&typeof chartLegendHTML==='function') _lr.innerHTML=chartLegendHTML();
+  if(_lr&&typeof window.chartLegendHTML==='function') _lr.innerHTML=window.chartLegendHTML();  /* MD-SSP-LEGEND-2026-09-16 */
   /* sync LIN/LOG buttons */
   _sspSyncScaleBtns();
 
@@ -19454,9 +19471,11 @@ renderTab("mm99");
         '  <div class="val-panel-hdr">\n'
         '    <span class="val-panel-ticker" id="val-panel-ticker"></span>\n'
         '    <span class="val-panel-company" id="val-panel-company"></span>\n'
-        '    <span style="margin-left:auto;display:flex;gap:2px" id="val-panel-widths"></span>\n'
-        '    <a class="chart-width-btn" id="val-panel-newtab" href="valuation.html" target="_blank" rel="noopener" style="margin-left:12px" title="Open this valuation chart full screen in a new tab">Full screen</a>\n'
-        '    <button class="val-close-btn" onclick="closeValuationPanel()" title="Close the valuation chart (Esc)">&times;</button>\n'
+        '    <span class="val-panel-ctrls">\n'
+        '      <span style="display:flex;gap:2px" id="val-panel-widths"></span>\n'
+        '      <a class="chart-width-btn" id="val-panel-newtab" href="valuation.html" target="_blank" rel="noopener" style="margin-left:10px" title="Open this valuation chart full screen in a new tab">Full screen</a>\n'
+        '      <button class="val-close-btn" onclick="closeValuationPanel()" title="Close the valuation chart (Esc)">&times;</button>\n'
+        '    </span>\n'
         '  </div>\n'
         '  <iframe class="val-panel-frame" id="val-panel-frame" title="Valuation range chart" src="about:blank"></iframe>\n'
         '</div>\n'

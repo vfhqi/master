@@ -231,7 +231,12 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     var box = $('chartbox'), W = box.clientWidth, H = canvas.clientHeight || 520, dpr = window.devicePixelRatio || 1;
     canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,W,H);
-    if (!REC){ return; }
+    /* MD-VAL-PANEL-QC3-2026-09-16 (Watson, SA - Master Dashboard). REC is set by loadStock but the
+       series is not computed until update() runs, so a resize landing between the two threw
+       "Cannot read properties of undefined (reading 'length')" out of the resize listener. Rare on the
+       standalone page, routine in the dashboard's side panel, where changing the panel width resizes
+       the frame. Guard on the series, not just the record. */
+    if (!REC || !series || !series.win){ return; }
     var win = series.win, n = win.length, f = S.field;
     var padL = 56, padR = 62, padT = 14, padB = 34, pw = W - padL - padR, ph = H - padT - padB;
     var x = function(i){ return padL + (n <= 1 ? pw/2 : i * pw / (n - 1)); };

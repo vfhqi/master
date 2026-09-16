@@ -3116,7 +3116,9 @@ window.openValuationPanel=function(t){
 /* MD-VAL-PANEL-QC1-2026-09-16 F1: the price chart panel shrinks the table rather than covering it
    (main.style.marginRight). Richard asked for the valuation panel to behave like the share price
    charts, so it does the same. Skipped over the Stock View, whose overlay is not .main. */
-function _valStockViewOpen(){var o=document.getElementById('ssp-overlay');return !!o&&getComputedStyle(o).display!=='none';}
+/* MD-VAL-PANEL-QC4-2026-09-16: read the class the Stock View actually toggles (.ssp-overlay.open{display:flex}),
+   not a computed style. One less thing that can silently change meaning under a CSS edit. */
+function _valStockViewOpen(){var o=document.getElementById('ssp-overlay');return !!o&&o.classList.contains('open');}
 function _valPushMain(){
   var m=document.querySelector('.main');if(!m)return;
   if(_valStockViewOpen()){m.style.marginRight='0';return;}
@@ -3124,6 +3126,22 @@ function _valPushMain(){
   m.style.marginLeft='0';
   m.style.marginRight=(p&&p.classList.contains('open'))?valPanelWidth+'%':'0';
 }
+/* MD-VAL-PANEL-QC4-2026-09-16 (MATERIAL). The chart page carries its own "Switch stock" box, and switching
+   there changed the frame but NOT the panel header or the Full screen link, so the header named one
+   company while the chart drew another. On a page read for investment judgement a header naming the
+   wrong stock is the worst kind of cosmetic bug. The frame calls this on every stock change. */
+window.__valPanelSyncStock=function(t,name){
+  if(!t)return;
+  var tEl=document.getElementById('val-panel-ticker');if(tEl)tEl.textContent=t;
+  var cEl=document.getElementById('val-panel-company');
+  if(cEl){
+    var company=name||'';
+    if(!company){try{for(var j=0;j<D.universe.length;j++){if(D.universe[j].ticker===t){company=D.universe[j].company_name||'';break}}}catch(e){}}
+    cEl.textContent=company;cEl.title=company;
+  }
+  var nt=document.getElementById('val-panel-newtab');if(nt)nt.href='valuation.html?t='+encodeURIComponent(t);
+  var fr=document.getElementById('val-panel-frame');if(fr)fr.setAttribute('data-ticker',t);
+};
 window.closeValuationPanel=function(){
   var p=document.getElementById('val-panel');if(!p)return;
   p.classList.remove('open');p.setAttribute('aria-hidden','true');
@@ -18513,6 +18531,11 @@ window.openStockView = function(initialTicker){
   window._sspBuildCohortIndex();
   document.getElementById('ssp-overlay').classList.add('open');
   _sspOpen = true; window._sspOpen = true;  /* MD-SSP-LEGEND-2026-09-16 */
+  /* MD-VAL-PANEL-QC4-2026-09-16: the valuation panel is anchored to whichever surface it was opened over (below
+     the header on the dashboard, full height over this overlay) and pushes the dashboard table only
+     on the dashboard. Crossing between the two with it open left it either covering the header or
+     leaving a strip of this overlay above it. It belongs to one context, so close it on the move. */
+  try{if(window.closeValuationPanel)window.closeValuationPanel();}catch(e){}
   if(typeof closeChart === 'function') closeChart();
   document.body.classList.add('ssp-open');
   if(initialTicker){
@@ -18525,6 +18548,7 @@ window.openStockView = function(initialTicker){
 window.closeStockView = function(){
   document.getElementById('ssp-overlay').classList.remove('open');
   _sspOpen = false; window._sspOpen = false;  /* MD-SSP-LEGEND-2026-09-16 */
+  try{if(window.closeValuationPanel)window.closeValuationPanel();}catch(e){}  /* MD-VAL-PANEL-QC4-2026-09-16 */
   document.body.classList.remove('ssp-open');
   _sspHideDd();
 };
@@ -19644,6 +19668,40 @@ def main():
 
     size = os.path.getsize(OUTPUT_PATH)
     print("  Written: {} ({:,} bytes)".format(OUTPUT_PATH, size))
+
+    # MD-CSSVAR-AUDIT-2026-09-16 (Watson, SA - Master Dashboard).
+    # `background: var(--accent)` with --accent never defined is not a no-op: the declaration becomes
+    # invalid at computed-value time, so the property falls back to its INITIAL value. On the Stock
+    # View's active zoom button that meant a transparent background under `color:#fff` -- white text
+    # on a near-white card, i.e. an unreadable button. Richard photographed exactly that on 16-Sep-26.
+    # 51 bare uses of 13 never-defined properties were live at that moment.
+    # This REPORTS, it does not fail the build. A build-failing ratchet on a cosmetic metric could
+    # take the dashboard offline for a night over a colour name, which is worse than the defect it
+    # guards. Proposed next step (NOT built): a QC.html row so the count is visible without reading
+    # a 130 KB log.
+    try:
+        import re as _re
+        _defined = set(_re.findall(r'(--[A-Za-z0-9_-]+)\s*:', html))
+        _bare = {}
+        for _m in _re.finditer(r'var\(\s*(--[A-Za-z0-9_-]+)\s*(,)?', html):
+            if _m.group(2) is None and _m.group(1) not in _defined:
+                _bare[_m.group(1)] = _bare.get(_m.group(1), 0) + 1
+        _tot = sum(_bare.values())
+        _audit = {"generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                  "bare_undefined_uses": _tot,
+                  "properties": dict(sorted(_bare.items(), key=lambda kv: -kv[1]))}
+        with open(str(PROJECT_DIR / "data" / "css-var-audit.json"), "w", encoding="utf-8") as _f:
+            json.dump(_audit, _f, indent=2)
+        if _tot:
+            print("  [css-var audit] {} BARE uses of {} never-defined custom properties "
+                  "(no fallback, so each falls back to the property's initial value): {}"
+                  .format(_tot, len(_bare),
+                          ", ".join("%s x%d" % (k, v) for k, v in
+                                    sorted(_bare.items(), key=lambda kv: -kv[1])[:6])))
+        else:
+            print("  [css-var audit] clean: every var() resolves or carries a fallback")
+    except Exception as _e:
+        print("  [css-var audit] skipped: {}".format(_e))
 
     # Bucket 2: verify-after-write on index.html (kind=html + regression band).
     # Floor 10 MB: the dashboard is ~22 MB; anything under 10 MB is truncated.

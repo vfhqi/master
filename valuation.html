@@ -139,6 +139,21 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
   // header for a frame and then collapse it.
   var EMBED = /[?&]embed=1(&|$)/.test(location.search);
   if (EMBED && document.body) document.body.className = (document.body.className ? document.body.className + ' ' : '') + 'embed';
+  // MD-VAL-PANEL-QC4-2026-09-16: two things the frame owes its host.
+  // (a) the host's header names the stock, so it has to be told when this page switches stock from
+  //     its own search box, or the header names one company beside another company's chart.
+  // (b) Escape is handled by the host, but a keydown while focus is inside this frame never reaches
+  //     it, so the panel would not close whenever the user had clicked in here first.
+  function hostSync(t, name){
+    if (!EMBED) return;
+    try { if (window.parent && window.parent !== window && window.parent.__valPanelSyncStock)
+            window.parent.__valPanelSyncStock(t, name || ''); } catch (e) {}
+  }
+  if (EMBED) document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    try { if (window.parent && window.parent !== window && window.parent.closeValuationPanel)
+            window.parent.closeValuationPanel(); } catch (err) {}
+  });
   // ── constants ────────────────────────────────────────────────────────────────────────
   var MIDDLE = 'p50';                  // the middle band level: the MEDIAN (D-VAL-42, closes Q-VAL-17); the mean is a dashed reference line
   var MEAN_COLOUR = '#9a8a2e';
@@ -434,6 +449,7 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     S.t = t; $('err').style.display = 'none';
     if (history.replaceState) history.replaceState(null, '', '?t=' + encodeURIComponent(t) + (EMBED ? '&embed=1' : ''));  /* MD-VAL-PANEL-EMBED-2026-09-16: keep embed mode across an in-page stock switch */
     document.title = t + ' valuation range';
+    hostSync(t, (IDX && IDX.stocks[t] && IDX.stocks[t].name) || '');  /* MD-VAL-PANEL-QC4-2026-09-16 */
     loadStock(t, function(ok){
       if (!ok){ REC = null; series = []; draw();
         var known = IDX && IDX.stocks[t]; var nodata = IDX && IDX.no_data && IDX.no_data.indexOf(t) >= 0;

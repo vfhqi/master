@@ -741,8 +741,13 @@ body.chart-from-left #mo-matrix-table tbody td.mo-mx-name-cell,body.chart-from-l
 .gcap .tnum{font-weight:600;}
 .chart-panel .close-btn{position:absolute;top:8px;right:8px;background:var(--card-hover);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:4px;cursor:pointer;font-size:16px}
 .chart-width-btns{display:flex;gap:4px;margin-bottom:12px}
-.chart-width-btn{background:var(--card);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font);font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer}
-.chart-width-btn.active{background:#1b3d5c;color:#fff;border-color:#1b3d5c}
+/* MD-SSP-BTN-ALIGN-2026-09-16 (Watson, SA - Master Dashboard). The Stock View zoom/scale buttons
+   (.ssp-czb, .ssp-cvb) are listed on the SAME rules as the standard chart panel's buttons rather than
+   carrying their own near-miss copy (they had 2px/7px padding, --bg-alt background, --text colour and an
+   --accent active state, against 3px/8px, --card, --text-dim and #1b3d5c here). One rule, so the two
+   surfaces cannot drift apart again. */
+.chart-width-btn,.ssp-czb,.ssp-cvb{background:var(--card);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font);font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer}
+.chart-width-btn.active,.ssp-czb.on,.ssp-cvb.on{background:#1b3d5c;color:#fff;border-color:#1b3d5c}
 
 /* FIX-16: graduated colours including grey neutral */
 .grad-green{color:#2e7d32}.grad-lgreen{color:#558b2f}.grad-neutral{color:#6b6b6b}.grad-red{color:#c62828}.grad-dred{color:#b71c1c}
@@ -2745,9 +2750,8 @@ col.mo-cg-screen { width: 76px; }
 .ssp-chart-body{flex:1;min-height:0;overflow:hidden;position:relative;padding:6px}
 #ssp-chart-canvas{width:100%;height:100%;display:block}
 .ssp-chart-controls{display:flex;align-items:center;gap:5px;padding:4px 12px;background:var(--bg);border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0}
-.ssp-czb,.ssp-cvb{padding:2px 7px;font-size:11px;border:1px solid var(--border);border-radius:3px;background:var(--bg-alt);color:var(--text);cursor:pointer}
-.ssp-czb.on,.ssp-cvb.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-.ssp-czb:hover,.ssp-cvb:hover{opacity:0.8}
+/* MD-SSP-BTN-ALIGN-2026-09-16: the .ssp-czb / .ssp-cvb resting, active and hover styles moved onto the
+   shared .chart-width-btn rules above. Do not re-add a local copy here. */
 .ssp-csep{width:1px;height:14px;background:var(--border);flex-shrink:0}
 .ssp-chart-loading{padding:20px;color:var(--text-dim);font-size:11px;text-align:center}
 /* Cohort pane */
@@ -3333,7 +3337,12 @@ function drawMasterChart(ticker,_sspo){
   // Determine tier from n.
   var xt;
   if(n<=25)      xt={major:'week',  label:'D-Mon',  minor:'day',     labelTier:'day'};
-  else if(n<=70) xt={major:'month', label:'Mon',    minor:'week',    labelTier:'week'};
+  /* MD-XAXIS-3M-FIDELITY-2026-09-16 (Watson, SA - Master Dashboard). At 3M (63 bars) this tier anchored
+     labels on MONTH starts, so the whole quarter carried three words and no date. Anchor on Mondays and
+     label them day-month, the same treatment 1M already gets; the anti-overlap pass below thins them to
+     whatever the panel width can hold, so a quarter-width panel degrades to fortnights rather than
+     colliding. Minor gridlines drop to daily to match. 6M and longer are unchanged. */
+  else if(n<=70) xt={major:'week',  label:'D-Mon',  minor:'day',     labelTier:'week'};
   else if(n<=140)xt={major:'month', label:'Mon',    minor:'week',    labelTier:'week'};
   else if(n<=280)xt={major:'quarter',label:'Mon-YY',minor:'month',   labelTier:'month'};
   else if(n<=520)xt={major:'quarter',label:'Mon-YY',minor:'month',   labelTier:'quarter'};

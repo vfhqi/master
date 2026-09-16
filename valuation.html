@@ -57,6 +57,20 @@ canvas{display:block;width:100%;height:520px}
 .err{font-size:13px;color:var(--red);padding:20px 0}
 .foot{font-size:11px;color:var(--text-dim);margin-top:8px}
 @media (max-width:700px){canvas{height:380px}.search input{width:200px}.current{text-align:left}}
+/* MD-VAL-PANEL-EMBED-2026-09-16 (Watson, SA - Master Dashboard). ?embed=1 puts the page inside the
+   dashboard's right-hand slide-in panel, where the panel supplies the stock name, the close button and
+   the full-screen link. Trim the chrome this page would otherwise duplicate and give the canvas a height
+   that suits a narrow column. Nothing here changes the standalone page. */
+body.embed .wrap{max-width:none;padding:8px 12px 18px}
+body.embed header{margin-bottom:8px;gap:6px 14px;align-items:center}
+body.embed h1{font-size:15px}
+body.embed h1 small{font-size:12px;margin-left:6px}
+body.embed .meta{font-size:11px}
+body.embed #back{display:none}
+body.embed .current{font-size:17px}
+body.embed .card{padding:8px 10px;margin-bottom:8px}
+body.embed canvas{height:430px}
+@media (max-width:700px){body.embed canvas{height:340px}}
 </style>
 </head>
 <body>
@@ -115,6 +129,10 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
 <script>
 (function(){
   'use strict';
+  // MD-VAL-PANEL-EMBED-2026-09-16: set before anything paints, so the panel never shows the full-page
+  // header for a frame and then collapse it.
+  var EMBED = /[?&]embed=1(&|$)/.test(location.search);
+  if (EMBED && document.body) document.body.className = (document.body.className ? document.body.className + ' ' : '') + 'embed';
   // ── constants ────────────────────────────────────────────────────────────────────────
   var MIDDLE = 'p50';                  // the middle band level: the MEDIAN (D-VAL-42, closes Q-VAL-17); the mean is a dashed reference line
   var MEAN_COLOUR = '#9a8a2e';
@@ -403,7 +421,7 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
   // ── stock switching and boot ─────────────────────────────────────────────────────────
   function show(t){
     S.t = t; $('err').style.display = 'none';
-    if (history.replaceState) history.replaceState(null, '', '?t=' + encodeURIComponent(t));
+    if (history.replaceState) history.replaceState(null, '', '?t=' + encodeURIComponent(t) + (EMBED ? '&embed=1' : ''));  /* MD-VAL-PANEL-EMBED-2026-09-16: keep embed mode across an in-page stock switch */
     document.title = t + ' valuation range';
     loadStock(t, function(ok){
       if (!ok){ REC = null; series = []; draw();

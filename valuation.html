@@ -67,6 +67,12 @@ body.embed h1{font-size:15px}
 body.embed h1 small{font-size:12px;margin-left:6px}
 body.embed .meta{font-size:11px}
 body.embed #back{display:none}
+/* MD-VAL-PANEL-QC1-2026-09-16 F3: the panel header already names the stock, so the page's own h1
+   would print it a second time three lines below. Keep the meta lines, which the panel does not carry. */
+body.embed h1{display:none}
+/* F4: the switch-stock box is a fixed 300px, which overflows a quarter-width panel. Let it flex. */
+body.embed .search{flex:1 1 220px;min-width:0}
+body.embed .search input{width:100%;min-width:0}
 body.embed .current{font-size:17px}
 body.embed .card{padding:8px 10px;margin-bottom:8px}
 body.embed canvas{height:430px}

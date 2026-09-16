@@ -749,6 +749,20 @@ body.chart-from-left #mo-matrix-table tbody td.mo-mx-name-cell,body.chart-from-l
 .chart-width-btn,.ssp-czb,.ssp-cvb{background:var(--card);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font);font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer}
 .chart-width-btn.active,.ssp-czb.on,.ssp-cvb.on{background:#1b3d5c;color:#fff;border-color:#1b3d5c}
 
+/* MD-VAL-PANEL-2026-09-16 (Watson, SA - Master Dashboard). The valuation range chart slides in from the right
+   the way the price chart does, instead of opening a new browser tab. The body is valuation.html in an
+   iframe, so the standalone page stays the single source of truth for the chart itself and the two can
+   never diverge. z-index sits ABOVE the Stock View overlay (9900) so it works from there too. */
+.val-panel{position:fixed;top:var(--header-height);right:0;bottom:0;width:50%;background:var(--card);border-left:1px solid var(--border);z-index:9950;transform:translateX(100%);transition:transform .3s ease,width .3s ease;display:flex;flex-direction:column;box-shadow:-2px 0 10px rgba(0,0,0,0.08)}
+.val-panel.open{transform:translateX(0)}
+.val-panel-hdr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--card);flex-shrink:0}
+.val-panel-ticker{font-size:14px;font-weight:700;color:var(--text-bright)}
+.val-panel-company{font-size:12px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:45%}
+.val-panel a.chart-width-btn{text-decoration:none;line-height:1.4}
+.val-panel .val-close-btn{background:var(--card-hover);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:4px;cursor:pointer;font-size:16px;line-height:1;flex-shrink:0}
+.val-panel-frame{flex:1;min-height:0;width:100%;border:0;display:block;background:var(--bg)}
+@media (max-width:700px){.val-panel{width:100%!important}.val-panel-company{display:none}}
+
 /* FIX-16: graduated colours including grey neutral */
 .grad-green{color:#2e7d32}.grad-lgreen{color:#558b2f}.grad-neutral{color:#6b6b6b}.grad-red{color:#c62828}.grad-dred{color:#b71c1c}
 .sparkline-cell{vertical-align:middle}
@@ -3051,6 +3065,87 @@ window.closeChart=function(){
   _ccMain.style.marginLeft="0";
   document.documentElement.style.setProperty("--chart-panel-w","0px");
 };
+/* MD-VAL-PANEL-2026-09-16. The valuation range chart panel: same right-slide behaviour as the price chart
+   panel above, with valuation.html carried in an iframe. The two panels are mutually exclusive -- at a
+   quarter or a third of the window neither is readable beside the other -- so opening one closes the
+   other. The iframe is only pointed at a URL when the panel is first opened for a stock, so a session
+   that never asks for a valuation chart never downloads one. */
+var valPanelWidth=50;
+var _VAL_PANEL_PREFS_KEY='vf_val_panel_prefs_v1';
+function saveValPanelPrefs(){try{localStorage.setItem(_VAL_PANEL_PREFS_KEY,JSON.stringify({width:valPanelWidth}));}catch(e){}}
+(function(){try{var _vp=JSON.parse(localStorage.getItem(_VAL_PANEL_PREFS_KEY)||'null');if(_vp&&typeof _vp.width==='number'&&_vp.width>0&&_vp.width<=100)valPanelWidth=_vp.width;}catch(e){}})();
+function _valPanelRenderWidths(){
+  var host=document.getElementById('val-panel-widths');if(!host)return;
+  var widths=[{p:25,l:"\u00bc"},{p:33,l:"\u2153"},{p:50,l:"\u00bd"},{p:100,l:"Full"}];
+  var h='';
+  for(var i=0;i<widths.length;i++){
+    h+='<button class="chart-width-btn'+(valPanelWidth===widths[i].p?' active':'')+'" onclick="setValuationPanelWidth('+widths[i].p+')" title="Set the valuation panel to '+widths[i].p+'% of the window">'+widths[i].l+'</button>';
+  }
+  host.innerHTML=h;
+}
+window.setValuationPanelWidth=function(w){
+  valPanelWidth=w;saveValPanelPrefs();
+  var p=document.getElementById('val-panel');if(p)p.style.width=w+'%';
+  _valPanelRenderWidths();
+  _valPushMain();
+};
+window.openValuationPanel=function(t){
+  if(!t)return;
+  try{var _cp=document.getElementById('chart-panel');if(_cp&&_cp.classList.contains('open'))closeChart();}catch(e){}
+  var p=document.getElementById('val-panel');if(!p)return;
+  var company='';
+  try{for(var j=0;j<D.universe.length;j++){if(D.universe[j].ticker===t){company=D.universe[j].company_name||'';break}}}catch(e){}
+  var tEl=document.getElementById('val-panel-ticker');if(tEl)tEl.textContent=t;
+  var cEl=document.getElementById('val-panel-company');if(cEl){cEl.textContent=company;cEl.title=company;}
+  var url='valuation.html?t='+encodeURIComponent(t);
+  var nt=document.getElementById('val-panel-newtab');if(nt)nt.href=url;
+  var fr=document.getElementById('val-panel-frame');
+  if(fr&&fr.getAttribute('data-ticker')!==t){fr.setAttribute('data-ticker',t);fr.src=url+'&embed=1';}
+  _valPanelRenderWidths();
+  p.style.width=valPanelWidth+'%';
+  /* MD-VAL-PANEL-QC1-2026-09-16 F2: over the Stock View (a full-screen overlay) the panel must run the whole
+     height, or a strip of the overlay stays visible above it. Below the header everywhere else. */
+  p.style.top=_valStockViewOpen()?'0':'';
+  p.classList.add('open');p.setAttribute('aria-hidden','false');
+  document.body.classList.add('val-panel-open');
+  _valPushMain();
+};
+/* MD-VAL-PANEL-QC1-2026-09-16 F1: the price chart panel shrinks the table rather than covering it
+   (main.style.marginRight). Richard asked for the valuation panel to behave like the share price
+   charts, so it does the same. Skipped over the Stock View, whose overlay is not .main. */
+function _valStockViewOpen(){var o=document.getElementById('ssp-overlay');return !!o&&getComputedStyle(o).display!=='none';}
+function _valPushMain(){
+  var m=document.querySelector('.main');if(!m)return;
+  if(_valStockViewOpen()){m.style.marginRight='0';return;}
+  var p=document.getElementById('val-panel');
+  m.style.marginLeft='0';
+  m.style.marginRight=(p&&p.classList.contains('open'))?valPanelWidth+'%':'0';
+}
+window.closeValuationPanel=function(){
+  var p=document.getElementById('val-panel');if(!p)return;
+  p.classList.remove('open');p.setAttribute('aria-hidden','true');
+  p.style.top='';
+  document.body.classList.remove('val-panel-open');
+  var m=document.querySelector('.main');if(m){m.style.marginRight='0';m.style.marginLeft='0';}
+};
+/* One click handler for every "range" link and the Stock View button. Modified clicks (ctrl, cmd,
+   shift, middle) keep the browser's own new-tab behaviour, so the href stays real and useful. */
+window.valLinkClick=function(ev,t){
+  if(ev){
+    if(ev.stopPropagation)ev.stopPropagation();
+    if(ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.button===1)return true;
+    if(ev.preventDefault)ev.preventDefault();
+  }
+  openValuationPanel(t);
+  return false;
+};
+/* Escape closes the valuation panel first, and stops there, so one press does not also close the Stock
+   View underneath it. Capture phase, because the Stock View's own Escape handler is on document too. */
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  var p=document.getElementById('val-panel');
+  if(p&&p.classList.contains('open')){e.stopPropagation();closeValuationPanel();}
+},true);
 window.setChartWidth=function(p){
   chartWidth=p;
   var pn=document.getElementById("chart-panel");
@@ -3348,12 +3443,16 @@ function drawMasterChart(ticker,_sspo){
   else if(n<=520)xt={major:'quarter',label:'Mon-YY',minor:'month',   labelTier:'quarter'};
   else if(n<=800)xt={major:'year',  label:'YYYY',   minor:'quarter', labelTier:'quarter'};
   else           xt={major:'year',  label:'YYYY',   minor:'quarter', labelTier:'year'};
-  function _isMon(d){return d.getDay()===1}
+  /* MD-VAL-PANEL-QC1-2026-09-16 F7: a week boundary is the first BAR of a new week, not a bar that happens to
+     fall on a Monday. ART-ES has no 2026-09-07 bar, so the literal-Monday test dropped that week's
+     label from the 1M chart entirely. Compare Monday-anchored week starts instead. */
+  function _weekStartMs(d){var t=new Date(d.getFullYear(),d.getMonth(),d.getDate());t.setDate(t.getDate()-((t.getDay()+6)%7));return t.getTime()}
+  function _isMon(d,prev){return !prev||_weekStartMs(d)!==_weekStartMs(prev)}
   function _isMonthStart(d,prev){return !prev||d.getMonth()!==prev.getMonth()}
   function _isQuarterStart(d,prev){return !prev||(d.getMonth()!==prev.getMonth()&&[0,3,6,9].indexOf(d.getMonth())>=0)}
   function _isYearStart(d,prev){return !prev||d.getFullYear()!==prev.getFullYear()}
-  function _isMajor(d,prev){if(xt.major==='week')return _isMon(d);if(xt.major==='month')return _isMonthStart(d,prev);if(xt.major==='quarter')return _isQuarterStart(d,prev);return _isYearStart(d,prev)}
-  function _isMinor(d,prev){if(xt.minor==='day')return true;if(xt.minor==='week')return _isMon(d);if(xt.minor==='month')return _isMonthStart(d,prev);return _isQuarterStart(d,prev)}
+  function _isMajor(d,prev){if(xt.major==='week')return _isMon(d,prev);if(xt.major==='month')return _isMonthStart(d,prev);if(xt.major==='quarter')return _isQuarterStart(d,prev);return _isYearStart(d,prev)}
+  function _isMinor(d,prev){if(xt.minor==='day')return true;if(xt.minor==='week')return _isMon(d,prev);if(xt.minor==='month')return _isMonthStart(d,prev);return _isQuarterStart(d,prev)}
   // Cap minor gridlines at ~30 across plot to avoid noise.
   var minorIdx=[];for(j=1;j<dates.length;j++){if(_isMinor(dates[j],dates[j-1]))minorIdx.push(j)}
   var minorSkip=Math.max(1,Math.ceil(minorIdx.length/30));
@@ -3499,6 +3598,8 @@ function _setChartFreshness(data,elId){
 }
 window._setChartFreshness=_setChartFreshness;
 window.openChart=function(t){
+  /* MD-VAL-PANEL-2026-09-16: the two right-hand panels are mutually exclusive. */
+  try{if(window.closeValuationPanel)closeValuationPanel();}catch(e){}
   var _prevChartTicker=chartTicker;
   chartTicker=t;
   var p=document.getElementById("chart-panel");
@@ -4430,7 +4531,7 @@ function buildPortfolioTile(tabId){
       +th("P/E","pe_cur","col-num col-filter grp-pe-first","","width:90px")
       +th("Pctile","pe_pctile","col-num col-filter","","width:80px")
       +th("EPS 24MF","eps_24mf","col-num col-filter grp-pe-last","","width:120px")
-      +'<th class="col-txt" style="width:64px;text-align:center" title="Valuation range chart: 24-month forward P/E against ten years of its own history (opens in a new tab)">Chart</th>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
+      +'<th class="col-txt" style="width:64px;text-align:center" title="Valuation range chart: 24-month forward P/E against ten years of its own history (opens in the side panel)">Chart</th>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
     h+='</tr></thead><tbody>';
     for(var jR=0;jR<posRows.length;jR++){
       var r=posRows[jR];
@@ -4447,7 +4548,7 @@ function buildPortfolioTile(tabId){
       h+='<td class="col-num col-filter grp-pe-first" style="font-weight:600">'+fpe(r.pe_cur)+'</td>';
       h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+nf(r.pe_pctile)+'</td>';
       h+='<td class="col-num col-filter grp-pe-last">'+fpCurr(r.eps_24mf,r.ticker)+'</td>';
-      h+='<td style="text-align:center"><a class="val-chart-link" href="valuation.html?t='+encodeURIComponent(r.ticker)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Valuation range chart for '+r.ticker+' (new tab)">range</a></td>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
+      h+='<td style="text-align:center"><a class="val-chart-link" href="valuation.html?t='+encodeURIComponent(r.ticker)+'" onclick="return valLinkClick(event,\''+r.ticker+'\')" title="Valuation range chart for '+r.ticker+' (opens in the side panel; ctrl-click for a new tab)">range</a></td>';  /* MD-VAL-PANEL-2026-09-16 */  /* MD-VAL-LINK-VALTAB-2026-09-11 */
       h+='</tr>';
     }
   } else {
@@ -6694,7 +6795,7 @@ function renderVal(){
     +th("P/E","pe_cur","col-num col-filter grp-pe-first","","width:90px")
     +th("Pctile","pe_pctile","col-num col-filter","","width:80px")
     +th("EPS 24MF","eps_24mf","col-num col-filter grp-pe-last","","width:120px")
-    +'<th class="col-txt" style="width:64px;text-align:center" title="Valuation range chart: 24-month forward P/E against ten years of its own history (opens in a new tab)">Chart</th>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
+    +'<th class="col-txt" style="width:64px;text-align:center" title="Valuation range chart: 24-month forward P/E against ten years of its own history (opens in the side panel)">Chart</th>';  /* MD-VAL-LINK-VALTAB-2026-09-11 */
   h+='</tr></thead><tbody>';
 
   for(var j=0;j<rows.length;j++){
@@ -6713,7 +6814,7 @@ function renderVal(){
     h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+nf(r.pe_pctile)+'</td>';
     h+='<td class="col-num col-filter grp-pe-last">'+fpCurr(r.eps_24mf,r.ticker)+'</td>';
     /* MD-VAL-LINK-VALTAB-2026-09-11: the row click opens the price chart, so the link stops propagation */
-    h+='<td style="text-align:center"><a class="val-chart-link" href="valuation.html?t='+encodeURIComponent(r.ticker)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Valuation range chart for '+r.ticker+' (new tab)">range</a></td>';
+    h+='<td style="text-align:center"><a class="val-chart-link" href="valuation.html?t='+encodeURIComponent(r.ticker)+'" onclick="return valLinkClick(event,\''+r.ticker+'\')" title="Valuation range chart for '+r.ticker+' (opens in the side panel; ctrl-click for a new tab)">range</a></td>';  /* MD-VAL-PANEL-2026-09-16 */
     h+='</tr>';
   }
   h+='</tbody></table></div>';
@@ -18996,6 +19097,14 @@ function sspRenderChart(ticker, company){
   /* sync zoom-button active state */
   var _zm={21:'ssp-z-1m',63:'ssp-z-3m',126:'ssp-z-6m',252:'ssp-z-12m',504:'ssp-z-2y',756:'ssp-z-3y',1260:'ssp-z-5y',99999:'ssp-z-all'};
   document.querySelectorAll('.ssp-czb').forEach(function(b){b.classList.remove('on');});
+  /* MD-VAL-PANEL-QC1-2026-09-16 F5: window._sspChartZoom is unset on the first render, so the button row
+     highlighted 12M while drawMasterChart sliced by the SHARED chartZoom (2Y out of the box). The
+     button said one thing and the chart showed another. Seed it from the shared zoom instead. */
+  if(!window._sspChartZoom){
+    var _s2n={'1M':21,'3M':63,'6M':126,'12M':252,'2Y':504,'3Y':756,'5Y':1260};
+    var _shared=(typeof window._dashChartZoom==='function')?window._dashChartZoom():'12M';
+    window._sspChartZoom=_s2n[_shared]||252;
+  }
   var _sspcz=window._sspChartZoom||252;
   var _zb=document.getElementById(_zm[_sspcz]); if(_zb)_zb.classList.add('on');
   /* populate clickable legend row */
@@ -19294,7 +19403,7 @@ renderTab("mm99");
         '    <span class="ssp-hdr-stock" id="ssp-hdr-ticker"></span>\n'
         '    <span class="ssp-hdr-company" id="ssp-hdr-company"></span>\n'
         '    <span class="ssp-hdr-company" id="ssp-hdr-freshness" style="margin-left:6px"></span>\n'
-        '    <a class="ssp-val-link" id="ssp-val-link" href="valuation.html" target="_blank" rel="noopener" title="Open the valuation range chart: 24-month forward P/E against ten years of its own history, with peers (new tab)"><span>Valuation range chart</span></a>\n'  # MD-VAL-LINK-SSP-2026-09-11
+        '    <a class="ssp-val-link" id="ssp-val-link" href="valuation.html" onclick="return valLinkClick(event,window._sspTicker)" title="Open the valuation range chart: 24-month forward P/E against ten years of its own history, with peers (opens in the side panel; ctrl-click for a new tab)"><span>Valuation range chart</span></a>\n'  # MD-VAL-LINK-SSP-2026-09-11, panel wiring MD-VAL-PANEL-2026-09-16
         '    <button class="ssp-close-btn" onclick="closeStockView()" title="Close Stock View">&times;</button>\n'
         '  </div>\n'
         '  <div class="ssp-tbl-band" id="ssp-tbl-band"></div>\n'
@@ -19340,6 +19449,17 @@ renderTab("mm99");
         '  </div>\n'
         '</div>\n'
         ''
+        '<!-- MD-VAL-PANEL-2026-09-16 -->\n'
+        '<div class="val-panel" id="val-panel" aria-hidden="true">\n'
+        '  <div class="val-panel-hdr">\n'
+        '    <span class="val-panel-ticker" id="val-panel-ticker"></span>\n'
+        '    <span class="val-panel-company" id="val-panel-company"></span>\n'
+        '    <span style="margin-left:auto;display:flex;gap:2px" id="val-panel-widths"></span>\n'
+        '    <a class="chart-width-btn" id="val-panel-newtab" href="valuation.html" target="_blank" rel="noopener" style="margin-left:12px" title="Open this valuation chart full screen in a new tab">Full screen</a>\n'
+        '    <button class="val-close-btn" onclick="closeValuationPanel()" title="Close the valuation chart (Esc)">&times;</button>\n'
+        '  </div>\n'
+        '  <iframe class="val-panel-frame" id="val-panel-frame" title="Valuation range chart" src="about:blank"></iframe>\n'
+        '</div>\n'
         '<div class="chart-panel" id="chart-panel">\n'
         '  <div id="chart-container" style="width:100%;min-height:calc(100vh - 200px)">Click a stock row to view chart</div>\n'
         '</div>\n'

@@ -3129,7 +3129,11 @@ function _valPushMain(){
 /* MD-VAL-PANEL-QC4-2026-09-16 (MATERIAL). The chart page carries its own "Switch stock" box, and switching
    there changed the frame but NOT the panel header or the Full screen link, so the header named one
    company while the chart drew another. On a page read for investment judgement a header naming the
-   wrong stock is the worst kind of cosmetic bug. The frame calls this on every stock change. */
+   wrong stock is the worst kind of cosmetic bug. The frame calls this on every stock change.
+   OTHER END OF THIS CONTRACT: master-dashboard/valuation.html, function hostSync(), same marker.
+   Both ends are try/catch guarded, so if one is edited away the panel degrades to a stale header
+   rather than throwing -- which means a grep for the marker is the only thing that will find the
+   pair. Change one, grep the marker, change the other. */
 window.__valPanelSyncStock=function(t,name){
   if(!t)return;
   var tEl=document.getElementById('val-panel-ticker');if(tEl)tEl.textContent=t;

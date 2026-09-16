@@ -140,6 +140,9 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
   var EMBED = /[?&]embed=1(&|$)/.test(location.search);
   if (EMBED && document.body) document.body.className = (document.body.className ? document.body.className + ' ' : '') + 'embed';
   // MD-VAL-PANEL-QC4-2026-09-16: two things the frame owes its host.
+  // OTHER END OF THIS CONTRACT: build_dashboard.py, window.__valPanelSyncStock and
+  // window.closeValuationPanel, same marker. Both ends are guarded, so a broken pair fails SILENTLY
+  // (stale header, dead Escape) rather than throwing. Grep the marker before editing either side.
   // (a) the host's header names the stock, so it has to be told when this page switches stock from
   //     its own search box, or the header names one company beside another company's chart.
   // (b) Escape is handled by the host, but a keydown while focus is inside this frame never reaches

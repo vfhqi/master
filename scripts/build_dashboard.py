@@ -8502,34 +8502,37 @@ function SUM_renderQualifiedStocks() {
     else if (key === 'low_52w')                intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
     else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
     var colour = s1ColourForIntensity(intensity);
+    var bg = window.MD_V2_BG_SPECTRUM(intensity); // MD-V2-BG-SPECTRUM-S134: Stage 1 bullish, same polarity as S2
     var text   = (s1State.mode.inputs === 'pct') ? s1FmtPct(pct) : s1FmtNum(v);
-    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+    return '<td class="num ' + extraCls + '" style="color:' + colour + ';background:' + bg + '">' + text + '</td>';
   }
 
   function s1TestCell(row, col) {
     if (col.colType === 'gate') {
       var gpass = !!(row[col.gateField]);
       var gcls  = col.cls || '';
+      var gbg = window.MD_V2_BG_PASSFAIL(gpass, false); // MD-V2-BG-SPECTRUM-S134
       if (s1State.mode.tests === 'val') {
         // Show % gap: (200D_today - 200D_150d_ago) / 200D_150d_ago — negative = gate passing
         var gv = (row.ma_200 != null) ? '—' : '—';
         // Best approximation from available data: rely on pass/fail + colour
         var gcolor = gpass ? s1ColourForIntensity(0.7) : s1ColourForIntensity(-0.4);
-        return '<td class="test-val ' + gcls + '" style="color:' + gcolor + '">' + (gpass ? '✓' : '·') + '</td>';
+        return '<td class="test-val ' + gcls + '" style="color:' + gcolor + ';background:' + gbg + '">' + (gpass ? '✓' : '·') + '</td>';
       }
-      if (gpass) return '<td class="test-pass ' + gcls + '"><span class="tick">✓</span></td>';
-      return '<td class="test-fail ' + gcls + '">·</td>';
+      if (gpass) return '<td class="test-pass ' + gcls + '" style="background:' + gbg + '"><span class="tick">✓</span></td>';
+      return '<td class="test-fail ' + gcls + '" style="background:' + gbg + '">·</td>';
     }
     if (col.colType === 'streak_thresh') {
       var sVal  = row[col.streakField] || 0;
       var sPass = sVal >= col.threshold;
       var stCls = col.cls || '';
+      var stbg = window.MD_V2_BG_PASSFAIL(sPass, false); // MD-V2-BG-SPECTRUM-S134
       if (s1State.mode.tests === 'val') {
         var stCol = sPass ? s1ColourForIntensity(0.7) : s1ColourForIntensity(-0.4);
-        return '<td class="test-val ' + stCls + '" style="color:' + stCol + '">' + sVal + 'd</td>';
+        return '<td class="test-val ' + stCls + '" style="color:' + stCol + ';background:' + stbg + '">' + sVal + 'd</td>';
       }
-      if (sPass) return '<td class="test-pass ' + stCls + '"><span class="tick">✓</span></td>';
-      return '<td class="test-fail ' + stCls + '">·</td>';
+      if (sPass) return '<td class="test-pass ' + stCls + '" style="background:' + stbg + '"><span class="tick">✓</span></td>';
+      return '<td class="test-fail ' + stCls + '" style="background:' + stbg + '">·</td>';
     }
     if (col.colType === 'count') {
       var n    = row[col.countKey] || 0;
@@ -9631,8 +9634,13 @@ function SUM_renderQualifiedStocks() {
     else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (20 - pct) / 30)); // near 52w low = bearish
     else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, -pct / 10));
     var colour = s3ColourForIntensity(intensity);
+    // MD-V2-BG-SPECTRUM-S134: Stage 3's `intensity` is bearish-positive (opposite of S1/S2's
+    // bullish-positive), confirmed by the colour comment above and s3ColourForIntensity's
+    // mapping (positive -> red). MD_V2_BG_SPECTRUM always maps positive -> green, so the sign
+    // is negated here to keep the background consistent with the text colour in this same cell.
+    var bg = window.MD_V2_BG_SPECTRUM(-intensity);
     var text = (s3State.mode.inputs === 'pct') ? s3FmtPct(pct) : s3FmtNum(v);
-    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+    return '<td class="num ' + extraCls + '" style="color:' + colour + ';background:' + bg + '">' + text + '</td>';
   }
 
   function s3TestValueFor(row, col) {
@@ -9668,14 +9676,15 @@ function SUM_renderQualifiedStocks() {
     var grp = (row.groups || {})[col.testGroup] || {};
     var pass = !!grp[col.testKey];
     var extra = col.cls || '';
+    var bg = window.MD_V2_BG_PASSFAIL(pass, true); // MD-V2-BG-SPECTRUM-S134: Stage 3 bearish, pass=red (matches .test-pass-bear)
     if (s3State.mode.tests === 'val') {
       var v = s3TestValueFor(row, col);
       // Stage 3 passes are BEARISH — colour pass red, fail neutral grey
       var colour = pass ? s3ColourForIntensity(0.7) : '#999';
-      return '<td class="test-val ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+      return '<td class="test-val ' + extra + '" style="color:' + colour + ';background:' + bg + '">' + v + '</td>';
     }
-    if (pass) return '<td class="test-pass-bear ' + extra + '"><span class="tick">✓</span></td>';
-    return '<td class="test-fail ' + extra + '">·</td>';
+    if (pass) return '<td class="test-pass-bear ' + extra + '" style="background:' + bg + '"><span class="tick">✓</span></td>';
+    return '<td class="test-fail ' + extra + '" style="background:' + bg + '">·</td>';
   }
 
   function s3PillFor(rating, count) {
@@ -10161,8 +10170,11 @@ function SUM_renderQualifiedStocks() {
     else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (20 - pct) / 30)); // near low = bearish
     else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, -pct / 10));
     var colour = s4ColourForIntensity(intensity);
+    // MD-V2-BG-SPECTRUM-S134: same inversion as Stage 3 (see s3InputCell) -- Stage 4's
+    // `intensity` is bearish-positive, negate for the background to match the text colour.
+    var bg = window.MD_V2_BG_SPECTRUM(-intensity);
     var text = (s4State.mode.inputs === 'pct') ? s4FmtPct(pct) : s4FmtNum(v);
-    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+    return '<td class="num ' + extraCls + '" style="color:' + colour + ';background:' + bg + '">' + text + '</td>';
   }
 
   function s4TestValueFor(row, col) {
@@ -10196,14 +10208,15 @@ function SUM_renderQualifiedStocks() {
     var grp = (row.groups || {})[col.testGroup] || {};
     var pass = !!grp[col.testKey];
     var extra = col.cls || '';
+    var bg = window.MD_V2_BG_PASSFAIL(pass, true); // MD-V2-BG-SPECTRUM-S134: Stage 4 bearish, pass=red (matches .test-pass-bear)
     if (s4State.mode.tests === 'val') {
       var v = s4TestValueFor(row, col);
       // Stage 4 passes are BEARISH — colour pass red, fail neutral grey
       var colour = pass ? s4ColourForIntensity(0.7) : '#999';
-      return '<td class="test-val ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+      return '<td class="test-val ' + extra + '" style="color:' + colour + ';background:' + bg + '">' + v + '</td>';
     }
-    if (pass) return '<td class="test-pass-bear ' + extra + '"><span class="tick">✓</span></td>';
-    return '<td class="test-fail ' + extra + '">·</td>';
+    if (pass) return '<td class="test-pass-bear ' + extra + '" style="background:' + bg + '"><span class="tick">✓</span></td>';
+    return '<td class="test-fail ' + extra + '" style="background:' + bg + '">·</td>';
   }
 
   function s4PillFor(rating, count) {

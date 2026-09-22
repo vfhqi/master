@@ -8330,6 +8330,36 @@ function SUM_renderQualifiedStocks() {
     sort: { col: 'count', dir: 'desc' }
   };
 
+  // ===== MD-V2-BG-SPECTRUM-S2: shared background-colour helpers for every
+  // INPUTS/TESTS toggle table (Stage 1-4 and sub-pages share this exact
+  // toggle pattern). Attached to `window` so every per-stage closure can
+  // reach them regardless of its own scope -- avoids assuming they all
+  // share one enclosing function, which this file does not guarantee.
+  //  - MD_V2_BG_SPECTRUM(intensity): continuous red-neutral-green background
+  //    for a -1..+1 continuous value (the Inputs columns: 52w high/low,
+  //    150D/200D MA). Same red/green hue family as the existing per-stage
+  //    ColourForIntensity() text-colour functions, as a translucent fill.
+  //  - MD_V2_BG_PASSFAIL(pass, bearish): flat two-tone background for a
+  //    boolean test (the Tests columns -- pass/fail has no magnitude, so a
+  //    flat tone is the honest read, not a graduated one). `bearish` flips
+  //    which colour means "pass", matching the existing .test-pass-bear
+  //    convention already used on Stage 3/4 (a passing bearish/breakdown
+  //    test is a warning and is shown red, not green).
+  function MD_V2_BG_SPECTRUM(intensity) {
+    if (intensity == null || isNaN(intensity)) return null;
+    var t = Math.max(-1, Math.min(1, intensity));
+    var alpha = (0.05 + Math.abs(t) * 0.22).toFixed(3);
+    if (t > 0.03) return 'rgba(27,94,32,' + alpha + ')';
+    if (t < -0.03) return 'rgba(168,50,50,' + alpha + ')';
+    return 'rgba(120,120,120,0.05)';
+  }
+  function MD_V2_BG_PASSFAIL(pass, bearish) {
+    var showGreen = bearish ? !pass : pass;
+    return showGreen ? 'rgba(27,94,32,0.09)' : 'rgba(168,50,50,0.09)';
+  }
+  window.MD_V2_BG_SPECTRUM = MD_V2_BG_SPECTRUM;
+  window.MD_V2_BG_PASSFAIL = MD_V2_BG_PASSFAIL;
+
   // ===== Column definitions =====
   var S1_COLS = [
     { id:'name',        label:'Company · Ticker',                                     sortKey:'company',              cls:'name-cell' },
@@ -9023,8 +9053,9 @@ function SUM_renderQualifiedStocks() {
     else if (key === 'low_52w') intensity = Math.max(-1, Math.min(1, (pct - 20) / 30));
     else if (key === 'ma_150' || key === 'ma_200') intensity = Math.max(-1, Math.min(1, pct / 10));
     var colour = s2ColourForIntensity(intensity);
+    var bg = window.MD_V2_BG_SPECTRUM(intensity); // MD-V2-BG-SPECTRUM-S2
     var text = (s2State.mode.inputs === 'pct') ? s2FmtPct(pct) : s2FmtNum(v);
-    return '<td class="num ' + extraCls + '" style="color:' + colour + '">' + text + '</td>';
+    return '<td class="num ' + extraCls + '" style="color:' + colour + ';background:' + bg + '">' + text + '</td>';
   }
 
   function s2TestValueFor(row, col) {
@@ -9052,13 +9083,14 @@ function SUM_renderQualifiedStocks() {
     var grp = (row.groups || {})[col.testGroup] || {};
     var pass = !!grp[col.testKey];
     var extra = col.cls || '';
+    var bg = window.MD_V2_BG_PASSFAIL(pass, false); // MD-V2-BG-SPECTRUM-S2: Stage 2 is bullish, pass=green
     if (s2State.mode.tests === 'val') {
       var v = s2TestValueFor(row, col);
       var colour = pass ? s2ColourForIntensity(0.7) : s2ColourForIntensity(-0.4);
-      return '<td class="test-val ' + extra + '" style="color:' + colour + '">' + v + '</td>';
+      return '<td class="test-val ' + extra + '" style="color:' + colour + ';background:' + bg + '">' + v + '</td>';
     }
-    if (pass) return '<td class="test-pass ' + extra + '"><span class="tick">✓</span></td>';
-    return '<td class="test-fail ' + extra + '">·</td>';
+    if (pass) return '<td class="test-pass ' + extra + '" style="background:' + bg + '"><span class="tick">✓</span></td>';
+    return '<td class="test-fail ' + extra + '" style="background:' + bg + '">·</td>';
   }
 
   function s2PillFor(rating, count) {

@@ -496,63 +496,77 @@ table.data-table th{background:#f0ede3;color:#6b6b6b;font-weight:600;font-size:1
 .val-chart-link{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border:1px solid #2f855a;color:#276749;background:rgba(56,161,105,0.08);border-radius:3px;text-decoration:none;line-height:1.4}
 .val-chart-link:hover{background:#2f855a;color:#fff}
 
-/* MD-POOL-ELIG-2026-09-28 -- Pool Eligibility for Portfolio Selection */
-.pe-title{font-size:15px;font-weight:700;color:var(--text-bright);margin-bottom:3px}
-.pe-sub{font-size:12px;color:var(--text-dim);line-height:1.5}
-.pe-dates{font-size:11px;color:#555;margin-top:6px}
-.pe-phase{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;padding:6px 10px;border-radius:5px;font-size:12px;line-height:1.45}
-.pe-phase.up{background:#eef6ee;border-left:4px solid #2e7d32}
-.pe-phase.down{background:#fdf1f1;border-left:4px solid #a32d2d}
-.pe-phase b{white-space:nowrap}
-.pe-warn{background:#fff8e1;border-left:4px solid #8d6e00;padding:6px 10px;margin-top:8px;font-size:11.5px;line-height:1.45;border-radius:4px}
-.pe-rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:8px;margin:10px 0 8px}
-.pe-rule{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 9px 7px}
+/* MD-POOL-ELIG-2026-09-28 -- Pool Eligibility for Portfolio Selection (Message 5 layout: the page fits the window) */
+.pe-tile{padding:8px 12px 8px;margin-bottom:8px}
+.pe-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;row-gap:4px;min-height:22px}
+.pe-title{font-size:15px;font-weight:700;color:var(--text-bright);white-space:nowrap}
+.pe-sub{font-size:11.5px;color:var(--text-dim);min-width:0}
+.pe-dates{font-size:11px;color:#555;white-space:nowrap;cursor:help}
+.pe-ph{font-size:11px;padding:2px 8px;border-radius:10px;white-space:nowrap;cursor:help}
+.pe-ph.up{background:#eef6ee;color:#1b5e20;border:1px solid #cfe3cf}
+.pe-ph.down{background:#fdf1f1;color:#8b1a1a;border:1px solid #efcfcf}
+.pe-warn{background:#fff8e1;border-left:4px solid #8d6e00;padding:3px 8px;margin-top:6px;font-size:11px;line-height:1.4;border-radius:4px}
+.pe-rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:8px;margin:7px 0 6px}
+.pe-rule{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 8px}
 .pe-rule.off{opacity:.62}
-.pe-tog{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;font:inherit;font-size:12px;font-weight:600;padding:6px 8px;border-radius:5px;border:1px solid #2e7d32;background:#2e7d32;color:#fff;cursor:pointer;text-align:left}
+.pe-tog{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;font:inherit;font-size:12px;font-weight:600;padding:4px 8px;border-radius:5px;border:1px solid #2e7d32;background:#2e7d32;color:#fff;cursor:pointer;text-align:left;min-width:0}
+.pe-tog .pe-tl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pe-tog:hover{filter:brightness(1.08)}
 .pe-rule.off .pe-tog{background:#fbfbf9;color:#555;border-color:#cfcfc8}
-.pe-tog .pe-state{font-size:10px;font-weight:700;letter-spacing:.4px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,.22);white-space:nowrap}
+.pe-tog .pe-state{font-size:10px;font-weight:700;letter-spacing:.4px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,.22);white-space:nowrap;flex:0 0 auto}
 .pe-rule.off .pe-tog .pe-state{background:#ecebe6;color:#666}
-.pe-cond{font-size:11px;color:#444;margin:5px 1px 4px;min-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pe-flex{display:flex;gap:3px}
-.pe-fx{flex:1 1 0;min-width:0;font:inherit;font-size:10.5px;padding:3px 0;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:3px;cursor:pointer;color:#333;white-space:nowrap;text-align:center}
+.pe-rrow{display:flex;align-items:center;gap:8px;margin-top:5px}
+.pe-flex{display:flex;gap:3px;flex:1 1 auto;min-width:0}
+.pe-fx{flex:1 1 0;min-width:0;font:inherit;font-size:10.5px;padding:2px 0;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:3px;cursor:pointer;color:#333;white-space:nowrap;text-align:center}
 .pe-fx:hover{background:#f0f0ec}
 .pe-fx.std{font-weight:700}
 .pe-fx.on{background:#1b3d5c;border-color:#1b3d5c;color:#fff}
-.pe-pass{font-size:10.5px;color:var(--text-dim);margin-top:5px}
-.pe-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 8px}
-.pe-count{font-size:13px;color:#222}
+.pe-pass{font-size:10.5px;color:var(--text-dim);white-space:nowrap;flex:0 0 auto;cursor:help}
+.pe-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;row-gap:5px}
+.pe-countbox{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pe-count{font-size:13px;color:#222;white-space:nowrap}
 .pe-count b{font-size:15px}
+.pe-showing{font-size:11.5px;color:#555}
 .pe-target{font-size:11px;padding:2px 7px;border-radius:10px;background:#eef3ec;color:#1b5e20;white-space:nowrap}
 .pe-target.outside{background:#fff4e5;color:#8a4b00}
-.pe-search{font:inherit;font-size:12px;padding:4px 8px;border:1px solid #cfcfc8;border-radius:4px;background:#fff;width:230px}
-.pe-btn{font:inherit;font-size:11px;padding:4px 9px;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:4px;cursor:pointer;color:#333;white-space:nowrap}
+.pe-search{font:inherit;font-size:12px;padding:3px 8px;border:1px solid #cfcfc8;border-radius:4px;background:#fff;width:290px}
+.pe-btn{font:inherit;font-size:11px;padding:3px 9px;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:4px;cursor:pointer;color:#333;white-space:nowrap}
 .pe-btn:hover{background:#f0f0ec}
 .pe-chk{font-size:11.5px;color:#444;display:inline-flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap}
 .pe-spacer{flex:1 1 auto}
+/* The page does not scroll on this tab (Message 5); sizeWrap() sets .pe-fit only when the table frame fits the window */
+html.pe-fit body[data-active-tab="pool_elig"]{overflow:hidden}
 .pe-wrap{overflow:auto;max-height:calc(100vh - var(--header-height) - 20px);border:1px solid var(--border);border-radius:6px;background:#fff}
-table.pe-table{border-collapse:separate;border-spacing:0;font-size:11.5px;background:#fff;color:#222;width:max-content;min-width:100%}
-table.pe-table th{background:#f0ede3;color:#555;font-weight:600;font-size:10.5px;padding:4px 6px;border-bottom:1px solid #ddd8c8;white-space:nowrap;position:sticky;z-index:3;cursor:pointer;user-select:none;-webkit-user-select:none}
-table.pe-table tr.pe-g th{top:0;height:24px;text-align:center;font-size:11px;letter-spacing:.3px;color:#333;cursor:default;border-bottom:1px solid #ddd8c8}
-table.pe-table tr.pe-h th{top:24px;height:40px;vertical-align:bottom;line-height:1.2;white-space:normal;min-width:44px;max-width:104px}
-table.pe-table tr.pe-h th.pe-name{max-width:210px}
+/* Fixed layout at the frame's width: the columns share the width instead of growing to their content, so the whole
+   table shows without sideways scrolling (Message 5). Below about 1240px wide it scrolls sideways inside its frame. */
+table.pe-table{border-collapse:separate;border-spacing:0;font-size:11.5px;background:#fff;color:#222;width:100%;min-width:1240px;table-layout:fixed}
+table.pe-table th{background:#f0ede3;color:#555;font-weight:600;font-size:10.5px;padding:3px 4px;border-bottom:1px solid #ddd8c8;position:sticky;z-index:3;cursor:pointer;user-select:none;-webkit-user-select:none;overflow:hidden}
+table.pe-table tr.pe-g th{top:0;height:22px;box-sizing:border-box;text-align:left;font-size:11px;letter-spacing:.3px;color:#333;cursor:default;white-space:nowrap;padding:3px 0}
+table.pe-table tr.pe-h th{top:22px;vertical-align:top;white-space:normal;line-height:1.15;padding:4px 3px 4px}
+table.pe-table th .pe-hs{display:block;font-size:11px;font-weight:700;color:#222;line-height:1.2}
+table.pe-table th .pe-hl{display:block;font-size:8.5px;font-weight:500;color:#6b6b6b;line-height:1.15;margin-top:2px;letter-spacing:.1px}
 table.pe-table th.num{text-align:right}
-table.pe-table th:hover{color:#111}
-table.pe-table th .pe-arr{margin-left:3px;color:#8d6e00}
-table.pe-table td{padding:3px 6px;border-bottom:1px solid #f0efe9;white-space:nowrap;height:22px}
+table.pe-table th:hover .pe-hs{color:#000}
+table.pe-table th .pe-arr{margin-left:2px;color:#8d6e00;font-size:9px}
+table.pe-table td{padding:3px 4px;border-bottom:1px solid #f0efe9;white-space:nowrap;height:22px;overflow:hidden;text-overflow:ellipsis}
 table.pe-table td.num{text-align:right;font-variant-numeric:tabular-nums}
 table.pe-table tbody tr:hover td{background-color:#fafaf6}
 table.pe-table tbody tr:hover td.pe-name{background-color:#f6f5ef}
-table.pe-table th.pe-name{left:0;z-index:5;text-align:left;min-width:210px;max-width:210px}
+table.pe-table th.pe-name{left:0;z-index:5;text-align:left}
+/* Column widths: the three text columns take these shares; the 19 numeric columns share the rest equally. On a 1920-wide
+   screen the numbers get about 66px each (the widest reading, e.g. "+16.0%" or "23,240", needs about 48px), so the
+   text columns get the spare room. Narrower screens give the numbers more of the width and use smaller type. */
+col.pe-c-name{width:12.5%} col.pe-c-ind{width:9%} col.pe-c-sec{width:12%}
+@media (max-width:1760px){col.pe-c-name{width:12%} col.pe-c-ind{width:7.5%} col.pe-c-sec{width:9%} table.pe-table td{font-size:11px}}
+@media (max-width:1480px){col.pe-c-name{width:12%} col.pe-c-ind{width:7%} col.pe-c-sec{width:8%} table.pe-table td{font-size:10.5px;padding:3px 3px}
+  table.pe-table th .pe-hs{font-size:10px} table.pe-table th .pe-hl{font-size:8px} table.pe-table th .pe-hs,table.pe-table th .pe-hl{overflow-wrap:anywhere}}
 table.pe-table tr.pe-g th.pe-gi{left:0;z-index:5;border-right:1px solid #ebe8de}
 table.pe-table tr.pe-g th.pe-gi2{background:#f0ede3}
-table.pe-table td.pe-name{position:sticky;left:0;z-index:2;background:#fff;min-width:210px;max-width:210px;overflow:hidden;text-overflow:ellipsis;border-right:1px solid #ebe8de}
+table.pe-table td.pe-name{position:sticky;left:0;z-index:2;background:#fff;border-right:1px solid #ebe8de;padding-left:6px}
 .pe-name .co{font-weight:600;color:#1a1a1a;cursor:pointer}
 .pe-name .co:hover{text-decoration:underline}
 .pe-name .tk{color:var(--text-dim);font-size:10px;margin-left:4px}
-td.pe-txt{max-width:150px;overflow:hidden;text-overflow:ellipsis;color:#444}
-td.pe-txt.w-ind{max-width:120px}
-td.pe-txt.w-coh{max-width:190px}
+td.pe-txt{color:#444}
 th.pe-gs,td.pe-gs{border-left:2px solid #d8d3c2}
 tr.pe-g th.pe-gm{background:#e9eef3}
 tr.pe-g th.pe-gf{background:#e8f1e6}
@@ -562,8 +576,7 @@ tr.pe-out td{opacity:.55}
 tr.pe-out td.pe-name{opacity:1}
 tr.pe-out td.pe-name .co{color:#777}
 td.pe-np{font-weight:700;text-align:center}
-.pe-legend{font-size:11px;color:#555;margin:8px 2px 2px;line-height:1.6}
-.pe-sw{display:inline-block;width:26px;height:11px;vertical-align:-1px;margin:0 3px 0 2px;border:1px solid #ddd}
+table.pe-table th.pe-hf[data-pe-sort="np"]{text-align:center}
 .pe-empty{padding:26px;text-align:center;color:#666;font-size:12px}
 /* MD-POOL-ELIG-2026-09-28: the page uses the V2 header chrome, exactly as the other Summary pages (Overview, Timeliness) */
 body[data-active-tab="pool_elig"] .header-tabs-row{display:none !important}
@@ -571,7 +584,7 @@ body[data-active-tab="pool_elig"] .v2-nav{display:flex}
 body[data-active-tab="pool_elig"] .header-controls-row{display:none !important}
 body[data-active-tab="pool_elig"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="pool_elig"]{--header-height:70px}
-.v2-nav-btn[data-v2-tab="pool_elig"]{width:150px}
+.v2-nav-btn[data-v2-tab="pool_elig"]{width:92px}
 /* An active navigation button kept its group's pale hover colour under the pointer, so its white label vanished
    (measured 28-Sep-26 on every Summary button; the group hover rule ties .v2-active on specificity and comes later, so it wins; the extra .v2-nav raises these above it). Keep the active colour. */
 .v2-nav .v2-nav-group .v2-nav-btn.v2-active:hover{background:#1b3d5c;border-color:#1b3d5c}
@@ -579,11 +592,10 @@ body[data-active-tab="pool_elig"]{--header-height:70px}
 .v2-nav .v2-nav-group .v2-nav-btn.v2-active-s2:hover{background:#2e7d32;border-color:#2e7d32}
 .v2-nav .v2-nav-group .v2-nav-btn.v2-active-s3:hover{background:#b45309;border-color:#b45309}
 .v2-nav .v2-nav-group .v2-nav-btn.v2-active-s4:hover{background:#991b1b;border-color:#991b1b}
-table.pe-table tr.pe-g th{text-align:left}
 table.pe-table tr.pe-h th.pe-hm{background:#e9eef3}
 table.pe-table tr.pe-h th.pe-hf{background:#e8f1e6}
-table.pe-table tr.pe-g th span.pe-gl{position:sticky;left:222px;padding:0 10px;display:inline-block}
-table.pe-table tr.pe-g th.pe-gi span.pe-gl{left:8px}
+table.pe-table tr.pe-g th span.pe-gl{padding:0 8px;display:inline-block}
+table.pe-table tr.pe-g th.pe-gi span.pe-gl{padding-left:6px}
 /* MD-QOT-2026-09-10 — Qualification over Time */
 .qot-warn{background:#fdf1f1;border-left:4px solid #A32D2D;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
 .qot-note{background:#eef3ec;border-left:4px solid #1b5e20;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
@@ -1460,7 +1472,7 @@ body[data-active-tab="master_overview"] .header-tabs-row,body[data-active-tab="s
    over overflow-x:auto because a wrapped second row stays clean and readable,
    whereas a horizontal scrollbar inside a header strip is both scruffy and easy to
    miss. On a window wide enough for the full strip nothing changes at all. */
-.v2-nav { display: none; flex-wrap: wrap; row-gap: 6px; padding: 5px 12px 6px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 5px; align-items: flex-start; overflow-x: visible; }
+.v2-nav { display: none; flex-wrap: wrap; row-gap: 6px; padding: 5px 12px 6px; background: #fbfaf5; border-bottom: 1px solid #e0dcc8; gap: 4px; align-items: flex-start; overflow-x: visible; }
 body[data-active-tab^="stage_"] .v2-nav,
 body[data-active-tab="pos_pre_indicators"] .v2-nav,body[data-active-tab="pulling_back"] .v2-nav,body[data-active-tab="neg_pre_indicators"] .v2-nav,
 body[data-active-tab="post_indicators"] .v2-nav,
@@ -1475,11 +1487,13 @@ body[data-active-tab="tests_probing_bet_s2"] .v2-nav,
 body[data-active-tab="setups_healthy_retest"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2-nav,body[data-active-tab="val"] .v2-nav,body[data-active-tab="combos"] .v2-nav { display: flex; }
 /* Group container */
-.v2-nav-group { display: flex; flex-direction: column; border-radius: 5px; padding: 4px 6px 5px; flex-shrink: 0; }
+/* MD-NAV-ONE-LINE-28Sep26 (Richard, Message 5): buttons 90px to 84px, padding 4px 7px to 3px 4px, group padding 6px to 4px,
+   gap 5px to 4px, so every group, Summary included, fits one line on a 1920-wide screen. No label overflows (measured). */
+.v2-nav-group { display: flex; flex-direction: column; border-radius: 5px; padding: 4px 4px 5px; flex-shrink: 0; }
 .v2-nav-group-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.45px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; line-height: 1; }
 .v2-nav-group-btns { display: flex; flex-wrap: wrap; gap: 3px; align-items: stretch; }
 /* Buttons: uniform 50px height, centred text */
-.v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; width: 90px; height: 66px; padding: 4px 7px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; overflow: hidden; }
+.v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; width: 84px; height: 66px; padding: 3px 4px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; overflow: hidden; }
 .v2-nav-btn:hover { background: #f3efe2; border-color: #b0ac98; }
 .v2-nav-btn.v2-active { background: #1b3d5c; border-color: #1b3d5c; color: #fff; }
 .v2-nav-btn.v2-active-s1 { background: #1b5e20; border-color: #1b5e20; color: #fff; }
@@ -18553,10 +18567,14 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 /* ============================================================================
    POOL ELIGIBILITY FOR PORTFOLIO SELECTION  (MD-POOL-ELIG-2026-09-28)
    Richard's page for the work-in-progress Filter Rules of APM - Stage 2 Gate-4
-   Backtest (SA - Master Dashboard decisions D-MD-POOL-1 to 20). Every stock in the
+   Backtest (SA - Master Dashboard decisions D-MD-POOL-1 onwards). Every stock in the
    universe, three column groups (Information, Metrics, Filter Tests), four rule
    toggles with Flex Values under each (Message 3, 28-Sep-26). The page ALWAYS opens at the Default
    Standard Settings (no memory between visits); switching tabs keeps the state.
+   Message 5 (28-Sep-26): the whole page fits the window. The table fits the width (no sideways scrolling on a
+   1920-wide screen; columns share the width), each heading is a short name in normal text with the full name in
+   small text beneath, the page itself does not scroll (only the table scrolls, inside its frame), no Cohort
+   column and no colour key.
    Data: MASTER_DATA.pool, written by scripts/build_pool_eligibility.py, whose
    docstring holds every definition and the backtest line it reproduces.
    ============================================================================ */
@@ -18566,11 +18584,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
   var EPS=1e-9;
 
-  /* The Filter Rules (now four, below). std = Default Standard Setting; flex = the Flex Values. Percent rules hold thresholds in
-     percent; the readings are fractions. Direction and the treatment of a missing reading follow the backtest
-     (APM - Stage 2 Gate-4 Backtest, session14/s14_step2_masks.py): a missing reading fails the rule. */
-  /* The four Filter Tests (Richard, Message 3, 28-Sep-26; D-MD-POOL-16), in his order and names. ">" in his list is
-     read as "at or above", the backtest's tested thresholds (D-MD-POOL-17). */
+  /* The four Filter Tests (Richard, Message 3, 28-Sep-26; D-MD-POOL-16), in his order and names, all "at or above"
+     (Message 4). std = Default Standard Setting; flex = the Flex Values. Percent rules hold thresholds in percent;
+     the readings are fractions. A missing reading fails the rule, as in the backtest (session14/s14_step2_masks.py). */
   var RULES=[
     {k:"rs",  field:"rs",  label:"Stock RS L12M Composite",          std:80, flex:[60,70,85,90],   pct:false, dir:"ge",
      tip:"Composite relative strength rank, 0 to 99, computed exactly as the backtest: 3-month return weighted 0.4, 6-, 9- and 12-month returns 0.2 each, each minus the Stoxx Europe 600's, ranked across the universe (the dashboard's other pages measure each look-back one trading day shorter, so a few ranks differ by a point or two)"},
@@ -18597,8 +18613,6 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var v=r[rule.field];
     if(v==null||isNaN(v))return false;
     if(rule.dir==="ge")return rule.pct?(v>=thr/100-EPS):(v>=thr-EPS);
-    if(rule.dir==="gt0")return thr===0?(v>0):(v>=thr/100-EPS);
-    if(rule.dir==="le")return v<=thr/100+EPS;
     return false;
   }
   function thrText(rule,v){
@@ -18607,7 +18621,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   }
   function condText(rule){
     var t=st.thr[rule.k];
-    if(rule.k==="sb")return "Net upgrade breadth "+(t>0?"+":"")+t+"% or more";
+    if(rule.pct)return rule.label+" "+(t>0?"+":"")+t+"% or more";
     return rule.label+" "+t+" or more";
   }
 
@@ -18623,35 +18637,37 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function fPx(v){if(v==null)return null;var a=Math.abs(v);return a>=1000?v.toLocaleString("en-GB",{maximumFractionDigits:0}):(a>=10?v.toFixed(2):(a>=1?v.toFixed(3):v.toPrecision(3)));}
   function fPct(v,d){if(v==null||isNaN(v))return null;var x=v*100;return (x>0&&d.sign?"+":"")+x.toFixed(d.dp)+"%";}
 
-  /* Column definitions. g: I = Information, M = Metrics, F = Filter Tests. */
+  /* Column definitions. g: I = Information, M = Metrics, F = Filter Tests. label = the full name (small text in the
+     heading); sh = the short name (normal text; Richard's example: "SS Sales Breadth"). w names the CSS width class of
+     the three text columns (col.pe-c-name etc., set per screen width in the CSS); the numeric columns share what is
+     left equally (table-layout:fixed). */
   var COLS=[
-    {id:"name",g:"I",label:"Company",key:"n",type:"name",tip:"Company and ticker; click the name to open the Stock View"},
-    {id:"ind", g:"I",label:"Industry",key:"ind",type:"txt",cls:"w-ind"},
-    {id:"sec", g:"I",label:"Sector",key:"sec",type:"txt"},
-    {id:"coh", g:"I",label:"Cohort",key:"cohn",type:"txt",cls:"w-coh"},
-    {id:"p",   g:"M",label:"SP",key:"p",type:"px",gs:true,tip:"Share price, last close"},
-    {id:"ma200",g:"M",label:"200D",key:"ma200",type:"px",tip:"200-day simple moving average of the daily close"},
-    {id:"sl",  g:"M",label:"200D Slope",key:"sl",type:"pct",dp:1,sign:true,red:-0.04,green:0.04,tip:TIPS.sl},
-    {id:"m0",  g:"M",label:"> 0% 200D Trend",key:"m0",type:"mon",cap:"m0c",red:1,green:9,tip:"Consecutive months (back from this month) in which the 200D Slope was above 0% on every trading day of the month. '+' = the run reaches the start of the price history"},
-    {id:"m2",  g:"M",label:"> 2% 200D Trend",key:"m2",type:"mon",cap:"m2c",red:1,green:6,tip:"Consecutive months in which the 200D Slope was above 2% on every trading day of the month"},
-    {id:"m4",  g:"M",label:"> 4% 200D Trend",key:"m4",type:"mon",cap:"m4c",red:0,green:3,tip:"Consecutive months in which the 200D Slope was above 4% on every trading day of the month"},
-    {id:"mlen",g:"M",label:"> 200D Length",key:"mlen",type:"mon",cap:"mlenc",red:1,green:9,tip:"Consecutive months in which the share price closed above its 200D on every trading day of the month"},
-    {id:"hi",  g:"M",label:"52W High",key:"hi",type:"pct",dp:0,red:0.50,green:0,tip:"Share price % below its 52-week high"},
-    {id:"lo",  g:"M",label:"52W Low",key:"lo",type:"pct",dp:0,red:0,green:0.30,tip:"Share price % above its 52-week low"},
+    {id:"name",g:"I",label:"Company",sh:"Company",key:"n",type:"name",w:"name",tip:"Company and ticker; click the name to open the Stock View"},
+    {id:"ind", g:"I",label:"Industry",sh:"Industry",key:"ind",type:"txt",w:"ind"},
+    {id:"sec", g:"I",label:"Sector",sh:"Sector",key:"sec",type:"txt",w:"sec"},
+    {id:"p",   g:"M",label:"SP",sh:"SP",key:"p",type:"px",gs:true,tip:"Share price, last close"},
+    {id:"ma200",g:"M",label:"200D",sh:"200D",key:"ma200",type:"px",tip:"200-day simple moving average of the daily close"},
+    {id:"sl",  g:"M",label:"200D Slope",sh:"Slope",key:"sl",type:"pct",dp:1,sign:true,red:-0.04,green:0.04,tip:TIPS.sl},
+    {id:"m0",  g:"M",label:"> 0% 200D Trend",sh:">0% Trend",key:"m0",type:"mon",cap:"m0c",red:1,green:9,tip:"Consecutive months (back from this month) in which the 200D Slope was above 0% on every trading day of the month. '+' = the run reaches the start of the price history"},
+    {id:"m2",  g:"M",label:"> 2% 200D Trend",sh:">2% Trend",key:"m2",type:"mon",cap:"m2c",red:1,green:6,tip:"Consecutive months in which the 200D Slope was above 2% on every trading day of the month"},
+    {id:"m4",  g:"M",label:"> 4% 200D Trend",sh:">4% Trend",key:"m4",type:"mon",cap:"m4c",red:0,green:3,tip:"Consecutive months in which the 200D Slope was above 4% on every trading day of the month"},
+    {id:"mlen",g:"M",label:"> 200D Length",sh:">200D Len",key:"mlen",type:"mon",cap:"mlenc",red:1,green:9,tip:"Consecutive months in which the share price closed above its 200D on every trading day of the month"},
+    {id:"hi",  g:"M",label:"52W High",sh:"52W High",key:"hi",type:"pct",dp:0,red:0.50,green:0,tip:"Share price % below its 52-week high"},
+    {id:"lo",  g:"M",label:"52W Low",sh:"52W Low",key:"lo",type:"pct",dp:0,red:0,green:0.30,tip:"Share price % above its 52-week low"},
     /* Strike-through in Metrics only on the columns that are also Filter Tests (Richard, Message 3; D-MD-POOL-18),
        at the rule's Default Standard Setting. */
-    {id:"rs",  g:"M",label:"Stock RS L12M Composite",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip},
-    {id:"srs", g:"M",label:"Sector RS L12M",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip},
-    {id:"rs18",g:"M",label:"Stock RS L18M",key:"rs18",type:"dec1",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip},
-    {id:"br",  g:"M",label:"SS EPS Net Upgrades L45D",key:"br",type:"pct",dp:0,sign:true,red:-0.30,green:0.30,tip:TIPS.br},
-    {id:"sb",  g:"M",label:"SS Sales Net Upgrade Breadth L3M",key:"sb",type:"pct",dp:0,sign:true,red:-1.0,green:1.0,strike:function(v){return v<0;},tip:RMAP.sb.tip},
-    {id:"f_rs",  g:"F",rule:"rs",  key:"rs",  type:"int",red:50,green:80,gs:true},
-    {id:"f_srs", g:"F",rule:"srs", key:"srs", type:"int",red:30,green:70},
-    {id:"f_sb",  g:"F",rule:"sb",  key:"sb",  type:"pct",dp:0,sign:true,red:-1.0,green:1.0},
-    {id:"f_rs18",g:"F",rule:"rs18",key:"rs18",type:"dec1",red:50,green:80},
-    {id:"np",    g:"F",label:"Rules passed",key:"_np",type:"np",tip:"How many of the rules that are switched on this stock passes"}
+    {id:"rs",  g:"M",label:"Stock RS L12M Composite",sh:"RS 12M",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip+". Struck through below 80, the Default Standard Setting"},
+    {id:"srs", g:"M",label:"Sector RS L12M",sh:"Sector RS",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip+". Struck through below 50, the Default Standard Setting"},
+    {id:"rs18",g:"M",label:"Stock RS L18M",sh:"RS 18M",key:"rs18",type:"dec1",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip+". Struck through below 80, the Default Standard Setting"},
+    {id:"br",  g:"M",label:"SS EPS Net Upgrades L45D",sh:"SS EPS Breadth",key:"br",type:"pct",dp:0,sign:true,red:-0.30,green:0.30,tip:TIPS.br},
+    {id:"sb",  g:"M",label:"SS Sales Net Upgrade Breadth L3M",sh:"SS Sales Breadth",key:"sb",type:"pct",dp:0,sign:true,red:-1.0,green:1.0,strike:function(v){return v<0;},tip:RMAP.sb.tip+". Struck through below 0%, the Default Standard Setting"},
+    {id:"f_rs",  g:"F",rule:"rs",  sh:"RS 12M",          key:"rs",  type:"int",red:50,green:80,gs:true},
+    {id:"f_srs", g:"F",rule:"srs", sh:"Sector RS",       key:"srs", type:"int",red:30,green:70},
+    {id:"f_sb",  g:"F",rule:"sb",  sh:"SS Sales Breadth",key:"sb",  type:"pct",dp:0,sign:true,red:-1.0,green:1.0},
+    {id:"f_rs18",g:"F",rule:"rs18",sh:"RS 18M",          key:"rs18",type:"dec1",red:50,green:80},
+    {id:"np",    g:"F",label:"Rules passed",sh:"Passed",key:"_np",type:"np",tip:"How many of the rules that are switched on this stock passes"}
   ];
-  for(var ci=0;ci<COLS.length;ci++){var c=COLS[ci];if(c.rule){c.label=RMAP[c.rule].label;c.tip=RMAP[c.rule].tip+". Struck through when it fails the rule's current setting";}}
+  for(var ci=0;ci<COLS.length;ci++){var c=COLS[ci];if(c.rule){c.label=RMAP[c.rule].label;c.tip=RMAP[c.rule].tip+". Struck through when it fails the rule at its current setting";}}
 
   function cell(c,r){
     var v=r[c.key],cls=[],sty="",txt,title="";
@@ -18660,8 +18676,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       return '<td class="pe-name"><span class="co" data-pe-open="'+esc(r.t)+'" title="'+esc(r.n)+' ('+esc(r.t)+'): open the Stock View">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span></td>';
     }
     if(c.type==="txt"){
-      var full=c.key==="cohn"?((r.coh?r.coh+" ":"")+(r.cohn||"")):(v||"");
-      return '<td class="pe-txt '+(c.cls||"")+(c.gs?" pe-gs":"")+'" title="'+esc(full)+'">'+esc(v||"")+'</td>';
+      return '<td class="pe-txt'+(c.gs?" pe-gs":"")+'" title="'+esc(v||"")+'">'+esc(v||"")+'</td>';
     }
     if(c.type==="np"){
       var on=0;for(var i=0;i<RULES.length;i++)if(st.on[RULES[i].k])on++;
@@ -18705,15 +18720,22 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     return rows;
   }
 
+  /* Fixed column widths, so the table fits the frame instead of growing to its content (Message 5). */
+  function colgroup(){
+    var h='<colgroup>';
+    for(var i=0;i<COLS.length;i++)h+=COLS[i].w?'<col class="pe-c-'+COLS[i].w+'">':'<col>';
+    return h+'</colgroup>';
+  }
+
   function header(){
     var h='<thead><tr class="pe-g">';
     var groups=[["I","Information","pe-gi"],["M","Metrics","pe-gm"],["F","Filter Tests","pe-gf"]];
     for(var g=0;g<groups.length;g++){
       var n=0;for(var i=0;i<COLS.length;i++)if(COLS[i].g===groups[g][0])n++;
       if(g===0){
-        /* Only the company column is pinned, so only its group-row cell may be pinned: a pinned cell spanning all four
-           Information columns stayed on screen when the table was scrolled sideways and covered the Metrics heading
-           (found in the 28-Sep-26 re-check). The rest of the Information heading scrolls with its columns. */
+        /* Only the company column is pinned (it matters on a narrow screen, where the table still scrolls sideways
+           inside its frame), so only its group-row cell is pinned; the rest of the Information heading scrolls with
+           its columns (the 28-Sep-26 re-check). */
         h+='<th class="pe-gi"><span class="pe-gl">'+groups[g][1]+'</span></th><th colspan="'+(n-1)+'" class="pe-gi2"></th>';
       } else {
         h+='<th colspan="'+n+'" class="'+groups[g][2]+' pe-gs"><span class="pe-gl">'+groups[g][1]+'</span></th>';
@@ -18727,54 +18749,49 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if(c.gs)cls.push("pe-gs");
       if(c.g==="M")cls.push("pe-hm");else if(c.g==="F")cls.push("pe-hf");
       var arr=st.sortKey===c.id?'<span class="pe-arr">'+(st.asc?"&#9650;":"&#9660;")+'</span>':"";
-      var lab=esc(c.label);  /* headers wrap inside a capped width (CSS), so long names take two or three short lines */
-      h+='<th class="'+cls.join(" ")+'" data-pe-sort="'+c.id+'" title="'+esc((c.tip||c.label)+". Click to sort")+'">'+lab+arr+'</th>';
+      /* Two lines (Message 5): the short name in normal text, the full name in small text beneath it. Where the two
+         are the same (SP, 200D, 52W High, Company...) only the short name is shown. */
+      var lab='<span class="pe-hs">'+esc(c.sh)+arr+'</span>'+(c.label!==c.sh?'<span class="pe-hl">'+esc(c.label)+'</span>':'');
+      h+='<th class="'+cls.join(" ")+'" data-pe-sort="'+c.id+'" title="'+esc(c.label+": "+(c.tip||c.label)+". Click to sort")+'">'+lab+'</th>';
     }
     return h+'</tr></thead>';
   }
 
-  function computed(){
-    var S=PD().stocks,all=[],i,j;
+  function model(){
+    var S=PD().stocks,all=[],rows=[],pool=0,i,j,q=st.q.trim().toLowerCase();
     for(i=0;i<S.length;i++){
       var r=S[i],np=0,ok=true;
       for(j=0;j<RULES.length;j++){
         var R=RULES[j];if(!st.on[R.k])continue;
         if(passes(R,r,st.thr[R.k]))np++;else ok=false;
       }
-      r._np=np;r._ok=ok;all.push(r);
-    }
-    return all;
-  }
-
-  function body(){
-    var all=computed(),q=st.q.trim().toLowerCase(),rows=[],pool=0,i;
-    for(i=0;i<all.length;i++){
-      var r=all[i];if(r._ok)pool++;
-      if(!st.showAll&&!r._ok)continue;
-      if(q){var hay=(r.n+" "+r.t+" "+(r.ind||"")+" "+(r.sec||"")+" "+(r.coh||"")+" "+(r.cohn||"")).toLowerCase();if(hay.indexOf(q)<0)continue;}
+      r._np=np;r._ok=ok;all.push(r);if(ok)pool++;
+      if(!st.showAll&&!ok)continue;
+      if(q){var hay=(r.n+" "+r.t+" "+(r.ind||"")+" "+(r.sec||"")).toLowerCase();if(hay.indexOf(q)<0)continue;}
       rows.push(r);
     }
     sortRows(rows);
     var onN=0;for(i=0;i<RULES.length;i++)if(st.on[RULES[i].k])onN++;
-    var inT=pool>=POOL_TARGET[0]&&pool<=POOL_TARGET[1];
-    var h='<div class="pe-bar"><span class="pe-count"><b>'+pool+'</b> of '+all.length+' stocks pass '+(onN===RULES.length?"all "+["","one","two","three","four","five","six"][RULES.length]+" rules":(onN?"the "+onN+" rules switched on":"(no rule is switched on)"))+'</span>'
-      +'<span class="pe-target'+(inT?"":" outside")+'" title="Richard\'s stated Pool target for the backtest: roughly 80 to 125 names">'+(inT?"inside":(pool<POOL_TARGET[0]?"below":"above"))+' the Pool target of 80 to 125</span>'
-      +(q||st.showAll?'<span class="pe-count" style="font-size:11.5px;color:#555">showing '+rows.length+(st.showAll?" (all stocks; failing ones faded)":"")+(q?' matching "'+esc(st.q)+'"':"")+'</span>':"")
-      +'</div>';
-    if(!rows.length){return h+'<div class="pe-empty">No stock matches. '+(q?"Clear the search, or ":"")+'switch a rule off or pick a looser Flex Value.</div>';}
-    h+='<div class="pe-wrap"><table class="pe-table">'+header()+'<tbody>';
-    for(i=0;i<rows.length;i++){
-      var rr=rows[i];
+    return {all:all,rows:rows,pool:pool,onN:onN,q:q};
+  }
+
+  function countHtml(m){
+    var inT=m.pool>=POOL_TARGET[0]&&m.pool<=POOL_TARGET[1];
+    return '<span class="pe-count"><b>'+m.pool+'</b> of '+m.all.length+' stocks pass '+(m.onN===RULES.length?"all "+["","one","two","three","four","five","six"][RULES.length]+" rules":(m.onN?"the "+m.onN+" rules switched on":"(no rule is switched on)"))+'</span>'
+      +'<span class="pe-target'+(inT?"":" outside")+'" title="Richard\'s stated Pool target for the backtest: roughly 80 to 125 names">'+(inT?"inside":(m.pool<POOL_TARGET[0]?"below":"above"))+' the Pool target of 80 to 125</span>'
+      +(m.q||st.showAll?'<span class="pe-showing">showing '+m.rows.length+(st.showAll?" (all stocks; failing ones faded)":"")+(m.q?' matching "'+esc(st.q)+'"':"")+'</span>':"");
+  }
+
+  function tableHtml(m){
+    if(!m.rows.length){return '<div class="pe-wrap"><div class="pe-empty">No stock matches. '+(m.q?"Clear the search, or ":"")+'switch a rule off or pick a looser Flex Value.</div></div>';}
+    var h='<div class="pe-wrap"><table class="pe-table">'+colgroup()+header()+'<tbody>';
+    for(var i=0;i<m.rows.length;i++){
+      var rr=m.rows[i];
       h+='<tr'+(rr._ok?"":' class="pe-out"')+'>';
       for(var c=0;c<COLS.length;c++)h+=cell(COLS[c],rr);
       h+='</tr>';
     }
-    h+='</tbody></table></div>';
-    h+='<div class="pe-legend">Colours run from dark red (weak) through neutral to bright green (strong) on each column\'s own scale. '
-      +'<span class="pe-sw" style="background:rgba(153,27,27,.55)"></span>weak <span class="pe-sw" style="background:rgba(22,163,74,.55)"></span>strong. '
-      +'<span style="color:#8b1a1a;text-decoration:line-through">Struck through</span>: in Filter Tests, fails the rule at its current setting; in Metrics, only on the columns that are also Filter Tests, below the Default Standard Setting of each rule (Stock RS L12M Composite and Stock RS L18M below 80; Sector RS L12M below 50; SS Sales Net Upgrade Breadth L3M below 0%). '
-      +'n/a: no reading (fails a rule that is on, as in the backtest).</div>';
-    return h;
+    return h+'</tbody></table></div>';
   }
 
   function perRuleCounts(){
@@ -18784,17 +18801,19 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     return out;
   }
 
+  /* Each rule: the toggle, then its Flex Value buttons with the count that passes the rule alone beside them. The
+     rule's condition in words is in the toggle's and the count's tooltips (Message 5 asked for a page that fits). */
   function rulesPanel(){
     var cnt=perRuleCounts(),n=PD().stocks.length,h='<div class="pe-rules">';
     for(var i=0;i<RULES.length;i++){
       var R=RULES[i],on=st.on[R.k],vals=R.flex.concat([R.std]).sort(function(a,b){return a-b;});
-      h+='<div class="pe-rule'+(on?"":" off")+'"><button class="pe-tog" data-pe-tog="'+R.k+'" title="'+esc(R.tip)+'"><span>'+esc(R.label)+'</span><span class="pe-state">'+(on?"ON":"OFF")+'</span></button>'
-        +'<div class="pe-cond" title="'+esc(condText(R))+'">'+esc(condText(R))+'</div><div class="pe-flex">';
+      h+='<div class="pe-rule'+(on?"":" off")+'"><button class="pe-tog" data-pe-tog="'+R.k+'" title="'+esc(condText(R)+". "+R.tip+". Click to switch the rule "+(on?"off":"on"))+'"><span class="pe-tl">'+esc(R.label)+'</span><span class="pe-state">'+(on?"ON":"OFF")+'</span></button>'
+        +'<div class="pe-rrow"><div class="pe-flex">';
       for(var j=0;j<vals.length;j++){
         var v=vals[j],isStd=v===R.std,act=st.thr[R.k]===v;
-        h+='<button class="pe-fx'+(isStd?" std":"")+(act?" on":"")+'" data-pe-fx="'+R.k+'" data-pe-v="'+v+'" title="'+(isStd?"Default Standard Setting":"Flex Value")+': '+esc(thrText(R,v))+'">'+esc(thrText(R,v))+'</button>';
+        h+='<button class="pe-fx'+(isStd?" std":"")+(act?" on":"")+'" data-pe-fx="'+R.k+'" data-pe-v="'+v+'" title="'+(isStd?"Default Standard Setting":"Flex Value")+': '+esc(thrText(R,v))+' or more">'+esc(thrText(R,v))+'</button>';
       }
-      h+='</div><div class="pe-pass">'+cnt[R.k]+' of '+n+' pass this rule alone</div></div>';
+      h+='</div><span class="pe-pass" title="'+esc(condText(R))+': '+cnt[R.k]+' of '+n+' stocks pass this rule alone">'+cnt[R.k]+' pass alone</span></div></div>';
     }
     return h+'</div>';
   }
@@ -18802,37 +18821,65 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function fmtDate(s){if(!s)return "unknown";var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];var p=String(s).split("-");return p.length===3?(+p[2])+"-"+m[+p[1]-1]+"-"+p[0]:s;}
 
   function top(){
-    var M=PD()._meta||{},ph=M.phase,ss=M.ss||{},h='<div class="summary-tile">';
-    h+='<div class="pe-title">Pool Eligibility for Portfolio Selection</div>';
-    h+='<div class="pe-sub">Work in progress: the Filter Rules being tested in APM - Stage 2 Gate-4 Backtest, shown on every stock in the universe. <b>Nothing here is adopted.</b> '
-      +'The page always opens at the Default Standard Settings (bold buttons); the other buttons under each rule are its Flex Values.</div>';
-    h+='<div class="pe-dates">Prices as at <b>'+fmtDate(M.price_date)+'</b> (daily, after the 17:15 UK refresh). '
-      +'Sell-side estimate counts as at <b>'+fmtDate(ss.as_of)+'</b>'+(ss.sales_source?' (sales: '+esc(ss.sales_source)+')':(ss.source?' ('+esc(ss.source)+')':''))+'. Readings built '+esc(M.generated||"")+'.</div>';
+    var M=PD()._meta||{},ph=M.phase,ss=M.ss||{},h='<div class="summary-tile pe-tile"><div class="pe-head">';
+    h+='<span class="pe-title">Pool Eligibility for Portfolio Selection</span>';
+    /* Richard signed off the Uptrend Pool on 28-Sep-26 (APM - Stage 2 Gate-4 Backtest, D-100): EUR 500m or more plus rules 1 to 3,
+       month-end readings decide. This page has no size test yet and keeps Stock RS L18M as a fourth rule (Richard, Message 4);
+       both differences are put to him (Q-MD-POOL-9 and Q-MD-POOL-10). The line says so rather than "nothing is adopted". */
+    h+='<span class="pe-sub" title="The Uptrend Pool Filter Criteria were signed off by Richard on 28-Sep-26 (APM - Stage 2 Gate-4 Backtest, D-100): market value of EUR 500m or more, Stock RS L12M Composite 80 or more, Sector RS L12M 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more; readings at each month-end decide eligibility for the following month, so this daily page is for information. This page does not test size yet, and it keeps Stock RS L18M 80 or more as a fourth rule, which the sign-off uses at APM List Compilation (Proven Stage 2 Cases). The page always opens at the Default Standard Settings (the bold button under each rule); the other buttons are its Flex Values.">Uptrend Pool signed off 28-Sep-26 (backtest D-100): &euro;500m+ and rules 1 to 3, read at month-ends. Size not tested here yet; rule 4 added.</span>';
+    h+='<span class="pe-spacer"></span>';
+    var dt="Prices as at "+fmtDate(M.price_date)+" (daily, after the 17:15 UK refresh). Sell-side estimate counts as at "+fmtDate(ss.as_of)+(ss.sales_source?" (sales: "+ss.sales_source+")":(ss.source?" ("+ss.source+")":""))+". Readings built "+(M.generated||"")+".";
+    h+='<span class="pe-dates" title="'+esc(dt)+'">Prices <b>'+fmtDate(M.price_date)+'</b> &middot; Sell-side <b>'+fmtDate(ss.as_of)+'</b></span>';
+    var up=true;
     if(ph&&ph.label){
-      var up=ph.label==="Uptrending";
-      h+='<div class="pe-phase '+(up?"up":"down")+'"><b>Market Cycle Phase: '+esc(ph.label)+'</b><span>since '+(ph.history_limited?"at least ":"")+fmtDate(ph.since)
-        +'. Stoxx Europe 600 '+ph.close+' against its 200-day average '+ph.ma200+' ('+(ph.days_above>0?"above for "+ph.days_above+" trading days":"below")+'); the average '
-        +(ph.ma200_1m>=0?"rose ":"fell ")+Math.abs(ph.ma200_1m*100).toFixed(1)+'% over 21 trading days. The backtest\'s month-end label, read daily.'
-        +(up?"":" <b>These four rules are the backtest's Uptrending Market rules; for a Downtrending Market it recommends a different Pool (the early-cycle industries with Sector RS L12M 50 or more), which is not on this page yet.</b>")+'</span></div>';
+      up=ph.label==="Uptrending";
+      var pt="Stoxx Europe 600 "+ph.close+" against its 200-day average "+ph.ma200+" ("+(ph.days_above>0?"above for "+ph.days_above+" trading days":"below")+"); the average "
+        +(ph.ma200_1m>=0?"rose ":"fell ")+Math.abs(ph.ma200_1m*100).toFixed(1)+"% over 21 trading days. Uptrending = the index above its 200-day average (all of the last 10 closes above; all 10 below = below; mixed = the previous answer carries over) AND the average higher than 21 trading days earlier (D-100). The backtest reads it at month-ends; this page reads it daily.";
+      h+='<span class="pe-ph '+(up?"up":"down")+'" title="'+esc(pt)+'">Market Cycle Phase: <b>'+esc(ph.label)+'</b> since '+(ph.history_limited?"at least ":"")+fmtDate(ph.since)+'</span>';
     }
+    h+='</div>';
+    if(!up)h+='<div class="pe-warn"><b>These four rules are the backtest\'s Uptrending Market rules; for a Downtrending Market it recommends a different Pool (the early-cycle industries with Sector RS L12M 50 or more), which is not on this page yet.</b></div>';
     var W=M.warnings||[];
-    for(var i=0;i<W.length;i++)h+='<div class="pe-warn">'+esc(W[i])+'</div>';
+    for(var i=0;i<W.length;i++)h+='<div class="pe-warn" title="'+esc(W[i])+'">'+esc(W[i])+'</div>';
     h+=rulesPanel();
-    h+='<div class="pe-bar"><input class="pe-search" id="pe-search" type="search" placeholder="Search company, ticker, sector, cohort" value="'+esc(st.q)+'">'
+    h+='<div class="pe-bar"><span id="pe-countbox" class="pe-countbox"></span><span class="pe-spacer"></span>'
+      +'<input class="pe-search" id="pe-search" type="search" placeholder="Search company, ticker, industry or sector" value="'+esc(st.q)+'">'
       +'<label class="pe-chk"><input type="checkbox" id="pe-showall"'+(st.showAll?" checked":"")+'> Also show stocks that fail a rule</label>'
-      +'<span class="pe-spacer"></span><button class="pe-btn" data-pe-reset="1">Reset to Default Standard Settings</button></div>';
+      +'<button class="pe-btn" data-pe-reset="1">Reset to Default Standard Settings</button></div>';
     return h+'</div>';
   }
 
-  /* The table scrolls inside its own frame (it is wider than the screen), so the frame must fit below the fixed
-     header, whose real height depends on how the navigation strip wraps: measure it rather than trust a constant. */
+  function isActive(){return document.body.getAttribute("data-active-tab")==="pool_elig";}
+  /* Message 5: the page must not scroll; only the table scrolls, inside its frame, which fills the window below the
+     header and the rules. The header's height depends on how the navigation strip wraps, so it is measured each time.
+     If the window is too short for a useful frame (under 240px of table), the page is allowed to scroll instead. */
   function sizeWrap(){
-    var w=document.querySelector("#tab-pool_elig .pe-wrap");if(!w)return;
-    var hd=document.querySelector(".header"),hh=hd?hd.getBoundingClientRect().height:145;
-    w.style.maxHeight=Math.max(300,Math.round(window.innerHeight-hh-14))+"px";
+    var w=document.querySelector("#tab-pool_elig .pe-wrap");if(!w||!isActive())return;
+    try{if(typeof window.measureV2Ribbon==="function")window.measureV2Ribbon();}catch(e){}
+    var de=document.documentElement;
+    de.classList.add("pe-fit");
+    if(window.scrollY||window.pageYOffset)window.scrollTo(0,0);
+    var avail=Math.floor(window.innerHeight-w.getBoundingClientRect().top-10);
+    if(avail>=240){w.style.height=avail+"px";w.style.maxHeight="none";}
+    else{
+      de.classList.remove("pe-fit");
+      var hd=document.querySelector(".header"),hh=hd?hd.getBoundingClientRect().height:145;
+      w.style.height="";w.style.maxHeight=Math.max(300,Math.round(window.innerHeight-hh-14))+"px";
+    }
   }
-  if(!window._peResizeWired){window._peResizeWired=true;window.addEventListener("resize",function(){if(document.body.getAttribute("data-active-tab")==="pool_elig")sizeWrap();});}
-  function paintBody(){var b=document.getElementById("pe-body");if(b){b.innerHTML=body();sizeWrap();}}
+  function sizeSoon(){sizeWrap();try{requestAnimationFrame(sizeWrap);}catch(e){}setTimeout(sizeWrap,120);setTimeout(sizeWrap,500);}
+  if(!window._peResizeWired){
+    window._peResizeWired=true;
+    window.addEventListener("resize",function(){if(isActive())sizeWrap();});
+    try{var hd0=document.querySelector(".header");if(hd0&&window.ResizeObserver)new ResizeObserver(function(){if(isActive())sizeWrap();}).observe(hd0);}catch(e){}
+  }
+  function paintBody(){
+    var b=document.getElementById("pe-body");if(!b)return;
+    var m=model();
+    b.innerHTML=tableHtml(m);
+    var cb=document.getElementById("pe-countbox");if(cb)cb.innerHTML=countHtml(m);
+    sizeWrap();
+  }
   function paint(){
     var c=document.getElementById("tab-pool_elig");
     if(!c)return;
@@ -18840,9 +18887,10 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       c.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>Pool Eligibility for Portfolio Selection</h3><p style="color:var(--text-dim);margin-top:8px">pool-eligibility.json was not built, so there is nothing to show. Run scripts/build_pool_eligibility.py before build_dashboard.py.</p></div>';
       return;
     }
-    c.innerHTML='<div id="pe-top">'+top()+'</div><div id="pe-body">'+body()+'</div>';
+    c.innerHTML='<div id="pe-top">'+top()+'</div><div id="pe-body"></div>';
     wire(c);
-    sizeWrap();requestAnimationFrame(sizeWrap);
+    paintBody();
+    sizeSoon();
   }
   function wire(c){
     if(c._peWired)return; c._peWired=true;
@@ -18873,7 +18921,6 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     paint();
   };
 })();
-
 function renderTab(id){
   try{
   if(id==="summary")renderSummary();

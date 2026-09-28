@@ -544,7 +544,8 @@ table.pe-table td.num{text-align:right;font-variant-numeric:tabular-nums}
 table.pe-table tbody tr:hover td{background-color:#fafaf6}
 table.pe-table tbody tr:hover td.pe-name{background-color:#f6f5ef}
 table.pe-table th.pe-name{left:0;z-index:5;text-align:left;min-width:210px;max-width:210px}
-table.pe-table tr.pe-g th.pe-gi{left:0;z-index:5}
+table.pe-table tr.pe-g th.pe-gi{left:0;z-index:5;border-right:1px solid #ebe8de}
+table.pe-table tr.pe-g th.pe-gi2{background:#f0ede3}
 table.pe-table td.pe-name{position:sticky;left:0;z-index:2;background:#fff;min-width:210px;max-width:210px;overflow:hidden;text-overflow:ellipsis;border-right:1px solid #ebe8de}
 .pe-name .co{font-weight:600;color:#1a1a1a;cursor:pointer}
 .pe-name .co:hover{text-decoration:underline}
@@ -18709,7 +18710,14 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var groups=[["I","Information","pe-gi"],["M","Metrics","pe-gm"],["F","Filter Tests","pe-gf"]];
     for(var g=0;g<groups.length;g++){
       var n=0;for(var i=0;i<COLS.length;i++)if(COLS[i].g===groups[g][0])n++;
-      h+='<th colspan="'+n+'" class="'+groups[g][2]+(g>0?" pe-gs":"")+'"><span class="pe-gl">'+groups[g][1]+'</span></th>';
+      if(g===0){
+        /* Only the company column is pinned, so only its group-row cell may be pinned: a pinned cell spanning all four
+           Information columns stayed on screen when the table was scrolled sideways and covered the Metrics heading
+           (found in the 28-Sep-26 re-check). The rest of the Information heading scrolls with its columns. */
+        h+='<th class="pe-gi"><span class="pe-gl">'+groups[g][1]+'</span></th><th colspan="'+(n-1)+'" class="pe-gi2"></th>';
+      } else {
+        h+='<th colspan="'+n+'" class="'+groups[g][2]+' pe-gs"><span class="pe-gl">'+groups[g][1]+'</span></th>';
+      }
     }
     h+='</tr><tr class="pe-h">';
     for(var j=0;j<COLS.length;j++){

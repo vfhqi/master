@@ -571,12 +571,12 @@ body[data-active-tab="pool_elig"] .header{height:auto !important;padding-bottom:
 body[data-active-tab="pool_elig"]{--header-height:70px}
 .v2-nav-btn[data-v2-tab="pool_elig"]{width:150px}
 /* An active navigation button kept its group's pale hover colour under the pointer, so its white label vanished
-   (measured 28-Sep-26 on every Summary button; the group hover rule outranks .v2-active). Keep the active colour. */
-.v2-nav-group .v2-nav-btn.v2-active:hover{background:#1b3d5c;border-color:#1b3d5c}
-.v2-nav-group .v2-nav-btn.v2-active-s1:hover{background:#1b5e20;border-color:#1b5e20}
-.v2-nav-group .v2-nav-btn.v2-active-s2:hover{background:#2e7d32;border-color:#2e7d32}
-.v2-nav-group .v2-nav-btn.v2-active-s3:hover{background:#b45309;border-color:#b45309}
-.v2-nav-group .v2-nav-btn.v2-active-s4:hover{background:#991b1b;border-color:#991b1b}
+   (measured 28-Sep-26 on every Summary button; the group hover rule ties .v2-active on specificity and comes later, so it wins; the extra .v2-nav raises these above it). Keep the active colour. */
+.v2-nav .v2-nav-group .v2-nav-btn.v2-active:hover{background:#1b3d5c;border-color:#1b3d5c}
+.v2-nav .v2-nav-group .v2-nav-btn.v2-active-s1:hover{background:#1b5e20;border-color:#1b5e20}
+.v2-nav .v2-nav-group .v2-nav-btn.v2-active-s2:hover{background:#2e7d32;border-color:#2e7d32}
+.v2-nav .v2-nav-group .v2-nav-btn.v2-active-s3:hover{background:#b45309;border-color:#b45309}
+.v2-nav .v2-nav-group .v2-nav-btn.v2-active-s4:hover{background:#991b1b;border-color:#991b1b}
 table.pe-table tr.pe-g th{text-align:left}
 table.pe-table tr.pe-h th.pe-hm{background:#e9eef3}
 table.pe-table tr.pe-h th.pe-hf{background:#e8f1e6}

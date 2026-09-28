@@ -10654,7 +10654,11 @@ function SUM_renderQualifiedStocks() {
     var active = document.body.getAttribute('data-active-tab') || '';
     var v2 = (active.indexOf('stage_') === 0 || active === 'pos_pre_indicators' || active === 'neg_pre_indicators' ||
               active.indexOf('post_indicators') === 0 || active.indexOf('setups') === 0 || active.indexOf('tests_') === 0 ||
-              active === 'tests' || active === 'master_overview');
+              active === 'tests' || active === 'master_overview' ||
+              /* MD-POOL-ELIG-2026-09-28: pages that use the V2 header chrome must be measured too. Without this, opening
+                 the dashboard straight onto them (a bookmark or a reload with #pool_elig or #combos) left .main at the
+                 70px fallback under a ~245px header, hiding the top of the page (found on the live site, 28-Sep-26). */
+              active === 'combos' || active === 'pool_elig');
     if (!v2) return;
     /* S66b: measure the actual rendered header height (header-top + nav groups) and
        publish as --header-height so .main margin-top and all frozen top: offsets are correct */

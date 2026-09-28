@@ -19054,11 +19054,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     return {html:h+'</tbody></table></div>',shown:shown};
   }
 
+  function liveNote(){var s=((((window.MASTER_DATA||{}).positions||{})._live_meta)||{}).saved_at||"";return "holdings as saved "+(s?PE().fmtDate(String(s).slice(0,10)):"(date unknown)");}
   function togglesHtml(B){
     var I=PD().ideas,h='<div class="il-togs">';
     for(var i=0;i<GROUPS.length;i++){
       var G=GROUPS[i],on=st.on[G.k],n=B.g[G.k].length;
-      var note=(G.k==="other")?"in the signed-off Pool, on no list":(G.k==="live"?"current holdings":(I?"list of "+PE().fmtDate(I.date):"no list found"));
+      var note=(G.k==="other")?"in the signed-off Pool, on no list":(G.k==="live"?liveNote():(I?"list of "+PE().fmtDate(I.date):"no list found"));
       h+='<div class="pe-rule'+(on?"":" off")+'"><button class="pe-tog" data-il-tog="'+G.k+'" title="'+esc(G.tip+". Click to "+(on?"hide":"show")+" them")+'"><span class="pe-tl">'+esc(G.label)+'</span><span class="pe-state">'+(on?"ON":"OFF")+'</span></button>'
         +'<div class="il-tnote"><b>'+n+'</b> stock'+(n===1?"":"s")+' &middot; '+esc(note)+'</div></div>';
     }

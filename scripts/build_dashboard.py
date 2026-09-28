@@ -18565,7 +18565,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
      (APM - Stage 2 Gate-4 Backtest, session14/s14_step2_masks.py): a missing reading fails the rule. */
   var RULES=[
     {k:"rs",  field:"rs",  label:"Stock RS",                 std:80, flex:[60,70,85,90],  pct:false, dir:"ge",
-     tip:"The dashboard's composite relative strength rank, 0 to 99: 3-month return weighted 0.4, 6-, 9- and 12-month returns 0.2 each, all relative to the Stoxx Europe 600, ranked across the universe"},
+     tip:"Composite relative strength rank, 0 to 99, computed exactly as the backtest: 3-month return weighted 0.4, 6-, 9- and 12-month returns 0.2 each, each minus the Stoxx Europe 600's, ranked across the universe (the dashboard's other pages measure each look-back one trading day shorter, so a few ranks differ by a point or two)"},
     {k:"srs", field:"srs", label:"Sector RS",                std:50, flex:[30,40,60,70],  pct:false, dir:"ge",
      tip:"The stock's sector rank, 0 to 99: the median composite relative strength of the stocks in each sector, ranked across all sectors (the backtest's sector rank; not a simple 12-month sector return)"},
     {k:"rs18",field:"rs18",label:"Stock RS 18M",             std:80, flex:[60,70,85,90],  pct:false, dir:"ge",

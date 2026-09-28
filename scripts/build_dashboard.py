@@ -549,7 +549,9 @@ table.pe-table th.num{text-align:right}
 table.pe-table th:hover .pe-hs{color:#000}
 table.pe-table th .pe-arr{margin-left:2px;color:#8d6e00;font-size:9px}
 table.pe-table td{padding:3px 4px;border-bottom:1px solid #f0efe9;white-space:nowrap;height:22px;overflow:hidden;text-overflow:ellipsis}
-table.pe-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+table.pe-table td.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:10px}
+table.pe-table tr.pe-h th.num{padding-right:10px}
+table.pe-table td.pe-np,table.pe-table tr.pe-h th[data-pe-sort="np"]{padding-right:4px}
 table.pe-table tbody tr:hover td{background-color:#fafaf6}
 table.pe-table tbody tr:hover td.pe-name{background-color:#f6f5ef}
 table.pe-table th.pe-name{left:0;z-index:5;text-align:left}
@@ -559,6 +561,7 @@ table.pe-table th.pe-name{left:0;z-index:5;text-align:left}
 col.pe-c-name{width:12.5%} col.pe-c-ind{width:9%} col.pe-c-sec{width:12%}
 @media (max-width:1760px){col.pe-c-name{width:12%} col.pe-c-ind{width:7.5%} col.pe-c-sec{width:9%} table.pe-table td{font-size:11px}}
 @media (max-width:1480px){col.pe-c-name{width:12%} col.pe-c-ind{width:7%} col.pe-c-sec{width:8%} table.pe-table td{font-size:10.5px;padding:3px 3px}
+  table.pe-table td.num,table.pe-table tr.pe-h th.num{padding-right:6px}
   table.pe-table th .pe-hs{font-size:10px} table.pe-table th .pe-hl{font-size:8px} table.pe-table th .pe-hs,table.pe-table th .pe-hl{overflow-wrap:anywhere}}
 table.pe-table tr.pe-g th.pe-gi{left:0;z-index:5;border-right:1px solid #ebe8de}
 table.pe-table tr.pe-g th.pe-gi2{background:#f0ede3}
@@ -18634,7 +18637,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     i=(0.5-t)*2;a=(0.07+0.48*i).toFixed(3);return "background-color:rgba(153,27,27,"+a+")";
   }
 
-  function fPx(v){if(v==null)return null;var a=Math.abs(v);return a>=1000?v.toLocaleString("en-GB",{maximumFractionDigits:0}):(a>=10?v.toFixed(2):(a>=1?v.toFixed(3):v.toPrecision(3)));}
+  /* Share price to about four significant figures (Message 6): 1,000 and above no decimals, 100 to 999 one, 1 to 99 two, below 1 three significant figures. */
+  function fPx(v){if(v==null)return null;var a=Math.abs(v);return a>=1000?v.toLocaleString("en-GB",{maximumFractionDigits:0}):(a>=100?v.toFixed(1):(a>=1?v.toFixed(2):v.toPrecision(3)));}
   function fPct(v,d){if(v==null||isNaN(v))return null;var x=v*100;return (x>0&&d.sign?"+":"")+x.toFixed(d.dp)+"%";}
 
   /* Column definitions. g: I = Information, M = Metrics, F = Filter Tests. label = the full name (small text in the
@@ -18646,14 +18650,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"ind", g:"I",label:"Industry",sh:"Industry",key:"ind",type:"txt",w:"ind"},
     {id:"sec", g:"I",label:"Sector",sh:"Sector",key:"sec",type:"txt",w:"sec"},
     {id:"p",   g:"M",label:"SP",sh:"SP",key:"p",type:"px",gs:true,tip:"Share price, last close"},
-    {id:"ma200",g:"M",label:"200D",sh:"200D",key:"ma200",type:"px",tip:"200-day simple moving average of the daily close"},
     {id:"sl",  g:"M",label:"200D Slope",sh:"Slope",key:"sl",type:"pct",dp:1,sign:true,red:-0.04,green:0.04,tip:TIPS.sl},
     {id:"m0",  g:"M",label:"> 0% 200D Trend",sh:">0% Trend",key:"m0",type:"mon",cap:"m0c",red:1,green:9,tip:"Consecutive months (back from this month) in which the 200D Slope was above 0% on every trading day of the month. '+' = the run reaches the start of the price history"},
     {id:"m2",  g:"M",label:"> 2% 200D Trend",sh:">2% Trend",key:"m2",type:"mon",cap:"m2c",red:1,green:6,tip:"Consecutive months in which the 200D Slope was above 2% on every trading day of the month"},
     {id:"m4",  g:"M",label:"> 4% 200D Trend",sh:">4% Trend",key:"m4",type:"mon",cap:"m4c",red:0,green:3,tip:"Consecutive months in which the 200D Slope was above 4% on every trading day of the month"},
     {id:"mlen",g:"M",label:"> 200D Length",sh:">200D Len",key:"mlen",type:"mon",cap:"mlenc",red:1,green:9,tip:"Consecutive months in which the share price closed above its 200D on every trading day of the month"},
-    {id:"hi",  g:"M",label:"52W High",sh:"52W High",key:"hi",type:"pct",dp:0,red:0.50,green:0,tip:"Share price % below its 52-week high"},
-    {id:"lo",  g:"M",label:"52W Low",sh:"52W Low",key:"lo",type:"pct",dp:0,red:0,green:0.30,tip:"Share price % above its 52-week low"},
+    {id:"hi",  g:"M",label:"P vs. 52W High",sh:"P vs. 52W High",key:"hi",type:"pct",dp:0,neg:true,sign:true,red:0.50,green:0,tip:"Share price against its 52-week high: 0% at the high, -16% = 16% below it (Message 6: renamed and shown with a sign)"},
+    {id:"lo",  g:"M",label:"P vs. 52W Low",sh:"P vs. 52W Low",key:"lo",type:"pct",dp:0,sign:true,red:0,green:0.30,tip:"Share price against its 52-week low: +30% = 30% above it (Message 6: renamed and shown with a sign)"},
     /* Strike-through in Metrics only on the columns that are also Filter Tests (Richard, Message 3; D-MD-POOL-18),
        at the rule's Default Standard Setting. */
     {id:"rs",  g:"M",label:"Stock RS L12M Composite",sh:"RS 12M",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip+". Struck through below 80, the Default Standard Setting"},
@@ -18690,7 +18693,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       return '<td class="'+cls.join(" ")+' pe-na" title="'+why+'">n/a</td>';
     }
     if(c.type==="px")txt=fPx(v);
-    else if(c.type==="pct")txt=fPct(v,{dp:c.dp,sign:c.sign});
+    else if(c.type==="pct")txt=fPct(c.neg?-v:v,{dp:c.dp,sign:c.sign});  /* neg: "P vs. 52W High" holds the distance below the high; shown as a negative */
     else if(c.type==="int")txt=String(Math.round(v));
     else if(c.type==="dec1")txt=v.toFixed(1);  /* Stock RS L18M is a percentile with decimals (the backtest's rowpct); shown to one decimal so 79.9 is never displayed as a passing "80" */
     else if(c.type==="mon"){txt=String(v)+(r[c.cap]?"+":"");if(r[c.cap])title="The run reaches the start of the price history, so it may be longer";}

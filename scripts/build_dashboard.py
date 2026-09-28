@@ -534,7 +534,8 @@ table.data-table th{background:#f0ede3;color:#6b6b6b;font-weight:600;font-size:1
 table.pe-table{border-collapse:separate;border-spacing:0;font-size:11.5px;background:#fff;color:#222;width:max-content;min-width:100%}
 table.pe-table th{background:#f0ede3;color:#555;font-weight:600;font-size:10.5px;padding:4px 6px;border-bottom:1px solid #ddd8c8;white-space:nowrap;position:sticky;z-index:3;cursor:pointer;user-select:none;-webkit-user-select:none}
 table.pe-table tr.pe-g th{top:0;height:24px;text-align:center;font-size:11px;letter-spacing:.3px;color:#333;cursor:default;border-bottom:1px solid #ddd8c8}
-table.pe-table tr.pe-h th{top:24px;height:38px;vertical-align:bottom;line-height:1.2}
+table.pe-table tr.pe-h th{top:24px;height:40px;vertical-align:bottom;line-height:1.2;white-space:normal;min-width:44px;max-width:104px}
+table.pe-table tr.pe-h th.pe-name{max-width:210px}
 table.pe-table th.num{text-align:right}
 table.pe-table th:hover{color:#111}
 table.pe-table th .pe-arr{margin-left:3px;color:#8d6e00}
@@ -18563,20 +18564,21 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   /* The six Filter Rules. std = Default Standard Setting; flex = the Flex Values. Percent rules hold thresholds in
      percent; the readings are fractions. Direction and the treatment of a missing reading follow the backtest
      (APM - Stage 2 Gate-4 Backtest, session14/s14_step2_masks.py): a missing reading fails the rule. */
+  /* The four Filter Tests (Richard, Message 3, 28-Sep-26; D-MD-POOL-16), in his order and names. ">" in his list is
+     read as "at or above", the backtest's tested thresholds (D-MD-POOL-17). */
   var RULES=[
-    {k:"rs",  field:"rs",  label:"Stock RS",                 std:80, flex:[60,70,85,90],  pct:false, dir:"ge",
+    {k:"rs",  field:"rs",  label:"Stock RS L12M Composite",          std:80, flex:[60,70,85,90],   pct:false, dir:"ge",
      tip:"Composite relative strength rank, 0 to 99, computed exactly as the backtest: 3-month return weighted 0.4, 6-, 9- and 12-month returns 0.2 each, each minus the Stoxx Europe 600's, ranked across the universe (the dashboard's other pages measure each look-back one trading day shorter, so a few ranks differ by a point or two)"},
-    {k:"srs", field:"srs", label:"Sector RS",                std:50, flex:[30,40,60,70],  pct:false, dir:"ge",
+    {k:"srs", field:"srs", label:"Sector RS L12M",                   std:50, flex:[30,40,60,70],   pct:false, dir:"ge",
      tip:"The stock's sector rank, 0 to 99: the median composite relative strength of the stocks in each sector, ranked across all sectors (the backtest's sector rank; not a simple 12-month sector return)"},
-    {k:"rs18",field:"rs18",label:"Stock RS 18M",             std:80, flex:[60,70,85,90],  pct:false, dir:"ge",
-     tip:"The stock's 18-month price return, ranked across the universe as a percentile (0 to 100)"},
-    {k:"br",  field:"br",  label:"SS EPS Net Upgrades L45D", std:0,  flex:[-20,-10,10,20],pct:true,  dir:"ge",
-     tip:"(Number of EPS estimates raised minus number cut in the last 45 days) divided by the number of estimates; EPS for the calendar year + 1. No estimates: no reading"},
-    {k:"sl",  field:"sl",  label:"200D Slope",               std:0,  flex:[1,2,3,4],      pct:true,  dir:"gt0",
-     tip:"The 200-day moving average against its level 21 trading days earlier (its one-month % change). At 0% the rule is 'above 0%'; at 1% or more it is 'at least'"},
-    {k:"hi",  field:"hi",  label:"P vs. 52W High",           std:25, flex:[15,20,30,35],  pct:true,  dir:"le",
-     tip:"Share price within this distance below its 52-week high (the highest daily high of the last 252 trading days)"}
+    {k:"sb",  field:"sb",  label:"SS Sales Net Upgrade Breadth L3M", std:0,  flex:[-50,-25,25,50], pct:true,  dir:"ge",
+     tip:"The backtest's three-month sales revision breadth: at today, one month ago and two months ago, (sales estimates raised minus cut over the previous 45 days); their sum divided by the average number of estimates, so it can exceed +/-100% (three months are added). Sales for the calendar year + 1. No estimates: no reading"},
+    {k:"rs18",field:"rs18",label:"Stock RS L18M",                    std:80, flex:[60,70,85,90],   pct:false, dir:"ge",
+     tip:"The stock's 18-month price return, ranked across the universe as a percentile (0 to 100)"}
   ];
+  /* Readings that are shown but are no longer Filter Tests (Message 3): their column tooltips. */
+  var TIPS={br:"(Number of EPS estimates raised minus number cut in the last 45 days) divided by the number of estimates; EPS for the calendar year + 1. Shown for information; not a Filter Test since 28-Sep-26",
+    sl:"The 200-day moving average against its level 21 trading days earlier (its one-month % change). Shown for information; not a Filter Test since 28-Sep-26"};
   var RMAP={};for(var ri=0;ri<RULES.length;ri++)RMAP[RULES[ri].k]=RULES[ri];
   var POOL_TARGET=[80,125];
 
@@ -18596,13 +18598,11 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   }
   function thrText(rule,v){
     if(!rule.pct)return String(v);
-    return (v>0&&rule.k==="br"?"+":"")+v+"%";
+    return (v>0?"+":"")+v+"%";
   }
   function condText(rule){
     var t=st.thr[rule.k];
-    if(rule.k==="sl")return t===0?"200D rising: slope above 0% a month":"200D slope at least "+t+"% a month";
-    if(rule.k==="hi")return "Within "+t+"% of the 52-week high";
-    if(rule.k==="br")return "Net upgrades "+(t>0?"+":"")+t+"% or more";
+    if(rule.k==="sb")return "Net upgrade breadth "+(t>0?"+":"")+t+"% or more";
     return rule.label+" "+t+" or more";
   }
 
@@ -18626,23 +18626,24 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"coh", g:"I",label:"Cohort",key:"cohn",type:"txt",cls:"w-coh"},
     {id:"p",   g:"M",label:"SP",key:"p",type:"px",gs:true,tip:"Share price, last close"},
     {id:"ma200",g:"M",label:"200D",key:"ma200",type:"px",tip:"200-day simple moving average of the daily close"},
-    {id:"sl",  g:"M",label:"200D Slope",key:"sl",type:"pct",dp:1,sign:true,red:-0.04,green:0.04,strike:function(v){return v<=0;},tip:RMAP.sl.tip},
+    {id:"sl",  g:"M",label:"200D Slope",key:"sl",type:"pct",dp:1,sign:true,red:-0.04,green:0.04,tip:TIPS.sl},
     {id:"m0",  g:"M",label:"> 0% 200D Trend",key:"m0",type:"mon",cap:"m0c",red:1,green:9,tip:"Consecutive months (back from this month) in which the 200D Slope was above 0% on every trading day of the month. '+' = the run reaches the start of the price history"},
     {id:"m2",  g:"M",label:"> 2% 200D Trend",key:"m2",type:"mon",cap:"m2c",red:1,green:6,tip:"Consecutive months in which the 200D Slope was above 2% on every trading day of the month"},
     {id:"m4",  g:"M",label:"> 4% 200D Trend",key:"m4",type:"mon",cap:"m4c",red:0,green:3,tip:"Consecutive months in which the 200D Slope was above 4% on every trading day of the month"},
     {id:"mlen",g:"M",label:"> 200D Length",key:"mlen",type:"mon",cap:"mlenc",red:1,green:9,tip:"Consecutive months in which the share price closed above its 200D on every trading day of the month"},
-    {id:"hi",  g:"M",label:"52W High",key:"hi",type:"pct",dp:0,red:0.50,green:0,strike:function(v){return v>=0.30-EPS;},tip:"Share price % below its 52-week high"},
+    {id:"hi",  g:"M",label:"52W High",key:"hi",type:"pct",dp:0,red:0.50,green:0,tip:"Share price % below its 52-week high"},
     {id:"lo",  g:"M",label:"52W Low",key:"lo",type:"pct",dp:0,red:0,green:0.30,tip:"Share price % above its 52-week low"},
-    {id:"rs",  g:"M",label:"Stock RS",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip},
-    {id:"srs", g:"M",label:"Sector RS",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip},
-    {id:"rs18",g:"M",label:"Stock 18M RS",key:"rs18",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip},
-    {id:"br",  g:"M",label:"SS EPS Net Upgrades L45D",key:"br",type:"pct",dp:0,sign:true,red:-0.30,green:0.30,strike:function(v){return v<0;},tip:RMAP.br.tip},
+    /* Strike-through in Metrics only on the columns that are also Filter Tests (Richard, Message 3; D-MD-POOL-18),
+       at the rule's Default Standard Setting. */
+    {id:"rs",  g:"M",label:"Stock RS L12M Composite",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip},
+    {id:"srs", g:"M",label:"Sector RS L12M",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip},
+    {id:"rs18",g:"M",label:"Stock RS L18M",key:"rs18",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip},
+    {id:"br",  g:"M",label:"SS EPS Net Upgrades L45D",key:"br",type:"pct",dp:0,sign:true,red:-0.30,green:0.30,tip:TIPS.br},
+    {id:"sb",  g:"M",label:"SS Sales Net Upgrade Breadth L3M",key:"sb",type:"pct",dp:0,sign:true,red:-1.0,green:1.0,strike:function(v){return v<0;},tip:RMAP.sb.tip},
     {id:"f_rs",  g:"F",rule:"rs",  key:"rs",  type:"int",red:50,green:80,gs:true},
     {id:"f_srs", g:"F",rule:"srs", key:"srs", type:"int",red:30,green:70},
+    {id:"f_sb",  g:"F",rule:"sb",  key:"sb",  type:"pct",dp:0,sign:true,red:-1.0,green:1.0},
     {id:"f_rs18",g:"F",rule:"rs18",key:"rs18",type:"int",red:50,green:80},
-    {id:"f_br",  g:"F",rule:"br",  key:"br",  type:"pct",dp:0,sign:true,red:-0.30,green:0.30},
-    {id:"f_sl",  g:"F",rule:"sl",  key:"sl",  type:"pct",dp:1,sign:true,red:-0.04,green:0.04},
-    {id:"f_hi",  g:"F",rule:"hi",  key:"hi",  type:"pct",dp:0,red:0.50,green:0},
     {id:"np",    g:"F",label:"Rules passed",key:"_np",type:"np",tip:"How many of the rules that are switched on this stock passes"}
   ];
   for(var ci=0;ci<COLS.length;ci++){var c=COLS[ci];if(c.rule){c.label=RMAP[c.rule].label;c.tip=RMAP[c.rule].tip+". Struck through when it fails the rule's current setting";}}
@@ -18665,7 +18666,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     }
     cls.push("num");
     if(v==null||isNaN(v)){
-      var why=r.nohist?"no price history":(c.key==="br"?(r.bn===0?"no EPS estimates":"no sell-side data"):"not enough history");
+      var why=r.nohist?"no price history":(c.key==="br"?(r.bn===0?"no EPS estimates":"no sell-side data"):(c.key==="sb"?"no sales estimates":"not enough history"));
       return '<td class="'+cls.join(" ")+' pe-na" title="'+why+'">n/a</td>';
     }
     if(c.type==="px")txt=fPx(v);
@@ -18678,6 +18679,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     else if(c.strike){fail=c.strike(v);}
     if(fail)cls.push("pe-fail");
     if(c.key==="br"&&r.bn!=null)title=r.bn+" estimates: "+(r.bu||0)+" raised, "+(r.bd||0)+" cut in the last 45 days";
+    if(c.key==="sb"&&r.sbn){var lab=["today","1 month ago","2 months ago"],pp=[];for(var q=0;q<3;q++)pp.push(lab[q]+": "+(r.sbn[q]==null?"no":r.sbn[q])+" estimates, "+r.sbu[q]+" raised, "+r.sbd[q]+" cut");title=pp.join("; ");}
     return '<td class="'+cls.join(" ")+'" style="'+sty+'"'+(title?' title="'+esc(title)+'"':'')+'>'+txt+'</td>';
   }
 
@@ -18712,8 +18714,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if(c.gs)cls.push("pe-gs");
       if(c.g==="M")cls.push("pe-hm");else if(c.g==="F")cls.push("pe-hf");
       var arr=st.sortKey===c.id?'<span class="pe-arr">'+(st.asc?"&#9650;":"&#9660;")+'</span>':"";
-      var lab=esc(c.label).replace(/ (?=[^ ]+$)/,"<br>");
-      if(c.label.length<=10)lab=esc(c.label);
+      var lab=esc(c.label);  /* headers wrap inside a capped width (CSS), so long names take two or three short lines */
       h+='<th class="'+cls.join(" ")+'" data-pe-sort="'+c.id+'" title="'+esc((c.tip||c.label)+". Click to sort")+'">'+lab+arr+'</th>';
     }
     return h+'</tr></thead>';
@@ -18743,7 +18744,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     sortRows(rows);
     var onN=0;for(i=0;i<RULES.length;i++)if(st.on[RULES[i].k])onN++;
     var inT=pool>=POOL_TARGET[0]&&pool<=POOL_TARGET[1];
-    var h='<div class="pe-bar"><span class="pe-count"><b>'+pool+'</b> of '+all.length+' stocks pass '+(onN===RULES.length?"all six rules":(onN?"the "+onN+" rules switched on":"(no rule is switched on)"))+'</span>'
+    var h='<div class="pe-bar"><span class="pe-count"><b>'+pool+'</b> of '+all.length+' stocks pass '+(onN===RULES.length?"all "+["","one","two","three","four","five","six"][RULES.length]+" rules":(onN?"the "+onN+" rules switched on":"(no rule is switched on)"))+'</span>'
       +'<span class="pe-target'+(inT?"":" outside")+'" title="Richard\'s stated Pool target for the backtest: roughly 80 to 125 names">'+(inT?"inside":(pool<POOL_TARGET[0]?"below":"above"))+' the Pool target of 80 to 125</span>'
       +(q||st.showAll?'<span class="pe-count" style="font-size:11.5px;color:#555">showing '+rows.length+(st.showAll?" (all stocks; failing ones faded)":"")+(q?' matching "'+esc(st.q)+'"':"")+'</span>':"")
       +'</div>';
@@ -18758,7 +18759,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     h+='</tbody></table></div>';
     h+='<div class="pe-legend">Colours run from dark red (weak) through neutral to bright green (strong) on each column\'s own scale. '
       +'<span class="pe-sw" style="background:rgba(153,27,27,.55)"></span>weak <span class="pe-sw" style="background:rgba(22,163,74,.55)"></span>strong. '
-      +'<span style="color:#8b1a1a;text-decoration:line-through">Struck through</span>: in Filter Tests, fails the rule at its current setting; in Metrics, below your fixed marks (200D Slope 0% or less; 52W High 30% or more below; Stock RS and Stock 18M RS below 80; Sector RS below 50; net upgrades below 0%). '
+      +'<span style="color:#8b1a1a;text-decoration:line-through">Struck through</span>: in Filter Tests, fails the rule at its current setting; in Metrics, only on the columns that are also Filter Tests, below the Default Standard Setting of each rule (Stock RS L12M Composite and Stock RS L18M below 80; Sector RS L12M below 50; SS Sales Net Upgrade Breadth L3M below 0%). '
       +'n/a: no reading (fails a rule that is on, as in the backtest).</div>';
     return h;
   }
@@ -18793,13 +18794,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     h+='<div class="pe-sub">Work in progress: the Filter Rules being tested in APM - Stage 2 Gate-4 Backtest, shown on every stock in the universe. <b>Nothing here is adopted.</b> '
       +'The page always opens at the Default Standard Settings (bold buttons); the other buttons under each rule are its Flex Values.</div>';
     h+='<div class="pe-dates">Prices as at <b>'+fmtDate(M.price_date)+'</b> (daily, after the 17:15 UK refresh). '
-      +'Sell-side estimate counts as at <b>'+fmtDate(ss.as_of)+'</b>'+(ss.source?' ('+esc(ss.source)+')':'')+'. Readings built '+esc(M.generated||"")+'.</div>';
+      +'Sell-side estimate counts as at <b>'+fmtDate(ss.as_of)+'</b>'+(ss.sales_source?' (sales: '+esc(ss.sales_source)+')':(ss.source?' ('+esc(ss.source)+')':''))+'. Readings built '+esc(M.generated||"")+'.</div>';
     if(ph&&ph.label){
       var up=ph.label==="Uptrending";
       h+='<div class="pe-phase '+(up?"up":"down")+'"><b>Market Cycle Phase: '+esc(ph.label)+'</b><span>since '+(ph.history_limited?"at least ":"")+fmtDate(ph.since)
         +'. Stoxx Europe 600 '+ph.close+' against its 200-day average '+ph.ma200+' ('+(ph.days_above>0?"above for "+ph.days_above+" trading days":"below")+'); the average '
         +(ph.ma200_1m>=0?"rose ":"fell ")+Math.abs(ph.ma200_1m*100).toFixed(1)+'% over 21 trading days. The backtest\'s month-end label, read daily.'
-        +(up?"":" <b>These six rules are Uptrending rules; the backtest found trend rules of this kind the weakest Pool in a Downtrending Market.</b>")+'</span></div>';
+        +(up?"":" <b>These four rules are the backtest's Uptrending Market rules; for a Downtrending Market it recommends a different Pool (the early-cycle industries with Sector RS L12M 50 or more), which is not on this page yet.</b>")+'</span></div>';
     }
     var W=M.warnings||[];
     for(var i=0;i<W.length;i++)h+='<div class="pe-warn">'+esc(W[i])+'</div>';

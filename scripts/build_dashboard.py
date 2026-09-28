@@ -318,6 +318,7 @@ TABS = [
     {"id": "master_overview", "label": "Overview", "accent": "#1b3d5c"},
     # Data / reference tabs
     {"id": "pool_elig", "label": "Pool Eligibility for Portfolio Selection", "accent": "#1b5e20"},  # MD-POOL-ELIG-2026-09-28
+    {"id": "ideas_lists", "label": "Ideas Lists (Bench, LL, SL)", "accent": "#1b5e20"},  # MD-IDEAS-LISTS-2026-09-28
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -347,6 +348,7 @@ IMPLEMENTED_TABS = [
     "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
     "ssem", "val",
     "pool_elig",  # MD-POOL-ELIG-2026-09-28
+    "ideas_lists",  # MD-IDEAS-LISTS-2026-09-28
 ]
 
 
@@ -587,7 +589,8 @@ body[data-active-tab="pool_elig"] .v2-nav{display:flex}
 body[data-active-tab="pool_elig"] .header-controls-row{display:none !important}
 body[data-active-tab="pool_elig"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="pool_elig"]{--header-height:70px}
-.v2-nav-btn[data-v2-tab="pool_elig"]{width:92px}
+.v2-nav-btn[data-v2-tab="pool_elig"],.v2-nav-btn[data-v2-tab="ideas_lists"]{width:88px}
+.v2-nav-btn[data-v2-tab="setups_healthy_retest"],.v2-nav-btn[data-v2-tab="tests_healthy_vcp"]{width:88px}  /* MD-IDEAS-LISTS: the two longest labels keep room */
 /* An active navigation button kept its group's pale hover colour under the pointer, so its white label vanished
    (measured 28-Sep-26 on every Summary button; the group hover rule ties .v2-active on specificity and comes later, so it wins; the extra .v2-nav raises these above it). Keep the active colour. */
 .v2-nav .v2-nav-group .v2-nav-btn.v2-active:hover{background:#1b3d5c;border-color:#1b3d5c}
@@ -599,6 +602,26 @@ table.pe-table tr.pe-h th.pe-hm{background:#e9eef3}
 table.pe-table tr.pe-h th.pe-hf{background:#e8f1e6}
 table.pe-table tr.pe-g th span.pe-gl{padding:0 8px;display:inline-block}
 table.pe-table tr.pe-g th.pe-gi span.pe-gl{padding-left:6px}
+/* MD-IDEAS-LISTS-2026-09-28 -- Ideas Lists (Bench, LL, SL): built on the Pool Eligibility page's styles (pe-*) */
+html.pe-fit body[data-active-tab="ideas_lists"]{overflow:hidden}
+body[data-active-tab="ideas_lists"] .header-tabs-row{display:none !important}
+body[data-active-tab="ideas_lists"] .v2-nav{display:flex}
+body[data-active-tab="ideas_lists"] .header-controls-row{display:none !important}
+body[data-active-tab="ideas_lists"] .header{height:auto !important;padding-bottom:0 !important}
+body[data-active-tab="ideas_lists"]{--header-height:70px}
+.il-togs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:7px 0 6px}
+.il-tnote{font-size:10.5px;color:var(--text-dim);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.il-tnote b{color:#222}
+/* Sub-header rows, one per group (Richard, Message 8) */
+table.pe-table tr.il-sub td{background:#f3f0e4;color:#1a1a1a;font-weight:700;font-size:12px;padding:6px 8px;height:auto;border-top:2px solid #cfc9b4;border-bottom:1px solid #ddd8c8;cursor:default}
+table.pe-table tbody tr.il-sub:hover td{background:#f3f0e4}
+table.pe-table tr.il-sub .il-sub-n{font-weight:500;color:#666;font-size:11px;margin-left:10px}
+table.pe-table tr.il-sub.il-bench td{box-shadow:inset 5px 0 0 #1b5e20}
+table.pe-table tr.il-sub.il-sl td{box-shadow:inset 5px 0 0 #2e7d32}
+table.pe-table tr.il-sub.il-ll td{box-shadow:inset 5px 0 0 #7cb342}
+table.pe-table tr.il-sub.il-other td{box-shadow:inset 5px 0 0 #8d6e00}
+table.pe-table tr.il-sub.il-live td{box-shadow:inset 5px 0 0 #1b3d5c}
+table.pe-table tr.il-none td{color:#888;font-style:italic;padding:5px 10px}
 /* MD-QOT-2026-09-10 — Qualification over Time */
 .qot-warn{background:#fdf1f1;border-left:4px solid #A32D2D;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
 .qot-note{background:#eef3ec;border-left:4px solid #1b5e20;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
@@ -1490,13 +1513,13 @@ body[data-active-tab="tests_probing_bet_s2"] .v2-nav,
 body[data-active-tab="setups_healthy_retest"] .v2-nav,
 body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2-nav,body[data-active-tab="val"] .v2-nav,body[data-active-tab="combos"] .v2-nav { display: flex; }
 /* Group container */
-/* MD-NAV-ONE-LINE-28Sep26 (Richard, Message 5): buttons 90px to 84px, padding 4px 7px to 3px 4px, group padding 6px to 4px,
+/* MD-NAV-ONE-LINE-28Sep26, then 84px to 78px for the seventh Summary button (Message 6; the two long S2 buttons 88px). (Richard, Message 5): buttons 90px to 84px, padding 4px 7px to 3px 4px, group padding 6px to 4px,
    gap 5px to 4px, so every group, Summary included, fits one line on a 1920-wide screen. No label overflows (measured). */
 .v2-nav-group { display: flex; flex-direction: column; border-radius: 5px; padding: 4px 4px 5px; flex-shrink: 0; }
 .v2-nav-group-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.45px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; line-height: 1; }
 .v2-nav-group-btns { display: flex; flex-wrap: wrap; gap: 3px; align-items: stretch; }
 /* Buttons: uniform 50px height, centred text */
-.v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; width: 84px; height: 66px; padding: 3px 4px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; overflow: hidden; }
+.v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; width: 78px; height: 66px; padding: 3px 4px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; overflow: hidden; }
 .v2-nav-btn:hover { background: #f3efe2; border-color: #b0ac98; }
 .v2-nav-btn.v2-active { background: #1b3d5c; border-color: #1b3d5c; color: #fff; }
 .v2-nav-btn.v2-active-s1 { background: #1b5e20; border-color: #1b5e20; color: #fff; }
@@ -10676,7 +10699,7 @@ function SUM_renderQualifiedStocks() {
               /* MD-POOL-ELIG-2026-09-28: pages that use the V2 header chrome must be measured too. Without this, opening
                  the dashboard straight onto them (a bookmark or a reload with #pool_elig or #combos) left .main at the
                  70px fallback under a ~245px header, hiding the top of the page (found on the live site, 28-Sep-26). */
-              active === 'combos' || active === 'pool_elig');
+              active === 'combos' || active === 'pool_elig' || active === 'ideas_lists');
     if (!v2) return;
     /* S66b: measure the actual rendered header height (header-top + nav groups) and
        publish as --header-height so .main margin-top and all frozen top: offsets are correct */
@@ -10771,6 +10794,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="val" onclick="switchTab(\'val\')">Valuation</button>'
 +     '<button class="v2-nav-btn" data-v2-tab="combos" onclick="switchTab(\'combos\')">Timeliness</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="pool_elig" onclick="switchTab(\'pool_elig\')">Pool Eligibility for Portfolio Selection</button>'  /* MD-POOL-ELIG-2026-09-28 */
+      +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Ideas Lists (Bench, LL, SL)</button>'  /* MD-IDEAS-LISTS-2026-09-28 */
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -18672,7 +18696,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   ];
   for(var ci=0;ci<COLS.length;ci++){var c=COLS[ci];if(c.rule){c.label=RMAP[c.rule].label;c.tip=RMAP[c.rule].tip+". Struck through when it fails the rule at its current setting";}}
 
-  function cell(c,r){
+  function cell(c,r,S0){
+    var S=S0||st;   /* MD-IDEAS-LISTS: the Ideas Lists page passes its own (default) rule state */
     var v=r[c.key],cls=[],sty="",txt,title="";
     if(c.gs)cls.push("pe-gs");
     if(c.type==="name"){
@@ -18682,7 +18707,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       return '<td class="pe-txt'+(c.gs?" pe-gs":"")+'" title="'+esc(v||"")+'">'+esc(v||"")+'</td>';
     }
     if(c.type==="np"){
-      var on=0;for(var i=0;i<RULES.length;i++)if(st.on[RULES[i].k])on++;
+      var on=0;for(var i=0;i<RULES.length;i++)if(S.on[RULES[i].k])on++;
       var s=on?(r._np+"/"+on):"-";
       sty=on?scaleBg(r._np,Math.max(0,on-3),on):"";
       return '<td class="num pe-np'+(c.gs?" pe-gs":"")+'" style="'+sty+'">'+s+'</td>';
@@ -18699,7 +18724,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     else if(c.type==="mon"){txt=String(v)+(r[c.cap]?"+":"");if(r[c.cap])title="The run reaches the start of the price history, so it may be longer";}
     if(c.red!=null)sty=scaleBg(v,c.red,c.green);
     var fail=false;
-    if(c.rule){fail=!passes(RMAP[c.rule],r,st.thr[c.rule]);}
+    if(c.rule){fail=!passes(RMAP[c.rule],r,S.thr[c.rule]);}
     else if(c.strike){fail=c.strike(v);}
     if(fail)cls.push("pe-fail");
     if(c.key==="br"&&r.bn!=null)title=r.bn+" estimates: "+(r.bu||0)+" raised, "+(r.bd||0)+" cut in the last 45 days";
@@ -18730,7 +18755,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     return h+'</colgroup>';
   }
 
-  function header(){
+  function header(S0){
+    var S=S0||st;
     var h='<thead><tr class="pe-g">';
     var groups=[["I","Information","pe-gi"],["M","Metrics","pe-gm"],["F","Filter Tests","pe-gf"]];
     for(var g=0;g<groups.length;g++){
@@ -18751,7 +18777,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       else if(c.type!=="txt")cls.push("num");
       if(c.gs)cls.push("pe-gs");
       if(c.g==="M")cls.push("pe-hm");else if(c.g==="F")cls.push("pe-hf");
-      var arr=st.sortKey===c.id?'<span class="pe-arr">'+(st.asc?"&#9650;":"&#9660;")+'</span>':"";
+      var arr=S.sortKey===c.id?'<span class="pe-arr">'+(S.asc?"&#9650;":"&#9660;")+'</span>':"";
       /* Two lines (Message 5): the short name in normal text, the full name in small text beneath it. Where the two
          are the same (SP, 200D, 52W High, Company...) only the short name is shown. */
       var lab='<span class="pe-hs">'+esc(c.sh)+arr+'</span>'+(c.label!==c.sh?'<span class="pe-hl">'+esc(c.label)+'</span>':'');
@@ -18923,6 +18949,211 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(!st)initState();
     paint();
   };
+  /* MD-IDEAS-LISTS-2026-09-28: the parts the Ideas Lists page reuses */
+  window._PE={COLS:COLS,RULES:RULES,RMAP:RMAP,cell:cell,colgroup:colgroup,header:header,passes:passes,fmtDate:fmtDate};
+})();
+
+/* ============================================================================
+   IDEAS LISTS (BENCH, LL, SL)  (MD-IDEAS-LISTS-2026-09-28)
+   Richard's page (Messages 6 to 8, 28-Sep-26; SA - Master Dashboard D-MD-POOL-36 onwards): every stock on the
+   latest weekly Ideas lists (Ideas Bench, Ideas Shortlist, Ideas Longlist, written each Friday by the Ideas line of
+   "Automation of 10 Info Sources to Reports to FfF to Shortlisting to Memo Commissioning"), then "Other" (the
+   signed-off Uptrend Pool, D-100: EUR 500m or more plus rules 1 to 3, not on any list and not held), then "Live
+   Stocks" (the current holdings). Built on the Pool Eligibility page: the same columns, cells, colours and
+   Filter Tests at their Default Standard Settings (window._PE); rows sit under a sub-header per group
+   (Richard, Message 8: "put the relevant rows below a sub-header"). Five toggles show or hide the groups; all
+   ON when the page opens. Data: MASTER_DATA.pool.ideas (build_pool_eligibility.py v1.4.0) and
+   MASTER_DATA.positions.investments (the Position Management System).
+   ============================================================================ */
+(function(){
+  function PE(){return window._PE;}
+  function PD(){return (window.MASTER_DATA||{}).pool||null;}
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  var GROUPS=[
+    {k:"bench",label:"Ideas Bench",tip:"The Ideas Bench of the latest weekly Ideas lists, in list order"},
+    {k:"sl",label:"Ideas Shortlist",tip:"The Ideas Shortlist of the latest weekly Ideas lists, in list order"},
+    {k:"ll",label:"Ideas Longlist",tip:"The Ideas Longlist of the latest weekly Ideas lists, in list order"},
+    {k:"other",label:"Other",tip:"Stocks in the signed-off Uptrend Pool (D-100: market value EUR 500m or more, Stock RS L12M Composite 80 or more, Sector RS L12M 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more) that are on none of the three lists and are not held; highest Stock RS L12M Composite first"},
+    {k:"live",label:"Live Stocks",tip:"The current portfolio holdings (Position Management System); highest Stock RS L12M Composite first"}
+  ];
+  var CHANGE={held:"held",promoted:"promoted",demoted:"demoted","new":"new this week"};
+
+  var st=null;
+  function initState(){st={on:{bench:true,sl:true,ll:true,other:true,live:true},q:"",sortKey:null,asc:false};}
+  /* The Filter Tests on this page are always at their Default Standard Settings, all switched on. */
+  function ruleState(){var R=PE().RULES,o={on:{},thr:{},sortKey:st.sortKey||"",asc:st.asc};for(var i=0;i<R.length;i++){o.on[R[i].k]=true;o.thr[R[i].k]=R[i].std;}return o;}
+  function inSignedOffPool(r){
+    var P=PE(),M=P.RMAP;
+    if(r.mc!=null&&r.mc<500)return false;   /* no market value on file (one stock today): not excluded on size */
+    return P.passes(M.rs,r,M.rs.std)&&P.passes(M.srs,r,M.srs.std)&&P.passes(M.sb,r,M.sb.std);
+  }
+
+  /* One group per stock. A held stock shows under Live Stocks even if a list names it (the lists leave holdings out
+     by design); then Bench, Shortlist, Longlist; Other last. */
+  function build(){
+    var S=PD().stocks,by={},i,j,g={bench:[],sl:[],ll:[],other:[],live:[]},missing=[],seen={};
+    for(i=0;i<S.length;i++)by[S[i].t]=S[i];
+    var inv=((window.MASTER_DATA||{}).positions||{}).investments||[];
+    for(i=0;i<inv.length;i++){var t=inv[i].ticker;if(!t||seen[t])continue;if(by[t]){g.live.push({r:by[t],pos:0});seen[t]=1;}else missing.push(t+" (held)");}
+    var I=PD().ideas,ks=["bench","sl","ll"];
+    if(I&&I.groups){
+      for(j=0;j<ks.length;j++){var L=I.groups[ks[j]]||[];
+        for(i=0;i<L.length;i++){var x=L[i];if(!x.t||seen[x.t])continue;if(!by[x.t]){missing.push(x.t);continue;}g[ks[j]].push({r:by[x.t],pos:x.rank||999,change:x.change});seen[x.t]=1;}}
+    }
+    for(i=0;i<S.length;i++){if(!seen[S[i].t]&&inSignedOffPool(S[i]))g.other.push({r:S[i],pos:0});}
+    /* Rules passed, at the Default Standard Settings (the cells read r._np; the Pool page recomputes its own before it paints) */
+    var P=PE(),RS=ruleState();
+    for(i=0;i<S.length;i++){var n=0;for(j=0;j<P.RULES.length;j++)if(P.passes(P.RULES[j],S[i],RS.thr[P.RULES[j].k]))n++;S[i]._np=n;}
+    return {g:g,missing:missing};
+  }
+
+  function sortGroup(arr){
+    if(!st.sortKey){   /* list order: the lists by their rank; Other and Live Stocks by Stock RS L12M Composite, highest first */
+      arr.sort(function(a,b){
+        if(a.pos||b.pos)return (a.pos||999)-(b.pos||999);
+        var x=a.r.rs,y=b.r.rs;x=(x==null||isNaN(x))?-1:x;y=(y==null||isNaN(y))?-1:y;
+        return (y-x)||String(a.r.n).localeCompare(String(b.r.n));
+      });
+      return arr;
+    }
+    var C=PE().COLS,col=null;for(var i=0;i<C.length;i++)if(C[i].id===st.sortKey)col=C[i];
+    var key=col?col.key:"rs",txt=col&&(col.type==="name"||col.type==="txt"),asc=st.asc;
+    arr.sort(function(A,B){
+      var a=A.r,b=B.r,x=a[key],y=b[key];
+      var xn=(x==null||x===""||(typeof x==="number"&&isNaN(x))),yn=(y==null||y===""||(typeof y==="number"&&isNaN(y)));
+      if(xn&&yn)return String(a.n).localeCompare(String(b.n));
+      if(xn)return 1; if(yn)return -1;
+      var d=txt?String(x).localeCompare(String(y)):(x-y);
+      if(d===0)return String(a.n).localeCompare(String(b.n));
+      return asc?d:-d;
+    });
+    return arr;
+  }
+
+  function match(r,q){if(!q)return true;return (r.n+" "+r.t+" "+(r.ind||"")+" "+(r.sec||"")).toLowerCase().indexOf(q)>=0;}
+
+  function tableHtml(B){
+    var P=PE(),C=P.COLS,RS=ruleState(),q=st.q.trim().toLowerCase(),shown=0,groupsOn=0;
+    var h='<div class="pe-wrap"><table class="pe-table il-table">'+P.colgroup()+P.header(RS)+'<tbody>';
+    for(var gi=0;gi<GROUPS.length;gi++){
+      var G=GROUPS[gi];if(!st.on[G.k])continue;groupsOn++;
+      var all=B.g[G.k],arr=[];for(var i=0;i<all.length;i++)if(match(all[i].r,q))arr.push(all[i]);
+      sortGroup(arr);shown+=arr.length;
+      h+='<tr class="il-sub il-'+G.k+'"><td colspan="'+C.length+'" title="'+esc(G.tip)+'"><span class="il-sub-l">'+esc(G.label)+'</span><span class="il-sub-n">'+(q?arr.length+" of "+all.length:all.length)+' stock'+((q?arr.length:all.length)===1?"":"s")+'</span></td></tr>';
+      if(!arr.length){h+='<tr class="il-none"><td colspan="'+C.length+'">'+(q?"None matching the search":"None")+'</td></tr>';continue;}
+      for(var k=0;k<arr.length;k++){
+        var row=arr[k];
+        h+='<tr'+(row.change?' data-il-change="'+esc(CHANGE[row.change]||row.change)+'"':'')+'>';
+        for(var c=0;c<C.length;c++)h+=P.cell(C[c],row.r,RS);
+        h+='</tr>';
+      }
+    }
+    if(!groupsOn)return {html:'<div class="pe-wrap"><div class="pe-empty">Every group is switched off. Switch one on above.</div></div>',shown:0};
+    return {html:h+'</tbody></table></div>',shown:shown};
+  }
+
+  function togglesHtml(B){
+    var I=PD().ideas,h='<div class="il-togs">';
+    for(var i=0;i<GROUPS.length;i++){
+      var G=GROUPS[i],on=st.on[G.k],n=B.g[G.k].length;
+      var note=(G.k==="other")?"in the signed-off Pool, on no list":(G.k==="live"?"current holdings":(I?"list of "+PE().fmtDate(I.date):"no list found"));
+      h+='<div class="pe-rule'+(on?"":" off")+'"><button class="pe-tog" data-il-tog="'+G.k+'" title="'+esc(G.tip+". Click to "+(on?"hide":"show")+" them")+'"><span class="pe-tl">'+esc(G.label)+'</span><span class="pe-state">'+(on?"ON":"OFF")+'</span></button>'
+        +'<div class="il-tnote"><b>'+n+'</b> stock'+(n===1?"":"s")+' &middot; '+esc(note)+'</div></div>';
+    }
+    return h+'</div>';
+  }
+
+  function top(B){
+    var P=PE(),M=PD()._meta||{},ss=M.ss||{},ph=M.phase,I=PD().ideas,h='<div class="summary-tile pe-tile"><div class="pe-head">';
+    h+='<span class="pe-title">Ideas Lists (Bench, LL, SL)</span>';
+    var sub=(I?"Weekly Ideas lists of "+P.fmtDate(I.date)+" (written each Friday)":"No weekly Ideas lists found")+", then Other (the signed-off Uptrend Pool, on no list) and Live Stocks. Struck through: fails that Filter Test at its Default Standard Setting.";
+    h+='<span class="pe-sub" title="'+esc("Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Other: market value EUR 500m or more, Stock RS L12M Composite 80 or more, Sector RS L12M 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more (D-100), on none of the three lists and not held. Live Stocks: the Position Management System. Each stock appears once. Click a column heading to sort within each group; Reset returns to list order.")+'">'+esc(sub)+'</span>';
+    h+='<span class="pe-spacer"></span>';
+    h+='<span class="pe-dates" title="'+esc("Prices as at "+P.fmtDate(M.price_date)+"; sell-side estimate counts as at "+P.fmtDate(ss.as_of)+"; market values as at "+P.fmtDate(M.mc_date)+"; readings built "+(M.generated||""))+'">Prices <b>'+P.fmtDate(M.price_date)+'</b> &middot; Sell-side <b>'+P.fmtDate(ss.as_of)+'</b></span>';
+    if(ph&&ph.label)h+='<span class="pe-ph '+(ph.label==="Uptrending"?"up":"down")+'" title="Market Cycle Phase, as on the Pool Eligibility page">Market Cycle Phase: <b>'+esc(ph.label)+'</b> since '+(ph.history_limited?"at least ":"")+P.fmtDate(ph.since)+'</span>';
+    h+='</div>';
+    var W=(M.warnings||[]).slice();
+    if(B.missing.length)W.push("Not in the dashboard's universe, so not shown: "+B.missing.join(", "));
+    for(var i=0;i<W.length;i++)h+='<div class="pe-warn">'+esc(W[i])+'</div>';
+    h+=togglesHtml(B);
+    h+='<div class="pe-bar"><span id="il-countbox" class="pe-countbox"></span><span class="pe-spacer"></span>'
+      +'<input class="pe-search" id="il-search" type="search" placeholder="Search company, ticker, industry or sector" value="'+esc(st.q)+'">'
+      +'<button class="pe-btn" data-il-reset="1" title="All groups on, list order, search kept">Reset to list order</button></div>';
+    return h+'</div>';
+  }
+
+  function isActive(){return document.body.getAttribute("data-active-tab")==="ideas_lists";}
+  /* As on the Pool page (Message 5): the page does not scroll; the table frame fills the window below the panel. */
+  function sizeWrap(){
+    var w=document.querySelector("#tab-ideas_lists .pe-wrap");if(!w||!isActive())return;
+    try{if(typeof window.measureV2Ribbon==="function")window.measureV2Ribbon();}catch(e){}
+    var de=document.documentElement;
+    de.classList.add("pe-fit");
+    if(window.scrollY||window.pageYOffset)window.scrollTo(0,0);
+    var avail=Math.floor(window.innerHeight-w.getBoundingClientRect().top-10);
+    if(avail>=240){w.style.height=avail+"px";w.style.maxHeight="none";}
+    else{
+      de.classList.remove("pe-fit");
+      var hd=document.querySelector(".header"),hh=hd?hd.getBoundingClientRect().height:145;
+      w.style.height="";w.style.maxHeight=Math.max(300,Math.round(window.innerHeight-hh-14))+"px";
+    }
+  }
+  function sizeSoon(){sizeWrap();try{requestAnimationFrame(sizeWrap);}catch(e){}setTimeout(sizeWrap,120);setTimeout(sizeWrap,500);}
+  if(!window._ilResizeWired){
+    window._ilResizeWired=true;
+    window.addEventListener("resize",function(){if(isActive())sizeWrap();});
+    try{var hd0=document.querySelector(".header");if(hd0&&window.ResizeObserver)new ResizeObserver(function(){if(isActive())sizeWrap();}).observe(hd0);}catch(e){}
+  }
+
+  var B=null;
+  function paintBody(){
+    var b=document.getElementById("il-body");if(!b)return;
+    var T=tableHtml(B);b.innerHTML=T.html;
+    var cb=document.getElementById("il-countbox");
+    if(cb){var on=0,tot=0;for(var i=0;i<GROUPS.length;i++)if(st.on[GROUPS[i].k]){on++;tot+=B.g[GROUPS[i].k].length;}
+      cb.innerHTML='<span class="pe-count"><b>'+T.shown+'</b> stock'+(T.shown===1?"":"s")+' shown'+(st.q.trim()?' matching "'+esc(st.q)+'" (of '+tot+')':'')+'</span>'+(st.sortKey?'<span class="pe-showing">sorted by a column within each group</span>':'<span class="pe-showing">in list order</span>');}
+    sizeWrap();
+  }
+  function refreshToggles(){
+    var p=document.querySelector("#tab-ideas_lists .il-togs");
+    if(p){var tmp=document.createElement("div");tmp.innerHTML=togglesHtml(B);p.parentNode.replaceChild(tmp.firstChild,p);}
+  }
+  function paint(){
+    var c=document.getElementById("tab-ideas_lists");if(!c)return;
+    if(!PE()||!PD()||!PD().stocks){
+      c.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>Ideas Lists (Bench, LL, SL)</h3><p style="color:var(--text-dim);margin-top:8px">pool-eligibility.json was not built, so there is nothing to show. Run scripts/build_pool_eligibility.py before build_dashboard.py.</p></div>';
+      return;
+    }
+    B=build();
+    c.innerHTML='<div id="il-top">'+top(B)+'</div><div id="il-body"></div>';
+    wire(c);
+    paintBody();
+    sizeSoon();
+  }
+  function wire(c){
+    if(c._ilWired)return; c._ilWired=true;
+    c.addEventListener("click",function(e){
+      var t=e.target;
+      while(t&&t!==c&&!(t.getAttribute&&(t.getAttribute("data-il-tog")||t.getAttribute("data-pe-sort")||t.getAttribute("data-pe-open")||t.getAttribute("data-il-reset"))))t=t.parentNode;
+      if(!t||t===c)return;
+      var k;
+      if((k=t.getAttribute("data-il-tog"))){st.on[k]=!st.on[k];refreshToggles();paintBody();}
+      else if((k=t.getAttribute("data-pe-sort"))){
+        if(st.sortKey===k)st.asc=!st.asc;
+        else{st.sortKey=k;var C=PE().COLS,col=null;for(var i=0;i<C.length;i++)if(C[i].id===k)col=C[i];st.asc=!!(col&&(col.type==="name"||col.type==="txt"||col.key==="hi"));}
+        paintBody();
+      }
+      else if((k=t.getAttribute("data-pe-open"))){if(typeof window.openStockView==="function")window.openStockView(k);}
+      else if(t.getAttribute("data-il-reset")){var q=st.q;initState();st.q=q;refreshToggles();paintBody();}
+    });
+    c.addEventListener("input",function(e){if(e.target&&e.target.id==="il-search"){st.q=e.target.value;paintBody();}});
+  }
+
+  window.renderIdeasLists=function(){
+    try{buildHeaderControls("ideas_lists");}catch(e){}
+    if(!st)initState();
+    paint();
+  };
 })();
 function renderTab(id){
   try{
@@ -18957,6 +19188,7 @@ function renderTab(id){
   else if(id==="combos")renderCombos();
   else if(id==="qual_over_time")renderQualOverTime();  /* MD-QOT-2026-09-10 */
   else if(id==="pool_elig")renderPoolEligibility();  /* MD-POOL-ELIG-2026-09-28 */
+  else if(id==="ideas_lists")renderIdeasLists();  /* MD-IDEAS-LISTS-2026-09-28 */
   else if(id==="changes")renderChanges();
   else if(id==="positions")renderPositions();
   else if(id==="ssem")renderSSEM();

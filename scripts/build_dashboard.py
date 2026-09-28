@@ -18548,9 +18548,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 /* ============================================================================
    POOL ELIGIBILITY FOR PORTFOLIO SELECTION  (MD-POOL-ELIG-2026-09-28)
    Richard's page for the work-in-progress Filter Rules of APM - Stage 2 Gate-4
-   Backtest (SA - Master Dashboard decisions D-MD-POOL-1 to 8). Every stock in the
-   universe, three column groups (Information, Metrics, Filter Tests), six rule
-   toggles with Flex Values under each. The page ALWAYS opens at the Default
+   Backtest (SA - Master Dashboard decisions D-MD-POOL-1 to 20). Every stock in the
+   universe, three column groups (Information, Metrics, Filter Tests), four rule
+   toggles with Flex Values under each (Message 3, 28-Sep-26). The page ALWAYS opens at the Default
    Standard Settings (no memory between visits); switching tabs keeps the state.
    Data: MASTER_DATA.pool, written by scripts/build_pool_eligibility.py, whose
    docstring holds every definition and the backtest line it reproduces.
@@ -18561,7 +18561,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
   var EPS=1e-9;
 
-  /* The six Filter Rules. std = Default Standard Setting; flex = the Flex Values. Percent rules hold thresholds in
+  /* The Filter Rules (now four, below). std = Default Standard Setting; flex = the Flex Values. Percent rules hold thresholds in
      percent; the readings are fractions. Direction and the treatment of a missing reading follow the backtest
      (APM - Stage 2 Gate-4 Backtest, session14/s14_step2_masks.py): a missing reading fails the rule. */
   /* The four Filter Tests (Richard, Message 3, 28-Sep-26; D-MD-POOL-16), in his order and names. ">" in his list is
@@ -18637,13 +18637,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
        at the rule's Default Standard Setting. */
     {id:"rs",  g:"M",label:"Stock RS L12M Composite",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip},
     {id:"srs", g:"M",label:"Sector RS L12M",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip},
-    {id:"rs18",g:"M",label:"Stock RS L18M",key:"rs18",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip},
+    {id:"rs18",g:"M",label:"Stock RS L18M",key:"rs18",type:"dec1",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip},
     {id:"br",  g:"M",label:"SS EPS Net Upgrades L45D",key:"br",type:"pct",dp:0,sign:true,red:-0.30,green:0.30,tip:TIPS.br},
     {id:"sb",  g:"M",label:"SS Sales Net Upgrade Breadth L3M",key:"sb",type:"pct",dp:0,sign:true,red:-1.0,green:1.0,strike:function(v){return v<0;},tip:RMAP.sb.tip},
     {id:"f_rs",  g:"F",rule:"rs",  key:"rs",  type:"int",red:50,green:80,gs:true},
     {id:"f_srs", g:"F",rule:"srs", key:"srs", type:"int",red:30,green:70},
     {id:"f_sb",  g:"F",rule:"sb",  key:"sb",  type:"pct",dp:0,sign:true,red:-1.0,green:1.0},
-    {id:"f_rs18",g:"F",rule:"rs18",key:"rs18",type:"int",red:50,green:80},
+    {id:"f_rs18",g:"F",rule:"rs18",key:"rs18",type:"dec1",red:50,green:80},
     {id:"np",    g:"F",label:"Rules passed",key:"_np",type:"np",tip:"How many of the rules that are switched on this stock passes"}
   ];
   for(var ci=0;ci<COLS.length;ci++){var c=COLS[ci];if(c.rule){c.label=RMAP[c.rule].label;c.tip=RMAP[c.rule].tip+". Struck through when it fails the rule's current setting";}}
@@ -18672,6 +18672,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(c.type==="px")txt=fPx(v);
     else if(c.type==="pct")txt=fPct(v,{dp:c.dp,sign:c.sign});
     else if(c.type==="int")txt=String(Math.round(v));
+    else if(c.type==="dec1")txt=v.toFixed(1);  /* Stock RS L18M is a percentile with decimals (the backtest's rowpct); shown to one decimal so 79.9 is never displayed as a passing "80" */
     else if(c.type==="mon"){txt=String(v)+(r[c.cap]?"+":"");if(r[c.cap])title="The run reaches the start of the price history, so it may be longer";}
     if(c.red!=null)sty=scaleBg(v,c.red,c.green);
     var fail=false;

@@ -154,6 +154,21 @@ def load_data():
         print("  [qot] qual-over-time.json missing -- the tab will say so. Run "
               "scripts/build_qual_over_time.py after the rating index.")
 
+    # MD-POOL-ELIG-2026-09-28: Pool Eligibility for Portfolio Selection readings. Rebuilt here, in-process, so the
+    # nightly (DASHBOARD) and the build-only job (BUILD) both refresh them without a separate bat step; a failure
+    # keeps the previous file and says so, and a missing file makes the tab say so. Never fails the build.
+    pool = None
+    try:
+        import build_pool_eligibility as _bpe
+        _bpe.main()
+    except Exception as _e:
+        print("  [pool] WARNING: build_pool_eligibility failed ({}); using the previous pool-eligibility.json if any".format(_e))
+    _pool_path = DATA_DIR / "pool-eligibility.json"
+    if _pool_path.exists():
+        pool = safe_json_load(_pool_path)
+    else:
+        print("  [pool] pool-eligibility.json missing -- the tab will say so.")
+
     # MD-V2-S36-BRIEF-MARKER: universe_updated = mtime of data/universe.json,
     # formatted as 'YYYY-MM-DD HH:MM'. The file has no _meta field, so we use mtime.
     try:
@@ -194,6 +209,8 @@ def load_data():
     # had no data at all and the tab rendered blank. Caught by browser QC, not by the build.
     if qot:
         master["qot"] = qot
+    if pool:
+        master["pool"] = pool  # MD-POOL-ELIG-2026-09-28
     if ssem:
         ssem_data = {k: v for k, v in ssem.items() if k != "_meta"}
         master["ssem"] = ssem_data
@@ -300,6 +317,7 @@ TABS = [
     # MD-V2-MASTER-OVERVIEW-S27-MARKER - synoptic rating matrix, default landing tab
     {"id": "master_overview", "label": "Overview", "accent": "#1b3d5c"},
     # Data / reference tabs
+    {"id": "pool_elig", "label": "Pool Eligibility for Portfolio Selection", "accent": "#1b5e20"},  # MD-POOL-ELIG-2026-09-28
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -328,6 +346,7 @@ IMPLEMENTED_TABS = [
     "master_overview",  # MD-V2-MASTER-OVERVIEW-S27-MARKER
     "mm99", "bp", "pb", "utr", "vcp", "tech", "combos", "changes", "positions",
     "ssem", "val",
+    "pool_elig",  # MD-POOL-ELIG-2026-09-28
 ]
 
 
@@ -477,6 +496,92 @@ table.data-table th{background:#f0ede3;color:#6b6b6b;font-weight:600;font-size:1
 .val-chart-link{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border:1px solid #2f855a;color:#276749;background:rgba(56,161,105,0.08);border-radius:3px;text-decoration:none;line-height:1.4}
 .val-chart-link:hover{background:#2f855a;color:#fff}
 
+/* MD-POOL-ELIG-2026-09-28 -- Pool Eligibility for Portfolio Selection */
+.pe-title{font-size:15px;font-weight:700;color:var(--text-bright);margin-bottom:3px}
+.pe-sub{font-size:12px;color:var(--text-dim);line-height:1.5}
+.pe-dates{font-size:11px;color:#555;margin-top:6px}
+.pe-phase{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;padding:6px 10px;border-radius:5px;font-size:12px;line-height:1.45}
+.pe-phase.up{background:#eef6ee;border-left:4px solid #2e7d32}
+.pe-phase.down{background:#fdf1f1;border-left:4px solid #a32d2d}
+.pe-phase b{white-space:nowrap}
+.pe-warn{background:#fff8e1;border-left:4px solid #8d6e00;padding:6px 10px;margin-top:8px;font-size:11.5px;line-height:1.45;border-radius:4px}
+.pe-rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:8px;margin:10px 0 8px}
+.pe-rule{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 9px 7px}
+.pe-rule.off{opacity:.62}
+.pe-tog{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;font:inherit;font-size:12px;font-weight:600;padding:6px 8px;border-radius:5px;border:1px solid #2e7d32;background:#2e7d32;color:#fff;cursor:pointer;text-align:left}
+.pe-tog:hover{filter:brightness(1.08)}
+.pe-rule.off .pe-tog{background:#fbfbf9;color:#555;border-color:#cfcfc8}
+.pe-tog .pe-state{font-size:10px;font-weight:700;letter-spacing:.4px;padding:1px 5px;border-radius:3px;background:rgba(255,255,255,.22);white-space:nowrap}
+.pe-rule.off .pe-tog .pe-state{background:#ecebe6;color:#666}
+.pe-cond{font-size:11px;color:#444;margin:5px 1px 4px;min-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pe-flex{display:flex;gap:3px}
+.pe-fx{flex:1 1 0;min-width:0;font:inherit;font-size:10.5px;padding:3px 0;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:3px;cursor:pointer;color:#333;white-space:nowrap;text-align:center}
+.pe-fx:hover{background:#f0f0ec}
+.pe-fx.std{font-weight:700}
+.pe-fx.on{background:#1b3d5c;border-color:#1b3d5c;color:#fff}
+.pe-pass{font-size:10.5px;color:var(--text-dim);margin-top:5px}
+.pe-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 8px}
+.pe-count{font-size:13px;color:#222}
+.pe-count b{font-size:15px}
+.pe-target{font-size:11px;padding:2px 7px;border-radius:10px;background:#eef3ec;color:#1b5e20;white-space:nowrap}
+.pe-target.outside{background:#fff4e5;color:#8a4b00}
+.pe-search{font:inherit;font-size:12px;padding:4px 8px;border:1px solid #cfcfc8;border-radius:4px;background:#fff;width:230px}
+.pe-btn{font:inherit;font-size:11px;padding:4px 9px;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:4px;cursor:pointer;color:#333;white-space:nowrap}
+.pe-btn:hover{background:#f0f0ec}
+.pe-chk{font-size:11.5px;color:#444;display:inline-flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap}
+.pe-spacer{flex:1 1 auto}
+.pe-wrap{overflow:auto;max-height:calc(100vh - var(--header-height) - 20px);border:1px solid var(--border);border-radius:6px;background:#fff}
+table.pe-table{border-collapse:separate;border-spacing:0;font-size:11.5px;background:#fff;color:#222;width:max-content;min-width:100%}
+table.pe-table th{background:#f0ede3;color:#555;font-weight:600;font-size:10.5px;padding:4px 6px;border-bottom:1px solid #ddd8c8;white-space:nowrap;position:sticky;z-index:3;cursor:pointer;user-select:none;-webkit-user-select:none}
+table.pe-table tr.pe-g th{top:0;height:24px;text-align:center;font-size:11px;letter-spacing:.3px;color:#333;cursor:default;border-bottom:1px solid #ddd8c8}
+table.pe-table tr.pe-h th{top:24px;height:38px;vertical-align:bottom;line-height:1.2}
+table.pe-table th.num{text-align:right}
+table.pe-table th:hover{color:#111}
+table.pe-table th .pe-arr{margin-left:3px;color:#8d6e00}
+table.pe-table td{padding:3px 6px;border-bottom:1px solid #f0efe9;white-space:nowrap;height:22px}
+table.pe-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+table.pe-table tbody tr:hover td{background-color:#fafaf6}
+table.pe-table tbody tr:hover td.pe-name{background-color:#f6f5ef}
+table.pe-table th.pe-name{left:0;z-index:5;text-align:left;min-width:210px;max-width:210px}
+table.pe-table tr.pe-g th.pe-gi{left:0;z-index:5}
+table.pe-table td.pe-name{position:sticky;left:0;z-index:2;background:#fff;min-width:210px;max-width:210px;overflow:hidden;text-overflow:ellipsis;border-right:1px solid #ebe8de}
+.pe-name .co{font-weight:600;color:#1a1a1a;cursor:pointer}
+.pe-name .co:hover{text-decoration:underline}
+.pe-name .tk{color:var(--text-dim);font-size:10px;margin-left:4px}
+td.pe-txt{max-width:150px;overflow:hidden;text-overflow:ellipsis;color:#444}
+td.pe-txt.w-ind{max-width:120px}
+td.pe-txt.w-coh{max-width:190px}
+th.pe-gs,td.pe-gs{border-left:2px solid #d8d3c2}
+tr.pe-g th.pe-gm{background:#e9eef3}
+tr.pe-g th.pe-gf{background:#e8f1e6}
+td.pe-fail{color:#8b1a1a;text-decoration:line-through;text-decoration-thickness:1px}
+td.pe-na{color:#aaa;text-align:center}
+tr.pe-out td{opacity:.55}
+tr.pe-out td.pe-name{opacity:1}
+tr.pe-out td.pe-name .co{color:#777}
+td.pe-np{font-weight:700;text-align:center}
+.pe-legend{font-size:11px;color:#555;margin:8px 2px 2px;line-height:1.6}
+.pe-sw{display:inline-block;width:26px;height:11px;vertical-align:-1px;margin:0 3px 0 2px;border:1px solid #ddd}
+.pe-empty{padding:26px;text-align:center;color:#666;font-size:12px}
+/* MD-POOL-ELIG-2026-09-28: the page uses the V2 header chrome, exactly as the other Summary pages (Overview, Timeliness) */
+body[data-active-tab="pool_elig"] .header-tabs-row{display:none !important}
+body[data-active-tab="pool_elig"] .v2-nav{display:flex}
+body[data-active-tab="pool_elig"] .header-controls-row{display:none !important}
+body[data-active-tab="pool_elig"] .header{height:auto !important;padding-bottom:0 !important}
+body[data-active-tab="pool_elig"]{--header-height:70px}
+.v2-nav-btn[data-v2-tab="pool_elig"]{width:150px}
+/* An active navigation button kept its group's pale hover colour under the pointer, so its white label vanished
+   (measured 28-Sep-26 on every Summary button; the group hover rule outranks .v2-active). Keep the active colour. */
+.v2-nav-group .v2-nav-btn.v2-active:hover{background:#1b3d5c;border-color:#1b3d5c}
+.v2-nav-group .v2-nav-btn.v2-active-s1:hover{background:#1b5e20;border-color:#1b5e20}
+.v2-nav-group .v2-nav-btn.v2-active-s2:hover{background:#2e7d32;border-color:#2e7d32}
+.v2-nav-group .v2-nav-btn.v2-active-s3:hover{background:#b45309;border-color:#b45309}
+.v2-nav-group .v2-nav-btn.v2-active-s4:hover{background:#991b1b;border-color:#991b1b}
+table.pe-table tr.pe-g th{text-align:left}
+table.pe-table tr.pe-h th.pe-hm{background:#e9eef3}
+table.pe-table tr.pe-h th.pe-hf{background:#e8f1e6}
+table.pe-table tr.pe-g th span.pe-gl{position:sticky;left:222px;padding:0 10px;display:inline-block}
+table.pe-table tr.pe-g th.pe-gi span.pe-gl{left:8px}
 /* MD-QOT-2026-09-10 — Qualification over Time */
 .qot-warn{background:#fdf1f1;border-left:4px solid #A32D2D;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
 .qot-note{background:#eef3ec;border-left:4px solid #1b5e20;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
@@ -10642,6 +10747,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="ssem" onclick="switchTab(\'ssem\')">SS Earnings Momentum</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="val" onclick="switchTab(\'val\')">Valuation</button>'
 +     '<button class="v2-nav-btn" data-v2-tab="combos" onclick="switchTab(\'combos\')">Timeliness</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="pool_elig" onclick="switchTab(\'pool_elig\')">Pool Eligibility for Portfolio Selection</button>'  /* MD-POOL-ELIG-2026-09-28 */
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -18438,6 +18544,322 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   };
 })();
 
+/* ============================================================================
+   POOL ELIGIBILITY FOR PORTFOLIO SELECTION  (MD-POOL-ELIG-2026-09-28)
+   Richard's page for the work-in-progress Filter Rules of APM - Stage 2 Gate-4
+   Backtest (SA - Master Dashboard decisions D-MD-POOL-1 to 8). Every stock in the
+   universe, three column groups (Information, Metrics, Filter Tests), six rule
+   toggles with Flex Values under each. The page ALWAYS opens at the Default
+   Standard Settings (no memory between visits); switching tabs keeps the state.
+   Data: MASTER_DATA.pool, written by scripts/build_pool_eligibility.py, whose
+   docstring holds every definition and the backtest line it reproduces.
+   ============================================================================ */
+(function(){
+  function DD(){return window.MASTER_DATA||{};}
+  function PD(){return DD().pool||null;}
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  var EPS=1e-9;
+
+  /* The six Filter Rules. std = Default Standard Setting; flex = the Flex Values. Percent rules hold thresholds in
+     percent; the readings are fractions. Direction and the treatment of a missing reading follow the backtest
+     (APM - Stage 2 Gate-4 Backtest, session14/s14_step2_masks.py): a missing reading fails the rule. */
+  var RULES=[
+    {k:"rs",  field:"rs",  label:"Stock RS",                 std:80, flex:[60,70,85,90],  pct:false, dir:"ge",
+     tip:"The dashboard's composite relative strength rank, 0 to 99: 3-month return weighted 0.4, 6-, 9- and 12-month returns 0.2 each, all relative to the Stoxx Europe 600, ranked across the universe"},
+    {k:"srs", field:"srs", label:"Sector RS",                std:50, flex:[30,40,60,70],  pct:false, dir:"ge",
+     tip:"The stock's sector rank, 0 to 99: the median composite relative strength of the stocks in each sector, ranked across all sectors (the backtest's sector rank; not a simple 12-month sector return)"},
+    {k:"rs18",field:"rs18",label:"Stock RS 18M",             std:80, flex:[60,70,85,90],  pct:false, dir:"ge",
+     tip:"The stock's 18-month price return, ranked across the universe as a percentile (0 to 100)"},
+    {k:"br",  field:"br",  label:"SS EPS Net Upgrades L45D", std:0,  flex:[-20,-10,10,20],pct:true,  dir:"ge",
+     tip:"(Number of EPS estimates raised minus number cut in the last 45 days) divided by the number of estimates; EPS for the calendar year + 1. No estimates: no reading"},
+    {k:"sl",  field:"sl",  label:"200D Slope",               std:0,  flex:[1,2,3,4],      pct:true,  dir:"gt0",
+     tip:"The 200-day moving average against its level 21 trading days earlier (its one-month % change). At 0% the rule is 'above 0%'; at 1% or more it is 'at least'"},
+    {k:"hi",  field:"hi",  label:"P vs. 52W High",           std:25, flex:[15,20,30,35],  pct:true,  dir:"le",
+     tip:"Share price within this distance below its 52-week high (the highest daily high of the last 252 trading days)"}
+  ];
+  var RMAP={};for(var ri=0;ri<RULES.length;ri++)RMAP[RULES[ri].k]=RULES[ri];
+  var POOL_TARGET=[80,125];
+
+  var st=null;
+  function initState(){
+    st={on:{},thr:{},q:"",showAll:false,sortKey:"rs",asc:false};
+    for(var i=0;i<RULES.length;i++){st.on[RULES[i].k]=true;st.thr[RULES[i].k]=RULES[i].std;}
+  }
+
+  function passes(rule,r,thr){
+    var v=r[rule.field];
+    if(v==null||isNaN(v))return false;
+    if(rule.dir==="ge")return rule.pct?(v>=thr/100-EPS):(v>=thr-EPS);
+    if(rule.dir==="gt0")return thr===0?(v>0):(v>=thr/100-EPS);
+    if(rule.dir==="le")return v<=thr/100+EPS;
+    return false;
+  }
+  function thrText(rule,v){
+    if(!rule.pct)return String(v);
+    return (v>0&&rule.k==="br"?"+":"")+v+"%";
+  }
+  function condText(rule){
+    var t=st.thr[rule.k];
+    if(rule.k==="sl")return t===0?"200D rising: slope above 0% a month":"200D slope at least "+t+"% a month";
+    if(rule.k==="hi")return "Within "+t+"% of the 52-week high";
+    if(rule.k==="br")return "Net upgrades "+(t>0?"+":"")+t+"% or more";
+    return rule.label+" "+t+" or more";
+  }
+
+  /* ---- colour scales: red end -> neutral -> green end (Richard's formatting, D-MD-POOL decisions) ---- */
+  function scaleBg(v,red,green){
+    if(v==null||isNaN(v))return "";
+    var t=(v-red)/(green-red);if(t<0)t=0;if(t>1)t=1;
+    var i,a;
+    if(t>=0.5){i=(t-0.5)*2;a=(0.07+0.48*i).toFixed(3);return "background-color:rgba(22,163,74,"+a+")";}
+    i=(0.5-t)*2;a=(0.07+0.48*i).toFixed(3);return "background-color:rgba(153,27,27,"+a+")";
+  }
+
+  function fPx(v){if(v==null)return null;var a=Math.abs(v);return a>=1000?v.toLocaleString("en-GB",{maximumFractionDigits:0}):(a>=10?v.toFixed(2):(a>=1?v.toFixed(3):v.toPrecision(3)));}
+  function fPct(v,d){if(v==null||isNaN(v))return null;var x=v*100;return (x>0&&d.sign?"+":"")+x.toFixed(d.dp)+"%";}
+
+  /* Column definitions. g: I = Information, M = Metrics, F = Filter Tests. */
+  var COLS=[
+    {id:"name",g:"I",label:"Company",key:"n",type:"name",tip:"Company and ticker; click the name to open the Stock View"},
+    {id:"ind", g:"I",label:"Industry",key:"ind",type:"txt",cls:"w-ind"},
+    {id:"sec", g:"I",label:"Sector",key:"sec",type:"txt"},
+    {id:"coh", g:"I",label:"Cohort",key:"cohn",type:"txt",cls:"w-coh"},
+    {id:"p",   g:"M",label:"SP",key:"p",type:"px",gs:true,tip:"Share price, last close"},
+    {id:"ma200",g:"M",label:"200D",key:"ma200",type:"px",tip:"200-day simple moving average of the daily close"},
+    {id:"sl",  g:"M",label:"200D Slope",key:"sl",type:"pct",dp:1,sign:true,red:-0.04,green:0.04,strike:function(v){return v<=0;},tip:RMAP.sl.tip},
+    {id:"m0",  g:"M",label:"> 0% 200D Trend",key:"m0",type:"mon",cap:"m0c",red:1,green:9,tip:"Consecutive months (back from this month) in which the 200D Slope was above 0% on every trading day of the month. '+' = the run reaches the start of the price history"},
+    {id:"m2",  g:"M",label:"> 2% 200D Trend",key:"m2",type:"mon",cap:"m2c",red:1,green:6,tip:"Consecutive months in which the 200D Slope was above 2% on every trading day of the month"},
+    {id:"m4",  g:"M",label:"> 4% 200D Trend",key:"m4",type:"mon",cap:"m4c",red:0,green:3,tip:"Consecutive months in which the 200D Slope was above 4% on every trading day of the month"},
+    {id:"mlen",g:"M",label:"> 200D Length",key:"mlen",type:"mon",cap:"mlenc",red:1,green:9,tip:"Consecutive months in which the share price closed above its 200D on every trading day of the month"},
+    {id:"hi",  g:"M",label:"52W High",key:"hi",type:"pct",dp:0,red:0.50,green:0,strike:function(v){return v>=0.30-EPS;},tip:"Share price % below its 52-week high"},
+    {id:"lo",  g:"M",label:"52W Low",key:"lo",type:"pct",dp:0,red:0,green:0.30,tip:"Share price % above its 52-week low"},
+    {id:"rs",  g:"M",label:"Stock RS",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip},
+    {id:"srs", g:"M",label:"Sector RS",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip},
+    {id:"rs18",g:"M",label:"Stock 18M RS",key:"rs18",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip},
+    {id:"br",  g:"M",label:"SS EPS Net Upgrades L45D",key:"br",type:"pct",dp:0,sign:true,red:-0.30,green:0.30,strike:function(v){return v<0;},tip:RMAP.br.tip},
+    {id:"f_rs",  g:"F",rule:"rs",  key:"rs",  type:"int",red:50,green:80,gs:true},
+    {id:"f_srs", g:"F",rule:"srs", key:"srs", type:"int",red:30,green:70},
+    {id:"f_rs18",g:"F",rule:"rs18",key:"rs18",type:"int",red:50,green:80},
+    {id:"f_br",  g:"F",rule:"br",  key:"br",  type:"pct",dp:0,sign:true,red:-0.30,green:0.30},
+    {id:"f_sl",  g:"F",rule:"sl",  key:"sl",  type:"pct",dp:1,sign:true,red:-0.04,green:0.04},
+    {id:"f_hi",  g:"F",rule:"hi",  key:"hi",  type:"pct",dp:0,red:0.50,green:0},
+    {id:"np",    g:"F",label:"Rules passed",key:"_np",type:"np",tip:"How many of the rules that are switched on this stock passes"}
+  ];
+  for(var ci=0;ci<COLS.length;ci++){var c=COLS[ci];if(c.rule){c.label=RMAP[c.rule].label;c.tip=RMAP[c.rule].tip+". Struck through when it fails the rule's current setting";}}
+
+  function cell(c,r){
+    var v=r[c.key],cls=[],sty="",txt,title="";
+    if(c.gs)cls.push("pe-gs");
+    if(c.type==="name"){
+      return '<td class="pe-name"><span class="co" data-pe-open="'+esc(r.t)+'" title="'+esc(r.n)+' ('+esc(r.t)+'): open the Stock View">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span></td>';
+    }
+    if(c.type==="txt"){
+      var full=c.key==="cohn"?((r.coh?r.coh+" ":"")+(r.cohn||"")):(v||"");
+      return '<td class="pe-txt '+(c.cls||"")+(c.gs?" pe-gs":"")+'" title="'+esc(full)+'">'+esc(v||"")+'</td>';
+    }
+    if(c.type==="np"){
+      var on=0;for(var i=0;i<RULES.length;i++)if(st.on[RULES[i].k])on++;
+      var s=on?(r._np+"/"+on):"-";
+      sty=on?scaleBg(r._np,Math.max(0,on-3),on):"";
+      return '<td class="num pe-np'+(c.gs?" pe-gs":"")+'" style="'+sty+'">'+s+'</td>';
+    }
+    cls.push("num");
+    if(v==null||isNaN(v)){
+      var why=r.nohist?"no price history":(c.key==="br"?(r.bn===0?"no EPS estimates":"no sell-side data"):"not enough history");
+      return '<td class="'+cls.join(" ")+' pe-na" title="'+why+'">n/a</td>';
+    }
+    if(c.type==="px")txt=fPx(v);
+    else if(c.type==="pct")txt=fPct(v,{dp:c.dp,sign:c.sign});
+    else if(c.type==="int")txt=String(Math.round(v));
+    else if(c.type==="mon"){txt=String(v)+(r[c.cap]?"+":"");if(r[c.cap])title="The run reaches the start of the price history, so it may be longer";}
+    if(c.red!=null)sty=scaleBg(v,c.red,c.green);
+    var fail=false;
+    if(c.rule){fail=!passes(RMAP[c.rule],r,st.thr[c.rule]);}
+    else if(c.strike){fail=c.strike(v);}
+    if(fail)cls.push("pe-fail");
+    if(c.key==="br"&&r.bn!=null)title=r.bn+" estimates: "+(r.bu||0)+" raised, "+(r.bd||0)+" cut in the last 45 days";
+    return '<td class="'+cls.join(" ")+'" style="'+sty+'"'+(title?' title="'+esc(title)+'"':'')+'>'+txt+'</td>';
+  }
+
+  function sortRows(rows){
+    var k=st.sortKey,asc=st.asc;
+    var col=null;for(var i=0;i<COLS.length;i++)if(COLS[i].id===k)col=COLS[i];
+    var key=col?col.key:"rs",txt=col&&(col.type==="name"||col.type==="txt");
+    rows.sort(function(a,b){
+      var x=a[key],y=b[key];
+      var xn=(x==null||x===""||(typeof x==="number"&&isNaN(x))),yn=(y==null||y===""||(typeof y==="number"&&isNaN(y)));
+      if(xn&&yn)return (a.n||"").localeCompare(b.n||"");
+      if(xn)return 1; if(yn)return -1;       /* missing readings always last */
+      var d=txt?String(x).localeCompare(String(y)):(x-y);
+      if(d===0)return (a.n||"").localeCompare(b.n||"");
+      return asc?d:-d;
+    });
+    return rows;
+  }
+
+  function header(){
+    var h='<thead><tr class="pe-g">';
+    var groups=[["I","Information","pe-gi"],["M","Metrics","pe-gm"],["F","Filter Tests","pe-gf"]];
+    for(var g=0;g<groups.length;g++){
+      var n=0;for(var i=0;i<COLS.length;i++)if(COLS[i].g===groups[g][0])n++;
+      h+='<th colspan="'+n+'" class="'+groups[g][2]+(g>0?" pe-gs":"")+'"><span class="pe-gl">'+groups[g][1]+'</span></th>';
+    }
+    h+='</tr><tr class="pe-h">';
+    for(var j=0;j<COLS.length;j++){
+      var c=COLS[j],cls=[];
+      if(c.type==="name")cls.push("pe-name");
+      else if(c.type!=="txt")cls.push("num");
+      if(c.gs)cls.push("pe-gs");
+      if(c.g==="M")cls.push("pe-hm");else if(c.g==="F")cls.push("pe-hf");
+      var arr=st.sortKey===c.id?'<span class="pe-arr">'+(st.asc?"&#9650;":"&#9660;")+'</span>':"";
+      var lab=esc(c.label).replace(/ (?=[^ ]+$)/,"<br>");
+      if(c.label.length<=10)lab=esc(c.label);
+      h+='<th class="'+cls.join(" ")+'" data-pe-sort="'+c.id+'" title="'+esc((c.tip||c.label)+". Click to sort")+'">'+lab+arr+'</th>';
+    }
+    return h+'</tr></thead>';
+  }
+
+  function computed(){
+    var S=PD().stocks,all=[],i,j;
+    for(i=0;i<S.length;i++){
+      var r=S[i],np=0,ok=true;
+      for(j=0;j<RULES.length;j++){
+        var R=RULES[j];if(!st.on[R.k])continue;
+        if(passes(R,r,st.thr[R.k]))np++;else ok=false;
+      }
+      r._np=np;r._ok=ok;all.push(r);
+    }
+    return all;
+  }
+
+  function body(){
+    var all=computed(),q=st.q.trim().toLowerCase(),rows=[],pool=0,i;
+    for(i=0;i<all.length;i++){
+      var r=all[i];if(r._ok)pool++;
+      if(!st.showAll&&!r._ok)continue;
+      if(q){var hay=(r.n+" "+r.t+" "+(r.ind||"")+" "+(r.sec||"")+" "+(r.coh||"")+" "+(r.cohn||"")).toLowerCase();if(hay.indexOf(q)<0)continue;}
+      rows.push(r);
+    }
+    sortRows(rows);
+    var onN=0;for(i=0;i<RULES.length;i++)if(st.on[RULES[i].k])onN++;
+    var inT=pool>=POOL_TARGET[0]&&pool<=POOL_TARGET[1];
+    var h='<div class="pe-bar"><span class="pe-count"><b>'+pool+'</b> of '+all.length+' stocks pass '+(onN===RULES.length?"all six rules":(onN?"the "+onN+" rules switched on":"(no rule is switched on)"))+'</span>'
+      +'<span class="pe-target'+(inT?"":" outside")+'" title="Richard\'s stated Pool target for the backtest: roughly 80 to 125 names">'+(inT?"inside":(pool<POOL_TARGET[0]?"below":"above"))+' the Pool target of 80 to 125</span>'
+      +(q||st.showAll?'<span class="pe-count" style="font-size:11.5px;color:#555">showing '+rows.length+(st.showAll?" (all stocks; failing ones faded)":"")+(q?' matching "'+esc(st.q)+'"':"")+'</span>':"")
+      +'</div>';
+    if(!rows.length){return h+'<div class="pe-empty">No stock matches. '+(q?"Clear the search, or ":"")+'switch a rule off or pick a looser Flex Value.</div>';}
+    h+='<div class="pe-wrap"><table class="pe-table">'+header()+'<tbody>';
+    for(i=0;i<rows.length;i++){
+      var rr=rows[i];
+      h+='<tr'+(rr._ok?"":' class="pe-out"')+'>';
+      for(var c=0;c<COLS.length;c++)h+=cell(COLS[c],rr);
+      h+='</tr>';
+    }
+    h+='</tbody></table></div>';
+    h+='<div class="pe-legend">Colours run from dark red (weak) through neutral to bright green (strong) on each column\'s own scale. '
+      +'<span class="pe-sw" style="background:rgba(153,27,27,.55)"></span>weak <span class="pe-sw" style="background:rgba(22,163,74,.55)"></span>strong. '
+      +'<span style="color:#8b1a1a;text-decoration:line-through">Struck through</span>: in Filter Tests, fails the rule at its current setting; in Metrics, below your fixed marks (200D Slope 0% or less; 52W High 30% or more below; Stock RS and Stock 18M RS below 80; Sector RS below 50; net upgrades below 0%). '
+      +'n/a: no reading (fails a rule that is on, as in the backtest).</div>';
+    return h;
+  }
+
+  function perRuleCounts(){
+    var S=PD().stocks,out={},i,j;
+    for(j=0;j<RULES.length;j++)out[RULES[j].k]=0;
+    for(i=0;i<S.length;i++)for(j=0;j<RULES.length;j++)if(passes(RULES[j],S[i],st.thr[RULES[j].k]))out[RULES[j].k]++;
+    return out;
+  }
+
+  function rulesPanel(){
+    var cnt=perRuleCounts(),n=PD().stocks.length,h='<div class="pe-rules">';
+    for(var i=0;i<RULES.length;i++){
+      var R=RULES[i],on=st.on[R.k],vals=R.flex.concat([R.std]).sort(function(a,b){return a-b;});
+      h+='<div class="pe-rule'+(on?"":" off")+'"><button class="pe-tog" data-pe-tog="'+R.k+'" title="'+esc(R.tip)+'"><span>'+esc(R.label)+'</span><span class="pe-state">'+(on?"ON":"OFF")+'</span></button>'
+        +'<div class="pe-cond" title="'+esc(condText(R))+'">'+esc(condText(R))+'</div><div class="pe-flex">';
+      for(var j=0;j<vals.length;j++){
+        var v=vals[j],isStd=v===R.std,act=st.thr[R.k]===v;
+        h+='<button class="pe-fx'+(isStd?" std":"")+(act?" on":"")+'" data-pe-fx="'+R.k+'" data-pe-v="'+v+'" title="'+(isStd?"Default Standard Setting":"Flex Value")+': '+esc(thrText(R,v))+'">'+esc(thrText(R,v))+'</button>';
+      }
+      h+='</div><div class="pe-pass">'+cnt[R.k]+' of '+n+' pass this rule alone</div></div>';
+    }
+    return h+'</div>';
+  }
+
+  function fmtDate(s){if(!s)return "unknown";var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];var p=String(s).split("-");return p.length===3?(+p[2])+"-"+m[+p[1]-1]+"-"+p[0]:s;}
+
+  function top(){
+    var M=PD()._meta||{},ph=M.phase,ss=M.ss||{},h='<div class="summary-tile">';
+    h+='<div class="pe-title">Pool Eligibility for Portfolio Selection</div>';
+    h+='<div class="pe-sub">Work in progress: the Filter Rules being tested in APM - Stage 2 Gate-4 Backtest, shown on every stock in the universe. <b>Nothing here is adopted.</b> '
+      +'The page always opens at the Default Standard Settings (bold buttons); the other buttons under each rule are its Flex Values.</div>';
+    h+='<div class="pe-dates">Prices as at <b>'+fmtDate(M.price_date)+'</b> (daily, after the 17:15 UK refresh). '
+      +'Sell-side estimate counts as at <b>'+fmtDate(ss.as_of)+'</b>'+(ss.source?' ('+esc(ss.source)+')':'')+'. Readings built '+esc(M.generated||"")+'.</div>';
+    if(ph&&ph.label){
+      var up=ph.label==="Uptrending";
+      h+='<div class="pe-phase '+(up?"up":"down")+'"><b>Market Cycle Phase: '+esc(ph.label)+'</b><span>since '+(ph.history_limited?"at least ":"")+fmtDate(ph.since)
+        +'. Stoxx Europe 600 '+ph.close+' against its 200-day average '+ph.ma200+' ('+(ph.days_above>0?"above for "+ph.days_above+" trading days":"below")+'); the average '
+        +(ph.ma200_1m>=0?"rose ":"fell ")+Math.abs(ph.ma200_1m*100).toFixed(1)+'% over 21 trading days. The backtest\'s month-end label, read daily.'
+        +(up?"":" <b>These six rules are Uptrending rules; the backtest found trend rules of this kind the weakest Pool in a Downtrending Market.</b>")+'</span></div>';
+    }
+    var W=M.warnings||[];
+    for(var i=0;i<W.length;i++)h+='<div class="pe-warn">'+esc(W[i])+'</div>';
+    h+=rulesPanel();
+    h+='<div class="pe-bar"><input class="pe-search" id="pe-search" type="search" placeholder="Search company, ticker, sector, cohort" value="'+esc(st.q)+'">'
+      +'<label class="pe-chk"><input type="checkbox" id="pe-showall"'+(st.showAll?" checked":"")+'> Also show stocks that fail a rule</label>'
+      +'<span class="pe-spacer"></span><button class="pe-btn" data-pe-reset="1">Reset to Default Standard Settings</button></div>';
+    return h+'</div>';
+  }
+
+  /* The table scrolls inside its own frame (it is wider than the screen), so the frame must fit below the fixed
+     header, whose real height depends on how the navigation strip wraps: measure it rather than trust a constant. */
+  function sizeWrap(){
+    var w=document.querySelector("#tab-pool_elig .pe-wrap");if(!w)return;
+    var hd=document.querySelector(".header"),hh=hd?hd.getBoundingClientRect().height:145;
+    w.style.maxHeight=Math.max(300,Math.round(window.innerHeight-hh-14))+"px";
+  }
+  if(!window._peResizeWired){window._peResizeWired=true;window.addEventListener("resize",function(){if(document.body.getAttribute("data-active-tab")==="pool_elig")sizeWrap();});}
+  function paintBody(){var b=document.getElementById("pe-body");if(b){b.innerHTML=body();sizeWrap();}}
+  function paint(){
+    var c=document.getElementById("tab-pool_elig");
+    if(!c)return;
+    if(!PD()||!PD().stocks){
+      c.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>Pool Eligibility for Portfolio Selection</h3><p style="color:var(--text-dim);margin-top:8px">pool-eligibility.json was not built, so there is nothing to show. Run scripts/build_pool_eligibility.py before build_dashboard.py.</p></div>';
+      return;
+    }
+    c.innerHTML='<div id="pe-top">'+top()+'</div><div id="pe-body">'+body()+'</div>';
+    wire(c);
+    sizeWrap();requestAnimationFrame(sizeWrap);
+  }
+  function wire(c){
+    if(c._peWired)return; c._peWired=true;
+    c.addEventListener("click",function(e){
+      var t=e.target;
+      while(t&&t!==c&&!(t.getAttribute&&(t.getAttribute("data-pe-tog")||t.getAttribute("data-pe-fx")||t.getAttribute("data-pe-sort")||t.getAttribute("data-pe-open")||t.getAttribute("data-pe-reset"))))t=t.parentNode;
+      if(!t||t===c)return;
+      var k;
+      if((k=t.getAttribute("data-pe-tog"))){st.on[k]=!st.on[k];refreshAll();}
+      else if((k=t.getAttribute("data-pe-fx"))){var v=+t.getAttribute("data-pe-v");st.thr[k]=v;st.on[k]=true;refreshAll();}
+      else if((k=t.getAttribute("data-pe-sort"))){if(st.sortKey===k)st.asc=!st.asc;else{st.sortKey=k;var col=null;for(var i=0;i<COLS.length;i++)if(COLS[i].id===k)col=COLS[i];st.asc=!!(col&&(col.type==="name"||col.type==="txt"||col.key==="hi"));}paintBody();}
+      else if((k=t.getAttribute("data-pe-open"))){if(typeof window.openStockView==="function")window.openStockView(k);}
+      else if(t.getAttribute("data-pe-reset")){var q=st.q;initState();st.q=q;refreshAll();}
+    });
+    c.addEventListener("input",function(e){if(e.target&&e.target.id==="pe-search"){st.q=e.target.value;paintBody();}});
+    c.addEventListener("change",function(e){if(e.target&&e.target.id==="pe-showall"){st.showAll=!!e.target.checked;paintBody();}});
+  }
+  /* Rebuild the rules panel and the table but keep the search box (and its focus) where it is. */
+  function refreshAll(){
+    var p=document.querySelector("#tab-pool_elig .pe-rules");
+    if(p){var tmp=document.createElement("div");tmp.innerHTML=rulesPanel();p.parentNode.replaceChild(tmp.firstChild,p);}
+    paintBody();
+  }
+
+  window.renderPoolEligibility=function(){
+    try{buildHeaderControls("pool_elig");}catch(e){}
+    if(!st)initState();
+    paint();
+  };
+})();
+
 function renderTab(id){
   try{
   if(id==="summary")renderSummary();
@@ -18470,6 +18892,7 @@ function renderTab(id){
   else if(id==="tech")renderTech();
   else if(id==="combos")renderCombos();
   else if(id==="qual_over_time")renderQualOverTime();  /* MD-QOT-2026-09-10 */
+  else if(id==="pool_elig")renderPoolEligibility();  /* MD-POOL-ELIG-2026-09-28 */
   else if(id==="changes")renderChanges();
   else if(id==="positions")renderPositions();
   else if(id==="ssem")renderSSEM();

@@ -18742,6 +18742,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if(xn&&yn)return (a.n||"").localeCompare(b.n||"");
       if(xn)return 1; if(yn)return -1;       /* missing readings always last */
       var d=txt?String(x).localeCompare(String(y)):(x-y);
+      if(col&&col.neg)d=-d;   /* sort by the value as shown (P vs. 52W High is shown negated) */
       if(d===0)return (a.n||"").localeCompare(b.n||"");
       return asc?d:-d;
     });
@@ -18930,7 +18931,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       var k;
       if((k=t.getAttribute("data-pe-tog"))){st.on[k]=!st.on[k];refreshAll();}
       else if((k=t.getAttribute("data-pe-fx"))){var v=+t.getAttribute("data-pe-v");st.thr[k]=v;st.on[k]=true;refreshAll();}
-      else if((k=t.getAttribute("data-pe-sort"))){if(st.sortKey===k)st.asc=!st.asc;else{st.sortKey=k;var col=null;for(var i=0;i<COLS.length;i++)if(COLS[i].id===k)col=COLS[i];st.asc=!!(col&&(col.type==="name"||col.type==="txt"||col.key==="hi"));}paintBody();}
+      else if((k=t.getAttribute("data-pe-sort"))){if(st.sortKey===k)st.asc=!st.asc;else{st.sortKey=k;var col=null;for(var i=0;i<COLS.length;i++)if(COLS[i].id===k)col=COLS[i];st.asc=!!(col&&(col.type==="name"||col.type==="txt"));}paintBody();}
       else if((k=t.getAttribute("data-pe-open"))){if(typeof window.openStockView==="function")window.openStockView(k);}
       else if(t.getAttribute("data-pe-reset")){var q=st.q;initState();st.q=q;refreshAll();}
     });
@@ -19024,6 +19025,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if(xn&&yn)return String(a.n).localeCompare(String(b.n));
       if(xn)return 1; if(yn)return -1;
       var d=txt?String(x).localeCompare(String(y)):(x-y);
+      if(col&&col.neg)d=-d;   /* sort by the value as shown */
       if(d===0)return String(a.n).localeCompare(String(b.n));
       return asc?d:-d;
     });
@@ -19140,7 +19142,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if((k=t.getAttribute("data-il-tog"))){st.on[k]=!st.on[k];refreshToggles();paintBody();}
       else if((k=t.getAttribute("data-pe-sort"))){
         if(st.sortKey===k)st.asc=!st.asc;
-        else{st.sortKey=k;var C=PE().COLS,col=null;for(var i=0;i<C.length;i++)if(C[i].id===k)col=C[i];st.asc=!!(col&&(col.type==="name"||col.type==="txt"||col.key==="hi"));}
+        else{st.sortKey=k;var C=PE().COLS,col=null;for(var i=0;i<C.length;i++)if(C[i].id===k)col=C[i];st.asc=!!(col&&(col.type==="name"||col.type==="txt"));}
         paintBody();
       }
       else if((k=t.getAttribute("data-pe-open"))){if(typeof window.openStockView==="function")window.openStockView(k);}

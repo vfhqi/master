@@ -9535,8 +9535,8 @@ function SUM_renderQualifiedStocks() {
     { id:'g52wh',     label:'4. Within 25% of 52w high (gate)',sortKey:'gate_g52wh', cls:'grp-end-g2', testGroup:'_gates', testKey:'g4_within_25pct_52WH' },
     { id:'t5',        label:'5. 50D MA above 150D MA',       sortKey:'t5_sort', cls:'grp-start-g3', testGroup:'g1_ma_stack', testKey:'T5' },
     { id:'t6',        label:'6. 50D MA above 200D MA',       sortKey:'t6_sort', cls:'grp-end-g3', testGroup:'g1_ma_stack', testKey:'T6' },
-    { id:'t7',        label:'7. Industry pct. ≥70',         sortKey:'t7_sort', cls:'grp-start-g4', testGroup:'g2_rs', testKey:'T7' },
-    { id:'t8',        label:'8. Sector pct. in industry ≥70',sortKey:'t8_sort', cls:'', testGroup:'g2_rs', testKey:'T8' },
+    { id:'t7',        label:'7. Industry RS ≥70',         sortKey:'t7_sort', cls:'grp-start-g4', testGroup:'g2_rs', testKey:'T7' },
+    { id:'t8',        label:'8. Sector RS ≥50',sortKey:'t8_sort', cls:'', testGroup:'g2_rs', testKey:'T8' },
     { id:'t9',        label:'9. Stock vs industry pct. ≥70',     sortKey:'t9_sort', cls:'grp-end-g4', testGroup:'g2_rs', testKey:'T9' },
     { id:'sec_in_ind',label:'# sectors in industry',        sortKey:'sectors_in_industry', cls:'grp-start-g5', colType:'count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 },
     { id:'co_in_sec', label:'# companies in sector',        sortKey:'companies_in_sector', cls:'grp-end-g5', colType:'count', countKey:'companies_in_sector', countRedAt:2, countAmberAt:5 },
@@ -9979,7 +9979,7 @@ function SUM_renderQualifiedStocks() {
         '<div class="gcap gcap-g1"><b>Group 1 · Long-term trend upwards?</b>The <span class="db">foundation of a Stage 2 uptrend</span> &mdash; the long-term trend must be pointing up before anything else matters.<span class="intro">Two long-term gates:</span><span class="tline"><span class="tnum">(1)</span> Is price trading <u>above its 200-day MA</u>?</span><span class="tline"><span class="tnum">(2)</span> Is the <u>150-day MA above the 200-day</u>?</span></div>' +
         '<div class="gcap gcap-g2"><b>Group 2 · Mid-term trend upwards?</b>The mid-term should be <span class="db">confirming the longer trend</span> &mdash; price holding above its 150-day MA and within striking distance of its 52-week high.<span class="intro">Two mid-term gates:</span><span class="tline"><span class="tnum">(3)</span> Is price <u>above its 150-day MA</u>?</span><span class="tline"><span class="tnum">(4)</span> Is price <u>within 25% of its 52-week high</u>?</span></div>' +
         '<div class="gcap gcap-g3"><b>Group 3 · Short-term trend upwards?</b>The <span class="db">fastest of the trend signals</span> &mdash; the short-term MAs sit above the longer ones, confirming the stack is the right way up.<span class="intro">Two short-term tests:</span><span class="tline"><span class="tnum">(5)</span> Is the <u>50-day MA above the 150-day</u>?</span><span class="tline"><span class="tnum">(6)</span> Is the <u>50-day MA above the 200-day</u>?</span></div>' +
-        '<div class="gcap gcap-g4"><b>Group 4 · Relative strength</b>Is the stock <span class="db">outperforming its peers</span> &mdash; three independent reads on relative strength, not one?<span class="intro">Three relative-strength tests:</span><span class="tline"><span class="tnum">(7)</span> Is industry RS percentile <u>at or above 70</u>?</span><span class="tline"><span class="tnum">(8)</span> Is sector RS percentile within industry <u>at or above 70</u>?</span><span class="tline"><span class="tnum">(9)</span> Is stock RS versus industry <u>at or above 70</u>?</span></div>' +
+        '<div class="gcap gcap-g4"><b>Group 4 · Relative strength</b>Is the stock <span class="db">outperforming its peers</span> &mdash; three independent reads on relative strength, not one?<span class="intro">Three relative-strength tests:</span><span class="tline"><span class="tnum">(7)</span> Is Industry RS (the Composite, ranked across all industries) <u>at or above 70</u>?</span><span class="tline"><span class="tnum">(8)</span> Is Sector RS (the Composite, ranked across all sectors) <u>at or above 50</u>, the Pool&rsquo;s pass mark?</span><span class="tline"><span class="tnum">(9)</span> Is stock RS versus industry <u>at or above 70</u>?</span></div>' +
       '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s2-main-table">' +
@@ -10091,7 +10091,7 @@ function SUM_renderQualifiedStocks() {
     { id:'t5',        label:'5. Down vol > up vol (L20d)',            sortKey:'t5_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T5' },
     { id:'t6',        label:'6. L1M volatility > P4M',    sortKey:'t6_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T6' },
     { id:'t7',        label:'7. ≥2 lower lows in last 2 months',     sortKey:'t7_s3', cls:'', testGroup:'g2_distribution_signals', testKey:'T7' },
-    { id:'t8',        label:'8. 10%+ lower sector RS L3M', sortKey:'t8_s3', cls:'grp-end-g4', testGroup:'g3_rs_degradation', testKey:'T8' },
+    { id:'t8',        label:'8. Sector RS down 10+ in 3M', sortKey:'t8_s3', cls:'grp-end-g4', testGroup:'g3_rs_degradation', testKey:'T8' },
     { id:'sec_in_ind',label:'# sectors in industry',               sortKey:'sectors_in_industry', cls:'grp-start-g5', colType:'count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 },
     { id:'co_in_sec', label:'# companies in sector',               sortKey:'companies_in_sector', cls:'grp-end-g5', colType:'count', countKey:'companies_in_sector', countRedAt:2, countAmberAt:5 },
     { id:'persist',   label:'Last 12 months',                      sortKey:'persistence_count', cls:'grp-start-persist' }
@@ -10545,7 +10545,7 @@ function SUM_renderQualifiedStocks() {
         '<div class="gcap gcap-g1"><b>Group 1 · Long-term trend upwards?</b>Stage 3 only applies to a <span class="db">previously confirmed uptrend</span> &mdash; if the long-term trend is not still up, the right place to look is Stage 1 or Stage 4.<span class="intro">One long-term gate:</span><span class="tline"><span class="tnum">(1)</span> Is the <u>200-day MA still higher</u> than it sat 80 trading days ago?</span></div>' +
         '<div class="gcap gcap-g2"><b>Group 2 · Mid-term trend upwards?</b>The mid-term must <span class="db">still be intact</span> for trend-exhaustion to even be meaningful &mdash; price has to be above its 200-day MA.<span class="intro">One mid-term gate:</span><span class="tline"><span class="tnum">(2)</span> Is <u>price above its 200-day MA</u>?</span></div>' +
         '<div class="gcap gcap-g3"><b>Group 3 · Mid-term trend extended?</b><span class="db">How mature is the run?</span> Each successive base built since the 52-week low raises the odds the trend is getting late.<span class="intro">One maturity test:</span><span class="tline"><span class="tnum">(3)</span> Has the stock built <u>2 or more bases</u> since its 52-week low (504-day window)?</span></div>' +
-        '<div class="gcap gcap-g4"><b>Group 4 · Short-term trend breaking down?</b>Even with the long-term still up, the <span class="db">short term is now showing distribution</span> &mdash; MA stack tightening, volume rotating down, volatility expanding, swing lows printing lower, RS slipping.<span class="intro">Five breakdown tests:</span><span class="tline"><span class="tnum">(4)</span> Is the <u>50D MA at or below 150D MA</u> (i.e. within 3% below — stack tightening toward a cross)?</span><span class="tline"><span class="tnum">(5)</span> Is down-day volume <u>at least 10% above up-day volume</u> over the last ~20 days?</span><span class="tline"><span class="tnum">(6)</span> Is last-month volatility <u>above the prior 4-month average</u> (L1M ATR vs P4M average ATR)?</span><span class="tline"><span class="tnum">(7)</span> Are there <u>2 or more lower lows</u> in the last 2 months?</span><span class="tline"><span class="tnum">(8)</span> Has sector RS percentile <u>dropped more than 10 points</u> versus 3 months ago?</span></div>' +
+        '<div class="gcap gcap-g4"><b>Group 4 · Short-term trend breaking down?</b>Even with the long-term still up, the <span class="db">short term is now showing distribution</span> &mdash; MA stack tightening, volume rotating down, volatility expanding, swing lows printing lower, RS slipping.<span class="intro">Five breakdown tests:</span><span class="tline"><span class="tnum">(4)</span> Is the <u>50D MA at or below 150D MA</u> (i.e. within 3% below — stack tightening toward a cross)?</span><span class="tline"><span class="tnum">(5)</span> Is down-day volume <u>at least 10% above up-day volume</u> over the last ~20 days?</span><span class="tline"><span class="tnum">(6)</span> Is last-month volatility <u>above the prior 4-month average</u> (L1M ATR vs P4M average ATR)?</span><span class="tline"><span class="tnum">(7)</span> Are there <u>2 or more lower lows</u> in the last 2 months?</span><span class="tline"><span class="tnum">(8)</span> Has Sector RS (the Composite, ranked across all sectors) <u>dropped more than 10 points</u> versus 3 months ago?</span></div>' +
       '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s3-main-table">' +
@@ -11396,7 +11396,7 @@ function SUM_renderQualifiedStocks() {
         {sk:null,       html:'50D &gt; 150D',            tip:'50-day MA above 150-day MA',    cls:'sg-edge s2col'},
         {sk:null,       html:'50D &gt; 200D',            tip:'50-day MA above 200-day MA',    cls:'s2col'},
         {sk:null,       html:'Industry RS ≥70',     tip:'Industry RS percentile ≥70',cls:'s2col'},
-        {sk:null,       html:'Sector RS ≥70',       tip:'Sector RS percentile ≥70', cls:'s2col'},
+        {sk:null,       html:'Sector RS ≥50',       tip:'Sector RS (the Composite, ranked across all sectors) ≥50', cls:'s2col'},
         {sk:null,       html:'Stock RS ≥70',        tip:'Stock RS vs industry ≥70', cls:'s2col'}
       ],
       tileThresh:{ Possible:'Stage 2 trend + 2 of 4 tests', Plausible:'+ 3 of 4', Probable:'+ all 4 of 4' }
@@ -11439,7 +11439,7 @@ function SUM_renderQualifiedStocks() {
         {sk:null,       html:'50D &gt; 150D',            tip:'50-day MA above 150-day MA',       cls:'sg-edge s2col'},
         {sk:null,       html:'50D &gt; 200D',            tip:'50-day MA above 200-day MA',       cls:'s2col'},
         {sk:null,       html:'Industry RS ≥70',     tip:'Industry RS percentile ≥70',  cls:'s2col'},
-        {sk:null,       html:'Sector RS ≥70',       tip:'Sector RS percentile ≥70',    cls:'s2col'},
+        {sk:null,       html:'Sector RS ≥50',       tip:'Sector RS (the Composite, ranked across all sectors) ≥50',    cls:'s2col'},
         {sk:null,       html:'Stock RS ≥70',        tip:'Stock RS vs industry ≥70',    cls:'s2col'}
       ],
       tileThresh:{ Possible:'1 or more basing tests', Plausible:'3 of 4 basing tests', Probable:'all 4 basing tests' }
@@ -11853,8 +11853,8 @@ function SUM_renderQualifiedStocks() {
     // g2: S2 MA+RS (5 cols)
     cols.push({ id:'s2_t5', label:'5. 50D MA above 150D MA',               sortKey:'s2_t5', cls:'grp-start-g2', kind:'s2_test', testGroup:'g1_ma_stack', testKey:'T5' });
     cols.push({ id:'s2_t6', label:'6. 50D MA above 200D MA',               sortKey:'s2_t6', cls:'',             kind:'s2_test', testGroup:'g1_ma_stack', testKey:'T6' });
-    cols.push({ id:'s2_t7', label:'7. Industry pct. ≥70',            sortKey:'s2_t7', cls:'',             kind:'s2_test', testGroup:'g2_rs', testKey:'T7' });
-    cols.push({ id:'s2_t8', label:'8. Sector pct. in industry ≥70',  sortKey:'s2_t8', cls:'',             kind:'s2_test', testGroup:'g2_rs', testKey:'T8' });
+    cols.push({ id:'s2_t7', label:'7. Industry RS ≥70',            sortKey:'s2_t7', cls:'',             kind:'s2_test', testGroup:'g2_rs', testKey:'T7' });
+    cols.push({ id:'s2_t8', label:'8. Sector RS ≥50',  sortKey:'s2_t8', cls:'',             kind:'s2_test', testGroup:'g2_rs', testKey:'T8' });
     cols.push({ id:'s2_t9', label:'9. Stock vs industry pct. ≥70',   sortKey:'s2_t9', cls:'',             kind:'s2_test', testGroup:'g2_rs', testKey:'T9' });
     // g3: S2 context counts (2 cols)
     cols.push({ id:'s2_sii', label:'# sectors in industry', sortKey:'sectors_in_industry', cls:'grp-start-g3', kind:'s2_count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 });
@@ -11875,7 +11875,7 @@ function SUM_renderQualifiedStocks() {
     cols.push({ id:'s3_t5', label:'14. Down vol > up vol (L20d)',        sortKey:'s3_t5', cls:'',             kind:'s3_test', testGroup:'g2_distribution_signals', testKey:'T5' });
     cols.push({ id:'s3_t6', label:'15. L1M volatility > P4M',           sortKey:'s3_t6', cls:'',             kind:'s3_test', testGroup:'g2_distribution_signals', testKey:'T6' });
     cols.push({ id:'s3_t7', label:'16. ≥2 lower lows in last 2 months', sortKey:'s3_t7', cls:'', kind:'s3_test', testGroup:'g2_distribution_signals', testKey:'T7' });
-    cols.push({ id:'s3_t8', label:'17. 10%+ lower sector RS L3M',       sortKey:'s3_t8', cls:'',             kind:'s3_test', testGroup:'g3_rs_degradation', testKey:'T8' });
+    cols.push({ id:'s3_t8', label:'17. Sector RS down 10+ in 3M',       sortKey:'s3_t8', cls:'',             kind:'s3_test', testGroup:'g3_rs_degradation', testKey:'T8' });
     return cols;
   }
   var NPI_COLS = npiBuildCols();
@@ -12290,7 +12290,7 @@ function SUM_renderQualifiedStocks() {
                     '<th class="gh-g1 grp-start-g1" colspan="14">Group 1 — Stage 2 quality?</th>' +
                     '<th class="gh-g4 grp-start-g4" colspan="4">Group 2 — Collapsing?</th>' +
                     '<th class="gh-g5 grp-start-g5" colspan="6">Group 3 — Stage 3 breakdown signals?</th>';
-    var captionsHtml = '<div class="gcap gcap-g1"><b>Group 1 — Stage 2 quality?</b>Quality of the Stage 2 uptrend for each stock. Tests 1–4: hard gates (all four MA position gates must pass). Tests 5–6: MA stack (50D above 150D and 200D). Tests 7–9: Relative strength ≥70th percentile (industry, sector, stock).</div>' +
+    var captionsHtml = '<div class="gcap gcap-g1"><b>Group 1 — Stage 2 quality?</b>Quality of the Stage 2 uptrend for each stock. Tests 1–4: hard gates (all four MA position gates must pass). Tests 5–6: MA stack (50D above 150D and 200D). Tests 7–9: relative strength, the Composite: Industry RS 70 or above; Sector RS 50 or above; the stock&rsquo;s rank within its industry 70 or above.</div>' +
                        '<div class="gcap gcap-g4"><b>Group 2 — Collapsing?</b>' + NPI_PATTERNS[0].caption + '</div>' +
                        '<div class="gcap gcap-g5"><b>Group 3 — Stage 3 breakdown signals?</b>Early breakdown signals from the Stage 3 pipeline. Tests 12–17: base deterioration (base 4 or later on the Minervini count; this test changed on 11-Sep-2026, so a Stage 3 rating can step on that day), MA cross (50D ≤ 150D), vol distribution, lower lows, sector RS degradation.</div>';
     var html =
@@ -15158,7 +15158,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     { key: 'T5_50D_above_150D',            label: '50D > 150D MA', tooltip: '50-day MA above 150-day MA' },
     { key: 'T6_50D_above_200D',            label: '50D > 200D MA', tooltip: '50-day MA above 200-day MA' },
     { key: 'T7_industry_RS_pct_ge70',      label: 'Industry RS ≥70', tooltip: 'Industry RS percentile >= 70' },
-    { key: 'T8_sector_RS_pct_ge70',        label: 'Sector RS ≥70', tooltip: 'Sector RS percentile >= 70 within industry' },
+    { key: 'T8_sector_RS_pct_ge70',        label: 'Sector RS ≥50', tooltip: 'Sector RS (the Composite, ranked across all sectors) >= 50, the Pool\'s pass mark' },
     { key: 'T9_stock_RS_vs_industry_ge70', label: 'Stock RS ≥70', tooltip: 'Stock RS vs industry percentile >= 70' }
   ];
   var HR_TESTS_G2 = [
@@ -16508,8 +16508,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   var S2_TEST_DEFS = [
     {key:'T5_50D_above_150D',            label:'5. 50D &gt; 150D MA',        tooltip:'50-day MA above 150-day MA'},
     {key:'T6_50D_above_200D',            label:'6. 50D &gt; 200D MA',        tooltip:'50-day MA above 200-day MA'},
-    {key:'T7_industry_RS_pct_ge70',      label:'7. Industry pct. &ge;70',    tooltip:'Industry RS percentile at least 70'},
-    {key:'T8_sector_RS_pct_ge70',        label:'8. Sector pct. &ge;70',      tooltip:'Sector RS percentile at least 70'},
+    {key:'T7_industry_RS_pct_ge70',      label:'7. Industry RS &ge;70',    tooltip:'Industry RS percentile at least 70'},
+    {key:'T8_sector_RS_pct_ge70',        label:'8. Sector RS &ge;50',      tooltip:'Sector RS (the Composite, ranked across all sectors) at least 50'},
     {key:'T9_stock_RS_vs_industry_ge70', label:'9. Stock pct. vs ind &ge;70',tooltip:'Stock RS vs industry percentile at least 70'}
   ];
 
@@ -19061,9 +19061,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
      (Message 4). std = Default Standard Setting; flex = the Flex Values. Percent rules hold thresholds in percent;
      the readings are fractions. A missing reading fails the rule, as in the backtest (session14/s14_step2_masks.py). */
   var RULES=[
-    {k:"rs",  field:"rs",  label:"Stock RS L12M Composite",          std:80, flex:[60,70,85,90],   pct:false, dir:"ge",
+    {k:"rs",  field:"rs",  label:"Stock RS (Composite)",          std:80, flex:[60,70,85,90],   pct:false, dir:"ge",
      tip:"Composite relative strength rank, 0 to 99, computed exactly as the backtest: 3-month return weighted 0.4, 6-, 9- and 12-month returns 0.2 each, each minus the Stoxx Europe 600's, ranked across the universe (the dashboard's other pages measure each look-back one trading day shorter, so a few ranks differ by a point or two)"},
-    {k:"srs", field:"srs", label:"Sector RS L12M",                   std:50, flex:[30,40,60,70],   pct:false, dir:"ge",
+    {k:"srs", field:"srs", label:"Sector RS (Composite)",                   std:50, flex:[30,40,60,70],   pct:false, dir:"ge",
      tip:"The stock's sector rank, 0 to 99: the median composite relative strength of the stocks in each sector, ranked across all sectors (the backtest's sector rank; not a simple 12-month sector return)"},
     {k:"sb",  field:"sb",  label:"SS Sales Net Upgrade Breadth L3M", std:0,  flex:[-50,-25,25,50], pct:true,  dir:"ge",
      tip:"The backtest's three-month sales revision breadth: at today, one month ago and two months ago, (sales estimates raised minus cut over the previous 45 days); their sum divided by the average number of estimates, so it can exceed +/-100% (three months are added). Sales for the calendar year + 1. No estimates: no reading"},
@@ -19129,8 +19129,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"lo",  g:"M",label:"P vs. 52W Low",sh:"P vs. 52W Low",key:"lo",type:"pct",dp:0,sign:true,red:0,green:0.30,tip:"Share price against its 52-week low: +30% = 30% above it (Message 6: renamed and shown with a sign)"},
     /* Strike-through in Metrics only on the columns that are also Filter Tests (Richard, Message 3; D-MD-POOL-18),
        at the rule's Default Standard Setting. */
-    {id:"rs",  g:"M",label:"Stock RS L12M Composite",sh:"RS 12M",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip+". Struck through below 80, the Default Standard Setting"},
-    {id:"srs", g:"M",label:"Sector RS L12M",sh:"Sector RS",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip+". Struck through below 50, the Default Standard Setting"},
+    {id:"rs",  g:"M",label:"Stock RS (Composite)",sh:"RS 12M",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip+". Struck through below 80, the Default Standard Setting"},
+    {id:"srs", g:"M",label:"Sector RS (Composite)",sh:"Sector RS",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip+". Struck through below 50, the Default Standard Setting"},
     {id:"rs18",g:"M",label:"Stock RS L18M",sh:"RS 18M",key:"rs18",type:"dec1",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip+". Struck through below 80, the Default Standard Setting"},
     {id:"br",  g:"M",label:"SS EPS Net Upgrades L45D",sh:"SS EPS Breadth",key:"br",type:"pct",dp:0,sign:true,red:-0.30,green:0.30,tip:TIPS.br},
     {id:"sb",  g:"M",label:"SS Sales Net Upgrade Breadth L3M",sh:"SS Sales Breadth",key:"sb",type:"pct",dp:0,sign:true,red:-1.0,green:1.0,strike:function(v){return v<0;},tip:RMAP.sb.tip+". Struck through below 0%, the Default Standard Setting"},
@@ -19316,7 +19316,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     /* Richard signed off the Uptrend Pool on 28-Sep-26 (APM - Stage 2 Gate-4 Backtest, D-100): EUR 500m or more plus rules 1 to 3,
        month-end readings decide. This page has no size test yet and keeps Stock RS L18M as a fourth rule (Richard, Message 4);
        both differences are put to him (Q-MD-POOL-9 and Q-MD-POOL-10). The line says so rather than "nothing is adopted". */
-    h+='<span class="pe-sub" title="The Uptrend Pool Filter Criteria were signed off by Richard on 28-Sep-26 (APM - Stage 2 Gate-4 Backtest, D-100): market value of EUR 500m or more, Stock RS L12M Composite 80 or more, Sector RS L12M 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more; readings at each month-end decide eligibility for the following month, so this daily page is for information. This page does not test size yet, and it keeps Stock RS L18M 80 or more as a fourth rule, which the sign-off uses at APM List Compilation (Proven Stage 2 Cases). The page always opens at the Default Standard Settings (the bold button under each rule); the other buttons are its Flex Values.">Uptrend Pool signed off 28-Sep-26 (backtest D-100): &euro;500m+ and rules 1 to 3, read at month-ends. Size not tested here yet; rule 4 added.</span>';
+    h+='<span class="pe-sub" title="The Uptrend Pool Filter Criteria were signed off by Richard on 28-Sep-26 (APM - Stage 2 Gate-4 Backtest, D-100): market value of EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more; readings at each month-end decide eligibility for the following month, so this daily page is for information. This page does not test size yet, and it keeps Stock RS L18M 80 or more as a fourth rule, which the sign-off uses at APM List Compilation (Proven Stage 2 Cases). The page always opens at the Default Standard Settings (the bold button under each rule); the other buttons are its Flex Values.">Uptrend Pool signed off 28-Sep-26 (backtest D-100): &euro;500m+ and rules 1 to 3, read at month-ends. Size not tested here yet; rule 4 added.</span>';
     h+='<span class="pe-spacer"></span>';
     var dt="Prices as at "+fmtDate(M.price_date)+" (daily, after the 17:15 UK refresh). Sell-side estimate counts as at "+fmtDate(ss.as_of)+(ss.sales_source?" (sales: "+ss.sales_source+")":(ss.source?" ("+ss.source+")":""))+". Readings built "+(M.generated||"")+".";
     h+='<span class="pe-dates" title="'+esc(dt)+'">Prices <b>'+fmtDate(M.price_date)+'</b> &middot; Sell-side <b>'+fmtDate(ss.as_of)+'</b></span>';
@@ -19328,7 +19328,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       h+='<span class="pe-ph '+(up?"up":"down")+'" title="'+esc(pt)+'">Market Cycle Phase: <b>'+esc(ph.label)+'</b> since '+(ph.history_limited?"at least ":"")+fmtDate(ph.since)+'</span>';
     }
     h+='</div>';
-    if(!up)h+='<div class="pe-warn"><b>These four rules are the backtest\'s Uptrending Market rules; for a Downtrending Market it recommends a different Pool (the early-cycle industries with Sector RS L12M 50 or more), which is not on this page yet.</b></div>';
+    if(!up)h+='<div class="pe-warn"><b>These four rules are the backtest\'s Uptrending Market rules; for a Downtrending Market it recommends a different Pool (the early-cycle industries with Sector RS (Composite) 50 or more), which is not on this page yet.</b></div>';
     var W=M.warnings||[];
     for(var i=0;i<W.length;i++)h+='<div class="pe-warn" title="'+esc(W[i])+'">'+esc(W[i])+'</div>';
     h+=rulesPanel();
@@ -19436,8 +19436,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {k:"bench",label:"Ideas Bench",tip:"The Ideas Bench of the latest weekly Ideas lists, in list order"},
     {k:"sl",label:"Ideas Shortlist",tip:"The Ideas Shortlist of the latest weekly Ideas lists, in list order"},
     {k:"ll",label:"Ideas Longlist",tip:"The Ideas Longlist of the latest weekly Ideas lists, in list order"},
-    {k:"other",label:"Other",tip:"Stocks in the signed-off Uptrend Pool (D-100: market value EUR 500m or more, Stock RS L12M Composite 80 or more, Sector RS L12M 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more) that are on none of the three lists and are not held; highest Stock RS L12M Composite first"},
-    {k:"live",label:"Live Stocks",tip:"The current portfolio holdings (Position Management System); highest Stock RS L12M Composite first"}
+    {k:"other",label:"Other",tip:"Stocks in the signed-off Uptrend Pool (D-100: market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more) that are on none of the three lists and are not held; highest Stock RS (Composite) first"},
+    {k:"live",label:"Live Stocks",tip:"The current portfolio holdings (Position Management System); highest Stock RS (Composite) first"}
   ];
   var CHANGE={held:"held",promoted:"promoted",demoted:"demoted","new":"new this week"};
   /* MD-EMR-2026-09-30: the eight (in their two families), the blended score and grade and the five flags for each listed
@@ -19481,7 +19481,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   }
 
   function sortGroup(arr){
-    if(!st.sortKey){   /* list order: the lists by their rank; Other and Live Stocks by Stock RS L12M Composite, highest first */
+    if(!st.sortKey){   /* list order: the lists by their rank; Other and Live Stocks by Stock RS (Composite), highest first */
       arr.sort(function(a,b){
         if(a.pos||b.pos)return (a.pos||999)-(b.pos||999);
         var x=a.r.rs,y=b.r.rs;x=(x==null||isNaN(x))?-1:x;y=(y==null||isNaN(y))?-1:y;
@@ -19542,7 +19542,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var P=PE(),M=PD()._meta||{},ss=M.ss||{},ph=M.phase,I=PD().ideas,h='<div class="summary-tile pe-tile"><div class="pe-head">';
     h+='<span class="pe-title">Ideas Lists (Bench, LL, SL)</span>';
     var sub=(I?"Weekly Ideas lists of "+P.fmtDate(I.date)+" (written each Friday)":"No weekly Ideas lists found")+", then Other (the signed-off Uptrend Pool, on no list) and Live Stocks. Struck through: fails that Filter Test at its Default Standard Setting.";
-    h+='<span class="pe-sub" title="'+esc("Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Other: market value EUR 500m or more, Stock RS L12M Composite 80 or more, Sector RS L12M 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more (D-100), on none of the three lists and not held. Live Stocks: the Position Management System. Each stock appears once. Click a column heading to sort within each group; Reset returns to list order.")+'">'+esc(sub)+'</span>';
+    h+='<span class="pe-sub" title="'+esc("Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Other: market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more (D-100), on none of the three lists and not held. Live Stocks: the Position Management System. Each stock appears once. Click a column heading to sort within each group; Reset returns to list order.")+'">'+esc(sub)+'</span>';
     h+='<span class="pe-spacer"></span>';
     h+='<span class="pe-dates" title="'+esc("Prices as at "+P.fmtDate(M.price_date)+"; sell-side estimate counts as at "+P.fmtDate(ss.as_of)+"; market values as at "+P.fmtDate(M.mc_date)+"; readings built "+(M.generated||""))+'">Prices <b>'+P.fmtDate(M.price_date)+'</b> &middot; Sell-side <b>'+P.fmtDate(ss.as_of)+'</b></span>';
     if(ph&&ph.label)h+='<span class="pe-ph '+(ph.label==="Uptrending"?"up":"down")+'" title="Market Cycle Phase, as on the Pool Eligibility page">Market Cycle Phase: <b>'+esc(ph.label)+'</b> since '+(ph.history_limited?"at least ":"")+P.fmtDate(ph.since)+'</span>';

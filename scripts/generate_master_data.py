@@ -1036,46 +1036,45 @@ def compute_smas(ohlcv_rows, periods=SMA_PERIODS):
 # ── RS Composite (IBD-style) ──────────────────────────────────────────────
 
 def compute_rs_composite(stock_rows, benchmark_rows):
-    """Compute IBD-style RS composite: 0.4*3M + 0.2*6M + 0.2*9M + 0.2*12M.
-    Returns the composite value and component returns."""
-    if len(stock_rows) < 252 or len(benchmark_rows) < 252:
-        return None, {}
+    """The Composite (Stock RS before ranking): 0.4 x 3-month + 0.2 x each of 6-, 9- and 12-month stock returns minus the
+    STOXX Europe 600's, each clipped at +/-200%.
 
-    def _period_return(rows, days):
-        if len(rows) < days:
-            return None
-        start_price = rows[-days]["close"]
-        end_price = rows[-1]["close"]
-        if start_price <= 0:
-            return None
-        ret = (end_price - start_price) / start_price
-        return max(min(ret, 2.0), -2.0)  # Cap at +/-200%
+    RS-ALIGN Q3 (1-Oct-2026, Richie login; Richard: "Concur" to using the Pool's code for the Master Dashboard's Stock RS):
+    computed by build_pool_eligibility.composite_at, the code the Pool, the Sell Criteria and the RS Dashboard use. The
+    earlier version here measured each look-back one trading day short (rows[-63] is 62 trading days back) and took the
+    index by position rather than by date. Returns (composite or None, {"3M","6M","9M","12M": stock's own return})."""
+    import build_pool_eligibility as _BPE
 
+    def _clean(rows):
+        out = []
+        for r in rows or []:
+            try:
+                c = float(r["close"])
+            except (TypeError, ValueError, KeyError):
+                continue
+            if c <= 0 or c != c:
+                continue
+            if out and out[-1][0] == r["date"]:
+                out[-1] = (r["date"], c)
+            else:
+                out.append((r["date"], c))
+        return out
+
+    st = _clean(stock_rows)
+    bm = _clean(benchmark_rows)
+    closes = [c for _, c in st]
     stock_returns = {}
-    bench_returns = {}
-    for label, days in [("3M", 63), ("6M", 126), ("9M", 189), ("12M", 252)]:
-        stock_returns[label] = _period_return(stock_rows, days)
-        bench_returns[label] = _period_return(benchmark_rows, days)
-
-    if any(v is None for v in stock_returns.values()):
-        return None, stock_returns
-
-    # Use RELATIVE returns (stock - benchmark) per Q6 decision (23-Apr-26)
-    rel_returns = {}
-    for label in ["3M", "6M", "9M", "12M"]:
-        sr = stock_returns[label]
-        br = bench_returns.get(label)
-        if sr is not None and br is not None:
-            rel_returns[label] = sr - br
+    for label, n in (("3M", 63), ("6M", 126), ("9M", 189), ("12M", 252)):
+        if len(closes) > n and closes[-1 - n] > 0:
+            stock_returns[label] = max(min(closes[-1] / closes[-1 - n] - 1.0, 2.0), -2.0)
         else:
-            rel_returns[label] = sr  # Fallback to absolute if no benchmark
-
-    composite = (0.4 * rel_returns["3M"] +
-                 0.2 * rel_returns["6M"] +
-                 0.2 * rel_returns["9M"] +
-                 0.2 * rel_returns["12M"])
-
-    return round(composite, 6), stock_returns
+            stock_returns[label] = None
+    if len(st) < 253 or len(bm) < 253:
+        return None, stock_returns
+    comp = _BPE.composite_at([d for d, _ in st], closes, None, [d for d, _ in bm], [c for _, c in bm])
+    if comp is None or comp != comp:
+        return None, stock_returns
+    return round(comp, 6), stock_returns
 
 
 def compute_rs_percentiles(rs_values):
@@ -2045,8 +2044,8 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
         if len(rows_with_sma) >= 126 and benchmark_rows and len(benchmark_rows) >= 126:
             try:
                 sliced_stock = rows_with_sma[:-63]
-                sliced_bench = benchmark_rows[:len(sliced_stock)] if len(benchmark_rows) >= len(sliced_stock) else benchmark_rows
-                if len(sliced_stock) >= 252 and len(sliced_bench) >= 252:
+                sliced_bench = benchmark_rows  # RS-ALIGN Q3: the index is aligned by date inside composite_at
+                if len(sliced_stock) >= 253 and len(sliced_bench) >= 253:
                     rs_m3_composite, _ = compute_rs_composite(sliced_stock, sliced_bench)
                     rs_at_m3 = rs_m3_composite
             except Exception:
@@ -2861,6 +2860,24 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
     # --- Result container ---
     result = {ticker: ['None'] * 12 for ticker in stock_sma_map}
 
+    # RS-ALIGN (1-Oct-2026, Richie login): Industry RS and Sector RS for tests 7 and 8 at each month-end come from the
+    # Pool's own Composite code (build_pool_eligibility.composite_upto + group_ranks), the same as today's screens and
+    # the Sell Criteria. Sector RS is ranked across all sectors. Bars loaded once; on failure the old rankings stand.
+    _rsa = None
+    try:
+        import build_pool_eligibility as _BPE
+        _bb = _BPE.load_bars("^STOXX") or []
+        _rsa = {"BPE": _BPE, "bd": [b[0] for b in _bb], "bc": [b[1] for b in _bb], "bars": {}, "sec": {}, "ind": {}}
+        for _t, _m in stock_meta.items():
+            _bars = _BPE.load_bars(_m['yf']) if _m.get('yf') else None
+            if _bars:
+                _rsa["bars"][_t] = ([b[0] for b in _bars], [b[1] for b in _bars])
+                _rsa["sec"][_t] = _m.get('sector', '') or ''
+                _rsa["ind"][_t] = _m.get('industry', '') or ''
+    except Exception as _e:
+        print("  RS-ALIGN FAILED in the 12-month Stage 2 persistence; old rankings used: %r" % (_e,))
+        _rsa = None
+
     for mi, date_str in enumerate(month_ends):
 
         # --- Benchmark snapshot at this month-end ---
@@ -2870,12 +2887,12 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
         # --- Step 1: RS composite for every stock at this month-end ---
         rs_at_date = {}
         if has_bench:
-            bench_slice = bench_sma[bench_idx - 251 : bench_idx + 1]
+            bench_slice = bench_sma[: bench_idx + 1]  # RS-ALIGN Q3: composite_at aligns the index by date
             for ticker, (rows, dates) in stock_sma_map.items():
                 idx = bisect.bisect_right(dates, date_str) - 1
-                if idx < 251:
+                if idx < 252:
                     continue
-                stock_slice = rows[idx - 251 : idx + 1]
+                stock_slice = rows[idx - 252 : idx + 1]  # RS-ALIGN Q3: 253 closes, so the 12-month look-back is 252 days
                 rs_val, _ = compute_rs_composite(stock_slice, bench_slice)
                 if rs_val is not None:
                     rs_at_date[ticker] = rs_val
@@ -2934,6 +2951,19 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
             for rank, (s, _) in enumerate(valid):
                 sec_pct_in_ind[s] = int(round(rank / max(nn - 1, 1) * 99))
 
+        if _rsa is not None:
+            try:
+                _cmp = {}
+                for _t, (_ds, _cs) in _rsa["bars"].items():
+                    _c = _rsa["BPE"].composite_upto(_ds, _cs, date_str, _rsa["bd"], _rsa["bc"])
+                    if _c is not None:
+                        _cmp[_t] = _c
+                _, _srs, _irs = _rsa["BPE"].group_ranks(_cmp, _rsa["sec"], _rsa["ind"])
+                if _irs and _srs:
+                    ind_pct_rank, sec_pct_in_ind = _irs, _srs
+            except Exception as _e:
+                print("  RS-ALIGN FAILED at %s; old rankings used: %r" % (date_str, _e))
+
         # Stock RS vs industry percentile
         rs_vs_ind_pct = {}
         for ind_name in set(stock_meta[t]['industry'] for t in stock_meta):
@@ -2984,7 +3014,7 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
             ind = stock_meta[ticker]['industry']
             sec = stock_meta[ticker]['sector']
             t7 = ind_pct_rank.get(ind, 0) >= 70
-            t8 = sec_pct_in_ind.get(sec, 0) >= 70
+            t8 = sec_pct_in_ind.get(sec, 0) >= 50  # RS-ALIGN Q1 (1-Oct-2026): the Pool's Sector RS pass mark
             t9 = rs_vs_ind_pct.get(ticker, 0) >= 70
 
             count = sum([t5, t6, t7, t8, t9])
@@ -3209,6 +3239,59 @@ def compute_master_dashboard_screens(prices, filter_results):
         _n_s = len(_secs_sorted)
         for _si, _sec in enumerate(_secs_sorted):
             _sec_m3_pct_in_ind[_sec] = int(round(_si / max(_n_s - 1, 1) * 99))
+
+    # RS-ALIGN (1-Oct-2026, Richie login, SA session). Richard: "Change *all* simple RS definitions to the composite,
+    # so the RS only displays/discusses Composite RS. Same for the Master Dashboard." The three rankings above are
+    # REPLACED here by the Pool's own code (build_pool_eligibility.composite_upto + group_ranks), the code the Pool,
+    # the Sell Criteria (scripts/framework14_reader.py) and the RS Dashboard use:
+    #   Industry RS = the industry's average Composite, ranked 0-99 across all industries (Stage 2 test 7)
+    #   Sector RS   = the sector's middle company's Composite, ranked 0-99 across ALL sectors (Stage 2 test 8).
+    #                 Before 1-Oct-2026 a sector was ranked only against the other sectors in its own industry.
+    #   Sector RS 3 months ago = the same, on the index's trading day 63 days earlier (Stage 3 test 8).
+    # The variable and key names (_sec_pct_in_ind, T8_sector_RS_pct_in_industry, sector_RS_pct_in_industry) are kept
+    # so every reader keeps working; their VALUE is now Sector RS across all sectors. If this block fails, the old
+    # rankings above stay in force and the run prints RS-ALIGN FAILED.
+    try:
+        import build_pool_eligibility as _BPE
+        _bb = _BPE.load_bars("^STOXX") or []
+        _bd = [b[0] for b in _bb]
+        _bc = [b[1] for b in _bb]
+        if len(_bd) < 320:
+            raise RuntimeError("index history too short (%d bars)" % len(_bd))
+        # As-of day = the newest stock price date in THIS prices list (not the index's newest bar), so the one-off
+        # history seed, which calls this function on prices sliced to a past day, ranks on that past day.
+        _asof = max((str(_pp.get("date")) for _pp in prices if _pp.get("date")), default=_bd[-1])
+        _k = max(i for i in range(len(_bd)) if _bd[i] <= _asof)
+        if _k < 64:
+            raise RuntimeError("index history too short before %s" % _asof)
+        _day_now, _day_m3 = _asof, _bd[_k - 63]
+        _sec_of, _ind_of, _comp_now, _comp_m3 = {}, {}, {}, {}
+        for _pp in prices:
+            _t = _pp.get("ticker")
+            _bars = _BPE.load_bars(_pp.get("yf_ticker")) if _pp.get("yf_ticker") else None
+            if not _t or not _bars:
+                continue
+            _ds = [b[0] for b in _bars]
+            _cs = [b[1] for b in _bars]
+            _sec_of[_t] = _pp.get("sector", "") or ""
+            _ind_of[_t] = _pp.get("industry", "") or ""
+            _c = _BPE.composite_upto(_ds, _cs, _day_now, _bd, _bc)
+            if _c is not None:
+                _comp_now[_t] = _c
+            _c = _BPE.composite_upto(_ds, _cs, _day_m3, _bd, _bc)
+            if _c is not None:
+                _comp_m3[_t] = _c
+        _, _srs_now, _irs_now = _BPE.group_ranks(_comp_now, _sec_of, _ind_of)
+        _, _srs_m3, _ = _BPE.group_ranks(_comp_m3, _sec_of, _ind_of)
+        if len(_irs_now) < 10 or len(_srs_now) < 50:
+            raise RuntimeError("too few groups ranked (%d industries, %d sectors)" % (len(_irs_now), len(_srs_now)))
+        _ind_pct_rank = dict(_irs_now)
+        _sec_pct_in_ind = dict(_srs_now)
+        _sec_m3_pct_in_ind = dict(_srs_m3)
+        print("  RS-ALIGN: Industry RS and Sector RS from the Pool's Composite code: %d industries, %d sectors, "
+              "%d stocks on %s (3 months ago: %s)" % (len(_irs_now), len(_srs_now), len(_comp_now), _day_now, _day_m3))
+    except Exception as _rs_align_err:
+        print("  RS-ALIGN FAILED, Industry RS and Sector RS fell back to the old definitions: %r" % (_rs_align_err,))
 
     for fr in filter_results:
         ticker = fr["ticker"]
@@ -3436,7 +3519,10 @@ def compute_master_dashboard_screens(prices, filter_results):
             # T7: industry RS percentile rank >= 70 (avg rs_excess_market per industry, ranked vs all industries)
             s2_t7 = (_ind_pct_rank.get(_stock_industry, 0) >= 70)
             # T8: sector RS percentile rank >= 70 within its industry
-            s2_t8 = (_sec_pct_in_ind.get(_stock_sector, 0) >= 70)
+            # RS-ALIGN Q1 (1-Oct-2026, Richard: "Align it to the approach we've agreed in the last week in Stage 2 Gate-4
+            # Backtest project"): Sector RS 50 or above, the Pool's pass mark (Uptrend Pool Filter Criteria, signed off
+            # 28/29-Sep-2026) and the Sell Criteria's line (Sector RS below 50). Key name T8_sector_RS_pct_ge70 kept for readers.
+            s2_t8 = (_sec_pct_in_ind.get(_stock_sector, 0) >= 50)
             # T9: stock's rs_vs_industry percentile >= 70
             s2_t9 = (rs_vs_ind is not None and rs_vs_ind >= 70)
             s2["tests"]["T5_50D_above_150D"] = s2_t5

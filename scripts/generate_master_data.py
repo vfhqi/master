@@ -23,6 +23,19 @@ from datetime import datetime, timedelta, date
 from collections import defaultdict
 import argparse
 
+# UNIT-CLEAN (session 26 of the Stage 2 backtest project, 1-Oct-2026; Richard, Message 99:
+# "clean the prices once at the source, in the nightly price job"). price_units.py, beside
+# this file, puts a series that jumped by a pence/pounds 100x or a 1,000x unit switch back on
+# one unit. Applied in load_cache() and save_cache(), so the files on disk and this run's own
+# data are both clean. A missing helper never stops the build; it declares itself.
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parent)) if str(Path(__file__).resolve().parent) not in sys.path else None
+    from price_units import normalise_units as _normalise_units, describe as _describe_units
+except Exception as _unit_import_error:
+    _normalise_units = None
+    print("  UNIT-CLEAN UNAVAILABLE: price_units.py could not be imported (%s); prices saved as fetched"
+          % _unit_import_error)
+
 
 def _safe_write_json(obj, out_path, min_bytes=1, validate=None,
                      indent=2, ensure_ascii=True, separators=None):
@@ -311,6 +324,10 @@ def load_cache(yf_ticker):
             print("  LEGACY-CACHE %-12s — served from databases/pullback-cache, "
                   "last bar %s. This store is not maintained by the nightly build; "
                   "treat its age as unknown." % (yf_ticker, _last))
+        if clean and _normalise_units is not None:
+            clean, _unit_rep = _normalise_units(clean, yf_ticker)
+            if _unit_rep:
+                print("  " + _describe_units(_unit_rep) + " (on load)")
         return clean or None
     return None
 
@@ -333,6 +350,11 @@ def save_cache(yf_ticker, rows):
     """
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = _cache_path(yf_ticker)
+
+    if _normalise_units is not None:
+        rows, _unit_rep = _normalise_units(rows, yf_ticker)
+        if _unit_rep:
+            print("  " + _describe_units(_unit_rep))
 
     prev_last_date = None
     if path.exists():
@@ -366,6 +388,7 @@ def save_cache(yf_ticker, rows):
             )
 
     _safe_write_json(rows, path, min_bytes=1, validate=_validate)
+    return rows  # UNIT-CLEAN: the cleaned rows, so the caller keeps what was saved
 
 
 def _merge_cached_and_new(cached_rows, new_rows):
@@ -870,7 +893,7 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
                 _cut = (end_date - timedelta(days=LOOKBACK_DAYS + 250)).strftime("%Y-%m-%d")
                 _merged = [r for r in _merged if r["date"] >= _cut]
                 try:
-                    save_cache(yf_ticker, _merged)
+                    _merged = save_cache(yf_ticker, _merged)
                     data[yf_ticker] = _merged
                     stats["reseed"] = stats.get("reseed", 0) + 1
                     # Only a re-seed that actually LANDED counts. A rejected or failed one must
@@ -910,7 +933,7 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
                 cutoff = (end_date - timedelta(days=LOOKBACK_DAYS + 250)).strftime("%Y-%m-%d")
                 merged = [r for r in merged if r["date"] >= cutoff]
                 try:
-                    save_cache(yf_ticker, merged)
+                    merged = save_cache(yf_ticker, merged)
                     data[yf_ticker] = merged
                     stats["incr"] += 1
                     print(f"  INCR  {yf_ticker:12s} — {len(new_rows)} new, {len(merged)} total")
@@ -934,7 +957,7 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
                 new_rows = [r for r in new_rows if r["date"] >= _cut]
             if new_rows:
                 try:
-                    save_cache(yf_ticker, new_rows)
+                    new_rows = save_cache(yf_ticker, new_rows)
                     data[yf_ticker] = new_rows
                     stats["full"] += 1
                     print(f"  FULL  {yf_ticker:12s} — {len(new_rows)} days")

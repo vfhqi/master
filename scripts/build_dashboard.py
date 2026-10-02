@@ -19576,6 +19576,11 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   /* The month-end reading is the system's STORED month-end record (databases/pool-month-end/, written on the month-end day
      and never rewritten); the Ideas lists and the "In the Pool" flag read the same record, so the page shows ONE Pool. */
   function meRec(){var s=SD();return (s&&s._meta&&s._meta.month_end_record)||null;}
+  /* MD-POOL-WEEKLY-2026-10-02 (Pool Run window, Richie; Richard D-RW-4): the record is now the WEEKLY Pool (kind "weekly",
+     databases/pool-weekly/, read through databases/scripts/pool_membership.py); a month-end record only as the fallback.
+     Members failing a Pool test carry Richard's mark "leaving the Pool, week n of 3". */
+  function recName(r){r=r||meRec()||{};return r.kind==="weekly"?"weekly Pool of "+fd(r.date)+(r.reading_date?" (read on the "+fd(r.reading_date)+" close)":""):"month-end record of "+fd(r.date);}
+  function lvMark(t){var r=meRec();var n=r&&r.leaving&&r.leaving[t];return n?"leaving the Pool, week "+n+" of 3":"";}
   var _meSet=null;
   function meSet(){if(_meSet)return _meSet;_meSet={};var r=meRec();if(r&&r.members)for(var i=0;i<r.members.length;i++)_meSet[r.members[i]]=1;return _meSet;}
   function meAvail(){var r=meRec();return !!(r&&r.members);}
@@ -19654,7 +19659,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   /* Month-end reading of the four Pool rules, for the Company cell's tooltip. */
   function meWords(r){
     var x=SR(r.t),m=SD()&&SD()._meta,rec=meRec(),o="";if(!m)return "";
-    if(rec)o+=" Month-end record of "+fd(rec.date)+": "+(meSet()[r.t]?"in the Pool":"not in the Pool")+".";
+    if(rec){var _rn=recName(rec);o+=" "+_rn.charAt(0).toUpperCase()+_rn.slice(1)+": "+(meSet()[r.t]?"in the Pool":"not in the Pool")+(lvMark(r.t)?", "+lvMark(r.t):"")+".";}
     if(x&&x.me){var e=x.me;
       o+=" Recomputed at "+fd(m.last_month_end)+" on today's full universe: Stock RS "+(e[0]==null?"none":e[0])+", Sector RS "+(e[1]==null?"none":e[1])
       +", SS Sales Net Upgrade Breadth L3M "+(e[2]==null?"none":pct(e[2],0))+", market value "+(e[3]==null?"not on file":"EUR "+Math.round(e[3]).toLocaleString("en-GB")+"m")
@@ -19664,8 +19669,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   /* Company, Industry and Sector cells with the Industry tint; the other cells come from the Pool page's module. */
   function cellHtml(c,r,RS,row){
     if(c.type==="name"){
-      var tip=r.n+" ("+r.t+"), "+(r.ind||"no industry")+". Click the row to open the chart."+meWords(r)+(row.out?" Outside the Pool on the "+(basis()==="me"?"month-end":"today's")+" reading.":"");
-      return '<td class="pe-name" style="'+indTint(r.ind)+';'+indEdge(r.ind)+'"><span class="co" data-pe-open="'+esc(r.t)+'" title="'+esc(tip)+'">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span></td>';
+      var tip=r.n+" ("+r.t+"), "+(r.ind||"no industry")+". Click the row to open the chart."+meWords(r)+(row.out?" Outside the Pool on the "+(basis()==="me"?((meRec()||{}).kind==="weekly"?"weekly":"month-end"):"today's")+" reading.":"");
+      return '<td class="pe-name" style="'+indTint(r.ind)+';'+indEdge(r.ind)+'"><span class="co" data-pe-open="'+esc(r.t)+'" title="'+esc(tip)+'">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span>'+(lvMark(r.t)?'<span class="tk" style="color:#b45309;font-weight:600" title="'+esc("A member leaves the Pool after failing a Pool test on three Fridays in a row (Richard, 2-Oct-26)")+'">'+esc(lvMark(r.t))+'</span>':'')+'</td>';
     }
     if(c.type==="txt"){var v=r[c.key];return '<td class="pe-txt'+(c.gs?" pe-gs":"")+'" style="'+indTint(r.ind)+'" title="'+esc(v||"")+'">'+esc(v||"")+'</td>';}
     if(c.type==="sell")return sellCell(c,r);
@@ -19823,8 +19828,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function basisHtml(){
     var M=(SD()||{})._meta||{},av=meAvail(),b=basis();
     var me=meRec()||{};
-    return '<span class="il-basis" title="Which reading decides who is in the Pool on this page. The signed-off rule: month-end readings decide eligibility for the following month."><span class="il-cg-l">Pool reading:</span>'
-      +'<button class="il-bb'+(b==="me"?" on":"")+'" data-il-basis="me"'+(av?'':' disabled')+' title="'+esc(av?"The month-end record of "+fd(me.date)+" ("+me.count+" stocks in the Pool): decides eligibility until the next month-end. The Ideas lists and the In the Pool flag read the same record":"No month-end reading available")+'">Month-end '+esc(av?fd(me.date):"")+'</button>'
+    return '<span class="il-basis" title="Which reading decides who is in the Pool on this page. The rule (Richard, 2-Oct-26): the Pool is read weekly at each Friday close; a stock enters after passing all four tests on three Fridays in a row and leaves after failing any of them on three Fridays in a row."><span class="il-cg-l">Pool reading:</span>'
+      +'<button class="il-bb'+(b==="me"?" on":"")+'" data-il-basis="me"'+(av?'':' disabled')+' title="'+esc(av?"The "+recName(me)+" ("+me.count+" stocks in the Pool"+(me.leaving&&Object.keys(me.leaving).length?", "+Object.keys(me.leaving).length+" leaving":"")+"): "+(me.kind==="weekly"?"decides eligibility until the next weekly Pool":"decides eligibility until the next month-end")+". The Ideas lists and the In the Pool flag read the same record":"No Pool record available")+'">'+(me.kind==="weekly"?"Weekly ":"Month-end ")+esc(av?fd(me.date):"")+'</button>'
       +'<button class="il-bb'+(b==="day"?" on":"")+'" data-il-basis="day" title="Today\'s reading: moves every day">Today '+esc(fd((PD()._meta||{}).price_date))+'</button></span>';
   }
 
@@ -19832,7 +19837,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var M=PD()._meta||{},ss=M.ss||{},ph=M.phase,I=PD().ideas,h='<div class="summary-tile pe-tile"><div class="pe-head">';
     var sm=(SD()||{})._meta||{};
     h+='<span class="pe-title">'+TITLE+'</span>';
-    var sub="Stocks in the Pool on the "+(basis()==="me"?"month-end record of "+fd((meRec()||{}).date):"reading of "+fd(M.price_date))+", under the weekly Ideas lists"+(I?" of "+fd(I.date):"")+", then Other and Live Stocks. Struck through: fails that Filter Test today. Red: a Sell Criterion is met.";
+    var sub="Stocks in the Pool on the "+(basis()==="me"?recName():"reading of "+fd(M.price_date))+", under the weekly Ideas lists"+(I?" of "+fd(I.date):"")+", then Other and Live Stocks. Struck through: fails that Filter Test today. Red: a Sell Criterion is met.";
     h+='<span class="pe-sub" title="'+esc("The Pool (signed off 28-Sep-26, version 2 on 29-Sep-26): market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth 0% or more ("+((ss.sales_definition==="L100D")?"read on FactSet's 100-day counts, as signed off on 29-Sep-26; the month-end record of 30-Sep used the three-month 45-day counts, which version 2 of the statement allows for the first month":"read on the three-month 45-day counts: the 100-day counts are missing from today's sell-side pull")+"). Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Each stock appears once. Click a column heading to sort within each group; Reset returns to list order and the opening settings.")+'">'+esc(sub)+'</span>';
     h+='<span class="pe-spacer"></span>';
     h+='<span class="pe-dates" title="'+esc("Prices as at "+fd(M.price_date)+"; sell-side estimate counts as at "+fd(ss.as_of)+"; market values as at "+fd(M.mc_date)+" (month-end file for stocks added since); Sell Criteria read on Friday "+fd(sm.last_friday)+" and the month-end "+fd(sm.last_month_end)+"; readings built "+(M.generated||""))+'">Prices <b>'+fd(M.price_date)+'</b> &middot; Sell-side <b>'+fd(ss.as_of)+'</b></span>';
@@ -19840,7 +19845,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     h+='</div>';
     var W=(M.warnings||[]).slice();
     if(ph&&ph.label&&ph.label!=="Uptrending")W.push("Market Cycle Phase today: "+ph.label+". The Pool and these Filter Tests are the signed-off Uptrend rules; the backtest recommends a different Pool in a Downtrending market, which is not on this page");
-    var rec0=meRec();if(rec0&&!rec0.in_uptrend)W.push("The month-end record of "+fd(rec0.date)+" was not an Uptrend month-end, so there is no Pool this month on the month-end reading");
+    var rec0=meRec();if(rec0&&!rec0.in_uptrend)W.push("The "+recName(rec0)+": the latest month-end was not an Uptrend month-end, so there is no Pool");
     if(!SD())W.push("The Sell Criteria and the month-end Pool reading were not built tonight, so the Sell Criteria columns show no readings and the page uses today's reading");
     if(B.missing.length)W.push("Not in the dashboard's universe, so not shown: "+B.missing.join(", "));
     for(var i=0;i<W.length;i++)h+='<div class="pe-warn">'+esc(W[i])+'</div>';
@@ -19850,7 +19855,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<label class="pe-chk" title="List names and holdings that are not in the Pool on this reading, shown faded under their group"><input type="checkbox" id="il-showout"'+(st.showOut?" checked":"")+'> Also show list names and holdings outside the Pool</label>'
       +'<span class="pe-spacer"></span>'
       +'<input class="pe-search" id="il-search" type="search" placeholder="Search company, ticker, industry or sector" value="'+esc(st.q)+'">'
-      +'<button class="pe-btn" data-il-reset="1" title="The opening settings: all groups on, Metrics hidden, month-end reading, list order; the search is kept">Reset</button></div>';
+      +'<button class="pe-btn" data-il-reset="1" title="The opening settings: all groups on, Metrics hidden, the reading of the Pool record, list order; the search is kept">Reset</button></div>';
     h+=cgHtml();
     return h+'</div>';
   }

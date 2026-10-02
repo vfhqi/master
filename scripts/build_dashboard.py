@@ -1222,13 +1222,17 @@ body[data-active-tab="ssem"] .header,body[data-active-tab="val"] .header,body[da
 body[data-active-tab="post_indicators_bull"] .header,body[data-active-tab="post_indicators_bear"] .header{height:auto !important}
 /* MD-TIDY-2026-10-02: SS Earnings Momentum -- the Live Portfolio and Qualified Stocks tables share one set of column
    widths (ssemAlignTables() adds the same colgroup to both); the numeric columns share one width. */
-#tab-ssem table.data-table.ssem-aligned{table-layout:fixed;width:100%}
+#tab-ssem table.data-table.ssem-aligned{table-layout:fixed;width:100%;min-width:1380px}  /* MD-TIDY-2026-10-02b: never squeezed below 1,380px (chart panel open) */
 #tab-ssem table.ssem-aligned td.col-identity,#tab-ssem table.ssem-aligned th.col-identity{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #tab-ssem table.ssem-aligned tr.col-header-row th{white-space:normal;overflow-wrap:normal;word-break:normal;vertical-align:bottom;overflow:hidden}
-@media (max-width:1600px){#tab-ssem table.ssem-aligned tr.col-header-row th{font-size:9px;padding-left:2px;padding-right:2px}}
+@media (max-width:1600px){#tab-ssem table.ssem-aligned tr.col-header-row th{font-size:8.5px;padding-left:1px;padding-right:1px}}  /* MD-TIDY-2026-10-02b: was 9px / 2px; EBITDA was cut by a pixel */
 #tab-ssem table.ssem-aligned tr.group-header-row th{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 #tab-ssem table.ssem-aligned td.col-num,#tab-ssem table.ssem-aligned td.col-price{padding-left:3px;padding-right:6px;overflow:hidden}
 #tab-ssem table.ssem-aligned tr.col-header-row th.ssem-th-score{text-align:center}
+/* MD-TIDY-2026-10-02b: the small type follows the table's own narrow layout (chart panel open), not only the window width */
+#tab-ssem table.ssem-aligned.ssem-narrow td.col-num,#tab-ssem table.ssem-aligned.ssem-narrow td.col-price{font-size:10.5px;padding-left:2px;padding-right:4px}
+#tab-ssem table.ssem-aligned.ssem-narrow td.col-identity{font-size:11px}
+#tab-ssem table.ssem-aligned.ssem-narrow tr.col-header-row th{font-size:8.5px;padding-left:1px;padding-right:1px}
 @media (max-width:1600px){#tab-ssem table.ssem-aligned td.col-num,#tab-ssem table.ssem-aligned td.col-price{font-size:10.5px;padding-left:2px;padding-right:4px}
   #tab-ssem table.ssem-aligned td.col-identity{font-size:11px}}
 
@@ -7402,14 +7406,15 @@ function ssemAlignTables(container){
     if(t.classList.contains("data-table-tile"))continue;
     var hr=t.querySelector("thead tr.col-header-row");if(!hr)continue;
     var n=hr.children.length;if(n<6)continue;
-    var narrow=(window.innerWidth||1920)<=1600;
+    var fw=(t.parentElement&&t.parentElement.clientWidth)||window.innerWidth||1920;
+    var narrow=fw<=1570;  /* MD-TIDY-2026-10-02b: from the frame's width, so an open chart panel counts */
     var nameW=narrow?11:13,secW=narrow?10:12.5,ratW=3.6,numN=n-3,numW=(100-nameW-secW-ratW)/numN;
     var old=t.querySelector("colgroup.ssem-cg");if(old)old.parentNode.removeChild(old);
     var cg=document.createElement("colgroup");cg.className="ssem-cg";
     for(var c=0;c<n;c++){var col=document.createElement("col");
       col.style.width=(c===0?nameW:(c===1?secW:(c===n-1?ratW:numW))).toFixed(3)+"%";cg.appendChild(col);}
     t.insertBefore(cg,t.firstChild);
-    t.classList.add("ssem-aligned");
+    t.classList.add("ssem-aligned");t.classList.toggle("ssem-narrow",narrow);  /* MD-TIDY-2026-10-02b */
     var ths=hr.children;
     for(var k=0;k<ths.length;k++){ths[k].style.width="";}
     if(ths[n-2])ths[n-2].classList.add("ssem-th-score");
@@ -7421,6 +7426,8 @@ function ssemAlignTables(container){
       else if(!bg)gh[g].style.backgroundColor="#fbfaf5";}
     var ids=t.querySelectorAll("tbody td.col-identity");
     for(var j=0;j<ids.length;j++){if(!ids[j].title)ids[j].title=ids[j].textContent;}
+    /* MD-TIDY-2026-10-02b: a number too wide for its column (an outlier such as (10715%)) shows in full on hover */
+    var nc=t.querySelectorAll("tbody td.col-num");for(var q=0;q<nc.length;q++){if(!nc[q].title&&nc[q].scrollWidth>nc[q].clientWidth+1)nc[q].title=nc[q].textContent;}
   }
 }
 /* mdFitHeader: on the pages listed in MD_FIT_TABS the fixed header is sized to its contents (CSS above); publish its
@@ -7449,6 +7456,8 @@ window.ilChartTop=ilChartTop;
   function both(){try{mdFitHeader();}catch(e){}try{ilChartTop();}catch(e){}}
   try{var hd=document.querySelector(".header");if(hd&&window.ResizeObserver)new ResizeObserver(both).observe(hd);}catch(e){}
   try{if(window.MutationObserver)new MutationObserver(both).observe(document.body,{attributes:true,attributeFilter:["data-active-tab"]});}catch(e){}
+  /* MD-TIDY-2026-10-02b: opening or closing the chart panel changes the width of .main; re-run the alignment when it does */
+  try{var _mdMain=document.querySelector(".main"),_mdW=0,_mdT=0;if(_mdMain&&window.ResizeObserver)new ResizeObserver(function(){var w=Math.round(_mdMain.getBoundingClientRect().width);if(w===_mdW)return;_mdW=w;if(document.body.getAttribute("data-active-tab")!=="ssem")return;clearTimeout(_mdT);_mdT=setTimeout(function(){try{ssemAlignTables(document.getElementById("tab-ssem"));}catch(e){}},400);}).observe(_mdMain);}catch(e){}
   window.addEventListener("resize",both);
   window.addEventListener("scroll",function(){if(document.body.getAttribute("data-active-tab")==="ideas_lists")ilChartTop();},{passive:true});
   setTimeout(both,0);

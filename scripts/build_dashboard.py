@@ -7435,11 +7435,16 @@ function ssemAlignTables(container){
 var MD_FIT_TABS={ssem:1,val:1,pulling_back:1,post_indicators_bull:1,post_indicators_bear:1};
 function mdFitHeader(){
   var a=document.body.getAttribute("data-active-tab")||"";
-  if(!MD_FIT_TABS[a])return;
+  if(!MD_FIT_TABS[a]){  /* MD-TIDY-2026-10-02d: hand the height back on every other page */
+    if(window._mdFitSet){document.body.style.removeProperty("--header-height");window._mdFitSet=false;}
+    try{if(typeof window.measureV2Ribbon==="function")window.measureV2Ribbon();}catch(e){}
+    return;
+  }
   var hd=document.querySelector(".header");if(!hd)return;
   var h=Math.floor(hd.getBoundingClientRect().height);  /* floor: the frozen table header tucks under the header's
      last fraction of a pixel instead of leaving a hairline gap that rows show through */
   if(h>0&&document.body.style.getPropertyValue("--header-height")!==h+"px")document.body.style.setProperty("--header-height",h+"px");
+  window._mdFitSet=true;  /* MD-TIDY-2026-10-02d */
 }
 window.mdFitHeader=mdFitHeader;
 /* ilChartTop: on the Pool of Middle Innings Eligible Stocks page the header scrolls away, so the slide-in chart and

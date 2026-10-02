@@ -6886,6 +6886,15 @@ function renderPositions(){
 // SESSION 12 — D-MD-SSEM-5/6/7: column-order mode (TYPE=dim-grouped, TIME=timeframe-grouped) + value mode (CUMUL=raw FactSet, PERIOD=net-of-prior).
 var ssemRatingMap = {};   // ticker -> A/B/C/D/F/- — populated by renderSSEM, read by buildPortfolioTile
 var valRatingMap = {};    // ticker -> A/B/C/D/F/- populated by renderVal
+/* MD-VAL-QUINTILES-2026-10-02 (Richard, 2-Oct-26): the valuation grade is fixed quintiles of the stock's own
+   ten-year P/E percentile: 0-20 A, 21-40 B, 41-60 C, 61-80 D, 81-100 F. No ranking across the universe.
+   Same rule as databases/scripts/build-ratings-snapshot.py valuation_quintile_grade(). */
+function valQuintileGrade(p){
+  if(p===null||p===undefined||p==="")return null;
+  var x=Number(p); if(!isFinite(x))return null;
+  x=Math.floor(x+0.5);
+  return x<=20?"A":x<=40?"B":x<=60?"C":x<=80?"D":"F";
+}
 var ssemColMode = "TYPE";       // "TYPE" or "TIME"
 var ssemValueMode = "CUMUL";    // "CUMUL" or "PERIOD"
 var ssemDimFilters = {eps: false, ebitda: false, sales: false, tp: false, buy: false};
@@ -7490,8 +7499,8 @@ function renderVal(){
     r.eps_24mf=(vl&&vl.eps_24mf!=null)?vl.eps_24mf:null;
   }
 
-  // Assign A-F valuation rating by pe_pctile ascending (low pctile = cheap = A)
-  // Bell-curve: 10% A / 15% B / 25% C / 25% D / 25% F -- matches SSEM distribution
+  // Assign A-F valuation rating: fixed quintiles of pe_pctile (MD-VAL-QUINTILES-2026-10-02, Richard 2-Oct-26)
+  // 0-20 A / 21-40 B / 41-60 C / 61-80 D / 81-100 F -- each stock on its own reading, no universe ranking
   var eligible=[],ineligible=[];
   for(var j=0;j<allRows.length;j++){
     if(allRows[j].pe_pctile!=null)eligible.push(allRows[j]);
@@ -7502,18 +7511,10 @@ function renderVal(){
     return (a.ticker||"").localeCompare(b.ticker||"");
   });
   var n=eligible.length;
-  var cutA=Math.ceil(n*0.10);
-  var cutB=cutA+Math.ceil(n*0.15);
-  var cutC=cutB+Math.ceil(n*0.25);
-  var cutD=cutC+Math.ceil(n*0.25);
   var gA=0,gB=0,gC=0,gD=0,gF=0,gN=0;
   for(var i=0;i<n;i++){
-    var gr;
-    if(i<cutA){gr="A";gA++;}
-    else if(i<cutB){gr="B";gB++;}
-    else if(i<cutC){gr="C";gC++;}
-    else if(i<cutD){gr="D";gD++;}
-    else{gr="F";gF++;}
+    var gr=valQuintileGrade(eligible[i].pe_pctile)||"F";
+    if(gr==="A")gA++; else if(gr==="B")gB++; else if(gr==="C")gC++; else if(gr==="D")gD++; else gF++;
     var _vrs={A:5,B:4,C:3,D:2,F:1};
     eligible[i].val_rating=gr; eligible[i].val_rating_sort=_vrs[gr]||0;
     valRatingMap[eligible[i].ticker]=gr;
@@ -7529,7 +7530,7 @@ function renderVal(){
   rows=sortData(rows,currentSort.col,currentSort.dir);
 
   var h='<div class="summary-tile" id="section-summary"><h3>Valuation -- P/E Rating</h3>'
-    +'<div class="sub">A-F rating from P/E percentile vs own 10-year history. A = cheapest 10% of universe. Percentile: 0 = cheapest vs own history, 100 = most expensive. EPS = 24-month forward estimate.</div>'
+    +'<div class="sub">A-F rating from P/E percentile vs own 10-year history, in fixed quintiles: A 0-20, B 21-40, C 41-60, D 61-80, F 81-100. Percentile: 0 = cheapest vs own history, 100 = most expensive. EPS = 24-month forward estimate.</div>'
     +'<div class="summary-stats">'
     +sumStat("With data",xyFmt(n,totalCount))
     +sumStat("A (cheapest)",String(gA),"green")
@@ -8516,16 +8517,11 @@ function deriveMasterRatings() {
     return (a.ticker || "").localeCompare(b.ticker || "");
   });
   var nVal = valElig.length;
-  var vA = Math.ceil(nVal*0.10), vB = vA+Math.ceil(nVal*0.15), vC = vB+Math.ceil(nVal*0.25), vD = vC+Math.ceil(nVal*0.25);
+  /* MD-VAL-QUINTILES-2026-10-02: fixed quintiles of the own-history percentile, not a universe bell curve */
   var valBuckets = {};
   for (var vi = 0; vi < nVal; vi++) {
-    var vr;
-    if (vi < vA) vr = "A";
-    else if (vi < vB) vr = "B";
-    else if (vi < vC) vr = "C";
-    else if (vi < vD) vr = "D";
-    else vr = "F";
-    valBuckets[valElig[vi].ticker] = vr;
+    var vr = valQuintileGrade(valElig[vi].pct);
+    if (vr) valBuckets[valElig[vi].ticker] = vr;
   }
   masterRatingsMap = {};
   for (var pi = 0; pi < D.prices.length; pi++) {

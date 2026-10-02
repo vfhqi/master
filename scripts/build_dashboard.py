@@ -787,10 +787,10 @@ table.pe-table tr.pe-h th.sc-h .pe-hs{color:#7a1f1f}
 table.pe-table td.sc-met{background-color:#c62828 !important;color:#fff;font-weight:700}
 table.pe-table td.sc-na{color:#9a9a9a;text-align:center;font-size:10.5px}
 table.pe-table td.pe-na{text-align:center}
-table.pe-table.il-table.il-mi col.pe-c-name{width:175px}
-table.pe-table.il-table.il-mi col.pe-c-ind{width:175px}
+table.pe-table.il-table.il-mi col.pe-c-name{width:190px}
+table.pe-table.il-table.il-mi col.pe-c-ind{width:185px}
 table.pe-table.il-table.il-mi col.pe-c-sec{width:190px}
-table.pe-table.il-table.il-mi col.pe-c-ilfl{width:320px}
+table.pe-table.il-table.il-mi col.pe-c-ilfl{width:300px}
 table.pe-table.il-table.il-mi td.emr-tdfl{white-space:normal}
 table.pe-table.il-table.il-mi td.pe-name{border-right:1px solid #e3dfd2}
 table.pe-table.il-table.il-mi tbody tr:hover td.pe-name,table.pe-table.il-table.il-mi tbody tr:hover td.pe-txt{filter:brightness(.97)}
@@ -803,6 +803,14 @@ table.pe-table.il-table.il-mi tbody tr:hover td.pe-name,table.pe-table.il-table.
 .emr-fl.emr-fl-rare{border-color:#a07a00;color:#7a5c00;background:#fbf1cc}
 @media (max-width:1760px){table.pe-table.il-table.il-mi col.pe-c-name{width:170px} table.pe-table.il-table.il-mi col.pe-c-ind{width:170px} table.pe-table.il-table.il-mi col.pe-c-sec{width:190px}}
 table.pe-table.il-table.il-mi td.num,table.pe-table.il-table.il-mi tr.pe-h th.num{padding-right:6px}
+/* Message 2 (2-Oct-26): Sell Criteria cells; the retired page's legacy tab button hidden */
+table.pe-table td span.sc-low{color:#8b1a1a;font-weight:700}
+table.pe-table td span.sc-sep{color:#888}
+table.pe-table td.sc-unk{color:#777;font-style:italic;background:repeating-linear-gradient(135deg,#f4f4f1 0 4px,#fbfbf9 4px 8px)}
+table.pe-table td.sc-met span{color:#fff}
+.tab-btn[data-tab="pool_elig"]{display:none !important}
+table.pe-table.il-table tbody tr[data-il-t]{cursor:pointer}
+table.pe-table tr.pe-out td.sc-met{opacity:1}
 /* MD-QOT-2026-09-10 — Qualification over Time */
 .qot-warn{background:#fdf1f1;border-left:4px solid #A32D2D;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
 .qot-note{background:#eef3ec;border-left:4px solid #1b5e20;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
@@ -11276,7 +11284,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="ssem" onclick="switchTab(\'ssem\')">SS Earnings Momentum</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="val" onclick="switchTab(\'val\')">Valuation</button>'
 +     '<button class="v2-nav-btn" data-v2-tab="combos" onclick="switchTab(\'combos\')">Timeliness</button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="pool_elig" onclick="switchTab(\'pool_elig\')">Pool of Stocks Eligible for Middle Innings Portfolio Selection</button>'  /* MD-POOL-ELIG-2026-09-28 */
+      /* MD-POOL-MI-2026-10-02 (Message 2): the button for pool_elig was removed: one Pool page, Richard: "There is only meant to be the one" */
       +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Pool of Middle Innings Eligible Stocks</button>'  /* MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02 */
       +   '</div>'
       + '</div>';
@@ -11300,6 +11308,8 @@ function SUM_renderQualifiedStocks() {
   // Wrap the existing switchTab so we sync state every time it runs.
   var _origSwitchTab = window.switchTab;
   window.switchTab = function(id) {
+    /* MD-POOL-MI-2026-10-02: the retired page pool_elig opens the one Pool page (old links and bookmarks) */
+    if (id === 'pool_elig') { id = 'ideas_lists'; window.currentTab = id; try { if (location.hash.slice(1).split('/')[0] === 'pool_elig') history.replaceState(null, '', '#ideas_lists'); } catch (e) {} }
     syncV2State(id);
     if (typeof _origSwitchTab === 'function') return _origSwitchTab(id);
   };
@@ -19504,21 +19514,22 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
      Each cell shows the reading on the day the rule reads it (Friday or month-end, as the Tuesday order sheet acts on it);
      today's value is in the tooltip. Red = the criterion is met. */
   var SELL=[
-    {id:"s1",c:"C1",sh:"Industry RS",label:"Industry RS < 30",when:"F"},
-    {id:"s2",c:"C2",sh:"Relative 200D Slope",label:"200D MA of relative price, MoM slope ≤ 0",when:"F"},
-    {id:"s3",c:"C3",sh:"Sector & Stock RS",label:"Sector RS < 50 and Stock RS < 70",when:"M"},
-    {id:"s4",c:"C4",sh:"Stock RS & SS",label:"Stock RS < 50 and SS Sales or PT Net Upgrade Breadth < 0",when:"M"},
-    {id:"s5",c:"C5",sh:"Relative P vs. 52W High",label:"Relative price > 25% below its 52W high",when:"M"},
-    {id:"s6",c:"C6",sh:"30% Fall",label:"Price ≥ 30% below highest close since purchase, Stock RS < 70 (holdings)",when:"D"}
+    {id:"s1",c:"C1",sh:"Industry RS",small:"met below 30",label:"Industry RS < 30",when:"F"},
+    {id:"s2",c:"C2",sh:"Relative 200D Slope",small:"met at 0% or below",label:"200D MA of relative price, MoM slope ≤ 0",when:"F"},
+    {id:"s3",c:"C3",sh:"Sector & Stock RS",small:"met below 50 and 70",label:"Sector RS < 50 and Stock RS < 70",when:"M"},
+    {id:"s4",c:"C4",sh:"Stock RS & SS",small:"met below 50, analysts cutting",label:"Stock RS < 50 and (SS Sales Net Upgrade Breadth < 0 or SS PT Net Upgrade Breadth < 0)",when:"M"},
+    {id:"s5",c:"C5",sh:"Relative P vs. 52W High",small:"met below −25%",label:"Relative price > 25% below its 52W high",when:"M"},
+    {id:"s6",c:"C6",sh:"30% Fall",small:"holdings; met at −30%",label:"Price ≥ 30% below highest close since purchase and Stock RS < 70 (per tranche, holdings only)",when:"D"}
   ];
   /* The signed-off Pool tests: market value EUR 500m or more (shown here; the Pool page has no size column yet), then
      Stock RS, Sector RS and SS Sales Net Upgrade Breadth. Stock RS L18M is NOT a Pool test in the sign-off (D-100 uses it
      at APM List Compilation: 80 or more = Proven Stage 2 Cases), so here it is shown for information, never struck through. */
-  var MC_COL={id:"f_mc",g:"F",sh:"Market Value",label:"EUR m; Pool: 500 or more",key:"mc",type:"mcap",gs:true};
-  var RS18_INFO={id:"f_rs18",g:"F",sh:"RS 18M",label:"Stock RS L18M; information, not a Pool test",key:"rs18",type:"dec1",red:50,green:80,
+  var MC_COL={id:"f_mc",g:"F",sh:"Market Value",label:"Market value, EUR m",small:"EUR m; 500 or more",key:"mc",type:"mcap",gs:true,tip:"The Pool needs EUR 500m or more"};
+  var F_SMALL={f_rs:"80 or more",f_srs:"50 or more",f_sb:"0% or more"};
+  var RS18_INFO={id:"f_rs18",g:"F",sh:"RS 18M",label:"Stock RS L18M",small:"information; not a Pool test",key:"rs18",type:"dec1",red:50,green:80,
     tip:"The stock's 18-month price return, ranked across the universe (0 to 100), shown as a whole number rounded down. Not one of the Pool's tests: the sign-off uses it at APM List Compilation (80 or more = Proven Stage 2 Cases; below = Early Stage 2 Cases)"};
   var SELL_COLS=[];
-  for(var si=0;si<SELL.length;si++)SELL_COLS.push({id:SELL[si].id,g:"S",sh:SELL[si].sh,label:SELL[si].label,key:"_"+SELL[si].id,type:"sell",sc:SELL[si],gs:si===0});
+  for(var si=0;si<SELL.length;si++)SELL_COLS.push({id:SELL[si].id,g:"S",sh:SELL[si].sh,label:SELL[si].label,small:SELL[si].small,key:"_"+SELL[si].id,type:"sell",sc:SELL[si],gs:si===0});
   var IL_EMR_COLS=[
     {id:"e_bu",g:"R",label:"Thesis's Change Forces' Strength, Foundations' Robustness, Setups' Fit/Crispness, Case Riskiness (A = simple and low-risk)",sh:"Bottom-up/​Stock-driven",key:"_e_bu",type:"emrfam",fam:"bu",w:"emrfam",gs:true,tip:"Set by the Investment Analyst when the memo is written; sorts on the Bottom-up/Stock-driven composite"},
     {id:"e_td",g:"R",label:"Sell-side Momentum, Thematic Fit/Momentum, Technical Momentum, TSR/Valuation",sh:"Top Down/​Exogenously-driven",key:"_e_td",type:"emrfam",fam:"td",w:"emrfamtd",tip:"Set by script every night or week, reassessed weekly by the Assistant Portfolio Manager; sorts on the Top Down/Exogenously-driven composite"},
@@ -19543,6 +19554,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     for(i=0;i<out.length;i++){
       /* the first visible column of each group carries the group's left border */
       var g=out[i].g,prev=i?out[i-1].g:null;out[i]=Object.create(out[i]);out[i].gs=(i>0&&g!==prev);
+      if(F_SMALL[out[i].id])out[i].small=F_SMALL[out[i].id];
     }
     return out;
   }
@@ -19553,7 +19565,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         cg:JSON.parse(JSON.stringify(CG_DEFAULT)),basis:"me",showOut:false};
   }
   function ruleState(){var R=PE().RULES,o={on:{},thr:{},sortKey:st.sortKey||"",asc:st.asc};for(var i=0;i<R.length;i++){o.on[R[i].k]=true;o.thr[R[i].k]=R[i].std;}return o;}
-  function meAvail(){var s=SD();return !!(s&&s._meta&&s._meta.month_end_pool);}
+  /* The month-end reading is the system's STORED month-end record (databases/pool-month-end/, written on the month-end day
+     and never rewritten); the Ideas lists and the "In the Pool" flag read the same record, so the page shows ONE Pool. */
+  function meRec(){var s=SD();return (s&&s._meta&&s._meta.month_end_record)||null;}
+  var _meSet=null;
+  function meSet(){if(_meSet)return _meSet;_meSet={};var r=meRec();if(r&&r.members)for(var i=0;i<r.members.length;i++)_meSet[r.members[i]]=1;return _meSet;}
+  function meAvail(){var r=meRec();return !!(r&&r.members);}
   function basis(){return (st.basis==="me"&&meAvail())?"me":"day";}
   /* The signed-off Pool (D-100, with the 29-Sep version 2): market value EUR 500m or more, Stock RS (Composite) 80 or
      more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth 0% or more. Month-end reading from the "sell"
@@ -19564,7 +19581,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     return P.passes(M.rs,r,M.rs.std)&&P.passes(M.srs,r,M.srs.std)&&P.passes(M.sb,r,M.sb.std);
   }
   function inPool(r){
-    if(basis()==="me"){var x=SR(r.t);return !!(x&&x.me&&x.me[4]);}
+    if(basis()==="me")return !!meSet()[r.t];
     return inPoolToday(r);
   }
 
@@ -19628,16 +19645,18 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function pct(v,dp){var x=v*100;return sgn(Math.round(x*Math.pow(10,dp))/Math.pow(10,dp))+Math.abs(x).toFixed(dp)+"%";}
   /* Month-end reading of the four Pool rules, for the Company cell's tooltip. */
   function meWords(r){
-    var x=SR(r.t),m=SD()&&SD()._meta;if(!x||!x.me||!m)return "";
-    var e=x.me;
-    return " Month-end reading of "+fd(m.last_month_end)+": Stock RS "+(e[0]==null?"none":e[0])+", Sector RS "+(e[1]==null?"none":e[1])
+    var x=SR(r.t),m=SD()&&SD()._meta,rec=meRec(),o="";if(!m)return "";
+    if(rec)o+=" Month-end record of "+fd(rec.date)+": "+(meSet()[r.t]?"in the Pool":"not in the Pool")+".";
+    if(x&&x.me){var e=x.me;
+      o+=" Recomputed at "+fd(m.last_month_end)+" on today's full universe: Stock RS "+(e[0]==null?"none":e[0])+", Sector RS "+(e[1]==null?"none":e[1])
       +", SS Sales Net Upgrade Breadth L3M "+(e[2]==null?"none":pct(e[2],0))+", market value "+(e[3]==null?"not on file":"EUR "+Math.round(e[3]).toLocaleString("en-GB")+"m")
-      +": "+(e[4]?"in the Pool":"not in the Pool")+".";
+      +": "+(e[4]?"passes":"fails")+".";}
+    return o;
   }
   /* Company, Industry and Sector cells with the Industry tint; the other cells come from the Pool page's module. */
   function cellHtml(c,r,RS,row){
     if(c.type==="name"){
-      var tip=r.n+" ("+r.t+"), "+(r.ind||"no industry")+". Click to open the Stock View."+meWords(r)+(row.out?" Outside the Pool on the "+(basis()==="me"?"month-end":"today's")+" reading.":"");
+      var tip=r.n+" ("+r.t+"), "+(r.ind||"no industry")+". Click the row to open the chart."+meWords(r)+(row.out?" Outside the Pool on the "+(basis()==="me"?"month-end":"today's")+" reading.":"");
       return '<td class="pe-name" style="'+indTint(r.ind)+';'+indEdge(r.ind)+'"><span class="co" data-pe-open="'+esc(r.t)+'" title="'+esc(tip)+'">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span></td>';
     }
     if(c.type==="txt"){var v=r[c.key];return '<td class="pe-txt'+(c.gs?" pe-gs":"")+'" style="'+indTint(r.ind)+'" title="'+esc(v||"")+'">'+esc(v||"")+'</td>';}
@@ -19649,44 +19668,58 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     }
     return PE().cell(c,r,RS);   /* the shared cell reads c.gs, set per visible group in allCols() */
   }
+  /* Graded fill for a Sell Criteria reading: green when far from being met, pale red as it nears its threshold (held
+     paler than the solid red of a met criterion, so "near" never reads as "met"). `at` = the threshold, `safe` = the
+     reading at which the fill is fully green. */
+  function sellBg(v,at,safe){
+    if(v==null||isNaN(v))return "";
+    var t=(v-at)/(safe-at);if(t<0)t=0;if(t>1)t=1;var i,a;
+    if(t>=0.5){i=(t-0.5)*2;a=(0.06+0.36*i).toFixed(3);return "background-color:rgba(22,163,74,"+a+")";}
+    i=(0.5-t)*2;a=(0.06+0.26*i).toFixed(3);return "background-color:rgba(198,40,40,"+a+")";
+  }
   function sellCell(c,r){
     var x=SR(r.t),sc=c.sc,M=(SD()||{})._meta||{},gs=c.gs?" pe-gs":"";
     var day=sc.when==="F"?M.last_friday:(sc.when==="M"?M.last_month_end:M.asof);
     var dayW=sc.when==="F"?"Friday "+fd(day):(sc.when==="M"?"the month-end "+fd(day):"today");
     if(!x)return '<td class="num pe-na'+gs+'" title="No Sell Criteria reading (no price history in the reader\'s universe)">–</td>';
-    var met=(x.f||[]).indexOf(sc.c)>=0,txt="",tip="",na=false;
+    var met=(x.f||[]).indexOf(sc.c)>=0,txt="",tip="",na=false,sty="",cls="",html=null;
     if(sc.c==="C1"){
       if(x.c1==null){na=true;tip="No Industry RS (the stock has no Industry)";}
-      else{txt=String(x.c1);tip="Industry RS (the average Stock RS of the Industry's companies, ranked 0 to 99 across the 16 Industries) on "+dayW+": "+x.c1+(x.c1t!=null?"; today "+x.c1t:"")+". Met below 30.";}
+      else{txt=String(x.c1);sty=sellBg(x.c1,30,70);tip="Industry RS (the average Stock RS of the Industry's companies, ranked 0 to 99 across the 16 Industries) on "+dayW+": "+x.c1+(x.c1t!=null?"; today "+x.c1t:"")+". Met below 30.";}
     } else if(sc.c==="C2"){
       if(x.c2==null){na=true;tip="Not enough relative price history";}
-      else{txt=pct(x.c2,2);tip="The 200-day average of the relative price against its level 21 trading days earlier, on "+dayW+": "+pct(x.c2,2)+(x.c2t!=null?"; today "+pct(x.c2t,2):"")+". Relative price = the price against an equal-weighted index of the other European companies of EUR 500m or more. Met at 0% or below.";}
+      else{txt=pct(x.c2,2);sty=sellBg(x.c2,0,0.03);tip="The 200-day average of the relative price against its level 21 trading days earlier, on "+dayW+": "+pct(x.c2,2)+(x.c2t!=null?"; today "+pct(x.c2t,2):"")+". Relative price = the price against an equal-weighted index of the other European companies of EUR 500m or more. Met at 0% or below.";}
     } else if(sc.c==="C3"){
       var a=x.c3||[],b=x.c3t||[];
       if(a[0]==null||a[1]==null){na=true;tip="No Sector RS or Stock RS reading";}
-      else{txt=a[0]+" / "+a[1];tip="Sector RS / Stock RS on "+dayW+": "+a[0]+" / "+a[1]+(b[0]!=null?"; today "+b[0]+" / "+b[1]:"")+". Met when Sector RS is below 50 AND Stock RS is below 70.";}
+      else{txt=a[0]+" / "+a[1];
+        /* met only when BOTH legs are below; the fill follows the leg furthest from its threshold, and a leg that is
+           already below its threshold is marked in dark red */
+        sty=sellBg(Math.max(a[0]-50,a[1]-70),0,25);
+        html='<span class="'+(a[0]<50?"sc-low":"")+'">'+a[0]+'</span><span class="sc-sep"> / </span><span class="'+(a[1]<70?"sc-low":"")+'">'+a[1]+'</span>';
+        tip="Sector RS / Stock RS on "+dayW+": "+a[0]+" / "+a[1]+(b[0]!=null?"; today "+b[0]+" / "+b[1]:"")+". Met when Sector RS is below 50 AND Stock RS is below 70.";}
     } else if(sc.c==="C4"){
       var d=x.c4||[];
       if(d[0]==null){na=true;tip="No Stock RS reading";}
       else{
-        txt=String(d[0]);
+        txt=String(d[0]);sty=sellBg(d[0],50,85);
         var an=d[3]?("SS Sales Net Upgrade Breadth "+(d[1]==null?"none":pct(d[1],0))+", SS PT Net Upgrade Breadth "+(d[2]==null?"none":pct(d[2],0))+" (100-day counts)"):"no analysts' 100-day counts for this stock (only the targeted pull has them; no analyst data never meets this criterion)";
         tip="Stock RS on "+dayW+": "+d[0]+"; "+an+". Met when Stock RS is below 50 AND either breadth is below 0."+(d[0]>=50?" Stock RS is 50 or more, so it cannot be met.":"");
-        if(d[0]<50&&!d[3])txt+="*";
+        if(d[0]<50&&!d[3]){sty="";cls=" sc-unk";tip="CANNOT BE READ: "+tip;}
       }
     } else if(sc.c==="C5"){
       if(x.c5==null){na=true;tip="Not enough relative price history";}
-      else{txt=pct(x.c5,0);tip="The relative price against its 52-week high on "+dayW+": "+pct(x.c5,1)+(x.c5t!=null?"; today "+pct(x.c5t,1):"")+". Met below −25%.";}
+      else{txt=pct(x.c5,0);sty=sellBg(x.c5,-0.25,0);tip="The relative price against its 52-week high on "+dayW+": "+pct(x.c5,1)+(x.c5t!=null?"; today "+pct(x.c5t,1):"")+". Met below −25%.";}
     } else if(sc.c==="C6"){
       var e=x.c6;
       if(!e){return '<td class="num sc-na'+gs+'" title="Applies only to a tranche you own: the price 30% or more below its highest close since that tranche\'s purchase, with Stock RS below 70">n/a</td>';}
       if(e.probing){return '<td class="num sc-na'+gs+'" title="'+esc((e.status||"Early Innings Probing Bet")+": its moving-average stops govern, not the 30% fall")+'">n/a</td>';}
       if(e.dd==null){na=true;tip="No tranche with a purchase date";}
-      else{txt=pct(e.dd,0);tip="The furthest any of the "+e.n+" tranche"+(e.n===1?"":"s")+" stands below its highest close since purchase: "+pct(e.dd,1)+". "+(e.trig?e.trig+" tranche"+(e.trig===1?"":"s")+" triggered. ":"")+"State: "+(e.state||"no trigger")+". Met when a tranche is 30% or more below that high with Stock RS below 70. As read by the Sell Criteria reader"+(e.day?" on "+fd(e.day):"")+" (it runs each weekday at 22:45 UK, after this page is built).";}
+      else{txt=pct(e.dd,0);sty=sellBg(e.dd,-0.30,0);tip="The furthest any of the "+e.n+" tranche"+(e.n===1?"":"s")+" stands below its highest close since purchase: "+pct(e.dd,1)+". "+(e.trig?e.trig+" tranche"+(e.trig===1?"":"s")+" triggered. ":"")+"State: "+(e.state||"no trigger")+". Met when a tranche is 30% or more below that high with Stock RS below 70. As read by the Sell Criteria reader"+(e.day?" on "+fd(e.day):"")+" (it runs each weekday at 22:45 UK, after this page is built).";}
     }
     if(na)return '<td class="num pe-na'+gs+'" title="'+esc(tip)+'">–</td>';
-    if(met)tip="MET: "+tip+(x.order?" Order sheet: "+x.order:"");
-    return '<td class="num'+(met?" sc-met":"")+gs+'" title="'+esc(tip)+'">'+esc(txt)+'</td>';
+    if(met){tip="MET: "+tip;sty="";cls=" sc-met";if(html)html=esc(txt);}
+    return '<td class="num'+cls+gs+'"'+(sty?' style="'+sty+'"':'')+' title="'+esc(tip)+'">'+(html||esc(txt))+'</td>';
   }
 
   /* Header: group row (one cell per visible group; click a group's name to hide it) and the column headings. */
@@ -19696,7 +19729,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var M=(SD()||{})._meta||{};
     var GT={M:"Today's readings. Click to hide the Metrics",
             F:"Today's readings against the Pool's four Filter Tests at their Default Standard Settings; struck through = fails today. Click to hide",
-            S:"The six signed-off Sell Criteria (Framework 14), each read on its own day: Industry RS and the relative 200-day slope on Fridays (latest "+fd(M.last_friday)+"), the other three at month-ends (latest "+fd(M.last_month_end)+"), the 30% fall daily for holdings. Red = met. Click to hide",
+            S:"The six signed-off Sell Criteria (Framework 14), each read on its own day: Industry RS and the relative 200-day slope on Fridays (latest "+fd(M.last_friday)+"), the other three at month-ends (latest "+fd(M.last_month_end)+"), the 30% fall daily for holdings. Green = far from being met; pale red = nearing it; solid red = met. Click to hide",
             R:"Click to hide the Eight Master Ratings"};
     var h='<thead><tr class="pe-g">',i=0;
     while(i<C.length){
@@ -19718,9 +19751,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if(c.g==="M")cls.push("pe-hm");else if(c.g==="F")cls.push("pe-hf");else if(c.g==="S")cls.push("sc-h");
       else if(c.fam==="bu")cls.push("emr-h-bu");else if(c.fam==="td")cls.push("emr-h-td");else if(c.g==="R")cls.push("emr-h-x");
       var arr=st.sortKey===c.id?'<span class="pe-arr">'+(st.asc?"&#9650;":"&#9660;")+'</span>':"";
-      var full=c.label||c.sh;
-      var lab='<span class="pe-hs">'+esc(c.sh)+arr+'</span>'+(full!==c.sh?'<span class="pe-hl">'+esc(full)+'</span>':'');
-      var tip=c.type==="sell"?full+" (read "+(c.sc.when==="F"?"on Fridays":(c.sc.when==="M"?"at month-ends":"daily, per tranche, for holdings only"))+"). Red = met. Click to sort":(full+": "+(c.tip||full)+". Click to sort");
+      var full=c.label||c.sh,small=c.small||full;
+      var lab='<span class="pe-hs">'+esc(c.sh)+arr+'</span>'+(small!==c.sh?'<span class="pe-hl">'+esc(small)+'</span>':'');
+      var tip=c.type==="sell"?full+" (read "+(c.sc.when==="F"?"on Fridays":(c.sc.when==="M"?"at month-ends":"daily, per tranche, for holdings only"))+"). Green = far from being met; pale red = nearing it; solid red = met. Click to sort":(full+(c.small?" ("+c.small+")":"")+": "+(c.tip||full)+". Click to sort");
       h+='<th class="'+cls.join(" ")+'" data-pe-sort="'+c.id+'" title="'+esc(tip)+'">'+lab+'</th>';
     }
     return h+'</tr></thead>';
@@ -19728,8 +19761,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function colgroup(C){var h='<colgroup>';for(var i=0;i<C.length;i++)h+=C[i].w?'<col class="pe-c-'+C[i].w+'">':'<col>';return h+'</colgroup>';}
   /* The table is at least as wide as the columns need (numbers about 62px each, the text columns their share), so no
      number is ever cut off; wider than the frame, it scrolls sideways inside it. */
-  /* Widths in px (CSS col.pe-c-*: the three text columns 175 / 175 / 190 on this page); the numbers share the rest. */
-  var FIXED={name:175,ind:175,sec:190,emrfam:104,emrfamtd:104,emrbl:66,ilfl:320};
+  /* Widths in px (CSS col.pe-c-*: the three text columns 190 / 185 / 190 on this page); the numbers share the rest. */
+  var FIXED={name:190,ind:185,sec:190,emrfam:104,emrfamtd:104,emrbl:66,ilfl:300};
   function minWidth(C){
     var fixed=0,nNum=0;
     for(var i=0;i<C.length;i++){var w=C[i].w;
@@ -19752,7 +19785,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if(!arr.length){h+='<tr class="il-none"><td colspan="'+C.length+'">'+(q?"None matching the search":(nout?"None in the Pool ("+nout+" outside it: tick “Also show” above)":"None"))+'</td></tr>';continue;}
       for(var k=0;k<arr.length;k++){
         var row=arr[k];
-        h+='<tr'+(row.out?' class="pe-out"':'')+'>';
+        h+='<tr data-il-t="'+esc(row.r.t)+'"'+(row.out?' class="pe-out"':'')+'>';
         for(var c=0;c<C.length;c++)h+=cellHtml(C[c],row.r,RS,row);
         h+='</tr>';
       }
@@ -19781,9 +19814,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   }
   function basisHtml(){
     var M=(SD()||{})._meta||{},av=meAvail(),b=basis();
-    var me=M.month_end_pool||{};
+    var me=meRec()||{};
     return '<span class="il-basis" title="Which reading decides who is in the Pool on this page. The signed-off rule: month-end readings decide eligibility for the following month."><span class="il-cg-l">Pool reading:</span>'
-      +'<button class="il-bb'+(b==="me"?" on":"")+'" data-il-basis="me"'+(av?'':' disabled')+' title="'+esc(av?"The month-end reading of "+fd(me.date)+" ("+me.count+" stocks in the Pool): decides eligibility until the next month-end":"No month-end reading available")+'">Month-end '+esc(av?fd(me.date):"")+'</button>'
+      +'<button class="il-bb'+(b==="me"?" on":"")+'" data-il-basis="me"'+(av?'':' disabled')+' title="'+esc(av?"The month-end record of "+fd(me.date)+" ("+me.count+" stocks in the Pool): decides eligibility until the next month-end. The Ideas lists and the In the Pool flag read the same record":"No month-end reading available")+'">Month-end '+esc(av?fd(me.date):"")+'</button>'
       +'<button class="il-bb'+(b==="day"?" on":"")+'" data-il-basis="day" title="Today\'s reading: moves every day">Today '+esc(fd((PD()._meta||{}).price_date))+'</button></span>';
   }
 
@@ -19791,13 +19824,15 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var M=PD()._meta||{},ss=M.ss||{},ph=M.phase,I=PD().ideas,h='<div class="summary-tile pe-tile"><div class="pe-head">';
     var sm=(SD()||{})._meta||{};
     h+='<span class="pe-title">'+TITLE+'</span>';
-    var sub="Stocks in the Pool on the "+(basis()==="me"?"month-end reading of "+fd((sm.month_end_pool||{}).date):"reading of "+fd(M.price_date))+", under the weekly Ideas lists"+(I?" of "+fd(I.date):"")+", then Other and Live Stocks. Struck through: fails that Filter Test today. Red: a Sell Criterion is met.";
-    h+='<span class="pe-sub" title="'+esc("The Pool (signed off 28-Sep-26, version 2 on 29-Sep-26): market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth 0% or more (this page still reads it on the three-month 45-day counts; the 100-day count signed off on 29-Sep is not yet pulled for every stock). Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Each stock appears once. Click a column heading to sort within each group; Reset returns to list order and the opening settings.")+'">'+esc(sub)+'</span>';
+    var sub="Stocks in the Pool on the "+(basis()==="me"?"month-end record of "+fd((meRec()||{}).date):"reading of "+fd(M.price_date))+", under the weekly Ideas lists"+(I?" of "+fd(I.date):"")+", then Other and Live Stocks. Struck through: fails that Filter Test today. Red: a Sell Criterion is met.";
+    h+='<span class="pe-sub" title="'+esc("The Pool (signed off 28-Sep-26, version 2 on 29-Sep-26): market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth 0% or more (read on the three-month 45-day counts until the 100-day count signed off on 29-Sep is pulled for every stock). Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Each stock appears once. Click a column heading to sort within each group; Reset returns to list order and the opening settings.")+'">'+esc(sub)+'</span>';
     h+='<span class="pe-spacer"></span>';
     h+='<span class="pe-dates" title="'+esc("Prices as at "+fd(M.price_date)+"; sell-side estimate counts as at "+fd(ss.as_of)+"; market values as at "+fd(M.mc_date)+" (month-end file for stocks added since); Sell Criteria read on Friday "+fd(sm.last_friday)+" and the month-end "+fd(sm.last_month_end)+"; readings built "+(M.generated||""))+'">Prices <b>'+fd(M.price_date)+'</b> &middot; Sell-side <b>'+fd(ss.as_of)+'</b></span>';
-    if(ph&&ph.label)h+='<span class="pe-ph '+(ph.label==="Uptrending"?"up":"down")+'" title="Market Cycle Phase, as on the Pool page">Market Cycle Phase: <b>'+esc(ph.label)+'</b> since '+(ph.history_limited?"at least ":"")+fd(ph.since)+'</span>';
+    if(ph&&ph.label)h+='<span class="pe-ph '+(ph.label==="Uptrending"?"up":"down")+'" title="Market Cycle Phase of the Stoxx Europe 600 (D-100): Uptrending = the index above its 200-day average and the average rising">Market Cycle Phase: <b>'+esc(ph.label)+'</b> since '+(ph.history_limited?"at least ":"")+fd(ph.since)+'</span>';
     h+='</div>';
     var W=(M.warnings||[]).slice();
+    if(ph&&ph.label&&ph.label!=="Uptrending")W.push("Market Cycle Phase today: "+ph.label+". The Pool and these Filter Tests are the signed-off Uptrend rules; the backtest recommends a different Pool in a Downtrending market, which is not on this page");
+    var rec0=meRec();if(rec0&&!rec0.in_uptrend)W.push("The month-end record of "+fd(rec0.date)+" was not an Uptrend month-end, so there is no Pool this month on the month-end reading");
     if(!SD())W.push("The Sell Criteria and the month-end Pool reading were not built tonight, so the Sell Criteria columns show no readings and the page uses today's reading");
     if(B.missing.length)W.push("Not in the dashboard's universe, so not shown: "+B.missing.join(", "));
     for(var i=0;i<W.length;i++)h+='<div class="pe-warn">'+esc(W[i])+'</div>';
@@ -19866,7 +19901,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(c._ilWired)return; c._ilWired=true;
     c.addEventListener("click",function(e){
       var t=e.target;
-      while(t&&t!==c&&!(t.getAttribute&&(t.getAttribute("data-il-tog")||t.getAttribute("data-pe-sort")||t.getAttribute("data-pe-open")||t.getAttribute("data-il-reset")||t.getAttribute("data-il-cg")||t.getAttribute("data-il-basis"))))t=t.parentNode;
+      while(t&&t!==c&&!(t.getAttribute&&(t.getAttribute("data-il-tog")||t.getAttribute("data-pe-sort")||t.getAttribute("data-pe-open")||t.getAttribute("data-il-reset")||t.getAttribute("data-il-cg")||t.getAttribute("data-il-basis")||t.getAttribute("data-il-t"))))t=t.parentNode;
       if(!t||t===c)return;
       var k;
       if((k=t.getAttribute("data-il-tog"))){st.on[k]=!st.on[k];refreshTop();paintBody();}
@@ -19879,7 +19914,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         else{st.sortKey=k;var C2=allCols(),col=null;for(var j=0;j<C2.length;j++)if(C2[j].id===k)col=C2[j];st.asc=!!(col&&(col.type==="name"||col.type==="txt"));}
         paintBody();
       }
-      else if((k=t.getAttribute("data-pe-open"))){if(typeof window.openStockView==="function")window.openStockView(k);}
+      /* Richard, 2-Oct-26: a click on a stock opens the chart sliding in from the side, as on the Stage 2 page (openChart), not the Stock View */
+      else if((k=t.getAttribute("data-pe-open")||t.getAttribute("data-il-t"))){if(typeof window.openChart==="function")window.openChart(k);else if(typeof window.openStockView==="function")window.openStockView(k);}
       else if(t.getAttribute("data-il-reset")){var q=st.q;initState();st.q=q;B=build();refreshTop();paintBody();}
     });
     c.addEventListener("input",function(e){if(e.target&&e.target.id==="il-search"){st.q=e.target.value;paintBody();}});

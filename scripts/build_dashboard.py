@@ -19121,6 +19121,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   var TIPS={br:"(Number of EPS estimates raised minus number cut in the last 45 days) divided by the number of estimates; EPS for the calendar year + 1. Shown for information; not a Filter Test since 28-Sep-26",
     sl:"The 200-day moving average against its level 21 trading days earlier (its one-month % change). Shown for information; not a Filter Test since 28-Sep-26"};
   var RMAP={};for(var ri=0;ri<RULES.length;ri++)RMAP[RULES[ri].k]=RULES[ri];
+  /* MD-POOL-MI-2026-10-02 (the 100-day count): when the data says the third test is read on the 100-day count (version 2 of
+     the signed-off Pool statement, 29-Sep-26), its name and description follow; the three-month reading moves to Metrics. */
+  var SB100=false;
+  try{SB100=(((((window.MASTER_DATA||{}).pool||{})._meta||{}).ss||{}).sales_definition==="L100D");}catch(e){}
+  if(SB100){RMAP.sb.label="SS Sales Net Upgrade Breadth L100D";
+    RMAP.sb.tip="(Sales estimates raised minus cut over the last 100 days) divided by the number of estimates, calendar year + 1; FactSet's 100-day counts, as signed off on 29-Sep-26 (version 2 of the Pool statement). Between \u2212100% and +100%. No estimates: no reading, which fails";}
   var POOL_TARGET=[80,125];
 
   var st=null;
@@ -19181,10 +19187,11 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"srs", g:"M",label:"Sector RS (Composite)",sh:"Sector RS",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip+". Struck through below 50, the Default Standard Setting"},
     {id:"rs18",g:"M",label:"Stock RS L18M",sh:"RS 18M",key:"rs18",type:"dec1",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip+". Struck through below 80, the Default Standard Setting"},
     {id:"br",  g:"M",label:"SS EPS Net Upgrades L45D",sh:"SS EPS Breadth",key:"br",type:"pct",dp:0,sign:true,red:-0.30,green:0.30,tip:TIPS.br},
-    {id:"sb",  g:"M",label:"SS Sales Net Upgrade Breadth L3M",sh:"SS Sales Breadth",key:"sb",type:"pct",dp:0,sign:true,red:-1.0,green:1.0,strike:function(v){return v<0;},tip:RMAP.sb.tip+". Struck through below 0%, the Default Standard Setting"},
+    SB100?{id:"sb",g:"M",label:"SS Sales Net Upgrade Breadth L3M (information)",sh:"SS Sales Breadth L3M",key:"sb3",type:"pct",dp:0,sign:true,red:-1.0,green:1.0,tip:"The three-month reading the Pool used until the 100-day count: at today, one month ago and two months ago, (sales estimates raised minus cut over the previous 45 days), summed and divided by the average number of estimates. Information only"}
+         :{id:"sb",  g:"M",label:"SS Sales Net Upgrade Breadth L3M",sh:"SS Sales Breadth",key:"sb",type:"pct",dp:0,sign:true,red:-1.0,green:1.0,strike:function(v){return v<0;},tip:RMAP.sb.tip+". Struck through below 0%, the Default Standard Setting"},
     {id:"f_rs",  g:"F",rule:"rs",  sh:"Stock RS",          key:"rs",  type:"int",red:50,green:80,gs:true},
     {id:"f_srs", g:"F",rule:"srs", sh:"Sector RS",       key:"srs", type:"int",red:30,green:70},
-    {id:"f_sb",  g:"F",rule:"sb",  sh:"SS Sales Breadth",key:"sb",  type:"pct",dp:0,sign:true,red:-1.0,green:1.0},
+    {id:"f_sb",  g:"F",rule:"sb",  sh:"SS Sales Breadth",key:"sb",  type:"pct",dp:0,sign:true,red:(SB100?-0.5:-1.0),green:(SB100?0.5:1.0)},
     {id:"f_rs18",g:"F",rule:"rs18",sh:"RS 18M",          key:"rs18",type:"dec1",red:50,green:80},
     {id:"np",    g:"F",label:"Rules passed",sh:"Passed",key:"_np",type:"np",tip:"How many of the rules that are switched on this stock passes"}
   ];
@@ -19219,7 +19226,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     }
     cls.push("num");
     if(v==null||isNaN(v)){
-      var why=r.nohist?"no price history":(c.key==="br"?(r.bn===0?"no EPS estimates":"no sell-side data"):(c.key==="sb"?"no sales estimates":"not enough history"));
+      var why=r.nohist?"no price history":(c.key==="br"?(r.bn===0?"no EPS estimates":"no sell-side data"):(c.key==="sb"||c.key==="sb3"?"no sales estimates":"not enough history"));
       return '<td class="'+cls.join(" ")+' pe-na" title="'+why+'">\u2013</td>';  /* MD-POOL-MI-2026-10-02: a dash for a missing reading */
     }
     if(c.type==="px")txt=fPx(v);
@@ -19233,6 +19240,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     else if(c.strike){fail=c.strike(v);}
     if(fail)cls.push("pe-fail");
     if(c.key==="br"&&r.bn!=null)title=r.bn+" estimates: "+(r.bu||0)+" raised, "+(r.bd||0)+" cut in the last 45 days";
+    if(c.key==="sb"&&r.sbw)title=r.sbw[0]+" sales estimates: "+r.sbw[1]+" raised, "+r.sbw[2]+" cut in the last 100 days";  /* MD-POOL-MI-2026-10-02 */
     if(c.key==="sb"&&r.sbn){var lab=["today","1 month ago","2 months ago"],pp=[];for(var q=0;q<3;q++)pp.push(lab[q]+": "+(r.sbn[q]==null?"no":r.sbn[q])+" estimates, "+r.sbu[q]+" raised, "+r.sbd[q]+" cut");title=pp.join("; ");}
     return '<td class="'+cls.join(" ")+'" style="'+sty+'"'+(title?' title="'+esc(title)+'"':'')+'>'+txt+'</td>';
   }
@@ -19703,7 +19711,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if(d[0]==null){na=true;tip="No Stock RS reading";}
       else{
         txt=String(d[0]);sty=sellBg(d[0],50,85);
-        var an=d[3]?("SS Sales Net Upgrade Breadth "+(d[1]==null?"none":pct(d[1],0))+", SS PT Net Upgrade Breadth "+(d[2]==null?"none":pct(d[2],0))+" (100-day counts)"):"no analysts' 100-day counts for this stock (only the targeted pull has them; no analyst data never meets this criterion)";
+        var an=d[3]?("SS Sales Net Upgrade Breadth "+(d[1]==null?"none":pct(d[1],0))+", SS PT Net Upgrade Breadth "+(d[2]==null?"none":pct(d[2],0))+" (100-day counts)"):"no analysts' 100-day counts for this stock at the month-end (no estimates; no analyst data never meets this criterion)";
         tip="Stock RS on "+dayW+": "+d[0]+"; "+an+". Met when Stock RS is below 50 AND either breadth is below 0."+(d[0]>=50?" Stock RS is 50 or more, so it cannot be met.":"");
         if(d[0]<50&&!d[3]){sty="";cls=" sc-unk";tip="CANNOT BE READ: "+tip;}
       }
@@ -19825,7 +19833,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var sm=(SD()||{})._meta||{};
     h+='<span class="pe-title">'+TITLE+'</span>';
     var sub="Stocks in the Pool on the "+(basis()==="me"?"month-end record of "+fd((meRec()||{}).date):"reading of "+fd(M.price_date))+", under the weekly Ideas lists"+(I?" of "+fd(I.date):"")+", then Other and Live Stocks. Struck through: fails that Filter Test today. Red: a Sell Criterion is met.";
-    h+='<span class="pe-sub" title="'+esc("The Pool (signed off 28-Sep-26, version 2 on 29-Sep-26): market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth 0% or more (read on the three-month 45-day counts until the 100-day count signed off on 29-Sep is pulled for every stock). Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Each stock appears once. Click a column heading to sort within each group; Reset returns to list order and the opening settings.")+'">'+esc(sub)+'</span>';
+    h+='<span class="pe-sub" title="'+esc("The Pool (signed off 28-Sep-26, version 2 on 29-Sep-26): market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth 0% or more ("+((ss.sales_definition==="L100D")?"read on FactSet's 100-day counts, as signed off on 29-Sep-26; the month-end record of 30-Sep used the three-month 45-day counts, which version 2 of the statement allows for the first month":"read on the three-month 45-day counts: the 100-day counts are missing from today's sell-side pull")+"). Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Each stock appears once. Click a column heading to sort within each group; Reset returns to list order and the opening settings.")+'">'+esc(sub)+'</span>';
     h+='<span class="pe-spacer"></span>';
     h+='<span class="pe-dates" title="'+esc("Prices as at "+fd(M.price_date)+"; sell-side estimate counts as at "+fd(ss.as_of)+"; market values as at "+fd(M.mc_date)+" (month-end file for stocks added since); Sell Criteria read on Friday "+fd(sm.last_friday)+" and the month-end "+fd(sm.last_month_end)+"; readings built "+(M.generated||""))+'">Prices <b>'+fd(M.price_date)+'</b> &middot; Sell-side <b>'+fd(ss.as_of)+'</b></span>';
     if(ph&&ph.label)h+='<span class="pe-ph '+(ph.label==="Uptrending"?"up":"down")+'" title="Market Cycle Phase of the Stoxx Europe 600 (D-100): Uptrending = the index above its 200-day average and the average rising">Market Cycle Phase: <b>'+esc(ph.label)+'</b> since '+(ph.history_limited?"at least ":"")+fd(ph.since)+'</span>';

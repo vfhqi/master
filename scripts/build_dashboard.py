@@ -748,6 +748,16 @@ table.pe-table tr.pe-g th span.pe-gl{padding:0 8px;display:inline-block}
 table.pe-table tr.pe-g th.pe-gi span.pe-gl{padding-left:6px}
 /* MD-IDEAS-LISTS-2026-09-28 -- Ideas Lists (Bench, LL, SL): built on the Pool Eligibility page's styles (pe-*) */
 html.pe-fit body[data-active-tab="ideas_lists"]{overflow:hidden}
+/* MD-TIDY-2026-10-02 (Richard, 2-Oct-26): on the Pool of Middle Innings Eligible Stocks page the whole page scrolls.
+   Everything above the table (the dashboard title bar, the navigation, the Pool section) scrolls away; only the
+   table's column headers stay frozen at the top of the window. The header is taken out of the fixed layer, the
+   table frame stops being its own scrolling box, and sizeWrap() no longer sizes it to the window. */
+body[data-active-tab="ideas_lists"] .header{position:absolute}
+html body[data-active-tab="ideas_lists"]{overflow:visible}
+body[data-active-tab="ideas_lists"] #tab-ideas_lists .pe-wrap{overflow:visible !important;max-height:none !important;height:auto !important}
+body[data-active-tab="ideas_lists"] #tab-ideas_lists table.pe-table tr.pe-g th{box-shadow:none}
+body[data-active-tab="ideas_lists"] #tab-ideas_lists table.pe-table tr.pe-h th{box-shadow:0 2px 3px rgba(0,0,0,0.08)}
+
 body[data-active-tab="ideas_lists"] .header-tabs-row{display:none !important}
 body[data-active-tab="ideas_lists"] .v2-nav{display:flex}
 body[data-active-tab="ideas_lists"] .header-controls-row{display:none !important}
@@ -1204,7 +1214,24 @@ th.utr-c-first,th.utr-c-last{border-top:2px solid rgba(46,125,50,0.30)}
 .ssem-rating-F{background:rgb(183,28,28);color:rgb(239,154,154)}
 .ssem-rating-N{background:rgb(232,227,212);color:rgb(154,147,128)}
 /* Score column — rating-keyed colour (D-MD-SSEM-6): A/B green, C neutral, D/F red */
-.ssem-score-cell{font-weight:700;font-size:13px;text-align:right}
+.ssem-score-cell{font-weight:700;font-size:13px;text-align:center}  /* MD-TIDY-2026-10-02: centred (was right) */
+/* MD-TIDY-2026-10-02 (Richard, 2-Oct-26): the fixed header grows to fit its contents on the pages where it was
+   shorter than them, so the "#3 TOGGLES / #4 FILTERS" row no longer hangs below it with table rows showing through.
+   mdFitHeader() (script) publishes the measured height as --header-height for .main and the frozen table headers. */
+body[data-active-tab="ssem"] .header,body[data-active-tab="val"] .header,body[data-active-tab="pulling_back"] .header,
+body[data-active-tab="post_indicators_bull"] .header,body[data-active-tab="post_indicators_bear"] .header{height:auto !important}
+/* MD-TIDY-2026-10-02: SS Earnings Momentum -- the Live Portfolio and Qualified Stocks tables share one set of column
+   widths (ssemAlignTables() adds the same colgroup to both); the numeric columns share one width. */
+#tab-ssem table.data-table.ssem-aligned{table-layout:fixed;width:100%}
+#tab-ssem table.ssem-aligned td.col-identity,#tab-ssem table.ssem-aligned th.col-identity{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tab-ssem table.ssem-aligned tr.col-header-row th{white-space:normal;overflow-wrap:normal;word-break:normal;vertical-align:bottom;overflow:hidden}
+@media (max-width:1600px){#tab-ssem table.ssem-aligned tr.col-header-row th{font-size:9px;padding-left:2px;padding-right:2px}}
+#tab-ssem table.ssem-aligned tr.group-header-row th{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#tab-ssem table.ssem-aligned td.col-num,#tab-ssem table.ssem-aligned td.col-price{padding-left:3px;padding-right:6px;overflow:hidden}
+#tab-ssem table.ssem-aligned tr.col-header-row th.ssem-th-score{text-align:center}
+@media (max-width:1600px){#tab-ssem table.ssem-aligned td.col-num,#tab-ssem table.ssem-aligned td.col-price{font-size:10.5px;padding-left:2px;padding-right:4px}
+  #tab-ssem table.ssem-aligned td.col-identity{font-size:11px}}
+
 .ssem-score-rA{color:#1b5e20}
 .ssem-score-rB{color:#2e7d32}
 .ssem-score-rC{color:#333333}
@@ -7234,7 +7261,7 @@ function ssemRowHTML(r) {
   }
   // Score — rating-keyed colour (D-MD-SSEM-6)
   var ratingKey = (r.ssem_rating === "-") ? "N" : r.ssem_rating;
-  h += '<td class="ssem-score-cell ssem-score-r' + ratingKey + '"' + (r.ssem_four_measures ? ' title="Scored on four measures: this company reports no EBITDA; rescaled to the 15-test range"' : '') + '>' + (r.ssem_score > 0 ? "+" : "") + r.ssem_score + (r.ssem_four_measures ? '<sup>4</sup>' : '') + '</td>';
+  h += '<td class="ssem-score-cell ssem-score-r' + ratingKey + '"' + (r.ssem_four_measures ? ' title="Scored on four measures: this company reports no EBITDA; rescaled to the 15-test range"' : '') + '>' + ssemFmtScore(r.ssem_score) + (r.ssem_four_measures ? '<sup>4</sup>' : '') + '</td>';  /* MD-TIDY-2026-10-02: whole number, (n) for negatives */
   h += '<td style="text-align:center">' + ssemRatingPill(r.ssem_rating) + '</td>';
   h += '</tr>';
   return h;
@@ -7352,7 +7379,80 @@ function renderSSEM(){
   }
   h+='</tbody></table></div>';
   container.innerHTML=h;
+  try{ssemAlignTables(container);}catch(e){console.error("ssemAlignTables",e);}  /* MD-TIDY-2026-10-02 */
 }
+
+/* MD-TIDY-2026-10-02 (Richard, 2-Oct-26) ------------------------------------------------------------------
+   ssemFmtScore: the SSEM Score as a whole number; negatives in brackets, e.g. -2 -> (2); halves round away from
+   zero (+2.5 -> +3, -2.5 -> (3)). Display only: sorting and the A-F rating still use the unrounded score. */
+function ssemFmtScore(v){
+  if(v===null||v===undefined||v===""||isNaN(+v))return "&mdash;";
+  var n=Math.round(Math.abs(+v));
+  if(n===0)return "0";
+  return (+v<0)?"("+n+")":"+"+n;
+}
+/* ssemAlignTables: the Live Portfolio and Qualified Stocks tables on SS Earnings Momentum get the same colgroup, so
+   their columns line up whatever the stock names; every numeric column (Price, the twenty revisions, Score) gets
+   the same width; the name and sector columns truncate with the full text on hover. */
+function ssemAlignTables(container){
+  if(!container)return;
+  var tbls=container.querySelectorAll("table.data-table");
+  for(var i=0;i<tbls.length;i++){
+    var t=tbls[i];
+    if(t.classList.contains("data-table-tile"))continue;
+    var hr=t.querySelector("thead tr.col-header-row");if(!hr)continue;
+    var n=hr.children.length;if(n<6)continue;
+    var narrow=(window.innerWidth||1920)<=1600;
+    var nameW=narrow?11:13,secW=narrow?10:12.5,ratW=3.6,numN=n-3,numW=(100-nameW-secW-ratW)/numN;
+    var old=t.querySelector("colgroup.ssem-cg");if(old)old.parentNode.removeChild(old);
+    var cg=document.createElement("colgroup");cg.className="ssem-cg";
+    for(var c=0;c<n;c++){var col=document.createElement("col");
+      col.style.width=(c===0?nameW:(c===1?secW:(c===n-1?ratW:numW))).toFixed(3)+"%";cg.appendChild(col);}
+    t.insertBefore(cg,t.firstChild);
+    t.classList.add("ssem-aligned");
+    var ths=hr.children;
+    for(var k=0;k<ths.length;k++){ths[k].style.width="";}
+    if(ths[n-2])ths[n-2].classList.add("ssem-th-score");
+    /* the group row's tints are see-through (rgba), so rows showed through the frozen header: lay each tint over the
+       header's own solid colour */
+    var gh=t.querySelectorAll("thead tr.group-header-row th");
+    for(var g=0;g<gh.length;g++){var bg=gh[g].style.backgroundColor||"";
+      if(bg.indexOf("rgba")===0)gh[g].style.background="linear-gradient("+bg+","+bg+"),#fbfaf5";
+      else if(!bg)gh[g].style.backgroundColor="#fbfaf5";}
+    var ids=t.querySelectorAll("tbody td.col-identity");
+    for(var j=0;j<ids.length;j++){if(!ids[j].title)ids[j].title=ids[j].textContent;}
+  }
+}
+/* mdFitHeader: on the pages listed in MD_FIT_TABS the fixed header is sized to its contents (CSS above); publish its
+   measured height as --header-height so .main starts below it and the frozen table headers sit just under it. */
+var MD_FIT_TABS={ssem:1,val:1,pulling_back:1,post_indicators_bull:1,post_indicators_bear:1};
+function mdFitHeader(){
+  var a=document.body.getAttribute("data-active-tab")||"";
+  if(!MD_FIT_TABS[a])return;
+  var hd=document.querySelector(".header");if(!hd)return;
+  var h=Math.floor(hd.getBoundingClientRect().height);  /* floor: the frozen table header tucks under the header's
+     last fraction of a pixel instead of leaving a hairline gap that rows show through */
+  if(h>0&&document.body.style.getPropertyValue("--header-height")!==h+"px")document.body.style.setProperty("--header-height",h+"px");
+}
+window.mdFitHeader=mdFitHeader;
+/* ilChartTop: on the Pool of Middle Innings Eligible Stocks page the header scrolls away, so the slide-in chart and
+   valuation panels start at the header's bottom edge while it is on screen and at the top of the window after. */
+function ilChartTop(){
+  var on=(document.body.getAttribute("data-active-tab")==="ideas_lists");
+  var hd=document.querySelector(".header"),top=on&&hd?Math.max(0,Math.round(hd.getBoundingClientRect().bottom)):null;
+  var ps=document.querySelectorAll(".chart-panel,.val-panel");
+  for(var i=0;i<ps.length;i++){ps[i].style.top=(top===null?"":top+"px");}
+}
+window.ilChartTop=ilChartTop;
+(function(){
+  if(window._mdTidyWired)return;window._mdTidyWired=true;
+  function both(){try{mdFitHeader();}catch(e){}try{ilChartTop();}catch(e){}}
+  try{var hd=document.querySelector(".header");if(hd&&window.ResizeObserver)new ResizeObserver(both).observe(hd);}catch(e){}
+  try{if(window.MutationObserver)new MutationObserver(both).observe(document.body,{attributes:true,attributeFilter:["data-active-tab"]});}catch(e){}
+  window.addEventListener("resize",both);
+  window.addEventListener("scroll",function(){if(document.body.getAttribute("data-active-tab")==="ideas_lists")ilChartTop();},{passive:true});
+  setTimeout(both,0);
+})();
 
 // ================================================================
 // VALUATION TAB -- MD-S79-VAL-REBUILD
@@ -19864,6 +19964,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function sizeWrap(){
     var w=document.querySelector("#tab-ideas_lists .pe-wrap");if(!w||!isActive())return;
     try{if(typeof window.measureV2Ribbon==="function")window.measureV2Ribbon();}catch(e){}
+    /* MD-TIDY-2026-10-02: the page scrolls (Richard, 2-Oct-26); the frame is no longer sized to the window */
+    if(window.IL_PAGE_SCROLL!==false){document.documentElement.classList.remove("pe-fit");w.style.height="";w.style.maxHeight="";return;}
     var de=document.documentElement;
     de.classList.add("pe-fit");
     if(window.scrollY||window.pageYOffset)window.scrollTo(0,0);

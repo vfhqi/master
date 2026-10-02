@@ -462,7 +462,7 @@ TABS = [
     {"id": "master_overview", "label": "Overview", "accent": "#1b3d5c"},
     # Data / reference tabs
     {"id": "pool_elig", "label": "Pool of Stocks Eligible for Middle Innings Portfolio Selection", "accent": "#1b5e20"},  # MD-POOL-ELIG-2026-09-28
-    {"id": "ideas_lists", "label": "Ideas Lists (Bench, LL, SL)", "accent": "#1b5e20"},  # MD-IDEAS-LISTS-2026-09-28
+    {"id": "ideas_lists", "label": "Pool of Middle Innings Eligible Stocks", "accent": "#1b5e20"},  # MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -766,6 +766,43 @@ table.pe-table tr.il-sub.il-ll td{box-shadow:inset 5px 0 0 #7cb342}
 table.pe-table tr.il-sub.il-other td{box-shadow:inset 5px 0 0 #8d6e00}
 table.pe-table tr.il-sub.il-live td{box-shadow:inset 5px 0 0 #1b3d5c}
 table.pe-table tr.il-none td{color:#888;font-style:italic;padding:5px 10px}
+/* MD-POOL-MI-2026-10-02 -- Pool of Middle Innings Eligible Stocks (tab ideas_lists): column-group switches, Pool reading
+   switch, the Sell Criteria group, Industry tints (set inline), flag colours. */
+.il-cg{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:6px}
+.il-cg-l{font-size:10.5px;color:#666;text-transform:uppercase;letter-spacing:.4px;margin-right:2px;white-space:nowrap}
+.il-cgb{font:inherit;font-size:11px;padding:2px 9px 2px 6px;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:12px;cursor:pointer;color:#666;white-space:nowrap}
+.il-cgb:hover{background:#f0f0ec}
+.il-cgb.on{background:#1b3d5c;border-color:#1b3d5c;color:#fff}
+.il-cgx{display:inline-block;width:11px;font-size:9px}
+.il-basis{display:inline-flex;align-items:center;gap:3px}
+.il-bb{font:inherit;font-size:11px;padding:2px 8px;border:1px solid #cfcfc8;background:#fbfbf9;border-radius:3px;cursor:pointer;color:#333;white-space:nowrap}
+.il-bb.on{background:#1b5e20;border-color:#1b5e20;color:#fff}
+.il-bb[disabled]{opacity:.45;cursor:not-allowed}
+table.pe-table tr.pe-g th.il-gclick{cursor:pointer}
+table.pe-table tr.pe-g th.il-gclick:hover .pe-gl{text-decoration:underline}
+table.pe-table tr.pe-g th.il-gsell{background:#f6e3e3;color:#8b1a1a}
+table.pe-table tr.pe-h th.sc-h{background:#f8ecec}
+table.pe-table tr.pe-h th.sc-h .pe-hs{color:#7a1f1f}
+.il-gday{font-weight:500;font-size:10px;color:#9a4a4a;margin-left:6px;letter-spacing:0}
+table.pe-table td.sc-met{background-color:#c62828 !important;color:#fff;font-weight:700}
+table.pe-table td.sc-na{color:#9a9a9a;text-align:center;font-size:10.5px}
+table.pe-table td.pe-na{text-align:center}
+table.pe-table.il-table.il-mi col.pe-c-name{width:175px}
+table.pe-table.il-table.il-mi col.pe-c-ind{width:175px}
+table.pe-table.il-table.il-mi col.pe-c-sec{width:190px}
+table.pe-table.il-table.il-mi col.pe-c-ilfl{width:320px}
+table.pe-table.il-table.il-mi td.emr-tdfl{white-space:normal}
+table.pe-table.il-table.il-mi td.pe-name{border-right:1px solid #e3dfd2}
+table.pe-table.il-table.il-mi tbody tr:hover td.pe-name,table.pe-table.il-table.il-mi tbody tr:hover td.pe-txt{filter:brightness(.97)}
+/* Flags, each its own colour (Richard, 2-Oct-26): green = In the Pool, purple = Worthy of a new memo (a judgement call),
+   blue = Ready to enter on merit, orange = Right time to enter, gold = Rare one */
+.emr-fl.emr-fl-pool{border-color:#2f7a4d;color:#1e5c37;background:#e3f2e8}
+.emr-fl.emr-fl-worthy{border-color:#6a3fa0;color:#4f2c80;background:#efe7f8}
+.emr-fl.emr-fl-merit{border-color:#1f5f99;color:#174a78;background:#e4eef8}
+.emr-fl.emr-fl-timing{border-color:#c2570c;color:#9a4508;background:#fdeedf}
+.emr-fl.emr-fl-rare{border-color:#a07a00;color:#7a5c00;background:#fbf1cc}
+@media (max-width:1760px){table.pe-table.il-table.il-mi col.pe-c-name{width:170px} table.pe-table.il-table.il-mi col.pe-c-ind{width:170px} table.pe-table.il-table.il-mi col.pe-c-sec{width:190px}}
+table.pe-table.il-table.il-mi td.num,table.pe-table.il-table.il-mi tr.pe-h th.num{padding-right:6px}
 /* MD-QOT-2026-09-10 — Qualification over Time */
 .qot-warn{background:#fdf1f1;border-left:4px solid #A32D2D;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
 .qot-note{background:#eef3ec;border-left:4px solid #1b5e20;padding:7px 11px;margin:9px 0;font-size:12px;line-height:1.5}
@@ -5152,14 +5189,14 @@ window.EMR = (function(){
     var x=row(t);
     if(!x)return '<span class="emr-nofl" title="Not in the ratings store">&ndash;</span>';
     var f=x.f||{},h="";
-    for(var i=0;i<FLAGS.length;i++)if(f[FLAGS[i][0]])h+='<span class="emr-fl">'+FLAGS[i][1]+'</span>';
+    for(var i=0;i<FLAGS.length;i++)if(f[FLAGS[i][0]])h+='<span class="emr-fl emr-fl-'+FLAGS[i][0]+'">'+FLAGS[i][1]+'</span>';  /* MD-POOL-MI-2026-10-02: a colour per flag */
     return '<span class="emr-flags" title="'+esc(flagsTitle(x))+'">'+(h||'<span class="emr-nofl">&ndash;</span>')+'</span>';
   }
   function worthy(t){
     var x=row(t);
     if(!x)return '<span class="emr-nofl" title="Not in the ratings store">&ndash;</span>';
     var f=x.f||{},tt="Worthy of a new memo: "+(f.worthy?"yes":"no")+(f.memo?" · memo: "+memoWords(f.memo):"")+(f.basis?" · Pool reading: "+f.basis:"");
-    return f.worthy?'<span class="emr-fl" title="'+esc(tt)+'">yes</span>':'<span class="emr-nofl" title="'+esc(tt)+'">&ndash;</span>';
+    return f.worthy?'<span class="emr-fl emr-fl-worthy" title="'+esc(tt)+'">yes</span>':'<span class="emr-nofl" title="'+esc(tt)+'">&ndash;</span>';
   }
   /* Sort readings for the Pool and Ideas Lists tables: numbers on the row, missing = null (sorted last). */
   function attach(r){
@@ -11240,7 +11277,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="val" onclick="switchTab(\'val\')">Valuation</button>'
 +     '<button class="v2-nav-btn" data-v2-tab="combos" onclick="switchTab(\'combos\')">Timeliness</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="pool_elig" onclick="switchTab(\'pool_elig\')">Pool of Stocks Eligible for Middle Innings Portfolio Selection</button>'  /* MD-POOL-ELIG-2026-09-28 */
-      +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Ideas Lists (Bench, LL, SL)</button>'  /* MD-IDEAS-LISTS-2026-09-28 */
+      +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Pool of Middle Innings Eligible Stocks</button>'  /* MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02 */
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -19109,7 +19146,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 
   /* Share price to about four significant figures (Message 6): 1,000 and above no decimals, 100 to 999 one, 1 to 99 two, below 1 three significant figures. */
   function fPx(v){if(v==null)return null;var a=Math.abs(v);return a>=1000?v.toLocaleString("en-GB",{maximumFractionDigits:0}):(a>=100?v.toFixed(1):(a>=1?v.toFixed(2):v.toPrecision(3)));}
-  function fPct(v,d){if(v==null||isNaN(v))return null;var x=v*100;return (x>0&&d.sign?"+":"")+x.toFixed(d.dp)+"%";}
+  /* MD-POOL-MI-2026-10-02: a true minus sign (the same width as "+" in tabular figures) and never "-0%" */
+  function fPct(v,d){if(v==null||isNaN(v))return null;var x=v*100,s=x.toFixed(d.dp),z=(+s===0);if(z)s=(0).toFixed(d.dp);return (!z&&x>0&&d.sign?"+":"")+s.replace("-","\u2212")+"%";}
 
   /* Column definitions. g: I = Information, M = Metrics, F = Filter Tests. label = the full name (small text in the
      heading); sh = the short name (normal text; Richard's example: "SS Sales Breadth"). w names the CSS width class of
@@ -19129,12 +19167,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"lo",  g:"M",label:"P vs. 52W Low",sh:"P vs. 52W Low",key:"lo",type:"pct",dp:0,sign:true,red:0,green:0.30,tip:"Share price against its 52-week low: +30% = 30% above it (Message 6: renamed and shown with a sign)"},
     /* Strike-through in Metrics only on the columns that are also Filter Tests (Richard, Message 3; D-MD-POOL-18),
        at the rule's Default Standard Setting. */
-    {id:"rs",  g:"M",label:"Stock RS (Composite)",sh:"RS 12M",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip+". Struck through below 80, the Default Standard Setting"},
+    {id:"rs",  g:"M",label:"Stock RS (Composite)",sh:"Stock RS",key:"rs",type:"int",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs.tip+". Struck through below 80, the Default Standard Setting"},
     {id:"srs", g:"M",label:"Sector RS (Composite)",sh:"Sector RS",key:"srs",type:"int",red:30,green:70,strike:function(v){return v<50;},tip:RMAP.srs.tip+". Struck through below 50, the Default Standard Setting"},
     {id:"rs18",g:"M",label:"Stock RS L18M",sh:"RS 18M",key:"rs18",type:"dec1",red:50,green:80,strike:function(v){return v<80;},tip:RMAP.rs18.tip+". Struck through below 80, the Default Standard Setting"},
     {id:"br",  g:"M",label:"SS EPS Net Upgrades L45D",sh:"SS EPS Breadth",key:"br",type:"pct",dp:0,sign:true,red:-0.30,green:0.30,tip:TIPS.br},
     {id:"sb",  g:"M",label:"SS Sales Net Upgrade Breadth L3M",sh:"SS Sales Breadth",key:"sb",type:"pct",dp:0,sign:true,red:-1.0,green:1.0,strike:function(v){return v<0;},tip:RMAP.sb.tip+". Struck through below 0%, the Default Standard Setting"},
-    {id:"f_rs",  g:"F",rule:"rs",  sh:"RS 12M",          key:"rs",  type:"int",red:50,green:80,gs:true},
+    {id:"f_rs",  g:"F",rule:"rs",  sh:"Stock RS",          key:"rs",  type:"int",red:50,green:80,gs:true},
     {id:"f_srs", g:"F",rule:"srs", sh:"Sector RS",       key:"srs", type:"int",red:30,green:70},
     {id:"f_sb",  g:"F",rule:"sb",  sh:"SS Sales Breadth",key:"sb",  type:"pct",dp:0,sign:true,red:-1.0,green:1.0},
     {id:"f_rs18",g:"F",rule:"rs18",sh:"RS 18M",          key:"rs18",type:"dec1",red:50,green:80},
@@ -19172,12 +19210,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     cls.push("num");
     if(v==null||isNaN(v)){
       var why=r.nohist?"no price history":(c.key==="br"?(r.bn===0?"no EPS estimates":"no sell-side data"):(c.key==="sb"?"no sales estimates":"not enough history"));
-      return '<td class="'+cls.join(" ")+' pe-na" title="'+why+'">n/a</td>';
+      return '<td class="'+cls.join(" ")+' pe-na" title="'+why+'">\u2013</td>';  /* MD-POOL-MI-2026-10-02: a dash for a missing reading */
     }
     if(c.type==="px")txt=fPx(v);
     else if(c.type==="pct")txt=fPct(c.neg?-v:v,{dp:c.dp,sign:c.sign});  /* neg: "P vs. 52W High" holds the distance below the high; shown as a negative */
     else if(c.type==="int")txt=String(Math.round(v));
-    else if(c.type==="dec1")txt=v.toFixed(1);  /* Stock RS L18M is a percentile with decimals (the backtest's rowpct); shown to one decimal so 79.9 is never displayed as a passing "80" */
+    else if(c.type==="dec1")txt=String(Math.floor(v+1e-9));  /* Stock RS L18M is a percentile with decimals (the backtest's rowpct). MD-POOL-MI-2026-10-02: a whole number ROUNDED DOWN, like the other ranks, so 79.9 shows "79" and never reads as a passing "80" (it was one decimal) */
     else if(c.type==="mon"){txt=String(v)+(r[c.cap]?"+":"");if(r[c.cap])title="The run reaches the start of the price history, so it may be longer";}
     if(c.red!=null)sty=scaleBg(v,c.red,c.green);
     var fail=false;
@@ -19417,79 +19455,160 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 })();
 
 /* ============================================================================
-   IDEAS LISTS (BENCH, LL, SL)  (MD-IDEAS-LISTS-2026-09-28)
-   Richard's page (Messages 6 to 8, 28-Sep-26; SA - Master Dashboard D-MD-POOL-36 onwards): every stock on the
-   latest weekly Ideas lists (Ideas Bench, Ideas Shortlist, Ideas Longlist, written each Friday by the Ideas line of
-   "Automation of 10 Info Sources to Reports to FfF to Shortlisting to Memo Commissioning"), then "Other" (the
-   signed-off Uptrend Pool, D-100: EUR 500m or more plus rules 1 to 3, not on any list and not held), then "Live
-   Stocks" (the current holdings). Built on the Pool Eligibility page: the same columns, cells, colours and
-   Filter Tests at their Default Standard Settings (window._PE); rows sit under a sub-header per group
-   (Richard, Message 8: "put the relevant rows below a sub-header"). Five toggles show or hide the groups; all
-   ON when the page opens. Data: MASTER_DATA.pool.ideas (build_pool_eligibility.py v1.4.0) and
-   MASTER_DATA.positions.investments (the Position Management System).
+   POOL OF MIDDLE INNINGS ELIGIBLE STOCKS  (tab id ideas_lists; MD-IDEAS-LISTS-2026-09-28, rebuilt MD-POOL-MI-2026-10-02)
+   Richard's page, renamed 2-Oct-26 from "Ideas Lists (Bench, LL, SL)" (SA - Master Dashboard D-MD-POOL-44 onwards).
+   Only stocks in the Pool are shown when the page opens (Richard, 2-Oct-26: "The page is meant to only display stocks
+   that meet the filter criteria for Pool of Middle Innings Eligible Stocks"); a tick-box brings back the weekly Ideas
+   list names and holdings outside the Pool, faded. Which reading decides membership: the month-end reading (the signed-off
+   rule: "month-end readings decide eligibility for the following month"), with a one-click switch to today's reading.
+   Groups under sub-headers, as before (Message 8, 28-Sep): Ideas Bench, Ideas Shortlist, Ideas Longlist (the latest
+   weekly lists of the Ideas line), Other (in the Pool, on no list, not held), Live Stocks (holdings).
+   Column groups, each shown or hidden with one click (Richard, 2-Oct-26): Industry/Sector, Metrics (hidden when the page
+   opens), Filter Tests for Middle Innings Pool, Sell Criteria (the six signed-off Framework 14 tests), Eight Master Ratings.
+   Company, Industry and Sector are tinted by Industry: violet for A through to red for P (Richard, 2-Oct-26).
+   Data: MASTER_DATA.pool (build_pool_eligibility.py v1.5.0: stocks, ideas, and "sell" from build_pool_sell_criteria.py)
+   and MASTER_DATA.positions.investments. Shared cells and colours: window._PE (the Pool page's module).
    ============================================================================ */
 (function(){
   function PE(){return window._PE;}
   function PD(){return (window.MASTER_DATA||{}).pool||null;}
+  function SD(){var p=PD();return (p&&p.sell)||null;}
+  function SR(t){var s=SD();return (s&&s.rows&&s.rows[t])||null;}
   function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  var MINUS="−";
+  function sgn(x){return x<0?MINUS:(x>0?"+":"");}
+  var TITLE="Pool of Middle Innings Eligible Stocks";
   var GROUPS=[
     {k:"bench",label:"Ideas Bench",tip:"The Ideas Bench of the latest weekly Ideas lists, in list order"},
     {k:"sl",label:"Ideas Shortlist",tip:"The Ideas Shortlist of the latest weekly Ideas lists, in list order"},
     {k:"ll",label:"Ideas Longlist",tip:"The Ideas Longlist of the latest weekly Ideas lists, in list order"},
-    {k:"other",label:"Other",tip:"Stocks in the signed-off Uptrend Pool (D-100: market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more) that are on none of the three lists and are not held; highest Stock RS (Composite) first"},
-    {k:"live",label:"Live Stocks",tip:"The current portfolio holdings (Position Management System); highest Stock RS (Composite) first"}
+    {k:"other",label:"Other",tip:"In the Pool, on none of the three lists and not held; highest Stock RS first"},
+    {k:"live",label:"Live Stocks",tip:"The current portfolio holdings (Position Management System); highest Stock RS first. A holding is never sold because it leaves the Pool; the Sell Criteria decide"}
   ];
-  var CHANGE={held:"held",promoted:"promoted",demoted:"demoted","new":"new this week"};
-  /* MD-EMR-2026-09-30: the eight (in their two families), the blended score and grade and the five flags for each listed
-     stock, from the ratings store (the look Richard approved, 30-Sep-26). Only when the store has the eight. */
-  var IL_EMR_COLS=[
-    {id:"e_bu",g:"R",label:"Thesis's Change Forces' Strength, Foundations' Robustness, Setups' Fit/Crispness, Case Riskiness (A = simple and low-risk)",sh:"Bottom-up/\u200bStock-driven",key:"_e_bu",type:"emrfam",fam:"bu",w:"emrfam",gs:true,tip:"Set by the Investment Analyst when the memo is written; sorts on the Bottom-up/Stock-driven composite"},
-    {id:"e_td",g:"R",label:"Sell-side Momentum, Thematic Fit/Momentum, Technical Momentum, TSR/Valuation",sh:"Top Down/\u200bExogenously-driven",key:"_e_td",type:"emrfam",fam:"td",w:"emrfamtd",/* MD-TSR-NOTE-2026-10-01: 104px as before; wider only when a note shows */tip:"Set by script every night or week, reassessed weekly by the Assistant Portfolio Manager; sorts on the Top Down/Exogenously-driven composite"},
-    {id:"e_bl",g:"R",label:"Blended score and grade",sh:"Blended",key:"_e_bl",type:"emrbl",w:"emrbl",tip:"The two composites blended at this week's tilt"},
-    {id:"e_fl",g:"R",label:"In the Pool, Worthy of a new memo, Ready to enter on merit, Right time to enter, Rare one",sh:"Flags",key:"_e_fl",type:"emrfl",w:"emrfl",tip:"The flags that are on; sorts on how many"}
+  /* The column groups Richard can show or hide (2-Oct-26). "is" = Industry/Sector (the Company column always shows). */
+  var CG=[
+    {k:"is",label:"Industry/Sector"},
+    {k:"M",label:"Metrics"},
+    {k:"F",label:"Filter Tests for Middle Innings Pool"},
+    {k:"S",label:"Sell Criteria"},
+    {k:"R",label:"Eight Master Ratings"}
   ];
-  function ILC(){var P=PE();return (window.EMR&&window.EMR.on())?P.COLS.concat(IL_EMR_COLS):P.COLS;}
+  var CG_DEFAULT={is:true,M:false,F:true,S:true,R:true};
+  /* Industry tint: a rainbow over the 16 Industries by their letter, violet for A through to red for P (Richard, 2-Oct-26).
+     Hue runs evenly from 275 (violet) to 0 (red); light fills keep the text readable. */
+  function indHue(ind){var c=String(ind||"").charCodeAt(0)-65;if(!(c>=0&&c<16))return null;return Math.round(275-c*275/15);}
+  function indTint(ind){var h=indHue(ind);return h==null?"":"background-color:hsl("+h+",85%,90%)";}
+  function indEdge(ind){var h=indHue(ind);return h==null?"":"box-shadow:inset 4px 0 0 hsl("+h+",60%,48%)";}
 
-  var st=null;
-  function initState(){st={on:{bench:true,sl:true,ll:true,other:true,live:true},q:"",sortKey:null,asc:false};}
-  /* The Filter Tests on this page are always at their Default Standard Settings, all switched on. */
-  function ruleState(){var R=PE().RULES,o={on:{},thr:{},sortKey:st.sortKey||"",asc:st.asc};for(var i=0;i<R.length;i++){o.on[R[i].k]=true;o.thr[R[i].k]=R[i].std;}return o;}
-  function inSignedOffPool(r){
-    var P=PE(),M=P.RMAP;
-    if(r.mc!=null&&r.mc<500)return false;   /* no market value on file (one stock today): not excluded on size */
-    return P.passes(M.rs,r,M.rs.std)&&P.passes(M.srs,r,M.srs.std)&&P.passes(M.sb,r,M.sb.std);
+  /* The six Sell Criteria (ADOPTED-2026-09-30-UPTREND-SELL-CRITERIA-FRAMEWORK-14, signed off by Richard, with Addenda 2-5).
+     Each cell shows the reading on the day the rule reads it (Friday or month-end, as the Tuesday order sheet acts on it);
+     today's value is in the tooltip. Red = the criterion is met. */
+  var SELL=[
+    {id:"s1",c:"C1",sh:"Industry RS",label:"Industry RS < 30",when:"F"},
+    {id:"s2",c:"C2",sh:"Relative 200D Slope",label:"200D MA of relative price, MoM slope ≤ 0",when:"F"},
+    {id:"s3",c:"C3",sh:"Sector & Stock RS",label:"Sector RS < 50 and Stock RS < 70",when:"M"},
+    {id:"s4",c:"C4",sh:"Stock RS & SS",label:"Stock RS < 50 and SS Sales or PT Net Upgrade Breadth < 0",when:"M"},
+    {id:"s5",c:"C5",sh:"Relative P vs. 52W High",label:"Relative price > 25% below its 52W high",when:"M"},
+    {id:"s6",c:"C6",sh:"30% Fall",label:"Price ≥ 30% below highest close since purchase, Stock RS < 70 (holdings)",when:"D"}
+  ];
+  /* The signed-off Pool tests: market value EUR 500m or more (shown here; the Pool page has no size column yet), then
+     Stock RS, Sector RS and SS Sales Net Upgrade Breadth. Stock RS L18M is NOT a Pool test in the sign-off (D-100 uses it
+     at APM List Compilation: 80 or more = Proven Stage 2 Cases), so here it is shown for information, never struck through. */
+  var MC_COL={id:"f_mc",g:"F",sh:"Market Value",label:"EUR m; Pool: 500 or more",key:"mc",type:"mcap",gs:true};
+  var RS18_INFO={id:"f_rs18",g:"F",sh:"RS 18M",label:"Stock RS L18M; information, not a Pool test",key:"rs18",type:"dec1",red:50,green:80,
+    tip:"The stock's 18-month price return, ranked across the universe (0 to 100), shown as a whole number rounded down. Not one of the Pool's tests: the sign-off uses it at APM List Compilation (80 or more = Proven Stage 2 Cases; below = Early Stage 2 Cases)"};
+  var SELL_COLS=[];
+  for(var si=0;si<SELL.length;si++)SELL_COLS.push({id:SELL[si].id,g:"S",sh:SELL[si].sh,label:SELL[si].label,key:"_"+SELL[si].id,type:"sell",sc:SELL[si],gs:si===0});
+  var IL_EMR_COLS=[
+    {id:"e_bu",g:"R",label:"Thesis's Change Forces' Strength, Foundations' Robustness, Setups' Fit/Crispness, Case Riskiness (A = simple and low-risk)",sh:"Bottom-up/​Stock-driven",key:"_e_bu",type:"emrfam",fam:"bu",w:"emrfam",gs:true,tip:"Set by the Investment Analyst when the memo is written; sorts on the Bottom-up/Stock-driven composite"},
+    {id:"e_td",g:"R",label:"Sell-side Momentum, Thematic Fit/Momentum, Technical Momentum, TSR/Valuation",sh:"Top Down/​Exogenously-driven",key:"_e_td",type:"emrfam",fam:"td",w:"emrfamtd",tip:"Set by script every night or week, reassessed weekly by the Assistant Portfolio Manager; sorts on the Top Down/Exogenously-driven composite"},
+    {id:"e_bl",g:"R",label:"Blended score and grade",sh:"Blended",key:"_e_bl",type:"emrbl",w:"emrbl",tip:"The two composites blended at this week's tilt"},
+    {id:"e_fl",g:"R",label:"In the Pool, Worthy of a new memo, Ready to enter on merit, Right time to enter, Rare one",sh:"Flags",key:"_e_fl",type:"emrfl",w:"ilfl",tip:"The flags that are on, each in its own colour; sorts on how many"}
+  ];
+  function emrOn(){return !!(window.EMR&&window.EMR.on());}
+  /* The columns shown, in order, for the current column-group switches. Rules Passed is not on this page (Richard, 2-Oct-26). */
+  function allCols(){
+    var P=PE(),out=[],i,c;
+    for(i=0;i<P.COLS.length;i++){
+      c=P.COLS[i];
+      if(c.id==="np")continue;
+      if(c.id==="f_rs"&&st.cg.F)out.push(MC_COL);   /* the size test leads the signed-off Pool's tests */
+      if(c.id==="f_rs18"){if(st.cg.F)out.push(RS18_INFO);continue;}
+      if(c.g==="I"){if(c.id!=="name"&&!st.cg.is)continue;}
+      else if(!st.cg[c.g])continue;
+      out.push(c);
+    }
+    if(st.cg.S)for(i=0;i<SELL_COLS.length;i++)out.push(SELL_COLS[i]);
+    if(st.cg.R&&emrOn())for(i=0;i<IL_EMR_COLS.length;i++)out.push(IL_EMR_COLS[i]);
+    for(i=0;i<out.length;i++){
+      /* the first visible column of each group carries the group's left border */
+      var g=out[i].g,prev=i?out[i-1].g:null;out[i]=Object.create(out[i]);out[i].gs=(i>0&&g!==prev);
+    }
+    return out;
   }
 
-  /* One group per stock. A held stock shows under Live Stocks even if a list names it (the lists leave holdings out
-     by design); then Bench, Shortlist, Longlist; Other last. */
+  var st=null;
+  function initState(){
+    st={on:{bench:true,sl:true,ll:true,other:true,live:true},q:"",sortKey:null,asc:false,
+        cg:JSON.parse(JSON.stringify(CG_DEFAULT)),basis:"me",showOut:false};
+  }
+  function ruleState(){var R=PE().RULES,o={on:{},thr:{},sortKey:st.sortKey||"",asc:st.asc};for(var i=0;i<R.length;i++){o.on[R[i].k]=true;o.thr[R[i].k]=R[i].std;}return o;}
+  function meAvail(){var s=SD();return !!(s&&s._meta&&s._meta.month_end_pool);}
+  function basis(){return (st.basis==="me"&&meAvail())?"me":"day";}
+  /* The signed-off Pool (D-100, with the 29-Sep version 2): market value EUR 500m or more, Stock RS (Composite) 80 or
+     more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth 0% or more. Month-end reading from the "sell"
+     block; today's reading from the row itself. A stock with no market value on file is not excluded on size. */
+  function inPoolToday(r){
+    var P=PE(),M=P.RMAP;
+    if(r.mc!=null&&r.mc<500)return false;
+    return P.passes(M.rs,r,M.rs.std)&&P.passes(M.srs,r,M.srs.std)&&P.passes(M.sb,r,M.sb.std);
+  }
+  function inPool(r){
+    if(basis()==="me"){var x=SR(r.t);return !!(x&&x.me&&x.me[4]);}
+    return inPoolToday(r);
+  }
+
+  /* Sort readings for the six Sell Criteria columns (numbers; missing = null, sorted last). */
+  function attachSell(r){
+    var x=SR(r.t);
+    if(!x){r._s1=r._s2=r._s3=r._s4=r._s5=r._s6=null;return;}
+    r._s1=x.c1!=null?x.c1:null; r._s2=x.c2!=null?x.c2:null;
+    r._s3=x.c3&&x.c3[1]!=null?x.c3[1]:null; r._s4=x.c4&&x.c4[0]!=null?x.c4[0]:null;
+    r._s5=x.c5!=null?x.c5:null; r._s6=x.c6&&x.c6.dd!=null?x.c6.dd:null;
+  }
+
+  /* One group per stock: a holding shows under Live Stocks; then Bench, Shortlist, Longlist; Other last. A stock outside the
+     Pool is kept with an "out" mark and shown only when the tick-box is on. */
   function build(){
     var S=PD().stocks,by={},i,j,g={bench:[],sl:[],ll:[],other:[],live:[]},missing=[],seen={};
     for(i=0;i<S.length;i++)by[S[i].t]=S[i];
     var inv=((window.MASTER_DATA||{}).positions||{}).investments||[];
-    for(i=0;i<inv.length;i++){var t=inv[i].ticker;if(!t||seen[t])continue;if(by[t]){g.live.push({r:by[t],pos:0});seen[t]=1;}else missing.push(t+" (held)");}
+    for(i=0;i<inv.length;i++){var t=inv[i].ticker;if(!t||seen[t])continue;if(by[t]){g.live.push({r:by[t],pos:0,out:!inPool(by[t])});seen[t]=1;}else missing.push(t+" (held)");}
     var I=PD().ideas,ks=["bench","sl","ll"];
     if(I&&I.groups){
       for(j=0;j<ks.length;j++){var L=I.groups[ks[j]]||[];
-        for(i=0;i<L.length;i++){var x=L[i];if(!x.t||seen[x.t])continue;if(!by[x.t]){missing.push(x.t);continue;}g[ks[j]].push({r:by[x.t],pos:x.rank||999,change:x.change});seen[x.t]=1;}}
+        for(i=0;i<L.length;i++){var x=L[i];if(!x.t||seen[x.t])continue;if(!by[x.t]){missing.push(x.t);continue;}g[ks[j]].push({r:by[x.t],pos:x.rank||999,change:x.change,out:!inPool(by[x.t])});seen[x.t]=1;}}
     }
-    for(i=0;i<S.length;i++){if(!seen[S[i].t]&&inSignedOffPool(S[i]))g.other.push({r:S[i],pos:0});}
-    /* Rules passed, at the Default Standard Settings (the cells read r._np; the Pool page recomputes its own before it paints) */
-    var P=PE(),RS=ruleState();
-    for(i=0;i<S.length;i++){var n=0;for(j=0;j<P.RULES.length;j++)if(P.passes(P.RULES[j],S[i],RS.thr[P.RULES[j].k]))n++;S[i]._np=n;}
-    if(window.EMR)for(i=0;i<S.length;i++)window.EMR.attach(S[i]);  /* MD-EMR-2026-09-30 */
+    for(i=0;i<S.length;i++){if(!seen[S[i].t]&&inPool(S[i]))g.other.push({r:S[i],pos:0,out:false});}
+    if(window.EMR)for(i=0;i<S.length;i++)window.EMR.attach(S[i]);
+    for(i=0;i<S.length;i++)attachSell(S[i]);
     return {g:g,missing:missing};
   }
+  function visible(arr){if(st.showOut)return arr;var o=[];for(var i=0;i<arr.length;i++)if(!arr[i].out)o.push(arr[i]);return o;}
+  function nIn(arr){var n=0;for(var i=0;i<arr.length;i++)if(!arr[i].out)n++;return n;}
 
   function sortGroup(arr){
-    if(!st.sortKey){   /* list order: the lists by their rank; Other and Live Stocks by Stock RS (Composite), highest first */
+    if(!st.sortKey){
       arr.sort(function(a,b){
+        if(a.out!==b.out&&!(a.pos||b.pos))return a.out?1:-1;
         if(a.pos||b.pos)return (a.pos||999)-(b.pos||999);
         var x=a.r.rs,y=b.r.rs;x=(x==null||isNaN(x))?-1:x;y=(y==null||isNaN(y))?-1:y;
         return (y-x)||String(a.r.n).localeCompare(String(b.r.n));
       });
       return arr;
     }
-    var C=ILC(),col=null;for(var i=0;i<C.length;i++)if(C[i].id===st.sortKey)col=C[i];
+    var C=allCols(),col=null;for(var i=0;i<C.length;i++)if(C[i].id===st.sortKey)col=C[i];
+    if(!col){var A=PE().COLS.concat([MC_COL],SELL_COLS,IL_EMR_COLS);for(i=0;i<A.length;i++)if(A[i].id===st.sortKey)col=A[i];}
     var key=col?col.key:"rs",txt=col&&(col.type==="name"||col.type==="txt"),asc=st.asc;
     arr.sort(function(A,B){
       var a=A.r,b=B.r,x=a[key],y=b[key];
@@ -19497,28 +19616,144 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       if(xn&&yn)return String(a.n).localeCompare(String(b.n));
       if(xn)return 1; if(yn)return -1;
       var d=txt?String(x).localeCompare(String(y)):(x-y);
-      if(col&&col.neg)d=-d;   /* sort by the value as shown */
+      if(col&&col.neg)d=-d;
       if(d===0)return String(a.n).localeCompare(String(b.n));
       return asc?d:-d;
     });
     return arr;
   }
-
   function match(r,q){if(!q)return true;return (r.n+" "+r.t+" "+(r.ind||"")+" "+(r.sec||"")).toLowerCase().indexOf(q)>=0;}
 
+  function fd(s){return PE().fmtDate(s);}
+  function pct(v,dp){var x=v*100;return sgn(Math.round(x*Math.pow(10,dp))/Math.pow(10,dp))+Math.abs(x).toFixed(dp)+"%";}
+  /* Month-end reading of the four Pool rules, for the Company cell's tooltip. */
+  function meWords(r){
+    var x=SR(r.t),m=SD()&&SD()._meta;if(!x||!x.me||!m)return "";
+    var e=x.me;
+    return " Month-end reading of "+fd(m.last_month_end)+": Stock RS "+(e[0]==null?"none":e[0])+", Sector RS "+(e[1]==null?"none":e[1])
+      +", SS Sales Net Upgrade Breadth L3M "+(e[2]==null?"none":pct(e[2],0))+", market value "+(e[3]==null?"not on file":"EUR "+Math.round(e[3]).toLocaleString("en-GB")+"m")
+      +": "+(e[4]?"in the Pool":"not in the Pool")+".";
+  }
+  /* Company, Industry and Sector cells with the Industry tint; the other cells come from the Pool page's module. */
+  function cellHtml(c,r,RS,row){
+    if(c.type==="name"){
+      var tip=r.n+" ("+r.t+"), "+(r.ind||"no industry")+". Click to open the Stock View."+meWords(r)+(row.out?" Outside the Pool on the "+(basis()==="me"?"month-end":"today's")+" reading.":"");
+      return '<td class="pe-name" style="'+indTint(r.ind)+';'+indEdge(r.ind)+'"><span class="co" data-pe-open="'+esc(r.t)+'" title="'+esc(tip)+'">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span></td>';
+    }
+    if(c.type==="txt"){var v=r[c.key];return '<td class="pe-txt'+(c.gs?" pe-gs":"")+'" style="'+indTint(r.ind)+'" title="'+esc(v||"")+'">'+esc(v||"")+'</td>';}
+    if(c.type==="sell")return sellCell(c,r);
+    if(c.type==="mcap"){
+      var mv=r.mc,gs0=c.gs?" pe-gs":"";
+      if(mv==null)return '<td class="num pe-na'+gs0+'" title="No market value on file: not excluded on size (as the Pool reading treats it)">\u2013</td>';
+      return '<td class="num'+(mv<500?" pe-fail":"")+gs0+'" title="'+esc("Market value EUR "+Math.round(mv).toLocaleString("en-GB")+"m (FactSet; 15-Sep read, or the month-end file for stocks added since). The Pool needs EUR 500m or more")+'">'+Math.round(mv).toLocaleString("en-GB")+'</td>';
+    }
+    return PE().cell(c,r,RS);   /* the shared cell reads c.gs, set per visible group in allCols() */
+  }
+  function sellCell(c,r){
+    var x=SR(r.t),sc=c.sc,M=(SD()||{})._meta||{},gs=c.gs?" pe-gs":"";
+    var day=sc.when==="F"?M.last_friday:(sc.when==="M"?M.last_month_end:M.asof);
+    var dayW=sc.when==="F"?"Friday "+fd(day):(sc.when==="M"?"the month-end "+fd(day):"today");
+    if(!x)return '<td class="num pe-na'+gs+'" title="No Sell Criteria reading (no price history in the reader\'s universe)">–</td>';
+    var met=(x.f||[]).indexOf(sc.c)>=0,txt="",tip="",na=false;
+    if(sc.c==="C1"){
+      if(x.c1==null){na=true;tip="No Industry RS (the stock has no Industry)";}
+      else{txt=String(x.c1);tip="Industry RS (the average Stock RS of the Industry's companies, ranked 0 to 99 across the 16 Industries) on "+dayW+": "+x.c1+(x.c1t!=null?"; today "+x.c1t:"")+". Met below 30.";}
+    } else if(sc.c==="C2"){
+      if(x.c2==null){na=true;tip="Not enough relative price history";}
+      else{txt=pct(x.c2,2);tip="The 200-day average of the relative price against its level 21 trading days earlier, on "+dayW+": "+pct(x.c2,2)+(x.c2t!=null?"; today "+pct(x.c2t,2):"")+". Relative price = the price against an equal-weighted index of the other European companies of EUR 500m or more. Met at 0% or below.";}
+    } else if(sc.c==="C3"){
+      var a=x.c3||[],b=x.c3t||[];
+      if(a[0]==null||a[1]==null){na=true;tip="No Sector RS or Stock RS reading";}
+      else{txt=a[0]+" / "+a[1];tip="Sector RS / Stock RS on "+dayW+": "+a[0]+" / "+a[1]+(b[0]!=null?"; today "+b[0]+" / "+b[1]:"")+". Met when Sector RS is below 50 AND Stock RS is below 70.";}
+    } else if(sc.c==="C4"){
+      var d=x.c4||[];
+      if(d[0]==null){na=true;tip="No Stock RS reading";}
+      else{
+        txt=String(d[0]);
+        var an=d[3]?("SS Sales Net Upgrade Breadth "+(d[1]==null?"none":pct(d[1],0))+", SS PT Net Upgrade Breadth "+(d[2]==null?"none":pct(d[2],0))+" (100-day counts)"):"no analysts' 100-day counts for this stock (only the targeted pull has them; no analyst data never meets this criterion)";
+        tip="Stock RS on "+dayW+": "+d[0]+"; "+an+". Met when Stock RS is below 50 AND either breadth is below 0."+(d[0]>=50?" Stock RS is 50 or more, so it cannot be met.":"");
+        if(d[0]<50&&!d[3])txt+="*";
+      }
+    } else if(sc.c==="C5"){
+      if(x.c5==null){na=true;tip="Not enough relative price history";}
+      else{txt=pct(x.c5,0);tip="The relative price against its 52-week high on "+dayW+": "+pct(x.c5,1)+(x.c5t!=null?"; today "+pct(x.c5t,1):"")+". Met below −25%.";}
+    } else if(sc.c==="C6"){
+      var e=x.c6;
+      if(!e){return '<td class="num sc-na'+gs+'" title="Applies only to a tranche you own: the price 30% or more below its highest close since that tranche\'s purchase, with Stock RS below 70">n/a</td>';}
+      if(e.probing){return '<td class="num sc-na'+gs+'" title="'+esc((e.status||"Early Innings Probing Bet")+": its moving-average stops govern, not the 30% fall")+'">n/a</td>';}
+      if(e.dd==null){na=true;tip="No tranche with a purchase date";}
+      else{txt=pct(e.dd,0);tip="The furthest any of the "+e.n+" tranche"+(e.n===1?"":"s")+" stands below its highest close since purchase: "+pct(e.dd,1)+". "+(e.trig?e.trig+" tranche"+(e.trig===1?"":"s")+" triggered. ":"")+"State: "+(e.state||"no trigger")+". Met when a tranche is 30% or more below that high with Stock RS below 70. As read by the Sell Criteria reader"+(e.day?" on "+fd(e.day):"")+" (it runs each weekday at 22:45 UK, after this page is built).";}
+    }
+    if(na)return '<td class="num pe-na'+gs+'" title="'+esc(tip)+'">–</td>';
+    if(met)tip="MET: "+tip+(x.order?" Order sheet: "+x.order:"");
+    return '<td class="num'+(met?" sc-met":"")+gs+'" title="'+esc(tip)+'">'+esc(txt)+'</td>';
+  }
+
+  /* Header: group row (one cell per visible group; click a group's name to hide it) and the column headings. */
+  function header(C,RS){
+    var GN={I:"Information",M:"Metrics",F:"Filter Tests for Middle Innings Pool",S:"Sell Criteria",R:"Eight Master Ratings"};
+    var GC={I:"pe-gi",M:"pe-gm",F:"pe-gf",S:"il-gsell",R:"pe-gr"};
+    var M=(SD()||{})._meta||{};
+    var GT={M:"Today's readings. Click to hide the Metrics",
+            F:"Today's readings against the Pool's four Filter Tests at their Default Standard Settings; struck through = fails today. Click to hide",
+            S:"The six signed-off Sell Criteria (Framework 14), each read on its own day: Industry RS and the relative 200-day slope on Fridays (latest "+fd(M.last_friday)+"), the other three at month-ends (latest "+fd(M.last_month_end)+"), the 30% fall daily for holdings. Red = met. Click to hide",
+            R:"Click to hide the Eight Master Ratings"};
+    var h='<thead><tr class="pe-g">',i=0;
+    while(i<C.length){
+      var g=C[i].g,n=0;while(i+n<C.length&&C[i+n].g===g)n++;
+      if(g==="I"){
+        h+='<th class="pe-gi"><span class="pe-gl">Information</span></th>'+(n>1?'<th colspan="'+(n-1)+'" class="pe-gi2 il-gclick" data-il-cg="is" title="Click to hide Industry and Sector"></th>':'');
+      } else {
+        var lab=GN[g]||g;
+        if(g==="S"&&M.last_friday)lab+=' <span class="il-gday">Fri '+esc(fd(M.last_friday))+' &middot; month-end '+esc(fd(M.last_month_end))+'</span>';
+        h+='<th colspan="'+n+'" class="'+(GC[g]||"")+' pe-gs il-gclick" data-il-cg="'+g+'" title="'+esc(GT[g]||"Click to hide")+'"><span class="pe-gl">'+lab+'</span></th>';
+      }
+      i+=n;
+    }
+    h+='</tr><tr class="pe-h">';
+    for(var j=0;j<C.length;j++){
+      var c=C[j],cls=[];
+      if(c.type==="name")cls.push("pe-name");else if(c.type!=="txt")cls.push("num");
+      if(c.gs)cls.push("pe-gs");
+      if(c.g==="M")cls.push("pe-hm");else if(c.g==="F")cls.push("pe-hf");else if(c.g==="S")cls.push("sc-h");
+      else if(c.fam==="bu")cls.push("emr-h-bu");else if(c.fam==="td")cls.push("emr-h-td");else if(c.g==="R")cls.push("emr-h-x");
+      var arr=st.sortKey===c.id?'<span class="pe-arr">'+(st.asc?"&#9650;":"&#9660;")+'</span>':"";
+      var full=c.label||c.sh;
+      var lab='<span class="pe-hs">'+esc(c.sh)+arr+'</span>'+(full!==c.sh?'<span class="pe-hl">'+esc(full)+'</span>':'');
+      var tip=c.type==="sell"?full+" (read "+(c.sc.when==="F"?"on Fridays":(c.sc.when==="M"?"at month-ends":"daily, per tranche, for holdings only"))+"). Red = met. Click to sort":(full+": "+(c.tip||full)+". Click to sort");
+      h+='<th class="'+cls.join(" ")+'" data-pe-sort="'+c.id+'" title="'+esc(tip)+'">'+lab+'</th>';
+    }
+    return h+'</tr></thead>';
+  }
+  function colgroup(C){var h='<colgroup>';for(var i=0;i<C.length;i++)h+=C[i].w?'<col class="pe-c-'+C[i].w+'">':'<col>';return h+'</colgroup>';}
+  /* The table is at least as wide as the columns need (numbers about 62px each, the text columns their share), so no
+     number is ever cut off; wider than the frame, it scrolls sideways inside it. */
+  /* Widths in px (CSS col.pe-c-*: the three text columns 175 / 175 / 190 on this page); the numbers share the rest. */
+  var FIXED={name:175,ind:175,sec:190,emrfam:104,emrfamtd:104,emrbl:66,ilfl:320};
+  function minWidth(C){
+    var fixed=0,nNum=0;
+    for(var i=0;i<C.length;i++){var w=C[i].w;
+      if(w&&FIXED[w]!=null)fixed+=(w==="emrfamtd"&&window.EMR&&window.EMR.tsrNotes&&window.EMR.tsrNotes())?154:FIXED[w];
+      else nNum++;}
+    return Math.ceil(nNum*62+fixed);
+  }
+
   function tableHtml(B){
-    var P=PE(),C=ILC(),RS=ruleState(),q=st.q.trim().toLowerCase(),shown=0,groupsOn=0;
-    var h='<div class="pe-wrap"><table class="pe-table il-table'+(C!==P.COLS?' pe-emr'+(window.EMR.tsrNotes()?' pe-emr-tn':''):'')+'">'/* MD-TSR-NOTE-2026-10-01: pe-emr-tn */+P.colgroup(C)+P.header(RS,C)+'<tbody>';
+    var C=allCols(),RS=ruleState(),q=st.q.trim().toLowerCase(),shown=0,groupsOn=0;
+    var tn=(window.EMR&&window.EMR.tsrNotes&&window.EMR.tsrNotes())?' pe-emr-tn':'';
+    var h='<div class="pe-wrap"><table class="pe-table il-table il-mi'+(st.cg.is?"":" il-noind")+(st.cg.R&&emrOn()?' pe-emr'+tn:'')+'" style="min-width:'+minWidth(C)+'px">'+colgroup(C)+header(C,RS)+'<tbody>';
     for(var gi=0;gi<GROUPS.length;gi++){
       var G=GROUPS[gi];if(!st.on[G.k])continue;groupsOn++;
-      var all=B.g[G.k],arr=[];for(var i=0;i<all.length;i++)if(match(all[i].r,q))arr.push(all[i]);
+      var all=visible(B.g[G.k]),arr=[];for(var i=0;i<all.length;i++)if(match(all[i].r,q))arr.push(all[i]);
       sortGroup(arr);shown+=arr.length;
-      h+='<tr class="il-sub il-'+G.k+'"><td colspan="'+C.length+'" title="'+esc(G.tip)+'"><span class="il-sub-l">'+esc(G.label)+'</span><span class="il-sub-n">'+(q?arr.length+" of "+all.length:all.length)+' stock'+((q?arr.length:all.length)===1?"":"s")+'</span></td></tr>';
-      if(!arr.length){h+='<tr class="il-none"><td colspan="'+C.length+'">'+(q?"None matching the search":"None")+'</td></tr>';continue;}
+      var nin=nIn(B.g[G.k]),nout=B.g[G.k].length-nin;
+      var cnt=(q?arr.length+" of "+all.length+" matching":nin+" in the Pool")+(st.showOut&&nout?" &middot; "+nout+" outside it, faded":"");
+      h+='<tr class="il-sub il-'+G.k+'"><td colspan="'+C.length+'" title="'+esc(G.tip)+'"><span class="il-sub-l">'+esc(G.label)+'</span><span class="il-sub-n">'+cnt+'</span></td></tr>';
+      if(!arr.length){h+='<tr class="il-none"><td colspan="'+C.length+'">'+(q?"None matching the search":(nout?"None in the Pool ("+nout+" outside it: tick “Also show” above)":"None"))+'</td></tr>';continue;}
       for(var k=0;k<arr.length;k++){
         var row=arr[k];
-        h+='<tr'+(row.change?' data-il-change="'+esc(CHANGE[row.change]||row.change)+'"':'')+'>';
-        for(var c=0;c<C.length;c++)h+=P.cell(C[c],row.r,RS);
+        h+='<tr'+(row.out?' class="pe-out"':'')+'>';
+        for(var c=0;c<C.length;c++)h+=cellHtml(C[c],row.r,RS,row);
         h+='</tr>';
       }
     }
@@ -19526,40 +19761,58 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     return {html:h+'</tbody></table></div>',shown:shown};
   }
 
-  function liveNote(){var s=((((window.MASTER_DATA||{}).positions||{})._live_meta)||{}).saved_at||"";return "holdings as saved "+(s?PE().fmtDate(String(s).slice(0,10)):"(date unknown)");}
+  function liveNote(){var s=((((window.MASTER_DATA||{}).positions||{})._live_meta)||{}).saved_at||"";return "holdings as saved "+(s?fd(String(s).slice(0,10)):"(date unknown)");}
   function togglesHtml(B){
     var I=PD().ideas,h='<div class="il-togs">';
     for(var i=0;i<GROUPS.length;i++){
-      var G=GROUPS[i],on=st.on[G.k],n=B.g[G.k].length;
-      var note=(G.k==="other")?"in the signed-off Pool, on no list":(G.k==="live"?liveNote():(I?"list of "+PE().fmtDate(I.date):"no list found"));
+      var G=GROUPS[i],on=st.on[G.k],nin=nIn(B.g[G.k]),nall=B.g[G.k].length;
+      var note=(G.k==="other")?"in the Pool, on no list, not held":(G.k==="live"?liveNote():(I?"list of "+fd(I.date):"no list found"));
+      var out=nall-nin;
       h+='<div class="pe-rule'+(on?"":" off")+'"><button class="pe-tog" data-il-tog="'+G.k+'" title="'+esc(G.tip+". Click to "+(on?"hide":"show")+" them")+'"><span class="pe-tl">'+esc(G.label)+'</span><span class="pe-state">'+(on?"ON":"OFF")+'</span></button>'
-        +'<div class="il-tnote"><b>'+n+'</b> stock'+(n===1?"":"s")+' &middot; '+esc(note)+'</div></div>';
+        +'<div class="il-tnote" title="'+esc(nin+" in the Pool"+(G.k==="other"?"":", "+out+" outside it")+" · "+note)+'"><b>'+nin+'</b> in the Pool'+(G.k==="other"?"":' &middot; '+out+' outside')+' &middot; '+esc(note)+'</div></div>';
     }
     return h+'</div>';
   }
+  function cgHtml(){
+    var h='<div class="il-cg"><span class="il-cg-l">Column groups:</span>';
+    for(var i=0;i<CG.length;i++){var g=CG[i],on=!!st.cg[g.k];
+      h+='<button class="il-cgb'+(on?" on":"")+'" data-il-cg="'+g.k+'" aria-pressed="'+(on?"true":"false")+'" title="Click to '+(on?"hide":"show")+' '+esc(g.label)+'"><span class="il-cgx">'+(on?"&#9662;":"&#9656;")+'</span>'+esc(g.label)+'</button>';}
+    return h+'</div>';
+  }
+  function basisHtml(){
+    var M=(SD()||{})._meta||{},av=meAvail(),b=basis();
+    var me=M.month_end_pool||{};
+    return '<span class="il-basis" title="Which reading decides who is in the Pool on this page. The signed-off rule: month-end readings decide eligibility for the following month."><span class="il-cg-l">Pool reading:</span>'
+      +'<button class="il-bb'+(b==="me"?" on":"")+'" data-il-basis="me"'+(av?'':' disabled')+' title="'+esc(av?"The month-end reading of "+fd(me.date)+" ("+me.count+" stocks in the Pool): decides eligibility until the next month-end":"No month-end reading available")+'">Month-end '+esc(av?fd(me.date):"")+'</button>'
+      +'<button class="il-bb'+(b==="day"?" on":"")+'" data-il-basis="day" title="Today\'s reading: moves every day">Today '+esc(fd((PD()._meta||{}).price_date))+'</button></span>';
+  }
 
   function top(B){
-    var P=PE(),M=PD()._meta||{},ss=M.ss||{},ph=M.phase,I=PD().ideas,h='<div class="summary-tile pe-tile"><div class="pe-head">';
-    h+='<span class="pe-title">Ideas Lists (Bench, LL, SL)</span>';
-    var sub=(I?"Weekly Ideas lists of "+P.fmtDate(I.date)+" (written each Friday)":"No weekly Ideas lists found")+", then Other (the signed-off Uptrend Pool, on no list) and Live Stocks. Struck through: fails that Filter Test at its Default Standard Setting.";
-    h+='<span class="pe-sub" title="'+esc("Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Other: market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth L3M 0% or more (D-100), on none of the three lists and not held. Live Stocks: the Position Management System. Each stock appears once. Click a column heading to sort within each group; Reset returns to list order.")+'">'+esc(sub)+'</span>';
+    var M=PD()._meta||{},ss=M.ss||{},ph=M.phase,I=PD().ideas,h='<div class="summary-tile pe-tile"><div class="pe-head">';
+    var sm=(SD()||{})._meta||{};
+    h+='<span class="pe-title">'+TITLE+'</span>';
+    var sub="Stocks in the Pool on the "+(basis()==="me"?"month-end reading of "+fd((sm.month_end_pool||{}).date):"reading of "+fd(M.price_date))+", under the weekly Ideas lists"+(I?" of "+fd(I.date):"")+", then Other and Live Stocks. Struck through: fails that Filter Test today. Red: a Sell Criterion is met.";
+    h+='<span class="pe-sub" title="'+esc("The Pool (signed off 28-Sep-26, version 2 on 29-Sep-26): market value EUR 500m or more, Stock RS (Composite) 80 or more, Sector RS (Composite) 50 or more, SS Sales Net Upgrade Breadth 0% or more (this page still reads it on the three-month 45-day counts; the 100-day count signed off on 29-Sep is not yet pulled for every stock). Lists: the Ideas line's data/ledger/"+(I?I.file:"list-*.json")+". Each stock appears once. Click a column heading to sort within each group; Reset returns to list order and the opening settings.")+'">'+esc(sub)+'</span>';
     h+='<span class="pe-spacer"></span>';
-    h+='<span class="pe-dates" title="'+esc("Prices as at "+P.fmtDate(M.price_date)+"; sell-side estimate counts as at "+P.fmtDate(ss.as_of)+"; market values as at "+P.fmtDate(M.mc_date)+"; readings built "+(M.generated||""))+'">Prices <b>'+P.fmtDate(M.price_date)+'</b> &middot; Sell-side <b>'+P.fmtDate(ss.as_of)+'</b></span>';
-    if(ph&&ph.label)h+='<span class="pe-ph '+(ph.label==="Uptrending"?"up":"down")+'" title="Market Cycle Phase, as on the Pool Eligibility page">Market Cycle Phase: <b>'+esc(ph.label)+'</b> since '+(ph.history_limited?"at least ":"")+P.fmtDate(ph.since)+'</span>';
+    h+='<span class="pe-dates" title="'+esc("Prices as at "+fd(M.price_date)+"; sell-side estimate counts as at "+fd(ss.as_of)+"; market values as at "+fd(M.mc_date)+" (month-end file for stocks added since); Sell Criteria read on Friday "+fd(sm.last_friday)+" and the month-end "+fd(sm.last_month_end)+"; readings built "+(M.generated||""))+'">Prices <b>'+fd(M.price_date)+'</b> &middot; Sell-side <b>'+fd(ss.as_of)+'</b></span>';
+    if(ph&&ph.label)h+='<span class="pe-ph '+(ph.label==="Uptrending"?"up":"down")+'" title="Market Cycle Phase, as on the Pool page">Market Cycle Phase: <b>'+esc(ph.label)+'</b> since '+(ph.history_limited?"at least ":"")+fd(ph.since)+'</span>';
     h+='</div>';
     var W=(M.warnings||[]).slice();
+    if(!SD())W.push("The Sell Criteria and the month-end Pool reading were not built tonight, so the Sell Criteria columns show no readings and the page uses today's reading");
     if(B.missing.length)W.push("Not in the dashboard's universe, so not shown: "+B.missing.join(", "));
     for(var i=0;i<W.length;i++)h+='<div class="pe-warn">'+esc(W[i])+'</div>';
     h+=togglesHtml(B);
-    if(window.EMR&&window.EMR.on())h+=window.EMR.how();  /* MD-EMR-2026-09-30: "How these flags and readings are set" */
-    h+='<div class="pe-bar"><span id="il-countbox" class="pe-countbox"></span><span class="pe-spacer"></span>'
+    if(window.EMR&&window.EMR.on())h+=window.EMR.how();
+    h+='<div class="pe-bar"><span id="il-countbox" class="pe-countbox"></span>'+basisHtml()
+      +'<label class="pe-chk" title="List names and holdings that are not in the Pool on this reading, shown faded under their group"><input type="checkbox" id="il-showout"'+(st.showOut?" checked":"")+'> Also show list names and holdings outside the Pool</label>'
+      +'<span class="pe-spacer"></span>'
       +'<input class="pe-search" id="il-search" type="search" placeholder="Search company, ticker, industry or sector" value="'+esc(st.q)+'">'
-      +'<button class="pe-btn" data-il-reset="1" title="All groups on, list order, search kept">Reset to list order</button></div>';
+      +'<button class="pe-btn" data-il-reset="1" title="The opening settings: all groups on, Metrics hidden, month-end reading, list order; the search is kept">Reset</button></div>';
+    h+=cgHtml();
     return h+'</div>';
   }
 
   function isActive(){return document.body.getAttribute("data-active-tab")==="ideas_lists";}
-  /* As on the Pool page (Message 5): the page does not scroll; the table frame fills the window below the panel. */
   function sizeWrap(){
     var w=document.querySelector("#tab-ideas_lists .pe-wrap");if(!w||!isActive())return;
     try{if(typeof window.measureV2Ribbon==="function")window.measureV2Ribbon();}catch(e){}
@@ -19586,18 +19839,21 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var b=document.getElementById("il-body");if(!b)return;
     var T=tableHtml(B);b.innerHTML=T.html;
     var cb=document.getElementById("il-countbox");
-    if(cb){var on=0,tot=0;for(var i=0;i<GROUPS.length;i++)if(st.on[GROUPS[i].k]){on++;tot+=B.g[GROUPS[i].k].length;}
-      cb.innerHTML='<span class="pe-count"><b>'+T.shown+'</b> stock'+(T.shown===1?"":"s")+' shown'+(st.q.trim()?' matching "'+esc(st.q)+'" (of '+tot+')':'')+'</span>'+(st.sortKey?'<span class="pe-showing">sorted by a column within each group</span>':'<span class="pe-showing">in list order</span>');}
+    if(cb){var tot=0,inn=0;for(var i=0;i<GROUPS.length;i++)if(st.on[GROUPS[i].k]){tot+=visible(B.g[GROUPS[i].k]).length;inn+=nIn(B.g[GROUPS[i].k]);}
+      cb.innerHTML='<span class="pe-count"><b>'+T.shown+'</b> stock'+(T.shown===1?"":"s")+' shown'+(st.q.trim()?' matching "'+esc(st.q)+'" (of '+tot+')':'')+'</span>'
+        +'<span class="pe-showing">'+inn+' in the Pool'+(st.showOut?' + '+(tot-inn)+' outside, faded':'')+(st.sortKey?' &middot; sorted by a column within each group':' &middot; in list order')+'</span>';}
     sizeWrap();
   }
-  function refreshToggles(){
-    var p=document.querySelector("#tab-ideas_lists .il-togs");
-    if(p){var tmp=document.createElement("div");tmp.innerHTML=togglesHtml(B);p.parentNode.replaceChild(tmp.firstChild,p);}
+  function refreshTop(){
+    var t=document.getElementById("il-top");if(!t)return;
+    var q=document.getElementById("il-search"),had=q&&document.activeElement===q,pos=had?q.selectionStart:null;
+    t.innerHTML=top(B);
+    if(had){var q2=document.getElementById("il-search");if(q2){q2.focus();try{q2.setSelectionRange(pos,pos);}catch(e){}}}
   }
   function paint(){
     var c=document.getElementById("tab-ideas_lists");if(!c)return;
     if(!PE()||!PD()||!PD().stocks){
-      c.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>Ideas Lists (Bench, LL, SL)</h3><p style="color:var(--text-dim);margin-top:8px">pool-eligibility.json was not built, so there is nothing to show. Run scripts/build_pool_eligibility.py before build_dashboard.py.</p></div>';
+      c.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>'+TITLE+'</h3><p style="color:var(--text-dim);margin-top:8px">pool-eligibility.json was not built, so there is nothing to show. Run scripts/build_pool_eligibility.py before build_dashboard.py.</p></div>';
       return;
     }
     B=build();
@@ -19610,20 +19866,25 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(c._ilWired)return; c._ilWired=true;
     c.addEventListener("click",function(e){
       var t=e.target;
-      while(t&&t!==c&&!(t.getAttribute&&(t.getAttribute("data-il-tog")||t.getAttribute("data-pe-sort")||t.getAttribute("data-pe-open")||t.getAttribute("data-il-reset"))))t=t.parentNode;
+      while(t&&t!==c&&!(t.getAttribute&&(t.getAttribute("data-il-tog")||t.getAttribute("data-pe-sort")||t.getAttribute("data-pe-open")||t.getAttribute("data-il-reset")||t.getAttribute("data-il-cg")||t.getAttribute("data-il-basis"))))t=t.parentNode;
       if(!t||t===c)return;
       var k;
-      if((k=t.getAttribute("data-il-tog"))){st.on[k]=!st.on[k];refreshToggles();paintBody();}
+      if((k=t.getAttribute("data-il-tog"))){st.on[k]=!st.on[k];refreshTop();paintBody();}
+      else if((k=t.getAttribute("data-il-cg"))){st.cg[k]=!st.cg[k];
+        if(st.sortKey){var C=allCols(),ok=false;for(var i=0;i<C.length;i++)if(C[i].id===st.sortKey)ok=true;if(!ok){st.sortKey=null;st.asc=false;}}
+        refreshTop();paintBody();}
+      else if((k=t.getAttribute("data-il-basis"))){if(t.disabled)return;st.basis=k;B=build();refreshTop();paintBody();}
       else if((k=t.getAttribute("data-pe-sort"))){
         if(st.sortKey===k)st.asc=!st.asc;
-        else{st.sortKey=k;var C=ILC(),col=null;for(var i=0;i<C.length;i++)if(C[i].id===k)col=C[i];st.asc=!!(col&&(col.type==="name"||col.type==="txt"));}
+        else{st.sortKey=k;var C2=allCols(),col=null;for(var j=0;j<C2.length;j++)if(C2[j].id===k)col=C2[j];st.asc=!!(col&&(col.type==="name"||col.type==="txt"));}
         paintBody();
       }
       else if((k=t.getAttribute("data-pe-open"))){if(typeof window.openStockView==="function")window.openStockView(k);}
-      else if(t.getAttribute("data-il-reset")){var q=st.q;initState();st.q=q;refreshToggles();paintBody();}
+      else if(t.getAttribute("data-il-reset")){var q=st.q;initState();st.q=q;B=build();refreshTop();paintBody();}
     });
     c.addEventListener("input",function(e){if(e.target&&e.target.id==="il-search"){st.q=e.target.value;paintBody();}});
-    c.addEventListener("toggle",function(){sizeWrap();},true);  /* MD-EMR-2026-09-30 */
+    c.addEventListener("change",function(e){if(e.target&&e.target.id==="il-showout"){st.showOut=!!e.target.checked;refreshTop();paintBody();}});
+    c.addEventListener("toggle",function(){sizeWrap();},true);
   }
 
   window.renderIdeasLists=function(){
@@ -19631,6 +19892,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(!st)initState();
     paint();
   };
+  window._IL={state:function(){return st;},inPool:function(t){var S=PD().stocks;for(var i=0;i<S.length;i++)if(S[i].t===t)return inPool(S[i]);return null;}};  /* for the headless checks */
 })();
 function renderTab(id){
   try{

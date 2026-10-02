@@ -800,7 +800,7 @@ table.pe-table td.pe-na{text-align:center}
 table.pe-table.il-table.il-mi col.pe-c-name{width:190px}
 table.pe-table.il-table.il-mi col.pe-c-ind{width:185px}
 table.pe-table.il-table.il-mi col.pe-c-sec{width:190px}
-table.pe-table.il-table.il-mi col.pe-c-ilfl{width:300px}
+table.pe-table.il-table.il-mi col.pe-c-ilfl{width:290px}  /* MD-TIDY-2026-10-02c: was 300px; 10px to the Top Down column */
 table.pe-table.il-table.il-mi td.emr-tdfl{white-space:normal}
 table.pe-table.il-table.il-mi td.pe-name{border-right:1px solid #e3dfd2}
 table.pe-table.il-table.il-mi tbody tr:hover td.pe-name,table.pe-table.il-table.il-mi tbody tr:hover td.pe-txt{filter:brightness(.97)}
@@ -1045,7 +1045,7 @@ col.pe-c-emrfam{width:104px} col.pe-c-emrbl{width:66px} col.pe-c-emrfl{width:132
 .emr-tn{display:inline-block;font-size:8.5px;line-height:1.2;color:#555;white-space:nowrap;vertical-align:middle;cursor:help;margin-left:2px;letter-spacing:0;align-self:center}
 .emr-tn.emr-tn-trial{color:#1f5f99;font-style:italic}
 col.pe-c-emrtv{width:74px} col.pe-c-emrfamtd{width:104px}
-table.pe-table.pe-emr-tn col.pe-c-emrtv{width:124px} table.pe-table.pe-emr-tn col.pe-c-emrfamtd{width:154px}
+table.pe-table.pe-emr-tn col.pe-c-emrtv{width:124px} table.pe-table.pe-emr-tn col.pe-c-emrfamtd{width:174px}  /* MD-TIDY-2026-10-02c: was 154px; the note's grade letter was cut off */
 table.pe-table.pe-emr.pe-emr-tn{min-width:1670px}
 table.pe-table.il-table.pe-emr.pe-emr-tn{min-width:1710px}
 /* the new headings break between words only (the page's narrow-screen rule breaks inside words) */

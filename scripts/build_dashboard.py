@@ -365,6 +365,42 @@ def load_data():
         qual = safe_json_load(qual_path)
         master["qualitative"] = qual
 
+    # MD-TMR-2026-10-03: the Technical Momentum Rating Richard signed on 2-Oct-2026 (the signed Lists statement,
+    # Part 2 section 6), computed by the ONE file that writes it (databases/scripts/technical_momentum_rating.py)
+    # and handed to the page as D.tm_rating = {ticker: [grade, [route ids]]}. The Timeliness tab, the Live
+    # Portfolio "Technical Momentum" column and the Summary fallback all read it; the page keeps no copy of the rule.
+    try:
+        import importlib.util as _ilu
+        _tp = COWORK_ROOT / "databases" / "scripts" / "technical_momentum_rating.py"
+        _tsp = _ilu.spec_from_file_location("technical_momentum_rating", str(_tp))
+        _tmr = _ilu.module_from_spec(_tsp)
+        _tsp.loader.exec_module(_tmr)
+        _route_id = {"Healthy Retest": "retest", "VCP after a Stage 2 base": "vcp_s2",
+                     "VCP after a Stage 1 to Stage 2 transition": "vcp_s1",
+                     "Pulling Back within MT/LT Uptrend": "pull_back", "Basing": "basing"}
+        _tm = {}
+        for _fe in filters.get("stocks", []):
+            _md = _tmr.md_v2_of(_fe)
+            _g, _routes = _tmr.grade_with_routes(_md)
+            if not _g:
+                continue
+            if _g == "A":
+                _rows = [_route_id.get(_r, "retest") for _r in _routes]
+            elif _g == "B":
+                _rows = ["s2_pp"]
+            elif _g == "C":
+                _rows = ["s2_possible"] if _tmr.tier((_md.get("stage_2") or {}).get("rating")) >= 2 else ["s1_probable"]
+            elif _g == "F":
+                _rows = ["s4"]
+            else:
+                _rows = ["other"]
+            _tm[_fe.get("ticker")] = [_g, _rows]
+        master["tm_rating"] = _tm
+        print("  Technical Momentum Rating (MD-TMR-2026-10-03): {} stocks graded".format(len(_tm)))
+    except Exception as _tme:
+        master["tm_rating"] = {}
+        print("  WARNING: the Technical Momentum Rating could not be computed ({}: {}); the Timeliness tab is empty".format(type(_tme).__name__, _tme))
+
     # MD-EMR-2026-09-30: the Eight Master Ratings from the ratings store (absent = today's display, unchanged)
     _emr = load_master_ratings()
     if _emr:
@@ -3304,21 +3340,11 @@ window.toggleComboGrade=function(k){comboGradeFilters[k]=!comboGradeFilters[k];r
 // Per-stock TIMELINESS grade (A/B/C/D/F/-).
 // Pass 1: uses 5 existing filters. Collapse/S3/S4 placeholders return false.
 function timeliness(r){
-  var bp=r.f.basing_plateau,pb=r.f.probing_bet,vcp=r.f.vcp,mm=r.f.mm99,ut=r.f.uptrend_retest;
-  var capUTR=ut&&ut.stage==="Capital";
-  var capVCP=vcp&&vcp.stage==="Capital"; // D-MD-FILTER-6: VCP placeholder, always false in Pass 1
-  var capMM=mm&&mm.stage==="Capital";
-  var capPB=pb&&pb.stage==="Capital";
-  var capCol=false; // Pass 2: Collapse filter
-  var capBP=bp&&bp.stage==="Capital";
-  var capS4=false; // Pass 2: Stage 4 Declining
-  var capS3=false; // Pass 2: Stage 3 Topping
-  if(capUTR||capVCP||capMM)return"A";
-  if(capPB||capCol)return"B";
-  if(capBP)return"C";
-  if(capS4)return"F"; // F overrides D
-  if(capS3)return"D";
-  return"-";
+  /* MD-TMR-2026-10-03: the Technical Momentum Rating, computed by databases/scripts/technical_momentum_rating.py
+     (the signed Lists statement, section 6) and carried in D.tm_rating. The old "Capital"-stage combination that
+     stood here is retired. */
+  var x=(D.tm_rating&&r&&r.ticker)?D.tm_rating[r.ticker]:null;
+  return x?x[0]:"-";
 }
 function timelinessBadge(g){
   var cls=g==="-"?"tm-N":"tm-"+g;
@@ -4913,7 +4939,7 @@ function buildPortfolioTile(tabId){
     h+=ratingsColHeaders().length>0?ratingsGroupTh():'';
     h+='</tr><tr>';
     h+=commonCols()
-      +'<th class="col-txt col-filter">Timeliness</th>'
+      +'<th class="col-txt col-filter">Technical Momentum</th>'
       +'<th class="col-txt col-filter combo-col-pending">Collapse</th>'
       +'<th class="col-txt col-filter">Basing Plateau</th>'
       +'<th class="col-txt col-filter">Probing Bet</th>'
@@ -6414,33 +6440,31 @@ function renderCombos(){
   var el = document.getElementById("tab-combos");
   if(!el) return;
 
-  // ---- Row definitions (spec §3 + §4) ----
+  // ---- Rows, columns and groups: MD-TMR-2026-10-03 ----
+  // The Technical Momentum Rating Richard signed on 2-Oct-2026. Each stock sits in its grade's column, in the row
+  // of the route that earned the grade (D.tm_rating, computed in Python by databases/scripts/technical_momentum_rating.py).
+  // The row text describes the rule; the rule itself is written only in that file.
   var TL_ROWS = [
-    // GROUP 1 - Capital qualification tests (A=Qualified|Probable, B=Plausible, C=Possible)
-    {id:"pb_s1",      label:"Stage 1 speculative bet",       path:["tests","probing_bet_s1"],                  stageNum:1, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
-    {id:"pb_s2",      label:"Stage 2 probing bet",           path:["tests","probing_bet_s2"],                  stageNum:2, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
-    {id:"retest",     label:"Stage 2 - Retest",              path:["tests","healthy_retest"],                  stageNum:2, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
-    {id:"vcp",        label:"Stage 2 - VCP",                 path:["tests","vcp_deploy_s2"],                   stageNum:2, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
-    {id:"spec_s3",    label:"Stage 3 - Speculative Bet",     path:["tests","speculative_bet_s3"],              stageNum:3, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
-    {id:"spec_s4",    label:"Stage 4 - Speculative bet",     path:["tests","speculative_bet_s4"],              stageNum:4, group:1, cells:{A:["Qualified","Probable"],B:["Plausible"],C:["Possible"]}},
-    // GROUP 2 - Early stage indicators [S2-GATED] (B=Probable, C=Plausible)
-    {id:"pull_back",  label:"Stage 2 pulling back",          path:["pre_indicators","pulling_back_uptrend"],   stageNum:2, group:2, cells:{B:["Probable"],C:["Plausible"]}, s2gate:true},
-    {id:"basing",     label:"Stage 2 basing",                path:["pre_indicators","basing"],                 stageNum:2, group:2, cells:{B:["Probable"],C:["Plausible"]}, s2gate:true},
-    // GROUP 3 - Long/mid-term up-trends
-    {id:"stage2_ctx", label:"Stage 2",                       path:["stage_2"],                                 stageNum:2, group:3, cells:{C:["Probable","Plausible"]}},
-    {id:"s1_late",    label:"Stage 1 - late (probable)",     path:["stage_1"],                                 stageNum:1, group:3, cells:{B:["Probable"]}},
-    {id:"s1_early",   label:"Stage 1 - early (plausible)",   path:["stage_1"],                                 stageNum:1, group:3, cells:{B:["Plausible"],C:["Possible"]}},
-    // GROUP 4 - Avoid list (long/mid-term down-trends)
-    {id:"stage3_ctx", label:"Stage 3",                       path:["stage_3"],                                 stageNum:3, group:4, cells:{C:["Plausible"],D:["Probable"]}},
-    {id:"stage4_ctx", label:"Stage 4",                       path:["stage_4"],                                 stageNum:4, group:4, cells:{C:["Possible"],D:["Plausible"],F:["Probable"]}}
+    {id:"retest",      label:"Healthy Retest",                              stageNum:2, group:1, cells:{A:["Plausible, Probable or Qualified"]}},
+    {id:"vcp_s2",      label:"VCP after a Stage 2 base",                    stageNum:2, group:1, cells:{A:["Plausible or better, with its Stage gate met"]}},
+    {id:"vcp_s1",      label:"VCP after a Stage 1 to Stage 2 transition",   stageNum:2, group:1, cells:{A:["Plausible or better, with its Stage gate met"]}},
+    {id:"pull_back",   label:"Pulling Back within MT/LT Uptrend",           stageNum:2, group:1, cells:{A:["all four tests, Stage 2 Plausible or Probable"]}},
+    {id:"basing",      label:"Basing",                                      stageNum:2, group:1, cells:{A:["all four tests, Stage 2 Plausible or Probable"]}},
+    {id:"s2_pp",       label:"Stage 2",                                     stageNum:2, group:2, cells:{B:["Probable or Plausible"]}},
+    {id:"s2_possible", label:"Stage 2",                                     stageNum:2, group:2, cells:{C:["Possible"]}},
+    {id:"s1_probable", label:"Stage 1",                                     stageNum:1, group:2, cells:{C:["Probable"]}},
+    {id:"s4",          label:"Stage 4",                                     stageNum:4, group:3, cells:{F:["Probable or Plausible"]}},
+    {id:"other",       label:"Every other stock",                           stageNum:3, group:3, cells:{D:["no reading above"]}}
   ];
+  var TL_ROW_IDX = {};
+  for(var _tri = 0; _tri < TL_ROWS.length; _tri++) TL_ROW_IDX[TL_ROWS[_tri].id] = _tri;
 
   var TL_COLS = [
-    {id:"A", label:"A · Time to deploy capital (guess): Now",            timelbl:"Now"},
-    {id:"B", label:"B · Time to deploy capital (guess): This fortnight", timelbl:"This fortnight"},
-    {id:"C", label:"C · Time to deploy capital (guess): This next month",timelbl:"This next month"},
-    {id:"D", label:"D · Unclear",                                        timelbl:"Unclear"},
-    {id:"F", label:"F · Unclear",                                        timelbl:"Unclear"}
+    {id:"A", label:"A · a setup now",                       timelbl:"A setup now"},
+    {id:"B", label:"B · Stage 2 Plausible or Probable",     timelbl:"Stage 2"},
+    {id:"C", label:"C · Stage 2 Possible or Stage 1 Probable", timelbl:"Early"},
+    {id:"D", label:"D · every other stock",                 timelbl:"Other"},
+    {id:"F", label:"F · Stage 4",                           timelbl:"Stage 4"}
   ];
   var TL_COL_IDS = ["A","B","C","D","F"];
 
@@ -6449,10 +6473,9 @@ function renderCombos(){
   var TL_STAGE_RANK  = {2:4,1:3,3:2,4:1};
 
   var TL_GROUPS = [
-    {num:1, label:"Group 1 - Capital qualification tests"},
-    {num:2, label:"Group 2 - Early stage indicators"},
-    {num:3, label:"Group 3 - Long/mid-term up-trends"},
-    {num:4, label:"Group 4 - Avoid list (long/mid-term down-trends)"}
+    {num:1, label:"Grade A routes: a setup now (any one is enough)"},
+    {num:2, label:"The long-term trend"},
+    {num:3, label:"Stage 4, and every other stock"}
   ];
   // ---- Sector label colour palette (industry-keyed hues, built once per render) ----
   var _tlSecBg = {};
@@ -6501,30 +6524,16 @@ function renderCombos(){
   // ---- Data helpers ----
   if(window._sspBuildCohortIndex) window._sspBuildCohortIndex();
 
-  function tlGetRating(md, pathArr) {
-    var obj = md;
-    for(var _p = 0; _p < pathArr.length; _p++) { obj = obj ? obj[pathArr[_p]] : null; }
-    return (obj && obj.rating && obj.rating !== "None") ? obj.rating : null;
-  }
-  function tlIsS2PP(md) {
-    var r = md && md.stage_2 ? md.stage_2.rating : null;
-    return r === "Plausible" || r === "Probable";
-  }
-  function tlGetCells(md) {
-    if(!md) return [];
-    var result = [], s2pp = tlIsS2PP(md);
-    for(var ri = 0; ri < TL_ROWS.length; ri++) {
-      var row = TL_ROWS[ri];
-      if(row.s2gate && !s2pp) continue;
-      var rating = tlGetRating(md, row.path);
-      if(!rating) continue;
-      for(var col in row.cells) {
-        if(row.cells[col].indexOf(rating) >= 0) {
-          result.push({col:col, rowIdx:ri, stageNum:row.stageNum});
-        }
-      }
+  function tlCellsFor(ticker) {
+    var x = (D.tm_rating) ? D.tm_rating[ticker] : null;
+    if(!x) return [];
+    var out = [];
+    for(var _k = 0; _k < x[1].length; _k++) {
+      var _ri = TL_ROW_IDX[x[1][_k]];
+      if(_ri === undefined) continue;
+      out.push({col:x[0], rowIdx:_ri, stageNum:TL_ROWS[_ri].stageNum});
     }
-    return result;
+    return out;
   }
   function tlBestCell(cells) {
     if(!cells.length) return null;
@@ -6557,7 +6566,7 @@ function renderCombos(){
     var md = fEntry.md_v2;
     var pEntry = priceMap[ticker];
     var name = (pEntry && pEntry.company_name) ? pEntry.company_name : ticker;
-    var allCells = tlGetCells(md);
+    var allCells = tlCellsFor(ticker);
     if(!allCells.length) continue;
     if(tlMode === "best") {
       var bc = tlBestCell(allCells);
@@ -6715,7 +6724,7 @@ function renderCombos(){
   // ---- Assemble ----
   var modeLbl = tlMode==="best" ? "Best — each stock once" : "Total — all qualifying cells";
   el.innerHTML = '<div class="tl-wrap">'
-    + '<div class="tl-page-title">Timeliness <span class="tl-mode-label">'+modeLbl+'</span></div>'
+    + '<div class="tl-page-title">Technical Momentum Rating <span class="tl-mode-label">'+modeLbl+'</span></div>'
     + controlsH + tilesH + colsH + '</div>';
 
   // ---- Wire hover + click on all name chips ----
@@ -8463,16 +8472,9 @@ var SUM_SSEM_DIMS = ["eps","ebitda","sales","tp","buy"];
 
 // V1 TM rating logic per Richard 12-May-26
 function SUM_v1TmRating(tk) {
-  var fm = (typeof filterMap !== "undefined") ? filterMap[tk] : null;
-  if (!fm) return "-";
-  var s = function(k) { return (fm[k] && fm[k].stage) ? fm[k].stage : null; };
-  if (s("s4_declining") === "Capital" || s("collapse") === "Capital") return "F";
-  if (s("s3_topping") === "Capital") return "D";
-  if (s("mm99") === "Capital" || s("vcp") === "Capital" || s("uptrend_retest") === "Capital") return "A";
-  if (s("probing_bet") === "Capital") return "B";
-  if (s("basing_plateau") === "Capital") return "C";
-  if (s("mm99") === "Late" || s("vcp") === "Late" || s("uptrend_retest") === "Late") return "C";
-  return "-";
+  /* MD-TMR-2026-10-03: the Technical Momentum Rating from D.tm_rating (one rule file); the old ladder is retired */
+  var x=(D.tm_rating)?D.tm_rating[tk]:null;
+  return x?x[0]:"-";
 }
 
 // SSEM per-timeframe total: sum signed scores across 5 dimensions for ONE timeframe

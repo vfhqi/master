@@ -21061,7 +21061,7 @@ renderTab("mm99");
         '      <button class="ctrl-btn" id="hdr-copy-btn" onclick="copyVisibleStocks()">Copy</button>\n'
         '      <button class="ctrl-btn" id="hdr-rdf-btn" onclick="RDF_toggle()">Ratings filter</button>\n'
         '      <button class="ctrl-btn" id="hdr-chart-btn" onclick="openChart(\'Overview\')">Chart</button>\n'
-        '      <a class="ctrl-btn" href="../../databases/soi-list.html" title="Standardised Stocks of Interest list">SOI List</a>\n'
+        # 'SOI List' button removed 6-Oct-26: the Standardised Stocks of Interest list was retired (SA - Stock Universe Canonical Source D79, D81 b)
         '      <button class="ctrl-btn ssp-btn" onclick="openStockView()" title="Single stock view — all ratings at a glance">Stock View</button>\n'
         # MD-HEADER-LINKS-ABSOLUTE-18Aug26. These were relative paths written for a
         # local file:// layout. On the deployed site "../../" climbs above the site

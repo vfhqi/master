@@ -860,6 +860,13 @@ def fetch_all_data(universe, full_refresh=False, no_reseed=False):
     # row. The RS benchmark is still keyed on BENCHMARK_TICKER by ticker, not by label,
     # so ^STOXX remains the relative-strength reference and is unaffected.
     tickers.append((BENCHMARK_50_TICKER, "BENCHMARK"))
+    # 6-Oct-2026 (project "Fund performance data analytics"): two accumulating (dividends reinvested) Stoxx
+    # Europe 600 tracker funds, cached so the monthly fund performance run can estimate the Stoxx Europe 600
+    # net return benchmark (Richard, 6-Oct-26: "Do use dividend adjusted benchmark"). Same non-fatal
+    # "BENCHMARK" label as the Euro Stoxx 50 above: a failed fetch can never fail the nightly build, and
+    # neither is a universe stock. Read only by projects/Fund performance data analytics/tools/fpa_benchmark.py.
+    tickers.append(("MEUD.PA", "BENCHMARK"))   # Amundi Stoxx Europe 600 UCITS ETF Acc, Paris
+    tickers.append(("XSX6.DE", "BENCHMARK"))   # Xtrackers Stoxx Europe 600 UCITS ETF 1C, Xetra
 
     data = {}
     stats = {"full": 0, "incr": 0, "cache": 0, "err": 0, "save_err": 0}

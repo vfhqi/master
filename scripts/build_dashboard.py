@@ -1309,6 +1309,7 @@ body[data-active-tab="post_indicators_bull"] .header,body[data-active-tab="post_
 .ssem-mode-toggle-row{display:inline-flex;gap:4px;align-items:center;margin-right:6px}
 .ssem-mode-btn{padding:3px 8px;font-size:10px;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text-dim);border-radius:4px;cursor:pointer;letter-spacing:.3px}
 .ssem-mode-btn.active{background:#1b3d5c;color:#fff;border-color:#1b3d5c}
+.ssem-cell-notscored{opacity:.4;font-style:italic}  /* 9-Oct-26: EBITDA not scored (a Financial, or none reported) */
 .ssem-mode-label{font-size:10px;color:var(--text-dim);margin-right:4px}
 
 /* UTR key description row above headers — SESSION 10: sticky <thead> handles vertical stacking, no per-row top needed */
@@ -5184,7 +5185,7 @@ window.EMR = (function(){
   function letter(g){var c=String(g||"").charAt(0);return RANK[c]?c:"N";}
   /* The same test as the Sell-side Momentum grading (ssemEnrichRow here; ssem_four_measures in build-ratings-snapshot.py):
      a stock with a sell-side entry whose three EBITDA readings are all missing (banks, insurers) is graded on four measures. */
-  function fourMeasures(t){var ss=(window.MASTER_DATA||{}).ssem,e=ss&&ss[t];if(!e||typeof e!=="object")return false;var d=e.ebitda_rev||{};return d.L1M==null&&d.L3M==null&&d.L6M==null;}
+  function fourMeasures(t){var ss=(window.MASTER_DATA||{}).ssem,e=ss&&ss[t];if(!e||typeof e!=="object")return false;if(typeof ssemIsFinancial==="function"&&ssemIsFinancial(t))return "fin";var d=e.ebitda_rev||{};return d.L1M==null&&d.L3M==null&&d.L6M==null;}  /* 9-Oct-26: every Financial is graded on four measures */
   function memoWords(m){return m==="none"?"no memo yet":(m==="current"?"a current memo":(m?String(m):""));}
   function pill(t,k){
     var x=row(t),e=x&&x.r?x.r[k]:null,nm=name(k,true);
@@ -5193,7 +5194,8 @@ window.EMR = (function(){
       return '<span class="emr-g emr-gN" title="'+esc(nm+": no rating"+why)+'">&ndash;</span>';
     }
     var sup=e.s||"",note=e.n||"";
-    if(k==="sellside_momentum"&&fourMeasures(t)){sup="4";note=(note?note+"; ":"")+"graded on four measures: the company reports no EBITDA";}
+    var fmK=k==="sellside_momentum"?fourMeasures(t):false;
+    if(fmK){sup="4";note=(note?note+"; ":"")+(fmK==="fin"?"graded on four measures: EBITDA is not relevant for a Financial":"graded on four measures: the company reports no EBITDA");}
     var tt=nm+": "+e.g+(e.o?" · "+e.o:"")+(e.a?" · as at "+fd(e.a):"")+(note?" · "+note:"");
     var tn=k==="tsr_valuation"?tsrNote(e):null;  /* MD-TSR-NOTE-2026-10-01 */
     if(tn&&tn.lab)tt+=tn.tip;
@@ -6957,6 +6959,25 @@ function ssemDimScore(L1M, L3M, L6M) {
   return {sub: sub, l1m_net: test_l1m, l3m_net: test_l3m, l6m_net: test_l6m, nulls: nullCount};
 }
 
+// FINANCIALS: EBITDA NOT RELEVANT (9-Oct-26, Richard: "For the SSEMs for Financials, EBITDA ("n.a.") is not
+// relevant ... exclude EBITDA and adjust ratings accordingly such that a financial is still comparable").
+// Every stock whose industry in data/universe.json is "G. Financials" is graded on four measures, whether or
+// not FactSet reports an EBITDA figure. Same source (universe.json) and same test as build-ratings-snapshot.py.
+var SSEM_FIN_SET = null;
+function ssemIsFinancial(t) {
+  if (!SSEM_FIN_SET) {
+    SSEM_FIN_SET = {};
+    var u = (window.MASTER_DATA || {}).universe || [];
+    for (var i = 0; i < u.length; i++) {
+      if (u[i] && String(u[i].industry || "").indexOf("G.") === 0) SSEM_FIN_SET[u[i].ticker] = 1;
+    }
+  }
+  return !!SSEM_FIN_SET[t];
+}
+function ssemFourWhy(fin) {
+  return fin ? "EBITDA is not relevant for a Financial" : "this company reports no EBITDA";
+}
+
 // Compute total SSEM score (-15 to +15) and per-dimension sub-scores.
 // Mutates row r adding: r.ssem_score, r.ssem_dim_eps/ebitda/sales/tp/buy (sub-scores), r.ssem_nulls (count).
 function ssemEnrichRow(r) {
@@ -6979,9 +7000,13 @@ function ssemEnrichRow(r) {
   // SA - Eight Master Ratings project): all three EBITDA readings missing (banks and insurers) -> graded
   // on the other four measures, rescaled to the -15..+15 range (x 15/12), the EBITDA gaps not counted
   // towards the ">= 3 missing: not graded" rule. Mirrored EXACTLY in databases/scripts/build-ratings-snapshot.py.
-  if (r.ebitda_1m == null && r.ebitda_3m == null && r.ebitda_6m == null) {
+  // Extended 9-Oct-26: every Financial too (ssemIsFinancial above), its EBITDA readings, present or missing,
+  // neither scored nor counted as missing.
+  var ebitdaNulls = (r.ebitda_1m == null ? 1 : 0) + (r.ebitda_3m == null ? 1 : 0) + (r.ebitda_6m == null ? 1 : 0);
+  r.ssem_financial = ssemIsFinancial(r.ticker);
+  if (ebitdaNulls === 3 || r.ssem_financial) {
     total = (total - r.ssem_dim_ebitda) * 1.25;
-    totalNulls = totalNulls - 3;
+    totalNulls = totalNulls - ebitdaNulls;
     r.ssem_four_measures = true;
   } else {
     r.ssem_four_measures = false;
@@ -7244,7 +7269,7 @@ function ssemHeadersHTML() {
       }
     }
   }
-  h += th("Score","ssem_score","col-num","Total SSEM score (-15 to +15) using net-off logic across 15 tests; a company that reports no EBITDA (banks, insurers) is scored on the other 12 tests, rescaled x15/12");
+  h += th("Score","ssem_score","col-num","Total SSEM score (-15 to +15) using net-off logic across 15 tests; a Financial (EBITDA not relevant) or a company that reports no EBITDA is scored on the other 12 tests, rescaled x15/12 (marked 4)");
   h += th("Rating","ssem_rating_sort","col-txt","A-F rating via bell-curve over SSEM universe (10/15/25/25/25)");
   h += '</tr></thead>';
   return h;
@@ -7266,7 +7291,8 @@ function ssemRowHTML(r) {
         var firstLast = (t === 0 ? " " + dm.grpCls + "-first" : (t === SSEM_TIMES.length-1 ? " " + dm.grpCls + "-last" : ""));
         var rawVals = [ssemRowVal(r, dm.k, "L1M"), ssemRowVal(r, dm.k, "L3M"), ssemRowVal(r, dm.k, "L6M"), ssemRowVal(r, dm.k, "L12M")];
         var v = ssemDisplayValue(rawVals[0], rawVals[1], rawVals[2], rawVals[3], tm.k);
-        h += '<td class="col-num col-filter' + firstLast + ' ' + ssemHeatClass(v) + '">' + fpcRaw(v) + '</td>';
+        var nsE = (dm.k === "ebitda" && r.ssem_four_measures);  /* 9-Oct-26: EBITDA not scored for this stock */
+        h += '<td class="col-num col-filter' + firstLast + ' ' + (nsE ? 'ssem-cell-neutral ssem-cell-notscored' : ssemHeatClass(v)) + '"' + (nsE ? ' title="Not scored: ' + ssemFourWhy(r.ssem_financial) + '"' : '') + '>' + fpcRaw(v) + '</td>';
       }
     }
   } else {
@@ -7277,13 +7303,14 @@ function ssemRowHTML(r) {
         var firstLast2 = (d2 === 0 ? " grp-tp-first" : (d2 === SSEM_DIMS.length-1 ? " grp-tp-last" : ""));
         var rawVals2 = [ssemRowVal(r, dm2.k, "L1M"), ssemRowVal(r, dm2.k, "L3M"), ssemRowVal(r, dm2.k, "L6M"), ssemRowVal(r, dm2.k, "L12M")];
         var v2 = ssemDisplayValue(rawVals2[0], rawVals2[1], rawVals2[2], rawVals2[3], tm2.k);
-        h += '<td class="col-num col-filter' + firstLast2 + ' ' + ssemHeatClass(v2) + '">' + fpcRaw(v2) + '</td>';
+        var nsE2 = (dm2.k === "ebitda" && r.ssem_four_measures);  /* 9-Oct-26: EBITDA not scored for this stock */
+        h += '<td class="col-num col-filter' + firstLast2 + ' ' + (nsE2 ? 'ssem-cell-neutral ssem-cell-notscored' : ssemHeatClass(v2)) + '"' + (nsE2 ? ' title="Not scored: ' + ssemFourWhy(r.ssem_financial) + '"' : '') + '>' + fpcRaw(v2) + '</td>';
       }
     }
   }
   // Score — rating-keyed colour (D-MD-SSEM-6)
   var ratingKey = (r.ssem_rating === "-") ? "N" : r.ssem_rating;
-  h += '<td class="ssem-score-cell ssem-score-r' + ratingKey + '"' + (r.ssem_four_measures ? ' title="Scored on four measures: this company reports no EBITDA; rescaled to the 15-test range"' : '') + '>' + ssemFmtScore(r.ssem_score) + (r.ssem_four_measures ? '<sup>4</sup>' : '') + '</td>';  /* MD-TIDY-2026-10-02: whole number, (n) for negatives */
+  h += '<td class="ssem-score-cell ssem-score-r' + ratingKey + '"' + (r.ssem_four_measures ? ' title="Scored on four measures: ' + ssemFourWhy(r.ssem_financial) + '; rescaled to the 15-test range"' : '') + '>' + ssemFmtScore(r.ssem_score) + (r.ssem_four_measures ? '<sup>4</sup>' : '') + '</td>';  /* MD-TIDY-2026-10-02: whole number, (n) for negatives */
   h += '<td style="text-align:center">' + ssemRatingPill(r.ssem_rating) + '</td>';
   h += '</tr>';
   return h;
@@ -7386,7 +7413,7 @@ function renderSSEM(){
     else if(g==="D")distD++;else if(g==="F")distF++;else distN++;
   }
   var h='<div class="summary-tile" id="section-summary"><h3>SS Earnings Momentum &mdash; Decision Lens</h3>'
-    +'<div class="sub">15-test net-of-prior-period scoring across 5 dimensions (EPS, EBITDA, Sales, TP, Buy) x 3 timeframes (L1M, L3M-net, L6M-net). Score range -15 to +15. A-F bell-curve distribution across the SSEM-covered universe (10/15/25/25/25). L12M shown for visual reference only (not scored). Use VIEW toggle to switch column grouping (TYPE/TIME); use VALUES toggle to switch between cumulative (raw) and per-period (net) revisions.</div>'
+    +'<div class="sub">15-test net-of-prior-period scoring across 5 dimensions (EPS, EBITDA, Sales, TP, Buy) x 3 timeframes (L1M, L3M-net, L6M-net). Score range -15 to +15. A-F bell-curve distribution across the SSEM-covered universe (10/15/25/25/25). Financials (EBITDA not relevant) and companies reporting no EBITDA are scored on the other 4 dimensions, rescaled x15/12 (marked 4; their EBITDA cells shown faded). L12M shown for visual reference only (not scored). Use VIEW toggle to switch column grouping (TYPE/TIME); use VALUES toggle to switch between cumulative (raw) and per-period (net) revisions.</div>'
     +'<div class="summary-stats">'
     +sumStat("Stocks",xyFmt(rowsAll.length,totalCount))
     +sumStat("A",distA,"green")+sumStat("B",distB,"green")+sumStat("C",distC,"amber")+sumStat("D",distD,"amber")+sumStat("F",distF,"red")+sumStat("&mdash;",distN)

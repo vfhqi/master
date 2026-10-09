@@ -7017,6 +7017,29 @@ function ssemEnrichRow(r) {
 
 // Assign A/B/C/D/F/- ratings via bell-curve distribution: 10/15/25/25/25.
 // Mutates each row in `rows`. Stocks with >=3 null tests get rating "-" and are excluded from the percentile ranking.
+// SAME POPULATION AS THE RATINGS STORE (9-Oct-26, D-EMR-100 live check). The store (build_ssem_index_bellcurve in
+// databases/scripts/build-ratings-snapshot.py) ranks every stock in factset-ssem.json; this page's rows cover only the
+// stocks with a dashboard row. Every sell-side stock without a row is added here for the ranking only (never shown,
+// never counted in the tiles), so the cut points, and therefore every grade, match the store.
+function ssemRankOnlyRows(rowsAll) {
+  var seen = {}, extra = [], ss = (D && D.ssem) || {};
+  for (var i = 0; i < rowsAll.length; i++) seen[rowsAll[i].ticker] = 1;
+  for (var t in ss) {
+    if (t === "_meta" || seen[t]) continue;
+    var e = ss[t];
+    if (!e || typeof e !== "object") continue;
+    var r = {ticker: t, _ssem_rank_only: true};
+    var ks = ["eps", "ebitda", "sales", "tp", "buy"];
+    for (var k = 0; k < ks.length; k++) {
+      var d = e[ks[k] + "_rev"] || {};
+      r[ks[k] + "_1m"] = d.L1M; r[ks[k] + "_3m"] = d.L3M; r[ks[k] + "_6m"] = d.L6M;
+    }
+    ssemEnrichRow(r);
+    extra.push(r);
+  }
+  return extra;
+}
+
 function ssemAssignRatings(rows) {
   var eligible = [];
   var ineligible = [];
@@ -7342,7 +7365,7 @@ function precomputeSsemRatings(){
     ssemEnrichRow(r);
     rowsAll.push(r);
   }
-  ssemAssignRatings(rowsAll);
+  ssemAssignRatings(rowsAll.concat(ssemRankOnlyRows(rowsAll)));  /* 9-Oct-26: rank the store's population */
   ssemRatingMap = {};
   for(var rk=0;rk<rowsAll.length;rk++){ssemRatingMap[rowsAll[rk].ticker]=rowsAll[rk].ssem_rating;}
 }
@@ -7375,7 +7398,7 @@ function renderSSEM(){
     ssemEnrichRow(r);
     rowsAll.push(r);
   }
-  ssemAssignRatings(rowsAll);
+  ssemAssignRatings(rowsAll.concat(ssemRankOnlyRows(rowsAll)));  /* 9-Oct-26: rank the store's population */
   // Populate global ticker->rating lookup so buildPortfolioTile (LP branch) shows the same rating.
   ssemRatingMap = {};
   for(var rk=0;rk<rowsAll.length;rk++){ssemRatingMap[rowsAll[rk].ticker]=rowsAll[rk].ssem_rating;}

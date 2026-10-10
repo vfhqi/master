@@ -19698,7 +19698,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   var COLR={"Bottoming":"#5f6b7a","Turning/Inflecting":"#00796b","Broadening":"#558b2f","Reinforcing":"#1b5e20","Stalling":"#b45309","Collapsing":"#991b1b"};
   var RANK={};for(var oi=0;oi<ORDER.length;oi++)RANK[ORDER[oi]]=oi;
   var st=null;
-  function initState(){st={ph:{},scope:"all",q:"",sortKey:"ph",asc:true,chk:false};}
+  function initState(){st={ph:{},scope:"all",q:"",sortKey:"ph",asc:true};}
 
   function live(){var o={},inv=((window.MASTER_DATA||{}).positions||{}).investments||[];for(var i=0;i<inv.length;i++)if(inv[i].ticker)o[inv[i].ticker]=true;return o;}
   function fmtDate(s){if(!s)return "unknown";var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];var p=String(s).split("-");return p.length===3?(+p[2])+"-"+m[+p[1]-1]+"-"+p[0]:s;}
@@ -19724,12 +19724,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"lo",g:"N",label:"P vs. 52W Low",sh:"P vs. 52W Low",key:"lo",type:"pct",dp:0,sign:true,red:0,green:0.30,tip:"Share price against its 52-week low. Decides a flat slope with positive breadth: within 30% = Bottoming, otherwise Stalling"},
     {id:"pb",g:"N",label:"SS Price-target Net Upgrade Breadth L100D (information)",sh:"Price-target Breadth",key:"pb",type:"pct",dp:0,sign:true,red:-0.5,green:0.5,tip:"The same count on price targets. Shown for information; it does not decide the Phase"},
     {id:"pe",g:"F",label:"24-month-forward P/E now",sh:"P/E now",key:"pe",type:"x",gs:true,tip:"Price over consensus earnings for the twelve months starting a year from now (the Master Dashboard's valuation reading)"},
-    {id:"fl",g:"F",label:"Fair multiple, bear (base − 10 points)",sh:"Bear",key:"fl",type:"x",tip:"The percentile of the stock's own monthly 24-month-forward P/E history ten points below the base, times the Market Cycle Phase factor"},
-    {id:"f",g:"F",label:"Fair two year forward PE multiple (base)",sh:"Base",key:"f",type:"xb",tip:"Uptrend percentiles: Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th; times the Market Cycle Phase factor (Uptrend and Bottoming 1.0, Topping 0.8, Downtrend 0.6)"},
-    {id:"fu",g:"F",label:"Fair multiple, bull (base + 10 points)",sh:"Bull",key:"fu",type:"x",tip:"The percentile ten points above the base (at most the 100th, the highest month), times the Market Cycle Phase factor"},
+    {id:"fl",g:"F",label:"Fair multiple, bear (base − 10 points)",sh:"Bear",key:"fl",type:"x",tip:"Ten percentile points below the base, on the same bell curve, times the Market Cycle Phase factor"},
+    {id:"f",g:"F",label:"Fair two year forward PE multiple (base)",sh:"Base",key:"f",type:"xb",tip:"Uptrend percentiles: Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th, read from a bell curve on the stock's ten-year history with spike months removed (median and robust standard deviation); times the Market Cycle Phase factor (Uptrend and Bottoming 1.0, Topping 0.8, Downtrend 0.6)"},
+    {id:"fu",g:"F",label:"Fair multiple, bull (base + 10 points)",sh:"Bull",key:"fu",type:"x",tip:"Ten percentile points above the base, at most the 95th (a bell curve has no 100th), times the Market Cycle Phase factor"},
     {id:"up",g:"F",label:"Base against P/E now",sh:"Base vs. now",key:"up",type:"pct",dp:0,sign:true,red:-0.3,green:0.3,tip:"How far the base fair multiple sits above (+) or below (−) today's multiple"},
-    {id:"bl",g:"F",label:"Model template's current blend, (75th + 2 x median) / 3",sh:"Template blend",key:"bl",type:"x",tip:"What the Excel model template uses today, for comparison"},
-    {id:"chk",g:"F",label:"Check: base more than 1.5 x today",sh:"Check",key:"chk",type:"chk",tip:"The base fair multiple is more than 1.5 times today's multiple: the ten-year history holds a higher-multiple period or years of low earnings. Check before trusting it"}
+    {id:"mr",g:"F",label:"Spike months removed (of the ten years)",sh:"Spikes removed",key:"mr",type:"int",tip:"Months more than 3 robust standard deviations from the stock's median ratio, either side, left out before the bell curve is fitted"},
+    {id:"bl",g:"F",label:"Model template's current blend, (75th + 2 x median) / 3",sh:"Template blend",key:"bl",type:"x",tip:"What the Excel model template uses today, for comparison"}
   ];
 
   function cell(c,r,L){
@@ -19760,9 +19760,11 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(c.key==="sb"&&r.sbw)title=r.sbw[0]+" sales estimates: "+r.sbw[1]+" raised, "+r.sbw[2]+" cut in the last 100 days";
     if(c.key==="pb"&&r.pbw)title=r.pbw[0]+" price targets: "+r.pbw[1]+" raised, "+r.pbw[2]+" cut in the last 100 days";
     if(c.key==="mp"&&r.mpx){var pp=[];for(var q=0;q<r.mpx.length;q++)pp.push(fmtDate(String(r.mpx[q][0]).replace("*",""))+(String(r.mpx[q][0]).indexOf("*")>=0?" (read 2-Oct-26)":"")+": "+(r.mpx[q][1]==null?"no reading":fPct(r.mpx[q][1],0,true)));title="Sales breadth at each month-end, newest first. "+pp.join("; ");}
-    if(c.key==="fl"&&r.ql!=null)title=pctl(r.ql)+" percentile of "+r.pem+" months";
-    if(c.key==="f"&&r.qb!=null&&r.pem)title=pctl(r.qb)+" percentile of "+r.pem+" months"+(PD()._meta.market&&PD()._meta.market.factor!==1?", times "+PD()._meta.market.factor:"");
-    if(c.key==="fu"&&r.qu!=null)title=pctl(r.qu)+" percentile of "+r.pem+" months";
+    var fac=(PD()._meta.market&&PD()._meta.market.factor!==1)?", times "+PD()._meta.market.factor:"";
+    var src=" of the bell curve on "+r.mu+" months"+(r.mr?" ("+r.mr+" spike month"+(r.mr>1?"s":"")+" removed)":"")+fac;
+    if(c.key==="fl"&&r.ql!=null)title=pctl(r.ql)+" percentile"+src;
+    if(c.key==="f"&&r.qb!=null)title=pctl(r.qb)+" percentile"+src;
+    if(c.key==="fu"&&r.qu!=null)title=pctl(r.qu)+" percentile"+src;
     if(c.type==="xb")cls.push("lp-base");
     return '<td class="'+cls.join(" ")+'" style="'+sty+'"'+(title?' title="'+esc(title)+'"':'')+'>'+txt+'</td>';
   }
@@ -19795,7 +19797,6 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       var r=S[i];r._rk=r.ph?RANK[r.ph]:99;
       if(st.scope==="live"&&!L[r.t])continue;
       if(anyPh&&!st.ph[r.ph||"none"])continue;
-      if(st.chk&&!r.chk)continue;
       if(q){var hay=(r.n+" "+r.t+" "+(r.ind||"")+" "+(r.sec||"")+" "+(r.ph||"")).toLowerCase();if(hay.indexOf(q)<0)continue;}
       rows.push(r);
     }
@@ -19846,13 +19847,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<li>Rising slope: <b>Turning/Inflecting</b> if the breadth is not positive; <b>Reinforcing</b> if it has been positive for more than four months (five or more month-ends), otherwise <b>Broadening</b></li>'
       +'<li>Flat slope: <b>Bottoming</b> if the breadth is not positive; if positive, <b>Bottoming</b> within 30% of the 52-week low, otherwise <b>Stalling</b></li></ul>'
       +'<p>It is a <i>starting</i> Phase. The Investment Analyst\'s judged Phase sits beside it once memos record one; none do yet.</p>'
-      +'<p><b>The fair two year forward PE multiple</b> is a percentile of the stock\'s own monthly 24-month-forward P/E history (ten years): Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th. Bear is ten points lower, bull ten points higher. All three are multiplied by the Market Cycle Phase factor. "Check" marks a base more than 1.5 times today\'s multiple. Whether to use the last five years instead of ten is an open question (10-Oct-26).</p>'
+      +'<p><b>The fair two year forward PE multiple</b> is a percentile of the stock\'s own monthly 24-month-forward P/E history over ten years: Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th. Bear is ten points lower, bull ten points higher (at most the 95th). Spike months, more than 3 robust standard deviations from the stock\'s median either side, are removed first; the percentiles are then read from a bell curve on the median and robust standard deviation of the months that remain. A robust standard deviation is the typical distance of a month from the median, which a few extreme months cannot distort. All three are multiplied by the Market Cycle Phase factor.</p>'
       +'</div></details>';
     h+=chips();
     var L=live(),nL=0;for(var t in L)nL++;
     h+='<div class="pe-bar"><span class="pe-countbox" id="lp-countbox"></span><span class="pe-spacer"></span>'
       +'<span class="lp-scope"><button class="pe-btn'+(st.scope==="all"?" lp-on":"")+'" data-lp-scope="all">All stocks</button><button class="pe-btn'+(st.scope==="live"?" lp-on":"")+'" data-lp-scope="live">Live holdings ('+nL+')</button></span>'
-      +'<label class="pe-chk"><input type="checkbox" id="lp-chkonly"'+(st.chk?" checked":"")+'> Only "check" flags</label>'
       +'<input class="pe-search" id="lp-search" type="search" placeholder="Search company, ticker, industry, sector or Phase" value="'+esc(st.q)+'">'
       +'<button class="pe-btn" data-lp-reset="1">Show all</button></div>';
     return h+'</div>';
@@ -19904,7 +19904,6 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       else if(t.getAttribute("data-lp-reset")){initState();paintTop();paintBody();}
     });
     c.addEventListener("input",function(e){if(e.target&&e.target.id==="lp-search"){st.q=e.target.value;paintBody();}});
-    c.addEventListener("change",function(e){if(e.target&&e.target.id==="lp-chkonly"){st.chk=!!e.target.checked;paintBody();}});
     c.addEventListener("toggle",function(){sizeWrap();},true);
   }
   window.renderLifecyclePhases=function(){

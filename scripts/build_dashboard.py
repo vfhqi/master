@@ -308,6 +308,20 @@ def load_data():
     else:
         print("  [pool] pool-eligibility.json missing -- the tab will say so.")
 
+    # MD-LIFECYCLE-PHASES-2026-10-10: Phases of a Stock Lifecycle (FA - Financial Modelling, session 10). Rebuilt here,
+    # in-process like the Pool readings; a failure keeps the previous file and says so; never fails the build.
+    phases = None
+    try:
+        import build_lifecycle_phases as _blp
+        _blp.main()
+    except Exception as _e:
+        print("  [phases] WARNING: build_lifecycle_phases failed ({}); using the previous lifecycle-phases.json if any".format(_e))
+    _phases_path = DATA_DIR / "lifecycle-phases.json"
+    if _phases_path.exists():
+        phases = safe_json_load(_phases_path)
+    else:
+        print("  [phases] lifecycle-phases.json missing -- the tab will say so.")
+
     # MD-V2-S36-BRIEF-MARKER: universe_updated = mtime of data/universe.json,
     # formatted as 'YYYY-MM-DD HH:MM'. The file has no _meta field, so we use mtime.
     try:
@@ -350,6 +364,8 @@ def load_data():
         master["qot"] = qot
     if pool:
         master["pool"] = pool  # MD-POOL-ELIG-2026-09-28
+    if phases:
+        master["phases"] = phases  # MD-LIFECYCLE-PHASES-2026-10-10
     if ssem:
         ssem_data = {k: v for k, v in ssem.items() if k != "_meta"}
         master["ssem"] = ssem_data
@@ -499,6 +515,7 @@ TABS = [
     # Data / reference tabs
     {"id": "pool_elig", "label": "Pool of Stocks Eligible for Middle Innings Portfolio Selection", "accent": "#1b5e20"},  # MD-POOL-ELIG-2026-09-28
     {"id": "ideas_lists", "label": "Pool of Middle Innings Eligible Stocks", "accent": "#1b5e20"},  # MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02
+    {"id": "lifecycle_phases", "label": "Phases of a Stock Lifecycle", "accent": "#1b3d5c"},  # MD-LIFECYCLE-PHASES-2026-10-10
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -529,6 +546,7 @@ IMPLEMENTED_TABS = [
     "ssem", "val",
     "pool_elig",  # MD-POOL-ELIG-2026-09-28
     "ideas_lists",  # MD-IDEAS-LISTS-2026-09-28
+    "lifecycle_phases",  # MD-LIFECYCLE-PHASES-2026-10-10
 ]
 
 
@@ -799,6 +817,36 @@ body[data-active-tab="ideas_lists"] .v2-nav{display:flex}
 body[data-active-tab="ideas_lists"] .header-controls-row{display:none !important}
 body[data-active-tab="ideas_lists"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="ideas_lists"]{--header-height:70px}
+/* MD-LIFECYCLE-PHASES-2026-10-10 -- Phases of a Stock Lifecycle (tab lifecycle_phases): built on the Pool page's styles (pe-*) */
+body[data-active-tab="lifecycle_phases"] .header-tabs-row{display:none !important}
+body[data-active-tab="lifecycle_phases"] .v2-nav{display:flex}
+body[data-active-tab="lifecycle_phases"] .header-controls-row{display:none !important}
+body[data-active-tab="lifecycle_phases"] .header{height:auto !important;padding-bottom:0 !important}
+body[data-active-tab="lifecycle_phases"]{--header-height:70px}
+.v2-nav-btn[data-v2-tab="lifecycle_phases"]{width:88px}
+col.pe-c-lpph{width:122px}
+table.pe-table.lp-table{min-width:1500px}
+table.pe-table tr.pe-g th.lp-gp,table.pe-table tr.pe-h th.lp-hp{background:#ece8f3}
+.lp-pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;line-height:16px}
+.lp-bot{background:#5f6b7a}.lp-tur{background:#00796b}.lp-bro{background:#558b2f}.lp-rei{background:#1b5e20}.lp-sta{background:#b45309}.lp-col{background:#991b1b}
+.lp-none{color:#999;font-style:italic;font-size:11px}
+table.pe-table td.lp-phcell{padding-left:6px}
+table.pe-table td.lp-flat{font-style:italic}
+table.pe-table td.lp-base{font-weight:700}
+table.pe-table td.lp-chkc{text-align:center}
+.lp-chk{display:inline-block;font-size:10px;font-weight:700;padding:0 6px;border-radius:3px;background:#fff8e1;color:#8d6e00;border:1px solid #e6cf7a;cursor:help}
+.lp-live{display:inline-block;margin-left:5px;font-size:9px;font-weight:700;color:#1b3d5c;border:1px solid #1b3d5c;border-radius:3px;padding:0 3px;vertical-align:1px;cursor:help}
+.lp-chips{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:7px 0 6px}
+.lp-chip{font:inherit;font-size:11px;padding:2px 10px;border-radius:12px;cursor:pointer;background:#fbfbf9;border:1.5px solid #cfcfc8;color:#333;white-space:nowrap}
+.lp-chip:hover{filter:brightness(0.97)}
+.lp-chip b{margin-left:3px}
+.lp-scope{display:inline-flex;gap:3px}
+.lp-scope .pe-btn.lp-on{background:#1b3d5c;color:#fff;border-color:#1b3d5c}
+details.lp-how{margin:6px 0 2px;font-size:11.5px}
+details.lp-how summary{cursor:pointer;color:#1b3d5c;font-weight:600}
+.lp-howb{padding:6px 10px;background:#fbfaf5;border:1px solid var(--border);border-radius:6px;margin-top:4px;line-height:1.45}
+.lp-howb ul{margin:4px 0 4px 18px}
+.lp-howb p{margin:4px 0}
 .il-togs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:7px 0 6px}
 .il-tnote{font-size:10.5px;color:var(--text-dim);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .il-tnote b{color:#222}
@@ -11352,7 +11400,7 @@ function SUM_renderQualifiedStocks() {
               /* MD-POOL-ELIG-2026-09-28: pages that use the V2 header chrome must be measured too. Without this, opening
                  the dashboard straight onto them (a bookmark or a reload with #pool_elig or #combos) left .main at the
                  70px fallback under a ~245px header, hiding the top of the page (found on the live site, 28-Sep-26). */
-              active === 'combos' || active === 'pool_elig' || active === 'ideas_lists');
+              active === 'combos' || active === 'pool_elig' || active === 'ideas_lists' || active === 'lifecycle_phases');  /* MD-LIFECYCLE-PHASES-2026-10-10 */
     if (!v2) return;
     /* S66b: measure the actual rendered header height (header-top + nav groups) and
        publish as --header-height so .main margin-top and all frozen top: offsets are correct */
@@ -11448,6 +11496,7 @@ function SUM_renderQualifiedStocks() {
 +     '<button class="v2-nav-btn" data-v2-tab="combos" onclick="switchTab(\'combos\')">Timeliness</button>'
       /* MD-POOL-MI-2026-10-02 (Message 2): the button for pool_elig was removed: one Pool page, Richard: "There is only meant to be the one" */
       +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Pool of Middle Innings Eligible Stocks</button>'  /* MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02 */
+      +     '<button class="v2-nav-btn" data-v2-tab="lifecycle_phases" onclick="switchTab(\'lifecycle_phases\')">Phases of a Stock Lifecycle</button>'  /* MD-LIFECYCLE-PHASES-2026-10-10 */
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -19635,6 +19684,237 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 })();
 
 /* ============================================================================
+   PHASES OF A STOCK LIFECYCLE  (tab id lifecycle_phases; MD-LIFECYCLE-PHASES-2026-10-10)
+   Richard's brief of 10-Oct-26 (FA - Financial Modelling, session 10, D-FM-77 onwards): every stock's starting Phase
+   from the slope of its 150-day moving average and its sales Net Upgrade Breadth, every input reading beside it, and
+   the fair two year forward PE multiple his percentile rule gives. Data: MASTER_DATA.phases, written by
+   scripts/build_lifecycle_phases.py, whose docstring holds every definition. Styles reuse the Pool page's (pe-*).
+   ============================================================================ */
+(function(){
+  function PD(){return (window.MASTER_DATA||{}).phases||null;}
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+  var ORDER=["Bottoming","Turning/Inflecting","Broadening","Reinforcing","Stalling","Collapsing"];
+  var CLS={"Bottoming":"lp-bot","Turning/Inflecting":"lp-tur","Broadening":"lp-bro","Reinforcing":"lp-rei","Stalling":"lp-sta","Collapsing":"lp-col"};
+  var COLR={"Bottoming":"#5f6b7a","Turning/Inflecting":"#00796b","Broadening":"#558b2f","Reinforcing":"#1b5e20","Stalling":"#b45309","Collapsing":"#991b1b"};
+  var RANK={};for(var oi=0;oi<ORDER.length;oi++)RANK[ORDER[oi]]=oi;
+  var st=null;
+  function initState(){st={ph:{},scope:"all",q:"",sortKey:"ph",asc:true,chk:false};}
+
+  function live(){var o={},inv=((window.MASTER_DATA||{}).positions||{}).investments||[];for(var i=0;i<inv.length;i++)if(inv[i].ticker)o[inv[i].ticker]=true;return o;}
+  function fmtDate(s){if(!s)return "unknown";var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];var p=String(s).split("-");return p.length===3?(+p[2])+"-"+m[+p[1]-1]+"-"+p[0]:s;}
+  function fPct(v,dp,sign){if(v==null||isNaN(v))return null;var x=v*100,s=x.toFixed(dp),z=(+s===0);if(z)s=(0).toFixed(dp);return (!z&&x>0&&sign?"+":"")+s.replace("-","−")+"%";}
+  function fX(v){return v==null||isNaN(v)?null:(v>=100?v.toFixed(0):v.toFixed(1))+"x";}
+  function scaleBg(v,red,green){
+    if(v==null||isNaN(v))return "";
+    var t=(v-red)/(green-red);if(t<0)t=0;if(t>1)t=1;var i,a;
+    if(t>=0.5){i=(t-0.5)*2;a=(0.06+0.42*i).toFixed(3);return "background-color:rgba(22,163,74,"+a+")";}
+    i=(0.5-t)*2;a=(0.06+0.42*i).toFixed(3);return "background-color:rgba(153,27,27,"+a+")";
+  }
+  function pctl(n){return n+(n%10===1&&n!==11?"st":n%10===2&&n!==12?"nd":n%10===3&&n!==13?"rd":"th");}
+
+  /* g: I = Information, P = Phase, N = the inputs, F = the fair multiple. sh = short name, label = full name. */
+  var COLS=[
+    {id:"name",g:"I",label:"Company",sh:"Company",key:"n",type:"name",w:"name"},
+    {id:"ind",g:"I",label:"Industry",sh:"Industry",key:"ind",type:"txt",w:"ind"},
+    {id:"sec",g:"I",label:"Sector",sh:"Sector",key:"sec",type:"txt",w:"sec"},
+    {id:"ph",g:"P",label:"Starting Phase, by your rule",sh:"Phase",key:"_rk",type:"phase",w:"lpph",gs:true,tip:"The Phase of a Stock Lifecycle that the rule gives. A starting Phase: the Investment Analyst's judged Phase, where a memo records one, sits beside it and may differ"},
+    {id:"sl",g:"N",label:"150D Slope (22 trading days)",sh:"150D Slope",key:"sl",type:"pct",dp:1,sign:true,red:-0.03,green:0.03,gs:true,tip:"The 150-day moving average today against its level 22 trading days earlier. Flat = between −1% and +1%"},
+    {id:"sb",g:"N",label:"SS Sales Net Upgrade Breadth L100D",sh:"Sales Breadth",key:"sb",type:"pct",dp:0,sign:true,red:-0.5,green:0.5,tip:"(Sales estimates raised minus cut over the last 100 days) divided by the number of estimates, calendar year + 1. Decides the Phase. Zero counts as not positive"},
+    {id:"mp",g:"N",label:"Month-ends positive (sales breadth)",sh:"Months +",key:"mp",type:"int",tip:"Consecutive month-ends, counted back from the latest, at which the sales breadth was above zero. Five or more with the breadth positive today = Reinforcing rather than Broadening"},
+    {id:"lo",g:"N",label:"P vs. 52W Low",sh:"P vs. 52W Low",key:"lo",type:"pct",dp:0,sign:true,red:0,green:0.30,tip:"Share price against its 52-week low. Decides a flat slope with positive breadth: within 30% = Bottoming, otherwise Stalling"},
+    {id:"pb",g:"N",label:"SS Price-target Net Upgrade Breadth L100D (information)",sh:"Price-target Breadth",key:"pb",type:"pct",dp:0,sign:true,red:-0.5,green:0.5,tip:"The same count on price targets. Shown for information; it does not decide the Phase"},
+    {id:"pe",g:"F",label:"24-month-forward P/E now",sh:"P/E now",key:"pe",type:"x",gs:true,tip:"Price over consensus earnings for the twelve months starting a year from now (the Master Dashboard's valuation reading)"},
+    {id:"fl",g:"F",label:"Fair multiple, bear (base − 10 points)",sh:"Bear",key:"fl",type:"x",tip:"The percentile of the stock's own monthly 24-month-forward P/E history ten points below the base, times the Market Cycle Phase factor"},
+    {id:"f",g:"F",label:"Fair two year forward PE multiple (base)",sh:"Base",key:"f",type:"xb",tip:"Uptrend percentiles: Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th; times the Market Cycle Phase factor (Uptrend and Bottoming 1.0, Topping 0.8, Downtrend 0.6)"},
+    {id:"fu",g:"F",label:"Fair multiple, bull (base + 10 points)",sh:"Bull",key:"fu",type:"x",tip:"The percentile ten points above the base (at most the 100th, the highest month), times the Market Cycle Phase factor"},
+    {id:"up",g:"F",label:"Base against P/E now",sh:"Base vs. now",key:"up",type:"pct",dp:0,sign:true,red:-0.3,green:0.3,tip:"How far the base fair multiple sits above (+) or below (−) today's multiple"},
+    {id:"bl",g:"F",label:"Model template's current blend, (75th + 2 x median) / 3",sh:"Template blend",key:"bl",type:"x",tip:"What the Excel model template uses today, for comparison"},
+    {id:"chk",g:"F",label:"Check: base more than 1.5 x today",sh:"Check",key:"chk",type:"chk",tip:"The base fair multiple is more than 1.5 times today's multiple: the ten-year history holds a higher-multiple period or years of low earnings. Check before trusting it"}
+  ];
+
+  function cell(c,r,L){
+    var v=r[c.key],cls=[],sty="",txt,title="";
+    if(c.gs)cls.push("pe-gs");
+    if(c.type==="name"){
+      return '<td class="pe-name"><span class="co" data-lp-open="'+esc(r.t)+'" title="'+esc(r.n)+' ('+esc(r.t)+'): open the Stock View">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span>'+(L[r.t]?'<span class="lp-live" title="A live holding (the Position Management System)">LIVE</span>':'')+'</td>';
+    }
+    if(c.type==="txt")return '<td class="pe-txt" title="'+esc(v||"")+'">'+esc(v||"")+'</td>';
+    if(c.type==="phase"){
+      if(!r.ph)return '<td class="pe-gs lp-phcell"><span class="lp-none" title="'+esc(r.why||"no reading")+'">no reading</span></td>';
+      var how=r.why?(" ("+r.why+": "+fPct(r.lo,0,true)+" above the 52-week low)"):"";
+      return '<td class="pe-gs lp-phcell"><span class="lp-pill '+CLS[r.ph]+'" title="'+esc(r.ph+how)+'">'+esc(r.ph)+'</span></td>';
+    }
+    if(c.type==="chk"){
+      return '<td class="lp-chkc">'+(r.chk?'<span class="lp-chk" title="'+esc(c.tip)+'">check</span>':'')+'</td>';
+    }
+    cls.push("num");
+    if(v==null||isNaN(v)){
+      var why=c.key==="sb"?"no sales estimates":c.key==="pb"?"no price-target estimates":(c.g==="F"?(r.fwhy||(r.ph?"no multiple history":"no Phase, so no fair multiple")):"not enough price history");
+      return '<td class="'+cls.join(" ")+' pe-na" title="'+esc(why)+'">–</td>';
+    }
+    if(c.type==="pct")txt=fPct(v,c.dp,c.sign);
+    else if(c.type==="int")txt=String(v);
+    else txt=fX(v);
+    if(c.red!=null)sty=scaleBg(v,c.red,c.green);
+    if(c.key==="sl"){var s=r.ss;title=(s==="flat"?"Flat":s==="rising"?"Rising":"Falling")+": the 150-day average "+(v>=0?"rose ":"fell ")+Math.abs(v*100).toFixed(2)+"% over 22 trading days";if(s==="flat")cls.push("lp-flat");}
+    if(c.key==="sb"&&r.sbw)title=r.sbw[0]+" sales estimates: "+r.sbw[1]+" raised, "+r.sbw[2]+" cut in the last 100 days";
+    if(c.key==="pb"&&r.pbw)title=r.pbw[0]+" price targets: "+r.pbw[1]+" raised, "+r.pbw[2]+" cut in the last 100 days";
+    if(c.key==="mp"&&r.mpx){var pp=[];for(var q=0;q<r.mpx.length;q++)pp.push(fmtDate(String(r.mpx[q][0]).replace("*",""))+(String(r.mpx[q][0]).indexOf("*")>=0?" (read 2-Oct-26)":"")+": "+(r.mpx[q][1]==null?"no reading":fPct(r.mpx[q][1],0,true)));title="Sales breadth at each month-end, newest first. "+pp.join("; ");}
+    if(c.key==="fl"&&r.ql!=null)title=pctl(r.ql)+" percentile of "+r.pem+" months";
+    if(c.key==="f"&&r.qb!=null&&r.pem)title=pctl(r.qb)+" percentile of "+r.pem+" months"+(PD()._meta.market&&PD()._meta.market.factor!==1?", times "+PD()._meta.market.factor:"");
+    if(c.key==="fu"&&r.qu!=null)title=pctl(r.qu)+" percentile of "+r.pem+" months";
+    if(c.type==="xb")cls.push("lp-base");
+    return '<td class="'+cls.join(" ")+'" style="'+sty+'"'+(title?' title="'+esc(title)+'"':'')+'>'+txt+'</td>';
+  }
+
+  function colgroup(){var h='<colgroup>';for(var i=0;i<COLS.length;i++)h+=COLS[i].w?'<col class="pe-c-'+COLS[i].w+'">':'<col>';return h+'</colgroup>';}
+  function header(){
+    var h='<thead><tr class="pe-g">',groups=[["I","Information","pe-gi"],["P","Phase","lp-gp"],["N","Inputs","pe-gm"],["F","Fair two year forward PE multiple","pe-gf"]];
+    for(var g=0;g<groups.length;g++){
+      var n=0;for(var i=0;i<COLS.length;i++)if(COLS[i].g===groups[g][0])n++;
+      if(g===0)h+='<th class="pe-gi"><span class="pe-gl">'+groups[g][1]+'</span></th><th colspan="'+(n-1)+'" class="pe-gi2"></th>';
+      else h+='<th colspan="'+n+'" class="'+groups[g][2]+' pe-gs"><span class="pe-gl">'+groups[g][1]+'</span></th>';
+    }
+    h+='</tr><tr class="pe-h">';
+    for(var j=0;j<COLS.length;j++){
+      var c=COLS[j],cls=[];
+      if(c.type==="name")cls.push("pe-name");else if(c.type!=="txt"&&c.type!=="phase")cls.push("num");
+      if(c.gs)cls.push("pe-gs");
+      if(c.g==="N")cls.push("pe-hm");else if(c.g==="F")cls.push("pe-hf");else if(c.g==="P")cls.push("lp-hp");
+      var arr=st.sortKey===c.id?'<span class="pe-arr">'+(st.asc?"&#9650;":"&#9660;")+'</span>':"";
+      var lab='<span class="pe-hs">'+esc(c.sh)+arr+'</span>'+(c.label!==c.sh?'<span class="pe-hl">'+esc(c.label)+'</span>':'');
+      h+='<th class="'+cls.join(" ")+'" data-lp-sort="'+c.id+'" title="'+esc(c.label+": "+(c.tip||c.label)+". Click to sort")+'">'+lab+'</th>';
+    }
+    return h+'</tr></thead>';
+  }
+
+  function model(){
+    var S=PD().stocks,L=live(),rows=[],q=st.q.trim().toLowerCase(),anyPh=false,k;
+    for(k in st.ph)if(st.ph[k])anyPh=true;
+    for(var i=0;i<S.length;i++){
+      var r=S[i];r._rk=r.ph?RANK[r.ph]:99;
+      if(st.scope==="live"&&!L[r.t])continue;
+      if(anyPh&&!st.ph[r.ph||"none"])continue;
+      if(st.chk&&!r.chk)continue;
+      if(q){var hay=(r.n+" "+r.t+" "+(r.ind||"")+" "+(r.sec||"")+" "+(r.ph||"")).toLowerCase();if(hay.indexOf(q)<0)continue;}
+      rows.push(r);
+    }
+    var col=null;for(var j=0;j<COLS.length;j++)if(COLS[j].id===st.sortKey)col=COLS[j];
+    var key=col?col.key:"_rk",txt=col&&(col.type==="name"||col.type==="txt"),asc=st.asc;
+    rows.sort(function(a,b){
+      var x=a[key],y=b[key];
+      var xn=(x==null||x===""||(typeof x==="number"&&isNaN(x))),yn=(y==null||y===""||(typeof y==="number"&&isNaN(y)));
+      if(xn&&yn)return (a.n||"").localeCompare(b.n||"");
+      if(xn)return 1;if(yn)return -1;
+      var d=txt?String(x).localeCompare(String(y)):(x-y);
+      if(d===0)return (a.n||"").localeCompare(b.n||"");
+      return asc?d:-d;
+    });
+    return {rows:rows,L:L};
+  }
+
+  function chips(){
+    var S=PD().stocks,L=live(),cnt={},cntL={},i;
+    for(i=0;i<S.length;i++){var p=S[i].ph||"none";cnt[p]=(cnt[p]||0)+1;if(L[S[i].t])cntL[p]=(cntL[p]||0)+1;}
+    var h='<div class="lp-chips"><span class="il-cg-l">Show Phase</span>';
+    var all=ORDER.concat(["none"]);
+    for(i=0;i<all.length;i++){
+      var p=all[i],on=!!st.ph[p],lab=p==="none"?"No reading":p;
+      var col=p==="none"?"#9e9e9e":COLR[p];
+      h+='<button class="lp-chip'+(on?" on":"")+'" style="border-color:'+col+(on?';background:'+col+';color:#fff':'')+'" data-lp-ph="'+esc(p)+'" title="'+esc((on?"Showing ":"Click to show only ")+lab+" (click several to combine; none selected = all). "+(cntL[p]||0)+" live holdings")+'">'+esc(lab)+' <b>'+(cnt[p]||0)+'</b></button>';
+    }
+    return h+'</div>';
+  }
+
+  function top(){
+    var M=PD()._meta||{},mk=M.market,h='<div class="summary-tile pe-tile"><div class="pe-head">';
+    h+='<span class="pe-title">Phases of a Stock Lifecycle</span>';
+    h+='<span class="pe-sub">The starting Phase by your rule of 10-Oct-26, its inputs, and the fair two year forward PE multiple it gives the Financial Analyst</span>';
+    h+='<span class="pe-spacer"></span>';
+    var dt="Prices as at "+fmtDate(M.price_date)+". Sell-side counts as at "+fmtDate(M.ssem_as_of)+" (pulled "+(M.ssem_pulled||"")+"). Month-end history to "+fmtDate((M.months||{}).monthly_to)+", then the daily file. Built "+(M.generated||"")+".";
+    h+='<span class="pe-dates" title="'+esc(dt)+'">Prices <b>'+fmtDate(M.price_date)+'</b> &middot; Sell-side <b>'+fmtDate(M.ssem_as_of)+'</b></span>';
+    if(mk&&mk.label){
+      var up=(mk.label==="Uptrend"||mk.label==="Bottoming");
+      var pt="Stoxx Europe 600 "+mk.close+" against its 200-day average "+mk.ma200+"; the average "+(mk.ma200_1m>=0?"rose ":"fell ")+Math.abs(mk.ma200_1m*100).toFixed(1)+"% over 21 trading days. Above and rising = Uptrend (x1.0); above and falling = Bottoming (x1.0); below and rising = Topping (x0.8); below and falling = Downtrend (x0.6). Above or below: all of the last 10 closes, otherwise the previous answer carries over, as on the Pool page.";
+      h+='<span class="pe-ph '+(up?"up":"down")+'" title="'+esc(pt)+'">Market Cycle Phase: <b>'+esc(mk.label)+'</b> (multiple x'+Number(mk.factor).toFixed(1)+') since '+(mk.history_limited?"at least ":"")+fmtDate(mk.since)+'</span>';
+    }
+    h+='</div>';
+    var W=M.warnings||[];for(var i=0;i<W.length;i++)h+='<div class="pe-warn">'+esc(W[i])+'</div>';
+    h+='<details class="lp-how"><summary>How the Phase and the fair multiple are set</summary><div class="lp-howb">'
+      +'<p><b>The Phase</b> comes from two readings: the slope of the 150-day moving average (flat = within 1% either way over 22 trading days) and the sales Net Upgrade Breadth over the last 100 days (price targets are shown for information only).</p>'
+      +'<ul><li>Falling slope: <b>Collapsing</b> if the breadth is not positive; <b>Stalling</b> if it is positive</li>'
+      +'<li>Rising slope: <b>Turning/Inflecting</b> if the breadth is not positive; <b>Reinforcing</b> if it has been positive for more than four months (five or more month-ends), otherwise <b>Broadening</b></li>'
+      +'<li>Flat slope: <b>Bottoming</b> if the breadth is not positive; if positive, <b>Bottoming</b> within 30% of the 52-week low, otherwise <b>Stalling</b></li></ul>'
+      +'<p>It is a <i>starting</i> Phase. The Investment Analyst\'s judged Phase sits beside it once memos record one; none do yet.</p>'
+      +'<p><b>The fair two year forward PE multiple</b> is a percentile of the stock\'s own monthly 24-month-forward P/E history (ten years): Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th. Bear is ten points lower, bull ten points higher. All three are multiplied by the Market Cycle Phase factor. "Check" marks a base more than 1.5 times today\'s multiple. Whether to use the last five years instead of ten is an open question (10-Oct-26).</p>'
+      +'</div></details>';
+    h+=chips();
+    var L=live(),nL=0;for(var t in L)nL++;
+    h+='<div class="pe-bar"><span class="pe-countbox" id="lp-countbox"></span><span class="pe-spacer"></span>'
+      +'<span class="lp-scope"><button class="pe-btn'+(st.scope==="all"?" lp-on":"")+'" data-lp-scope="all">All stocks</button><button class="pe-btn'+(st.scope==="live"?" lp-on":"")+'" data-lp-scope="live">Live holdings ('+nL+')</button></span>'
+      +'<label class="pe-chk"><input type="checkbox" id="lp-chkonly"'+(st.chk?" checked":"")+'> Only "check" flags</label>'
+      +'<input class="pe-search" id="lp-search" type="search" placeholder="Search company, ticker, industry, sector or Phase" value="'+esc(st.q)+'">'
+      +'<button class="pe-btn" data-lp-reset="1">Show all</button></div>';
+    return h+'</div>';
+  }
+
+  function isActive(){return document.body.getAttribute("data-active-tab")==="lifecycle_phases";}
+  function sizeWrap(){
+    var w=document.querySelector("#tab-lifecycle_phases .pe-wrap");if(!w||!isActive())return;
+    try{if(typeof window.measureV2Ribbon==="function")window.measureV2Ribbon();}catch(e){}
+    var avail=Math.floor(window.innerHeight-w.getBoundingClientRect().top-10);
+    if(avail>=240){w.style.height=avail+"px";w.style.maxHeight="none";}else{w.style.height="";w.style.maxHeight="70vh";}
+  }
+  if(!window._lpResizeWired){window._lpResizeWired=true;window.addEventListener("resize",function(){if(isActive())sizeWrap();});}
+
+  function paintBody(){
+    var b=document.getElementById("lp-body");if(!b)return;
+    var m=model(),h;
+    if(!m.rows.length)h='<div class="pe-wrap"><div class="pe-empty">No stock matches. Click "Show all".</div></div>';
+    else{
+      h='<div class="pe-wrap"><table class="pe-table lp-table">'+colgroup()+header()+'<tbody>';
+      for(var i=0;i<m.rows.length;i++){h+='<tr>';for(var c=0;c<COLS.length;c++)h+=cell(COLS[c],m.rows[i],m.L);h+='</tr>';}
+      h+='</tbody></table></div>';
+    }
+    b.innerHTML=h;
+    var cb=document.getElementById("lp-countbox");if(cb)cb.innerHTML='<span class="pe-count">Showing <b>'+m.rows.length+'</b> of '+PD().stocks.length+' stocks</span>';
+    sizeWrap();setTimeout(sizeWrap,120);
+  }
+  function paintTop(){var t=document.getElementById("lp-top");if(t)t.innerHTML=top();}
+  function paint(){
+    var c=document.getElementById("tab-lifecycle_phases");if(!c)return;
+    if(!PD()||!PD().stocks){
+      c.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>Phases of a Stock Lifecycle</h3><p style="color:var(--text-dim);margin-top:8px">lifecycle-phases.json was not built, so there is nothing to show. Run scripts/build_lifecycle_phases.py before build_dashboard.py.</p></div>';
+      return;
+    }
+    c.innerHTML='<div id="lp-top">'+top()+'</div><div id="lp-body"></div>';
+    wire(c);paintBody();
+  }
+  function wire(c){
+    if(c._lpWired)return;c._lpWired=true;
+    c.addEventListener("click",function(e){
+      var t=e.target;
+      while(t&&t!==c&&!(t.getAttribute&&(t.getAttribute("data-lp-ph")||t.getAttribute("data-lp-sort")||t.getAttribute("data-lp-open")||t.getAttribute("data-lp-scope")||t.getAttribute("data-lp-reset"))))t=t.parentNode;
+      if(!t||t===c)return;
+      var k;
+      if((k=t.getAttribute("data-lp-ph"))){st.ph[k]=!st.ph[k];paintTop();paintBody();}
+      else if((k=t.getAttribute("data-lp-scope"))){st.scope=k;paintTop();paintBody();}
+      else if((k=t.getAttribute("data-lp-sort"))){if(st.sortKey===k)st.asc=!st.asc;else{st.sortKey=k;var col=null;for(var i=0;i<COLS.length;i++)if(COLS[i].id===k)col=COLS[i];st.asc=!!(col&&(col.type==="name"||col.type==="txt"||col.type==="phase"));}paintBody();}
+      else if((k=t.getAttribute("data-lp-open"))){if(typeof window.openStockView==="function")window.openStockView(k);}
+      else if(t.getAttribute("data-lp-reset")){initState();paintTop();paintBody();}
+    });
+    c.addEventListener("input",function(e){if(e.target&&e.target.id==="lp-search"){st.q=e.target.value;paintBody();}});
+    c.addEventListener("change",function(e){if(e.target&&e.target.id==="lp-chkonly"){st.chk=!!e.target.checked;paintBody();}});
+    c.addEventListener("toggle",function(){sizeWrap();},true);
+  }
+  window.renderLifecyclePhases=function(){
+    try{buildHeaderControls("lifecycle_phases");}catch(e){}
+    if(!st)initState();
+    paint();
+  };
+})();
+
+/* ============================================================================
    POOL OF MIDDLE INNINGS ELIGIBLE STOCKS  (tab id ideas_lists; MD-IDEAS-LISTS-2026-09-28, rebuilt MD-POOL-MI-2026-10-02)
    Richard's page, renamed 2-Oct-26 from "Ideas Lists (Bench, LL, SL)" (SA - Master Dashboard D-MD-POOL-44 onwards).
    Only stocks in the Pool are shown when the page opens (Richard, 2-Oct-26: "The page is meant to only display stocks
@@ -20141,6 +20421,7 @@ function renderTab(id){
   else if(id==="qual_over_time")renderQualOverTime();  /* MD-QOT-2026-09-10 */
   else if(id==="pool_elig")renderPoolEligibility();  /* MD-POOL-ELIG-2026-09-28 */
   else if(id==="ideas_lists")renderIdeasLists();  /* MD-IDEAS-LISTS-2026-09-28 */
+  else if(id==="lifecycle_phases")renderLifecyclePhases();  /* MD-LIFECYCLE-PHASES-2026-10-10 */
   else if(id==="changes")renderChanges();
   else if(id==="positions")renderPositions();
   else if(id==="ssem")renderSSEM();

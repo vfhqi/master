@@ -7639,7 +7639,7 @@ function renderVal(){
   rows=sortData(rows,currentSort.col,currentSort.dir);
 
   var h='<div class="summary-tile" id="section-summary"><h3>Valuation -- P/E Rating</h3>'
-    +'<div class="sub">A-F rating from P/E percentile vs own 10-year history, in fixed quintiles: A 0-20, B 21-40, C 41-60, D 61-80, F 81-100. Percentile: 0 = cheapest vs own history, 100 = most expensive. The history is the robust range (from 11-Oct-26): spike months more than 3 robust standard deviations from the median are left out and the percentile is read from a bell curve on the months kept, the same range the valuation charts and the fair two year forward PE multiple use. EPS = 24-month forward estimate.</div>'
+    +'<div class="sub">A-F rating from P/E percentile vs own 10-year history, in fixed quintiles: A 0-20, B 21-40, C 41-60, D 61-80, F 81-100. Percentile: 0 = cheapest vs own history, 100 = most expensive. The history is the robust range (from 11-Oct-26): outlier months more than 3 robust standard deviations ABOVE the median are left out (never months below it, and never a high period that is still going on) and the percentile is read from a bell curve on the months kept, the same range the valuation charts and the fair two year forward PE multiple use. EPS = 24-month forward estimate.</div>'
     +'<div class="summary-stats">'
     +sumStat("With data",xyFmt(n,totalCount))
     +sumStat("A (cheapest)",String(gA),"green")
@@ -19727,10 +19727,10 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"pb",g:"N",label:"SS Price-target Net Upgrade Breadth L100D (information)",sh:"Price-target Breadth",key:"pb",type:"pct",dp:0,sign:true,red:-0.5,green:0.5,tip:"The same count on price targets. Shown for information; it does not decide the Phase"},
     {id:"pe",g:"F",label:"24-month-forward P/E now",sh:"P/E now",key:"pe",type:"x",gs:true,tip:"Price over consensus earnings for the twelve months starting a year from now (the Master Dashboard's valuation reading)"},
     {id:"fl",g:"F",label:"Fair multiple, bear (base − 10 points)",sh:"Bear",key:"fl",type:"x",tip:"Ten percentile points below the base, on the same bell curve, times the Market Cycle Phase factor"},
-    {id:"f",g:"F",label:"Fair two year forward PE multiple (base)",sh:"Base",key:"f",type:"xb",tip:"Uptrend percentiles: Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th, read from a bell curve on the stock's ten-year history with spike months removed (median and robust standard deviation); times the Market Cycle Phase factor (Uptrend and Bottoming 1.0, Topping 0.8, Downtrend 0.6)"},
+    {id:"f",g:"F",label:"Fair two year forward PE multiple (base)",sh:"Base",key:"f",type:"xb",tip:"Uptrend percentiles: Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th, read from a bell curve on the stock's ten-year history with outlier months far above normal removed (median and robust standard deviation); times the Market Cycle Phase factor (Uptrend and Bottoming 1.0, Topping 0.8, Downtrend 0.6)"},
     {id:"fu",g:"F",label:"Fair multiple, bull (base + 10 points)",sh:"Bull",key:"fu",type:"x",tip:"Ten percentile points above the base, at most the 95th (a bell curve has no 100th), times the Market Cycle Phase factor"},
     {id:"up",g:"F",label:"Base against P/E now",sh:"Base vs. now",key:"up",type:"pct",dp:0,sign:true,red:-0.3,green:0.3,tip:"How far the base fair multiple sits above (+) or below (−) today's multiple"},
-    {id:"mr",g:"F",label:"Spike months removed (of the ten years)",sh:"Spikes removed",key:"mr",type:"int",tip:"Months more than 3 robust standard deviations from the stock's median ratio, either side, left out before the bell curve is fitted"},
+    {id:"mr",g:"F",label:"Outlier months removed (of the ten years)",sh:"Outliers removed",key:"mr",type:"int",tip:"Months more than 3 robust standard deviations ABOVE the stock's median ratio, left out before the bell curve is fitted. Months below the median are never left out, and neither is a high period that is still going on"},
     {id:"bl",g:"F",label:"Model template's current blend, (75th + 2 x median) / 3",sh:"Template blend",key:"bl",type:"x",tip:"What the Excel model template uses today, for comparison"}
   ];
 
@@ -19763,7 +19763,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(c.key==="pb"&&r.pbw)title=r.pbw[0]+" price targets: "+r.pbw[1]+" raised, "+r.pbw[2]+" cut in the last 100 days";
     if(c.key==="mp"&&r.mpx){var pp=[];for(var q=0;q<r.mpx.length;q++)pp.push(fmtDate(String(r.mpx[q][0]).replace("*",""))+(String(r.mpx[q][0]).indexOf("*")>=0?" (read on the first trading day after)":"")+": "+(r.mpx[q][1]==null?"no reading":fPct(r.mpx[q][1],0,true)));title="Sales breadth at each month-end, newest first. "+pp.join("; ");}
     var fac=(PD()._meta.market&&PD()._meta.market.factor!==1)?", times "+PD()._meta.market.factor:"";
-    var src=" of the bell curve on "+r.mu+" months"+(r.mr?" ("+r.mr+" spike month"+(r.mr>1?"s":"")+" removed)":"")+fac;
+    var src=" of the bell curve on "+r.mu+" months"+(r.mr?" ("+r.mr+" outlier month"+(r.mr>1?"s":"")+" far above normal removed)":"")+fac;
     if(c.key==="fl"&&r.ql!=null)title=pctl(r.ql)+" percentile"+src;
     if(c.key==="f"&&r.qb!=null)title=pctl(r.qb)+" percentile"+src;
     if(c.key==="fu"&&r.qu!=null)title=pctl(r.qu)+" percentile"+src;
@@ -19849,7 +19849,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<li>Rising slope: <b>Turning/Inflecting</b> if the breadth is not positive; <b>Reinforcing</b> if it has been positive for more than four months (five or more month-ends), otherwise <b>Broadening</b></li>'
       +'<li>Flat slope: <b>Bottoming</b> if the breadth is not positive; if positive, <b>Bottoming</b> within 30% of the 52-week low, otherwise <b>Stalling</b></li></ul>'
       +'<p>It is a <i>starting</i> Phase. The Investment Analyst\'s judged Phase sits beside it once memos record one; none do yet.</p>'
-      +'<p><b>The fair two year forward PE multiple</b> is a percentile of the stock\'s own monthly 24-month-forward P/E history over ten years: Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th. Bear is ten points lower, bull ten points higher (at most the 95th). Spike months, more than 3 robust standard deviations from the stock\'s median either side, are removed first; the percentiles are then read from a bell curve on the median and robust standard deviation of the months that remain. A robust standard deviation is the typical distance of a month from the median, which a few extreme months cannot distort. All three are multiplied by the Market Cycle Phase factor.</p>'
+      +'<p><b>The fair two year forward PE multiple</b> is a percentile of the stock\'s own monthly 24-month-forward P/E history over ten years: Bottoming 20th, Collapsing 20th, Stalling 40th, Turning/Inflecting 60th, Broadening 80th, Reinforcing 90th. Bear is ten points lower, bull ten points higher (at most the 95th). Outlier months, more than 3 robust standard deviations ABOVE the stock\'s median, are removed first; months below the median are never removed, and neither is a high period that is still going on (the latest months far above normal, allowing up to two months back inside the line); the percentiles are then read from a bell curve on the median and robust standard deviation of the months that remain. A robust standard deviation is the typical distance of a month from the median, which a few extreme months cannot distort. All three are multiplied by the Market Cycle Phase factor.</p>'
       +'</div></details>';
     h+=chips();
     var L=live(),nL=0;for(var t in L)nL++;

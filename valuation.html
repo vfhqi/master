@@ -353,8 +353,12 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     if (bands){
       var names = ['10th pct','35th pct', MIDDLE === 'mean' ? 'mean' : 'median','75th pct','90th pct'];
       [bands.p10, bands.p35, bands[MIDDLE], bands.p75, bands.p90].forEach(function(v,i){ L.push('<span><i style="border-top-color:' + LEVEL_COLOURS[i] + '"></i>' + names[i] + ' ' + fmtX(v, f) + '</span>'); });
-      if (bands.mean != null) L.push('<span><i class="dash" style="border-top-color:' + MEAN_COLOUR + '"></i>mean ' + fmtX(bands.mean, f) + ' (dashed)</span>');
-      L.push('<span>bands: ten-year history, ' + bands.n + ' points, fixed across windows</span>');
+      if (bands.mean != null) L.push('<span><i class="dash" style="border-top-color:' + MEAN_COLOUR + '"></i>mean ' + fmtX(bands.mean, f) + (bands.spikes ? ' (dashed; spike months left out)' : ' (dashed)') + '</span>');
+      /* MD-VAL-ROBUST-2026-10-11 (Richard, 11-Oct-26): the same five levels and colours, now read from the robust ten-year
+         range: spike months more than 3 robust standard deviations from the median removed, levels from the bell curve
+         (master-dashboard/scripts/robust_range.py, shared with the valuation grade and the fair multiple). */
+      var spk = bands.spikes ? ', ' + bands.spikes + ' spike month' + (bands.spikes > 1 ? 's' : '') + ' left out' + (bands.spike_values && bands.spike_values.length ? ' (' + bands.spike_values.map(function(v){ return fmtX(v, f); }).join(', ') + ')' : '') : ', no spike months';
+      L.push('<span title="Robust range: months more than 3 robust standard deviations from the median, either side, are left out as spikes; the five levels are then read from a bell curve on the median and robust standard deviation of the months kept. The valuation grade and the fair two year forward PE multiple use the same range.">bands: ten-year history, ' + bands.n + ' points' + (bands.method ? spk + ', robust standard deviation' : '') + '; fixed across windows</span>');
     }
     $('legend').innerHTML = L.join('');
     var notes = [];

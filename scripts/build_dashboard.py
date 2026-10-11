@@ -7637,7 +7637,7 @@ function renderVal(){
   rows=sortData(rows,currentSort.col,currentSort.dir);
 
   var h='<div class="summary-tile" id="section-summary"><h3>Valuation -- P/E Rating</h3>'
-    +'<div class="sub">A-F rating from P/E percentile vs own 10-year history, in fixed quintiles: A 0-20, B 21-40, C 41-60, D 61-80, F 81-100. Percentile: 0 = cheapest vs own history, 100 = most expensive. EPS = 24-month forward estimate.</div>'
+    +'<div class="sub">A-F rating from P/E percentile vs own 10-year history, in fixed quintiles: A 0-20, B 21-40, C 41-60, D 61-80, F 81-100. Percentile: 0 = cheapest vs own history, 100 = most expensive. The history is the robust range (from 11-Oct-26): spike months more than 3 robust standard deviations from the median are left out and the percentile is read from a bell curve on the months kept, the same range the valuation charts and the fair two year forward PE multiple use. EPS = 24-month forward estimate.</div>'
     +'<div class="summary-stats">'
     +sumStat("With data",xyFmt(n,totalCount))
     +sumStat("A (cheapest)",String(gA),"green")

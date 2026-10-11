@@ -7604,6 +7604,8 @@ function renderVal(){
     r.pe_cur=vl?vl.pe_current:null;
     r.pe_pctile=vl?vl.pe_percentile:null;
     r.eps_24mf=(vl&&vl.eps_24mf!=null)?vl.eps_24mf:null;
+    /* MD-VAL-NA-2026-10-11 (Richard, 11-Oct-26: "Grade them n.a. please"): a zero or negative P/E has no grade */
+    r._pe_na=!!(vl&&vl.pe_percentile==null&&vl.pe_current!=null&&vl.pe_current<=0);
   }
 
   // Assign A-F valuation rating: fixed quintiles of pe_pctile (MD-VAL-QUINTILES-2026-10-02, Richard 2-Oct-26)
@@ -7626,7 +7628,7 @@ function renderVal(){
     eligible[i].val_rating=gr; eligible[i].val_rating_sort=_vrs[gr]||0;
     valRatingMap[eligible[i].ticker]=gr;
   }
-  for(var k=0;k<ineligible.length;k++){ineligible[k].val_rating="-";ineligible[k].val_rating_sort=0;gN++;}
+  for(var k=0;k<ineligible.length;k++){ineligible[k].val_rating=ineligible[k]._pe_na?"n.a.":"-";ineligible[k].val_rating_sort=0;gN++;}
 
   var rows=eligible.concat(ineligible);
   /* MD-S82-RDF: percentiles graded on the full universe above. Narrow the display, then recount the tiles so the A-F numbers match the rows shown. */

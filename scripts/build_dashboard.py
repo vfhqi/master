@@ -19759,7 +19759,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(c.key==="sl"){var s=r.ss;title=(s==="flat"?"Flat":s==="rising"?"Rising":"Falling")+": the 150-day average "+(v>=0?"rose ":"fell ")+Math.abs(v*100).toFixed(2)+"% over 22 trading days";if(s==="flat")cls.push("lp-flat");}
     if(c.key==="sb"&&r.sbw)title=r.sbw[0]+" sales estimates: "+r.sbw[1]+" raised, "+r.sbw[2]+" cut in the last 100 days";
     if(c.key==="pb"&&r.pbw)title=r.pbw[0]+" price targets: "+r.pbw[1]+" raised, "+r.pbw[2]+" cut in the last 100 days";
-    if(c.key==="mp"&&r.mpx){var pp=[];for(var q=0;q<r.mpx.length;q++)pp.push(fmtDate(String(r.mpx[q][0]).replace("*",""))+(String(r.mpx[q][0]).indexOf("*")>=0?" (read 2-Oct-26)":"")+": "+(r.mpx[q][1]==null?"no reading":fPct(r.mpx[q][1],0,true)));title="Sales breadth at each month-end, newest first. "+pp.join("; ");}
+    if(c.key==="mp"&&r.mpx){var pp=[];for(var q=0;q<r.mpx.length;q++)pp.push(fmtDate(String(r.mpx[q][0]).replace("*",""))+(String(r.mpx[q][0]).indexOf("*")>=0?" (read on the first trading day after)":"")+": "+(r.mpx[q][1]==null?"no reading":fPct(r.mpx[q][1],0,true)));title="Sales breadth at each month-end, newest first. "+pp.join("; ");}
     var fac=(PD()._meta.market&&PD()._meta.market.factor!==1)?", times "+PD()._meta.market.factor:"";
     var src=" of the bell curve on "+r.mu+" months"+(r.mr?" ("+r.mr+" spike month"+(r.mr>1?"s":"")+" removed)":"")+fac;
     if(c.key==="fl"&&r.ql!=null)title=pctl(r.ql)+" percentile"+src;

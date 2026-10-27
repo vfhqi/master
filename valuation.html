@@ -77,6 +77,8 @@ body.embed .current{font-size:17px}
 body.embed .card{padding:8px 10px;margin-bottom:8px}
 body.embed canvas{height:430px}
 @media (max-width:700px){body.embed canvas{height:340px}}
+/* MD-VAL-PMS-EMBED-2026-10-27: inside the PMS Per-stock Dashboard the host names the holding; no stock switching */
+body.pmsembed .search input, body.pmsembed .search datalist{display:none}
 </style>
 </head>
 <body>
@@ -172,6 +174,12 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
   // ── state ────────────────────────────────────────────────────────────────────────────
   var S = {t:null, win:5, field:'pe', px:'monthly', cohAvg:false, cohLines:false, secAvg:false, secLines:false,
            indAvg:false, avg:'mean', peers:[], peerLines:false, hoverIdx:-1, hoverKey:null};
+  // MD-VAL-PMS-EMBED-2026-10-27 (Watson, for the PMS Per-stock Dashboard, Richard's 27-Oct-2026 ruling that its valuation charts
+  // ARE this page's charts): optional ?win=2|5|10 and ?field=pe|evs open the page on that window and multiple; ?pms=1 hides the
+  // switch-stock box, because the host page shows one holding. Without these parameters nothing changes.
+  (function(){ var q = /[?&]win=(2|5|10)(&|$)/.exec(location.search); if (q) S.win = +q[1];
+    var f = /[?&]field=(pe|evs)(&|$)/.exec(location.search); if (f) S.field = f[1];
+    if (/[?&]pms=1(&|$)/.test(location.search) && document.body) document.body.className += ' pmsembed'; })();
   var IDX = null, REC = null, loading = {}, geom = null, series = [];
   var $ = function(id){ return document.getElementById(id); };
   var canvas = $('c'), ctx = canvas.getContext('2d');
@@ -458,7 +466,7 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
   // ── stock switching and boot ─────────────────────────────────────────────────────────
   function show(t){
     S.t = t; $('err').style.display = 'none';
-    if (history.replaceState) history.replaceState(null, '', '?t=' + encodeURIComponent(t) + (EMBED ? '&embed=1' : ''));  /* MD-VAL-PANEL-EMBED-2026-09-16: keep embed mode across an in-page stock switch */
+    if (history.replaceState) history.replaceState(null, '', '?t=' + encodeURIComponent(t) + (EMBED ? '&embed=1' : '') + (/[?&]pms=1(&|$)/.test(location.search) ? '&pms=1' : ''));  /* MD-VAL-PANEL-EMBED-2026-09-16: keep embed mode across an in-page stock switch */
     document.title = t + ' valuation range';
     hostSync(t, (IDX && IDX.stocks[t] && IDX.stocks[t].name) || '');  /* MD-VAL-PANEL-QC4-2026-09-16 */
     loadStock(t, function(ok){

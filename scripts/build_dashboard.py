@@ -3203,6 +3203,16 @@ col.mo-cg-screen { width: 76px; }
 /* Amber/gold Stock View header button */
 .ctrl-btn.ssp-btn{background:rgba(180,100,0,0.08);border-color:rgba(180,100,0,0.4);color:#92400e}
 .ctrl-btn.ssp-btn:hover{background:rgba(180,100,0,0.18);border-color:#b45309;color:#78350f}
+/* MD-PSD-2026-10-28: the Per-stock Dashboard button and its full-screen panel (the PMS per-stock page in a frame) */
+.ctrl-btn.psd-btn{background:rgba(10,61,145,0.08);border-color:rgba(10,61,145,0.45);color:#0a3d91}
+.ctrl-btn.psd-btn:hover{background:rgba(10,61,145,0.16);border-color:#0a3d91;color:#082e6e}
+.psd-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9960;display:none;flex-direction:column;background:var(--card,#fff)}
+.psd-overlay.open{display:flex}
+.psd-hdr{display:flex;align-items:center;gap:12px;padding:6px 14px;border-bottom:1px solid var(--border,#d0d7de);background:var(--card,#fff)}
+.psd-title{font-size:13px;font-weight:700;color:var(--text-bright,#1f2328);white-space:nowrap}
+.psd-hdr a{font-size:12px;color:#0a3d91}
+.psd-hdr .sp{flex:1}
+#psd-frame{flex:1;border:0;width:100%;background:#fff}
 
 /* Full-screen overlay */
 .ssp-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9900;background:var(--bg);display:none;flex-direction:column;overflow:hidden}
@@ -19383,7 +19393,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
      the three text columns (col.pe-c-name etc., set per screen width in the CSS); the numeric columns share what is
      left equally (table-layout:fixed). */
   var COLS=[
-    {id:"name",g:"I",label:"Company",sh:"Company",key:"n",type:"name",w:"name",tip:"Company and ticker; click the name to open the Stock View"},
+    {id:"name",g:"I",label:"Company",sh:"Company",key:"n",type:"name",w:"name",tip:"Company and ticker; click the name to open the Per-stock Chart"},
     {id:"ind", g:"I",label:"Industry",sh:"Industry",key:"ind",type:"txt",w:"ind"},
     {id:"sec", g:"I",label:"Sector",sh:"Sector",key:"sec",type:"txt",w:"sec"},
     {id:"p",   g:"M",label:"SP",sh:"SP",key:"p",type:"px",gs:true,tip:"Share price, last close"},
@@ -19426,7 +19436,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     if(c.gs)cls.push("pe-gs");
     if(c.type&&String(c.type).indexOf("emr")===0&&window.EMR)return window.EMR.peCell(c,r);  /* MD-EMR-2026-09-30 */
     if(c.type==="name"){
-      return '<td class="pe-name"><span class="co" data-pe-open="'+esc(r.t)+'" title="'+esc(r.n)+' ('+esc(r.t)+'): open the Stock View">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span></td>';
+      return '<td class="pe-name"><span class="co" data-pe-open="'+esc(r.t)+'" title="'+esc(r.n)+' ('+esc(r.t)+'): open the Per-stock Chart">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span></td>';
     }
     if(c.type==="txt"){
       return '<td class="pe-txt'+(c.gs?" pe-gs":"")+'" title="'+esc(v||"")+'">'+esc(v||"")+'</td>';
@@ -19737,7 +19747,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var v=r[c.key],cls=[],sty="",txt,title="";
     if(c.gs)cls.push("pe-gs");
     if(c.type==="name"){
-      return '<td class="pe-name"><span class="co" data-lp-open="'+esc(r.t)+'" title="'+esc(r.n)+' ('+esc(r.t)+'): open the Stock View">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span>'+(L[r.t]?'<span class="lp-live" title="A live holding (the Position Management System)">LIVE</span>':'')+'</td>';
+      return '<td class="pe-name"><span class="co" data-lp-open="'+esc(r.t)+'" title="'+esc(r.n)+' ('+esc(r.t)+'): open the Per-stock Chart">'+esc(r.n)+'</span><span class="tk">'+esc(r.t)+'</span>'+(L[r.t]?'<span class="lp-live" title="A live holding (the Position Management System)">LIVE</span>':'')+'</td>';
     }
     if(c.type==="txt")return '<td class="pe-txt" title="'+esc(v||"")+'">'+esc(v||"")+'</td>';
     if(c.type==="phase"){
@@ -21393,7 +21403,9 @@ renderTab("mm99");
         '      <button class="ctrl-btn" id="hdr-rdf-btn" onclick="RDF_toggle()">Ratings filter</button>\n'
         '      <button class="ctrl-btn" id="hdr-chart-btn" onclick="openChart(\'Overview\')">Chart</button>\n'
         # 'SOI List' button removed 6-Oct-26: the Standardised Stocks of Interest list was retired (SA - Stock Universe Canonical Source D79, D81 b)
-        '      <button class="ctrl-btn ssp-btn" onclick="openStockView()" title="Single stock view — all ratings at a glance">Stock View</button>\n'
+        '      <button class="ctrl-btn ssp-btn" onclick="openStockView()" title="Single stock view — all ratings at a glance">Per-stock Chart</button>\n'
+        # MD-PSD-2026-10-28: Richard, 28-Oct-26: "a button at the top, next to STOCK VIEW; call the button Per-stock Dashboard. (Rename "Stock View" to "Per-stock Chart")"
+        '      <button class="ctrl-btn psd-btn" onclick="openPerStockDashboard()" title="The Per-stock Dashboard (the PMS per-stock page) for any stock in the universe">Per-stock Dashboard</button>\n'
         # MD-HEADER-LINKS-ABSOLUTE-18Aug26. These were relative paths written for a
         # local file:// layout. On the deployed site "../../" climbs above the site
         # root, so from vfhqi.github.io/master/index.html they resolved to
@@ -21433,10 +21445,16 @@ renderTab("mm99");
         '<!-- FIX-1: Key panel overlay -->\n'
         '<div class="key-panel" id="key-panel"></div>\n'
         '<div class="main ratings-hidden">' + tab_containers + '</div>\n'
+        '<!-- MD-PSD-2026-10-28: the Per-stock Dashboard panel: the PMS per-stock page itself, framed (one page, two doors) -->\n'
+        '<div class="psd-overlay" id="psd-overlay">\n'
+        '  <div class="psd-hdr"><span class="psd-title">Per-stock Dashboard</span><span class="sp"></span><a id="psd-newtab" href="https://vfhqi.github.io/ratings/pms/holding.html" target="_blank" rel="noopener">open in a new tab</a><button class="ssp-close-btn" onclick="closePerStockDashboard()" title="Close the Per-stock Dashboard">&times;</button></div>\n'
+        '  <iframe id="psd-frame" title="Per-stock Dashboard"></iframe>\n'
+        '</div>\n'
+        '<script>(function(){var BASE=\'https://vfhqi.github.io/ratings/pms/holding.html\';window.openPerStockDashboard=function(t){t=t||window._sspTicker||(typeof chartTicker!==\'undefined\'&&chartTicker)||\'\';var o=document.getElementById(\'psd-overlay\'),f=document.getElementById(\'psd-frame\');if(!o||!f)return;var u=BASE+(t?\'?t=\'+encodeURIComponent(t)+\'&embed=1\':\'?embed=1\');if(f.getAttribute(\'data-src\')!==u){f.setAttribute(\'data-src\',u);f.src=u;}var nt=document.getElementById(\'psd-newtab\');if(nt)nt.href=BASE+(t?\'?t=\'+encodeURIComponent(t):\'\');o.classList.add(\'open\');window._psdOpen=true;};window.closePerStockDashboard=function(){var o=document.getElementById(\'psd-overlay\');if(o)o.classList.remove(\'open\');window._psdOpen=false;};document.addEventListener(\'keydown\',function(e){if(e.key===\'Escape\'&&window._psdOpen){window.closePerStockDashboard();e.stopPropagation();e.preventDefault();}},true);try{var q=new URLSearchParams(location.search).get(\'perstock\');if(q)setTimeout(function(){window.openPerStockDashboard(decodeURIComponent(q).toUpperCase());},400);}catch(e){}})();</script>\n'
         '<!-- MD-V2-S63-STOCK-VIEW-HTML-MARKER -->\n'
         '<div class="ssp-overlay" id="ssp-overlay">\n'
         '  <div class="ssp-hdr">\n'
-        '    <span class="ssp-hdr-title">Stock View</span>\n'
+        '    <span class="ssp-hdr-title">Per-stock Chart</span>\n'
         '    <div class="ssp-search-wrap">\n'
         '      <input class="ssp-search" id="ssp-search" type="text" placeholder="Search ticker or company name..." autocomplete="off"\n'
         '        oninput="sspOnInput(this.value)" onkeydown="sspKeydown(event)">\n'
@@ -21446,7 +21464,8 @@ renderTab("mm99");
         '    <span class="ssp-hdr-company" id="ssp-hdr-company"></span>\n'
         '    <span class="ssp-hdr-company" id="ssp-hdr-freshness" style="margin-left:6px"></span>\n'
         '    <a class="ssp-val-link" id="ssp-val-link" href="valuation.html" onclick="return valLinkClick(event,window._sspTicker)" title="Open the valuation range chart: 24-month forward P/E against ten years of its own history, with peers (opens in the side panel; ctrl-click for a new tab)"><span>Valuation range chart</span></a>\n'  # MD-VAL-LINK-SSP-2026-09-11, panel wiring MD-VAL-PANEL-2026-09-16
-        '    <button class="ssp-close-btn" onclick="closeStockView()" title="Close Stock View">&times;</button>\n'
+        '    <button class="ctrl-btn psd-btn" onclick="openPerStockDashboard(window._sspTicker)" title="Open the Per-stock Dashboard for this stock" style="margin-left:8px">Per-stock Dashboard</button>\n'
+        '    <button class="ssp-close-btn" onclick="closeStockView()" title="Close the Per-stock Chart">&times;</button>\n'
         '  </div>\n'
         '  <div class="ssp-tbl-band" id="ssp-tbl-band"></div>\n'
         '  <div class="ssp-legend" id="ssp-legend">\n'

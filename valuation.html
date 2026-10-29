@@ -169,6 +169,9 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
   var PEER_COLOURS = ['#1565c0','#7955bf','#8d6e00','#2e7d32','#c62828'];
   var GROUP_STYLE = {coh:{c:'#1565c0',label:'Cohort'}, sec:{c:'#7955bf',label:'Sector'}, ind:{c:'#8d6e00',label:'Industry'}};
   var LINE_COLOUR = '#e0dccd';        // individual peer lines (recessive; hover isolates)
+  // MD-VAL-LINE-SHADES-2026-10-29 (Watson, SA - Position Management System window; Richard, 29-Oct-2026 09:04: "The "each stock" lines are too unclear as
+  // they are all the same colour; keep them subtle but they need to be slightly different colours"): each individual line takes the next muted shade
+  var LINE_SHADES = ['#c9a27a', '#93b28f', '#a49fca', '#cc9696', '#86afc3', '#c2b073', '#b497b8', '#8fbba8', '#c79d86', '#a3b583', '#9aa7c9', '#c8a0ae'];
   var MAX_PEERS = 5, MAX_LINES = 60;
 
   // ── state ────────────────────────────────────────────────────────────────────────────
@@ -229,12 +232,13 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
       series.push({key:'avg_'+kind, label:GROUP_STYLE[kind].label + ' ' + S.avg + ' (' + g.members.length + ' with data' + (last<2?', too few':'') + ')', colour:GROUP_STYLE[kind].c, width:1.8, dash:[6,4], axis:'mult', vals:vals, counts:cn, kind:'avg', weak:last<2});
     });
     // individual lines
+    var nLine = 0;
     ['coh','sec'].forEach(function(kind){
       var on = kind==='coh' ? S.cohLines : S.secLines; if (!on) return;
-      members(kind).slice(0, MAX_LINES).forEach(function(m){
+      members(kind).slice(0, MAX_LINES).forEach(function(m){ var shade = LINE_SHADES[nLine++ % LINE_SHADES.length];
         var r = VAL_REGISTRY[m]; if (!r) return;
         var map = {}; r.months.forEach(function(mm,i){ map[mm] = i; });
-        series.push({key:'line_'+m, label:(r.name||m), colour:LINE_COLOUR, width:1, axis:'mult', vals:win.map(function(mm){ var i = map[mm]; return i == null ? null : r[f][i]; }), kind:'line', ticker:m});
+        series.push({key:'line_'+m, label:(r.name||m), colour:shade, width:1.1, axis:'mult', vals:win.map(function(mm){ var i = map[mm]; return i == null ? null : r[f][i]; }), kind:'line', ticker:m});
       });
     });
     // named peers: chips always show; lines only when S.peerLines (D-VAL-41)
@@ -331,7 +335,7 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     // hover
     if (S.hoverIdx >= 0 && S.hoverIdx < n){
       ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(x(S.hoverIdx), padT); ctx.lineTo(x(S.hoverIdx), padT+ph); ctx.stroke(); ctx.setLineDash([]);
-      series.forEach(function(s){ if (s.daily) return; var v = s.vals[S.hoverIdx]; if (v == null) return; ctx.fillStyle = s.colour === LINE_COLOUR ? '#999' : s.colour; ctx.beginPath(); ctx.arc(x(S.hoverIdx), s.axis === 'px' ? yp(v) : y(v), 3.5, 0, Math.PI*2); ctx.fill(); });
+      series.forEach(function(s){ if (s.daily) return; var v = s.vals[S.hoverIdx]; if (v == null) return; ctx.fillStyle = s.colour; ctx.beginPath(); ctx.arc(x(S.hoverIdx), s.axis === 'px' ? yp(v) : y(v), 3.5, 0, Math.PI*2); ctx.fill(); });
     }
     geom = {padL:padL, padR:padR, padT:padT, padB:padB, pw:pw, ph:ph, n:n, x:x, y:y, yp:yp, lo:lo, hi:hi};
   }
@@ -357,7 +361,7 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     var L = [];
     series.forEach(function(s){ if (s.kind === 'line') return; L.push('<span><i style="border-top-color:' + s.colour + '" class="' + (s.dash ? (s.dash[0] < 3 ? 'dot' : 'dash') : '') + '"></i>' + s.label + '</span>'); });
     var nl = series.filter(function(s){ return s.kind === 'line'; }).length;
-    if (nl) L.push('<span><i style="border-top-color:#c9c4b4"></i>' + nl + ' individual ' + (S.cohLines && S.secLines ? 'cohort and sector' : S.cohLines ? 'cohort' : 'sector') + ' stocks (hover to name one)</span>');
+    if (nl) L.push('<span><i style="border-top-color:' + LINE_SHADES[0] + ';width:6px;margin-right:0"></i><i style="border-top-color:' + LINE_SHADES[1] + ';width:6px;margin-right:0"></i><i style="border-top-color:' + LINE_SHADES[2] + ';width:6px"></i>' + nl + ' individual ' + (S.cohLines && S.secLines ? 'cohort and sector' : S.cohLines ? 'cohort' : 'sector') + ' stocks, each in its own muted shade (hover to name one)</span>');
     if (bands){
       var names = ['10th pct','35th pct', MIDDLE === 'mean' ? 'mean' : 'median','75th pct','90th pct'];
       [bands.p10, bands.p35, bands[MIDDLE], bands.p75, bands.p90].forEach(function(v,i){ L.push('<span><i style="border-top-color:' + LEVEL_COLOURS[i] + '"></i>' + names[i] + ' ' + fmtX(v, f) + '</span>'); });

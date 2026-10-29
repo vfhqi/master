@@ -140,6 +140,8 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
   // MD-VAL-PANEL-EMBED-2026-09-16: set before anything paints, so the panel never shows the full-page
   // header for a frame and then collapse it.
   var EMBED = /[?&]embed=1(&|$)/.test(location.search);
+  var TRQ = (/[?&]tr=([0-9,\-]+)/.exec(location.search) || [])[1] || '', TRT = (/[?&]t=([^&]+)/.exec(location.search) || [])[1];   /* MD-VAL-TRANCHES-2026-10-29: read before show() rewrites the address */
+  TRT = TRT ? decodeURIComponent(TRT) : null;
   if (EMBED && document.body) document.body.className = (document.body.className ? document.body.className + ' ' : '') + 'embed';
   // MD-VAL-PANEL-QC4-2026-09-16: two things the frame owes its host.
   // OTHER END OF THIS CONTRACT: build_dashboard.py, window.__valPanelSyncStock and
@@ -332,6 +334,14 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     var every = S.win === 2 ? 3 : S.win === 5 ? 6 : 12; while (pw / (n / every) < 54 && every < 48) every *= 2;
     win.forEach(function(m, i){ var mm = +m.slice(5,7); if ((mm - 1) % every === 0) ctx.fillText(monthLabel(m), x(i), padT + ph + 6); });
+    /* MD-VAL-TRANCHES-2026-10-29 (Watson, SA - Position Management System window; Richard, 6-Oct-2026 "Q2 = A", entry marked on every chart, and
+       9-Oct-2026 "with the entry date marked", lost when this page was embedded in the PMS Per-stock Dashboard on 27-Oct): ?tr=<date>,<date>
+       draws each tranche's purchase as a labelled purple dashed line; the page without ?tr is unchanged */
+    (function(){ if (!TRQ || S.t !== TRT) return;
+      TRQ.split(',').filter(Boolean).forEach(function(d, k){ var xx = dateX(d); if (xx == null) return;
+        ctx.save(); ctx.strokeStyle = '#8250df'; ctx.lineWidth = 1.2; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(xx, padT); ctx.lineTo(xx, padT + ph); ctx.stroke(); ctx.setLineDash([]);
+        ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'top'; var lab = 'tranche ' + (k + 1) + ' bought, ' + (+d.slice(8,10)) + '-' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+d.slice(5,7) - 1];
+        var tw = ctx.measureText(lab).width; ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(xx - tw - 6, padT + 4 + k * 14, tw + 4, 13); ctx.fillStyle = '#8250df'; ctx.fillText(lab, xx - 4, padT + 5 + k * 14); ctx.restore(); }); })();
     // hover
     if (S.hoverIdx >= 0 && S.hoverIdx < n){
       ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(x(S.hoverIdx), padT); ctx.lineTo(x(S.hoverIdx), padT+ph); ctx.stroke(); ctx.setLineDash([]);

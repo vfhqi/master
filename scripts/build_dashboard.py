@@ -164,6 +164,14 @@ def load_master_ratings():
             if not isinstance(v, dict) or not v.get("grade"):
                 continue   # no rating: shown as missing, never invented
             e = {"g": v["grade"], "p": v.get("provenance") or "", "a": v.get("as_at") or "", "o": _emr_owner(v)}
+            # 4-Nov-26 (D-SQ-292, Richard: "for every LETTER rating displayed to me in the system, I want the number as well"): the
+            # Rater's 1-100 number (v) and the fine grade (B+, C-) travel with the letter when the snapshot carries them.
+            if v.get("score") is not None:
+                e["v"] = v["score"]
+            if v.get("grade_fine") and str(v.get("grade_fine"))[:1] == str(v["grade"])[:1]:
+                e["gf"] = v["grade_fine"]
+            if v.get("rank") and v.get("n"):
+                e["rk"] = [v["rank"], v["n"]]
             n = _emr_note(k, v)
             if n:
                 e["n"] = n
@@ -1085,6 +1093,7 @@ table.data-table td.col-identity{white-space:nowrap}
    Bottom-up/Stock-driven family (judgements), blue the Top Down/Exogenously-driven family (observations). */
 .emr-g{display:inline-block;min-width:17px;padding:1px 3px;border-radius:3px;font-weight:700;font-size:10.5px;text-align:center;line-height:1.25;border:1px solid transparent;box-sizing:border-box;cursor:help;vertical-align:middle;white-space:nowrap}
 .emr-g sup{font-size:7.5px;margin-left:1px;font-weight:600;line-height:0}
+.emr-n{display:inline-block;margin-left:2px;font-size:10px;font-weight:600;color:#5d636c;font-variant-numeric:tabular-nums}
 .emr-gA{background:#0d3817;color:#fff;border-color:#0d3817}
 .emr-gB{background:#2e7d32;color:#fff;border-color:#2e7d32}
 .emr-gC{background:#f2e1a5;color:#8d6e00;border-color:#d4b859}
@@ -5254,10 +5263,11 @@ window.EMR = (function(){
     var sup=e.s||"",note=e.n||"";
     var fmK=k==="sellside_momentum"?fourMeasures(t):false;
     if(fmK){sup="4";note=(note?note+"; ":"")+(fmK==="fin"?"graded on four measures: EBITDA is not relevant for a Financial":"graded on four measures: the company reports no EBITDA");}
-    var tt=nm+": "+e.g+(e.o?" · "+e.o:"")+(e.a?" · as at "+fd(e.a):"")+(note?" · "+note:"");
+    var gshow=e.gf||e.g,vnum=(e.v!=null)?String(Math.round(+e.v)):"";   /* 4-Nov-26: the fine grade and the 1-100 number beside every letter */
+    var tt=nm+": "+gshow+(vnum?" ("+vnum+" of 100"+(e.rk?", "+e.rk[0]+" of "+e.rk[1]+" stocks":"")+")":"")+(e.o?" · "+e.o:"")+(e.a?" · as at "+fd(e.a):"")+(note?" · "+note:"");
     var tn=k==="tsr_valuation"?tsrNote(e):null;  /* MD-TSR-NOTE-2026-10-01 */
     if(tn&&tn.lab)tt+=tn.tip;
-    return '<span class="emr-g emr-g'+letter(e.g)+(e.p==="memo_v1_mapped"?' emr-hollow':'')+'" title="'+esc(tt)+'">'+esc(e.g)+(sup?'<sup>'+esc(sup)+'</sup>':'')+'</span>'
+    return '<span class="emr-g emr-g'+letter(e.g)+(e.p==="memo_v1_mapped"?' emr-hollow':'')+'" title="'+esc(tt)+'">'+esc(gshow)+(sup?'<sup>'+esc(sup)+'</sup>':'')+'</span>'+(vnum?'<span class="emr-n" title="'+esc(tt)+'">'+vnum+'</span>':'')'
       +(tn&&tn.lab?'<span class="emr-tn'+(e.s==="val"?' emr-tn-trial':'')+'" title="'+esc(tn.ltip)+'">'+esc(tn.lab)+'</span>':'');
   }
   /* MD-TSR-NOTE-2026-10-01 (Richard, message 12): beside the TSR/Valuation pill, what the valuation-only (not TSR) grade
@@ -6895,7 +6905,7 @@ function renderPositions(){
   }
   var h='<div class="summary-tile" id="section-summary"><h3>Position Management</h3>'
     +'<div class="sub">'+srcLine+'</div>'
-    +'<div class="summary-stats">'+sumStat("Holdings",invs.length)+sumStat("Tranches",totalTrades)+sumStat("% of fund",(totalSize?totalSize.toFixed(2):"0.00")+"%","green")+'</div></div>';
+    +'<div class="summary-stats">'+sumStat("Holdings",invs.length)+sumStat("Tranches",totalTrades)+sumStat("% of fund now",(totalSize?totalSize.toFixed(2):"0.00")+"%","green")+'</div></div>';
   if(!invs.length){
     container.innerHTML=h;
     return;
@@ -6919,8 +6929,9 @@ function renderPositions(){
     for(var k=0;k<TRANCHE_TYPES.length;k++){
       var t2=byType[TRANCHE_TYPES[k]];
       if(t2){
-        var lbl=(t2.target_size_pct!=null)?(t2.target_size_pct*100).toFixed(2)+"%":"held";
-        var ttl=TRANCHE_TYPES[k]+" held"+(t2.entry_date?", entered "+t2.entry_date:"")+(t2.stop_ma?", stop at the "+t2.stop_ma+" moving average":"");
+        // CURRENT-AUM-2026-11-04: the cell shows the CURRENT % of AUM (what the tranche is worth now); at entry in the tooltip
+        var lbl=(t2.current_size_pct!=null)?Number(t2.current_size_pct).toFixed(2)+"%":(t2.target_size_pct!=null)?(t2.target_size_pct*100).toFixed(2)+"%":"held";
+        var ttl=TRANCHE_TYPES[k]+" held"+(t2.target_size_pct!=null?", "+(t2.target_size_pct*100).toFixed(2)+"% of AUM at entry":"")+(t2.entry_date?", entered "+t2.entry_date:"")+(t2.stop_ma?", stop at the "+t2.stop_ma+" moving average":"");
         tradeCells+='<td class="pass" style="text-align:center" title="'+ttl+'">'+lbl+'</td>';
       } else {
         tradeCells+='<td class="neutral" style="text-align:center">&mdash;</td>';

@@ -172,6 +172,8 @@ def load_master_ratings():
                 e["gf"] = v["grade_fine"]
             if v.get("rank") and v.get("rank_n"):   # 5-Nov-26 (D-MD-JSGUARD-5): the population size travels as rank_n; "n" is dropped from the store
                 e["rk"] = [v["rank"], v["rank_n"]]
+                if v.get("rank_prov"):   # MD-EMR-RANK-PROV-2026-11-05: the canonical file's own provisional flag
+                    e["rp"] = 1
             n = _emr_note(k, v)
             if n:
                 e["n"] = n
@@ -1094,6 +1096,7 @@ table.data-table td.col-identity{white-space:nowrap}
 .emr-g{display:inline-block;min-width:17px;padding:1px 3px;border-radius:3px;font-weight:700;font-size:10.5px;text-align:center;line-height:1.25;border:1px solid transparent;box-sizing:border-box;cursor:help;vertical-align:middle;white-space:nowrap}
 .emr-g sup{font-size:7.5px;margin-left:1px;font-weight:600;line-height:0}
 .emr-n{display:inline-block;margin-left:2px;font-size:10px;font-weight:600;color:#5d636c;font-variant-numeric:tabular-nums}
+.emr-n.emr-prov{font-style:italic;color:#9aa0a8}  /* MD-EMR-RANK-PROV-2026-11-05: a provisional place (fewer than 30 stocks scored) */
 .emr-gA{background:#0d3817;color:#fff;border-color:#0d3817}
 .emr-gB{background:#2e7d32;color:#fff;border-color:#2e7d32}
 .emr-gC{background:#f2e1a5;color:#8d6e00;border-color:#d4b859}
@@ -5255,6 +5258,7 @@ window.EMR = (function(){
   function name(k,withLegend){return (NAMES[k]||k)+(withLegend&&k==="case_riskiness"?" ("+LEGEND+")":"");}
   function famNames(fam){var ks=fam==="bu"?BU:TD,a=[];for(var i=0;i<ks.length;i++)a.push(name(ks[i],true));return a.join(", ");}
   function letter(g){var c=String(g||"").charAt(0);return RANK[c]?c:"N";}
+  function ordn(n){n=Math.round(+n);var v=n%100;return n+((v>=11&&v<=13)?"th":(["th","st","nd","rd"][n%10]||"th"));}  /* MD-EMR-RANK-PROV-2026-11-05 */
   /* The same test as the Sell-side Momentum grading (ssemEnrichRow here; ssem_four_measures in build-ratings-snapshot.py):
      a stock with a sell-side entry whose three EBITDA readings are all missing (banks, insurers) is graded on four measures. */
   function fourMeasures(t){var ss=(window.MASTER_DATA||{}).ssem,e=ss&&ss[t];if(!e||typeof e!=="object")return false;if(typeof ssemIsFinancial==="function"&&ssemIsFinancial(t))return "fin";var d=e.ebitda_rev||{};return d.L1M==null&&d.L3M==null&&d.L6M==null;}  /* 9-Oct-26: every Financial is graded on four measures */
@@ -5269,10 +5273,10 @@ window.EMR = (function(){
     var fmK=k==="sellside_momentum"?fourMeasures(t):false;
     if(fmK){sup="4";note=(note?note+"; ":"")+(fmK==="fin"?"graded on four measures: EBITDA is not relevant for a Financial":"graded on four measures: the company reports no EBITDA");}
     var gshow=e.gf||e.g,vnum=(e.v!=null)?String(Math.round(+e.v)):"";   /* 4-Nov-26: the fine grade and the 1-100 number beside every letter */
-    var tt=nm+": "+gshow+(vnum?" ("+vnum+" of 100"+(e.rk?", "+e.rk[0]+" of "+e.rk[1]+" stocks":"")+")":"")+(e.o?" · "+e.o:"")+(e.a?" · as at "+fd(e.a):"")+(note?" · "+note:"");
+    var tt=nm+": "+gshow+(vnum?" ("+vnum+" of 100"+(e.rk?", "+ordn(e.rk[0])+" of "+e.rk[1]+" stocks"+(e.rp?", provisional":""):"")+")":"")+(e.o?" · "+e.o:"")+(e.a?" · as at "+fd(e.a):"")+(note?" · "+note:"");
     var tn=k==="tsr_valuation"?tsrNote(e):null;  /* MD-TSR-NOTE-2026-10-01 */
     if(tn&&tn.lab)tt+=tn.tip;
-    return '<span class="emr-g emr-g'+letter(e.g)+(e.p==="memo_v1_mapped"?' emr-hollow':'')+'" title="'+esc(tt)+'">'+esc(gshow)+(sup?'<sup>'+esc(sup)+'</sup>':'')+'</span>'+(vnum?'<span class="emr-n" title="'+esc(tt)+'">'+vnum+'</span>':'')
+    return '<span class="emr-g emr-g'+letter(e.g)+(e.p==="memo_v1_mapped"?' emr-hollow':'')+'" title="'+esc(tt)+'">'+esc(gshow)+(sup?'<sup>'+esc(sup)+'</sup>':'')+'</span>'+(vnum?'<span class="emr-n'+(e.rp?' emr-prov':'')+'" title="'+esc(tt)+'">'+vnum+'</span>':'')
       +(tn&&tn.lab?'<span class="emr-tn'+(e.s==="val"?' emr-tn-trial':'')+'" title="'+esc(tn.ltip)+'">'+esc(tn.lab)+'</span>':'');
   }
   /* MD-TSR-NOTE-2026-10-01 (Richard, message 12): beside the TSR/Valuation pill, what the valuation-only (not TSR) grade

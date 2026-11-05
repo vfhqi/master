@@ -170,8 +170,8 @@ def load_master_ratings():
                 e["v"] = v["score"]
             if v.get("grade_fine") and str(v.get("grade_fine"))[:1] == str(v["grade"])[:1]:
                 e["gf"] = v["grade_fine"]
-            if v.get("rank") and v.get("n"):
-                e["rk"] = [v["rank"], v["n"]]
+            if v.get("rank") and v.get("rank_n"):   # 5-Nov-26 (D-MD-JSGUARD-5): the population size travels as rank_n; "n" is dropped from the store
+                e["rk"] = [v["rank"], v["rank_n"]]
             n = _emr_note(k, v)
             if n:
                 e["n"] = n
@@ -5267,7 +5267,7 @@ window.EMR = (function(){
     var tt=nm+": "+gshow+(vnum?" ("+vnum+" of 100"+(e.rk?", "+e.rk[0]+" of "+e.rk[1]+" stocks":"")+")":"")+(e.o?" · "+e.o:"")+(e.a?" · as at "+fd(e.a):"")+(note?" · "+note:"");
     var tn=k==="tsr_valuation"?tsrNote(e):null;  /* MD-TSR-NOTE-2026-10-01 */
     if(tn&&tn.lab)tt+=tn.tip;
-    return '<span class="emr-g emr-g'+letter(e.g)+(e.p==="memo_v1_mapped"?' emr-hollow':'')+'" title="'+esc(tt)+'">'+esc(gshow)+(sup?'<sup>'+esc(sup)+'</sup>':'')+'</span>'+(vnum?'<span class="emr-n" title="'+esc(tt)+'">'+vnum+'</span>':'')'
+    return '<span class="emr-g emr-g'+letter(e.g)+(e.p==="memo_v1_mapped"?' emr-hollow':'')+'" title="'+esc(tt)+'">'+esc(gshow)+(sup?'<sup>'+esc(sup)+'</sup>':'')+'</span>'+(vnum?'<span class="emr-n" title="'+esc(tt)+'">'+vnum+'</span>':'')
       +(tn&&tn.lab?'<span class="emr-tn'+(e.s==="val"?' emr-tn-trial':'')+'" title="'+esc(tn.ltip)+'">'+esc(tn.lab)+'</span>':'');
   }
   /* MD-TSR-NOTE-2026-10-01 (Richard, message 12): beside the TSR/Valuation pill, what the valuation-only (not TSR) grade

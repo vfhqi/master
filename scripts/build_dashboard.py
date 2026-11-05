@@ -1141,6 +1141,11 @@ col.pe-c-emrtv{width:74px} col.pe-c-emrfamtd{width:104px}
 table.pe-table.pe-emr-tn col.pe-c-emrtv{width:124px} table.pe-table.pe-emr-tn col.pe-c-emrfamtd{width:174px}  /* MD-TIDY-2026-10-02c: was 154px; the note's grade letter was cut off */
 table.pe-table.pe-emr.pe-emr-tn{min-width:1670px}
 table.pe-table.il-table.pe-emr.pe-emr-tn{min-width:1710px}
+/* MD-EMR-NUM-WIDTH-2026-11-05 (D-MD-JSGUARD-6): the Rater's 1-100 number beside each Bottom-up letter needs up to 167px
+   (four fine grades with numbers, measured in the Windows browser pane); the column widens only when the store carries a number. */
+table.pe-table.pe-emr-bn col.pe-c-emrfam{width:170px}
+table.pe-table.pe-emr.pe-emr-bn{min-width:1686px}
+table.pe-table.pe-emr.pe-emr-tn.pe-emr-bn{min-width:1736px}
 /* the new headings break between words only (the page's narrow-screen rule breaks inside words) */
 table.pe-table tr.pe-h th.emr-h-bu .pe-hs,table.pe-table tr.pe-h th.emr-h-td .pe-hs,table.pe-table tr.pe-h th.emr-h-x .pe-hs,
 table.pe-table tr.pe-h th.emr-h-bu .pe-hl,table.pe-table tr.pe-h th.emr-h-td .pe-hl,table.pe-table tr.pe-h th.emr-h-x .pe-hl{overflow-wrap:normal;word-break:normal}
@@ -5295,6 +5300,8 @@ window.EMR = (function(){
     return TSRN;
   }
   function tsrNotes(){return tsrScan().notes;}
+  var BUN=null;  /* MD-EMR-NUM-WIDTH-2026-11-05: does any stock carry the Rater's number on a Bottom-up rating? */
+  function buNums(){if(BUN!==null)return BUN;BUN=false;var e=E();if(!e)return BUN;for(var t in e.s){if(!e.s.hasOwnProperty(t))continue;var r=e.s[t]&&e.s[t].r;if(!r)continue;for(var i=0;i<BU.length;i++){var x=r[BU[i]];if(x&&x.v!=null){BUN=true;return BUN;}}}return BUN;}
   /* The key sentence for legends that explain MR and val; empty when the store has neither TSR grades nor notes. */
   function tsrKey(){
     var s=tsrScan();if(!s.notes&&!s.tsr)return "";
@@ -5417,7 +5424,7 @@ window.EMR = (function(){
   }
   function sumTds(t){return '<td style="padding:4px;text-align:center">'+family(t,"bu")+'</td><td style="padding:4px;text-align:center">'+family(t,"td")+'</td><td style="padding:4px;text-align:center">'+blend(t)+'</td>';}
   return {KEYS:KEYS,BU:BU,TD:TD,FAM:FAM,on:on,row:row,name:name,famNames:famNames,pill:pill,family:family,blend:blend,flags:flags,worthy:worthy,
-    attach:attach,peCell:peCell,gradeMap:gradeMap,how:how,techHeaders:techHeaders,techTds:techTds,summaryNote:summaryNote,sumGroupThs:sumGroupThs,sumColThs:sumColThs,sumTds:sumTds,tsrNote:tsrNote,tsrNotes:tsrNotes,tsrKey:tsrKey};  /* MD-TSR-NOTE-2026-10-01: the last three */
+    attach:attach,peCell:peCell,gradeMap:gradeMap,how:how,techHeaders:techHeaders,techTds:techTds,summaryNote:summaryNote,sumGroupThs:sumGroupThs,sumColThs:sumColThs,sumTds:sumTds,tsrNote:tsrNote,tsrNotes:tsrNotes,tsrKey:tsrKey,buNums:buNums};  /* MD-TSR-NOTE-2026-10-01: the last three */
 })();
 function ratingsColCount(){return (window.EMR&&window.EMR.on())?5:8;}
 function ratingsGroupTh(){return (window.EMR&&window.EMR.on())?'<th colspan="5" class="col-ratings">Eight Master Ratings</th>':'<th colspan="8" class="col-ratings">Ratings</th>';}
@@ -19564,7 +19571,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 
   function tableHtml(m){
     if(!m.rows.length){return '<div class="pe-wrap"><div class="pe-empty">No stock matches. '+(m.q?"Clear the search, or ":"")+'switch a rule off or pick a looser Flex Value.</div></div>';}
-    var h='<div class="pe-wrap"><table class="pe-table'+(cols()!==COLS?' pe-emr'+(window.EMR.tsrNotes()?' pe-emr-tn':''):'')+'">'+colgroup()+header()+'<tbody>';  /* MD-TSR-NOTE-2026-10-01: pe-emr-tn */
+    var h='<div class="pe-wrap"><table class="pe-table'+(cols()!==COLS?' pe-emr'+(window.EMR.tsrNotes()?' pe-emr-tn':'')+(window.EMR.buNums&&window.EMR.buNums()?' pe-emr-bn':''):'')+'">'+colgroup()+header()+'<tbody>';  /* MD-TSR-NOTE-2026-10-01: pe-emr-tn */
     for(var i=0;i<m.rows.length;i++){
       var rr=m.rows[i];
       h+='<tr'+(rr._ok?"":' class="pe-out"')+'>';
@@ -20242,14 +20249,14 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function minWidth(C){
     var fixed=0,nNum=0;
     for(var i=0;i<C.length;i++){var w=C[i].w;
-      if(w&&FIXED[w]!=null)fixed+=(w==="emrfamtd"&&window.EMR&&window.EMR.tsrNotes&&window.EMR.tsrNotes())?154:FIXED[w];
+      if(w&&FIXED[w]!=null)fixed+=(w==="emrfamtd"&&window.EMR&&window.EMR.tsrNotes&&window.EMR.tsrNotes())?154:((w==="emrfam"&&window.EMR&&window.EMR.buNums&&window.EMR.buNums())?170:FIXED[w]);
       else nNum++;}
     return Math.ceil(nNum*62+fixed);
   }
 
   function tableHtml(B){
     var C=allCols(),RS=ruleState(),q=st.q.trim().toLowerCase(),shown=0,groupsOn=0;
-    var tn=(window.EMR&&window.EMR.tsrNotes&&window.EMR.tsrNotes())?' pe-emr-tn':'';
+    var tn=(window.EMR&&window.EMR.tsrNotes&&window.EMR.tsrNotes())?' pe-emr-tn':'';if(window.EMR&&window.EMR.buNums&&window.EMR.buNums())tn+=' pe-emr-bn';
     var h='<div class="pe-wrap"><table class="pe-table il-table il-mi'+(st.cg.is?"":" il-noind")+(st.cg.R&&emrOn()?' pe-emr'+tn:'')+'" style="min-width:'+minWidth(C)+'px">'+colgroup(C)+header(C,RS)+'<tbody>';
     for(var gi=0;gi<GROUPS.length;gi++){
       var G=GROUPS[gi];if(!st.on[G.k])continue;groupsOn++;

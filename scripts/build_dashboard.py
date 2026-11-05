@@ -3798,11 +3798,62 @@ function _expandChartRows(rows){
   return out;
 }
 
+/* MD-SPEED-2026-11-05 (D-MD-SPEED-1, Systems Architect, Ricky login; Richard, 5-Nov-26: "The charts in the MD take a long
+   time to load when I click on a stock"): the chart store. Each chart file fetched is also kept in the browser's own store
+   (Cache Storage "vf-charts-v1", one store for every page on vfhqi.github.io, so the PMS Per-stock Dashboard, whose copy of
+   this code is built from this page, reads and fills the same store). A stock opened before is drawn at once from its
+   stored copy; the published file is then fetched quietly and, if it differs, stored and the chart drawn again. A copy
+   that does not end the way a whole chart file ends is never stored or used. Anything that fails falls back to the
+   script-tag load, exactly as before; on file:// or without Cache Storage only the script-tag load runs. */
+var _VFC_NAME="vf-charts-v1",_VFC_MAX=600,_vfcLast=null,_vfcQ=[],_vfcBusy=0;
+function _vfcOk(){try{return typeof caches!=="undefined"&&!!caches.open&&typeof fetch==="function"&&typeof Response==="function"&&(location.protocol==="https:"||location.protocol==="http:");}catch(e){return false;}}
+function _vfcGood(t){return typeof t==="string"&&t.length>200&&t.indexOf("CHART_REGISTRY[")>=0&&/\]\];?\s*$/.test(t);}
+function _vfcRun(t){var s=document.createElement("script");s.text=t;document.head.appendChild(s);document.head.removeChild(s);}
+function _vfcGet(key){
+  return caches.open(_VFC_NAME).then(function(c){return c.match(key);}).then(function(r){
+    if(!r)return null;var v=r.headers.get("X-VF-Ver")||"";
+    return r.text().then(function(t){return {t:t,v:v};});
+  }).catch(function(){return null;});
+}
+function _vfcPut(key,t,ver){
+  try{caches.open(_VFC_NAME).then(function(c){
+    return c.put(key,new Response(t,{headers:{"Content-Type":"text/javascript","X-VF-Ver":ver||""}})).then(function(){
+      if(Math.random()<0.05)return c.keys().then(function(ks){for(var i=0;i<ks.length-_VFC_MAX;i++)c["delete"](ks[i]);});
+    });
+  }).catch(function(){});}catch(e){}
+}
+function _vfcFetch(url){return fetch(url).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.text();});}
+function _chartUrl(ticker){
+  var _cb=(typeof D!=="undefined"&&D&&D.meta&&D.meta.generated)?String(D.meta.generated).replace(/[^0-9]/g,""):"";
+  var url="charts/"+_safeTickerFile(ticker)+".js"+(_cb?("?v="+_cb):"");
+  var key=url.split("?")[0];try{key=new URL(key,location.href).href;}catch(e){}
+  return {url:url,ver:_cb,key:key};
+}
+/* MD-SPEED-2026-11-05 (D-MD-SPEED-2): the store filled ahead of a click. Two at a time, the latest request first, at most 20
+   waiting; a stock already stored from this build is skipped; nothing is drawn. */
+function _vfcPrefetch(ticker){
+  if(!ticker||!_vfcOk()||CHART_REGISTRY[ticker]||_chartLoading[ticker])return;
+  for(var i=0;i<_vfcQ.length;i++)if(_vfcQ[i]===ticker)return;
+  _vfcQ.push(ticker);if(_vfcQ.length>20)_vfcQ.shift();_vfcPump();
+}
+function _vfcPump(){
+  while(_vfcBusy<2&&_vfcQ.length){
+    (function(t){
+      _vfcBusy++;var u=_chartUrl(t);
+      _vfcGet(u.key).then(function(hit){
+        if(hit&&u.ver&&hit.v===u.ver&&_vfcGood(hit.t))return;
+        return _vfcFetch(u.url).then(function(txt){if(_vfcGood(txt))_vfcPut(u.key,txt,u.ver);});
+      }).catch(function(){}).then(function(){_vfcBusy--;_vfcPump();});
+    })(_vfcQ.pop());
+  }
+}
+
 function loadChartData(ticker, callback){
   // SESSION 12 D-MD-CHART-1: pure script-tag injection. XHR+eval path failed silently
   // on GitHub Pages because eval(xhr.responseText) runs in IIFE-local scope, and the
   // chart file's `var CHART_REGISTRY=CHART_REGISTRY||{}` shadows the global registry.
   // Script-tag injection executes at GLOBAL scope and writes to window.CHART_REGISTRY directly.
+  // (MD-SPEED-2026-11-05: a stored or fetched file is run the same way, as a script element, so it registers globally too.)
   // Already loaded?
   if(CHART_REGISTRY[ticker]){
     callback(_expandChartRows(CHART_REGISTRY[ticker]));
@@ -3814,22 +3865,49 @@ function loadChartData(ticker, callback){
     return;
   }
   _chartLoading[ticker]=[callback];
-  var _cb=(typeof D!=="undefined"&&D&&D.meta&&D.meta.generated)?String(D.meta.generated).replace(/[^0-9]/g,""):"";
-  var url="charts/"+_safeTickerFile(ticker)+".js"+(_cb?("?v="+_cb):"");
-  var s=document.createElement("script");
-  s.src=url;
-  s.onload=function(){
+  _vfcLast=ticker;
+  var u=_chartUrl(ticker),url=u.url;
+  function deliver(data){
     var cbs=_chartLoading[ticker]||[];
     delete _chartLoading[ticker];
-    var data=CHART_REGISTRY[ticker]?_expandChartRows(CHART_REGISTRY[ticker]):null;
-    for(var i=0;i<cbs.length;i++)cbs[i](data);
-  };
-  s.onerror=function(){
-    var cbs=_chartLoading[ticker]||[];
-    delete _chartLoading[ticker];
-    for(var i=0;i<cbs.length;i++)cbs[i](null);
-  };
-  document.head.appendChild(s);
+    if(data===undefined)data=CHART_REGISTRY[ticker]?_expandChartRows(CHART_REGISTRY[ticker]):null;
+    for(var i=0;i<cbs.length;i++){try{cbs[i](data);}catch(e){(function(er){setTimeout(function(){throw er;},0);})(e);}}
+    return cbs;
+  }
+  function viaTag(){
+    var s=document.createElement("script");
+    s.src=url;
+    s.onload=function(){deliver();};
+    s.onerror=function(){deliver(null);};
+    document.head.appendChild(s);
+  }
+  if(!_vfcOk()){viaTag();return;}
+  _vfcGet(u.key).then(function(hit){
+    if(hit&&_vfcGood(hit.t)){try{_vfcRun(hit.t);}catch(e){}}
+    if(CHART_REGISTRY[ticker]){
+      var cbs=deliver();
+      _vfcFetch(url).then(function(t){
+        if(!_vfcGood(t))return;
+        if(t===hit.t){if(hit.v!==u.ver)_vfcPut(u.key,t,u.ver);return;}
+        _vfcRun(t);_vfcPut(u.key,t,u.ver);
+        if(_vfcLast===ticker&&CHART_REGISTRY[ticker]){
+          var d=_expandChartRows(CHART_REGISTRY[ticker]);
+          for(var i=0;i<cbs.length;i++){try{cbs[i](d);}catch(e){}}
+        }
+      }).catch(function(){});
+      return;
+    }
+    return _vfcFetch(url).then(function(t){
+      if(!_vfcGood(t))throw new Error("incomplete chart file");
+      _vfcRun(t);
+      if(!CHART_REGISTRY[ticker])throw new Error("chart file did not register");
+      _vfcPut(u.key,t,u.ver);
+      deliver();
+    });
+  }).catch(function(){
+    if(!_chartLoading[ticker])return;
+    if(CHART_REGISTRY[ticker])deliver();else viaTag();
+  });
 }
 // === END LAZY CHART LOADER ===
 
@@ -4185,13 +4263,16 @@ window.openChart=function(t){
     p.style.transition="";
   }
   // MD-S76-CHART-PERSIST: use persisted chartWidth instead of hardcoded 50%.
-  p.style.width=chartWidth+"%";
+  /* MD-SPEED-2026-11-05 (D-MD-SPEED-3): while the panel is closed, and so off screen, it takes its width at once rather
+     than over the 0.3 s width animation, so the chart can be drawn as soon as its data is in hand. */
+  if(!_wasChartOpen){var _ptr=p.style.transition;p.style.transition="none";p.style.width=chartWidth+"%";void p.offsetWidth;p.style.transition=_ptr;}
+  else p.style.width=chartWidth+"%";
   document.documentElement.style.setProperty("--chart-panel-w",chartWidth+"vw");
   p.classList.add("open");
   document.body.classList.add("chart-open");
   var _chartMain=document.querySelector(".main");
   // S41: always push the table to the LEFT with margin-right; chart slides from right on all tabs now.
-  _chartMain.style.marginLeft="0";_chartMain.style.marginRight=chartWidth+"%";
+  /* MD-SPEED-5-2026-11-05 (D-MD-SPEED-5): the table takes its new width in one step, not over a 0.3 s animation that re-lays-out the whole table on every frame; closing and width changes then also go in one step. */_chartMain.style.transition="none";_chartMain.style.marginLeft="0";_chartMain.style.marginRight=chartWidth+"%";
   // MD-S76-CHART-PERSIST: per-tab MA/zoom reset blocks removed. All settings persist universally
   // across stock opens, tab switches, and browser sessions via localStorage.
   var cont=document.getElementById("chart-container");
@@ -4232,11 +4313,43 @@ window.openChart=function(t){
   h+='<div id="chart-canvas-wrap" style="width:100%;position:relative"><canvas id="chart-canvas" style="width:100%;display:block"></canvas></div>';
   cont.innerHTML=h;
   // Pre-load chart data, then draw after CSS transition finishes (300ms)
+  /* MD-SPEED-2026-11-05 (D-MD-SPEED-3): drawn as soon as the data is in hand when the panel already has its final width
+     (the slide-in moves the panel without resizing it); otherwise after the 0.3 s width change, as before. Only the stock
+     still chosen is drawn, so a quick second click is never overdrawn by the first. */
   loadChartData(t,function(data){
-    setTimeout(function(){drawMasterChart(t)},350);
+    if(chartTicker!==t)return;
+    var _pw=p.getBoundingClientRect().width,_tw=document.documentElement.clientWidth*chartWidth/100;
+    if(Math.abs(_pw-_tw)<=2)drawMasterChart(t);
+    else setTimeout(function(){if(chartTicker===t)drawMasterChart(t);},350);
     try{_setChartFreshness(data);}catch(e){}
   });
 };
+/* MD-SPEED-2026-11-05 (D-MD-SPEED-2): a stock's chart is fetched into the chart store when the pointer rests for 0.1 s on
+   anything that opens it (a stock's name cell on the V2 tabs, read as the name-cell click handler above reads it; a row or
+   button that calls openChart or openStockView; the Pool and Ideas lists' links), and the live holdings' charts 4 s after
+   the page opens, so a click usually finds its chart already stored. */
+(function(){
+  if(!_vfcOk())return;
+  var known={},i;for(i=0;i<D.prices.length;i++)known[D.prices[i].ticker]=1;
+  var RX=/open(?:Chart|StockView)\(\s*['"]([^'"]+)['"]/,timer=0,last=null;
+  function tickerOf(n){
+    var nc=(n&&n.closest)?n.closest("td.name-cell, td.mo-mx-name-cell"):null;
+    if(nc){var tkEl=nc.querySelector(".tk, .mo-mx-tk"),tk=tkEl?(tkEl.textContent||"").trim():"";if(tk)return tk;}
+    for(var k=0;n&&n.getAttribute&&k<8;k++,n=n.parentElement){
+      var a=n.getAttribute("data-pe-open")||n.getAttribute("data-lp-open")||n.getAttribute("data-il-t");
+      if(a)return a;
+      var oc=n.getAttribute("onclick");if(oc){var m=RX.exec(oc);if(m)return m[1];}
+    }
+    return null;
+  }
+  document.addEventListener("mouseover",function(e){
+    var t=tickerOf(e.target);if(!t||!known[t]||t===last)return;
+    last=t;clearTimeout(timer);timer=setTimeout(function(){_vfcPrefetch(t);},100);
+  },{passive:true});
+  setTimeout(function(){
+    try{var inv=(D.positions&&D.positions.investments)||[];for(var j=0;j<inv.length;j++){if(inv[j]&&known[inv[j].ticker])_vfcPrefetch(inv[j].ticker);}}catch(e){}
+  },4000);
+})();
 window.setChartZoom=function(z){
   chartZoom=z;
   saveChartPrefs();
@@ -21373,7 +21486,9 @@ document.addEventListener('click', function(e){
 })();
 /* MD-V2-S63-STOCK-VIEW-MARKER-END */
 
-renderTab("mm99");
+/* MD-SPEED-2026-11-05 (D-MD-SPEED-4): the MM 99 tab is no longer built while the page opens. It held 390,230 of the
+   page's 445,114 elements and cost about 0.8 s of every opening while hidden; switchTab builds it on its first visit,
+   as it does every other tab (measured: the opening screen pixel-identical, the MM 99 tab identical on its visit). */
 
 /* MD-V2-STOCK-DEEPLINK: ?stock=TICKER URL parameter handler.
    Added 02-Jun-26 for Reports & Memos Repository company-link integration.
@@ -21382,7 +21497,9 @@ renderTab("mm99");
   function _doDeepLink(){
     try{
       var params=new URLSearchParams(window.location.search);
-      var ticker=params.get('stock');
+      /* MD-SPEED-6-2026-11-05 (D-MD-SPEED-6): ?stock= as read by the page's first script, before the opening tab
+         rewrote the address and dropped it */
+      var ticker=window.__vfStockParam||params.get('stock');
       if(!ticker)return;
       ticker=decodeURIComponent(ticker).toUpperCase();
       if(typeof window.openStockView==='function'){window.openStockView(ticker);}
@@ -21472,7 +21589,7 @@ renderTab("mm99");
         '  <div class="psd-hdr"><span class="psd-title">Per-stock Dashboard</span><span class="sp"></span><a id="psd-newtab" href="https://vfhqi.github.io/ratings/pms/holding.html" target="_blank" rel="noopener">open in a new tab</a><button class="ssp-close-btn" onclick="closePerStockDashboard()" title="Close the Per-stock Dashboard">&times;</button></div>\n'
         '  <iframe id="psd-frame" title="Per-stock Dashboard"></iframe>\n'
         '</div>\n'
-        '<script>(function(){var BASE=\'https://vfhqi.github.io/ratings/pms/holding.html\';window.openPerStockDashboard=function(t){t=t||window._sspTicker||(typeof chartTicker!==\'undefined\'&&chartTicker)||\'\';var o=document.getElementById(\'psd-overlay\'),f=document.getElementById(\'psd-frame\');if(!o||!f)return;var u=BASE+(t?\'?t=\'+encodeURIComponent(t)+\'&embed=1\':\'?embed=1\');if(f.getAttribute(\'data-src\')!==u){f.setAttribute(\'data-src\',u);f.src=u;}var nt=document.getElementById(\'psd-newtab\');if(nt)nt.href=BASE+(t?\'?t=\'+encodeURIComponent(t):\'\');o.classList.add(\'open\');window._psdOpen=true;};window.closePerStockDashboard=function(){var o=document.getElementById(\'psd-overlay\');if(o)o.classList.remove(\'open\');window._psdOpen=false;};document.addEventListener(\'keydown\',function(e){if(e.key===\'Escape\'&&window._psdOpen){window.closePerStockDashboard();e.stopPropagation();e.preventDefault();}},true);try{var q=new URLSearchParams(location.search).get(\'perstock\');if(q)setTimeout(function(){window.openPerStockDashboard(decodeURIComponent(q).toUpperCase());},400);}catch(e){}})();</script>\n'
+        '<script>(function(){var BASE=\'https://vfhqi.github.io/ratings/pms/holding.html\';window.openPerStockDashboard=function(t){t=t||window._sspTicker||(typeof chartTicker!==\'undefined\'&&chartTicker)||\'\';var o=document.getElementById(\'psd-overlay\'),f=document.getElementById(\'psd-frame\');if(!o||!f)return;var u=BASE+(t?\'?t=\'+encodeURIComponent(t)+\'&embed=1\':\'?embed=1\');if(f.getAttribute(\'data-src\')!==u){f.setAttribute(\'data-src\',u);f.src=u;}var nt=document.getElementById(\'psd-newtab\');if(nt)nt.href=BASE+(t?\'?t=\'+encodeURIComponent(t):\'\');o.classList.add(\'open\');window._psdOpen=true;};window.closePerStockDashboard=function(){var o=document.getElementById(\'psd-overlay\');if(o)o.classList.remove(\'open\');window._psdOpen=false;};document.addEventListener(\'keydown\',function(e){if(e.key===\'Escape\'&&window._psdOpen){window.closePerStockDashboard();e.stopPropagation();e.preventDefault();}},true);try{window.__vfStockParam=new URLSearchParams(location.search).get(\'stock\');}catch(e){}try{var q=new URLSearchParams(location.search).get(\'perstock\');if(q)setTimeout(function(){window.openPerStockDashboard(decodeURIComponent(q).toUpperCase());},400);}catch(e){}})();</script>\n'
         '<!-- MD-V2-S63-STOCK-VIEW-HTML-MARKER -->\n'
         '<div class="ssp-overlay" id="ssp-overlay">\n'
         '  <div class="ssp-hdr">\n'

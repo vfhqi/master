@@ -815,8 +815,9 @@ body[data-active-tab="pool_elig"] .v2-nav{display:flex}
 body[data-active-tab="pool_elig"] .header-controls-row{display:none !important}
 body[data-active-tab="pool_elig"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="pool_elig"]{--header-height:70px}
-.v2-nav-btn[data-v2-tab="pool_elig"],.v2-nav-btn[data-v2-tab="ideas_lists"]{width:88px}
-.v2-nav-btn[data-v2-tab="setups_healthy_retest"],.v2-nav-btn[data-v2-tab="tests_healthy_vcp"]{width:88px}  /* MD-IDEAS-LISTS: the two longest labels keep room */
+/* MD-RIBBON-ONE-ROW-2026-11-06 (Richard, 6-Nov-26: "You cannot split the "header" of the MD into two rows ... Put it back to one row and change size of the buttons accordingly"): buttons 78->74px, the wide ones 88->84px, padding 3px 4px -> 3px 2px, font 11 -> 10.5px; one row from 1880px wide, as before the IG tab */
+.v2-nav-btn[data-v2-tab="pool_elig"],.v2-nav-btn[data-v2-tab="ideas_lists"]{width:84px}
+.v2-nav-btn[data-v2-tab="setups_healthy_retest"],.v2-nav-btn[data-v2-tab="tests_healthy_vcp"]{width:84px}  /* MD-IDEAS-LISTS: the two longest labels keep room */
 /* An active navigation button kept its group's pale hover colour under the pointer, so its white label vanished
    (measured 28-Sep-26 on every Summary button; the group hover rule ties .v2-active on specificity and comes later, so it wins; the extra .v2-nav raises these above it). Keep the active colour. */
 .v2-nav .v2-nav-group .v2-nav-btn.v2-active:hover{background:#1b3d5c;border-color:#1b3d5c}
@@ -851,14 +852,14 @@ body[data-active-tab="lifecycle_phases"] .v2-nav{display:flex}
 body[data-active-tab="lifecycle_phases"] .header-controls-row{display:none !important}
 body[data-active-tab="lifecycle_phases"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="lifecycle_phases"]{--header-height:70px}
-.v2-nav-btn[data-v2-tab="lifecycle_phases"]{width:88px}
+.v2-nav-btn[data-v2-tab="lifecycle_phases"]{width:84px}
 /* MD-IG-TURNING-2026-11-06 -- IG - Turning/Inflecting (tab ig_turning; project IG - Turning and Inflection Setups). Every rule is scoped to #tab-ig_turning. */
 body[data-active-tab="ig_turning"] .header-tabs-row{display:none !important}
 body[data-active-tab="ig_turning"] .v2-nav{display:flex}
 body[data-active-tab="ig_turning"] .header-controls-row{display:none !important}
 body[data-active-tab="ig_turning"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="ig_turning"]{--header-height:70px}
-.v2-nav-btn[data-v2-tab="ig_turning"]{width:88px}
+.v2-nav-btn[data-v2-tab="ig_turning"]{width:84px}
 #tab-ig_turning{--igt-card:#fffdf8;--igt-ink:#23241f;--igt-mute:#6d6b62;--igt-line:#e6e2d6;--igt-rule:#d6d1c1;--igt-accent:#2f5d3a;
  --igt-p0:#e7e4da;--igt-p1:#cfe3c6;--igt-p2:#8cbf86;--igt-p3:#2f7d3a;--igt-up:#2a6a34;--igt-dn:#9e3b30;--igt-hd:#efece2;--igt-hd2:#f6f3ea;
  color:var(--igt-ink);font:12.5px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:6px 8px 0}
@@ -881,12 +882,12 @@ body[data-active-tab="ig_turning"]{--header-height:70px}
 #tab-ig_turning .igt-legend .igt-pip{vertical-align:middle;margin-right:3px}
 #tab-ig_turning .igt-wrap{background:var(--igt-card);border:1px solid var(--igt-line);border-radius:6px;overflow:auto}
 #tab-ig_turning table.igt-table{border-collapse:separate;border-spacing:0;width:100%;min-width:1180px;table-layout:fixed}
-#tab-ig_turning .igt-table th,#tab-ig_turning .igt-table td{padding:4px 5px;border-bottom:1px solid var(--igt-line);vertical-align:middle;overflow:hidden}
+#tab-ig_turning .igt-table th,#tab-ig_turning .igt-table td{padding:4px 8px;border-bottom:1px solid var(--igt-line);vertical-align:middle;overflow:hidden}
 #tab-ig_turning .igt-table thead{position:sticky;top:0;z-index:3}
 #tab-ig_turning .igt-table thead th{background:var(--igt-hd);text-align:left;font-weight:600;color:var(--igt-ink)}
-#tab-ig_turning tr.igt-grow th{font-size:9.5px;color:var(--igt-accent);padding:5px 5px 3px;border-bottom:1px solid var(--igt-rule);white-space:nowrap;text-align:center}
+#tab-ig_turning tr.igt-grow th{font-size:9.5px;color:var(--igt-accent);padding:5px 8px 3px;border-bottom:1px solid var(--igt-rule);white-space:nowrap;text-align:center}
 #tab-ig_turning tr.igt-grow th.igt-blank{border-bottom-color:transparent}
-#tab-ig_turning tr.igt-lrow th{font-size:10px;line-height:1.25;padding:4px 3px;cursor:pointer;user-select:none;vertical-align:bottom;border-bottom:1px solid var(--igt-rule);overflow:hidden;overflow-wrap:normal;word-break:keep-all}
+#tab-ig_turning tr.igt-lrow th{font-size:10px;line-height:1.25;padding:4px 8px;cursor:pointer;user-select:none;vertical-align:bottom;border-bottom:1px solid var(--igt-rule);overflow:hidden;overflow-wrap:normal;word-break:keep-all}
 #tab-ig_turning tr.igt-lrow th:hover{background:#e7e3d6}
 #tab-ig_turning tr.igt-lrow th .igt-arr{color:var(--igt-accent);font-size:9px;margin-left:2px}
 #tab-ig_turning tr.igt-frow th{background:var(--igt-hd2);padding:3px 4px;border-bottom:2px solid #cfcab9;font-weight:400;cursor:default}
@@ -896,7 +897,7 @@ body[data-active-tab="ig_turning"]{--header-height:70px}
 #tab-ig_turning .igt-table .igt-gs{border-left:2px solid var(--igt-rule)}
 #tab-ig_turning .igt-table tbody tr:hover td{box-shadow:inset 0 0 0 999px rgba(60,55,30,.05)}
 #tab-ig_turning .igt-table tbody td{height:38px;font-size:12.5px}
-#tab-ig_turning td.igt-rk{color:var(--igt-mute);font-size:10.5px;text-align:right;padding:4px 5px 4px 2px}
+#tab-ig_turning td.igt-rk{color:var(--igt-mute);font-size:10.5px;text-align:right;padding:4px 8px 4px 4px}
 #tab-ig_turning .igt-el{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #tab-ig_turning .igt-nm{font-weight:600;cursor:pointer}
 #tab-ig_turning .igt-nm:hover{text-decoration:underline}
@@ -908,9 +909,10 @@ body[data-active-tab="ig_turning"]{--header-height:70px}
 #tab-ig_turning .igt-pos{color:var(--igt-up)}
 #tab-ig_turning .igt-neg{color:var(--igt-dn)}
 #tab-ig_turning .igt-zero{color:var(--igt-mute)}
-#tab-ig_turning .igt-pers{display:flex;align-items:center;gap:5px;white-space:nowrap}
-#tab-ig_turning .igt-pips{display:inline-flex;gap:1px}
-#tab-ig_turning .igt-pip{display:inline-block;width:5px;height:12px;border-radius:1px;background:var(--igt-p0)}
+#tab-ig_turning .igt-pers{display:flex;align-items:center;gap:7px;white-space:nowrap}
+#tab-ig_turning .igt-pips{display:flex;flex:1;gap:2px;min-width:72px}
+#tab-ig_turning .igt-pip{display:inline-block;flex:1;min-width:4px;height:15px;border-radius:2px;background:var(--igt-p0)}
+#tab-ig_turning .igt-legend .igt-pip{flex:none;width:6px;height:12px}
 #tab-ig_turning .igt-pip.igt-r1{background:var(--igt-p1)}
 #tab-ig_turning .igt-pip.igt-r2{background:var(--igt-p2)}
 #tab-ig_turning .igt-pip.igt-r3{background:var(--igt-p3)}
@@ -920,11 +922,14 @@ body[data-active-tab="ig_turning"]{--header-height:70px}
 #tab-ig_turning .igt-ra.igt-u{color:var(--igt-up)}
 #tab-ig_turning .igt-ra.igt-d{color:var(--igt-dn)}
 #tab-ig_turning .igt-ra.igt-s{color:#a8a495}
-#tab-ig_turning .igt-pev{display:inline-block;min-width:18px;text-align:right}
-#tab-ig_turning .igt-pebar{display:inline-block;width:40px;height:6px;border-radius:3px;margin-left:6px;vertical-align:middle;position:relative;background:linear-gradient(90deg,rgba(47,125,58,.35),rgba(231,228,218,.9) 50%,rgba(176,69,58,.35))}
-#tab-ig_turning .igt-pebar i{position:absolute;top:-2px;width:3px;height:10px;margin-left:-1px;background:var(--igt-ink);border-radius:1px}
+#tab-ig_turning .igt-pew{display:flex;align-items:center;gap:8px}
+#tab-ig_turning .igt-pev{flex:none;min-width:20px;text-align:right}
+#tab-ig_turning .igt-pebar{display:block;flex:1;height:9px;border-radius:4px;position:relative;background:linear-gradient(90deg,rgba(47,125,58,.35),rgba(231,228,218,.9) 50%,rgba(176,69,58,.35))}
+#tab-ig_turning .igt-pebar i{position:absolute;top:-3px;width:3px;height:15px;margin-left:-1.5px;background:var(--igt-ink);border-radius:1px}
 #tab-ig_turning .igt-dag{color:var(--igt-mute);cursor:help;margin-left:1px}
 #tab-ig_turning .igt-empty{padding:16px;color:var(--igt-mute)}
+/* Narrower screens: a smaller indent, so the headings and numbers still fit (8px from 1600px wide, Richard 6-Nov-26) */
+@media (max-width:1599px){#tab-ig_turning .igt-table th,#tab-ig_turning .igt-table td{padding-left:5px;padding-right:5px}#tab-ig_turning tr.igt-lrow th{padding-left:3px;padding-right:3px}#tab-ig_turning td.igt-rk{padding:4px 5px 4px 2px}}
 col.pe-c-lpph{width:122px}
 table.pe-table.lp-table{min-width:1500px}
 table.pe-table tr.pe-g th.lp-gp,table.pe-table tr.pe-h th.lp-hp{background:#ece8f3}
@@ -1997,7 +2002,7 @@ body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2
 .v2-nav-group-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.45px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; line-height: 1; }
 .v2-nav-group-btns { display: flex; flex-wrap: wrap; gap: 3px; align-items: stretch; }
 /* Buttons: uniform 50px height, centred text */
-.v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; width: 78px; height: 66px; padding: 3px 4px; font-size: 11px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; overflow: hidden; }
+.v2-nav-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; width: 74px; height: 66px; padding: 3px 2px; font-size: 10.5px; font-weight: 600; color: #333; background: #fff; border: 1px solid #d0ccb8; border-radius: 4px; cursor: pointer; transition: background 0.15s, border-color 0.15s; line-height: 1.3; overflow: hidden; }
 .v2-nav-btn:hover { background: #f3efe2; border-color: #b0ac98; }
 .v2-nav-btn.v2-active { background: #1b3d5c; border-color: #1b3d5c; color: #fff; }
 .v2-nav-btn.v2-active-s1 { background: #1b5e20; border-color: #1b5e20; color: #fff; }
@@ -20259,7 +20264,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
      var extra=c.id==='sb'?'. L1M stand-in (45-day count): '+accT(r.sb1==null?null:r.sb1*100,0,'%'):c.id==='eb'?'. The same 45-day count serves as L1M':'. No shorter-window count exists for price targets, so the filter uses this 100-day reading only';
      return '<td class="igt-num'+g+' '+(v==null?'':sc(v*100))+'" style="'+(v==null?'':tint(v/CAP[c.id]))+'" title="'+esc(brTip(tr,win)+extra)+'">'+(v==null?NA:acc(v*100,0,'%'))+'</td>';}
    case 'pe':{if(r.pe==null)return '<td class="igt-num'+g+'">'+NA+'</td>';var pc=Math.max(0,Math.min(100,r.pe));
-     return '<td class="igt-num'+g+'" style="'+tint((50-r.pe)/50*0.6)+'" title="'+esc('Percentile '+r.pe+'; P/E on 24-month-forward EPS '+(r.pec==null?'n/a':r.pec+'x')+'; method: '+(r.pem||''))+'"><span class="igt-pev">'+r.pe+'</span><span class="igt-pebar"><i style="left:'+pc+'%"></i></span></td>';}
+     return '<td class="igt-num'+g+'" style="'+tint((50-r.pe)/50*0.6)+'" title="'+esc('Percentile '+r.pe+'; P/E on 24-month-forward EPS '+(r.pec==null?'n/a':r.pec+'x')+'; method: '+(r.pem||''))+'"><div class="igt-pew"><span class="igt-pev">'+r.pe+'</span><span class="igt-pebar"><i style="left:'+pc+'%"></i></span></div></td>';}
    case 'irs':return rsCell(r.irs,r.irs3,'Industry RS',1);
    case 'srs':return rsCell(r.srs,r.srs3,'Sector RS',0);
    case 'stk':return rsCell(r.stk,r.stk3,'Stock RS',0);}

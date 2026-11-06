@@ -332,6 +332,20 @@ def load_data():
     else:
         print("  [phases] lifecycle-phases.json missing -- the tab will say so.")
 
+    # MD-IG-TURNING-2026-11-06: IG - Turning/Inflecting (project IG - Turning and Inflection Setups). Rebuilt here,
+    # in-process like the Phases; a failure keeps the previous file and says so; never fails the build.
+    ig_turning = None
+    try:
+        import build_ig_turning as _bigt
+        _bigt.main()
+    except Exception as _e:
+        print("  [ig_turning] WARNING: build_ig_turning failed ({}); using the previous ig-turning.json if any".format(_e))
+    _igt_path = DATA_DIR / "ig-turning.json"
+    if _igt_path.exists():
+        ig_turning = safe_json_load(_igt_path)
+    else:
+        print("  [ig_turning] ig-turning.json missing -- the tab will say so.")
+
     # MD-V2-S36-BRIEF-MARKER: universe_updated = mtime of data/universe.json,
     # formatted as 'YYYY-MM-DD HH:MM'. The file has no _meta field, so we use mtime.
     try:
@@ -376,6 +390,8 @@ def load_data():
         master["pool"] = pool  # MD-POOL-ELIG-2026-09-28
     if phases:
         master["phases"] = phases  # MD-LIFECYCLE-PHASES-2026-10-10
+    if ig_turning:
+        master["ig_turning"] = ig_turning  # MD-IG-TURNING-2026-11-06
     if ssem:
         ssem_data = {k: v for k, v in ssem.items() if k != "_meta"}
         master["ssem"] = ssem_data
@@ -526,6 +542,7 @@ TABS = [
     {"id": "pool_elig", "label": "Pool of Stocks Eligible for Middle Innings Portfolio Selection", "accent": "#1b5e20"},  # MD-POOL-ELIG-2026-09-28
     {"id": "ideas_lists", "label": "Pool of Middle Innings Eligible Stocks", "accent": "#1b5e20"},  # MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02
     {"id": "lifecycle_phases", "label": "Phases of a Stock Lifecycle", "accent": "#1b3d5c"},  # MD-LIFECYCLE-PHASES-2026-10-10
+    {"id": "ig_turning", "label": "IG - Turning/Inflecting", "accent": "#2f5d3a"},  # MD-IG-TURNING-2026-11-06
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -557,6 +574,7 @@ IMPLEMENTED_TABS = [
     "pool_elig",  # MD-POOL-ELIG-2026-09-28
     "ideas_lists",  # MD-IDEAS-LISTS-2026-09-28
     "lifecycle_phases",  # MD-LIFECYCLE-PHASES-2026-10-10
+    "ig_turning",  # MD-IG-TURNING-2026-11-06
 ]
 
 
@@ -834,6 +852,79 @@ body[data-active-tab="lifecycle_phases"] .header-controls-row{display:none !impo
 body[data-active-tab="lifecycle_phases"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="lifecycle_phases"]{--header-height:70px}
 .v2-nav-btn[data-v2-tab="lifecycle_phases"]{width:88px}
+/* MD-IG-TURNING-2026-11-06 -- IG - Turning/Inflecting (tab ig_turning; project IG - Turning and Inflection Setups). Every rule is scoped to #tab-ig_turning. */
+body[data-active-tab="ig_turning"] .header-tabs-row{display:none !important}
+body[data-active-tab="ig_turning"] .v2-nav{display:flex}
+body[data-active-tab="ig_turning"] .header-controls-row{display:none !important}
+body[data-active-tab="ig_turning"] .header{height:auto !important;padding-bottom:0 !important}
+body[data-active-tab="ig_turning"]{--header-height:70px}
+.v2-nav-btn[data-v2-tab="ig_turning"]{width:88px}
+#tab-ig_turning{--igt-card:#fffdf8;--igt-ink:#23241f;--igt-mute:#6d6b62;--igt-line:#e6e2d6;--igt-rule:#d6d1c1;--igt-accent:#2f5d3a;
+ --igt-p0:#e7e4da;--igt-p1:#cfe3c6;--igt-p2:#8cbf86;--igt-p3:#2f7d3a;--igt-up:#2a6a34;--igt-dn:#9e3b30;--igt-hd:#efece2;--igt-hd2:#f6f3ea;
+ color:var(--igt-ink);font:12.5px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:6px 8px 0}
+#tab-ig_turning .igt-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+#tab-ig_turning h2.igt-title{font-size:16px;margin:0;font-weight:700;color:var(--igt-ink)}
+#tab-ig_turning .igt-sub{color:var(--igt-mute);font-size:11.5px}
+#tab-ig_turning details.igt-defs{margin:6px 0;background:var(--igt-card);border:1px solid var(--igt-line);border-radius:6px;padding:5px 10px}
+#tab-ig_turning details.igt-defs summary{cursor:pointer;font-weight:600;font-size:12px}
+#tab-ig_turning details.igt-defs{position:relative}
+#tab-ig_turning details.igt-defs li{margin:3px 0}
+#tab-ig_turning details.igt-defs[open]>ul{position:absolute;z-index:20;left:-1px;right:-1px;top:100%;margin:0;padding:8px 14px 10px 30px;max-height:60vh;overflow:auto;background:var(--igt-card);border:1px solid var(--igt-line);border-top:none;border-radius:0 0 6px 6px;box-shadow:0 8px 18px rgba(0,0,0,.12)}
+#tab-ig_turning .igt-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 6px}
+#tab-ig_turning .igt-stats{color:var(--igt-mute);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
+#tab-ig_turning .igt-stats b{color:var(--igt-ink)}
+#tab-ig_turning .igt-btns{display:flex;gap:6px;flex:none}
+#tab-ig_turning button.igt-btn{font:inherit;font-size:11.5px;padding:2px 9px;border:1px solid #b9b39f;background:#fff;border-radius:4px;cursor:pointer;color:var(--igt-ink)}
+#tab-ig_turning button.igt-btn:hover{background:#f0ede3}
+#tab-ig_turning button:focus-visible,#tab-ig_turning select:focus-visible,#tab-ig_turning input:focus-visible,#tab-ig_turning th:focus-visible{outline:2px solid #6b8fd6;outline-offset:1px}
+#tab-ig_turning .igt-legend{display:inline-flex;gap:8px;align-items:center;font-size:11px;color:var(--igt-mute);white-space:nowrap}
+#tab-ig_turning .igt-legend .igt-pip{vertical-align:middle;margin-right:3px}
+#tab-ig_turning .igt-wrap{background:var(--igt-card);border:1px solid var(--igt-line);border-radius:6px;overflow:auto}
+#tab-ig_turning table.igt-table{border-collapse:separate;border-spacing:0;width:100%;min-width:1180px;table-layout:fixed}
+#tab-ig_turning .igt-table th,#tab-ig_turning .igt-table td{padding:4px 5px;border-bottom:1px solid var(--igt-line);vertical-align:middle;overflow:hidden}
+#tab-ig_turning .igt-table thead{position:sticky;top:0;z-index:3}
+#tab-ig_turning .igt-table thead th{background:var(--igt-hd);text-align:left;font-weight:600;color:var(--igt-ink)}
+#tab-ig_turning tr.igt-grow th{font-size:9.5px;color:var(--igt-accent);padding:5px 5px 3px;border-bottom:1px solid var(--igt-rule);white-space:nowrap;text-align:center}
+#tab-ig_turning tr.igt-grow th.igt-blank{border-bottom-color:transparent}
+#tab-ig_turning tr.igt-lrow th{font-size:10px;line-height:1.25;padding:4px 3px;cursor:pointer;user-select:none;vertical-align:bottom;border-bottom:1px solid var(--igt-rule);overflow:hidden;overflow-wrap:normal;word-break:keep-all}
+#tab-ig_turning tr.igt-lrow th:hover{background:#e7e3d6}
+#tab-ig_turning tr.igt-lrow th .igt-arr{color:var(--igt-accent);font-size:9px;margin-left:2px}
+#tab-ig_turning tr.igt-frow th{background:var(--igt-hd2);padding:3px 4px;border-bottom:2px solid #cfcab9;font-weight:400;cursor:default}
+#tab-ig_turning .igt-frow select,#tab-ig_turning .igt-frow input{display:block;width:100%;font:inherit;font-size:10.5px;padding:1px 2px;border:1px solid #d3cebd;border-radius:3px;background:#fff;color:var(--igt-ink);height:auto}
+#tab-ig_turning .igt-frow .igt-on{background:#fff1b8;border-color:#c9a93a;font-weight:600}
+#tab-ig_turning .igt-table .igt-num{text-align:right}
+#tab-ig_turning .igt-table .igt-gs{border-left:2px solid var(--igt-rule)}
+#tab-ig_turning .igt-table tbody tr:hover td{box-shadow:inset 0 0 0 999px rgba(60,55,30,.05)}
+#tab-ig_turning .igt-table tbody td{height:38px;font-size:12.5px}
+#tab-ig_turning td.igt-rk{color:var(--igt-mute);font-size:10.5px;text-align:right;padding:4px 5px 4px 2px}
+#tab-ig_turning .igt-el{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tab-ig_turning .igt-nm{font-weight:600;cursor:pointer}
+#tab-ig_turning .igt-nm:hover{text-decoration:underline}
+#tab-ig_turning .igt-tk{color:var(--igt-mute);font-size:10.5px}
+#tab-ig_turning .igt-ind{font-size:11px}
+#tab-ig_turning .igt-sec{color:var(--igt-mute);font-size:10.5px}
+#tab-ig_turning .igt-na{color:#b1ad9f}
+#tab-ig_turning .igt-pr{visibility:hidden}
+#tab-ig_turning .igt-pos{color:var(--igt-up)}
+#tab-ig_turning .igt-neg{color:var(--igt-dn)}
+#tab-ig_turning .igt-zero{color:var(--igt-mute)}
+#tab-ig_turning .igt-pers{display:flex;align-items:center;gap:5px;white-space:nowrap}
+#tab-ig_turning .igt-pips{display:inline-flex;gap:1px}
+#tab-ig_turning .igt-pip{display:inline-block;width:5px;height:12px;border-radius:1px;background:var(--igt-p0)}
+#tab-ig_turning .igt-pip.igt-r1{background:var(--igt-p1)}
+#tab-ig_turning .igt-pip.igt-r2{background:var(--igt-p2)}
+#tab-ig_turning .igt-pip.igt-r3{background:var(--igt-p3)}
+#tab-ig_turning .igt-pn{font-weight:600}
+#tab-ig_turning .igt-pc{color:var(--igt-mute);font-size:10.5px}
+#tab-ig_turning .igt-ra{display:inline-block;width:11px;text-align:center;font-size:10px;margin-left:3px}
+#tab-ig_turning .igt-ra.igt-u{color:var(--igt-up)}
+#tab-ig_turning .igt-ra.igt-d{color:var(--igt-dn)}
+#tab-ig_turning .igt-ra.igt-s{color:#a8a495}
+#tab-ig_turning .igt-pev{display:inline-block;min-width:18px;text-align:right}
+#tab-ig_turning .igt-pebar{display:inline-block;width:40px;height:6px;border-radius:3px;margin-left:6px;vertical-align:middle;position:relative;background:linear-gradient(90deg,rgba(47,125,58,.35),rgba(231,228,218,.9) 50%,rgba(176,69,58,.35))}
+#tab-ig_turning .igt-pebar i{position:absolute;top:-2px;width:3px;height:10px;margin-left:-1px;background:var(--igt-ink);border-radius:1px}
+#tab-ig_turning .igt-dag{color:var(--igt-mute);cursor:help;margin-left:1px}
+#tab-ig_turning .igt-empty{padding:16px;color:var(--igt-mute)}
 col.pe-c-lpph{width:122px}
 table.pe-table.lp-table{min-width:1500px}
 table.pe-table tr.pe-g th.lp-gp,table.pe-table tr.pe-h th.lp-hp{background:#ece8f3}
@@ -7023,7 +7114,7 @@ function renderPositions(){
   if(lm.error){
     srcLine='<span style="color:#A32D2D;font-weight:600">Live holdings could not be read from the Position Management System, so none are shown. Reason: '+lm.error+'</span>';
   } else {
-    srcLine='Source: the Position Management System (pms-state.json), as saved '+(lm.saved_at?String(lm.saved_at).replace("T"," ").slice(0,16):"date unknown")+'. Trade types: PB1 and PB2 are probing bets; MM1 to MM4 are core position tranches.';
+    srcLine='Source: the Position Management System (pms-state.json), as saved '+(lm.saved_at?String(lm.saved_at).replace("T"," ").slice(0,16):"date unknown")+'. Tranche columns: the six original Position Management System keys (PB1, PB2, MM1 to MM4) and Other for tranches added from 6-Nov-2026; each tranche now carries its own type there (Core Investment, Probing Bet or Speculative Bet).';
     if(lm.orphan_slots&&lm.orphan_slots.length)srcLine+=' <span style="color:#A32D2D;font-weight:600">Warning: '+lm.orphan_slots.length+' slot(s) hold capital with no stock assigned.</span>';
     if(lm.unpriced&&lm.unpriced.length)srcLine+=' <span style="color:#A32D2D;font-weight:600">Warning: no price data for '+lm.unpriced.join(", ")+', so these will not highlight on other tabs.</span>';
   }
@@ -7037,7 +7128,7 @@ function renderPositions(){
 
   h+='<div class="data-table-wrap" id="section-stocks"><table class="data-table"><thead><tr>'
     +'<th class="col-txt" style="width:120px">Ticker</th><th class="col-txt" style="width:200px">Company</th><th class="col-txt" style="width:50px">Currency</th>'
-    +'<th title="Probing bet, first tranche">PB1</th><th title="Probing bet, second tranche">PB2</th><th title="Core position, first tranche">MM1</th><th title="Core position, second tranche">MM2</th><th title="Core position, third tranche">MM3</th><th title="Core position, fourth tranche">MM4</th>'
+    +'<th title="Probing bet, first tranche">PB1</th><th title="Probing bet, second tranche">PB2</th><th title="Core position, first tranche">MM1</th><th title="Core position, second tranche">MM2</th><th title="Core position, third tranche">MM3</th><th title="Core position, fourth tranche">MM4</th><th title="Tranches added in the Position Management System from 6-Nov-2026 (T1, T2, ...), current % of AUM summed">Other</th>'
     +'<th class="col-txt">Filter Status</th></tr></thead><tbody>';
 
   for(var j=0;j<invs.length;j++){
@@ -7061,6 +7152,10 @@ function renderPositions(){
         tradeCells+='<td class="neutral" style="text-align:center">&mdash;</td>';
       }
     }
+    // D-PMS-V4-150 (6-Nov-2026): a stock may now hold any number of tranches; those under the new keys (T1, T2, ...) are summed here
+    var othK=[],othS=0;
+    for(var k=0;k<inv.trades.length;k++){var t3=inv.trades[k];if(TRANCHE_TYPES.indexOf(t3.type)<0){othK.push(t3.type+(t3.entry_date?" "+t3.entry_date:""));othS+=(t3.current_size_pct!=null)?Number(t3.current_size_pct):((t3.target_size_pct||0)*100);}}
+    tradeCells+=othK.length?'<td class="pass" style="text-align:center" title="'+othK.join(", ")+'">'+othS.toFixed(2)+'%</td>':'<td class="neutral" style="text-align:center">&mdash;</td>';
     var fStatus="&mdash;";
     if(f){
       var stages=[];
@@ -11547,7 +11642,7 @@ function SUM_renderQualifiedStocks() {
               /* MD-POOL-ELIG-2026-09-28: pages that use the V2 header chrome must be measured too. Without this, opening
                  the dashboard straight onto them (a bookmark or a reload with #pool_elig or #combos) left .main at the
                  70px fallback under a ~245px header, hiding the top of the page (found on the live site, 28-Sep-26). */
-              active === 'combos' || active === 'pool_elig' || active === 'ideas_lists' || active === 'lifecycle_phases');  /* MD-LIFECYCLE-PHASES-2026-10-10 */
+              active === 'combos' || active === 'pool_elig' || active === 'ideas_lists' || active === 'lifecycle_phases' || active === 'ig_turning');  /* MD-LIFECYCLE-PHASES-2026-10-10; MD-IG-TURNING-2026-11-06 */
     if (!v2) return;
     /* S66b: measure the actual rendered header height (header-top + nav groups) and
        publish as --header-height so .main margin-top and all frozen top: offsets are correct */
@@ -11644,6 +11739,7 @@ function SUM_renderQualifiedStocks() {
       /* MD-POOL-MI-2026-10-02 (Message 2): the button for pool_elig was removed: one Pool page, Richard: "There is only meant to be the one" */
       +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Pool of Middle Innings Eligible Stocks</button>'  /* MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02 */
       +     '<button class="v2-nav-btn" data-v2-tab="lifecycle_phases" onclick="switchTab(\'lifecycle_phases\')">Phases of a Stock Lifecycle</button>'  /* MD-LIFECYCLE-PHASES-2026-10-10 */
+      +     '<button class="v2-nav-btn" data-v2-tab="ig_turning" onclick="switchTab(\'ig_turning\')">IG - Turning/<wbr>Inflecting</button>'  /* MD-IG-TURNING-2026-11-06 */
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -20060,6 +20156,195 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 })();
 
 /* ============================================================================
+   IG - TURNING/INFLECTING  (tab id ig_turning; MD-IG-TURNING-2026-11-06)
+   Richard's brief of 6-Nov-26 (project "IG - Turning and Inflection Setups", APM): every stock rated Stage 2 Possible or
+   higher, ranked lowest to highest Stage Qualification Persistence, with his twelve fields, sortable on every column and
+   filterable ("> 0" = positive over L3M or L1M, his rule of 6-Nov-26), plus Industry, Sector and Stock RS with an arrow
+   against 3 months ago. Data: MASTER_DATA.ig_turning, written by scripts/build_ig_turning.py (its docstring holds every
+   definition). Styles and names are all prefixed igt- and scoped to #tab-ig_turning.
+   ============================================================================ */
+(function(){
+  var RANKN=['None','Possible','Plausible','Probable'];
+  var RANK={'Possible':1,'Plausible':2,'Probable':3};
+  var RSBAND=5;
+  var M=null,ROWS=null,state=null,shown=[],built=false;
+  function D(){return (window.MASTER_DATA||{}).ig_turning||null;}
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function fd(s){if(!s)return'';var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];var p=String(s).slice(0,10).split('-');return p.length===3?(+p[2])+'-'+m[+p[1]-1]+'-'+p[0].slice(2):s;}
+  /* Accounting style: negatives in brackets, (X); positives plain, padded so the digits line up */
+  function acc(v,dp,suf){if(v==null)return'';suf=suf||'';var a=Math.abs(v).toFixed(dp||0);if(+a===0)return '0'+suf+'<span class="igt-pr">)</span>';return v<0?'('+a+suf+')':a+suf+'<span class="igt-pr">)</span>';}
+  function accT(v,dp,suf){if(v==null)return'n/a';suf=suf||'';var a=Math.abs(v).toFixed(dp||0);return v<0?'('+a+suf+')':(+a===0?'0':'+'+a)+suf;}
+  function sc(v){if(v==null)return'';var r=Math.round(v*100)/100;return r>0?'igt-pos':r<0?'igt-neg':'igt-zero';}
+  /* Subtle conditional shading: green better, red worse, stronger with size, capped */
+  function tint(score){if(score==null||isNaN(score)||score===0)return'';var s=Math.max(-1,Math.min(1,score)),a=(0.05+0.20*Math.abs(s)).toFixed(3);
+   return s>0?'background:rgba(47,125,58,'+a+')':'background:rgba(176,69,58,'+a+')';}
+  function seq(score){if(score==null||isNaN(score)||score<=0)return'';var a=(0.04+0.18*Math.min(1,score)).toFixed(3);return 'background:rgba(70,100,150,'+a+')';}
+  var NA='<span class="igt-na" title="No FactSet estimates on file for this stock">–</span>';
+  function brTip(tr,win){if(!tr||tr[0]==null)return'No estimate counts on file';return 'Raised '+tr[1]+', cut '+tr[2]+', of '+tr[0]+' estimates ('+win+')';}
+  function rsCell(now,then,what,gs){var cls='igt-num'+(gs?' igt-gs':'');if(now==null)return '<td class="'+cls+'">'+NA+'</td>';
+   /* Dead-band (Richard, 6-Nov-26, "Q5 = Do it"): an arrow only for a move of 5 points or more against 3 months ago */
+   var d=(then==null)?null:now-then,cl='igt-s',ch='▬';
+   if(d!=null&&d>=RSBAND){cl='igt-u';ch='▲';}else if(d!=null&&d<=-RSBAND){cl='igt-d';ch='▼';}
+   var tip=what+' now '+now+(then==null?'; no reading 3 months ago':'; 3 months ago ('+fd(M.rs_day_m3)+') '+then+'; change '+accT(d,0,' points'));
+   return '<td class="'+cls+'" style="'+tint((now-50)/50)+'" title="'+esc(tip)+'">'+now+(d==null?'<span class="igt-ra igt-s"> </span>':'<span class="igt-ra '+cl+'">'+ch+'</span>')+'</td>';}
+  /* w = column width in % of the table (sums to 100) */
+  var COLS=null;
+  function cols(){return [
+   {id:'rk',w:2.8,label:'#',tip:'Position in the current sort.',nosort:1},
+   {id:'n',w:11.0,label:'Name',tip:'Company and ticker. Click a name to open its chart.',v:function(r){return r.n.toLowerCase();}},
+   {id:'ind',w:11.4,label:'Industry + Sector',tip:'Viewforth taxonomy: Industry (upper line), Sector (lower line).',v:function(r){return (r.ind+'|'+r.sec).toLowerCase();}},
+   {id:'dh',w:6.0,g:'Prior underperformance',label:'Distance from 104W High',num:1,gs:1,tip:'Latest close against the highest daily high of the last 104 weeks. (40%) means 40% below the high. Blue shading deepens with the distance.',v:function(r){return r.dh;}},
+   {id:'dq',w:5.6,label:'Distance from Bottom Quartile Average over 52W',num:1,tip:'Latest close against the bottom-quartile reading of the last year: the 25th percentile of the daily closes over the last 52 weeks (Richard, 6-Nov-26). 25% means 25% above it; (5%) means 5% below it. Blue shading deepens with the distance above.',v:function(r){return r.dq;}},
+   {id:'pers',w:12.6,g:'Technicals',label:'Stage Qualification Persistence',gs:1,tip:'Month-end Stage 2 rating over the last 12 months, as on the Stage 2 tab (oldest left, this month right). The bold number is the months rated Possible or higher; then the Possible / Plausible / Probable months, in the Stage 2 tab’s order. Sorted by months qualifying, then by the Stage 2 tab’s own weighting (Probable months count most).',v:function(r){return r.ptot*1000+r.pw;}},
+   {id:'eu',w:5,g:'SS upgrades',label:'EPS upgrades L3M',num:1,gs:1,tip:'% change in consensus EPS for calendar '+M.estimate_year+' over the last three months (FactSet). Hover a cell for L1M too.',v:function(r){return r.eu;}},
+   {id:'su',w:5,label:'Sales upgrades L3M',num:1,tip:'% change in consensus sales for calendar '+M.estimate_year+' over the last three months (FactSet). Hover a cell for L1M too.',v:function(r){return r.su;}},
+   {id:'tu',w:5,label:'PT upgrades L3M',num:1,tip:'% change in the consensus price target over the last three months (FactSet). Hover a cell for L1M too.',v:function(r){return r.tu;}},
+   {id:'eb',w:5,g:'SS upgrade breadth',label:'EPS upgrade breadth L3M',num:1,gs:1,tip:'(EPS estimates raised minus cut) ÷ number of estimates, calendar '+M.estimate_year+'. NOTE: counted over the last 45 days, not three months: the system pulls only the 45-day count for EPS.',v:function(r){return r.eb;}},
+   {id:'sb',w:5,label:'Sales upgrade breadth L3M',num:1,tip:'(Sales estimates raised minus cut) ÷ number of estimates, calendar '+M.estimate_year+', over the last 100 days (about 3.3 months): the count the Pool and the Phases page use.',v:function(r){return r.sb;}},
+   {id:'tb',w:5,label:'PT upgrade breadth L3M',num:1,tip:'(Price targets raised minus cut) ÷ number of price targets, over the last 100 days (about 3.3 months).',v:function(r){return r.tb;}},
+   {id:'pe',w:6.8,g:'Valuation',label:'2YF P/E Multiple as Percentile in 10Y Historical Range',num:1,gs:1,tip:'Today’s P/E on 24-month-forward EPS, as a percentile of its own 10-year monthly range (extreme outlier months removed). 0 = cheapest of the decade, 100 = dearest. The bar marks where it sits: green end cheap, red end dear. Same number as the Valuation tab.',v:function(r){return r.pe;}},
+   {id:'irs',w:4.8,g:'Relative strength',label:'Industry RS',num:1,gs:1,tip:'Industry RS (Composite), 0 to 99: the industry’s average Composite ranked across all industries (Stage 2 test 7). Arrow: up or down 5 points or more against 3 months ago (63 trading days).',v:function(r){return r.irs;}},
+   {id:'srs',w:4.6,label:'Sector RS',num:1,tip:'Sector RS (Composite), 0 to 99: the sector’s middle company’s Composite ranked across all sectors (Stage 2 test 8). Arrow: up or down 5 points or more against 3 months ago (63 trading days).',v:function(r){return r.srs;}},
+   {id:'stk',w:4.4,label:'Stock RS',num:1,tip:'Stock RS (Composite), 0 to 99, ranked across the universe (the Pool’s Stock RS). Arrow: up or down 5 points or more against 3 months ago (63 trading days).',v:function(r){return r.stk;}}
+  ];}
+  var POSF=[['','All','Any value'],['pos','> 0','Positive over L3M or L1M (either)'],['nonpos','≤ 0','Not positive over either L3M or L1M']];
+  var RSF=[['','All','Any value'],['50','≥ 50','50 or above'],['70','≥ 70','70 or above'],['80','≥ 80','80 or above'],['up','▲','Rising over L3M (up 5 points or more)'],['up50','▲ & ≥ 50','Rising over L3M (up 5 points or more) and 50 or above']];
+  var FMAP={
+   n:{id:'q',text:1},
+   dh:{id:'dh',opts:[['','All','Any value'],['m20','≤ (20%)','At least 20% below'],['m35','≤ (35%)','At least 35% below'],['m50','≤ (50%)','At least 50% below']]},
+   pers:{id:'ptot',opts:[['','All','Any number of months'],['le2','≤ 2 months','2 months or fewer'],['le3','≤ 3 months','3 months or fewer'],['le6','≤ 6 months','6 months or fewer'],['ge7','≥ 7 months','7 months or more']]},
+   eu:{id:'eu',opts:POSF},su:{id:'su',opts:POSF},tu:{id:'tu',opts:POSF},eb:{id:'eb',opts:POSF},sb:{id:'sb',opts:POSF},tb:{id:'tb',opts:POSF},
+   pe:{id:'pe',opts:[['','All','Any value'],['le25','≤ 25','25th percentile or below'],['le50','≤ 50','50th or below (at or below 10Y median)'],['le75','≤ 75','75th or below'],['gt50','> 50','Above the 50th']]},
+   irs:{id:'irs',opts:RSF},srs:{id:'srs',opts:RSF},stk:{id:'stk',opts:RSF}
+  };
+  function initState(){state={sort:'pers',dir:1,f:{}};}
+  /* Positive = above 0 over L3M OR over L1M (Richard, 6-Nov-26). v = L3M, v1 = L1M (null where no L1M reading exists) */
+  function passPos(v,m,v1){if(!m)return true;var p3=v!=null&&v>0,p1=v1!=null&&v1>0;if(m==='pos')return p3||p1;if(v==null&&v1==null)return false;return !p3&&!p1;}
+  function passRS(now,then,m){if(!m)return true;if(now==null)return false;
+   if(m==='up')return then!=null&&now-then>=RSBAND; if(m==='up50')return then!=null&&now-then>=RSBAND&&now>=50; return now>=+m;}
+  function keep(r){var f=state.f;
+   if(!passPos(r.eu,f.eu,r.eu1)||!passPos(r.su,f.su,r.su1)||!passPos(r.tu,f.tu,r.tu1)||!passPos(r.eb,f.eb,r.eb)||!passPos(r.sb,f.sb,r.sb1)||!passPos(r.tb,f.tb,null))return false;
+   if(f.pe){if(r.pe==null)return false;if(f.pe==='le25'&&r.pe>25)return false;if(f.pe==='le50'&&r.pe>50)return false;if(f.pe==='le75'&&r.pe>75)return false;if(f.pe==='gt50'&&r.pe<=50)return false;}
+   if(!passRS(r.irs,r.irs3,f.irs)||!passRS(r.srs,r.srs3,f.srs)||!passRS(r.stk,r.stk3,f.stk))return false;
+   if(f.ptot){var n=r.ptot;if(f.ptot==='le2'&&n>2)return false;if(f.ptot==='le3'&&n>3)return false;if(f.ptot==='le6'&&n>6)return false;if(f.ptot==='ge7'&&n<7)return false;}
+   if(f.dh){var lim={m20:-0.2,m35:-0.35,m50:-0.5}[f.dh];if(r.dh==null||r.dh>lim)return false;}
+   if(f.q){var q=f.q.toLowerCase();if((r.n+' '+r.t+' '+r.ind+' '+r.sec).toLowerCase().indexOf(q)<0)return false;}
+   return true;}
+  function colById(id){for(var i=0;i<COLS.length;i++)if(COLS[i].id===id)return COLS[i];return null;}
+  function cmp(a,b){var c=colById(state.sort),va=c.v(a),vb=c.v(b);
+   var an=(va==null),bn=(vb==null);if(an&&!bn)return 1;if(bn&&!an)return -1;
+   if(!an&&va!==vb)return (va<vb?-1:1)*state.dir;
+   var p=(a.ptot*1000+a.pw)-(b.ptot*1000+b.pw);if(p)return p;return a.n.localeCompare(b.n);}
+  function persCell(r){var h='<div class="igt-pers" title="'+esc(r.pers.map(function(v,i){return (i===11?'This month':(i-11)+' mo')+': '+v;}).join('\n'))+'"><span class="igt-pips">';
+   for(var i=0;i<12;i++){var v=r.pers[i];h+='<span class="igt-pip'+(RANK[v]?' igt-r'+RANK[v]:'')+'"></span>';}
+   return h+'</span><span class="igt-pn">'+r.ptot+'/12</span><span class="igt-pc">'+r.pc[0]+'/'+r.pc[1]+'/'+r.pc[2]+'</span></div>';}
+  var CAP={eu:10,su:10,tu:20,eb:0.5,sb:0.5,tb:0.5};
+  function rangeTip(r,which){
+   var t=which==='dh'?'104-week high '+r.hi+'; latest close '+r.px:'52-week bottom quartile (25th percentile of daily closes) '+(r.q25==null?'n/a':(+r.q25).toFixed(2))+'; latest close '+r.px+'; 104-week low '+r.lo;
+   if(which==='dh'?!r.full104:!r.full52)t+='; † price history only from '+fd(r.first)+', so the reading covers that period';
+   if(r.rk104==='rescaled')t+='; † the price history switched unit (pence/pounds) on '+fd(r.rk104d)+'; earlier prices converted to the new unit';
+   else if(r.rk104==='excursion')t+='; † off-scale prices around '+fd(r.rk104d)+' left out, as the dashboard does for its 52-week range';
+   else if(r.rk104==='rebased')t+='; † the price history changed unit on '+fd(r.rk104d)+'; range covers only the period since';
+   return t;}
+  function cell(c,r,i){var g=c.gs?' igt-gs':'';
+   switch(c.id){
+   case 'rk':return '<td class="igt-rk">'+(i+1)+'</td>';
+   case 'n':return '<td title="'+esc(r.n+' ('+r.t+'). Click to open the chart.')+'"><div class="igt-nm igt-el" data-igt-open="'+esc(r.t)+'">'+esc(r.n)+'</div><div class="igt-tk igt-el">'+esc(r.t)+'</div></td>';
+   case 'ind':return '<td title="'+esc(r.ind+'\n'+r.sec)+'"><div class="igt-ind igt-el">'+esc(r.ind)+'</div><div class="igt-sec igt-el">'+esc(r.sec)+'</div></td>';
+   case 'dh':case 'dq':{var v=r[c.id];var sh=v==null?'':(c.id==='dh'?seq(-v/0.6):seq(v/0.6));var dag=((c.id==='dh'?r.full104:r.full52)&&!r.rk104)?'':'<span class="igt-dag">†</span> ';
+     return '<td class="igt-num'+g+'" style="'+sh+'" title="'+esc(rangeTip(r,c.id))+'">'+dag+(v==null?NA:acc(v*100,0,'%'))+'</td>';}
+   case 'pers':return '<td class="igt-gs">'+persCell(r)+'</td>';
+   case 'eu':case 'su':case 'tu':{var v=r[c.id];return '<td class="igt-num'+g+' '+sc(v)+'" style="'+(v==null?'':tint(v/CAP[c.id]))+'" title="'+esc('L3M '+accT(v,0,'%')+'; L1M '+accT(r[c.id+'1'],0,'%'))+'">'+(v==null?NA:acc(v,0,'%'))+'</td>';}
+   case 'eb':case 'sb':case 'tb':{var v=r[c.id],tr=r[c.id+'r'],win=c.id==='eb'?'last 45 days':'last 100 days';
+     var extra=c.id==='sb'?'. L1M stand-in (45-day count): '+accT(r.sb1==null?null:r.sb1*100,0,'%'):c.id==='eb'?'. The same 45-day count serves as L1M':'. No shorter-window count exists for price targets, so the filter uses this 100-day reading only';
+     return '<td class="igt-num'+g+' '+(v==null?'':sc(v*100))+'" style="'+(v==null?'':tint(v/CAP[c.id]))+'" title="'+esc(brTip(tr,win)+extra)+'">'+(v==null?NA:acc(v*100,0,'%'))+'</td>';}
+   case 'pe':{if(r.pe==null)return '<td class="igt-num'+g+'">'+NA+'</td>';var pc=Math.max(0,Math.min(100,r.pe));
+     return '<td class="igt-num'+g+'" style="'+tint((50-r.pe)/50*0.6)+'" title="'+esc('Percentile '+r.pe+'; P/E on 24-month-forward EPS '+(r.pec==null?'n/a':r.pec+'x')+'; method: '+(r.pem||''))+'"><span class="igt-pev">'+r.pe+'</span><span class="igt-pebar"><i style="left:'+pc+'%"></i></span></td>';}
+   case 'irs':return rsCell(r.irs,r.irs3,'Industry RS',1);
+   case 'srs':return rsCell(r.srs,r.srs3,'Sector RS',0);
+   case 'stk':return rsCell(r.stk,r.stk3,'Stock RS',0);}
+   return '<td></td>';}
+  function headHTML(){
+   var cg=COLS.map(function(c){return '<col style="width:'+c.w+'%">';}).join('');
+   var g='',i=0;while(i<COLS.length){var c=COLS[i];if(!c.g){var n=0;while(i<COLS.length&&!COLS[i].g&&!(n>0&&COLS[i].gs)){n++;i++;}g+='<th class="igt-blank" colspan="'+n+'"></th>';continue;}
+    var n2=1;i++;while(i<COLS.length&&!COLS[i].g&&!COLS[i].gs){n2++;i++;}g+='<th class="igt-gs" colspan="'+n2+'">'+esc(c.g)+'</th>';}
+   var f='';COLS.forEach(function(c){var m=FMAP[c.id],cl=c.gs?' class="igt-gs"':'';
+    if(c.id==='rk'){f+='<th title="Filters: pick a value under any column"></th>';return;}
+    if(c.id==='ind')return; /* the search box spans Name and Industry + Sector */
+    if(!m){f+='<th'+cl+'></th>';return;}
+    if(m.text){f+='<th'+cl+' colspan="2"><input data-f="'+m.id+'" type="search" placeholder="Search name, ticker, industry, sector" aria-label="Search name, ticker, industry or sector"></th>';return;}
+    f+='<th'+cl+'><select data-f="'+m.id+'" aria-label="Filter: '+esc(c.label)+'" title="Filter: '+esc(c.label)+'">';m.opts.forEach(function(o){f+='<option value="'+o[0]+'" title="'+esc(o[2])+'">'+esc(o[1])+'</option>';});f+='</select></th>';});
+   return '<colgroup>'+cg+'</colgroup><thead><tr class="igt-grow">'+g+'</tr><tr class="igt-lrow" id="igt-hdr"></tr><tr class="igt-frow" id="igt-frow">'+f+'</tr></thead>';}
+  function hdr(){var h='';COLS.forEach(function(c){var a=state.sort===c.id?'<span class="igt-arr">'+(state.dir>0?'▲':'▼')+'</span>':'';
+   h+='<th data-id="'+c.id+'"'+(c.nosort?'':' tabindex="0" aria-sort="'+(state.sort===c.id?(state.dir>0?'ascending':'descending'):'none')+'"')+' class="'+(c.num?'igt-num':'')+(c.gs?' igt-gs':'')+'" title="'+esc(c.tip+(c.nosort?'':' Click to sort; click again to reverse.'))+'">'+esc(c.label)+a+'</th>';});
+   var el=document.getElementById('igt-hdr');if(el)el.innerHTML=h;}
+  function render(){shown=ROWS.filter(keep).sort(cmp);var h='';
+   for(var i=0;i<shown.length;i++){var r=shown[i];h+='<tr>';for(var j=0;j<COLS.length;j++)h+=cell(COLS[j],r,i);h+='</tr>';}
+   document.getElementById('igt-tb').innerHTML=h||'<tr><td colspan="'+COLS.length+'" class="igt-empty" style="height:auto">No stocks pass these filters. Use “Clear filters” to start again.</td></tr>';
+   var nf=0;for(var k in state.f)if(state.f[k])nf++;
+   document.getElementById('igt-stats').innerHTML='<span>Showing <b>'+shown.length+'</b> of '+ROWS.length+' stocks rated Stage 2 Possible or higher (universe '+M.universe+')'+(nf?'; <b>'+nf+'</b> filter'+(nf>1?'s':'')+' on':'')+'. Sorted by <b>'+esc(colById(state.sort).label)+'</b>, '+(state.dir>0?'lowest first':'highest first')+'.</span>'+
+    '<span class="igt-legend">Persistence: <span><span class="igt-pip"></span>None</span><span><span class="igt-pip igt-r1"></span>Possible</span><span><span class="igt-pip igt-r2"></span>Plausible</span><span><span class="igt-pip igt-r3"></span>Probable</span></span>'+
+    '<span class="igt-legend">RS vs 3 months ago: <span><span class="igt-ra igt-u">▲</span>up 5+ points</span><span><span class="igt-ra igt-d">▼</span>down 5+</span><span><span class="igt-ra igt-s">▬</span>within 4</span></span>';
+   hdr();}
+  function defsHTML(){var d=[
+   'The list: every stock in the universe rated <b>Stage 2 Possible, Plausible or Probable</b> today ('+ROWS.length+' of '+M.universe+'). Default order: <b>Stage Qualification Persistence, lowest first</b>, so the stocks that qualified most recently come first.',
+   '<b>Stage Qualification Persistence</b>: the 12 month-end Stage 2 ratings shown on the Stage 2 tab. Ranked by the number of months rated Possible or higher, then by the Stage 2 tab’s weighting (a Probable month counts more than a Plausible one, which counts more than a Possible one). The three small numbers are Possible / Plausible / Probable months.',
+   '<b>Distance from 104W High</b> uses the highest daily high of the last 104 weeks. <b>Distance from Bottom Quartile Average over 52W</b> uses the 25th percentile of the last 52 weeks’ daily closes, the bottom-quartile reading of the past year. Both read the same price history as the rest of the dashboard, with the dashboard’s own repairs for impossible prices and unit switches. A † marks a stock with a shorter history or a repaired range; hover for why.',
+   '<b>Upgrades L3M</b> are the % change in the consensus number over three months; calendar '+M.estimate_year+' for EPS and sales. <b>Upgrade breadth</b> is (raised minus cut) ÷ number of estimates. <b>EPS breadth is a 45-day count</b>, because the system does not yet pull FactSet’s 100-day count for EPS; sales and price-target breadth are the 100-day counts (about 3.3 months), as the Pool and the Phases page use.',
+   '<b>Filters marked “> 0”</b> pass a stock if the number is positive over L3M <i>or</i> over L1M. Upgrades use FactSet’s one-month change. Breadth has no exact one-month count: Sales breadth uses the 45-day count as its L1M stand-in; EPS breadth is already a 45-day count; price-target breadth has only the 100-day count, so its filter reads L3M alone. Hover a cell to see both readings.',
+   '<b>2YF P/E percentile</b> is the Valuation tab’s figure: P/E on 24-month-forward EPS against its own 10-year monthly range with extreme outlier months removed; 0 is the cheapest of the decade. The small bar marks where it sits between cheap (green end) and dear (red end).',
+   '<b>Relative strength</b>: Industry RS, Sector RS and Stock RS (Composite), each 0 to 99, computed by the same code as the Stage 2 tests and the Pool. The arrow compares today with '+fd(M.rs_day_m3)+', 63 trading days earlier: \u25b2 up 5 points or more, \u25bc down 5 points or more, \u25ac a smaller move; the \u201cRising over L3M\u201d filter uses the same 5-point rule. Hover for both readings.',
+   '<b>Shading</b> is deliberately light. Green is better and red worse, stronger with size: upgrades (full strength at ±10% for EPS and sales, ±20% for price targets), breadth (±50%), P/E percentile (green below the 50th), RS (green above 50). The two 104-week columns use a neutral blue that deepens with distance, as neither direction is good or bad on its own. Negative numbers are shown in brackets.',
+   '<b>Blanks (–)</b>: about 36 stocks, mainly banks, insurers and holding companies, plus a few with a known ticker-mapping gap (for example Roche), have no FactSet estimates on file. A filter on those columns drops them.'];
+   return '<ul>'+d.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>';}
+  function isActive(){return document.body.getAttribute('data-active-tab')==='ig_turning';}
+  function sizeWrap(){
+   var w=document.querySelector('#tab-ig_turning .igt-wrap');if(!w||!isActive())return;
+   try{if(typeof window.measureV2Ribbon==='function')window.measureV2Ribbon();}catch(e){}
+   var avail=Math.floor(window.innerHeight-w.getBoundingClientRect().top-10);
+   if(avail>=240){w.style.height=avail+'px';w.style.maxHeight='none';}else{w.style.height='';w.style.maxHeight='70vh';}
+  }
+  if(!window._igtResizeWired){window._igtResizeWired=true;window.addEventListener('resize',function(){if(isActive())sizeWrap();});}
+  function csv(){
+   var cn=['Ticker','Name','Industry','Sector','Distance from 104W High %','Distance from Bottom Quartile Average over 52W %','52W bottom quartile price (25th percentile of daily closes)','Stage Qualification Persistence (months of 12)','Possible months','Plausible months','Probable months','EPS upgrades L3M %','EPS upgrades L1M %','Sales upgrades L3M %','Sales upgrades L1M %','PT upgrades L3M %','PT upgrades L1M %','EPS upgrade breadth (45 days) %','Sales upgrade breadth (100 days) %','Sales upgrade breadth (45 days) %','PT upgrade breadth (100 days) %','2YF P/E percentile in 10Y range','Industry RS','Industry RS 3 months ago','Sector RS','Sector RS 3 months ago','Stock RS','Stock RS 3 months ago'];
+   function q(v){v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+   function p(v){return v==null?'':(v*100).toFixed(1);}
+   var lines=[cn.join(',')];shown.forEach(function(r){lines.push([r.t,r.n,r.ind,r.sec,p(r.dh),p(r.dq),r.q25,r.ptot,r.pc[0],r.pc[1],r.pc[2],r.eu,r.eu1,r.su,r.su1,r.tu,r.tu1,p(r.eb),p(r.sb),p(r.sb1),p(r.tb),r.pe,r.irs,r.irs3,r.srs,r.srs3,r.stk,r.stk3].map(q).join(','));});
+   var b=new Blob([lines.join('\n')],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ig-turning-inflecting-'+M.price_date+'.csv';document.body.appendChild(a);a.click();a.remove();
+  }
+  function sortBy(id){var c=colById(id);if(!c||c.nosort)return;
+   if(state.sort===id)state.dir=-state.dir;else{state.sort=id;state.dir=(id==='pers'||id==='n'||id==='ind'||id==='pe'||id==='dh')?1:-1;}render();}
+  function build(c){
+   M=D().meta;ROWS=D().rows;
+   for(var i=0;i<ROWS.length;i++){var r=ROWS[i];if(!r.pers){var s=String(r.p||''),a=[];for(var k=0;k<12;k++)a.push(RANKN[+s.charAt(k)||0]);r.pers=a;}}
+   COLS=cols();
+   c.innerHTML='<div class="igt-head"><h2 class="igt-title">IG - Turning/Inflecting: Stage 2 Possible or higher, ranked by Stage Qualification Persistence</h2>'
+    +'<span class="igt-sub">Prices, Stage 2 ratings and RS at the close of '+fd(M.price_date)+'; sell-side estimates (FactSet) as of '+fd(M.ssem_as_of)+'; valuation '+fd(M.valuation_generated)+'. Click a heading to sort; use the row under the headings to filter.</span></div>'
+    +'<details class="igt-defs"><summary>How to read this table, definitions and data dates</summary>'+defsHTML()+'</details>'
+    +'<div class="igt-bar"><div class="igt-stats" id="igt-stats"></div><div class="igt-btns"><button class="igt-btn" id="igt-reset" type="button">Clear filters</button><button class="igt-btn" id="igt-csv" type="button">Download CSV</button></div></div>'
+    +'<div class="igt-wrap"><table class="igt-table">'+headHTML()+'<tbody id="igt-tb"></tbody></table></div>';
+   function upd(e){var k=e.target.getAttribute&&e.target.getAttribute('data-f');if(k){state.f[k]=e.target.value;e.target.classList.toggle('igt-on',!!e.target.value);render();}}
+   var fr=document.getElementById('igt-frow');fr.addEventListener('input',upd);fr.addEventListener('change',upd);
+   document.getElementById('igt-reset').addEventListener('click',function(){state.f={};fr.querySelectorAll('select,input').forEach(function(s){s.value='';s.classList.remove('igt-on');});render();});
+   document.getElementById('igt-csv').addEventListener('click',csv);
+   var H=document.getElementById('igt-hdr');
+   H.addEventListener('click',function(e){var th=e.target.closest('th');if(th)sortBy(th.getAttribute('data-id'));});
+   H.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){var th=e.target.closest('th');if(th){e.preventDefault();sortBy(th.getAttribute('data-id'));}}});
+   document.getElementById('igt-tb').addEventListener('click',function(e){var t=e.target.closest('[data-igt-open]');if(t&&typeof window.openStockView==='function')window.openStockView(t.getAttribute('data-igt-open'));});
+   c.querySelector('details.igt-defs').addEventListener('toggle',function(){sizeWrap();});
+   built=true;render();
+  }
+  window.renderIgTurning=function(){
+   try{buildHeaderControls('ig_turning');}catch(e){}
+   var c=document.getElementById('tab-ig_turning');if(!c)return;
+   if(!D()||!D().rows){c.innerHTML='<div class="summary-tile" style="text-align:center;padding:40px"><h3>IG - Turning/Inflecting</h3><p style="color:var(--text-dim);margin-top:8px">ig-turning.json was not built, so there is nothing to show. Run scripts/build_ig_turning.py, then rebuild the dashboard.</p></div>';return;}
+   if(!state)initState();
+   if(!built||!c.querySelector('.igt-wrap'))build(c);
+   sizeWrap();setTimeout(sizeWrap,120);
+  };
+})();
+
+/* ============================================================================
    POOL OF MIDDLE INNINGS ELIGIBLE STOCKS  (tab id ideas_lists; MD-IDEAS-LISTS-2026-09-28, rebuilt MD-POOL-MI-2026-10-02)
    Richard's page, renamed 2-Oct-26 from "Ideas Lists (Bench, LL, SL)" (SA - Master Dashboard D-MD-POOL-44 onwards).
    Only stocks in the Pool are shown when the page opens (Richard, 2-Oct-26: "The page is meant to only display stocks
@@ -20567,6 +20852,7 @@ function renderTab(id){
   else if(id==="pool_elig")renderPoolEligibility();  /* MD-POOL-ELIG-2026-09-28 */
   else if(id==="ideas_lists")renderIdeasLists();  /* MD-IDEAS-LISTS-2026-09-28 */
   else if(id==="lifecycle_phases")renderLifecyclePhases();  /* MD-LIFECYCLE-PHASES-2026-10-10 */
+  else if(id==="ig_turning")renderIgTurning();  /* MD-IG-TURNING-2026-11-06 */
   else if(id==="changes")renderChanges();
   else if(id==="positions")renderPositions();
   else if(id==="ssem")renderSSEM();

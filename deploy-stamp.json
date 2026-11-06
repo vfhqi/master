@@ -4,10 +4,10 @@
   "data_generated_read_from": "index.html",
   "price_source": "yfinance",
   "filters_generated": "2026-11-05 22:28",
-  "universe_updated": "2026-11-05 22:15",
+  "universe_updated": "2026-11-06 05:30",
   "chart_reference_date": "2026-11-05",
-  "index_bytes": 37897404,
-  "index_mtime_local": "2026-11-05 22:48",
-  "stamped_utc": "2026-11-05 22:50:48Z",
-  "stamped_local": "2026-11-05 22:50:48"
+  "index_bytes": 38226741,
+  "index_mtime_local": "2026-11-06 15:30",
+  "stamped_utc": "2026-11-06 15:36:25Z",
+  "stamped_local": "2026-11-06 15:36:25"
 }

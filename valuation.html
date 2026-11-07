@@ -195,7 +195,12 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     if (loading[src]){ loading[src].push(cb); return; }
     loading[src] = [cb];
     var s = document.createElement('script');
-    s.src = src + (src.indexOf('?')<0 ? '?v=' + (IDX && IDX.generated ? encodeURIComponent(IDX.generated) : Date.now()) : '');
+    /* MD-SPEED-Q1-2026-11-07 (D-MD-SPEED-9): the index carries no version tag, so the browser keeps it as GitHub says
+       (10 minutes, then a zero-byte "unchanged" check) instead of a fresh download on every open. Richard 6-Nov-26:
+       "Yes to Q1". Cost accepted: an index up to 10 minutes old just after a publish; harmless, because every
+       stock and group file carries its own months and lines are matched month by month. */
+    var ver = (src === 'valuation/_index.js') ? '' : '?v=' + (IDX && IDX.generated ? encodeURIComponent(IDX.generated) : Date.now());
+    s.src = src + (src.indexOf('?')<0 ? ver : '');
     s.onload = function(){ var cbs = loading[src]; loading[src] = 'done'; cbs.forEach(function(f){ f(true); }); };
     s.onerror = function(){ var cbs = loading[src]; delete loading[src]; cbs.forEach(function(f){ f(false); }); };
     document.head.appendChild(s);
@@ -333,7 +338,7 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     if (pmax > 0){ ctx.textAlign = 'right'; niceTicks(0, pmax*1.12, 5).forEach(function(v){ ctx.fillText(v === 0 ? '0' : v >= 10 ? v.toFixed(0) : fmtPx(v), padL - 6, yp(v)); }); }
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
     var every = S.win === 2 ? 3 : S.win === 5 ? 6 : 12; while (pw / (n / every) < 54 && every < 48) every *= 2;
-    win.forEach(function(m, i){ var mm = +m.slice(5,7); if ((mm - 1) % every === 0) ctx.fillText(monthLabel(m), x(i), padT + ph + 6); });
+    win.forEach(function(m, i){ var mm = +m.slice(5,7); if (((+m.slice(0,4)) * 12 + mm - 1) % every === 0) ctx.fillText(monthLabel(m), x(i), padT + ph + 6); /* MD-VAL-LABELS-2026-11-07: counted from year zero, so every = 24 or 48 thins the Januaries too */ });
     /* MD-VAL-TRANCHES-2026-10-29 (Watson, SA - Position Management System window; Richard, 6-Oct-2026 "Q2 = A", entry marked on every chart, and
        9-Oct-2026 "with the entry date marked", lost when this page was embedded in the PMS Per-stock Dashboard on 27-Oct): ?tr=<date>,<date>
        draws each tranche's purchase as a labelled purple dashed line; the page without ?tr is unchanged */

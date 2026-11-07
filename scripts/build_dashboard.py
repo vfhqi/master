@@ -930,6 +930,8 @@ body[data-active-tab="ig_turning"]{--header-height:70px}
 #tab-ig_turning .igt-empty{padding:16px;color:var(--igt-mute)}
 /* Narrower screens: a smaller indent, so the headings and numbers still fit (8px from 1600px wide, Richard 6-Nov-26) */
 @media (max-width:1599px){#tab-ig_turning .igt-table th,#tab-ig_turning .igt-table td{padding-left:5px;padding-right:5px}#tab-ig_turning tr.igt-lrow th{padding-left:3px;padding-right:3px}#tab-ig_turning td.igt-rk{padding:4px 5px 4px 2px}}
+/* 1280-1399px: the group headings ("Prior underperformance") need the room; smaller side padding and type there (v9, 7-Nov-26) */
+@media (max-width:1399px){#tab-ig_turning tr.igt-grow th{padding-left:2px;padding-right:2px;font-size:9px}}
 col.pe-c-lpph{width:122px}
 table.pe-table.lp-table{min-width:1500px}
 table.pe-table tr.pe-g th.lp-gp,table.pe-table tr.pe-h th.lp-hp{background:#ece8f3}

@@ -3321,6 +3321,9 @@ col.mo-cg-screen { width: 76px; }
 /* MD-PSD-2026-10-28: the Per-stock Dashboard button and its full-screen panel (the PMS per-stock page in a frame) */
 .ctrl-btn.psd-btn{background:rgba(10,61,145,0.08);border-color:rgba(10,61,145,0.45);color:#0a3d91}
 .ctrl-btn.psd-btn:hover{background:rgba(10,61,145,0.16);border-color:#0a3d91;color:#082e6e}
+/* MD-MULTICHART-2026-11-10: the Multi-chart Visual Display button, tinted like its two neighbours */
+.ctrl-btn.mc-btn{background:rgba(26,127,55,0.08);border-color:rgba(26,127,55,0.45);color:#116329}
+.ctrl-btn.mc-btn:hover{background:rgba(26,127,55,0.16);border-color:#1a7f37;color:#0d4f20}
 .psd-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9960;display:none;flex-direction:column;background:var(--card,#fff)}
 .psd-overlay.open{display:flex}
 .psd-hdr{display:flex;align-items:center;gap:12px;padding:6px 14px;border-bottom:1px solid var(--border,#d0d7de);background:var(--card,#fff)}
@@ -21838,6 +21841,9 @@ document.addEventListener('click', function(e){
         '      <button class="ctrl-btn ssp-btn" onclick="openStockView()" title="Single stock view — all ratings at a glance">Per-stock Chart</button>\n'
         # MD-PSD-2026-10-28: Richard, 28-Oct-26: "a button at the top, next to STOCK VIEW; call the button Per-stock Dashboard. (Rename "Stock View" to "Per-stock Chart")"
         '      <button class="ctrl-btn psd-btn" onclick="openPerStockDashboard()" title="The Per-stock Dashboard (the PMS per-stock page) for any stock in the universe">Per-stock Dashboard</button>\n'
+        # MD-MULTICHART-2026-11-10: Richard, 10-Nov-26: "Add button to link to this page at the top of the MD, next to the "per stock" buttons" -- the
+        # multi-chart visual display (two stocks per screen, price and volume, any population), its own page at multichart/ (build_multichart.py)
+        '      <button class="ctrl-btn mc-btn" onclick="window.open(\'multichart/\',\'_blank\',\'noopener\')" title="The multi-chart visual display: two stocks per screen, price and volume side by side, for any population (opens in a new tab)">Multi-chart Visual Display</button>\n'
         # MD-HEADER-LINKS-ABSOLUTE-18Aug26. These were relative paths written for a
         # local file:// layout. On the deployed site "../../" climbs above the site
         # root, so from vfhqi.github.io/master/index.html they resolved to

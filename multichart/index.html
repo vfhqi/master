@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Multi-chart Visual Display</title>
+<!-- the PMS Per-stock Dashboard's own styles, from its live site, so the panels look exactly as on the six-panel view -->
+<link rel="stylesheet" href="/ratings/pms/dashboard.css">
+<link rel="stylesheet" href="/ratings/pms/dashboard-v2.css">
+<link rel="stylesheet" href="/ratings/pms/onescreen.css">
+<style>
+  /* the multi-chart visual display: a frozen header, two stock rows, the population's list on the right; sized to the window, no scrolling */
+  html, body { height:100%; margin:0; overflow:hidden; background:#f6f8fa; }
+  #os.mc { display:flex !important; height:100vh; flex-direction:column; gap:5px; padding:5px 6px 6px; }
+  #os.mc .hd1 { flex:0 0 auto; display:flex; flex-wrap:wrap; align-items:center; gap:4px 5px; background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:4px 8px; font-size:12px; }
+  #os.mc .brand { font-weight:700; font-size:12.5px; color:#1f2328; margin-right:4px; white-space:nowrap; }
+  #os.mc .brand .v { font-weight:400; color:#8b949e; font-size:11px; }
+  #os.mc #dds { display:contents; }
+  #os.mc select.f, #os.mc select#f-sort { font:inherit; font-size:11.5px; height:22px; padding:0 2px; border:1px solid #d0d7de; border-radius:5px; background:#fff; color:#57606a; width:122px; }
+  #os.mc select#f-sort { width:100%; }
+  #os.mc select.f.on { border-color:#1f2328; color:#1f2328; font-weight:600; background:#eef6ff; }
+  #os.mc select#f-des { width:196px; } #os.mc select.g { width:96px; color:#1f2328; } #os.mc select#f-gk { width:92px; } #os.mc select#f-gv { width:130px; }
+  #os.mc select.f[data-g="live"] { width:150px; } #os.mc select.f[data-g="watch"] { width:130px; } #os.mc select.f[data-g="interest"] { width:108px; }
+  #os.mc select.f[data-g="range"] { width:136px; } #os.mc select.f[data-g="exit"] { width:100px; } #os.mc select.f[data-g="events"] { width:96px; } #os.mc select.f[data-g="ig"] { width:136px; }
+  #os.mc label.nw { font-size:11px; color:#57606a; white-space:nowrap; display:inline-flex; align-items:center; gap:2px; }
+  #os.mc .sep { width:1px; height:18px; background:#d0d7de; margin:0 3px; }
+  #os.mc .sp { flex:1 1 auto; }
+  #os.mc button.nb { font:inherit; font-size:11.5px; height:22px; padding:0 8px; border:1px solid #d0d7de; border-radius:5px; background:#fff; cursor:pointer; }
+  #os.mc button.nb:disabled { opacity:0.35; cursor:default; }
+  #os.mc #pg { font-size:11px; color:#1f2328; font-weight:600; white-space:nowrap; text-align:center; }
+  #os.mc .hd2 { flex:0 0 auto; display:flex; align-items:center; gap:8px; font-size:11px; color:#424a53; padding:0 4px; white-space:nowrap; overflow:hidden; }
+  #os.mc .hd2 > * { flex:0 0 auto; }
+  #os.mc .hd2 .tg .lb { display:inline !important; }
+  #os.mc .hd2 #notes { overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1 1 auto; }
+  #os.mc .hd2 .and { color:#8b949e; font-style:italic; }
+  #os.mc .mut { color:#8b949e; }
+  #os.mc .tg { display:inline-flex; gap:2px; align-items:center; }
+  #os.mc .tg button { padding:0 4px; font-size:10.5px; }
+  #os.mc .tg .lb { font-size:10.5px; color:#8b949e; margin:0 2px 0 6px; }
+  #os.mc .body { flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 232px; gap:6px; }
+  #os.mc .rows { min-height:0; display:grid; grid-template-rows:repeat(2, minmax(0,1fr)); gap:6px; }
+  #os.mc .row { background:#fff; border:1px solid #d0d7de; border-radius:8px; display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+  #os.mc .strip { flex:0 0 auto; display:flex; align-items:center; gap:7px; padding:3px 8px; border-bottom:1px solid #eaeef2; font-size:11.5px; white-space:nowrap; overflow:hidden; }
+  #os.mc .strip .nm { font-size:13.5px; font-weight:700; }
+  #os.mc .strip .tk { font-size:11px; color:#656d76; margin-left:-3px; }
+  #os.mc .strip .pill { font-size:10.5px; padding:0 7px; border-radius:9px; background:#eaeef2; color:#424a53; line-height:17px; }
+  #os.mc .strip .pill.held { background:#ddf4ff; color:#0969da; font-weight:600; }
+  #os.mc .strip .pill.int { background:#fff8c5; color:#7d4e00; }
+  #os.mc .strip .sg { font-size:10.5px; padding:0 6px; border-radius:4px; line-height:16px; border:1px solid #d0d7de; }
+  #os.mc .strip .sg.s1 { color:#1b5e20; } #os.mc .strip .sg.s2 { color:#2e7d32; border-color:#2e7d32; } #os.mc .strip .sg.s3 { color:#b45309; } #os.mc .strip .sg.s4 { color:#991b1b; }
+  #os.mc .strip .kv { color:#57606a; } #os.mc .strip .kv b { color:#1f2328; } #os.mc .strip i { font-style:normal; color:#8b949e; font-size:10.5px; }
+  #os.mc b.nr, #os.mc .dv.nr { color:#1a7f37; } #os.mc b.neg, #os.mc .dv.neg { color:#cf222e; }
+  #os.mc .pair { flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:6px; padding:2px 4px 3px; }
+  #os.mc .cp { position:relative; min-height:0; min-width:0; }
+  #os.mc .vp { position:relative; min-height:0; min-width:0; border-left:1px solid #eaeef2; }
+  #os.mc .vp .q4 { inset:0 0 0 6px; }
+  #os.mc .nod { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#8b949e; font-size:12px; padding:20px; background:repeating-linear-gradient(45deg,#fafbfc,#fafbfc 8px,#f3f5f7 8px,#f3f5f7 16px); border-radius:6px; }
+  #os.mc .side { background:#fff; border:1px solid #d0d7de; border-radius:8px; display:flex; flex-direction:column; min-height:0; }
+  #os.mc .side .sh { flex:0 0 auto; padding:5px 8px; border-bottom:1px solid #eaeef2; font-size:12px; display:flex; align-items:center; gap:6px; }
+  #os.mc .side .sh b { font-size:12.5px; }
+  #os.mc #lst { flex:1 1 auto; overflow-y:auto; font-size:11.5px; }
+  #os.mc .it { display:flex; align-items:center; gap:5px; padding:2px 8px; cursor:pointer; border-left:3px solid transparent; white-space:nowrap; }
+  #os.mc .it:hover { background:#f6f8fa; }
+  #os.mc .it.cur { background:#eef6ff; border-left-color:#0969da; font-weight:600; }
+  #os.mc .it .no { color:#8b949e; width:20px; text-align:right; font-size:10.5px; flex:0 0 auto; }
+  #os.mc .it .nm { overflow:hidden; text-overflow:ellipsis; flex:1 1 auto; min-width:0; }
+  #os.mc .it .hd { font-size:9.5px; color:#0969da; font-weight:600; }
+  #os.mc .it .dv { font-size:10.5px; color:#656d76; font-variant-numeric:tabular-nums; flex:0 0 auto; }
+  #os.mc .side .sf { flex:0 0 auto; border-top:1px solid #eaeef2; padding:4px 8px; font-size:10.5px; color:#8b949e; line-height:1.35; }
+  #os.mc .empty { padding:12px; color:#57606a; line-height:1.5; }
+  #os.mc .empty .nb { margin-top:8px; }
+  #os.mc .cc canvas { display:block; }
+
+  #os.mc a.brand { font-weight:700; font-size:12.5px; color:#1f2328; margin-right:4px; white-space:nowrap; text-decoration:none; }
+  #os.mc a.brand:hover { text-decoration:underline; }
+  #os.mc .asof { font-size:10.5px; margin-left:6px; white-space:nowrap; cursor:help; }
+  #os.mc .err { color:#cf222e; font-weight:600; }
+  #os.mc .tg button:disabled { cursor:default; opacity:1; }
+  #os.mc .tg button:disabled:not(.on) { opacity:0.4; }
+  /* the coloured callouts: green, a capital qualification test Probable or Qualified; red, an exit signal on a live stock; amber, an exit to watch */
+  #os.mc .row { border-left-width:4px; }
+  #os.mc .row.mk-cap { border-left-color:#1a7f37; } #os.mc .row.mk-sell { border-left-color:#cf222e; } #os.mc .row.mk-watch { border-left-color:#d4a72c; }
+  #os.mc .strip .co { flex:0 0 auto; font-size:11px; font-weight:600; padding:0 8px; border-radius:4px; line-height:18px; cursor:help; }
+  #os.mc .strip .co.cap.g4 { background:#1a7f37; color:#fff; }
+  #os.mc .strip .co.cap.g3 { background:#dafbe1; color:#116329; border:1px solid #4ac26b; line-height:16px; }
+  #os.mc .strip .co.sell { background:#cf222e; color:#fff; }
+  #os.mc .strip .co.watch { background:#fff8c5; color:#7d4e00; border:1px solid #d4a72c; line-height:16px; }
+  #os.mc .strip .more { display:flex; align-items:center; gap:7px; min-width:0; overflow:hidden; flex:1 1 auto; }
+  #os.mc .strip .more > * { flex:0 0 auto; }
+  #os.mc .strip .more .secn { flex:0 0 auto; }
+  #os.mc .it .mk { width:7px; height:7px; border-radius:2px; flex:0 0 auto; }
+  #os.mc .it .mk.cap { background:#1a7f37; } #os.mc .it .mk.sell { background:#cf222e; } #os.mc .it .mk.watch { background:#d4a72c; }
+</style>
+</head>
+<body class="os-on v2">
+<div id="os" class="mc">
+  <div class="hd1">
+    <a class="brand" href="../" title="Back to the Master Dashboard">Multi-chart Visual Display</a>
+    <span id="dds"></span>
+    <button class="nb" id="clear" title="Clear every choice">Clear</button>
+  </div>
+  <div class="hd2">
+    <span id="notes"></span>
+    <span class="tg" id="zoom"></span><span class="tg"><span class="lb"></span></span><span class="tg" id="scale"></span>
+    <span class="tg"><span class="lb">MAs</span></span><span class="lay1" id="mas"></span>
+    <span class="tg"><span class="lb">Volume</span></span><span class="tg" id="volw"></span>
+    <span class="asof mut" id="asof"></span>
+  </div>
+  <div class="body">
+    <div class="rows">
+      <div class="row" id="row0"><div class="strip"></div><div class="pair"><div class="cp"></div><div class="vp"><div class="q4"></div></div></div></div>
+      <div class="row" id="row1"><div class="strip"></div><div class="pair"><div class="cp"></div><div class="vp"><div class="q4"></div></div></div></div>
+    </div>
+    <div class="side">
+      <div class="sh"><b id="cnt"></b><span class="sp"></span><button class="nb" id="prev" title="Previous two (Up arrow)">&#9650;</button><span id="pg"></span><button class="nb" id="next" title="Next two (Down arrow)">&#9660;</button></div>
+      <div class="sh"><select id="f-sort" title="Order"><option value="tma">Closest to target moving average</option><option value="rs">Stock RS, highest first</option><option value="sec">Alphabetical within Sector</option><option value="res">Next results, soonest first</option></select></div>
+      <div id="lst"></div>
+    </div>
+  </div>
+</div>
+<script>window.PMS_CHART_BASE = (window.MC_BASE || '/') + 'master/charts/';</script>
+<script src="/ratings/pms/chart-renderer-dashboard.js"></script>
+<script src="/ratings/pms/dashboard.js"></script>
+<script src="compare-vol.js"></script>
+<script src="compare.js"></script>
+</body></html>

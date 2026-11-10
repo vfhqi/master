@@ -1,6 +1,6 @@
 /* compare-vol.js: GENERATED nightly by master-dashboard/scripts/build_multichart.py; do not edit.
    The six-panel view's panel 2 (Volume) from pms-data/dashboard/site/onescreen.js, function drawVol, word for word,
-   given a host element and a model so two stocks can be drawn on one screen (the Multi-Stock Chart Display). */
+   given a host element and a model so two stocks can be drawn on one screen (the Multi-stock Dashboard). */
 (function () {
   'use strict';
   var C = DASH.C, NS = 'http://www.w3.org/2000/svg', MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -79,14 +79,28 @@
     path(u50, GREEN, 1.4, '6 3'); path(d50, C.red, 1.4, '6 3'); path(u20, GREEN, 2); path(d20, C.red, 2);
     endLab(F, [[u20, GREEN], [d20, C.red]].map(function (a) { return { y: yB(a[0][n - 1]) + 3.5, t: fmtVol(a[0][n - 1]), c: a[1] }; }));
     dates(F); hover(hB, F, function (i) { return '<div>last 20 sessions: up days ' + fmtVol(u20[i]) + ', down days ' + fmtVol(d20[i]) + '</div><div>last 50 sessions: up days ' + fmtVol(u50[i]) + ', down days ' + fmtVol(d50[i]) + '</div>'; });
-    /* pane C: distribution days */
+    /* pane C: distribution days, and below them the up days less the down days over the same last 25 sessions (Richard, 10-Nov-2026: "add in a
+       visual communication of the # of up days vs. down days on a trailing 20-25D basis"; 25 so the pane reads as one window, and a distribution day is
+       one of the down days). An up day: close at or above the previous close, as the bars are coloured. */
     var cC = cardH(hC, '<b>Distribution days, last 25 sessions</b>; warning at 6', 34);
-    F = frame(hC, 30); var dmax = Math.max(8, Math.max.apply(null, rows.map(function (q) { return q.dist25 || 0; }))), yC = function (v) { return F.top + F.ph - v / dmax * (F.ph - cC); };
+    F = frame(hC, 30); var sH = Math.max(30, Math.round((F.ph - cC) * 0.34)), baseC = F.top + F.ph - sH - 5;
+    var dmax = Math.max(8, Math.max.apply(null, rows.map(function (q) { return q.dist25 || 0; }))), yC = function (v) { return baseC - v / dmax * (baseC - F.top - cC); };
     [0, 3, 6].forEach(function (v) { el('line', { x1: F.pad.l, x2: F.W - F.pad.r, y1: yC(v), y2: yC(v), stroke: v === 6 ? C.red : C.grid, 'stroke-dasharray': v === 6 ? '5 3' : '', opacity: v === 6 ? 0.7 : 1 }, F.svg); txt(F.svg, F.pad.l - 4, yC(v) + 3.5, String(v), { 'text-anchor': 'end', 'font-size': 9.5, fill: v === 6 ? C.red : C.ink3, 'font-weight': v === 6 ? 700 : 400 }); });
     var dd = ''; rows.forEach(function (q, i) { if (q.dist25 == null) return; dd += (dd ? 'L' : 'M') + F.edge(i).toFixed(1) + ',' + yC(q.dist25).toFixed(1) + 'L' + F.edge(i + 1).toFixed(1) + ',' + yC(q.dist25).toFixed(1); });
-    if (dd) { el('path', { d: dd + 'L' + (F.W - F.pad.r) + ',' + (F.top + F.ph) + 'L' + F.pad.l + ',' + (F.top + F.ph) + 'Z', fill: 'rgba(207,34,46,0.10)' }, F.svg); el('path', { d: dd, fill: 'none', stroke: C.red, 'stroke-width': 1.7 }, F.svg); }
-    endLab(F, [{ y: yC(q0.dist25) + 3.5, t: String(q0.dist25), c: C.red }]);
-    dates(F); hover(hC, F, function (i) { return '<div>distribution days in 25 sessions: ' + rows[i].dist25 + '</div>'; });
+    if (dd) { el('path', { d: dd + 'L' + (F.W - F.pad.r) + ',' + baseC + 'L' + F.pad.l + ',' + baseC + 'Z', fill: 'rgba(207,34,46,0.10)' }, F.svg); el('path', { d: dd, fill: 'none', stroke: C.red, 'stroke-width': 1.7 }, F.svg); }
+    var udN = {}; for (var k2 = 0; k2 < VV.length; k2++) { if (VV[k2].d <= from || k2 < 24) continue; var nu2 = 0; for (var j2 = k2 - 24; j2 <= k2; j2++) if (VV[j2].up) nu2++; udN[VV[k2].d] = { u: nu2, n: 25 - nu2 }; }
+    var ud = rows.map(function (q) { return udN[q.d] || null; }), net = ud.map(function (o) { return o ? o.u - o.n : null; }), nv = net.filter(function (v) { return v != null; });
+    var sMax = Math.max(5, Math.ceil(Math.max.apply(null, nv.map(Math.abs).concat([0])) / 5) * 5), sMid = F.top + F.ph - sH / 2, yS = function (v) { return sMid - v / sMax * (sH / 2 - 2); };
+    el('line', { x1: F.pad.l, x2: F.W - F.pad.r, y1: F.top + F.ph - sH - 2.5, y2: F.top + F.ph - sH - 2.5, stroke: C.border }, F.svg);
+    el('line', { x1: F.pad.l, x2: F.W - F.pad.r, y1: sMid, y2: sMid, stroke: C.ink3, 'stroke-width': 0.8 }, F.svg);
+    txt(F.svg, F.pad.l - 4, sMid + 3.5, '0', { 'text-anchor': 'end', 'font-size': 9.5, fill: C.ink3 });
+    [sMax, -sMax].forEach(function (v) { txt(F.svg, F.pad.l - 4, yS(v) + (v > 0 ? 6 : 1), v > 0 ? '+' + v : '(' + (-v) + ')', { 'text-anchor': 'end', 'font-size': 8.5, fill: v > 0 ? GREEN : C.red }); });
+    for (var i3 = 0; i3 < n; i3++) { var v3 = net[i3]; if (v3 == null || v3 === 0) continue; el('rect', { x: F.edge(i3), y: Math.min(sMid, yS(v3)), width: F.bw + 0.4, height: Math.abs(yS(v3) - sMid), fill: v3 > 0 ? 'rgba(26,127,55,0.55)' : 'rgba(207,34,46,0.55)' }, F.svg); }
+    var uL = ud[n - 1];
+    if (uL) txt(F.svg, F.pad.l + 3, F.top + F.ph - sH + 8, 'up days less down days: ' + uL.u + ' up, ' + uL.n + ' down', { 'font-size': 9, fill: C.ink2, halo: true });
+    var ends = [{ y: yC(q0.dist25) + 3.5, t: String(q0.dist25), c: C.red }]; if (net[n - 1] != null) ends.push({ y: Math.max(yS(net[n - 1]), F.top + F.ph - sH + 8) + 3.5, t: net[n - 1] > 0 ? '+' + net[n - 1] : net[n - 1] < 0 ? '(' + (-net[n - 1]) + ')' : '0', c: net[n - 1] > 0 ? GREEN : net[n - 1] < 0 ? C.red : C.ink3 });
+    endLab(F, ends);
+    dates(F); hover(hC, F, function (i) { return '<div>distribution days in 25 sessions: ' + rows[i].dist25 + '</div>' + (ud[i] ? '<div>in the same 25 sessions: ' + ud[i].u + ' up days, ' + ud[i].n + ' down days</div>' : ''); });
     /* pane D: relative price against its 52W high */
     var dD = ov(hD, '<b>Relative price against its 52W high</b>; sell line (25%)', 34, 'bottom'), cD = dD.offsetHeight + 6;
     F = frame(hD, 36); var rd = rows.map(function (q) { var x_ = DL[q.d]; return x_ && x_.rdh != null ? x_.rdh * 100 : null; }), rdv = rd.filter(function (v) { return v != null; });

@@ -1,4 +1,4 @@
-/* compare.js v1.0: the Master Dashboard's Multi-Stock Chart Display (10-Nov-2026, Ricardinho, Systems Architect; project SA - Master Dashboard).
+/* compare.js v1.0: the Master Dashboard's Multi-stock Dashboard (10-Nov-2026, Ricardinho, Systems Architect; project SA - Master Dashboard).
    Richard, 10-Nov-2026: two stocks per screen, price and moving averages on the left, volume on the right, adapted from the six-panel view;
    a frozen header of short dropdowns; every stock in the chosen population listed on the right; full width, no scrolling.
    His answers: choices in different dropdowns narrow each other ("Q5 = B"); default order closest to target moving average ("Q6 = B").
@@ -147,7 +147,7 @@
     $('cnt').textContent = POP.length + (POP.length === 1 ? ' stock' : ' stocks');
     $('lst').innerHTML = POP.map(function (t, i) {
       var s = S[t], d = s.dist, dc = d == null ? '' : (d >= -0.01 && d <= 0.03) ? 'nr' : d < 0 ? 'neg' : '', mk = mark(t);
-      return '<div class="it' + (i === at || i === at + 1 ? ' cur' : '') + '" data-i="' + i + '" title="' + esc(s.n + ' (' + t + '), ' + s.sec) + '"><span class="no">' + (i + 1) + '</span><span class="mk ' + mk + '"></span><span class="nm">' + esc(s.n) + (s.held ? ' <span class="hd">held</span>' : '') + '</span><span class="dv ' + dc + '">' + (d == null ? '' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</span></div>';
+      return '<div class="it' + (i === at || i === at + 1 ? ' cur' : '') + '" data-i="' + i + '" title="' + esc(s.n + ' (' + t + '), ' + s.sec + (d == null ? '' : '. Price ' + (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '% against its target moving average (' + (s.tma || '50D') + (s.tma_assumed ? ', assumed: none set' : '') + ')')) + '"><span class="no">' + (i + 1) + '</span><span class="mk ' + mk + '"></span><span class="nm">' + esc(s.n) + (s.held ? ' <span class="hd">held</span>' : '') + '</span><span class="dv ' + dc + '">' + (d == null ? '' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</span></div>';
     }).join('') || (LASTSEL && document.querySelectorAll('select.f.on').length > 1
       ? '<div class="empty">No stock meets every choice. Choices in different dropdowns narrow each other.<br><button class="nb" id="keep1">Keep only the last choice</button></div>'
       : '<div class="empty">' + (document.querySelectorAll('select.f.on').length ? 'No stock in this list this week.' : 'Choose a population from any dropdown above.') + '</div>');
@@ -199,9 +199,10 @@
     var sh = chartZoom === '1W' || chartZoom === '1M';
     /* a held stock's tranche dates: with 40px or more above the plot the renderer writes them there, clear of the price scale */
     var ov = DASH.overlayFor(m, true), top = sh || (ov && ov.marks && ov.marks.length) ? 46 : 22;
-    /* a right margin of 212px puts the renderer in its wide mode: the exit lines' and the 52-week-high line's names are written in
-       their own column beside the price scale, never over the lines in the plot (Richard, 28-Oct-2026, PMS-DASH 15) */
-    drawMasterChart(t, { canvasId: 'cv' + k, containerId: 'cc' + k, height: Math.max(160, Math.floor(hh)), upto: m.asof, overlay: ov, pad: { t: top, r: 212, b: sh ? 50 : 28, l: 6 }, priceTicks: 10 });
+    /* PMS-DASH 22 (Richard, 10-Nov-2026 14:25: "dont waste the white space ... the annotations need to sit above the underlying y-axis labels, and make the
+       chart area larger"): the values sit in the price scale's own column (malOver) and the margin is only the scale's width; the exit lines' names are
+       written inside the plot's right edge on a white backing, as on the PMS Per-stock Dashboard. Was a 212px margin with a names column. */
+    drawMasterChart(t, { canvasId: 'cv' + k, containerId: 'cc' + k, height: Math.max(160, Math.floor(hh)), upto: m.asof, overlay: ov, pad: { t: top, r: 56, b: sh ? 50 : 28, l: 6 }, priceTicks: 10, malOver: true });
     MCVOL.draw(vc, m, volWin());
   }
   function show() {

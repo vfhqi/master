@@ -20,7 +20,7 @@
 
   /* ---------- 1W on the price chart: the shared renderer knows 1M to 5Y, so the slice for 1W (the last five sessions) is added here ---------- */
   var _slice = window.getChartSlice;
-  window.getChartSlice = function (chart, zoom) { return zoom === '1W' ? chart.slice(Math.max(0, chart.length - 5)) : _slice(chart, zoom); };
+  if (typeof _slice === 'function') window.getChartSlice = function (chart, zoom) { return zoom === '1W' ? chart.slice(Math.max(0, chart.length - 5)) : _slice(chart, zoom); };
 
   /* ---------- settings kept in this browser ---------- */
   var KEY = 'mcSettings', st = { sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', mas: null, sel: {} };
@@ -183,7 +183,7 @@
       (s.int ? '<span class="pill int">Interest ' + s.int + '</span>' : '') + stg +
       '<span class="kv">RS: stock <b>' + (s.rs == null ? 'n/a' : s.rs) + '</b>, sector ' + (s.srs == null ? 'n/a' : s.srs) + ', industry ' + (s.irs == null ? 'n/a' : s.irs) + '</span>' +
       '<span class="kv">' + s.tma + ' target' + (s.tma_assumed ? ' <i>(50D assumed)</i>' : '') + ': <b class="' + (d == null ? '' : d >= -0.01 && d <= 0.03 ? 'nr' : d < 0 ? 'neg' : '') + '">' + (d == null ? 'n/a' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</b></span>' +
-      (s.nr ? '<span class="kv">Results <b>' + dmy(s.nr) + '</b> <span class="mut">' + esc((s.nrs || '').toLowerCase()) + '</span></span>' : '') +
+      (s.nr ? (s.nr <= META.asof ? '<span class="kv">Reported <b>' + dmy(s.nr) + '</b></span>' : '<span class="kv">Results <b>' + dmy(s.nr) + '</b> <span class="mut">' + esc((s.nrs || '').toLowerCase()) + '</span></span>') : '') +
       '<span class="mut secn">' + esc(s.sec) + '</span></span>';
   }
   var drawSeq = 0;

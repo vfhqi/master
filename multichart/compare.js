@@ -186,24 +186,6 @@
       (s.nr ? '<span class="kv">Results <b>' + dmy(s.nr) + '</b> <span class="mut">' + esc((s.nrs || '').toLowerCase()) + '</span></span>' : '') +
       '<span class="mut secn">' + esc(s.sec) + '</span></span>';
   }
-  /* At this panel's width the shared renderer writes an overlay line's label inside the plot at the line's own height, so a line
-     beyond the price scale (the 52-week-high line under a short zoom) puts its label on the date axis. The label is dropped when
-     the line's latest value lies outside every price and visible moving average in the window shown; the line is off the chart then. */
-  function fitOverlay(t, ov) {
-    try {
-      if (!ov || !ov.lines || !CHART_REGISTRY[t]) return ov;
-      var rows = getChartSlice(_expandChartRows(CHART_REGISTRY[t]), chartZoom), lo = Infinity, hi = -Infinity;
-      rows.forEach(function (r) { if (r.l != null) lo = Math.min(lo, r.l); if (r.h != null) hi = Math.max(hi, r.h);
-        ['ma5', 'ma10', 'ma20', 'ma50', 'ma100', 'ma150', 'ma200'].forEach(function (k) { if (chartVis[k] && r[k] != null) { lo = Math.min(lo, r[k]); hi = Math.max(hi, r[k]); } }); });
-      var d0 = rows.length ? rows[0].d : '';
-      ov.lines.forEach(function (L) {
-        if (!L.label || !L.byDate) return;
-        var ds = Object.keys(L.byDate).filter(function (d) { return d >= d0 && L.byDate[d] != null; }).sort(), v = ds.length ? L.byDate[ds[ds.length - 1]] : null;
-        if (v != null && (v < lo || v > hi)) L.label = null;
-      });
-    } catch (e) { /* keep the overlay as given */ }
-    return ov;
-  }
   var drawSeq = 0;
   function drawRow(k, t, m) {
     var row = $('row' + k), pc = row.querySelector('.cp'), vc = row.querySelector('.vp .q4');
@@ -213,8 +195,10 @@
        gives them room there rather than letting the canvas cut them off */
     var sh = chartZoom === '1W' || chartZoom === '1M';
     /* a held stock's tranche dates: with 40px or more above the plot the renderer writes them there, clear of the price scale */
-    var ov = fitOverlay(t, DASH.overlayFor(m, true)), top = sh || (ov && ov.marks && ov.marks.length) ? 46 : 22;
-    drawMasterChart(t, { canvasId: 'cv' + k, containerId: 'cc' + k, height: Math.max(160, Math.floor(hh)), upto: m.asof, overlay: ov, pad: { t: top, r: 82, b: sh ? 50 : 28, l: 6 }, priceTicks: 10, malX: 40 });
+    var ov = DASH.overlayFor(m, true), top = sh || (ov && ov.marks && ov.marks.length) ? 46 : 22;
+    /* a right margin of 212px puts the renderer in its wide mode: the exit lines' and the 52-week-high line's names are written in
+       their own column beside the price scale, never over the lines in the plot (Richard, 28-Oct-2026, PMS-DASH 15) */
+    drawMasterChart(t, { canvasId: 'cv' + k, containerId: 'cc' + k, height: Math.max(160, Math.floor(hh)), upto: m.asof, overlay: ov, pad: { t: top, r: 212, b: sh ? 50 : 28, l: 6 }, priceTicks: 10 });
     MCVOL.draw(vc, m, volWin());
   }
   function show() {

@@ -190,6 +190,40 @@
       '<span class="mut secn">' + esc(s.sec) + '</span></span>';
   }
   var drawSeq = 0;
+  /* ---------- the relative price band (Richard, 10-Nov-2026 17:04: "Do "B" for the Relative price onto the SP/MA chart. TY. Get the label into a smaller
+     area taking up only one line, not two"; mock-up B of 14:46, "Lower band"). The relative price (the stock against the average of the universe's stocks of
+     EUR 500m or more, the PMS Per-stock Dashboard's relative price panel) as a faint shaded area in the bottom quarter of the price chart, on its own scale,
+     with its relative 200D MA on top, coloured by that MA's change over the month: green above 0, red at or below 0 (the sell rule's line). Drawn behind the
+     candles and MAs (multiply), so the price chart reads first. One label line at the band's top left. Every stock's file carries rel, rma and slope. ---------- */
+  function whenDrawn(cid, fn) { var n = 0; (function poll() { var L = window.PMS_CHART_LAYOUT && window.PMS_CHART_LAYOUT[cid]; if (L) { fn(); return; } if (++n < 100) setTimeout(poll, 50); })(); }
+  function relBand(cid, m) {
+    var L = window.PMS_CHART_LAYOUT && window.PMS_CHART_LAYOUT[cid], cv = document.getElementById(cid); if (!L || !cv || !m.daily) return;
+    var DL = {}; m.daily.forEach(function (q) { DL[q.d] = q; });
+    var rows = L.dates.map(function (d) { return DL[d] || null; }), n = rows.length, pad = L.pad, W = L.W, H = L.H, pw = W - pad.l - pad.r, ph = H - pad.t - pad.b, bw = pw / n;
+    var rel = rows.map(function (q) { return q && q.rel != null ? q.rel : null; }), rma = rows.map(function (q) { return q && q.rma != null ? q.rma : null; }), slo = rows.map(function (q) { return q && q.slope != null ? q.slope : null; });
+    var vv = rel.concat(rma).filter(function (v) { return v != null; }); if (vv.length < 2) return;
+    var lo = Math.min.apply(null, vv), hi = Math.max.apply(null, vv), sp = (hi - lo) || 1, top = pad.t + ph * 0.75, bot = pad.t + ph - 2;
+    var x = function (i) { return pad.l + i * bw + bw / 2; }, y = function (v) { return bot - (v - lo) / sp * (bot - top); };
+    var GR = '26,127,55', RD = '207,34,46', ctx = cv.getContext('2d'), dpr = window.devicePixelRatio || 1;
+    ctx.save(); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.beginPath(); ctx.rect(pad.l, pad.t, pw, ph); ctx.clip(); ctx.globalCompositeOperation = 'multiply';
+    var i, st = false, last = -1; ctx.fillStyle = 'rgba(110,119,129,0.10)'; ctx.beginPath();
+    for (i = 0; i < n; i++) { if (rel[i] == null) continue; if (!st) { ctx.moveTo(x(i), bot); st = true; } ctx.lineTo(x(i), y(rel[i])); last = i; }
+    if (st) { ctx.lineTo(x(last), bot); ctx.closePath(); ctx.fill(); }
+    ctx.lineCap = 'round';
+    for (i = 1; i < n; i++) { if (rel[i] != null && rel[i - 1] != null) { ctx.strokeStyle = 'rgba(110,119,129,0.5)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x(i - 1), y(rel[i - 1])); ctx.lineTo(x(i), y(rel[i])); ctx.stroke(); } }
+    for (i = 1; i < n; i++) { if (rma[i] != null && rma[i - 1] != null) { ctx.strokeStyle = 'rgba(' + (slo[i] != null && slo[i] <= 0 ? RD : GR) + ',0.45)'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(x(i - 1), y(rma[i - 1])); ctx.lineTo(x(i), y(rma[i])); ctx.stroke(); } }
+    ctx.globalCompositeOperation = 'source-over';
+    var k2 = -1; for (i = n - 1; i >= 0; i--) if (rel[i] != null && rma[i] != null) { k2 = i; break; }
+    if (k2 >= 0) {
+      var fv = function (v) { return v >= 100 ? String(Math.round(v)) : v.toFixed(1); }, sv = slo[k2], sTxt = sv == null ? '' : (sv > 0 ? '+' + (sv * 100).toFixed(1) + '%' : '(' + Math.abs(sv * 100).toFixed(1) + '%)');
+      var parts = [['Relative price ' + fv(rel[k2]), 'rgb(87,96,106)'], ['  ·  its 200D MA ' + fv(rma[k2]) + (sTxt ? ', ' + sTxt + ' over the month' : ''), 'rgb(' + (sv != null && sv <= 0 ? RD : GR) + ')']];
+      ctx.font = '10px "Segoe UI",system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.lineJoin = 'round'; var xx = pad.l + 4, yy = top - 3;
+      var tw = parts.reduce(function (a, p) { return a + ctx.measureText(p[0]).width; }, 0); ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(xx - 3, yy - 10, tw + 6, 13);
+      parts.forEach(function (p) { ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 3; ctx.strokeText(p[0], xx, yy); ctx.fillStyle = p[1]; ctx.fillText(p[0], xx, yy); xx += ctx.measureText(p[0]).width; });
+      ctx.strokeStyle = 'rgba(110,119,129,0.25)'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(xx + 6, top + 0.5); ctx.lineTo(pad.l + pw, top + 0.5); ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.restore();
+  }
   function drawRow(k, t, m) {
     var row = $('row' + k), pc = row.querySelector('.cp'), vc = row.querySelector('.vp .q4');
     pc.innerHTML = '<div id="cc' + k + '" class="cc"><canvas id="cv' + k + '" style="width:100%;display:block"></canvas></div>';
@@ -202,7 +236,9 @@
     /* PMS-DASH 22 (Richard, 10-Nov-2026 14:25: "dont waste the white space ... the annotations need to sit above the underlying y-axis labels, and make the
        chart area larger"): the values sit in the price scale's own column (malOver) and the margin is only the scale's width; the exit lines' names are
        written inside the plot's right edge on a white backing, as on the PMS Per-stock Dashboard. Was a 212px margin with a names column. */
+    if (window.PMS_CHART_LAYOUT) delete window.PMS_CHART_LAYOUT['cv' + k];
     drawMasterChart(t, { canvasId: 'cv' + k, containerId: 'cc' + k, height: Math.max(160, Math.floor(hh)), upto: m.asof, overlay: ov, pad: { t: top, r: 56, b: sh ? 50 : 28, l: 6 }, priceTicks: 10, malOver: true });
+    whenDrawn('cv' + k, function () { relBand('cv' + k, m); });
     MCVOL.draw(vc, m, volWin());
   }
   function show() {

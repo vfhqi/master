@@ -1,6 +1,6 @@
 /* compare-vol.js: GENERATED nightly by master-dashboard/scripts/build_multichart.py; do not edit.
    The six-panel view's panel 2 (Volume) from pms-data/dashboard/site/onescreen.js, function drawVol, word for word,
-   given a host element and a model so two stocks can be drawn on one screen (the multi-chart visual display). */
+   given a host element and a model so two stocks can be drawn on one screen (the Multi-Stock Chart Display). */
 (function () {
   'use strict';
   var C = DASH.C, NS = 'http://www.w3.org/2000/svg', MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];

@@ -1,4 +1,4 @@
-/* compare.js v1.0: the Master Dashboard's multi-chart visual display (10-Nov-2026, Ricardinho, Systems Architect; project SA - Master Dashboard).
+/* compare.js v1.0: the Master Dashboard's Multi-Stock Chart Display (10-Nov-2026, Ricardinho, Systems Architect; project SA - Master Dashboard).
    Richard, 10-Nov-2026: two stocks per screen, price and moving averages on the left, volume on the right, adapted from the six-panel view;
    a frozen header of short dropdowns; every stock in the chosen population listed on the right; full width, no scrolling.
    His answers: choices in different dropdowns narrow each other ("Q5 = B"); default order closest to target moving average ("Q6 = B").

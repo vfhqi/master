@@ -45,11 +45,14 @@
 
   /* ---------- the callouts (Richard, 10-Nov 13:00: "a visual coloured callout for any stock that is potentially triggering a
      "capital deployment" or "exit" being plausible (even if the page selected is not for one of those two drop downs)").
-     Capital deployment: one of the Master Dashboard's six capital qualification tests graded Probable or Qualified.
+     Capital deployment: one of the four capital qualification tests a stock can be bought on (not the Stage 3 or Stage 4 Speculative bet) graded Probable or Qualified.
      (Plausible is left out: 651 of 1,358 stocks hold a Plausible or better on one of the six, so a callout there would mark half of every list.)
      Exit (live stocks only): the PMS book's own reading of what the rules do today; a SELL of any kind red, a stop-loss release window
      or a tranche within 5% of its nearer exit line amber. ---------- */
-  var CAP = REG[2][1];
+  /* Re-check 10-Nov 14:25: the Stage 3 and Stage 4 Speculative bet tests are left out of the green callout. POSITION-ENTRY-AND-EXIT-RULES section 1:
+     "no Late Innings Speculative Bets (named, never bought)". Counting them made 121 of 183 green callouts, and one live stock (Helios Towers) green
+     from a Stage 3 test alone. Both tests stay in the designation dropdown. */
+  var CAP = REG[2][1].filter(function (x) { return !/^speculative_bet_s[34]$/.test(x[0]); });
   var capCache = {};
   function capOf(t) {
     if (capCache[t] !== undefined) return capCache[t];
@@ -63,7 +66,7 @@
   function calloutHTML(t) {
     var h = '', c = capOf(t), e = exitOf(t);
     if (e) h += '<span class="co ' + e.lvl + '" title="' + esc(e.full + (e.near ? '. Nearest exit line: ' + e.near[0].toFixed(1) + '% below the price (' + e.near[1] + ')' : '')) + '">' + (e.lvl === 'sell' ? 'Exit: ' : 'Exit watch: ') + esc(e.short) + '</span>';
-    if (c) h += '<span class="co cap g' + c[0].r + '" title="' + esc(c.map(function (x) { return x.lab + ': ' + GRADE[x.r]; }).join('; ') + ' (the Master Dashboard\'s capital qualification tests)') + '">Capital deployment: ' + esc(c[0].lab) + ', ' + GRADE[c[0].r] + (c.length > 1 ? ' +' + (c.length - 1) : '') + '</span>';
+    if (c) h += '<span class="co cap g' + c[0].r + '" title="' + esc(c.map(function (x) { return x.lab + ': ' + GRADE[x.r]; }).join('; ') + ' (the Master Dashboard\'s capital qualification tests that can lead to a purchase)') + '">Capital deployment: ' + esc(c[0].lab) + ', ' + GRADE[c[0].r] + (c.length > 1 ? ' +' + (c.length - 1) : '') + '</span>';
     return h;
   }
 

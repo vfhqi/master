@@ -20377,7 +20377,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function isActive(){return document.body.getAttribute('data-active-tab')==='capital_deploy';}
   function size(){var f=document.querySelector('#tab-capital_deploy iframe.cdir-frame');if(!f||!isActive())return;
     try{if(typeof window.measureV2Ribbon==='function')window.measureV2Ribbon();}catch(e){}
-    var h=Math.floor(window.innerHeight-f.getBoundingClientRect().top-2);f.style.height=(h>=300?h:Math.floor(window.innerHeight*0.8))+'px';}
+    var h=Math.floor(window.innerHeight-f.getBoundingClientRect().top-2);h=(h>=300?h:Math.floor(window.innerHeight*0.8));f.style.height=h+'px';
+    var ex=document.documentElement.scrollHeight-window.innerHeight;if(ex>0&&h-ex>=300)f.style.height=(h-ex)+'px';}  /* no page scroll under the frame (measured 10px on the live site, 11-Nov) */
   if(!window._cdirResizeWired){window._cdirResizeWired=true;window.addEventListener('resize',function(){if(isActive())size();});}
   window.renderCapitalDeploy=function(){
     try{buildHeaderControls('capital_deploy');}catch(e){}

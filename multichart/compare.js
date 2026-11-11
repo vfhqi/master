@@ -144,6 +144,12 @@
     if (keepIds[0] !== 'f-gk') fillGroupValues();
     refresh();
   }
+  /* UI QC 11-Nov-2026: a dropdown never cuts off the choice it shows: each header dropdown widens to fit its chosen text (up to 260px) and
+     returns to its own width when cleared */
+  var _mc = document.createElement('canvas').getContext('2d');
+  function fitSel(sel) { if (!sel || !sel.offsetParent) return; if (sel.dataset.w0 == null) sel.dataset.w0 = sel.getBoundingClientRect().width; var w0 = +sel.dataset.w0, cs = getComputedStyle(sel), o = sel.options[sel.selectedIndex];
+    _mc.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily; var need = o ? _mc.measureText(o.text).width + 30 : 0; sel.style.width = need > w0 ? Math.min(260, Math.ceil(need)) + 'px' : ''; }
+  function fitAll() { document.querySelectorAll('#os select.f').forEach(fitSel); }
   function refresh() {
     var p = population();
     POP = grpSort(p.list.slice().sort(SORTS[$('f-sort').value] || SORTS.tma));
@@ -151,16 +157,16 @@
     $('notes').innerHTML = p.any ? p.notes.join(' <span class="and">and</span> ') : '<span class="mut">Choose a population from any dropdown; choices in different dropdowns narrow each other.</span>';
     st.sel = {}; document.querySelectorAll('select.f').forEach(function (s) { st.sel[s.id || ('g:' + s.dataset.g)] = s.value; }); st.sel.fnew = $('f-new').checked; st.sort = $('f-sort').value; st.grp = $('f-grp') ? $('f-grp').value : ''; if ($('f-grp')) $('f-grp').classList.toggle('on', !!st.grp); save();
     document.querySelectorAll('select.f').forEach(function (s) { s.classList.toggle('on', !!s.value && s.id !== 'f-grade'); });
-    show();
+    fitAll(); show();
   }
   function list() {
     $('cnt').textContent = POP.length + (POP.length === 1 ? ' stock' : ' stocks');
     var gm = $('f-grp') ? $('f-grp').value : '', cnt = {}; if (gm) POP.forEach(function (t) { var g = grpOf(t); cnt[g] = (cnt[g] || 0) + 1; });
     var lastG = null, lastSec = null;
     function head(t) { if (!gm) return ''; var s = S[t], g = grpOf(t), h = ''; if (g === lastG) return ''; lastG = g;
-      if (gm === 'coh') { if (s.sec !== lastSec) { lastSec = s.sec; var ns = POP.filter(function (x) { return S[x].sec === s.sec; }).length; h += '<div class="gs" title="' + esc(s.sec) + '">' + esc(s.sec) + '<span class="gn">' + ns + '</span></div>'; }
-        return h + '<div class="gh" title="' + esc('Cohort ' + s.coh + ' ' + (COHN[s.coh] || '')) + '">' + esc(s.coh + ' ' + (COHN[s.coh] || '')) + '<span class="gn">' + cnt[g] + '</span></div>'; }
-      return '<div class="gs" title="' + esc(g) + '">' + esc(g || 'none') + '<span class="gn">' + cnt[g] + '</span></div>'; }
+      if (gm === 'coh') { if (s.sec !== lastSec) { lastSec = s.sec; var ns = POP.filter(function (x) { return S[x].sec === s.sec; }).length; h += '<div class="gs" title="' + esc(s.sec) + '"><span class="gt">' + esc(s.sec) + '</span><span class="gn">' + ns + '</span></div>'; }
+        return h + '<div class="gh" title="' + esc('Cohort ' + s.coh + ' ' + (COHN[s.coh] || '')) + '"><span class="gt">' + esc(s.coh + ' ' + (COHN[s.coh] || '')) + '</span><span class="gn">' + cnt[g] + '</span></div>'; }
+      return '<div class="gs" title="' + esc(g) + '"><span class="gt">' + esc(g || 'none') + '</span><span class="gn">' + cnt[g] + '</span></div>'; }
     $('lst').innerHTML = POP.map(function (t, i) {
       var s = S[t], d = s.dist, dc = d == null ? '' : (d >= -0.01 && d <= 0.03) ? 'nr' : d < 0 ? 'neg' : '', mk = mark(t);
       return head(t) + '<div class="it' + (i === at || i === at + 1 ? ' cur' : '') + '" data-i="' + i + '" title="' + esc(s.n + ' (' + t + '), ' + s.sec + (d == null ? '' : '. Price ' + (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '% against its target moving average (' + (s.tma || '50D') + (s.tma_assumed ? ', assumed: none set' : '') + ')')) + '"><span class="no">' + (i + 1) + '</span><span class="mk ' + mk + '"></span><span class="nm">' + esc(s.n) + (s.held ? ' <span class="hd">held</span>' : '') + '</span><span class="dv ' + dc + '">' + (d == null ? '' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</span></div>';
@@ -227,14 +233,21 @@
     if (st) { ctx.lineTo(x(last), bot); ctx.closePath(); ctx.fill(); }
     ctx.lineCap = 'round';
     for (i = 1; i < n; i++) { if (rel[i] != null && rel[i - 1] != null) { ctx.strokeStyle = 'rgba(110,119,129,0.5)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x(i - 1), y(rel[i - 1])); ctx.lineTo(x(i), y(rel[i])); ctx.stroke(); } }
-    for (i = 1; i < n; i++) { if (rma[i] != null && rma[i - 1] != null) { ctx.strokeStyle = 'rgba(' + (slo[i] != null && slo[i] <= 0 ? RD : GR) + ',0.45)'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(x(i - 1), y(rma[i - 1])); ctx.lineTo(x(i), y(rma[i])); ctx.stroke(); } }
-    ctx.globalCompositeOperation = 'source-over';
+    /* the relative 200D MA dotted (UI QC 11-Nov-2026: a solid red line here read like the price chart's red 20D MA), one path per run of one colour */
+    ctx.lineWidth = 2.4; ctx.setLineDash([0.1, 3.6]); var runC = null, runOpen = false;
+    for (i = 0; i < n; i++) { if (rma[i] == null) { if (runOpen) ctx.stroke(); runOpen = false; continue; } var cc = 'rgba(' + (slo[i] != null && slo[i] <= 0 ? RD : GR) + ',0.6)';
+      if (!runOpen) { ctx.beginPath(); ctx.strokeStyle = cc; ctx.moveTo(x(i), y(rma[i])); runOpen = true; runC = cc; continue; }
+      ctx.lineTo(x(i), y(rma[i])); if (cc !== runC) { ctx.stroke(); ctx.beginPath(); ctx.strokeStyle = cc; ctx.moveTo(x(i), y(rma[i])); runC = cc; } }
+    if (runOpen) ctx.stroke();
+    ctx.setLineDash([]); ctx.globalCompositeOperation = 'source-over';
+    var k0 = -1; for (i = 0; i < n; i++) if (rel[i] != null) { k0 = i; break; }
     var k2 = -1; for (i = n - 1; i >= 0; i--) if (rel[i] != null && rma[i] != null) { k2 = i; break; }
     if (k2 >= 0) {
       var fv = function (v) { return v >= 100 ? String(Math.round(v)) : v.toFixed(1); }, sv = slo[k2], sTxt = sv == null ? '' : (sv > 0 ? '+' + (sv * 100).toFixed(1) + '%' : '(' + Math.abs(sv * 100).toFixed(1) + '%)');
       var parts = [['Relative price ' + fv(rel[k2]), 'rgb(87,96,106)'], ['  ·  its 200D MA ' + fv(rma[k2]) + (sTxt ? ', ' + sTxt + ' over the month' : ''), 'rgb(' + (sv != null && sv <= 0 ? RD : GR) + ')']];
       ctx.font = '10px "Segoe UI",system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.lineJoin = 'round'; var xx = pad.l + 4, yy = top - 3;
-      var tw = parts.reduce(function (a, p) { return a + ctx.measureText(p[0]).width; }, 0); ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(xx - 3, yy - 10, tw + 6, 13);
+      var tw = parts.reduce(function (a, p) { return a + ctx.measureText(p[0]).width; }, 0); if (k0 > 0) xx = Math.max(pad.l + 4, Math.min(x(k0) + 4, pad.l + pw - 6 - tw));   /* the band starts where the stored history starts (about 13 months): the label sits at its start */
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(xx - 3, yy - 10, tw + 6, 13);
       parts.forEach(function (p) { ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 3; ctx.strokeText(p[0], xx, yy); ctx.fillStyle = p[1]; ctx.fillText(p[0], xx, yy); xx += ctx.measureText(p[0]).width; });
       ctx.strokeStyle = 'rgba(110,119,129,0.25)'; ctx.lineWidth = 1; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(xx + 6, top + 0.5); ctx.lineTo(pad.l + pw, top + 0.5); ctx.stroke(); ctx.setLineDash([]);
     }

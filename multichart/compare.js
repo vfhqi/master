@@ -23,7 +23,7 @@
   if (typeof _slice === 'function') window.getChartSlice = function (chart, zoom) { return zoom === '1W' ? chart.slice(Math.max(0, chart.length - 5)) : _slice(chart, zoom); };
 
   /* ---------- settings kept in this browser ---------- */
-  var KEY = 'mcSettings', st = { sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', mas: null, sel: {} };
+  var KEY = 'mcSettings', st = { grp: '', sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', mas: null, sel: {} };
   try { var o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o) for (var k in st) if (o[k] != null) st[k] = o[k]; } catch (e) { /* not kept */ }
   function save() { try { st.zoom = chartZoom; st.scale = chartScaleMode; st.mas = {}; ['ma5','ma10','ma20','ma50','ma100','ma150','ma200'].forEach(function (k) { st.mas[k] = !!chartVis[k]; }); localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* not kept */ } }
   chartZoom = st.zoom; chartScaleMode = st.scale;
@@ -126,6 +126,16 @@
 
   /* ---------- state ---------- */
   var POP = [], at = 0, LASTSEL = null;
+  /* ---------- grouping the list (Richard, 11-Nov-2026 08:40, his answers to the 17:45 questions on "add option on RHS to list the stocks so they
+     are grouped by their cohorts": Q1 = A, also Sector and Industry; Q2 = Concur, groups in Sector order then cohort number; Q3 = A, a cohort with one
+     stock in the list is its own small group; Q4 = A, paging unchanged, two stocks at a time down the grouped list). Within a group the chosen order
+     applies. Cohort names come from the Groupings dropdown's own Cohort entries ("Sector|number name"). ---------- */
+  var COHN = {};
+  function cohNames() { (P.dropdowns || []).forEach(function (g) { var c = g.kinds && g.kinds.Cohort; if (c) c.forEach(function (o) { var i = o.label.indexOf('|'); if (i > 0) { var r = o.label.slice(i + 1), sp = r.indexOf(' '); COHN[sp > 0 ? r.slice(0, sp) : r] = sp > 0 ? r.slice(sp + 1) : ''; } }); }); }
+  var NUMCMP = function (a, b) { return String(a).localeCompare(String(b), 'en', { numeric: true }); };
+  function grpOf(t) { var g = $('f-grp') ? $('f-grp').value : '', s = S[t]; return !g ? '' : g === 'coh' ? (s.sec || '') + '\u0001' + (s.coh || '') : g === 'sec' ? (s.sec || '') : (s.ind || ''); }
+  function grpSort(list) { if (!$('f-grp') || !$('f-grp').value) return list; var idx = {}; list.forEach(function (t, i) { idx[t] = i; });
+    return list.slice().sort(function (a, b) { var ga = grpOf(a), gb = grpOf(b); return ga === gb ? idx[a] - idx[b] : NUMCMP(ga, gb); }); }
   /* the empty-list button: clear every choice except the one just made (a choice in a new dropdown narrows the last one) */
   function keepLast() {
     var keepIds = LASTSEL.id === 'f-des' || LASTSEL.id === 'f-grade' ? ['f-des', 'f-grade'] : LASTSEL.id === 'f-gv' || LASTSEL.id === 'f-gk' ? ['f-gk', 'f-gv'] : [];
@@ -136,18 +146,24 @@
   }
   function refresh() {
     var p = population();
-    POP = p.list.slice().sort(SORTS[$('f-sort').value] || SORTS.tma);
+    POP = grpSort(p.list.slice().sort(SORTS[$('f-sort').value] || SORTS.tma));
     at = 0;
     $('notes').innerHTML = p.any ? p.notes.join(' <span class="and">and</span> ') : '<span class="mut">Choose a population from any dropdown; choices in different dropdowns narrow each other.</span>';
-    st.sel = {}; document.querySelectorAll('select.f').forEach(function (s) { st.sel[s.id || ('g:' + s.dataset.g)] = s.value; }); st.sel.fnew = $('f-new').checked; st.sort = $('f-sort').value; save();
+    st.sel = {}; document.querySelectorAll('select.f').forEach(function (s) { st.sel[s.id || ('g:' + s.dataset.g)] = s.value; }); st.sel.fnew = $('f-new').checked; st.sort = $('f-sort').value; st.grp = $('f-grp') ? $('f-grp').value : ''; if ($('f-grp')) $('f-grp').classList.toggle('on', !!st.grp); save();
     document.querySelectorAll('select.f').forEach(function (s) { s.classList.toggle('on', !!s.value && s.id !== 'f-grade'); });
     show();
   }
   function list() {
     $('cnt').textContent = POP.length + (POP.length === 1 ? ' stock' : ' stocks');
+    var gm = $('f-grp') ? $('f-grp').value : '', cnt = {}; if (gm) POP.forEach(function (t) { var g = grpOf(t); cnt[g] = (cnt[g] || 0) + 1; });
+    var lastG = null, lastSec = null;
+    function head(t) { if (!gm) return ''; var s = S[t], g = grpOf(t), h = ''; if (g === lastG) return ''; lastG = g;
+      if (gm === 'coh') { if (s.sec !== lastSec) { lastSec = s.sec; var ns = POP.filter(function (x) { return S[x].sec === s.sec; }).length; h += '<div class="gs" title="' + esc(s.sec) + '">' + esc(s.sec) + '<span class="gn">' + ns + '</span></div>'; }
+        return h + '<div class="gh" title="' + esc('Cohort ' + s.coh + ' ' + (COHN[s.coh] || '')) + '">' + esc(s.coh + ' ' + (COHN[s.coh] || '')) + '<span class="gn">' + cnt[g] + '</span></div>'; }
+      return '<div class="gs" title="' + esc(g) + '">' + esc(g || 'none') + '<span class="gn">' + cnt[g] + '</span></div>'; }
     $('lst').innerHTML = POP.map(function (t, i) {
       var s = S[t], d = s.dist, dc = d == null ? '' : (d >= -0.01 && d <= 0.03) ? 'nr' : d < 0 ? 'neg' : '', mk = mark(t);
-      return '<div class="it' + (i === at || i === at + 1 ? ' cur' : '') + '" data-i="' + i + '" title="' + esc(s.n + ' (' + t + '), ' + s.sec + (d == null ? '' : '. Price ' + (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '% against its target moving average (' + (s.tma || '50D') + (s.tma_assumed ? ', assumed: none set' : '') + ')')) + '"><span class="no">' + (i + 1) + '</span><span class="mk ' + mk + '"></span><span class="nm">' + esc(s.n) + (s.held ? ' <span class="hd">held</span>' : '') + '</span><span class="dv ' + dc + '">' + (d == null ? '' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</span></div>';
+      return head(t) + '<div class="it' + (i === at || i === at + 1 ? ' cur' : '') + '" data-i="' + i + '" title="' + esc(s.n + ' (' + t + '), ' + s.sec + (d == null ? '' : '. Price ' + (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '% against its target moving average (' + (s.tma || '50D') + (s.tma_assumed ? ', assumed: none set' : '') + ')')) + '"><span class="no">' + (i + 1) + '</span><span class="mk ' + mk + '"></span><span class="nm">' + esc(s.n) + (s.held ? ' <span class="hd">held</span>' : '') + '</span><span class="dv ' + dc + '">' + (d == null ? '' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</span></div>';
     }).join('') || (LASTSEL && document.querySelectorAll('select.f.on').length > 1
       ? '<div class="empty">No stock meets every choice. Choices in different dropdowns narrow each other.<br><button class="nb" id="keep1">Keep only the last choice</button></div>'
       : '<div class="empty">' + (document.querySelectorAll('select.f.on').length ? 'No stock in this list this week.' : 'Choose a population from any dropdown above.') + '</div>');
@@ -290,6 +306,7 @@
     document.querySelectorAll('select.f').forEach(function (s) { s.addEventListener('change', function () { LASTSEL = s; if (s.id === 'f-gk') fillGroupValues(); refresh(); }); });
     $('f-new').addEventListener('change', refresh);
     $('f-sort').addEventListener('change', refresh);
+    if ($('f-grp')) $('f-grp').addEventListener('change', refresh);
     $('clear').onclick = function () { document.querySelectorAll('select.f').forEach(function (s) { if (s.id !== 'f-grade') s.value = ''; }); $('f-new').checked = false; fillGroupValues(); refresh(); };
     $('prev').onclick = function () { go(at - 2); }; $('next').onclick = function () { go(at + 2); };
     $('lst').onclick = function (e) { var it = e.target.closest('.it'); if (it) go(parseInt(it.dataset.i, 10)); };
@@ -305,6 +322,7 @@
       $('f-new').checked = !!st.sel.fnew;
     } else { var w = document.querySelector('select.f[data-g="watch"]'); if (w) w.value = 'w_bench'; }
     $('f-sort').value = SORTS[st.sort] ? st.sort : 'tma';
+    cohNames(); if ($('f-grp')) $('f-grp').value = /^(coh|sec|ind)$/.test(st.grp || '') ? st.grp : '';
     controls(); refresh();
     var tm; window.addEventListener('resize', function () { clearTimeout(tm); tm = setTimeout(redraw, 200); });
     window.MC = { go: go, pop: function () { return POP; }, at: function () { return at; }, mark: mark };

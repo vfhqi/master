@@ -543,6 +543,7 @@ TABS = [
     {"id": "ideas_lists", "label": "Pool of Middle Innings Eligible Stocks", "accent": "#1b5e20"},  # MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02
     {"id": "lifecycle_phases", "label": "Phases of a Stock Lifecycle", "accent": "#1b3d5c"},  # MD-LIFECYCLE-PHASES-2026-10-10
     {"id": "ig_turning", "label": "IG - Turning/Inflecting", "accent": "#2f5d3a"},  # MD-IG-TURNING-2026-11-06
+    {"id": "capital_deploy", "label": "Capital Deployment In Range", "accent": "#0d366b"},  # MD-CAPITAL-DEPLOY-2026-11-11
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -575,6 +576,7 @@ IMPLEMENTED_TABS = [
     "ideas_lists",  # MD-IDEAS-LISTS-2026-09-28
     "lifecycle_phases",  # MD-LIFECYCLE-PHASES-2026-10-10
     "ig_turning",  # MD-IG-TURNING-2026-11-06
+    "capital_deploy",  # MD-CAPITAL-DEPLOY-2026-11-11
 ]
 
 
@@ -860,6 +862,20 @@ body[data-active-tab="ig_turning"] .header-controls-row{display:none !important}
 body[data-active-tab="ig_turning"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="ig_turning"]{--header-height:70px}
 .v2-nav-btn[data-v2-tab="ig_turning"]{width:84px}
+/* MD-CAPITAL-DEPLOY-2026-11-11 -- Capital Deployment In Range (tab capital_deploy; Richard, 11-Nov-2026: "Create a new page and put it in the SUMMARY group and call it \"Capital Deployment In Range\"").
+   The page itself is master-dashboard/capital-deployment/index.html (build_capital_deployment.py), shown here in a frame so it also works on its own. */
+body[data-active-tab="capital_deploy"] .header-tabs-row{display:none !important}
+body[data-active-tab="capital_deploy"] .v2-nav{display:flex}
+body[data-active-tab="capital_deploy"] .header-controls-row{display:none !important}
+body[data-active-tab="capital_deploy"] .header{height:auto !important;padding-bottom:0 !important}
+body[data-active-tab="capital_deploy"]{--header-height:70px}
+/* MD-CAPITAL-DEPLOY-2026-11-11: an eighth Summary button would wrap the Summary group onto a second row at 1920 wide (measured: 663px needed,
+   610px free with the page scrollbar). To keep every group on one line (MD-NAV-ONE-LINE-28Sep26), the Summary buttons are 70px and the
+   Pool button 80px; every label was measured to fit (no overflow) at those widths. */
+.v2-nav .v2-grp-summary .v2-nav-btn{width:70px}
+.v2-nav .v2-grp-summary .v2-nav-btn[data-v2-tab="ideas_lists"]{width:80px}
+#tab-capital_deploy{padding:0 !important}
+#tab-capital_deploy iframe.cdir-frame{display:block;width:100%;border:0;background:#f9f9f7}
 #tab-ig_turning{--igt-card:#fffdf8;--igt-ink:#23241f;--igt-mute:#6d6b62;--igt-line:#e6e2d6;--igt-rule:#d6d1c1;--igt-accent:#2f5d3a;
  --igt-p0:#e7e4da;--igt-p1:#cfe3c6;--igt-p2:#8cbf86;--igt-p3:#2f7d3a;--igt-up:#2a6a34;--igt-dn:#9e3b30;--igt-hd:#efece2;--igt-hd2:#f6f3ea;
  color:var(--igt-ink);font:12.5px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:6px 8px 0}
@@ -11652,7 +11668,7 @@ function SUM_renderQualifiedStocks() {
               /* MD-POOL-ELIG-2026-09-28: pages that use the V2 header chrome must be measured too. Without this, opening
                  the dashboard straight onto them (a bookmark or a reload with #pool_elig or #combos) left .main at the
                  70px fallback under a ~245px header, hiding the top of the page (found on the live site, 28-Sep-26). */
-              active === 'combos' || active === 'pool_elig' || active === 'ideas_lists' || active === 'lifecycle_phases' || active === 'ig_turning');  /* MD-LIFECYCLE-PHASES-2026-10-10; MD-IG-TURNING-2026-11-06 */
+              active === 'combos' || active === 'pool_elig' || active === 'ideas_lists' || active === 'lifecycle_phases' || active === 'ig_turning' || active === 'capital_deploy');  /* MD-LIFECYCLE-PHASES-2026-10-10; MD-IG-TURNING-2026-11-06 */
     if (!v2) return;
     /* S66b: measure the actual rendered header height (header-top + nav groups) and
        publish as --header-height so .main margin-top and all frozen top: offsets are correct */
@@ -11750,6 +11766,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Pool of Middle Innings Eligible Stocks</button>'  /* MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02 */
       +     '<button class="v2-nav-btn" data-v2-tab="lifecycle_phases" onclick="switchTab(\'lifecycle_phases\')">Phases of a Stock Lifecycle</button>'  /* MD-LIFECYCLE-PHASES-2026-10-10 */
       +     '<button class="v2-nav-btn" data-v2-tab="ig_turning" onclick="switchTab(\'ig_turning\')">IG - Turning/<wbr>Inflecting</button>'  /* MD-IG-TURNING-2026-11-06 */
+      +     '<button class="v2-nav-btn" data-v2-tab="capital_deploy" onclick="switchTab(\'capital_deploy\')">Capital Deployment In Range</button>'  /* MD-CAPITAL-DEPLOY-2026-11-11 */
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -20354,6 +20371,24 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   };
 })();
 
+/* MD-CAPITAL-DEPLOY-2026-11-11: Capital Deployment In Range. The page lives at capital-deployment/ (built nightly by
+   build_capital_deployment.py) and is framed here, sized to the window, so the Summary group can open it like any other page. */
+(function(){
+  function isActive(){return document.body.getAttribute('data-active-tab')==='capital_deploy';}
+  function size(){var f=document.querySelector('#tab-capital_deploy iframe.cdir-frame');if(!f||!isActive())return;
+    try{if(typeof window.measureV2Ribbon==='function')window.measureV2Ribbon();}catch(e){}
+    var h=Math.floor(window.innerHeight-f.getBoundingClientRect().top-2);f.style.height=(h>=300?h:Math.floor(window.innerHeight*0.8))+'px';}
+  if(!window._cdirResizeWired){window._cdirResizeWired=true;window.addEventListener('resize',function(){if(isActive())size();});}
+  window.renderCapitalDeploy=function(){
+    try{buildHeaderControls('capital_deploy');}catch(e){}
+    var c=document.getElementById('tab-capital_deploy');if(!c)return;
+    if(!c.querySelector('iframe.cdir-frame')){
+      c.innerHTML='<iframe class="cdir-frame" title="Capital Deployment In Range" src="capital-deployment/index.html?v='+Math.floor(Date.now()/600000)+'"></iframe>';
+    }
+    size();setTimeout(size,150);setTimeout(size,600);
+  };
+})();
+
 /* ============================================================================
    POOL OF MIDDLE INNINGS ELIGIBLE STOCKS  (tab id ideas_lists; MD-IDEAS-LISTS-2026-09-28, rebuilt MD-POOL-MI-2026-10-02)
    Richard's page, renamed 2-Oct-26 from "Ideas Lists (Bench, LL, SL)" (SA - Master Dashboard D-MD-POOL-44 onwards).
@@ -20863,6 +20898,7 @@ function renderTab(id){
   else if(id==="ideas_lists")renderIdeasLists();  /* MD-IDEAS-LISTS-2026-09-28 */
   else if(id==="lifecycle_phases")renderLifecyclePhases();  /* MD-LIFECYCLE-PHASES-2026-10-10 */
   else if(id==="ig_turning")renderIgTurning();  /* MD-IG-TURNING-2026-11-06 */
+  else if(id==="capital_deploy")renderCapitalDeploy();  /* MD-CAPITAL-DEPLOY-2026-11-11 */
   else if(id==="changes")renderChanges();
   else if(id==="positions")renderPositions();
   else if(id==="ssem")renderSSEM();

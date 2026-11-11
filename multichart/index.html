@@ -15,7 +15,11 @@
   #os.mc .brand .v { font-weight:400; color:#8b949e; font-size:11px; }
   #os.mc #dds { display:contents; }
   #os.mc select.f, #os.mc select#f-sort { font:inherit; font-size:11.5px; height:22px; padding:0 2px; border:1px solid #d0d7de; border-radius:5px; background:#fff; color:#57606a; width:122px; }
-  #os.mc select#f-sort { width:100%; }
+  #os.mc select#f-sort { width:auto; flex:1 1 auto; min-width:0; } #os.mc select#f-grp { font:inherit; font-size:11.5px; height:22px; padding:0 2px; border:1px solid #d0d7de; border-radius:5px; background:#fff; color:#57606a; flex:0 0 84px; } #os.mc select#f-grp.on { border-color:#1f2328; color:#1f2328; font-weight:600; background:#eef6ff; }
+  /* the list's group headings (Richard, 11-Nov-2026: grouped by cohort, Sector or Industry) */
+  #os.mc .gs { padding:5px 8px 1px; font-size:10px; font-weight:700; color:#1f2328; text-transform:none; border-top:1px solid #d0d7de; background:#f6f8fa; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #os.mc .gh { padding:3px 8px 1px 14px; font-size:10.5px; font-weight:600; color:#0969da; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #os.mc .gh .gn, #os.mc .gs .gn { color:#8b949e; font-weight:400; margin-left:4px; }
   #os.mc select.f.on { border-color:#1f2328; color:#1f2328; font-weight:600; background:#eef6ff; }
   #os.mc select#f-des { width:196px; } #os.mc select.g { width:96px; color:#1f2328; } #os.mc select#f-gk { width:92px; } #os.mc select#f-gv { width:130px; }
   #os.mc select.f[data-g="live"] { width:150px; } #os.mc select.f[data-g="watch"] { width:130px; } #os.mc select.f[data-g="interest"] { width:108px; }
@@ -112,7 +116,7 @@
     </div>
     <div class="side">
       <div class="sh"><b id="cnt"></b><span class="sp"></span><button class="nb" id="prev" title="Previous two (Up arrow)">&#9650;</button><span id="pg"></span><button class="nb" id="next" title="Next two (Down arrow)">&#9660;</button></div>
-      <div class="sh"><select id="f-sort" title="Order"><option value="tma">Closest to target moving average</option><option value="rs">Stock RS, highest first</option><option value="sec">Alphabetical within Sector</option><option value="res">Next results, soonest first</option></select></div>
+      <div class="sh"><select id="f-sort" title="Order"><option value="tma">Closest to target moving average</option><option value="rs">Stock RS, highest first</option><option value="sec">Alphabetical within Sector</option><option value="res">Next results, soonest first</option></select><select id="f-grp" title="Group the list by Cohort (under its Sector), Sector or Industry"><option value="">Ungrouped</option><option value="coh">Cohort</option><option value="sec">Sector</option><option value="ind">Industry</option></select></div>
       <div class="lh"><span>Stock</span><span title="The price's distance from the stock's target moving average; the 50-day where none is set">Price vs target MA</span></div>
       <div id="lst"></div>
     </div>

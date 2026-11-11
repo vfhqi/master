@@ -580,6 +580,271 @@ IMPLEMENTED_TABS = [
 ]
 
 
+# MD-FIT-2026-11-11 (SA - Master Dashboard, 11-Nov-2026; Richard: "Get the page looking clean on various screen sizes,
+# including my laptop, office PC, ipad mini, ipad (old, larger one), tablet (lenovo android)"). Display only.
+# Source files and patcher: scripts/patch_md_fit_2026_11_11/. Decisions D-MD-FIT-1 onwards in the project.
+MD_FIT_HEAD_JS = r"""/* MD-FIT-2026-11-11 (SA, Richard 11-Nov-26: "Get the page looking clean on various screen sizes, including my laptop,
+   office PC, ipad mini, ipad (old, larger one), tablet (lenovo android)"). Touch tablets lay the page out at the
+   laptop's width (1500 browser pixels) and the tablet scales it to fit; pinch to zoom. Computers are untouched.
+   Must run in <head>, straight after the viewport meta tag, before the page is laid out. */
+(function(){
+  var W=1500;
+  function touchFirst(){
+    try{
+      if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)return true;
+      /* iPad Safari in desktop mode can report a Mac; a Mac has no touch points */
+      if(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent))return true;
+    }catch(e){}
+    return false;
+  }
+  function apply(){
+    try{
+      var m=document.querySelector('meta[name="viewport"]');if(!m)return;
+      if(!touchFirst()){if(m.getAttribute('content')!=='width=device-width, initial-scale=1.0')m.setAttribute('content','width=device-width, initial-scale=1.0');return;}
+      var big=Math.max(screen.width||0,screen.height||0),small=Math.min(screen.width||0,screen.height||0),land=false;
+      try{
+        if(screen.orientation&&screen.orientation.type)land=/landscape/.test(screen.orientation.type);
+        else if(typeof window.orientation==='number')land=Math.abs(window.orientation)===90;
+        else land=matchMedia('(orientation:landscape)').matches;
+      }catch(e){}
+      /* the screen's width as held now; a touch screen at least as wide as the layout keeps its own width */
+      var narrow=(land?big:small)<W;
+      var want=narrow?('width='+W):'width=device-width, initial-scale=1.0';
+      if(m.getAttribute('content')!==want)m.setAttribute('content',want);
+      document.documentElement.classList.toggle('md-tablet',narrow);
+    }catch(e){}
+  }
+  apply();
+  window.addEventListener('orientationchange',function(){setTimeout(apply,50);});
+  window._mdFitViewport=apply;
+})();
+"""
+MD_FIT_CSS = r"""/* MD-FIT-2026-11-11 (SA, Richard 11-Nov-26): the page fits the screen on the laptop, office PC and tablets.
+   1. When the six navigation groups do not fit on one row (any window narrower than about 1,880 pixels), html gets
+      .md-navc: each group becomes one button on a single row and opens a drop-down list of its pages, the page names
+      unchanged; the group holding the page you are on shows that page's name. Richard, 6-Nov-26: the header stays one row.
+   2. In the same mode the header's information line (Stocks, Price data source, dates, Charts) moves under the title
+      and buttons on one line, instead of stacking four to six lines high.
+   3. The "Breaking out" and "Advancing" indicators page and the "Breaking 50D, 150D and 200D MAs" page get the same
+      navigation as every other page (they still showed the older #1 Tabs row).
+   Tables wider than the window are shrunk to fit by the script (mdFitTables), never below 75% of normal size. */
+
+/* 3. The two post-set pages use the six-group navigation */
+body[data-active-tab="post_indicators_bull"] .v2-nav,body[data-active-tab="post_indicators_bear"] .v2-nav{display:flex}
+body[data-active-tab="post_indicators_bull"] .header-tabs-row,body[data-active-tab="post_indicators_bear"] .header-tabs-row{display:none !important}
+/* Their filter bar stays frozen under the header like every other page's (the rule named only the old page, so the bar
+   scrolled away while the frozen table header still left room for it: a 42-pixel gap at 1920 that rows showed through) */
+body[data-active-tab="post_indicators_bull"] .controls.s1-controls,body[data-active-tab="post_indicators_bear"] .controls.s1-controls{position:sticky;top:var(--header-height);left:0;z-index:60;box-shadow:0 2px 5px rgba(0,0,0,0.07)}
+/* The navigation always sits straight under the title row; a page's own #3 Toggles / #4 Filters row comes after it,
+   next to the content it controls (it used to sit between the title and the navigation on five pages) */
+.header>.v2-nav{order:1}
+.header>.header-tabs-row,.header>.header-controls-row{order:2}
+
+/* 1. Navigation as one row of drop-downs */
+.md-navc-cur{display:none}
+html.md-navc .v2-nav{flex-wrap:nowrap;align-items:center;gap:6px;row-gap:0;padding:4px 12px 5px}
+html.md-navc .v2-nav-group{position:relative;flex-direction:row;align-items:center;padding:0;background:#fff;flex-shrink:0;min-width:0}
+html.md-navc .v2-nav-group.md-has-cur{flex-shrink:1}
+html.md-navc .v2-nav-group.md-has-cur .v2-nav-group-label{min-width:0;max-width:100%}
+html.md-navc .v2-nav-group-label{display:flex;align-items:center;gap:7px;margin:0;padding:5px 9px 5px 10px;min-height:24px;box-sizing:border-box;font-size:10px;line-height:14px;cursor:pointer;user-select:none;-webkit-user-select:none;border-radius:4px;white-space:nowrap}
+html.md-navc .v2-nav-group-label::after{content:"";width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;margin-left:1px;opacity:.8;transition:transform .15s}
+html.md-navc .v2-nav-group.md-open .v2-nav-group-label::after{transform:rotate(180deg)}
+html.md-navc .v2-nav-group-label:hover,html.md-navc .v2-nav-group.md-open .v2-nav-group-label{background:#f3efe2}
+html.md-navc .md-navc-cur{display:inline-block;max-width:340px;min-width:0;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;text-transform:none;letter-spacing:0;font-size:11px;font-weight:600;line-height:16px;color:#fff;background:#1b3d5c;padding:1px 8px;border-radius:3px}
+html.md-navc .v2-nav-group-btns{display:none;position:absolute;top:calc(100% + 4px);left:-1px;z-index:1000;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:2px;padding:5px;min-width:240px;max-height:calc(100vh - 120px);overflow-y:auto;background:#fff;border:1px solid #d0ccb8;border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.16)}
+html.md-navc .v2-nav-group.md-open .v2-nav-group-btns{display:flex}
+html.md-navc .v2-nav-group.md-right .v2-nav-group-btns{left:auto;right:-1px}
+html.md-navc .v2-nav .v2-nav-group .v2-nav-btn{display:block;width:auto !important;height:auto;min-height:0;padding:7px 11px;font-size:12px;line-height:1.3;text-align:left;white-space:normal;border-color:transparent}
+html.md-navc .v2-nav .v2-nav-group .v2-nav-btn:hover{border-color:#d0ccb8}
+html.md-navc .v2-nav .v2-nav-group .v2-nav-btn br{display:none}
+
+html.md-navc .v2-nav-group-label:focus{outline:none}
+html.md-navc .v2-nav-group-label:focus-visible{outline:2px solid rgba(27,61,92,.45);outline-offset:1px}
+
+/* 2. The header's information line under the title and buttons. Every line height is a whole number of pixels, so the
+   header's height is too: the frozen bars below it start at its measured (rounded-up) height, and a fractional
+   header left a hairline gap that table rows showed through. */
+html.md-navc .header-top{flex-wrap:wrap;row-gap:1px;column-gap:12px;padding:5px 12px 3px}
+html.md-navc .header-title{font-size:15px;line-height:22px}
+html.md-navc .header-right-btns{flex-wrap:nowrap}
+html.md-navc .header-right-btns .ctrl-btn{line-height:14px;box-sizing:border-box;height:24px}
+html.md-navc .header-stats{order:3;flex:0 0 100%;display:flex;gap:18px;font-size:11px;line-height:15px;white-space:nowrap;overflow:hidden;min-width:0}
+html.md-navc .header-stats>span,html.md-navc .header-stats>a{white-space:nowrap;flex-shrink:0}
+html.md-navc #stat-dashboard-version{margin-left:0 !important;font-size:10px}
+
+/* Tablets: keep the laptop's proportions; the browser's automatic text enlargement made paragraph text larger than the
+   tables beside it and pushed the tables down (pinch to zoom instead) */
+html.md-tablet{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* Tablets: no hover, so the slide-in panels' close buttons and the drop-downs need finger-sized targets */
+html.md-tablet.md-navc .v2-nav-group-label{min-height:30px;padding:7px 11px 7px 12px}
+html.md-tablet.md-navc .v2-nav .v2-nav-group .v2-nav-btn{padding:10px 12px;font-size:13px}
+"""
+MD_FIT_JS = r"""/* MD-FIT-2026-11-11 (SA, Richard 11-Nov-26: "Get the page looking clean on various screen sizes ...").
+   mdFitNav: one row of drop-downs when the six navigation groups do not fit on one row (html.md-navc).
+   mdFitTables: a table wider than the window is shrunk to fit with CSS zoom, never below MIN_Z (75%); its frozen
+   header still sits just under the page header (the header's height is divided by the zoom on the table).
+   Display only: no data, rating or rule is touched. */
+(function(){
+  if(window._mdFitWired)return;window._mdFitWired=true;
+  var MIN_Z=0.75,root=document.documentElement;
+
+  /* ---------- navigation ---------- */
+  function nav(){return document.getElementById('v2-nav-strip');}
+  function markCurrent(){
+    var n=nav();if(!n)return;
+    var gs=n.querySelectorAll('.v2-nav-group');
+    for(var i=0;i<gs.length;i++){
+      var g=gs[i],lab=g.querySelector('.v2-nav-group-label');if(!lab)continue;
+      var cur=lab.querySelector('.md-navc-cur');
+      if(!cur){cur=document.createElement('span');cur.className='md-navc-cur';lab.appendChild(cur);}
+      var act=g.querySelector('.v2-nav-btn.v2-active,.v2-nav-btn.v2-active-s1,.v2-nav-btn.v2-active-s2,.v2-nav-btn.v2-active-s3,.v2-nav-btn.v2-active-s4');
+      if(act){cur.textContent=act.textContent.replace(/\s+/g,' ').trim();cur.title=cur.textContent;
+        try{cur.style.background=getComputedStyle(act).backgroundColor;}catch(e){}
+        cur.style.display='';}
+      else{cur.textContent='';cur.style.display='none';}
+      g.classList.toggle('md-has-cur',!!act);
+      lab.setAttribute('role','button');lab.setAttribute('tabindex','0');
+      lab.setAttribute('aria-expanded',g.classList.contains('md-open')?'true':'false');
+    }
+  }
+  function closeAll(except){
+    var n=nav();if(!n)return;var o=n.querySelectorAll('.v2-nav-group.md-open');
+    for(var i=0;i<o.length;i++){if(o[i]!==except){o[i].classList.remove('md-open');var l=o[i].querySelector('.v2-nav-group-label');if(l)l.setAttribute('aria-expanded','false');}}
+  }
+  function mdFitNav(){
+    var n=nav();if(!n)return;
+    if(getComputedStyle(n).display==='none'){return;}
+    var was=root.classList.contains('md-navc');
+    if(was)root.classList.remove('md-navc');
+    /* the full row's natural width (the groups never shrink) against the page's own width; the page's width, not
+       the window's, because a tablet zoomed out to show a wide table has a wider window than page */
+    var gs=n.querySelectorAll('.v2-nav-group'),cs=getComputedStyle(n),need=0;
+    for(var i=0;i<gs.length;i++)need+=gs[i].getBoundingClientRect().width;
+    need+=(parseFloat(cs.columnGap)||0)*Math.max(0,gs.length-1)+(parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0);
+    var compact=need>document.documentElement.clientWidth-1;
+    root.classList.toggle('md-navc',compact);
+    if(!compact)closeAll(null);
+    if(compact){  /* a drop-down that would run off the right edge opens leftwards */
+      var vw=document.documentElement.clientWidth;
+      for(var j=0;j<gs.length;j++){var r=gs[j].getBoundingClientRect();gs[j].classList.toggle('md-right',r.left+260>vw);}
+    }
+    markCurrent();
+    if(was!==compact){try{if(typeof window.measureV2Ribbon==='function')window.measureV2Ribbon();}catch(e){}
+      try{if(typeof window.mdFitHeader==='function')window.mdFitHeader();}catch(e){}}
+  }
+  window.mdFitNav=mdFitNav;
+  document.addEventListener('click',function(ev){
+    if(!root.classList.contains('md-navc'))return;
+    var t=ev.target,lab=t.closest?t.closest('.v2-nav-group-label'):null;
+    if(lab&&nav()&&nav().contains(lab)){var g=lab.parentNode,open=!g.classList.contains('md-open');closeAll(g);
+      g.classList.toggle('md-open',open);lab.setAttribute('aria-expanded',open?'true':'false');ev.preventDefault();return;}
+    if(t.closest&&t.closest('.v2-nav-btn')){setTimeout(function(){closeAll(null);},0);return;}
+    if(!(t.closest&&t.closest('.v2-nav-group')))closeAll(null);
+  },true);
+  /* a click inside an embedded page (the Capital Deployment In Range page is one) never reaches this document, but it
+     takes the focus away from the window */
+  window.addEventListener('blur',function(){closeAll(null);});
+  document.addEventListener('keydown',function(ev){
+    if(ev.key==='Escape')closeAll(null);
+    if((ev.key==='Enter'||ev.key===' ')&&ev.target&&ev.target.classList&&ev.target.classList.contains('v2-nav-group-label')&&root.classList.contains('md-navc')){ev.preventDefault();ev.target.click();}
+  });
+
+  /* ---------- tables ---------- */
+  function hh(){var v=getComputedStyle(document.body).getPropertyValue('--header-height');return parseFloat(v)||0;}
+  function rh(){var v=getComputedStyle(document.body).getPropertyValue('--v2-ribbon-h');return parseFloat(v)||0;}
+  function containedSideways(el,stop){
+    /* true when the table sits inside its own sideways-scrolling or clipping box (by design); the Pool and Phases
+       frames (.pe-wrap) are fitted like the page */
+    for(var p=el.parentElement;p&&p!==stop&&p!==document.body;p=p.parentElement){
+      if(p.classList&&p.classList.contains('pe-wrap'))return false;
+      var ox=getComputedStyle(p).overflowX;if(ox==='auto'||ox==='scroll'||ox==='hidden')return true;
+    }
+    return false;
+  }
+  function setZ(tb,z){
+    if(z>=0.999){if(tb.style.zoom){tb.style.zoom='';tb.style.removeProperty('--header-height');tb.style.removeProperty('--v2-ribbon-h');tb.removeAttribute('data-md-zoom');}return;}
+    tb.style.zoom=String(z);tb.setAttribute('data-md-zoom',z.toFixed(3));
+    /* sticky offsets inside a zoomed box are zoomed too: give it the page header's height divided by the zoom */
+    tb.style.setProperty('--header-height',(hh()/z).toFixed(2)+'px');
+    tb.style.setProperty('--v2-ribbon-h',(rh()/z).toFixed(2)+'px');
+  }
+  function mdFitTables(){
+    var a=document.body.getAttribute('data-active-tab')||'';
+    var pane=document.getElementById('tab-'+a);if(!pane||pane.offsetParent===null)return;
+    var vw=document.documentElement.clientWidth,tbs=pane.querySelectorAll('table'),cand=[],i;
+    for(i=0;i<tbs.length;i++){var t=tbs[i];if(t.offsetParent===null)continue;if(t.parentElement&&t.parentElement.closest('table'))continue;cand.push(t);}
+    for(i=0;i<cand.length;i++){if(cand[i].style.zoom)setZ(cand[i],1);}  /* measure at full size */
+    var plan=[];
+    for(i=0;i<cand.length;i++){
+      var tb=cand[i],r=tb.getBoundingClientRect();
+      if(r.width<1||r.right<=vw-1)continue;
+      if(containedSideways(tb,pane))continue;
+      var right=vw-12,fr=tb.closest('.pe-wrap');
+      if(fr){var fr2=fr.getBoundingClientRect();right=Math.min(right,fr2.left+fr.clientWidth);}
+      var z=Math.max(MIN_Z,Math.min(1,(right-r.left)/r.width));
+      plan.push([tb,Math.floor(z*1000)/1000]);
+    }
+    /* tables lined up one above another (the Overview's two) take the same zoom */
+    var minz=1;for(i=0;i<plan.length;i++)minz=Math.min(minz,plan[i][1]);
+    for(i=0;i<plan.length;i++)setZ(plan[i][0],a==='master_overview'?minz:plan[i][1]);
+  }
+  window.mdFitTables=mdFitTables;
+
+  /* ---------- wiring ---------- */
+  /* the header's height as a whole number of pixels: the frozen bars below start at its rounded-up height, and a
+     fractional header left a hairline gap that table rows showed through */
+  function roundHeader(){
+    var hd=document.querySelector('.header');if(!hd)return;
+    hd.style.minHeight='';
+    if(!root.classList.contains('md-navc'))return;
+    var h=hd.getBoundingClientRect().height;
+    if(h>0&&Math.abs(h-Math.round(h))>0.01)hd.style.minHeight=Math.ceil(h)+'px';
+  }
+  var tmr=0,rid=0,lastHH=-1;
+  function fitAll(){tmr=0;rid=0;try{mdFitNav();}catch(e){}try{roundHeader();}catch(e){}try{mdFitTables();}catch(e){}lastHH=hh();}
+  function soon(ms){if(tmr)clearTimeout(tmr);tmr=setTimeout(fitAll,ms||120);}
+  /* before the next paint, so a wide table is never drawn at full width first (a tablet would zoom out to show it) */
+  function beforePaint(){if(!rid)rid=(window.requestAnimationFrame||setTimeout)(fitAll);}
+  window.mdFitAll=fitAll;
+  window.addEventListener('resize',function(){soon(150);});
+  try{new MutationObserver(function(){closeAll(null);beforePaint();}).observe(document.body,{attributes:true,attributeFilter:['data-active-tab']});}catch(e){}
+  try{var mn=document.querySelector('.main');if(mn&&window.MutationObserver)new MutationObserver(function(ms){
+      /* a table re-drawn by a sort, filter or toggle loses its zoom: fit again (our own style changes are not childList) */
+      for(var k=0;k<ms.length;k++){if(ms[k].type==='childList'){beforePaint();return;}}
+    }).observe(mn,{childList:true,subtree:true});}catch(e){}
+  try{var _w=0;if(window.ResizeObserver&&mn)new ResizeObserver(function(){var w=Math.round(mn.getBoundingClientRect().width);if(w!==_w){_w=w;beforePaint();}}).observe(mn);}catch(e){}
+  /* the page publishes the header's and the filter bar's heights on <body style> (--header-height, --v2-ribbon-h) after
+     layout settles: a zoomed table re-reads them every time they change, so its frozen header stays under the bars */
+  function refreshZoomVars(){
+    var z=document.querySelectorAll('table[data-md-zoom]'),H=hh(),R=rh();
+    for(var q=0;q<z.length;q++){var f=parseFloat(z[q].getAttribute('data-md-zoom'))||1,
+      h=(H/f).toFixed(2)+'px',r=(R/f).toFixed(2)+'px';
+      if(z[q].style.getPropertyValue('--header-height')!==h)z[q].style.setProperty('--header-height',h);
+      if(z[q].style.getPropertyValue('--v2-ribbon-h')!==r)z[q].style.setProperty('--v2-ribbon-h',r);}
+  }
+  try{new MutationObserver(refreshZoomVars).observe(document.body,{attributes:true,attributeFilter:['style']});}catch(e){}
+  try{var hd=document.querySelector('.header');if(hd&&window.ResizeObserver)new ResizeObserver(function(){
+      setTimeout(function(){try{roundHeader();}catch(e){}refreshZoomVars();lastHH=hh();},30);
+    }).observe(hd);}catch(e){}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){soon(50);});else soon(50);
+  window.addEventListener('load',function(){soon(300);});
+  setTimeout(fitAll,1500);
+})();
+"""
+
+
+def _md_fit_post_css(css):
+    """MD-FIT-2026-11-11: copies of the rules written for the old page name #tab-post_indicators, for the two pages that
+    replaced it (#tab-post_indicators_bull and _bear); without them their tiles and captions are unstyled."""
+    import re as _re
+    out = []
+    for rule in _re.findall(r'[^{}]*#tab-post_indicators(?![_a-z0-9])[^{}]*\{[^{}]*\}', css):
+        rule = _re.sub(r'/\*.*?\*/', '', rule, flags=_re.S).strip()
+        for suffix in ('_bull', '_bear'):
+            out.append(_re.sub(r'#tab-post_indicators(?![_a-z0-9])', '#tab-post_indicators' + suffix, rule))
+    return '\n/* MD-FIT-2026-11-11: the post-set pages\' own styles, copied to their current names */\n' + '\n'.join(out) + '\n'
+
+
 def build_html(data_js):
     # FIX-6: Build tab buttons with per-tab accent colour as inline style
     def hex_to_rgba(hex_color, alpha):
@@ -21851,10 +22116,12 @@ document.addEventListener('click', function(e){
         '<head>\n'
         '<meta charset="UTF-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+        '<script>' + MD_FIT_HEAD_JS + '</script>\n'  # MD-FIT-2026-11-11
         '<title>Master Dashboard &mdash; Viewforth</title>\n'
         '<style>\n'
         + css +
         '\n</style>\n'
+        '<style>' + MD_FIT_CSS + _md_fit_post_css(css) + '</style>\n'  # MD-FIT-2026-11-11
         '</head>\n'
         '<body>\n'
         '<div class="header">\n'
@@ -22005,6 +22272,7 @@ document.addEventListener('click', function(e){
         '<script>\n'
         + js +
         '\n</script>\n'
+        '<script>' + MD_FIT_JS + '</script>\n'  # MD-FIT-2026-11-11
         '</body>\n'
         '</html>'
     )

@@ -23,7 +23,7 @@
   if (typeof _slice === 'function') window.getChartSlice = function (chart, zoom) { return zoom === '1W' ? chart.slice(Math.max(0, chart.length - 5)) : _slice(chart, zoom); };
 
   /* ---------- settings kept in this browser ---------- */
-  var KEY = 'mcSettings', st = { grp: '', sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', mas: null, sel: {} };
+  var KEY = 'mcSettings', st = { rel: true, grp: '', sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', mas: null, sel: {} };
   try { var o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o) for (var k in st) if (o[k] != null) st[k] = o[k]; } catch (e) { /* not kept */ }
   function save() { try { st.zoom = chartZoom; st.scale = chartScaleMode; st.mas = {}; ['ma5','ma10','ma20','ma50','ma100','ma150','ma200'].forEach(function (k) { st.mas[k] = !!chartVis[k]; }); localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* not kept */ } }
   chartZoom = st.zoom; chartScaleMode = st.scale;
@@ -267,7 +267,7 @@
        written inside the plot's right edge on a white backing, as on the PMS Per-stock Dashboard. Was a 212px margin with a names column. */
     if (window.PMS_CHART_LAYOUT) delete window.PMS_CHART_LAYOUT['cv' + k];
     drawMasterChart(t, { canvasId: 'cv' + k, containerId: 'cc' + k, height: Math.max(160, Math.floor(hh)), upto: m.asof, overlay: ov, pad: { t: top, r: 56, b: sh ? 50 : 28, l: 6 }, priceTicks: 10, malOver: true });
-    whenDrawn('cv' + k, function () { relBand('cv' + k, m); });
+    if (st.rel !== false) whenDrawn('cv' + k, function () { relBand('cv' + k, m); });
     MCVOL.draw(vc, m, volWin());
   }
   function show() {
@@ -305,6 +305,9 @@
     $('mas').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; chartVis[b.dataset.k] = !chartVis[b.dataset.k]; save(); controls(); redraw(); };
     var f = FOLLOW[chartZoom];
     btns($('volw'), (f === 'L1W' ? [['L1W', 'L1W']] : []).concat([['L1M', 'L1M'], ['L3M', 'L3M']]), volWin(), function (k) { st.vol = k; save(); controls(); redraw(); }, !!f);
+    /* the relative price band on or off (Watson's decision, 11-Nov-2026, on Richard's "You decide on those topics": for 18% of stocks the latest
+       close sits inside the band's area, so the band can be hidden; on by default, kept with the other settings) */
+    btns($('relb'), [['on', 'Relative price']], st.rel === false ? '' : 'on', function () { st.rel = st.rel === false; save(); controls(); redraw(); });
     $('volw').title = f ? 'Set by the price chart: at 1W, 1M and 3M the volume charts show the same window' : 'The volume window for price zooms of 6M and longer';
   }
 

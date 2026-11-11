@@ -242,6 +242,17 @@ def _load_forced_reseeds(path):
         print(f"  FORCED RE-SEED: skipped, could not read the request file ({exc})")
         return set()
 SMA_PERIODS = [5, 10, 20, 50, 100, 150, 200]
+# MD-S2-T1-200D-FLAT-2026-11-11 (Richard, 11-Nov-2026): Stage 2 gate 1 is "Is 200D MA flat or rising?". It passes
+# when the 200D MA today is no more than 5% a year below its level 21 trading days earlier (his Q2 = B: the Basing
+# Plateau screen's "flat" band; 21 rows back is the system's rule for a rising 200-day, as the Pool's Market
+# Cycle Phase and the Minervini base counter use). -0.05 * 21 / 252 = about -0.42% over the 21 days.
+S2_G1_LOOKBACK_DAYS = 21
+S2_G1_FLAT_BAND_PA = 0.05
+S2_G1_MIN_CHANGE_21D = -S2_G1_FLAT_BAND_PA * S2_G1_LOOKBACK_DAYS / 252.0
+# MD-S2-T2-GATES-SWAP-2026-11-11 (Richard, 11-Nov-2026 15:51; variant A): the two 50D tests are gates 3 and 4;
+# "price above the 150D" is a scored test; "within 25% of the 52-week high" is a scored test.
+S2_W25_IS_GATE = False
+S2_RATING_AT = {"Probable": 4, "Plausible": 3, "Possible": 2}
 BENCHMARK_TICKER = "^STOXX"
 # Cached for scripts/pms_historical_performance.py only; NOT the relative-strength
 # benchmark, which stays BENCHMARK_TICKER.
@@ -1469,6 +1480,8 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
         mas["200D_80d_ago"] = rows_with_sma[-81].get("sma_200") if len(rows_with_sma) >= 81 else None
         # 150-day-ago 200D MA (Stage 1 gate: 200D declining over 150D window)
         mas["200D_150d_ago"] = rows_with_sma[-151].get("sma_200") if len(rows_with_sma) >= 151 else None
+        # MD-S2-T1-200D-FLAT-2026-11-11: the 200D MA 21 trading days earlier (Stage 2 gate 1, "Is 200D MA flat or rising?")
+        mas["200D_21d_ago"] = rows_with_sma[-22].get("sma_200") if len(rows_with_sma) >= 22 else None
 
         # Previous day close for the SMA DoD calculations in the pullback monitor
         prev_sma_rows = rows_with_sma[-2] if len(rows_with_sma) > 1 else None
@@ -3006,30 +3019,33 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
             if not h52 or h52 <= 0:
                 continue
 
-            # 4 hard gates
-            g1 = price > ma200
-            g2 = price > ma150
-            g3 = ma150 > ma200
-            g4 = price >= h52 * 0.75
-            if not (g1 and g2 and g3 and g4):
+            # 4 hard gates. MD-S2-T1-200D-FLAT-2026-11-11: gate 1 is the 200D MA flat or rising over 21 trading days
+            ma200_21 = rows[idx - S2_G1_LOOKBACK_DAYS].get('sma_200') if idx >= S2_G1_LOOKBACK_DAYS else None
+            g1 = bool(ma200_21) and (ma200 / ma200_21 - 1.0) >= S2_G1_MIN_CHANGE_21D
+            # MD-S2-T2-GATES-SWAP-2026-11-11: gates 2 to 4 are 150D > 200D, 50D > 150D, 50D > 200D (+ within 25% of
+            # the 52-week high when S2_W25_IS_GATE); price above the 150D is a scored test.
+            g2 = ma150 > ma200
+            g3 = ma50 > ma150
+            g4 = ma50 > ma200
+            w25 = price >= h52 * 0.75
+            p150 = price > ma150
+            if not (g1 and g2 and g3 and g4 and (w25 or not S2_W25_IS_GATE)):
                 result[ticker][mi] = 'None'
                 continue
 
             # 5 tests (T5-T9 matching compute_master_dashboard_screens)
-            t5 = ma50 > ma150
-            t6 = ma50 > ma200
             ind = stock_meta[ticker]['industry']
             sec = stock_meta[ticker]['sector']
             t7 = ind_pct_rank.get(ind, 0) >= 70
             t8 = sec_pct_in_ind.get(sec, 0) >= 50  # RS-ALIGN Q1 (1-Oct-2026): the Pool's Sector RS pass mark
             t9 = rs_vs_ind_pct.get(ticker, 0) >= 70
 
-            count = sum([t5, t6, t7, t8, t9])
-            if count >= 4:
+            count = sum([p150, t7, t8, t9] + ([] if S2_W25_IS_GATE else [w25]))
+            if count >= S2_RATING_AT['Probable']:
                 result[ticker][mi] = 'Probable'
-            elif count >= 3:
+            elif count >= S2_RATING_AT['Plausible']:
                 result[ticker][mi] = 'Plausible'
-            elif count >= 2:
+            elif count >= S2_RATING_AT['Possible']:
                 result[ticker][mi] = 'Possible'
             else:
                 result[ticker][mi] = 'None'
@@ -3496,57 +3512,68 @@ def compute_master_dashboard_screens(prices, filter_results):
 
         # ──────────────────────────────────────────────────────────────
         # STAGE 2 — Uptrend  [MD-V2-S54-REWRITE]
-        # 4 hard gates: P>200D, P>150D, 150D>200D, P within 25% of 52W high
-        # Gate failure → None. 5 tests: T5-T9. Possible=2/5, Plausible=3/5, Probable=4/5.
-        # T5: 50D>150D / T6: 50D>200D / T7: industry RS pct >= 70 / T8: sector RS pct >= 70 / T9: rs_vs_industry >= 70
+        # 4 hard gates [MD-S2-T2-GATES-SWAP-2026-11-11, Richard 11-Nov-2026 15:51; see S2_W25_IS_GATE and S2_RATING_AT]:
+        # (1) 200D MA flat or rising (MD-S2-T1-200D-FLAT-2026-11-11; it replaced price above the 200D, which the other
+        # gates implied); (2) 150D > 200D; (3) 50D > 150D; (4) 50D > 200D (implied by 3 and 2, kept as Richard named it);
+        # plus (5) price within 25% of the 52-week high when S2_W25_IS_GATE. Gate failure -> None.
+        # Scored tests: price above the 150D; within 25% of the 52-week high unless it is a gate; Industry RS >= 70;
+        # Sector RS >= 50; Stock RS vs industry >= 70. The gate key g3_150D_above_200D keeps its old name because the
+        # change log's 150D-above-200D record (the Stage 2 qualification SOP's cross trigger) reads it.
         # ──────────────────────────────────────────────────────────────
         s2 = {"tests": {}, "groups": {}, "count": 0, "rating": "None"}
-        s2_gate1 = (price is not None and ma200 is not None and price > ma200)
-        s2_gate2 = (price is not None and ma150 is not None and price > ma150)
-        s2_gate3 = (ma150 is not None and ma200 is not None and ma150 > ma200)
-        s2_gate4 = (price is not None and h52 is not None and h52 > 0 and price >= h52 * 0.75)
-        s2_gates_pass = s2_gate1 and s2_gate2 and s2_gate3 and s2_gate4
+        ma200_21d_ago = mas.get("200D_21d_ago")
+        s2_g1_change = (ma200 / ma200_21d_ago - 1.0) if (ma200 is not None and ma200_21d_ago) else None
+        s2_gate1 = (s2_g1_change is not None and s2_g1_change >= S2_G1_MIN_CHANGE_21D)
+        s2_g150_200 = (ma150 is not None and ma200 is not None and ma150 > ma200)
+        s2_g50_150 = (ma50 is not None and ma150 is not None and ma50 > ma150)
+        s2_g50_200 = (ma50 is not None and ma200 is not None and ma50 > ma200)
+        s2_p150 = (price is not None and ma150 is not None and price > ma150)
+        s2_w25 = (price is not None and h52 is not None and h52 > 0 and price >= h52 * 0.75)
         s2["gates"] = {
-            "g1_P_above_200D": s2_gate1,
-            "g2_P_above_150D": s2_gate2,
-            "g3_150D_above_200D": s2_gate3,
-            "g4_within_25pct_52WH": s2_gate4,
+            "g1_200D_flat_or_rising": s2_gate1,
+            "g3_150D_above_200D": s2_g150_200,
+            "g_50D_above_150D": s2_g50_150,
+            "g_50D_above_200D": s2_g50_200,
         }
+        if S2_W25_IS_GATE:
+            s2["gates"]["g4_within_25pct_52WH"] = s2_w25
+        s2_gates_pass = all(s2["gates"].values())
         # Always populate test_values — RS data shown even for gate-failing stocks
         s2["test_values"] = {
+            "G1_200D_change_21d": _md_v2_round(s2_g1_change),
             "T5_50D_vs_150D": _md_v2_pct_gap(ma50, ma150),
             "T6_50D_vs_200D": _md_v2_pct_gap(ma50, ma200),
+            "P_vs_150D": _md_v2_pct_gap(price, ma150),
+            "P_vs_52WH": _md_v2_pct_gap(price, h52),
             "T7_industry_RS_pct": _ind_pct_rank.get(_stock_industry, 0),
             "T8_sector_RS_pct_in_industry": _sec_pct_in_ind.get(_stock_sector, 0),
             "T9_rs_vs_industry": rs_vs_ind,
         }
         if s2_gates_pass:
-            s2_t5 = (ma50 is not None and ma150 is not None and ma50 > ma150)
-            s2_t6 = (ma50 is not None and ma200 is not None and ma50 > ma200)
             # T7: industry RS percentile rank >= 70 (avg rs_excess_market per industry, ranked vs all industries)
             s2_t7 = (_ind_pct_rank.get(_stock_industry, 0) >= 70)
-            # T8: sector RS percentile rank >= 70 within its industry
-            # RS-ALIGN Q1 (1-Oct-2026, Richard: "Align it to the approach we've agreed in the last week in Stage 2 Gate-4
-            # Backtest project"): Sector RS 50 or above, the Pool's pass mark (Uptrend Pool Filter Criteria, signed off
-            # 28/29-Sep-2026) and the Sell Criteria's line (Sector RS below 50). Key name T8_sector_RS_pct_ge70 kept for readers.
+            # T8: RS-ALIGN Q1 (1-Oct-2026): Sector RS 50 or above, the Pool's pass mark. Key name kept for readers.
             s2_t8 = (_sec_pct_in_ind.get(_stock_sector, 0) >= 50)
             # T9: stock's rs_vs_industry percentile >= 70
             s2_t9 = (rs_vs_ind is not None and rs_vs_ind >= 70)
-            s2["tests"]["T5_50D_above_150D"] = s2_t5
-            s2["tests"]["T6_50D_above_200D"] = s2_t6
+            s2["tests"]["T_P_above_150D"] = s2_p150
+            if not S2_W25_IS_GATE:
+                s2["tests"]["T_within_25pct_52WH"] = s2_w25
             s2["tests"]["T7_industry_RS_pct_ge70"] = s2_t7
             s2["tests"]["T8_sector_RS_pct_ge70"] = s2_t8
             s2["tests"]["T9_stock_RS_vs_industry_ge70"] = s2_t9
-            s2["groups"]["g1_ma_stack"] = {"T5": s2_t5, "T6": s2_t6}
+            s2["groups"]["g1_price"] = {"P150": s2_p150}
+            if not S2_W25_IS_GATE:
+                s2["groups"]["g1_price"]["W25"] = s2_w25
             s2["groups"]["g2_rs"] = {"T7": s2_t7, "T8": s2_t8, "T9": s2_t9}
-            s2_count = sum([s2_t5, s2_t6, s2_t7, s2_t8, s2_t9])
+            s2_count = sum(1 for _v in s2["tests"].values() if _v)
             s2["count"] = s2_count
-            s2["total"] = 5
-            if s2_count >= 4:
+            s2["total"] = len(s2["tests"])
+            if s2_count >= S2_RATING_AT["Probable"]:
                 s2["rating"] = "Probable"
-            elif s2_count >= 3:
+            elif s2_count >= S2_RATING_AT["Plausible"]:
                 s2["rating"] = "Plausible"
-            elif s2_count >= 2:
+            elif s2_count >= S2_RATING_AT["Possible"]:
                 s2["rating"] = "Possible"
             else:
                 s2["rating"] = "None"

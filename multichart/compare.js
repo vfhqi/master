@@ -36,8 +36,8 @@
   /* ---------- the designations: the Master Dashboard Overview's own list of 18 (build_dashboard.py, the registry with ratingPath and tabId) ---------- */
   var REG = [
     ['Stages', [['stage_1', 'Stage 1 — Basing'], ['stage_2', 'Stage 2 — Uptrend'], ['stage_3', 'Stage 3 — Topping'], ['stage_4', 'Stage 4 — Decline']]],
-    ['Early-stage pre-test indicators', [['pulling_back', 'Pulling back within MT/LT uptrend'], ['basing', 'Basing in a MT/LT uptrend'], ['collapsing', 'Collapsing']]],
-    ['Late-stage capital qualification setups and tests', [['probing_bet_s1', 'Stage 1 — Speculative bet'], ['probing_bet_s2', 'Stage 2 — Probing bet'], ['healthy_retest', 'S2 — Retest setup'], ['vcp_deploy_s2', 'S2 — VCP deploy'], ['speculative_bet_s3', 'Stage 3 — Speculative bet'], ['speculative_bet_s4', 'Stage 4 — Speculative bet']]],
+    ['Early-stage pre-test indicators', [['pulling_back', 'Pulling Back in Uptrend'], ['basing', 'Basing in a MT/LT uptrend'], ['collapsing', 'Collapsing']]],
+    ['Late-stage capital qualification setups and tests', [['probing_bet_s1', 'Stage 1 — Speculative bet'], ['probing_bet_s2', 'Stage 2 — Probing bet'], ['healthy_retest', 'Retest'], ['vcp_deploy_s2', 'S2 — VCP deploy'], ['speculative_bet_s3', 'Stage 3 — Speculative bet'], ['speculative_bet_s4', 'Stage 4 — Speculative bet']]],
     ['Bullish post-setup/tests technical behaviour', [['breakout', 'Breakout'], ['advancing', 'Advancing']]],
     ['Negative breaking through key MAs', [['breakdown_50D', 'Breaking through 50D MA'], ['breakdown_150D', 'Breaking through 150D MA'], ['breakdown_200D', 'Breaking through 200D MA']]]];
   REG.forEach(function (g) { g[1].forEach(function (x) { LBL[x[0]] = x[1]; }); });

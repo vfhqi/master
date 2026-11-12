@@ -257,6 +257,16 @@ S2_RATING_AT = {"Probable": 4, "Plausible": 3, "Possible": 2}
 # option B is most sensible"): the Basing in uptrend page measures from the highest intraday high of the last
 # BASE_HIGH_LOOKBACK_DAYS trading days. It replaced the most recent local peak, whose day count ran back past the peak.
 BASE_HIGH_LOOKBACK_DAYS = 126
+# MD-PB-RETEST-2026-11-12 (Richard, 12-Nov-2026, Messages 5 to 9 in projects/SA - Master Dashboard/RICHARD-VERBATIM-2026-11-11-12-*):
+# Pulling Back in Uptrend and Retest. One 6% band throughout, as the stop-loss rule (the line less 6%).
+PULLBACK_MIN_DEPTH = 0.10          # test 4: deepest fall from the six-month high more than 10%
+PULLBACK_BANDS = ((0.15, "Shallow Pullback"), (0.20, "Medium Pullback"), (9.99, "Deep Pullback"))
+RETEST_MAS = (50, 100, 150, 200)   # the 20-day was removed (Richard, 12-Nov-2026 20:33: "Do not do it for the 20D")
+RETEST_BAND = 0.06                 # close within 6% of that day's moving average
+RETEST_PLAUSIBLE_DAYS = 3          # of the last 10 trading days, not necessarily consecutive
+RETEST_PROBABLE_DAYS = 5
+# A moving average qualifies for Retest only if TODAY's close is within RETEST_BAND of it, above or below (Richard,
+# 12-Nov-2026 21:22 and 21:27: "The rule is 6% above or below the MA, to be very clear."). The days count then sets the rung.
 BENCHMARK_TICKER = "^STOXX"
 # Cached for scripts/pms_historical_performance.py only; NOT the relative-strength
 # benchmark, which stays BENCHMARK_TICKER.
@@ -1463,6 +1473,54 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
                     if isinstance(latest.get("close"), (int, float)):
                         pullback_from_base_high = round((_bh - latest["close"]) / _bh, 4)
 
+        # MD-PB-RETEST-2026-11-12: Retest measures per moving average (50, 100, 150, 200-day). "Near" = the close
+        # within RETEST_BAND of that day's moving average. Length of Retest = near days since the six-month high (the
+        # count starts the first day the price came within the band; days outside do not break it; Richard's Q5 = A).
+        # Volatility = the day's high-to-low range as a fraction of its close. Ratios below 1 mean "reducing".
+        retest_by_ma = {}
+        def _rt_num(x):
+            return isinstance(x, (int, float)) and not math.isnan(x)
+        def _rt_mean(xs):
+            xs = [x for x in xs if _rt_num(x)]
+            return (sum(xs) / len(xs)) if xs else None
+        def _rt_ratio(a, b):
+            return round(a / b, 3) if (a is not None and b is not None and b > 0) else None
+        def _rt_rng(r):
+            h, l, c = r.get("high"), r.get("low"), r.get("close")
+            return ((h - l) / c) if (_rt_num(h) and _rt_num(l) and _rt_num(c) and c > 0) else None
+        def _rt_top(r):
+            h, l, c = r.get("high"), r.get("low"), r.get("close")
+            if not (_rt_num(h) and _rt_num(l) and _rt_num(c)):
+                return None
+            return 1.0 if c >= (h + l) / 2.0 else 0.0
+        _rt_l5, _rt_l10, _rt_l20, _rt_l63 = rows_with_sma[-5:], rows_with_sma[-10:], rows_with_sma[-20:], rows_with_sma[-63:]
+        _rt_since = ([r for r in rows_with_sma if r.get("date") and r["date"] >= base_high_date]
+                     if base_high_date else [])
+        for _m in RETEST_MAS:
+            _k = "sma_%d" % _m
+            def _near(r, _k=_k):
+                v, c = r.get(_k), r.get("close")
+                return bool(_rt_num(v) and v > 0 and _rt_num(c) and abs(c / v - 1.0) <= RETEST_BAND)
+            _near10 = [r for r in _rt_l10 if _near(r)]
+            _nears = [r for r in _rt_since if _near(r)]
+            _man = latest.get(_k)
+            _topn = _rt_mean([_rt_top(r) for r in _nears])
+            _top5 = _rt_mean([_rt_top(r) for r in _rt_l5])
+            _vol5 = _rt_mean([r.get("volume") for r in _rt_l5])
+            retest_by_ma["%dD" % _m] = {
+                "days_within_l10d": len(_near10),
+                "near_today": _near(latest),   # today's close within 6% of today's moving average, above or below
+                "length_of_retest": (len(_nears) if base_high_date else None),
+                "dist_from_ma": (round(latest["close"] / _man - 1.0, 4) if (_rt_num(_man) and _man > 0) else None),
+                "vol_near_vs_l20d": _rt_ratio(_rt_mean([_rt_rng(r) for r in _nears]), _rt_mean([_rt_rng(r) for r in _rt_l20])),
+                "vol_l5d_vs_l10d": _rt_ratio(_rt_mean([_rt_rng(r) for r in _rt_l5]), _rt_mean([_rt_rng(r) for r in _rt_l10])),
+                "volume_near_vs_l20d": _rt_ratio(_rt_mean([r.get("volume") for r in _nears]), _rt_mean([r.get("volume") for r in _rt_l20])),
+                "volume_l5d_vs_l10d": _rt_ratio(_vol5, _rt_mean([r.get("volume") for r in _rt_l10])),
+                "volume_l5d_vs_l3m": _rt_ratio(_vol5, _rt_mean([r.get("volume") for r in _rt_l63])),
+                "closes_top_half_near": (round(_topn, 3) if _topn is not None else None),
+                "closes_top_half_l5d_vs_near": _rt_ratio(_top5, _topn),
+            }
+
         # Volume averages
         recent_20 = rows_with_sma[-20:] if len(rows_with_sma) >= 20 else rows_with_sma
         recent_60 = rows_with_sma[-60:] if len(rows_with_sma) >= 60 else rows_with_sma
@@ -1511,6 +1569,7 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
         mas["200D_150d_ago"] = rows_with_sma[-151].get("sma_200") if len(rows_with_sma) >= 151 else None
         # MD-S2-T1-200D-FLAT-2026-11-11: the 200D MA 21 trading days earlier (Stage 2 gate 1, "Is 200D MA flat or rising?")
         mas["200D_21d_ago"] = rows_with_sma[-22].get("sma_200") if len(rows_with_sma) >= 22 else None
+        mas["150D_21d_ago"] = rows_with_sma[-22].get("sma_150") if len(rows_with_sma) >= 22 else None  # MD-PB-RETEST-2026-11-12
 
         # Previous day close for the SMA DoD calculations in the pullback monitor
         prev_sma_rows = rows_with_sma[-2] if len(rows_with_sma) > 1 else None
@@ -2362,6 +2421,7 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             "days_since_base_high": days_since_base_high,
             "max_pullback_since_base_high": max_pullback_since_base_high,
             "pullback_from_base_high": pullback_from_base_high,
+            "retest_by_ma": retest_by_ma,  # MD-PB-RETEST-2026-11-12
             "utr_candle_quality_10d": utr_candle_quality_10d,
             "utr_candle_quality_3d": utr_candle_quality_3d,
             "utr_updown_ratio_5d": utr_updown_ratio_5d,
@@ -3752,20 +3812,32 @@ def compute_master_dashboard_screens(prices, filter_results):
         # md["pre_indicators"] so the dashboard can render per-pattern
         # rating + score columns (D-MD-V2-55, Option A 3-tier ladder).
 
-        # ---- Indicator 1: Pulling back within MT/LT uptrend (D-MD-V2-50) ----
-        # In a real MT/LT uptrend (50D + 150D MAs still rising) AND currently
-        # inside a pullback (5D + 10D MAs rolling over). No Stage 2 rating gate.
-        pb_t1_50d_rising = bool(utr_50d_rising)
-        pb_t2_150d_rising = bool(utr_150d_rising)
-        pb_t3_5d_rolling = bool(utr_5d_declining)
-        pb_t4_10d_rolling = bool(utr_10d_declining)
+        # ---- Indicator 1: Pulling Back in Uptrend (MD-PB-RETEST-2026-11-12; Richard, 12-Nov-2026) ----
+        # Four tests, all needed for Probable: (1) price > 200D MA; (2) 200D MA higher than 21 trading days ago;
+        # (3) 150D MA higher than 21 trading days ago; (4) depth of pullback more than 10%, the depth being the deepest
+        # fall from the six-month high to the lowest intraday price since it (as Basing test 1; Richard's Q2 = A).
+        # Depth band: 10-15% Shallow Pullback, 15-20% Medium Pullback, over 20% Deep Pullback. Until 12-Nov-2026 the
+        # tests were 50D rising, 150D rising, 5D and 10D rolling over, all day on day (D-MD-V2-50).
+        pb_depth = p.get("max_pullback_since_base_high")
+        ma150_21d_pb = mas.get("150D_21d_ago")
+        ma200_21d_pb = mas.get("200D_21d_ago")
+        pb_t1_above_200d = bool(price is not None and ma200 is not None and price > ma200)
+        pb_t2_200d_rising = bool(ma200 is not None and ma200_21d_pb is not None and ma200 > ma200_21d_pb)
+        pb_t3_150d_rising = bool(ma150 is not None and ma150_21d_pb is not None and ma150 > ma150_21d_pb)
+        pb_t4_depth = bool(pb_depth is not None and pb_depth > PULLBACK_MIN_DEPTH)
         pb_tests = {
-            "t1_50d_rising": pb_t1_50d_rising,
-            "t2_150d_rising": pb_t2_150d_rising,
-            "t3_5d_rolling_over": pb_t3_5d_rolling,
-            "t4_10d_rolling_over": pb_t4_10d_rolling,
+            "t1_price_above_200d": pb_t1_above_200d,
+            "t2_200d_rising": pb_t2_200d_rising,
+            "t3_150d_rising": pb_t3_150d_rising,
+            "t4_pullback_gt10": pb_t4_depth,
         }
         pb_count = sum(1 for v in pb_tests.values() if v)
+        pb_band = None
+        if pb_t4_depth:
+            for _lim, _name in PULLBACK_BANDS:
+                if pb_depth <= _lim:
+                    pb_band = _name
+                    break
         ind["pulling_back_uptrend"] = bool(pb_count == 4)
 
         # ---- Indicator 2: Basing in uptrend (D-MD-V2-49; MD-BASING-6M-HIGH-2026-11-12) ----
@@ -3826,11 +3898,16 @@ def compute_master_dashboard_screens(prices, filter_results):
                 "tests": pb_tests, "count": pb_count, "total": 4,
                 "rating": ("Probable" if pb_count >= 4 else "Plausible" if pb_count >= 3 else "Possible" if pb_count >= 2 else "None"),
                 "qualifies": ind["pulling_back_uptrend"],
+                # MD-PB-RETEST-2026-11-12: depth band and the information columns
+                "info_depth_band": pb_band,
+                "info_pullback_now": p.get("pullback_from_base_high"),
+                "info_base_high_date": p.get("base_high_date"),
+                "info_days_since_high": p.get("days_since_base_high"),
                 "test_values": {
-                    "t1_50d_rising": "rising" if pb_t1_50d_rising else "not rising",
-                    "t2_150d_rising": "rising" if pb_t2_150d_rising else "not rising",
-                    "t3_5d_rolling_over": "rolling over" if pb_t3_5d_rolling else "not rolling",
-                    "t4_10d_rolling_over": "rolling over" if pb_t4_10d_rolling else "not rolling",
+                    "t1_price_above_200d": _md_v2_pct_gap(price, ma200),
+                    "t2_200d_rising": _md_v2_pct_gap(ma200, ma200_21d_pb),
+                    "t3_150d_rising": _md_v2_pct_gap(ma150, ma150_21d_pb),
+                    "t4_pullback_gt10": _md_v2_round(pb_depth),
                 },
             },
             "basing": {
@@ -4039,42 +4116,58 @@ def compute_master_dashboard_screens(prices, filter_results):
             "test_values": _md_v2_vcp_values(vcp_tests, vcp_contractions),
         }
 
-        # ---- Setup 3: Healthy retest within MT/LT uptrend (6 tests) ----
-        # Built in Session 25 (D-MD-V2-51). Unchanged here.
-        hr_t1_vol_contracting = bool(utr_vol_trend is not None and utr_vol_trend < 1.0)
-        hr_t2_updown_ge105 = bool(utr_updown_ratio is not None and utr_updown_ratio >= 1.05)
-        hr_t3_few_dist_days = bool(utr_dist_days is not None and utr_dist_days <= 3)
-        hr_t4_volatility_contracting = bool(utr_pullback_contraction is not None and utr_pullback_contraction < 1.0)
-        hr_t5_testing_ma = bool(utr_test_ma is not None)
-        hr_t6_buying_l10d = bool(utr_candle_quality_10d is not None and utr_candle_quality_10d >= 0.5)
-        hr_tests = {
-            "t1_volume_contracting": hr_t1_vol_contracting,
-            "t2_updown_vol_ge105": hr_t2_updown_ge105,
-            "t3_few_distribution_days": hr_t3_few_dist_days,
-            "t4_volatility_contracting": hr_t4_volatility_contracting,
-            "t5_testing_meaningful_ma": hr_t5_testing_ma,
-            "t6_buying_through_l10d": hr_t6_buying_l10d,
+        # ---- Setup 3: Retest (MD-PB-RETEST-2026-11-12; Richard, 12-Nov-2026) ----
+        # Gate: Pulling Back in Uptrend = Probable. Per moving average (50, 100, 150, 200-day), only if today's close is
+        # within 6% of it, above or below (Richard, 12-Nov-2026 21:22/21:27): Plausible when the
+        # close was within 6% of that day's moving average on 3 or more of the last 10 trading days, Probable on 5 or
+        # more (not necessarily consecutive). The stock's rating is its best moving average's (ties go to the longer
+        # moving average). setups.healthy_retest and tests.healthy_retest carry this one definition; it replaced the
+        # 6-test healthy retest setup (D-MD-V2-51) and the 13-criterion healthy retest test (D-MD-V2-108).
+        rt_gate = bool(ind["pulling_back_uptrend"])
+        rt_by_ma = p.get("retest_by_ma") or {}
+        rt_labels = ["%dD" % _m for _m in RETEST_MAS]
+        rt_per_ma = {}
+        for _lab in rt_labels:
+            _rt_x = rt_by_ma.get(_lab) or {}
+            _n = _rt_x.get("days_within_l10d")
+            _t = bool(_rt_x.get("near_today"))
+            _r = "None"
+            if rt_gate and _n is not None and _t:
+                _r = ("Probable" if _n >= RETEST_PROBABLE_DAYS else
+                      "Plausible" if _n >= RETEST_PLAUSIBLE_DAYS else "None")
+            rt_per_ma[_lab] = {"rating": _r, "days_within_l10d": _n, "near_today": _t}
+        _rt_rank = {"Probable": 2, "Plausible": 1, "None": 0}
+        rt_best = None
+        for _lab in reversed(rt_labels):  # longest first, so a tie keeps the longer moving average
+            _x = rt_per_ma[_lab]
+            if not _rt_rank[_x["rating"]]:
+                continue
+            if rt_best is None or (_rt_rank[_x["rating"]], _x["days_within_l10d"] or 0) > \
+                    (_rt_rank[rt_per_ma[rt_best]["rating"]], rt_per_ma[rt_best]["days_within_l10d"] or 0):
+                rt_best = _lab
+        rt_rating = rt_per_ma[rt_best]["rating"] if rt_best else "None"
+        rt_tests = {"g1_pulling_back_probable": rt_gate}
+        for _lab in rt_labels:
+            rt_tests["r_%s_probable" % _lab] = bool(rt_per_ma[_lab]["rating"] == "Probable")
+        _rt_best_d = (rt_by_ma.get(rt_best) or {}) if rt_best else {}
+        retest = {
+            "tests": rt_tests,
+            "count": sum(1 for _lab in rt_labels if rt_per_ma[_lab]["rating"] == "Probable"),
+            "total": len(rt_labels),
+            "rating": rt_rating,
+            "qualifies": bool(rt_rating == "Probable"),
+            "per_ma": rt_per_ma,
+            "info_ma_retested": rt_best,
+            "info_ma_dist_pct": (round(_rt_best_d["dist_from_ma"] * 100, 2)
+                                 if _rt_best_d.get("dist_from_ma") is not None else None),
+            "info_retest_count": (rt_per_ma[rt_best]["days_within_l10d"] if rt_best else None),
+            "info_size_of_pullback": p.get("pullback_from_base_high"),
+            "test_values": dict([("g1_pulling_back_probable", ("Probable" if rt_gate else "not Probable"))] +
+                                [("r_%s_probable" % _lab, rt_per_ma[_lab]["days_within_l10d"]) for _lab in rt_labels]),
         }
-        hr_count = sum(1 for v in hr_tests.values() if v)
-        hr_retest_count = utr_retest_counts.get(utr_test_ma) if utr_test_ma else None
-        setups["healthy_retest"] = {
-            "tests": hr_tests, "count": hr_count, "total": 6,
-            "rating": _pre_rating(hr_count, 6),
-            "qualifies": bool(hr_count == 6),
-            "info_ma_retested": utr_test_ma,
-            "info_ma_dist_pct": utr_test_ma_dist,
-            "info_retest_count": hr_retest_count,
-            "test_values": {
-                "t1_volume_contracting": _md_v2_round(utr_vol_trend, 3),
-                "t2_updown_vol_ge105": _md_v2_round(utr_updown_ratio, 3),
-                "t3_few_distribution_days": utr_dist_days,
-                "t4_volatility_contracting": _md_v2_round(utr_pullback_contraction, 3),
-                "t5_testing_meaningful_ma": (utr_test_ma if utr_test_ma else "none"),
-                "t6_buying_through_l10d": _md_v2_round(utr_candle_quality_10d, 3),
-            },
-        }
+        setups["healthy_retest"] = retest
         # Back-compat alias - downstream may still reference utr_after_s2_pullback
-        setups["utr_after_s2_pullback"] = setups["healthy_retest"]["qualifies"]
+        setups["utr_after_s2_pullback"] = retest["qualifies"]
 
         # ---- Setup 4: VCP after S2 base (4 VCP tests + stage gate) ----
         # D-MD-V2-62: uses the new 4-test VCP contraction structure.
@@ -4151,107 +4244,37 @@ def compute_master_dashboard_screens(prices, filter_results):
             mr_setup_t5_testing_ma and mr_trig_reclaim and mr_trig_confirmation and
             (mr_setup_t1_vol_contracting or mr_setup_t6_buying_l10d)
         )
+        # MD-PB-RETEST-2026-11-12 (Richard, 12-Nov-2026, Q7 = A): this capital deployment test keeps its trigger (a
+        # close back above the moving average; a close at least 2% above yesterday's) and is rebuilt on the new Retest:
+        # its gate is Retest = Probable, on the Retest's best moving average. Possible = gate only; Plausible = gate +
+        # close above that moving average; Probable (qualifies) = + the 2% confirmation. mr_qualifies above is kept
+        # only for the legacy Uptrend Retest filter (tests["uptrend_retest"]).
+        _rt_ma = retest["info_ma_retested"] if retest["rating"] == "Probable" else None
+        _rt_ma_val = mas.get(_rt_ma) if _rt_ma else None
+        mrn_g1 = bool(_rt_ma)
+        mrn_x1 = bool(mrn_g1 and price is not None and _rt_ma_val is not None and price > _rt_ma_val)
+        mrn_x2 = bool(close_pct_change_today is not None and close_pct_change_today >= 0.02)
+        mrn_rating = ("None" if not mrn_g1 else "Probable" if (mrn_x1 and mrn_x2) else
+                      "Plausible" if mrn_x1 else "Possible")
         tests["ma_retest_upwards"] = {
-            "tests": mr_tests, "count": mr_count, "total": 8,
-            "rating": _pre_rating(mr_count, 8),
-            "qualifies": mr_qualifies,
-            "info_ma_retested": utr_test_ma,
-            "info_retest_count": (utr_retest_counts.get(utr_test_ma) if utr_test_ma else None),
+            "tests": {"g1_retest_probable": mrn_g1, "x1_reclaim_close_above_ma": mrn_x1,
+                      "x2_confirmation_close_ge2pct": mrn_x2},
+            "count": sum([mrn_g1, mrn_x1, mrn_x2]), "total": 3,
+            "rating": mrn_rating,
+            "qualifies": bool(mrn_rating == "Probable"),
+            "info_ma_retested": _rt_ma,
+            "info_retest_count": (retest["info_retest_count"] if _rt_ma else None),
             "test_values": {
-                "s1_volume_contracting": _md_v2_round(utr_vol_trend, 3),
-                "s2_updown_vol_ge105": _md_v2_round(utr_updown_ratio, 3),
-                "s3_few_distribution_days": utr_dist_days,
-                "s4_volatility_contracting": _md_v2_round(utr_pullback_contraction, 3),
-                "s5_testing_meaningful_ma": (utr_test_ma if utr_test_ma else "none"),
-                "s6_buying_through_l10d": _md_v2_round(utr_candle_quality_10d, 3),
-                "x1_reclaim_close_above_ma": _md_v2_pct_gap(price, _test_ma_val),
+                "g1_retest_probable": (_rt_ma if _rt_ma else "none"),
+                "x1_reclaim_close_above_ma": _md_v2_pct_gap(price, _rt_ma_val),
                 "x2_confirmation_close_ge2pct": _md_v2_round(close_pct_change_today),
             },
         }
 
-        # ---- Test: Healthy retest of upwards MA (healthy_retest) ----
-        # MD-V2-S46-HEALTHY-RETEST-MARKER (18-May-26, D-MD-V2-108)
-        # New "Core MM trade" test per Richard's S46 brief §8.2. Coexists
-        # with ma_retest_upwards above during transition; dashboard render
-        # is a follow-up patcher. Architecture per D-MD-V2-108:
-        #   Group A: Stage 2 hard precondition (D-MD-V2-109)
-        #   Group B: pulling-back-uptrend inlined (4 tests, all required)
-        #   Group C: 6 healthy-retest setup tests (reuse mr_setup_t1-t6)
-        #   Group D: reclaim + confirmation (reuse mr_trig_* above)
-        # 13 criteria total. Today's-close confirmation per D-MD-V2-111.
-        # v1: criterion 12 (reclaim) uses mr_trig_reclaim ("price > MA now");
-        # the 10-day window enhancement is a follow-up patcher (needs new
-        # upstream field in uptrend_retest filter).
-        # D-MD-V2-HR-S2GATE-16Aug26: Richard's ruling — the Stage 2 precondition
-        # (rendered as "Gate #1" + "Gate #2" on the page) now accepts Possible as
-        # well as Plausible/Probable. Was ("Probable","Plausible") only.
-        hr_stage_qualifies = bool(s2.get("rating") in ("Probable", "Plausible", "Possible"))
-        hr_b1_50d_rising = bool(pb_t1_50d_rising)
-        hr_b2_150d_rising = bool(pb_t2_150d_rising)
-        hr_b3_5d_declining = bool(pb_t3_5d_rolling)
-        hr_b4_10d_declining = bool(pb_t4_10d_rolling)
-        hr_tests = {
-            "g1_stage_2_qualifies": hr_stage_qualifies,
-            "g2_b1_50d_rising": hr_b1_50d_rising,
-            "g2_b2_150d_rising": hr_b2_150d_rising,
-            "g2_b3_5d_declining": hr_b3_5d_declining,
-            "g2_b4_10d_declining": hr_b4_10d_declining,
-            "g3_c1_volume_contracting": mr_setup_t1_vol_contracting,
-            "g3_c2_up_vol_gt_down_vol": mr_setup_t2_updown_ge105,
-            "g3_c3_few_distribution_days": mr_setup_t3_few_dist_days,
-            "g3_c4_volatility_reducing": mr_setup_t4_volatility_contracting,
-            "g3_c5_testing_meaningful_ma": mr_setup_t5_testing_ma,
-            "g3_c6_buying_through_l10d": mr_setup_t6_buying_l10d,
-            "g4_d1_reclaimed_ma": mr_trig_reclaim_10d,
-            "g4_d2_confirmation_close_ge2pct": mr_trig_confirmation,
-        }
-        hr_count = sum(1 for v in hr_tests.values() if v)
-        _hr_group_b_all = bool(hr_b1_50d_rising and hr_b2_150d_rising and
-                               hr_b3_5d_declining and hr_b4_10d_declining)
-        _hr_group_c_count = sum([
-            1 if mr_setup_t1_vol_contracting else 0,
-            1 if mr_setup_t2_updown_ge105 else 0,
-            1 if mr_setup_t3_few_dist_days else 0,
-            1 if mr_setup_t4_volatility_contracting else 0,
-            1 if mr_setup_t5_testing_ma else 0,
-            1 if mr_setup_t6_buying_l10d else 0,
-        ])
-        if not hr_stage_qualifies:
-            hr_rating = "None"
-        elif not _hr_group_b_all:
-            hr_rating = "None"
-        elif _hr_group_c_count < 3:
-            hr_rating = "Possible"
-        elif not mr_trig_reclaim_10d:
-            hr_rating = "Plausible"
-        elif not mr_trig_confirmation:
-            hr_rating = "Probable"
-        else:
-            hr_rating = "Qualified"
-        hr_qualifies = bool(hr_rating == "Qualified")
-        tests["healthy_retest"] = {
-            "tests": hr_tests, "count": hr_count, "total": 13,
-            "rating": hr_rating,
-            "qualifies": hr_qualifies,
-            "info_ma_retested": utr_test_ma,
-            "info_retest_count": (utr_retest_counts.get(utr_test_ma) if utr_test_ma else None),
-            "info_window_note": "v2: criterion 12 uses 10-day crossover lookback (price crossed above test MA in last 10 trading days)",
-            "test_values": {
-                "g1_stage_2_qualifies": (s2.get("rating") if hr_stage_qualifies else "not S2 Possible+"),
-                "g2_b1_50d_rising": ("rising" if hr_b1_50d_rising else "not rising"),
-                "g2_b2_150d_rising": ("rising" if hr_b2_150d_rising else "not rising"),
-                "g2_b3_5d_declining": ("declining" if hr_b3_5d_declining else "not declining"),
-                "g2_b4_10d_declining": ("declining" if hr_b4_10d_declining else "not declining"),
-                "g3_c1_volume_contracting": _md_v2_round(utr_vol_trend, 3),
-                "g3_c2_up_vol_gt_down_vol": _md_v2_round(utr_updown_ratio, 3),
-                "g3_c3_few_distribution_days": utr_dist_days,
-                "g3_c4_volatility_reducing": _md_v2_round(utr_pullback_contraction, 3),
-                "g3_c5_testing_meaningful_ma": (utr_test_ma if utr_test_ma else "none"),
-                "g3_c6_buying_through_l10d": _md_v2_round(utr_candle_quality_10d, 3),
-                "g4_d1_reclaimed_ma": _md_v2_pct_gap(price, _test_ma_val),
-                "g4_d2_confirmation_close_ge2pct": _md_v2_round(close_pct_change_today),
-            },
-        }
+        # ---- Test: Retest (healthy_retest) ----  MD-PB-RETEST-2026-11-12
+        # The same Retest as setups["healthy_retest"] (one definition; see Setup 3). The 13-criterion version
+        # (D-MD-V2-108, S56) was retired on Richard's brief of 12-Nov-2026.
+        tests["healthy_retest"] = retest
 
         # ---- Test: VCP after Stage 1->2 (vcp_deploy_s1) ----  D-MD-V2-64/65
         # Gate column: Stage 1 rating is Probable Early OR Probable Late.

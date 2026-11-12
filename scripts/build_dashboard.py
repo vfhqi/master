@@ -514,7 +514,7 @@ TABS = [
     {"id": "stage_4",   "label": "Stage 4",           "accent": "#991b1b"},
     # MD-V2-PRE-INDICATORS-MARKER - Split into positive and negative indicator pages
     {"id": "pos_pre_indicators", "label": "Basing in uptrend", "accent": "#0F6E56"},
-    {"id": "pulling_back", "label": "Pulling back", "accent": "#2E7D32"},  # MD-V2-PULLING-BACK-BASING-SPLIT-V1
+    {"id": "pulling_back", "label": "Pulling Back in Uptrend", "accent": "#2E7D32"},  # MD-V2-PULLING-BACK-BASING-SPLIT-V1
     {"id": "neg_pre_indicators", "label": "Negative pre-setup/test indicators", "accent": "#A32D2D"},
     # MD-V2-POST-INDICATORS-MARKER - Post-indicators (5 trailing binary patterns)
     {"id": "post_indicators", "label": "Post-Indicators", "accent": "#A32D2D"},
@@ -526,7 +526,7 @@ TABS = [
     # MD-V2-TESTS-MARKER - Capital qualification tests (3 tests)
     {"id": "tests", "label": "Capital Tests", "accent": "#0F6E56"},
     # MD-V2-S47-TAB-HEALTHY-RETEST-MARKER - Healthy Retest of MA (13-criterion standalone)
-    {"id": "setups_healthy_retest", "label": "Healthy Retest", "accent": "#2E7D32"},
+    {"id": "setups_healthy_retest", "label": "Retest", "accent": "#2E7D32"},
     # MD-V2-S59-TAB-PB-SPLIT-MARKER - S1 + S2 Probing Bet (separate pages)
     {"id": "tests_probing_bet_s1", "label": "S1 Speculative Bet", "accent": "#1b5e20"},  # S81 rename (id kept)
     {"id": "tests_probing_bet_s2", "label": "S2 Probing Bet", "accent": "#2e7d32"},
@@ -2780,6 +2780,101 @@ body[data-active-tab="master_overview"],body[data-active-tab="combos"] { --heade
 }
 #tab-pulling_back .s1-controls .toggle-btn,
 #tab-pos_pre_indicators .s1-controls .toggle-btn {
+  padding: 2px 5px !important;
+  font-size: 10px !important;
+}
+/* ===== end compact control bar ===== */
+/* MD-PB-RETEST-2026-11-12: the Retest page uses the Pulling Back in Uptrend styles (copied, ids changed) */
+/* ===== MD-V2-PB-CSS-FIX-V1: Faithful Twins — #rt-main-table + #rt-main-table ===== */
+#tab-setups_healthy_retest .group-captions { display:grid;gap:10px;margin:16px 0 14px; }
+#tab-setups_healthy_retest .group-captions .gcap { background:#fbfaf5;border:1px solid #e0dcc8;border-left:3px solid #aaa;border-radius:4px;padding:10px 12px;font-size:11px;line-height:1.45;color:#555; }
+#tab-setups_healthy_retest .group-captions .gcap b { display:block;margin-bottom:4px;font-weight:700;font-size:11px; }
+#tab-setups_healthy_retest .gcap-g1 { border-left-color:#b08a4e; } #tab-setups_healthy_retest .gcap-g1 b { color:#b08a4e; }
+#tab-setups_healthy_retest .gcap-g2 { border-left-color:#4a6a8a; } #tab-setups_healthy_retest .gcap-g2 b { color:#4a6a8a; }
+#tab-setups_healthy_retest .gcap-forref,#tab-setups_healthy_retest .gcap-forref { border-left-color:#999; }
+#tab-setups_healthy_retest .gcap-forref b,#tab-setups_healthy_retest .gcap-forref b { color:#777; }
+#tab-setups_healthy_retest .gcap-base { border-left-color:#1D7A4E; } #tab-setups_healthy_retest .gcap-base b { color:#1D7A4E; }
+#tab-setups_healthy_retest .s1-rating-tiles { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:13px; }
+#rt-main-table,#rt-main-table { width:100%;border-collapse:separate;border-spacing:0;font-size:11px;table-layout:fixed;background:#fbfaf5;border:1px solid #e0dcc8;border-radius:4px; }
+#rt-main-table thead,#rt-main-table thead { position:sticky;top:0;z-index:50;background:#fbfaf5;box-shadow:0 2px 4px rgba(0,0,0,0.06); }
+#rt-main-table thead th,#rt-main-table thead th { background:#fbfaf5!important;border-bottom:1px solid #e0dcc8;padding:7px 3px;text-align:center;font-weight:600;font-size:10px;color:#666;cursor:pointer;user-select:none;line-height:1.25;vertical-align:middle;overflow:hidden; }
+#rt-main-table thead th:hover,#rt-main-table thead th:hover { background:#f0ebd9!important; }
+#rt-main-table thead .group-header-row th,#rt-main-table thead .group-header-row th { background:#f3efe2!important;font-size:9.5px;font-weight:700;letter-spacing:0.2px;padding:5px 3px;cursor:default; }
+#rt-main-table thead .group-header-row th:hover,#rt-main-table thead .group-header-row th:hover { background:#f3efe2!important; }
+#rt-main-table thead .sub-group-row th,#rt-main-table thead .sub-group-row th { position:sticky;top:24px;font-size:9px;text-transform:uppercase;letter-spacing:0.3px;color:#888;padding:3px;font-weight:600;background:#f8f6ee!important;border-bottom:1px solid #e0dcc8; }
+#rt-main-table thead .col-header-row th,#rt-main-table thead .col-header-row th { position:sticky;top:44px;border-top:1px solid #e0dcc8; }
+#rt-main-table thead .gh-inputs,#rt-main-table thead .gh-inputs { color:#555; }
+#rt-main-table thead .gh-rating,#rt-main-table thead .gh-rating { color:#2E7D32; }
+#rt-main-table thead .gh-g1 { color:#b08a4e; } #rt-main-table thead .gh-g2 { color:#4a6a8a; }
+#rt-main-table thead .gh-base { color:#1D7A4E; }
+#rt-main-table thead .gh-forref,#rt-main-table thead .gh-forref { color:#777; }
+#rt-main-table td,#rt-main-table td { padding:5px 4px;border-bottom:1px solid #efece0;text-align:center;vertical-align:middle;height:38px;font-variant-numeric:tabular-nums;overflow:hidden; }
+#rt-main-table tr:hover,#rt-main-table tr:hover { background:rgba(46,125,50,0.05); }
+#rt-main-table td.gs-g1,#rt-main-table th.gs-g1 { border-left:2px solid rgba(176,138,78,0.50); }
+#rt-main-table td.gs-g2,#rt-main-table th.gs-g2 { border-left:2px solid rgba(74,106,138,0.50); }
+#rt-main-table td.gs-rating,#rt-main-table th.gs-rating,#rt-main-table td.gs-rating,#rt-main-table th.gs-rating { border-left:2px solid rgba(46,125,50,0.50); }
+#rt-main-table td.gs-base,#rt-main-table th.gs-base { border-left:2px solid rgba(29,122,78,0.50); }
+#rt-main-table td.gs-forref,#rt-main-table th.gs-forref,#rt-main-table td.gs-forref,#rt-main-table th.gs-forref { border-left:2px solid rgba(150,150,150,0.45); }
+#rt-main-table td.sg-edge,#rt-main-table th.sg-edge,#rt-main-table td.sg-edge,#rt-main-table th.sg-edge { border-left:1px solid rgba(120,120,120,0.25); }
+#rt-main-table td.pi-pass,#rt-main-table td.pi-pass { background:rgba(46,125,50,0.12);color:#2E7D32;font-weight:700; }
+#rt-main-table td.pi-fail,#rt-main-table td.pi-fail { color:#999; }
+#rt-main-table .pi-pill,#rt-main-table .pi-pill { display:inline-block;padding:2px 8px;border-radius:3px;font-size:9.5px;font-weight:800;line-height:1.3;white-space:nowrap; }
+#rt-main-table .pi-pill-prob,#rt-main-table .pi-pill-prob { background:#2E7D32;color:#fff; }
+#rt-main-table .pi-pill-pla,#rt-main-table .pi-pill-pla { background:rgba(46,125,50,0.30);color:#0a4a3a; }
+#rt-main-table .pi-pill-pos,#rt-main-table .pi-pill-pos { background:rgba(46,125,50,0.14);color:#3a6a5a; }
+#rt-main-table .pi-pill-none,#rt-main-table .pi-pill-none { background:#ece9dd;color:#999; }
+#rt-main-table td.pi-rating-cell,#rt-main-table td.pi-rating-cell { padding:3px 4px;background:rgba(46,125,50,0.04); }
+#rt-main-table td.pi-score-cell,#rt-main-table td.pi-score-cell { padding:4px 3px;background:rgba(46,125,50,0.04);border-right:1px solid rgba(46,125,50,0.18); }
+#rt-main-table .pi-pip-row,#rt-main-table .pi-pip-row { display:inline-flex;align-items:center;gap:2px;justify-content:center; }
+#rt-main-table .pi-pip-row .pip,#rt-main-table .pi-pip-row .pip { width:7px;height:7px;border-radius:50%;background:#ddd;display:inline-block; }
+#rt-main-table .pi-pip-row .pip.on,#rt-main-table .pi-pip-row .pip.on { background:#1b5e20; }
+#rt-main-table .pi-pip-row .pi-score-num,#rt-main-table .pi-pip-row .pi-score-num { font-size:9.5px;color:#444;margin-left:4px;font-weight:700; }
+#rt-main-table .s2-pill,#rt-main-table .s2-pill { display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;white-space:nowrap; }
+#rt-main-table .s2-pill-prob,#rt-main-table .s2-pill-prob { background:#b08a4e;color:#fff; }
+#rt-main-table .s2-pill-pla,#rt-main-table .s2-pill-pla { background:rgba(176,138,78,0.35);color:#6a4a10; }
+#rt-main-table .s2-pill-pos,#rt-main-table .s2-pill-pos { background:rgba(176,138,78,0.15);color:#8a6a2a; }
+#rt-main-table .s2-pill-none,#rt-main-table .s2-pill-none { background:#ece9dd;color:#aaa; }
+#rt-main-table td.s2-gate-pass,#rt-main-table td.s2-gate-pass { background:rgba(176,138,78,0.18);color:#7a5a1a;font-weight:700; }
+#rt-main-table td.s2-gate-fail,#rt-main-table td.s2-gate-fail { color:#bbb; }
+#rt-main-table td.s2-test-pass,#rt-main-table td.s2-test-pass { background:rgba(176,138,78,0.12);color:#7a5a1a;font-weight:700; }
+#rt-main-table td.s2-test-fail,#rt-main-table td.s2-test-fail { color:#ccc; }
+#rt-main-table .s2col.hide,#rt-main-table .s2col.hide,#rt-main-table th.s2col.hide,#rt-main-table th.s2col.hide { display:none!important; }
+#rt-main-table td.name-cell,#rt-main-table td.name-cell { text-align:left;padding:4px 4px 4px 8px;cursor:pointer; }
+#rt-main-table td.name-cell .co,#rt-main-table td.name-cell .co { font-weight:700;font-size:11px;color:#2a2a2a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block; }
+#rt-main-table td.name-cell .tk,#rt-main-table td.name-cell .tk { font-size:9px;color:#999; }
+#rt-main-table td.name-cell .live-dot,#rt-main-table td.name-cell .live-dot { color:#2e7d32;font-weight:700;margin-right:4px; }
+#rt-main-table td.taxon,#rt-main-table td.taxon { text-align:left;font-size:9px;line-height:1.2;padding:4px; }
+#rt-main-table td.taxon .ind,#rt-main-table td.taxon .ind { color:#666;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+#rt-main-table td.taxon .sec,#rt-main-table td.taxon .sec { color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+#rt-main-table td.num,#rt-main-table td.num { color:#444; }
+#rt-main-table .sort-arrow,#rt-main-table .sort-arrow { font-size:8px;color:#2E7D32; }
+#rt-main-table .tval,#rt-main-table .tval { font-size:9px;color:#555; }
+#tab-setups_healthy_retest .s2grp .ctrl-label,#tab-setups_healthy_retest .ctrl-grp.s2grp .ctrl-label { color:#b08a4e!important;font-weight:700; }
+#tab-setups_healthy_retest .toggle-btn.s2on,#tab-setups_healthy_retest .toggle-btn.s2on { background:#b08a4e!important;border-color:#b08a4e!important;color:#fff!important;font-weight:600; }
+/* ===== end MD-V2-PB-CSS-FIX-V1 ===== */
+
+/* ===== Compact 1-row control bar for pb + basing tabs (override global .s1-controls wrap) ===== */
+#tab-setups_healthy_retest .s1-controls,
+#tab-setups_healthy_retest .s1-controls {
+  flex-wrap: nowrap !important;
+  gap: 7px !important;
+  padding: 7px 8px !important;
+  overflow: hidden;
+}
+#tab-setups_healthy_retest .s1-controls .ctrl-grp,
+#tab-setups_healthy_retest .s1-controls .ctrl-grp {
+  gap: 3px !important;
+  padding-right: 7px !important;
+  flex-shrink: 0;
+}
+#tab-setups_healthy_retest .s1-controls .ctrl-label,
+#tab-setups_healthy_retest .s1-controls .ctrl-label {
+  font-size: 8px !important;
+  letter-spacing: 0.01em !important;
+  margin-right: 1px !important;
+}
+#tab-setups_healthy_retest .s1-controls .toggle-btn,
+#tab-setups_healthy_retest .s1-controls .toggle-btn {
   padding: 2px 5px !important;
   font-size: 10px !important;
 }
@@ -7021,10 +7116,10 @@ function renderCombos(){
   // of the route that earned the grade (D.tm_rating, computed in Python by databases/scripts/technical_momentum_rating.py).
   // The row text describes the rule; the rule itself is written only in that file.
   var TL_ROWS = [
-    {id:"retest",      label:"Healthy Retest",                              stageNum:2, group:1, cells:{A:["Plausible, Probable or Qualified"]}},
+    {id:"retest",      label:"Retest",                                      stageNum:2, group:1, cells:{A:["Plausible or Probable on any moving average"]}},  /* MD-PB-RETEST-2026-11-12 */
     {id:"vcp_s2",      label:"VCP after a Stage 2 base",                    stageNum:2, group:1, cells:{A:["Plausible or better, with its Stage gate met"]}},
     {id:"vcp_s1",      label:"VCP after a Stage 1 to Stage 2 transition",   stageNum:2, group:1, cells:{A:["Plausible or better, with its Stage gate met"]}},
-    {id:"pull_back",   label:"Pulling Back within MT/LT Uptrend",           stageNum:2, group:1, cells:{A:["all four tests, Stage 2 Plausible or Probable"]}},
+    {id:"pull_back",   label:"Pulling Back in Uptrend",           stageNum:2, group:1, cells:{A:["all four tests, Stage 2 Plausible or Probable"]}},
     {id:"basing",      label:"Basing",                                      stageNum:2, group:1, cells:{A:["all four tests, Stage 2 Plausible or Probable"]}},
     {id:"s2_pp",       label:"Stage 2",                                     stageNum:2, group:2, cells:{B:["Probable or Plausible"]}},
     {id:"s2_possible", label:"Stage 2",                                     stageNum:2, group:2, cells:{C:["Possible"]}},
@@ -11991,7 +12086,7 @@ function SUM_renderQualifiedStocks() {
       +   '<div class="v2-nav-group-label">Early-stage pre-test indicators</div>'
       +   '<div class="v2-nav-group-btns">'
       +     '<button class="v2-nav-btn" data-v2-tab="pos_pre_indicators" onclick="switchTab(\'pos_pre_indicators\')">Basing in uptrend</button>'  /* MD-V2-PULLING-BACK-BASING-SPLIT-V1 */
-      +     '<button class="v2-nav-btn" data-v2-tab="pulling_back" onclick="switchTab(\'pulling_back\')">Pulling back</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="pulling_back" onclick="switchTab(\'pulling_back\')">Pulling Back in Uptrend</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="neg_pre_indicators" onclick="switchTab(\'neg_pre_indicators\')">Negative (&ldquo;Collapsing&rdquo; share price)</button>'
       +   '</div>'
       + '</div>'
@@ -12001,7 +12096,7 @@ function SUM_renderQualifiedStocks() {
       +   '<div class="v2-nav-group-btns">'
       +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">Stage 1 &mdash; Speculative bet</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">Stage 2 &mdash; Probing bet</button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">S2 &mdash; &ldquo;Retest&rdquo; and &ldquo;breakout&rdquo; of upwards MA</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
+      +     '<button class="v2-nav-btn" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">Retest</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
       +     '<button class="v2-nav-btn" data-v2-tab="tests_healthy_vcp" onclick="switchTab(\'tests_healthy_vcp\')">S2 &mdash; &ldquo;VCP&rdquo; and &ldquo;breakout&rdquo; of upwards MA</button>'  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
       +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s3" onclick="switchTab(\'tests_speculative_bet_s3\')">Stage 3 &mdash; Speculative bet</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s4" onclick="switchTab(\'tests_speculative_bet_s4\')">Stage 4 &mdash; Speculative bet</button>'
@@ -12151,26 +12246,23 @@ function SUM_renderQualifiedStocks() {
 
   // ---- PER-PAGE CONFIG ----
   var CFG = {
-    pulling_back: {
+    pulling_back: {  /* MD-PB-RETEST-2026-11-12: Pulling Back in Uptrend (Richard, 12-Nov-2026) */
       hostId:'tab-pulling_back', tableId:'pb-main-table', tbodyId:'pb-tbody',
-      patternKey:'pulling_back_uptrend',
-      intro:'<b>Pulling back within a Stage 2 uptrend</b> — the early read for a “buy the pullback” entry. The stock must already be in a confirmed Stage 2 uptrend (shown for reference on the right), with its long-term moving averages still rising (Group 1) while it pulls back over the short term (Group 2). Four scored tests, all equally weighted. Rating tiers: Possible (2 of 4), Plausible (3 of 4), Probable (all 4). Counts default to stocks whose Stage 2 rating is Plausible or Probable; widen with the Stage 2 gate toggles.',
-      numCaps:3,
+      patternKey:'pulling_back_uptrend', depthFilter:true,
+      intro:'<b>Pulling Back in Uptrend</b> — stocks in an intact long-term uptrend that have pulled back more than 10% from their six-month high, categorised by depth of pullback. Four tests, all needed for Probable: Possible (2 of 4), Plausible (3 of 4), Probable (all 4). The Probable list is the list of stocks in a pullback in an uptrend; use the Depth buttons to show one depth. Stage 2 status shown for reference on the right. Counts default to stocks whose Stage 2 rating is Plausible or Probable; widen with the Stage 2 gate toggles. (Changed 12-Nov-2026.)',
+      numCaps:2,
       caps:[
-        {cls:'gcap-g1',     title:'Group 1 — Upwards long-term trend?',         body:'Two trend tests: (1) Is the 50-day MA rising? (2) Is the 150-day MA rising?'},
-        {cls:'gcap-g2',     title:'Group 2 — Pulling back within the uptrend?', body:'Two pullback tests: (3) Is the 5-day MA declining? (4) Is the 10-day MA declining? Pullback depth shown alongside.'},
-        {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)',body:'The stock’s Stage 2 status: rating, four gates and five tests. Shown for context, not scored here.'}
+        {cls:'gcap-base',   title:'Pulling back within the uptrend?', body:'Four tests: (1) price above the 200-day MA; (2) 200-day MA higher than 21 trading days ago; (3) 150-day MA higher than 21 trading days ago; (4) depth of pullback more than 10%: the deepest fall from the highest high of the last 6 months (126 trading days) to the lowest price since, as Basing test 1. Depth: 10-15% Shallow Pullback, 15-20% Medium Pullback, over 20% Deep Pullback. Pullback (information) = today’s close against that high.'},
+        {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)', body:'The stock’s Stage 2 status: rating, four gates and five tests. Shown for context, not scored here.'}
       ],
-      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:72px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:52px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
+      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:76px"><col style="width:58px"><col style="width:64px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
       ghrHtml:'<th class="gh-inputs gs-inputs" colspan="3">Inputs</th>'
              +'<th class="gh-rating gs-rating" colspan="2">Rating</th>'
-             +'<th class="gh-g1 gs-g1" colspan="2">Group 1 — Upwards LT trend?</th>'
-             +'<th class="gh-g2 gs-g2" colspan="3">Group 2 — Pulling back?</th>'
+             +'<th class="gh-base gs-base" colspan="7">Pulling back within the uptrend?</th>'
              +'<th class="gh-forref gs-forref s2col" colspan="10">For reference — Stage 2 quality</th>',
       sgrHtml:'<th colspan="3"></th>'
              +'<th class="gs-rating" colspan="2">Rating</th>'
-             +'<th class="gs-g1" colspan="2">Rising MAs</th>'
-             +'<th class="gs-g2" colspan="2">Trend</th><th class="sg-edge" colspan="1">Info</th>'
+             +'<th class="gs-base" colspan="4">Tests</th><th class="sg-edge" colspan="3">Info</th>'
              +'<th class="gs-forref s2col" colspan="1">Rating</th><th class="sg-edge s2col" colspan="4">Gates</th><th class="sg-edge s2col" colspan="5">Tests</th>',
       chrDefs:[
         {sk:'company',  html:'Company · Ticker',     tip:'Company and ticker',           cls:''},
@@ -12178,11 +12270,13 @@ function SUM_renderQualifiedStocks() {
         {sk:'price',    html:'Price',                    tip:'Last price',                    cls:''},
         {sk:'rate',     html:'Rating',                   tip:'Pattern rating',                cls:'gs-rating'},
         {sk:'score',    html:'Score',                    tip:'Tests passed of 4',             cls:''},
-        {sk:'t1',       html:'1. 50D MA rising',         tip:'50-day MA rising day-over-day', cls:'gs-g1'},
-        {sk:'t2',       html:'2. 150D MA rising',        tip:'150-day MA rising day-over-day',cls:''},
-        {sk:'t3',       html:'3. 5D MA declining',       tip:'5-day MA declining',            cls:'gs-g2'},
-        {sk:'t4',       html:'4. 10D MA declining',      tip:'10-day MA declining',           cls:''},
-        {sk:'pbdepth',  html:'Pullback',                 tip:'Pullback depth from recent swing high', cls:'sg-edge'},
+        {sk:'t1',       html:'1. Above 200D',            tip:'Price above the 200-day MA', cls:'gs-base', wrap:true},
+        {sk:'t2',       html:'2. 200D rising',           tip:'200-day MA higher than 21 trading days ago', cls:'', wrap:true},
+        {sk:'t3',       html:'3. 150D rising',           tip:'150-day MA higher than 21 trading days ago', cls:'', wrap:true},
+        {sk:'t4',       html:'4. Depth >10%',            tip:'Depth of pullback more than 10%: the deepest fall from the 6-month high (highest high of the last 126 trading days) to the lowest price since', cls:'', wrap:true},
+        {sk:'pbband',   html:'Depth',                    tip:'Depth of pullback: Shallow Pullback 10-15%, Medium Pullback 15-20%, Deep Pullback over 20%', cls:'sg-edge'},
+        {sk:'pbdepth',  html:'Pullback',                 tip:'Today’s close against the 6-month high', cls:''},
+        {sk:'bhdate',   html:'6M high date',             tip:'Date of the 6-month high', cls:'', wrap:true},
         {sk:'s2r',      html:'S2 Rating',                tip:'Stage 2 rating (for reference)',cls:'gs-forref s2col'},
         {sk:null,       html:'200D flat/rising',         tip:'200-day MA flat or rising: no more than 5% a year below its level 21 trading days earlier (Stage 2 gate 1 from 11-Nov-2026)', cls:'sg-edge s2col'},  /* MD-S2-T1-200D-FLAT-2026-11-11 */
         {sk:null,       html:'150D &gt; 200D',           tip:'Gate 2: 150-day MA above 200-day MA',   cls:'s2col'},  /* MD-S2-T2-GATES-SWAP-2026-11-11 */
@@ -12194,7 +12288,7 @@ function SUM_renderQualifiedStocks() {
         {sk:null,       html:'Sector RS ≥50',       tip:'Sector RS (the Composite, ranked across all sectors) ≥50', cls:'s2col'},
         {sk:null,       html:'Stock RS ≥70',        tip:'Stock RS vs industry ≥70', cls:'s2col'}
       ],
-      tileThresh:{ Possible:'Stage 2 trend + 2 of 4 tests', Plausible:'+ 3 of 4', Probable:'+ all 4 of 4' }
+      tileThresh:{ Possible:'2 of 4 tests', Plausible:'3 of 4 tests', Probable:'all 4 tests' }
     },
 
     pos_pre_indicators: {
@@ -12240,6 +12334,64 @@ function SUM_renderQualifiedStocks() {
         {sk:null,       html:'Stock RS ≥70',        tip:'Stock RS vs industry ≥70',    cls:'s2col'}
       ],
       tileThresh:{ Possible:'1 or more basing tests', Plausible:'3 of 4 basing tests', Probable:'all 4 basing tests' }
+    },
+    setups_healthy_retest: {  /* MD-PB-RETEST-2026-11-12: Retest (Richard, 12-Nov-2026); replaced Healthy Retest */
+      hostId:'tab-setups_healthy_retest', tableId:'rt-main-table', tbodyId:'rt-tbody',
+      patternKey:'healthy_retest', isRetest:true, maFilter:true, depthFilter:true, s2HiddenDefault:true, tiers:['Plausible','Probable'],
+      intro:'<b>Retest</b> — stocks rated Probable on Pulling Back in Uptrend whose close today is within 6% of a moving average (50, 100, 150 or 200-day), above or below. One row per stock for each moving average it qualifies on. Only if today’s close is within 6% of the moving average; then Plausible: the close within 6% of that day’s moving average on 3 or more of the last 10 trading days (not necessarily consecutive); Probable: 5 or more. Use the MA buttons to show one moving average. Stage 2 columns hidden by default (S2 cols: Show). (Changed 12-Nov-2026; replaced Healthy Retest.)',
+      numCaps:3,
+      caps:[
+        {cls:'gcap-base',   title:'Pulling Back in Uptrend (the gate)', body:'Probable on all four tests: price above the 200-day MA; 200-day MA rising; 150-day MA rising; depth of pullback more than 10% from the 6-month high. Depth shown as Shallow, Medium or Deep Pullback.'},
+        {cls:'gcap-base',   title:'Retest of the moving average?', body:'Today’s close must be within 6% of the moving average, above or below. Days (L10D): days of the last 10 with the close within 6% of it; 3+ Plausible, 5+ Probable. Length of Retest: days within 6% since the price first came within 6% of it after the 6-month high (days outside do not break the count). Price vs MA: today.'},
+        {cls:'gcap-forref', title:'For information', body:'Size of Pullback: today’s close against the 6-month high. Volatility = the day’s high-to-low range as a % of the close. Near the MA = the days within 6% of it since the 6-month high. Ratios: green = the favourable direction.'}
+      ],
+      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:52px"><col style="width:44px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:76px"><col style="width:56px"><col style="width:56px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
+      ghrHtml:'<th class="gh-inputs gs-inputs" colspan="3">Inputs</th>'
+             +'<th class="gh-rating gs-rating" colspan="3">Rating</th>'
+             +'<th class="gh-base gs-base" colspan="5">Pulling Back in Uptrend</th>'
+             +'<th class="gh-base gs-base" colspan="2">Retest</th>'
+             +'<th class="gh-base gs-base" colspan="8">For information</th>'
+             +'<th class="gh-forref gs-forref s2col" colspan="10">For reference — Stage 2 quality</th>',
+      sgrHtml:'<th colspan="3"></th>'
+             +'<th class="gs-rating" colspan="3">Rating</th>'
+             +'<th class="gs-base" colspan="4">Tests</th><th class="sg-edge" colspan="1">Depth</th>'
+             +'<th class="sg-edge" colspan="2">Retest</th>'
+             +'<th class="sg-edge" colspan="8">Info</th>'
+             +'<th class="gs-forref s2col" colspan="1">Rating</th><th class="sg-edge s2col" colspan="4">Gates</th><th class="sg-edge s2col" colspan="5">Tests</th>',
+      chrDefs:[
+        {sk:'company',  html:'Company · Ticker',     tip:'Company and ticker',           cls:''},
+        {sk:null,       html:'Industry · Sector',    tip:'Industry and sector',           cls:''},
+        {sk:'price',    html:'Price',                    tip:'Last price',                    cls:''},
+        {sk:'rate',     html:'Rating',                   tip:'Retest rating on this moving average', cls:'gs-rating'},
+        {sk:'score',    html:'Days (L10D)',              tip:'Days of the last 10 with the close within 6% of this moving average', cls:'', wrap:true},
+        {sk:'ma',       html:'MA',                       tip:'The moving average being retested', cls:''},
+        {sk:'t1',       html:'1. Above 200D',            tip:'Price above the 200-day MA', cls:'gs-base', wrap:true},
+        {sk:'t2',       html:'2. 200D rising',           tip:'200-day MA higher than 21 trading days ago', cls:'', wrap:true},
+        {sk:'t3',       html:'3. 150D rising',           tip:'150-day MA higher than 21 trading days ago', cls:'', wrap:true},
+        {sk:'t4',       html:'4. Depth >10%',            tip:'Depth of pullback more than 10%: the deepest fall from the 6-month high (highest high of the last 126 trading days) to the lowest price since', cls:'', wrap:true},
+        {sk:'pbband',   html:'Depth',                    tip:'Depth of pullback: Shallow Pullback 10-15%, Medium Pullback 15-20%, Deep Pullback over 20%', cls:'sg-edge'},
+        {sk:'rtlen',    html:'Length of Retest',         tip:'Days with the close within 6% of this moving average since the price first came within 6% of it after the 6-month high', cls:'sg-edge', wrap:true},
+        {sk:'rtvsma',   html:'Price vs MA',              tip:'Today’s close against this moving average', cls:'', wrap:true},
+        {sk:'pbdepth', html:'Size of Pullback', tip:'Distance of price vs. the recent high: today\u2019s close against the 6-month high', cls:'sg-edge', wrap:true},
+        {sk:'i2', html:'Daily Volatility Reducing Near the MA? (Vs. L1M)', tip:'Average daily range (high to low, % of close) on the days within 6% of the MA since the 6-month high, divided by the last-20-day average. Below 1 = reducing', cls:'', wrap:true},
+        {sk:'i3', html:'Daily Volatility Reducing Sequentially? (L1W/L2W)', tip:'Average daily range of the last 5 days divided by the last 10 days. Below 1 = reducing', cls:'', wrap:true},
+        {sk:'i4', html:'Selling Pressure (Volume) Reducing Near the MA? (Vs. L1M)', tip:'Average volume on the days within 6% of the MA since the 6-month high, divided by the last-20-day average. Below 1 = reducing', cls:'', wrap:true},
+        {sk:'i5', html:'Recent Selling Pressure (Volume) Reducing Sequentially? (L1W/L2W)', tip:'Average volume of the last 5 days divided by the last 10 days. Below 1 = reducing', cls:'', wrap:true},
+        {sk:'i6', html:'Volume vs. Average (L1W/L3M)', tip:'Average volume of the last 5 days divided by the last 63 days (3 months)', cls:'', wrap:true},
+        {sk:'i7', html:'Closes in Top Half of Intra-day Range, Near MA', tip:'Share of the days within 6% of the MA (since the 6-month high) that closed in the top half of the day\u2019s range', cls:'', wrap:true},
+        {sk:'i8', html:'Recent Closes in Top Half of Intra-day Range (L1W/Near MA)', tip:'Share of the last 5 days closing in the top half of the day\u2019s range, divided by the same share for the days near the MA. Above 1 = improving', cls:'', wrap:true},
+        {sk:'s2r',      html:'S2 Rating',                tip:'Stage 2 rating (for reference)',cls:'gs-forref s2col'},
+        {sk:null,       html:'200D flat/rising',         tip:'200-day MA flat or rising: no more than 5% a year below its level 21 trading days earlier (Stage 2 gate 1 from 11-Nov-2026)', cls:'sg-edge s2col'},  /* MD-S2-T1-200D-FLAT-2026-11-11 */
+        {sk:null,       html:'150D &gt; 200D',           tip:'Gate 2: 150-day MA above 200-day MA',   cls:'s2col'},  /* MD-S2-T2-GATES-SWAP-2026-11-11 */
+        {sk:null,       html:'50D &gt; 150D',            tip:'Gate 3: 50-day MA above 150-day MA',    cls:'s2col'},
+        {sk:null,       html:'50D &gt; 200D',            tip:'Gate 4: 50-day MA above 200-day MA',    cls:'s2col'},
+        {sk:null,       html:'P &gt; 150D',              tip:'Test: price above 150-day MA',          cls:'sg-edge s2col'},
+        {sk:null,       html:'Within 25% 52WH',          tip:'Test: within 25% of 52-week high',      cls:'s2col'},
+        {sk:null,       html:'Industry RS ≥70',     tip:'Industry RS percentile ≥70',cls:'s2col'},
+        {sk:null,       html:'Sector RS ≥50',       tip:'Sector RS (the Composite, ranked across all sectors) ≥50', cls:'s2col'},
+        {sk:null,       html:'Stock RS ≥70',        tip:'Stock RS vs industry ≥70', cls:'s2col'}
+      ],
+      tileThresh:{ Plausible:'within 6% of the MA today, and 3+ of the last 10 days', Probable:'within 6% of the MA today, and 5+ of the last 10 days' }
     }
   };
 
@@ -12248,8 +12400,8 @@ function SUM_renderQualifiedStocks() {
   function initState(tabId) {
     if (!STATE[tabId]) STATE[tabId] = {
       s2gate:{None:false,Possible:false,Plausible:true,Probable:true},
-      s2shown:true, testsMode:'tick', scope:'all',
-      tierFilter:[], tint:'none', port:'off',
+      s2shown:!(CFG[tabId]&&CFG[tabId].s2HiddenDefault), testsMode:'tick', scope:'all',
+      tierFilter:[], tint:'none', port:'off', depth:'all', ma:'all',  /* MD-PB-RETEST-2026-11-12 */
       sort:{col:'rate',dir:'desc'}
     };
   }
@@ -12267,8 +12419,31 @@ function SUM_renderQualifiedStocks() {
   function liveInds(){var o={},pr=pricesLookup(),lv=liveTickers();for(var t in lv){var p=pr[t];if(p&&p.industry)o[p.industry]=true;} return o;}
 
   // ---- ROWS ----
+  /* MD-PB-RETEST-2026-11-12: Retest rows, one per stock per moving average it qualifies on (Plausible or Probable) */
+  function getRetestRows(){
+    var raw=(window.MASTER_DATA&&MASTER_DATA.filters)||[];
+    var pr=pricesLookup(),lv=liveTickers(),lS=liveSectors(),lI=liveInds(),rows=[],MAS=['50D','100D','150D','200D'];
+    for(var i=0;i<raw.length;i++){
+      var s=raw[i]; if(!s||!s.md_v2||!s.md_v2.tests) continue;
+      var rt=s.md_v2.tests.healthy_retest; if(!rt||!rt.per_ma) continue;
+      var pb=(s.md_v2.pre_indicators||{}).pulling_back_uptrend||{};
+      var p=pr[s.ticker]||{},s2=s.md_v2.stage_2||{},rbm=p.retest_by_ma||{};
+      for(var j=0;j<MAS.length;j++){
+        var x=rt.per_ma[MAS[j]]; if(!x||(x.rating!=='Plausible'&&x.rating!=='Probable')) continue;
+        rows.push({ticker:s.ticker, company:p.company_name||s.ticker, industry:p.industry||'', sector:p.sector||'',
+          price:p.price, recent_pullback:p.pullback_from_base_high, base_high_date:p.base_high_date, days_since_bh:p.days_since_base_high,
+          md_v2:s.md_v2, ma:MAS[j], rt:rbm[MAS[j]]||{},
+          pat_rating:x.rating, pat_count:x.days_within_l10d,
+          pat_tests:pb.tests||{}, pat_tv:pb.test_values||{}, depth_band:pb.info_depth_band||null, depth:(pb.test_values||{}).t4_pullback_gt10,
+          s2r:s2.rating||'None', s2gates:s2.gates||{}, s2tests:s2.tests||{},
+          is_live:!!lv[s.ticker], sect_port:!!lS[p.sector], ind_port:!!lI[p.industry]});
+      }
+    }
+    return rows;
+  }
   function getRows(tabId){
     var cfg=CFG[tabId],raw=(window.MASTER_DATA&&MASTER_DATA.filters)||[];
+    if(cfg&&cfg.isRetest) return RDF_apply(getRetestRows());  /* MD-PB-RETEST-2026-11-12 */
     var pr=pricesLookup(),lv=liveTickers(),lS=liveSectors(),lI=liveInds(),rows=[];
     for(var i=0;i<raw.length;i++){
       var s=raw[i];
@@ -12278,7 +12453,7 @@ function SUM_renderQualifiedStocks() {
       rows.push({
         ticker:s.ticker, company:p.company_name||s.ticker,
         industry:p.industry||'', sector:p.sector||'',
-        price:p.price, recent_pullback:(cfg.patternKey==='basing'?p.pullback_from_base_high:p.recent_pullback_pct), base_high_date:p.base_high_date, days_since_bh:p.days_since_base_high,  /* MD-BASING-6M-HIGH-2026-11-12 */
+        price:p.price, recent_pullback:((cfg.patternKey==='basing'||cfg.patternKey==='pulling_back_uptrend')?p.pullback_from_base_high:p.recent_pullback_pct), base_high_date:p.base_high_date, days_since_bh:p.days_since_base_high, depth_band:pat.info_depth_band||null, depth:(pat.test_values||{}).t4_pullback_gt10,  /* MD-BASING-6M-HIGH-2026-11-12; MD-PB-RETEST-2026-11-12 */
         md_v2:s.md_v2,
         pat_rating:pat.rating||'None', pat_count:pat.count||0,
         pat_tests:pat.tests||{}, pat_tv:pat.test_values||{},
@@ -12294,6 +12469,8 @@ function SUM_renderQualifiedStocks() {
     return rows.filter(function(r){
       if(!st.s2gate[r.s2r]) return false;
       if(st.tierFilter.length>0&&st.tierFilter.indexOf(r.pat_rating)<0) return false;
+      if(st.depth&&st.depth!=='all'&&r.depth_band!==st.depth) return false;  /* MD-PB-RETEST-2026-11-12 */
+      if(st.ma&&st.ma!=='all'&&r.ma!==st.ma) return false;
       if(st.scope==='live'&&!r.is_live) return false;
       if(st.scope==='sector'&&!r.sect_port) return false;
       if(st.scope==='industry'&&!r.ind_port) return false;
@@ -12301,6 +12478,9 @@ function SUM_renderQualifiedStocks() {
     });
   }
 
+  /* MD-PB-RETEST-2026-11-12: test keys per page, and the Retest information columns */
+  var TESTKEYS={pulling_back:['t1_price_above_200d','t2_200d_rising','t3_150d_rising','t4_pullback_gt10'],setups_healthy_retest:['t1_price_above_200d','t2_200d_rising','t3_150d_rising','t4_pullback_gt10'],pos_pre_indicators:['t1_price_pullback_ge15','t2_time_below_high_ge20d','t3_price_above_200d','t4_200d_rising']};
+  var RTKEYS={rtlen:'length_of_retest',rtvsma:'dist_from_ma',i2:'vol_near_vs_l20d',i3:'vol_l5d_vs_l10d',i4:'volume_near_vs_l20d',i5:'volume_l5d_vs_l10d',i6:'volume_l5d_vs_l3m',i7:'closes_top_half_near',i8:'closes_top_half_l5d_vs_near'};
   function sortRows(rows,tabId){
     var st=STATE[tabId],sk=st.sort.col,dir=st.sort.dir;
     rows.sort(function(a,b){
@@ -12312,10 +12492,10 @@ function SUM_renderQualifiedStocks() {
       else if(sk==='pbdepth'){va=a.recent_pullback==null?-1e9:a.recent_pullback;vb=b.recent_pullback==null?-1e9:b.recent_pullback;}
       else if(sk==='bhdate'){va=a.base_high_date||'';vb=b.base_high_date||'';}  /* MD-BASING-6M-HIGH-2026-11-12 */
       else if(sk==='bhdays'){va=a.days_since_bh==null?-1e9:a.days_since_bh;vb=b.days_since_bh==null?-1e9:b.days_since_bh;}
-      else if(sk==='t1'){va=a.pat_tests.t1_50d_rising||a.pat_tests.t1_price_pullback_ge15?1:0;vb=b.pat_tests.t1_50d_rising||b.pat_tests.t1_price_pullback_ge15?1:0;}
-      else if(sk==='t2'){va=a.pat_tests.t2_150d_rising||a.pat_tests.t2_time_below_high_ge20d?1:0;vb=b.pat_tests.t2_150d_rising||b.pat_tests.t2_time_below_high_ge20d?1:0;}
-      else if(sk==='t3'){va=a.pat_tests.t3_5d_rolling_over||a.pat_tests.t3_price_above_200d?1:0;vb=b.pat_tests.t3_5d_rolling_over||b.pat_tests.t3_price_above_200d?1:0;}
-      else if(sk==='t4'){va=a.pat_tests.t4_10d_rolling_over||a.pat_tests.t4_200d_rising?1:0;vb=b.pat_tests.t4_10d_rolling_over||b.pat_tests.t4_200d_rising?1:0;}
+      else if(/^t[1-4]$/.test(sk)){var _tk=(TESTKEYS[tabId]||[])[+sk.charAt(1)-1];va=a.pat_tests[_tk]?1:0;vb=b.pat_tests[_tk]?1:0;}  /* MD-PB-RETEST-2026-11-12 */
+      else if(sk==='pbband'){va=a.depth==null?-1e9:a.depth;vb=b.depth==null?-1e9:b.depth;}
+      else if(sk==='ma'){va=parseInt(a.ma,10)||0;vb=parseInt(b.ma,10)||0;}
+      else if(RTKEYS[sk]){var _rk=RTKEYS[sk],_x=(a.rt||{})[_rk],_y=(b.rt||{})[_rk];va=_x==null?-1e9:_x;vb=_y==null?-1e9:_y;}
       else{va=0;vb=0;}
       var c=typeof va==='string'?va.localeCompare(vb):(va-vb);
       if(c===0) c=a.ticker.localeCompare(b.ticker);
@@ -12337,6 +12517,13 @@ function SUM_renderQualifiedStocks() {
     if(i<=-0.6) return '#A32D2D'; if(i<=-0.25) return '#E24B4A'; if(i<=-0.05) return '#F09595';
     return '#888';
   }
+  /* MD-PB-RETEST-2026-11-12: cells for Pulling Back in Uptrend and Retest */
+  function bandCell(row,cls){var b=row.depth_band;var c=b==='Deep Pullback'?'#A32D2D':b==='Medium Pullback'?'#b45309':b==='Shallow Pullback'?'#2E7D32':'#888';return '<td class="'+(cls||'')+'" style="color:'+c+';font-size:10px;white-space:normal;line-height:1.2">'+(b||'—')+'</td>';}
+  function dateCell(d,cls){var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return '<td class="num '+(cls||'')+'">'+(d?(+d.slice(8,10))+' '+m[+d.slice(5,7)-1]+' '+d.slice(2,4):'—')+'</td>';}
+  function intCell(v,cls){return '<td class="num '+(cls||'')+'">'+(v==null?'—':v)+'</td>';}
+  function signPctCell(v,cls){if(v==null||isNaN(v))return '<td class="num '+(cls||'')+'">—</td>';var p=Math.round(v*1000)/10;return '<td class="num '+(cls||'')+'">'+(p>0?'+':'')+p+'%</td>';}
+  function ratioCell(v,lowGood,cls){if(v==null||isNaN(v))return '<td class="num '+(cls||'')+'">—</td>';var good=lowGood?v<1:v>1;return '<td class="num '+(cls||'')+'" style="color:'+(v===1?'#888':good?'#2E7D32':'#A32D2D')+'">'+v.toFixed(2)+'×</td>';}
+  function shareCell(v,cls){if(v==null||isNaN(v))return '<td class="num '+(cls||'')+'">—</td>';return '<td class="num '+(cls||'')+'" style="color:'+(v>=0.5?'#2E7D32':'#A32D2D')+'">'+Math.round(v*100)+'%</td>';}
   function pullbackCell(row,cls){
     var v=row.recent_pullback;
     if(v==null||isNaN(v)) return '<td class="num '+(cls||'')+'">-</td>';
@@ -12402,13 +12589,28 @@ function SUM_renderQualifiedStocks() {
     h+='<td class="taxon"><div class="ind">'+row.industry+'</div><div class="sec">'+row.sector+'</div></td>';
     h+='<td class="num">'+fmtNum(row.price)+'</td>';
     h+='<td class="gs-rating pi-rating-cell">'+ratePill(row.pat_rating)+'</td>';
-    h+='<td class="pi-score-cell">'+pips4(row.pat_count)+'</td>';
-    if(tabId==='pulling_back'){
-      h+=testCell(t.t1_50d_rising,tv.t1_50d_rising,'gs-g1',mode);
-      h+=testCell(t.t2_150d_rising,tv.t2_150d_rising,'',mode);
-      h+=testCell(t.t3_5d_rolling_over,tv.t3_5d_rolling_over,'gs-g2',mode);
-      h+=testCell(t.t4_10d_rolling_over,tv.t4_10d_rolling_over,'',mode);
-      h+=pullbackCell(row,'sg-edge');
+    if(tabId==='setups_healthy_retest'){  /* MD-PB-RETEST-2026-11-12 */
+      h+='<td class="pi-score-cell"><span class="pi-score-num">'+(row.pat_count==null?'—':row.pat_count)+'/10</span></td>';
+      h+='<td class="num"><b>'+row.ma+'</b></td>';
+    } else {
+      h+='<td class="pi-score-cell">'+pips4(row.pat_count)+'</td>';
+    }
+    if(tabId==='pulling_back'||tabId==='setups_healthy_retest'){
+      h+=testCell(t.t1_price_above_200d,tv.t1_price_above_200d,'gs-base',mode);
+      h+=testCell(t.t2_200d_rising,tv.t2_200d_rising,'',mode);
+      h+=testCell(t.t3_150d_rising,tv.t3_150d_rising,'',mode);
+      h+=testCell(t.t4_pullback_gt10,tv.t4_pullback_gt10,'',mode);
+      h+=bandCell(row,'sg-edge');
+      if(tabId==='pulling_back'){
+        h+=pullbackCell(row,'');
+        h+=dateCell(row.base_high_date,'');
+      } else {
+        var m=row.rt||{};
+        h+=intCell(m.length_of_retest,'sg-edge')+signPctCell(m.dist_from_ma,'');
+        h+=pullbackCell(row,'sg-edge');
+        h+=ratioCell(m.vol_near_vs_l20d,true,'')+ratioCell(m.vol_l5d_vs_l10d,true,'')+ratioCell(m.volume_near_vs_l20d,true,'')+ratioCell(m.volume_l5d_vs_l10d,true,'')+ratioCell(m.volume_l5d_vs_l3m,true,'');
+        h+=shareCell(m.closes_top_half_near,'')+ratioCell(m.closes_top_half_l5d_vs_near,false,'');
+      }
     } else {
       h+=testCell(t.t1_price_pullback_ge15,tv.t1_price_pullback_ge15,'gs-base',mode);
       h+=testCell(t.t2_time_below_high_ge20d,tv.t2_time_below_high_ge20d,'',mode);
@@ -12429,7 +12631,7 @@ function SUM_renderQualifiedStocks() {
   function renderTiles(tabId,allRows,el){
     var cfg=CFG[tabId],st=STATE[tabId];
     var gated=allRows.filter(function(r){return st.s2gate[r.s2r];});
-    var tiers=['Possible','Plausible','Probable'],g={},u={};
+    var tiers=(cfg.tiers||['Possible','Plausible','Probable']),g={},u={};  /* MD-PB-RETEST-2026-11-12 */
     tiers.forEach(function(t){g[t]=0;u[t]=0;});
     gated.forEach(function(r){if(g[r.pat_rating]!=null)g[r.pat_rating]++;});
     allRows.forEach(function(r){if(u[r.pat_rating]!=null)u[r.pat_rating]++;});
@@ -12459,6 +12661,9 @@ function SUM_renderQualifiedStocks() {
       +'<button class="toggle-btn'+(st.s2shown?' active':'')+'" data-s2show="1">Show</button>'
       +'<button class="toggle-btn'+(!st.s2shown?' active':'')+'" data-s2show="0">Hide</button>'
       +'</div>';
+    var _cfgc=CFG[tabId];  /* MD-PB-RETEST-2026-11-12: Depth and MA filters */
+    if(_cfgc&&_cfgc.depthFilter) h+='<div class="ctrl-grp"><span class="ctrl-label">Depth</span>'+[['all','All'],['Shallow Pullback','Shallow'],['Medium Pullback','Medium'],['Deep Pullback','Deep']].map(function(d){return '<button class="toggle-btn'+(st.depth===d[0]?' active':'')+'" data-depth="'+d[0]+'">'+d[1]+'</button>';}).join('')+'</div>';
+    if(_cfgc&&_cfgc.maFilter) h+='<div class="ctrl-grp"><span class="ctrl-label">MA</span>'+['all','50D','100D','150D','200D'].map(function(m){return '<button class="toggle-btn'+(st.ma===m?' active':'')+'" data-ma="'+m+'">'+(m==='all'?'All':m)+'</button>';}).join('')+'</div>';
     h+='<div class="ctrl-grp"><span class="ctrl-label">Tests</span>'
       +'<button class="toggle-btn'+(st.testsMode==='tick'?' active':'')+'" data-tm="tick">Ticks</button>'
       +'<button class="toggle-btn'+(st.testsMode==='val'?' active':'')+'" data-tm="val">Values</button>'
@@ -12494,7 +12699,7 @@ function SUM_renderQualifiedStocks() {
       +cfg.chrDefs.map(function(d){
         var arrow=d.sk?arrowH(tabId,d.sk):'';
         var sk=d.sk?(' data-sk="'+d.sk+'"'):'';
-        return '<th class="'+(d.cls||'')+'"'+sk+' title="'+d.tip+'">'+d.html+arrow+'</th>';
+        return '<th class="'+(d.cls||'')+'"'+sk+(d.wrap?' style="white-space:normal;line-height:1.15;font-size:10px;vertical-align:bottom;overflow:visible;text-overflow:clip"':'')+' title="'+d.tip+'">'+d.html+arrow+'</th>';  /* MD-PB-RETEST-2026-11-12: wrap */
       }).join('')
       +'</tr>';
     return cg+'<thead>'+ghr+sgr+chr+'</thead>';
@@ -12533,12 +12738,15 @@ function SUM_renderQualifiedStocks() {
       var sc=btn.getAttribute('data-scope');
       var tn=btn.getAttribute('data-tint');
       var pt=btn.getAttribute('data-port');
+      var dp=btn.getAttribute('data-depth'),mf=btn.getAttribute('data-ma');  /* MD-PB-RETEST-2026-11-12 */
       if(s2k!==null){st.s2gate[s2k]=!st.s2gate[s2k];}
       else if(s2show!==null){st.s2shown=s2show==='1';}
       else if(tm!==null){st.testsMode=tm;}
       else if(sc!==null){st.scope=sc;}
       else if(tn!==null){st.tint=tn;}
       else if(pt!==null){st.port=pt;}
+      else if(dp!==null){st.depth=dp;}
+      else if(mf!==null){st.ma=mf;}
       reRender(tabId);
     });
 
@@ -12607,6 +12815,7 @@ function SUM_renderQualifiedStocks() {
   function renderPage(tabId){ initState(tabId); buildScaffold(tabId); reRender(tabId); }
   window.renderPullingBack      = function(){ renderPage('pulling_back'); };
   window.renderPosPreIndicators = function(){ renderPage('pos_pre_indicators'); };
+  window.renderHealthyRetest     = function(){ renderPage('setups_healthy_retest'); };  /* MD-PB-RETEST-2026-11-12: the Retest page */
 
 })();
 
@@ -14256,7 +14465,7 @@ function SUM_renderQualifiedStocks() {
     },
     {
       tabId: 'setups_s2vcp',
-      patternKeys: ['healthy_retest', 'vcp_after_s2_base'],
+      patternKeys: ['vcp_after_s2_base'],  /* MD-PB-RETEST-2026-11-12: the healthy retest moved to the Retest page */
       intro: 'Stage 2 VCP and retest setups - the healthy retest within a medium or long-term uptrend and the VCP after a Stage 2 base. Each setup is the AND of its named constituent tests, shown as individual tick columns alongside a per-pattern rating and score. Each tile has a rating-tier filter row: click a tier chip to show only stocks at that tier, or click the tile body to select all tiers. Tier selections within a setup combine as OR; selections across setups combine as AND.'
     }
   ];
@@ -14966,17 +15175,12 @@ function SUM_renderQualifiedStocks() {
       "shortLabel": "MA retest",
       "tone": "teal",
       "tierLadder": ["Possible", "Plausible", "Probable"],
-      "total": 8,
-      "tooltip": "Price reclaims a test moving average on a healthy retest, with a confirming up-day.",
-      "caption": "<span class='db'>The trigger that pairs with the Healthy retest setup</span> &mdash; price reclaiming the moving average it pulled back to.<span class='intro'>Six setup columns + two trigger columns. To qualify:</span><span class='tline'><span class='tnum'>(1)</span> Is price <u>testing a meaningful MA</u> and has it <u>closed back above it</u>?</span><span class='tline'><span class='tnum'>(2)</span> Is the reclaim <u>confirmed by a close at least 2% above yesterday</u>?</span><span class='tline'><span class='tnum'>(3)</span> Was the pullback itself <u>healthy</u> &mdash; orderly on volume, distribution, volatility and candles (the six setup columns)?</span>",
+      "total": 3,
+      "tooltip": "A Retest rated Probable, then the price closes back above that moving average with a confirming up-day (rebuilt 12-Nov-2026).",
+      "caption": "<span class='db'>The trigger that pairs with the Retest page</span> &mdash; the price closing back above the moving average it has been retesting (rebuilt on the new Retest, 12-Nov-2026).<span class='intro'>One gate + two trigger columns. Possible = gate; Plausible = + reclaim; Probable = + confirmation:</span><span class='tline'><span class='tnum'>(1)</span> Is the stock <u>Probable on Retest</u> (on its best moving average)?</span><span class='tline'><span class='tnum'>(2)</span> Has today&rsquo;s close <u>reclaimed that moving average</u>?</span><span class='tline'><span class='tnum'>(3)</span> Is it <u>confirmed by a close at least 2% above yesterday</u>?</span>",
       "tests": [
-        { "key": "s1_volume_contracting",      "label": "Volume contracting",        "group": "setup",   "tooltip": "10-day average volume below the 50-day - selling is drying up through the pullback" },
-        { "key": "s2_updown_vol_ge105",        "label": "Up-vol ≥ down-vol",     "group": "setup",   "tooltip": "Up-day volume at least 5% above down-day volume over the last month" },
-        { "key": "s3_few_distribution_days",   "label": "Few distribution days",      "group": "setup",   "tooltip": "Three or fewer distribution days over the last 25 sessions" },
-        { "key": "s4_volatility_contracting",  "label": "Volatility contracting",     "group": "setup",   "tooltip": "10-day ATR below the 20-day - the pullback is orderly, not violent" },
-        { "key": "s5_testing_meaningful_ma",   "label": "Testing a meaningful MA",    "group": "setup",   "tooltip": "Price has come down to within range of a 50/100/150/200-day moving average" },
-        { "key": "s6_buying_through_l10d",     "label": "Buying through 10 days",     "group": "setup",   "tooltip": "At least half of the last 10 days closed in the upper 40% of their daily range" },
-        { "key": "x1_reclaim_close_above_ma",  "label": "Reclaimed the MA",           "group": "trigger", "tooltip": "Current price is back above the moving average being tested" },
+        { "key": "g1_retest_probable",         "label": "Retest = Probable",         "group": "gate",    "tooltip": "Probable on the Retest page: the close within 6% of a moving average today and on 5+ of the last 10 days, inside a Pulling Back in Uptrend rated Probable" },
+        { "key": "x1_reclaim_close_above_ma",  "label": "Reclaimed the MA",           "group": "trigger", "tooltip": "Today's close is above the moving average being retested" },
         { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
       ]
     },
@@ -15803,28 +16007,28 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 <style>
 /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER-CSS-START */
 /* Healthy Retest of MA — 4-group redesign (S56) */
-#tab-setups_healthy_retest .group-captions { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin: 16px 0 14px 0; }
-#tab-setups_healthy_retest .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #aaa; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
-#tab-setups_healthy_retest .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; font-size: 11px; letter-spacing: 0.2px; }
-#tab-setups_healthy_retest .group-captions .gcap-g1 { border-left-color: #b08a4e; }
-#tab-setups_healthy_retest .group-captions .gcap-g1 b { color: #b08a4e; }
-#tab-setups_healthy_retest .group-captions .gcap-g2 { border-left-color: #4a6a8a; }
-#tab-setups_healthy_retest .group-captions .gcap-g2 b { color: #4a6a8a; }
-#tab-setups_healthy_retest .group-captions .gcap-g3 { border-left-color: #3a7a5a; }
-#tab-setups_healthy_retest .group-captions .gcap-g3 b { color: #3a7a5a; }
-#tab-setups_healthy_retest .group-captions .gcap-g4 { border-left-color: #8a4a3a; }
-#tab-setups_healthy_retest .group-captions .gcap-g4 b { color: #8a4a3a; }
-#tab-setups_healthy_retest .s1-rating-tiles { display: grid; grid-template-columns: 1fr; gap: 8px; }
-#tab-setups_healthy_retest .s1-rating-tiles .pi-tile-pullback { background: rgba(46,125,50,0.10); border: 1px solid rgba(46,125,50,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
-#tab-setups_healthy_retest .s1-rating-tiles .pi-tile-pullback.active { background: rgba(46,125,50,0.22); border: 1.5px solid #2E7D32; }
-#tab-setups_healthy_retest .s1-rating-tiles .pi-strip-pullback { background: #2E7D32; height: 4px; margin-top: 6px; border-radius: 2px; }
-#tab-setups_healthy_retest .s1-rating-tiles .rt-breakdown { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.35; }
-#tab-setups_healthy_retest .pi-tier-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
-#tab-setups_healthy_retest .pi-tier-chip { font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer; user-select: none; border: 0.5px solid; line-height: 1.4; white-space: nowrap; transition: background 0.12s, color 0.12s; }
-#tab-setups_healthy_retest .pi-chip-pullback { background: #E1F5EE; color: #2E7D32; border-color: #9FE1CB; }
-#tab-setups_healthy_retest .pi-chip-pullback.on { background: #2E7D32; color: #fff; border-color: #2E7D32; font-weight: 500; }
-#tab-setups_healthy_retest .pi-tier-chip:hover { filter: brightness(0.96); }
-#tab-setups_healthy_retest .s1-rating-tiles .rating-tile.active { box-shadow: inset 0 0 0 1.5px currentColor; }
+#tab-setups_healthy_retest-s56-retired .group-captions { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin: 16px 0 14px 0; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap { background: #fbfaf5; border: 1px solid #e0dcc8; border-left: 3px solid #aaa; border-radius: 4px; padding: 10px 12px; font-size: 11px; line-height: 1.45; color: #555; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap b { display: block; margin-bottom: 4px; font-weight: 700; font-size: 11px; letter-spacing: 0.2px; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap-g1 { border-left-color: #b08a4e; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap-g1 b { color: #b08a4e; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap-g2 { border-left-color: #4a6a8a; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap-g2 b { color: #4a6a8a; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap-g3 { border-left-color: #3a7a5a; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap-g3 b { color: #3a7a5a; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap-g4 { border-left-color: #8a4a3a; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap-g4 b { color: #8a4a3a; }
+#tab-setups_healthy_retest-s56-retired .s1-rating-tiles { display: grid; grid-template-columns: 1fr; gap: 8px; }
+#tab-setups_healthy_retest-s56-retired .s1-rating-tiles .pi-tile-pullback { background: rgba(46,125,50,0.10); border: 1px solid rgba(46,125,50,0.25); border-radius: 4px; padding: 8px 10px; cursor: pointer; }
+#tab-setups_healthy_retest-s56-retired .s1-rating-tiles .pi-tile-pullback.active { background: rgba(46,125,50,0.22); border: 1.5px solid #2E7D32; }
+#tab-setups_healthy_retest-s56-retired .s1-rating-tiles .pi-strip-pullback { background: #2E7D32; height: 4px; margin-top: 6px; border-radius: 2px; }
+#tab-setups_healthy_retest-s56-retired .s1-rating-tiles .rt-breakdown { font-size: 9px; color: #888; margin-top: 4px; line-height: 1.35; }
+#tab-setups_healthy_retest-s56-retired .pi-tier-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+#tab-setups_healthy_retest-s56-retired .pi-tier-chip { font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer; user-select: none; border: 0.5px solid; line-height: 1.4; white-space: nowrap; transition: background 0.12s, color 0.12s; }
+#tab-setups_healthy_retest-s56-retired .pi-chip-pullback { background: #E1F5EE; color: #2E7D32; border-color: #9FE1CB; }
+#tab-setups_healthy_retest-s56-retired .pi-chip-pullback.on { background: #2E7D32; color: #fff; border-color: #2E7D32; font-weight: 500; }
+#tab-setups_healthy_retest-s56-retired .pi-tier-chip:hover { filter: brightness(0.96); }
+#tab-setups_healthy_retest-s56-retired .s1-rating-tiles .rating-tile.active { box-shadow: inset 0 0 0 1.5px currentColor; }
 #hr-main-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; table-layout: fixed; background: #fbfaf5; border: 1px solid #e0dcc8; border-radius: 4px; }
 #hr-main-table thead { position: sticky; top: 0; z-index: 50; background: #fbfaf5; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
 #hr-main-table thead th { background: #fbfaf5 !important; border-bottom: 1px solid #e0dcc8; padding: 7px 3px; text-align: center; font-weight: 600; font-size: 10px; color: #666; cursor: pointer; user-select: none; line-height: 1.25; vertical-align: middle; }
@@ -15925,7 +16129,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 #hr-main-table td.grp-start-forref, #hr-main-table th.grp-start-forref { border-left: 2px solid rgba(150,150,150,0.45); }
 #hr-main-table td.grp-start-g1new, #hr-main-table th.grp-start-g1new { border-left: 2px solid rgba(176,138,78,0.50); }
 #hr-main-table td.sg-edge, #hr-main-table th.sg-edge { border-left: 1px solid rgba(120,120,120,0.40); }
-#tab-setups_healthy_retest .group-captions .gcap-forref { border-left-color: #999; }
+#tab-setups_healthy_retest-s56-retired .group-captions .gcap-forref { border-left-color: #999; }
 /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER-CSS-END */
 
 </style>
@@ -16590,7 +16794,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     hrRenderRows();
     if (window.measureV2Ribbon) measureV2Ribbon();
   }
-  window.renderHealthyRetest = renderHealthyRetest;
+  window.renderHealthyRetestS56Retired = renderHealthyRetest;  /* MD-PB-RETEST-2026-11-12: retired; the Retest page is drawn by the pre-indicator module */
 
 })();
 
@@ -19021,13 +19225,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     { section:'Stages', key:'stage_3', label:'Stage 3 — Topping', short:'S3 Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
     { section:'Stages', key:'stage_4', label:'Stage 4 — Decline', short:'S4 Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
     // -- Group 2: Early-stage pre-test indicators --
-    { section:'Early-stage pre-test indicators', key:'pulling_back_uptrend', label:'Pulling back within MT/LT uptrend', short:'Pulling back', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pulling_back', patternKey:'pulling_back_uptrend', s2gated:true },  /* MD-V2-PULLING-BACK-BASING-SPLIT-V1 */
+    { section:'Early-stage pre-test indicators', key:'pulling_back_uptrend', label:'Pulling Back in Uptrend', short:'Pulling Back in Uptrend', ratingPath:'group:pre_indicators:pulling_back_uptrend', tabId:'pulling_back', patternKey:'pulling_back_uptrend', s2gated:true },  /* MD-V2-PULLING-BACK-BASING-SPLIT-V1 */
     { section:'Early-stage pre-test indicators', key:'basing', label:'Basing in a MT/LT uptrend', short:'Basing', ratingPath:'group:pre_indicators:basing', tabId:'pos_pre_indicators', patternKey:'basing', s2gated:true },  /* MD-V2-PULLING-BACK-BASING-SPLIT-V1 */
     { section:'Early-stage pre-test indicators', key:'collapsing', label:'Collapsing', short:'Collapsing', ratingPath:'group:pre_indicators:collapsing', tabId:'neg_pre_indicators', patternKey:'collapsing' },
     // -- Group 3: Late-stage capital qualification setups and tests (one row per nav button) --
     { section:'Late-stage capital qualification setups and tests', key:'probing_bet_s1', label:'Stage 1 — Speculative bet', short:'S1 SB', ratingPath:'group:tests:probing_bet_s1', tabId:'tests_probing_bet_s1', patternKey:'probing_bet_s1' },
     { section:'Late-stage capital qualification setups and tests', key:'probing_bet_s2', label:'Stage 2 — Probing bet', short:'S2 PB', ratingPath:'group:tests:probing_bet_s2', tabId:'tests_probing_bet_s2', patternKey:'probing_bet_s2' },
-    { section:'Late-stage capital qualification setups and tests', key:'healthy_retest', label:'S2 — Retest setup', short:'S2 Retest', ratingPath:'group:tests:healthy_retest', tabId:'setups_healthy_retest', patternKey:'healthy_retest' },
+    { section:'Late-stage capital qualification setups and tests', key:'healthy_retest', label:'Retest', short:'Retest', ratingPath:'group:tests:healthy_retest', tabId:'setups_healthy_retest', patternKey:'healthy_retest' },
     { section:'Late-stage capital qualification setups and tests', key:'vcp_deploy_s2', label:'S2 — VCP deploy', short:'S2 VCP', ratingPath:'group:tests:vcp_deploy_s2', tabId:'tests_healthy_vcp', patternKey:'vcp_deploy_s2' },
     { section:'Late-stage capital qualification setups and tests', key:'speculative_bet_s3', label:'Stage 3 — Speculative bet', short:'S3 SB', ratingPath:'group:tests:speculative_bet_s3', tabId:'tests_speculative_bet_s3', patternKey:'speculative_bet_s3' },
     { section:'Late-stage capital qualification setups and tests', key:'speculative_bet_s4', label:'Stage 4 — Speculative bet', short:'S4 SB', ratingPath:'group:tests:speculative_bet_s4', tabId:'tests_speculative_bet_s4', patternKey:'speculative_bet_s4' },
@@ -21614,7 +21818,7 @@ function sspRenderTable(ticker, p, md2){
   ch += '<th class="ssp-ch ssp-pair-div" colspan="2">Stage 2 — Uptrend</th>';
   ch += '<th class="ssp-ch ssp-pair-div" colspan="2">Stage 3 — Topping</th>';
   ch += '<th class="ssp-ch ssp-pair-div" colspan="2">Stage 4 — Decline</th>';
-  ch += '<th class="ssp-ch ssp-gs-ppi" colspan="2">Pulling back within MT/LT uptrend</th>';
+  ch += '<th class="ssp-ch ssp-gs-ppi" colspan="2">Pulling Back in Uptrend</th>';
   ch += '<th class="ssp-ch ssp-pair-div" colspan="2">Basing in a MT/LT uptrend</th>';
   ch += '<th class="ssp-ch ssp-gs-npi" colspan="2">Collapsing patterns</th>';
   ch += '<th class="ssp-ch ssp-gs-setups" colspan="2">Healthy Retest of Moving Average</th>';

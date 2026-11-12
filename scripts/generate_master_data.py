@@ -253,6 +253,10 @@ S2_G1_MIN_CHANGE_21D = -S2_G1_FLAT_BAND_PA * S2_G1_LOOKBACK_DAYS / 252.0
 # "price above the 150D" is a scored test; "within 25% of the 52-week high" is a scored test.
 S2_W25_IS_GATE = False
 S2_RATING_AT = {"Probable": 4, "Plausible": 3, "Possible": 2}
+# MD-BASING-6M-HIGH-2026-11-12 (Richard, 12-Nov-2026: "It needs to be from a more recent high, e.g. L3-6M. Your prior
+# option B is most sensible"): the Basing in uptrend page measures from the highest intraday high of the last
+# BASE_HIGH_LOOKBACK_DAYS trading days. It replaced the most recent local peak, whose day count ran back past the peak.
+BASE_HIGH_LOOKBACK_DAYS = 126
 BENCHMARK_TICKER = "^STOXX"
 # Cached for scripts/pms_historical_performance.py only; NOT the relative-strength
 # benchmark, which stays BENCHMARK_TICKER.
@@ -1434,6 +1438,31 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
                 swing_high_global_idx = len(rows_with_sma) - len(lookback_for_swing) + si
                 break
 
+        # MD-BASING-6M-HIGH-2026-11-12: the six-month base high, taken from the same repaired rows as the 52-week
+        # range (_lb52: bad ticks repaired, off-scale excursions excluded, a rebased series cut at the break).
+        base_high = None
+        base_high_date = None
+        days_since_base_high = None
+        max_pullback_since_base_high = None
+        pullback_from_base_high = None
+        if high_52w is not None and _lb52:
+            _bh_rows = [r for r in _lb52[-BASE_HIGH_LOOKBACK_DAYS:]
+                        if isinstance(r.get("high"), (int, float)) and not math.isnan(r["high"])]
+            if _bh_rows:
+                _bh_i = max(range(len(_bh_rows)), key=lambda k: (_bh_rows[k]["high"], k))  # latest on a tie
+                _bh = _bh_rows[_bh_i]["high"]
+                if _bh > 0:
+                    base_high = _bh
+                    base_high_date = _bh_rows[_bh_i].get("date")
+                    _since = _bh_rows[_bh_i:]
+                    days_since_base_high = len(_since) - 1
+                    _lows = [r["low"] for r in _since
+                             if isinstance(r.get("low"), (int, float)) and not math.isnan(r["low"])]
+                    if _lows:
+                        max_pullback_since_base_high = round((_bh - min(_lows)) / _bh, 4)
+                    if isinstance(latest.get("close"), (int, float)):
+                        pullback_from_base_high = round((_bh - latest["close"]) / _bh, 4)
+
         # Volume averages
         recent_20 = rows_with_sma[-20:] if len(rows_with_sma) >= 20 else rows_with_sma
         recent_60 = rows_with_sma[-60:] if len(rows_with_sma) >= 60 else rows_with_sma
@@ -2327,6 +2356,12 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             # MD-V2-PIPELINE-FIELDS-S25-MARKER: Session 25 fields
             "max_pullback_since_swing_high": max_pullback_since_swing_high,
             "days_below_swing_high": days_below_swing_high,
+            # MD-BASING-6M-HIGH-2026-11-12: the Basing in uptrend page reads these
+            "base_high": (round(base_high, 4) if base_high is not None else None),
+            "base_high_date": base_high_date,
+            "days_since_base_high": days_since_base_high,
+            "max_pullback_since_base_high": max_pullback_since_base_high,
+            "pullback_from_base_high": pullback_from_base_high,
             "utr_candle_quality_10d": utr_candle_quality_10d,
             "utr_candle_quality_3d": utr_candle_quality_3d,
             "utr_updown_ratio_5d": utr_updown_ratio_5d,
@@ -3733,14 +3768,19 @@ def compute_master_dashboard_screens(prices, filter_results):
         pb_count = sum(1 for v in pb_tests.values() if v)
         ind["pulling_back_uptrend"] = bool(pb_count == 4)
 
-        # ---- Indicator 2: Basing (D-MD-V2-49) ----
-        # 4 tests: price pullback >=15% (max drawdown since swing high, even if
-        # partly reclawed) AND price below swing high >=20 trading days AND
-        # price > 200D MA AND 200D MA still rising MoM.
-        ba_t1_pullback = bool(max_pullback_ssh is not None and max_pullback_ssh >= 0.15)
-        ba_t2_time = bool(days_below_sh is not None and days_below_sh >= 20)
+        # ---- Indicator 2: Basing in uptrend (D-MD-V2-49; MD-BASING-6M-HIGH-2026-11-12) ----
+        # 4 tests, measured from the six-month base high (highest intraday high of the last
+        # BASE_HIGH_LOOKBACK_DAYS trading days): (1) deepest fall from it >=15%, even if partly recovered;
+        # (2) at least 20 trading days since it; (3) price > 200D MA; (4) 200D MA higher than 21 trading
+        # days ago. Until 12-Nov-2026 test 2 counted closes below the most recent local peak and ran back past
+        # the peak (Kainos read 840 days), and test 4 compared with yesterday only.
+        max_pullback_bh = p.get("max_pullback_since_base_high")
+        days_since_bh = p.get("days_since_base_high")
+        ma200_21d_basing = mas.get("200D_21d_ago")
+        ba_t1_pullback = bool(max_pullback_bh is not None and max_pullback_bh >= 0.15)
+        ba_t2_time = bool(days_since_bh is not None and days_since_bh >= 20)
         ba_t3_above_200d = bool(price is not None and ma200 is not None and price > ma200)
-        ba_t4_200d_rising = bool(ma200 is not None and ma200_prev is not None and ma200 > ma200_prev)
+        ba_t4_200d_rising = bool(ma200 is not None and ma200_21d_basing is not None and ma200 > ma200_21d_basing)
         ba_tests = {
             "t1_price_pullback_ge15": ba_t1_pullback,
             "t2_time_below_high_ge20d": ba_t2_time,
@@ -3797,10 +3837,10 @@ def compute_master_dashboard_screens(prices, filter_results):
                 "tests": ba_tests, "count": ba_count, "total": 4,
                 "rating": _pre_rating(ba_count, 4), "qualifies": ind["basing"],
                 "test_values": {
-                    "t1_price_pullback_ge15": _md_v2_round(max_pullback_ssh),
-                    "t2_time_below_high_ge20d": days_below_sh,
+                    "t1_price_pullback_ge15": _md_v2_round(max_pullback_bh),  # MD-BASING-6M-HIGH-2026-11-12
+                    "t2_time_below_high_ge20d": days_since_bh,
                     "t3_price_above_200d": _md_v2_pct_gap(price, ma200),
-                    "t4_200d_rising": _md_v2_pct_gap(ma200, ma200_prev),
+                    "t4_200d_rising": _md_v2_pct_gap(ma200, ma200_21d_basing),
                 },
             },
             "collapsing": {

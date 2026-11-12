@@ -10736,7 +10736,7 @@ function SUM_renderQualifiedStocks() {
     if (!host) return false;
     if (host.querySelector('#s2-main-table')) return true;
     var html = '' +
-      '<div class="s1-intro">Stage 2 looks for stocks already in a clear uptrend &mdash; long, mid, and short-term trends all pointing upwards, and price showing genuine relative strength against sector, industry, and the wider market. The aim is to identify quality holdings to initiate, add to, or hold as core positions. Nine tests across four groups: the more tests passing, the more confirmed the uptrend.</div>' +
+      '<div class="s1-intro">Stage 2 looks for stocks already in a clear uptrend &mdash; the long-term and short-term moving averages pointing upwards (four gates, all required), then price confirmation and genuine relative strength against sector, industry and the wider market (five scored tests). The aim is to identify quality holdings to initiate, add to, or hold as core positions. The more of the five tests passing, the more confirmed the uptrend; price within 25% of its 52-week high marks a proven rather than an early Stage 2. <!-- MD-S2-T2-GATES-SWAP-2026-11-11 intro, 12-Nov-2026 --></div>' +
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-s2-grp="inputs" data-s2-val="pct" onclick="s2SetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -12203,17 +12203,17 @@ function SUM_renderQualifiedStocks() {
       intro:'<b>Basing within a Stage 2 uptrend</b> — a genuine base forming inside an intact long-term uptrend (distinct from the Stage 1 “Basing Plateau” page, which is a base after a downtrend). Stage 2 status shown for reference on the right. Four scored tests on the current ladder (1 of 4 already counts as Possible). Counts default to stocks whose Stage 2 rating is Plausible or Probable; widen with the Stage 2 gate toggles.',
       numCaps:2,
       caps:[
-        {cls:'gcap-base',   title:'Basing within the uptrend?',             body:'Four tests: (1) price pulled back ≥15% off the recent high; (2) below that high ≥20 trading days; (3) price above the 200-day MA; (4) 200-day MA still rising.'},
+        {cls:'gcap-base',   title:'Basing within the uptrend?',             body:'Four tests, measured from the highest high of the last 6 months (126 trading days): (1) price pulled back ≥15% off that high; (2) at least 20 trading days since that high; (3) price above the 200-day MA; (4) 200-day MA higher than 21 trading days ago. (Changed 12-Nov-2026.)'},
         {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)', body:'The stock’s Stage 2 status: rating, four gates and five tests. Shown for context, not scored here.'}
       ],
-      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
+      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:64px"><col style="width:50px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
       ghrHtml:'<th class="gh-inputs gs-inputs" colspan="3">Inputs</th>'
              +'<th class="gh-rating gs-rating" colspan="2">Rating</th>'
-             +'<th class="gh-base gs-base" colspan="5">Basing within the uptrend?</th>'
+             +'<th class="gh-base gs-base" colspan="7">Basing within the uptrend?</th>'
              +'<th class="gh-forref gs-forref s2col" colspan="10">For reference — Stage 2 quality</th>',
       sgrHtml:'<th colspan="3"></th>'
              +'<th class="gs-rating" colspan="2">Rating</th>'
-             +'<th class="gs-base" colspan="4">Tests</th><th class="sg-edge" colspan="1">Info</th>'
+             +'<th class="gs-base" colspan="4">Tests</th><th class="sg-edge" colspan="3">Info</th>'
              +'<th class="gs-forref s2col" colspan="1">Rating</th><th class="sg-edge s2col" colspan="4">Gates</th><th class="sg-edge s2col" colspan="5">Tests</th>',
       chrDefs:[
         {sk:'company',  html:'Company · Ticker',     tip:'Company and ticker',             cls:''},
@@ -12221,11 +12221,13 @@ function SUM_renderQualifiedStocks() {
         {sk:'price',    html:'Price',                    tip:'Last price',                      cls:''},
         {sk:'rate',     html:'Rating',                   tip:'Pattern rating',                  cls:'gs-rating'},
         {sk:'score',    html:'Score',                    tip:'Tests passed of 4',               cls:''},
-        {sk:'t1',       html:'1. Pullback ≥15%',    tip:'Deepest drawdown from recent swing high ≥15%', cls:'gs-base'},
-        {sk:'t2',       html:'2. Below high ≥20d',  tip:'Below the swing high ≥20 trading days',        cls:''},
+        {sk:'t1',       html:'1. Pullback ≥15%',    tip:'Deepest fall from the 6-month high (highest high of the last 126 trading days) ≥15%, even if partly recovered', cls:'gs-base'},  /* MD-BASING-6M-HIGH-2026-11-12 */
+        {sk:'t2',       html:'2. Below high ≥20d',  tip:'At least 20 trading days since the 6-month high',        cls:''},
         {sk:'t3',       html:'3. Above 200D',            tip:'Price above the 200-day MA',      cls:''},
-        {sk:'t4',       html:'4. 200D rising',           tip:'200-day MA rising month-on-month', cls:''},
-        {sk:'pbdepth',  html:'Pullback',                 tip:'Recent pullback depth from swing high', cls:'sg-edge'},
+        {sk:'t4',       html:'4. 200D rising',           tip:'200-day MA higher than 21 trading days ago', cls:''},
+        {sk:'pbdepth',  html:'Pullback',                 tip:'Current % below the 6-month high', cls:'sg-edge'},
+        {sk:'bhdate',   html:'6M high date',             tip:'Date of the 6-month high the tests measure from', cls:''},
+        {sk:'bhdays',   html:'Days since',               tip:'Trading days since the 6-month high', cls:''},
         {sk:'s2r',      html:'S2 Rating',                tip:'Stage 2 rating (for reference)',  cls:'gs-forref s2col'},
         {sk:null,       html:'200D flat/rising',         tip:'200-day MA flat or rising: no more than 5% a year below its level 21 trading days earlier (Stage 2 gate 1 from 11-Nov-2026)', cls:'sg-edge s2col'},  /* MD-S2-T1-200D-FLAT-2026-11-11 */
         {sk:null,       html:'150D &gt; 200D',           tip:'Gate 2: 150-day MA above 200-day MA',   cls:'s2col'},  /* MD-S2-T2-GATES-SWAP-2026-11-11 */
@@ -12276,7 +12278,7 @@ function SUM_renderQualifiedStocks() {
       rows.push({
         ticker:s.ticker, company:p.company_name||s.ticker,
         industry:p.industry||'', sector:p.sector||'',
-        price:p.price, recent_pullback:p.recent_pullback_pct,
+        price:p.price, recent_pullback:(cfg.patternKey==='basing'?p.pullback_from_base_high:p.recent_pullback_pct), base_high_date:p.base_high_date, days_since_bh:p.days_since_base_high,  /* MD-BASING-6M-HIGH-2026-11-12 */
         md_v2:s.md_v2,
         pat_rating:pat.rating||'None', pat_count:pat.count||0,
         pat_tests:pat.tests||{}, pat_tv:pat.test_values||{},
@@ -12308,6 +12310,8 @@ function SUM_renderQualifiedStocks() {
       else if(sk==='score'){va=a.pat_count;vb=b.pat_count;}
       else if(sk==='s2r'){va=RANK[a.s2r]||0;vb=RANK[b.s2r]||0;}
       else if(sk==='pbdepth'){va=a.recent_pullback==null?-1e9:a.recent_pullback;vb=b.recent_pullback==null?-1e9:b.recent_pullback;}
+      else if(sk==='bhdate'){va=a.base_high_date||'';vb=b.base_high_date||'';}  /* MD-BASING-6M-HIGH-2026-11-12 */
+      else if(sk==='bhdays'){va=a.days_since_bh==null?-1e9:a.days_since_bh;vb=b.days_since_bh==null?-1e9:b.days_since_bh;}
       else if(sk==='t1'){va=a.pat_tests.t1_50d_rising||a.pat_tests.t1_price_pullback_ge15?1:0;vb=b.pat_tests.t1_50d_rising||b.pat_tests.t1_price_pullback_ge15?1:0;}
       else if(sk==='t2'){va=a.pat_tests.t2_150d_rising||a.pat_tests.t2_time_below_high_ge20d?1:0;vb=b.pat_tests.t2_150d_rising||b.pat_tests.t2_time_below_high_ge20d?1:0;}
       else if(sk==='t3'){va=a.pat_tests.t3_5d_rolling_over||a.pat_tests.t3_price_above_200d?1:0;vb=b.pat_tests.t3_5d_rolling_over||b.pat_tests.t3_price_above_200d?1:0;}
@@ -12411,6 +12415,10 @@ function SUM_renderQualifiedStocks() {
       h+=testCell(t.t3_price_above_200d,tv.t3_price_above_200d,'',mode);
       h+=testCell(t.t4_200d_rising,tv.t4_200d_rising,'',mode);
       h+=pullbackCell(row,'sg-edge');
+      /* MD-BASING-6M-HIGH-2026-11-12: the 6-month high's date and the trading days since it */
+      var _bd=row.base_high_date,_bm=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      h+='<td class="num">'+(_bd?(+_bd.slice(8,10))+' '+_bm[+_bd.slice(5,7)-1]+' '+_bd.slice(2,4):'—')+'</td>';
+      h+='<td class="num">'+(row.days_since_bh!=null?row.days_since_bh:'—')+'</td>';
     }
     h+=forrefCells(row);
     h+='</tr>';

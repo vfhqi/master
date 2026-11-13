@@ -244,7 +244,7 @@
     var k2 = -1; for (i = n - 1; i >= 0; i--) if (rel[i] != null && rma[i] != null) { k2 = i; break; }
     if (k2 >= 0) {
       var fv = function (v) { return v >= 100 ? String(Math.round(v)) : v.toFixed(1); }, sv = slo[k2], sTxt = sv == null ? '' : (sv > 0 ? '+' + (sv * 100).toFixed(1) + '%' : '(' + Math.abs(sv * 100).toFixed(1) + '%)');
-      var parts = [['Relative price ' + fv(rel[k2]), 'rgb(87,96,106)'], ['  ·  its 200D MA ' + fv(rma[k2]) + (sTxt ? ', ' + sTxt + ' over the month' : ''), 'rgb(' + (sv != null && sv <= 0 ? RD : GR) + ')']];
+      var lagD = rows[k2] && L.dates[n - 1] && rows[k2].d < L.dates[n - 1] ? ' (' + dmy(rows[k2].d) + ')' : '', parts = [['Relative price' + lagD + ' ' + fv(rel[k2]), 'rgb(87,96,106)'], ['  ·  its 200D MA ' + fv(rma[k2]) + (sTxt ? ', ' + sTxt + ' over the month' : ''), 'rgb(' + (sv != null && sv <= 0 ? RD : GR) + ')']];
       ctx.font = '10px "Segoe UI",system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.lineJoin = 'round'; var xx = pad.l + 4, yy = top - 3;
       var tw = parts.reduce(function (a, p) { return a + ctx.measureText(p[0]).width; }, 0); if (k0 > 0) xx = Math.max(pad.l + 4, Math.min(x(k0) + 4, pad.l + pw - 6 - tw));   /* the band starts where the stored history starts (about 13 months): the label sits at its start */
       ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(xx - 3, yy - 10, tw + 6, 13);
@@ -266,7 +266,14 @@
        chart area larger"): the values sit in the price scale's own column (malOver) and the margin is only the scale's width; the exit lines' names are
        written inside the plot's right edge on a white backing, as on the PMS Per-stock Dashboard. Was a 212px margin with a names column. */
     if (window.PMS_CHART_LAYOUT) delete window.PMS_CHART_LAYOUT['cv' + k];
-    drawMasterChart(t, { canvasId: 'cv' + k, containerId: 'cc' + k, height: Math.max(160, Math.floor(hh)), upto: m.asof, overlay: ov, pad: { t: top, r: 56, b: sh ? 50 : 28, l: 6 }, priceTicks: 10, malOver: true });
+    /* MC-CHART-TO-PAGE-DATE-2026-11-13 (Richard, 13-Nov-2026 19:10: Carlsberg up 0.25% today yet the chart's last candle red; 19:14: "I thought the
+       attached says data updated today, but maybe its not in the multi stock page charts?"). The candles end at the page's own reading date (META.asof,
+       the date in the header and of every reading in the stock's line), not at the stock's Per-stock Dashboard file's date: a held stock's file is
+       built at 06:13 from the previous close and a stock not held at 22:50, so from the 17:33 build until then the chart stopped one day short of the
+       header and the line above it. The relative price band and the volume panel come from that file and keep its date; where it is older the band's
+       label names that date, and the volume panel shows its own dates. The later of the two dates is used, so a late populations build never shortens a chart. */
+    var upto = META && META.asof && META.asof > m.asof ? META.asof : m.asof;
+    drawMasterChart(t, { canvasId: 'cv' + k, containerId: 'cc' + k, height: Math.max(160, Math.floor(hh)), upto: upto, overlay: ov, pad: { t: top, r: 56, b: sh ? 50 : 28, l: 6 }, priceTicks: 10, malOver: true });
     if (st.rel !== false) whenDrawn('cv' + k, function () { relBand('cv' + k, m); });
     MCVOL.draw(vc, m, volWin());
   }

@@ -257,8 +257,9 @@ S2_G1_MIN_CHANGE_21D = -S2_G1_FLAT_BAND_PA * S2_G1_LOOKBACK_DAYS / 252.0
 # "price above the 150D" is a scored test; "within 25% of the 52-week high" is a scored test.
 S2_W25_IS_GATE = False
 # MD-DEFS-2026-11-13 (Richard, 13-Nov-2026 18:50 UK: "Change the 3x. 50D MA gates to "tests" not gates"): two gates and
-# seven scored tests, the ladder in position_rules.py (S2_PROBABLE, S2_PLAUSIBLE, S2_POSSIBLE_MIN). Kept for readers.
-S2_RATING_AT = {"Probable": _PR.S2_PROBABLE, "Plausible": _PR.S2_PLAUSIBLE, "Possible": _PR.S2_POSSIBLE_MIN}
+# seven tests. MD-S2-GROUPS-2026-11-14 (Richard, 14-Nov-2026 12:14 UK, "Do B."): the seven tests are scored in four
+# groups, the ladder in position_rules.py (S2_GROUPS, S2_PROBABLE_GROUPS, S2_PLAUSIBLE_GROUPS): 4 groups Probable,
+# 3 Plausible, both gates only Possible. The S2_RATING_AT table of the 7 / 6 / 5 ladder is removed (nothing read it).
 # MD-BASING-6M-HIGH-2026-11-12 (Richard, 12-Nov-2026: "It needs to be from a more recent high, e.g. L3-6M. Your prior
 # option B is most sensible"): the Basing in uptrend page measures from the highest intraday high of the last
 # BASE_HIGH_LOOKBACK_DAYS trading days. It replaced the most recent local peak, whose day count ran back past the peak.
@@ -3649,6 +3650,15 @@ def compute_master_dashboard_screens(prices, filter_results):
                                         "P50": s2["tests"]["T_P_above_50D"], "L30": s2["tests"]["T_30pct_above_52WL"]}
             s2["groups"]["g2_trend"] = {"T50_150": s2["tests"]["T_50D_above_150D"], "T50_200": s2["tests"]["T_50D_above_200D"]}
             s2["groups"]["g3_rs"] = {"SRS70": s2["tests"]["T_stock_RS_ge70"]}
+            # MD-S2-GROUPS-2026-11-14: the four scoring groups (position_rules.S2_GROUPS), for the Stage 2 page.
+            s2["groups"]["gs_price_trend"] = {"P150": s2["tests"]["T_P_above_150D"], "P50": s2["tests"]["T_P_above_50D"]}
+            s2["groups"]["gs_range"] = {"W25": s2["tests"]["T_within_25pct_52WH"], "L30": s2["tests"]["T_30pct_above_52WL"]}
+            s2["groups"]["gs_ma_stack"] = {"T50_150": s2["tests"]["T_50D_above_150D"], "T50_200": s2["tests"]["T_50D_above_200D"]}
+            s2["groups"]["gs_rs"] = {"SRS70": s2["tests"]["T_stock_RS_ge70"]}
+            _gp = _s2r.get("groups") or {}
+            s2["group_pass"] = {"price_trend": bool(_gp.get("Price trend")), "range": bool(_gp.get("Position in the 52-week range")),
+                                "ma_stack": bool(_gp.get("Moving-average stack")), "rs": bool(_gp.get("Relative strength"))}
+            s2["groups_passed"] = int(_s2r.get("groups_passed") or 0)
             s2["count"] = sum(1 for _v in s2["tests"].values() if _v)
             s2["total"] = len(s2["tests"])
             s2["rating"] = _s2r["rating"]

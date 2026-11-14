@@ -1964,10 +1964,21 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s2-main-table thead .gh-g3 { color: #4a6a8a; }
 #s2-main-table thead .gh-g4 { color: #8a5a6a; }
 #s2-main-table thead .gh-g5 { color: #6a5a8a; }
+#s2-main-table thead .gh-g6 { color: #3f7f7a; }  /* MD-S2-GROUPS-2026-11-14 */
+#s2-main-table thead .gh-g7 { color: #7a4f7f; }
+#s2-main-table td.grp-start-g6, #s2-main-table th.grp-start-g6 { border-left: 2px solid rgba(63,127,122,0.35); }
+#s2-main-table td.grp-end-g6, #s2-main-table th.grp-end-g6 { border-right: 2px solid rgba(63,127,122,0.35); }
+#s2-main-table td.grp-start-g7, #s2-main-table th.grp-start-g7 { border-left: 2px solid rgba(122,79,127,0.35); }
+#s2-main-table td.grp-end-g7, #s2-main-table th.grp-end-g7 { border-right: 2px solid rgba(122,79,127,0.35); }
 #s2-main-table .hd { display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 100%; }
 #s2-main-table .hd .lbl { white-space: normal; word-break: break-word; }
 #s2-main-table .hd .sort-arrow { font-size: 9px; color: #2e7d32; flex: 0 0 auto; line-height: 1; }
 #s2-main-table .hd .sort-placeholder { width: 9px; flex: 0 0 auto; }
+/* MD-S2-GROUPS-2026-11-14: give the narrow test headings the whole cell width, so words are not split letter by letter */
+#s2-main-table thead tr.col-header-row th { padding-left: 2px; padding-right: 2px; }
+#s2-main-table .hd { gap: 1px; }
+#s2-main-table .hd .sort-placeholder { width: 0; }
+#s2-main-table .hd .lbl { word-break: normal; overflow-wrap: anywhere; hyphens: none; }
 #s2-main-table td { padding: 5px 4px; border-bottom: 1px solid #efece0; text-align: center; vertical-align: middle; height: 38px; box-sizing: border-box; font-variant-numeric: tabular-nums; }
 #s2-main-table tr:hover { background: rgba(27,94,32,0.04); }
 #s2-main-table td.grp-start-g1, #s2-main-table th.grp-start-g1 { border-left: 2px solid rgba(176,138,78,0.35); }
@@ -2391,6 +2402,8 @@ body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2
 #tab-stage_2 .group-captions .gcap-g4 b { color: #8a5a6a; }
 #tab-stage_2 .group-captions .gcap-g5 { border-left-color: #6a5a8a; }
 #tab-stage_2 .group-captions .gcap-g5 b { color: #6a5a8a; }
+#tab-stage_2 .group-captions .gcap-g6 { border-left-color: #3f7f7a; } #tab-stage_2 .group-captions .gcap-g6 b { color: #3f7f7a; }
+#tab-stage_2 .group-captions .gcap-g7 { border-left-color: #7a4f7f; } #tab-stage_2 .group-captions .gcap-g7 b { color: #7a4f7f; }  /* MD-S2-GROUPS-2026-11-14 */
 /* MD-V2-S42-STAGE-COLOUR-MIRROR-MARKER -- stage_3 and stage_4 per-group caption accents placed AFTER the shared default rule (#tab-stage_3 .group-captions .gcap { border-left: 3px solid #b08a4e; }) so cascade source order makes them win. The original per-stage accent rules at L875-884 (stage_3) and L990-994 (stage_4) had identical specificity to the shared default but came EARLIER in source, so the gold default was overriding the orange/red palettes. Colours match each stage's existing .gh-g{N} thead text-colors. */
 #tab-stage_3 .group-captions .gcap-g1 { border-left-color: #d97706; }
 #tab-stage_3 .group-captions .gcap-g1 b { color: #b45309; }
@@ -10456,16 +10469,16 @@ function SUM_renderQualifiedStocks() {
     { id:'ma_150',    label:'150D MA',        sortKey:'ma_150', cls:'num' },
     { id:'ma_200',    label:'200D MA',        sortKey:'ma_200', cls:'num' },
     { id:'rating',    label:'Rating',                        sortKey:'rating_rank', cls:'grp-start-rating' },
-    { id:'count',     label:'Score',                         sortKey:'count', cls:'' },
-    { id:'gp200',     label:'1. 200D MA flat or rising (gate)', sortKey:'g1_val', cls:'grp-start-g1', testGroup:'_gates', testKey:'g1_200D_flat_or_rising' },  /* MD-S2-T1-200D-FLAT-2026-11-11 */
-    { id:'g150_200',  label:'2. 150D MA above 200D MA (gate)',sortKey:'g150_val', cls:'grp-end-g1', testGroup:'_gates', testKey:'g3_150D_above_200D' },  /* MD-S2-T2-GATES-SWAP-2026-11-11 */
-    { id:'gp150',     label:'3. Price above 150D MA',        sortKey:'p150_val', cls:'grp-start-g2', testGroup:'g1_price', testKey:'P150' },  /* MD-DEFS-2026-11-13 */
-    { id:'g52wh',     label:'4. Within 25% of 52w high',     sortKey:'w25_val', cls:'', testGroup:'g1_price', testKey:'W25' },
-    { id:'gp50',      label:'5. Price above 50D MA',         sortKey:'p50_val', cls:'', testGroup:'g1_price', testKey:'P50' },
-    { id:'gl30',      label:'6. 30% above 52w low',          sortKey:'l30_val', cls:'', testGroup:'g1_price', testKey:'L30' },
-    { id:'srs70',     label:'7. Stock RS ≥70',               sortKey:'srs_sort', cls:'grp-end-g2', testGroup:'g3_rs', testKey:'SRS70' },
-    { id:'t5',        label:'8. 50D MA above 150D MA',       sortKey:'g50_150_val', cls:'grp-start-g3', testGroup:'g2_trend', testKey:'T50_150' },
-    { id:'t6',        label:'9. 50D MA above 200D MA',       sortKey:'t6_sort', cls:'grp-end-g3', testGroup:'g2_trend', testKey:'T50_200' },
+    { id:'count',     label:'Groups passed',                 sortKey:'gsort', cls:'' },  /* MD-S2-GROUPS-2026-11-14 */
+    { id:'gp200',     label:'1. 200D flat or rising (gate)', sortKey:'g1_val', cls:'grp-start-g1', testGroup:'_gates', testKey:'g1_200D_flat_or_rising' },  /* MD-S2-T1-200D-FLAT-2026-11-11 */
+    { id:'g150_200',  label:'2. 150D > 200D (gate)',sortKey:'g150_val', cls:'grp-end-g1', testGroup:'_gates', testKey:'g3_150D_above_200D' },  /* MD-S2-T2-GATES-SWAP-2026-11-11 */
+    { id:'gp150',     label:'3. Price > 150D',        sortKey:'p150_val', cls:'grp-start-g2', testGroup:'gs_price_trend', testKey:'P150' },  /* MD-S2-GROUPS-2026-11-14 */
+    { id:'gp50',      label:'4. Price > 50D',         sortKey:'p50_val', cls:'grp-end-g2', testGroup:'gs_price_trend', testKey:'P50' },
+    { id:'g52wh',     label:'5. Within 25% of high',     sortKey:'w25_val', cls:'grp-start-g6', testGroup:'gs_range', testKey:'W25' },
+    { id:'gl30',      label:'6. 30%+ above low',          sortKey:'l30_val', cls:'grp-end-g6', testGroup:'gs_range', testKey:'L30' },
+    { id:'t5',        label:'7. 50D > 150D',       sortKey:'g50_150_val', cls:'grp-start-g3', testGroup:'gs_ma_stack', testKey:'T50_150' },
+    { id:'t6',        label:'8. 50D > 200D',       sortKey:'t6_sort', cls:'grp-end-g3', testGroup:'gs_ma_stack', testKey:'T50_200' },
+    { id:'srs70',     label:'9. Stock RS ≥70',               sortKey:'srs_sort', cls:'grp-start-g7 grp-end-g7', testGroup:'gs_rs', testKey:'SRS70' },
     { id:'t7',        label:'Ind. RS ≥70 (info)',        sortKey:'t7_sort', cls:'grp-start-g4', testGroup:'g_info', testKey:'T7' },
     { id:'t8',        label:'Sect. RS ≥50 (info)',          sortKey:'t8_sort', cls:'', testGroup:'g_info', testKey:'T8' },
     { id:'t9',        label:'vs ind. ≥70 (info)', sortKey:'t9_sort', cls:'grp-end-g4', testGroup:'g_info', testKey:'T9' },
@@ -10523,6 +10536,8 @@ function SUM_renderQualifiedStocks() {
         price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
         ma_50: mas['50D'], ma_150: mas['150D'], ma_200: mas['200D'],
         rating: s2.rating, count: s2.count,
+        gp: (s2.groups_passed != null ? s2.groups_passed : null), gpass: s2.group_pass || {},  /* MD-S2-GROUPS-2026-11-14 */
+        gsort: (S2_RATING_RANK[s2.rating] || 0) * 100 + (s2.groups_passed || 0) * 10 + (s2.count || 0),
         tests: s2.tests || {}, groups: s2grps, persistence: pers,
         rs_sector: p.rs_vs_sector_pct, rs_industry: p.rs_vs_industry_pct, rs_market: p.rs_market_pct,
         g1_val: (_s2tv.G1_200D_change_21d != null ? _s2tv.G1_200D_change_21d * 100 : null),  /* MD-S2-T1-200D-FLAT-2026-11-11 */
@@ -10642,7 +10657,18 @@ function SUM_renderQualifiedStocks() {
     return '<span class="pill pill-none">None</span>';
   }
   // MD-V2-S58-S2-PIPS: gate dots + 5 tests (T5-T9)
-  function s2ScorePips(row) {
+  function s2ScorePips(row) {  /* MD-S2-GROUPS-2026-11-14: gates, then one pip per scoring group */
+    var gp = row.gpass || {}, gates0 = (row.groups && row.groups._gates) || {};
+    var order = [['price_trend','Price trend'],['range','Position in the 52-week range'],['ma_stack','Moving-average stack'],['rs','Relative strength']];
+    var s0 = '<span class="pip ' + (gates0.g1_200D_flat_or_rising ? 'gate-ok' : 'gate-x') + '" title="Gate 1: 200-day MA flat or rising"></span>' +
+             '<span class="pip ' + (gates0.g3_150D_above_200D ? 'gate-ok' : 'gate-x') + '" title="Gate 2: 150-day MA above the 200-day MA"></span>' +
+             '<span class="pip-div"></span>';
+    var n0 = 0;
+    for (var q = 0; q < order.length; q++) { var on = !!gp[order[q][0]]; if (on) n0++; s0 += '<span class="pip ' + (on ? (q === 3 ? 'rs-on' : 'on') : '') + '" title="' + order[q][1] + (on ? ': passed' : ': not passed') + '"></span>'; }
+    if (row.gp == null) return '<div class="score-pip-row">' + s0 + '<span class="score-num">—</span></div>';
+    return '<div class="score-pip-row">' + s0 + '<span class="score-num">' + n0 + '/4</span></div>';
+  }
+  function s2ScorePipsTests_unused(row) {
     var t = row.tests;
     var passed = [!!t.T_P_above_150D, !!t.T_within_25pct_52WH, !!t.T_P_above_50D, !!t.T_30pct_above_52WL, !!t.T_stock_RS_ge70, !!t.T_50D_above_150D, !!t.T_50D_above_200D];  /* MD-DEFS-2026-11-13 */
     var count = passed.filter(Boolean).length;
@@ -10766,10 +10792,10 @@ function SUM_renderQualifiedStocks() {
     var order = ['None','Possible','Plausible','Probable'];
     var strip = {'Probable':'prob','Plausible':'pla','Possible':'pos','None':'none'};
     var S2_THRESH = {
-      'Probable':  'all 7 tests · both gates pass',  /* MD-DEFS-2026-11-13 */
-      'Plausible': '6 of 7 tests · both gates pass',
-      'Possible':  '5 of 7 tests · both gates pass',
-      'None':      'a gate fails, or fewer than 5 tests'
+      'Probable':  'all 4 groups · both gates pass',  /* MD-S2-GROUPS-2026-11-14 */
+      'Plausible': '3 of 4 groups · both gates pass',
+      'Possible':  'both gates pass · 2 or fewer groups',
+      'None':      'a gate fails'
     }; /* MD-V2-S49-PER-TILE-CRITERIA-s2 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
@@ -10836,7 +10862,7 @@ function SUM_renderQualifiedStocks() {
         s2InputCell(s, 'ma_150') + s2InputCell(s, 'ma_200') +
         '<td class="grp-start-rating">' + s2PillFor(s.rating, s.count) + '</td>' +
         '<td>' + s2ScorePips(s) + '</td>';
-      for (var j = 9; j <= 19; j++) html += s2TestCell(s, S2_COLS[j]); // MD-V2-S54
+      for (var j = 9; j < S2_COLS.length - 1; j++) html += s2TestCell(s, S2_COLS[j]); // MD-V2-S54; MD-S2-GROUPS-2026-11-14: every column between the score and the 12-month column (was a fixed 9 to 19, three short after 14-Nov)
       html += '<td class="grp-start-persist">' + s2PersistCells(s.persistence, s.rating) + '</td>' +
         '</tr>';
     }
@@ -10884,7 +10910,7 @@ function SUM_renderQualifiedStocks() {
     if (!host) return false;
     if (host.querySelector('#s2-main-table')) return true;
     var html = '' +
-      '<div class="s1-intro">Stage 2 (advancing) looks for stocks already in a clear uptrend: two gates, both required (the 200-day MA flat or rising; the 150-day MA above the 200-day MA), then seven scored tests on price, the 50-day MA and Stock RS. All seven = Probable, six = Plausible, five = Possible; fewer, no rating. Industry RS, Sector RS and Stock RS against its industry are shown for information, not scored. Position Entry and Exit Rules, version of 13-Nov-2026.</div>' +  /* MD-DEFS-2026-11-13 */
+      '<div class="s1-intro">Stage 2 (advancing) looks for stocks already in a clear uptrend: two gates, both required (the 200-day MA flat or rising; the 150-day MA above the 200-day MA), then seven tests scored in four groups: Price trend (price above the 150-day and the 50-day MA, both needed); Position in the 52-week range (within 25% of the high and at least 30% above the low, both needed); Moving-average stack (the 50-day MA above the 150-day or the 200-day, either one); Relative strength (Stock RS 70 or more). All four groups = Probable, three = Plausible; both gates passing with two or fewer groups = Possible; a gate failing, no rating. Industry RS, Sector RS and Stock RS against its industry are shown for information, not scored. Position Entry and Exit Rules, version of 13-Nov-2026, with the four-group ladder of 14-Nov-2026.</div>' +  /* MD-DEFS-2026-11-13; MD-S2-GROUPS-2026-11-14 */
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-s2-grp="inputs" data-s2-val="pct" onclick="s2SetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -10913,10 +10939,12 @@ function SUM_renderQualifiedStocks() {
         '</div>' +
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="s2-rating-tiles" style="grid-template-columns: repeat(4, 1fr);"></div>' +
-      '<div class="group-captions" style="grid-template-columns: repeat(4, 1fr);">' +
+      '<div class="group-captions" style="grid-template-columns: repeat(6, 1fr);">' +
         '<div class="gcap gcap-g1"><b>Gates · Long-term trend upwards?</b>Both must pass, or the stock has no Stage 2 rating.<span class="tline"><span class="tnum">(1)</span> 200-day MA flat or rising: no more than 5% a year below its level 21 trading days earlier</span><span class="tline"><span class="tnum">(2)</span> 150-day MA above the 200-day MA</span></div>' +  /* MD-DEFS-2026-11-13 */
-        '<div class="gcap gcap-g2"><b>Tests · Price and Stock RS</b>Scored; seven tests in all, five here.<span class="tline"><span class="tnum">(3)</span> price above the 150-day MA</span><span class="tline"><span class="tnum">(4)</span> within 25% of the 52-week high</span><span class="tline"><span class="tnum">(5)</span> price above the 50-day MA</span><span class="tline"><span class="tnum">(6)</span> at least 30% above the 52-week low</span><span class="tline"><span class="tnum">(7)</span> Stock RS percentile against the market 70 or more</span></div>' +
-        '<div class="gcap gcap-g3"><b>Tests · Short-term trend upwards?</b>Scored; the 50-day MA conditions became tests on 13-Nov-2026 (they were gates).<span class="tline"><span class="tnum">(8)</span> 50-day MA above the 150-day MA</span><span class="tline"><span class="tnum">(9)</span> 50-day MA above the 200-day MA</span><span class="intro">Rating: all 7 tests Probable; 6 Plausible; 5 Possible; fewer, no rating.</span></div>' +
+        '<div class="gcap gcap-g2"><b>Group · Price trend</b>Passed when both tests pass.<span class="tline"><span class="tnum">(3)</span> price above the 150-day MA</span><span class="tline"><span class="tnum">(4)</span> price above the 50-day MA</span></div>' +  /* MD-S2-GROUPS-2026-11-14 */
+        '<div class="gcap gcap-g6"><b>Group · Position in the 52-week range</b>Passed when both tests pass.<span class="tline"><span class="tnum">(5)</span> within 25% of the 52-week high</span><span class="tline"><span class="tnum">(6)</span> at least 30% above the 52-week low</span></div>' +
+        '<div class="gcap gcap-g3"><b>Group · Moving-average stack</b>Passed when either test passes. Gate 2 already puts the 150-day above the 200-day, so in effect this is the 50-day MA above the 200-day MA.<span class="tline"><span class="tnum">(7)</span> 50-day MA above the 150-day MA</span><span class="tline"><span class="tnum">(8)</span> 50-day MA above the 200-day MA</span></div>' +
+        '<div class="gcap gcap-g7"><b>Group · Relative strength</b>A group of one.<span class="tline"><span class="tnum">(9)</span> Stock RS percentile against the market 70 or more</span><span class="intro">Rating: all 4 groups Probable; 3 Plausible; both gates with 2 or fewer groups Possible; a gate fails, no rating.</span></div>' +
         '<div class="gcap gcap-g4"><b>Relative strength · information</b>Shown, not scored (Position Entry and Exit Rules, 13-Nov-2026).<span class="tline">Industry RS 70 or more</span><span class="tline">Sector RS 50 or more</span><span class="tline">Stock RS against its industry 70 or more</span></div>' +
       '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
@@ -10938,8 +10966,10 @@ function SUM_renderQualifiedStocks() {
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
               '<th class="gh-rating grp-start-rating" colspan="2">Stage 2 rating</th>' /* MD-V2-S55-gh-s2 */ +
               '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="2">Gates — Long-term trend upwards?</th>' +  /* MD-DEFS-2026-11-13 */
-              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="5">Tests — Price and Stock RS</th>' +
-              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Tests — Short-term trend upwards?</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group — Price trend (both)</th>' +  /* MD-S2-GROUPS-2026-11-14 */
+              '<th class="gh-g6 grp-start-g6 grp-end-g6" colspan="2">Group — 52-week range (both)</th>' +
+              '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="2">Group — Moving-average stack (either one)</th>' +
+              '<th class="gh-g7 grp-start-g7 grp-end-g7" colspan="1">Group — Stock RS</th>' +
               '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="3">Relative strength (information, not scored)</th>' +
               '<th class="gh-g5 grp-start-g5 grp-end-g5" colspan="2">Group 5 — Taxonomy context?</th>' +
               '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
@@ -12320,7 +12350,7 @@ function SUM_renderQualifiedStocks() {
       numCaps:2,
       caps:[
         {cls:'gcap-base',   title:'Pulling back within the uptrend?', body:'Four tests: (1) price above the 200-day MA; (2) 200-day MA higher than 21 trading days ago; (3) 150-day MA higher than 21 trading days ago; (4) depth of pullback more than 10%: the deepest fall from the highest high of the last 6 months (126 trading days) to the lowest price since, as Basing test 1. Depth: 10-15% Shallow Pullback, 15-20% Medium Pullback, over 20% Deep Pullback. Pullback (information) = today’s close against that high.'},
-        {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)', body:'The stock’s Stage 2 status: rating, two gates and seven tests. Shown for context, not scored here.'}
+        {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)', body:'The stock’s Stage 2 status: rating, two gates and seven tests (scored in four groups). Shown for context, not scored here.'}
       ],
       colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:76px"><col style="width:58px"><col style="width:64px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
       ghrHtml:'<th class="gh-inputs gs-inputs" colspan="3">Inputs</th>'
@@ -12365,7 +12395,7 @@ function SUM_renderQualifiedStocks() {
       numCaps:2,
       caps:[
         {cls:'gcap-base',   title:'Basing within the uptrend?',             body:'Four tests, measured from the highest high of the last 6 months (126 trading days): (1) price pulled back ≥10% off that high; (2) at least 20 trading days since that high; (3) price above the 200-day MA; (4) 200-day MA higher than 21 trading days ago. (Changed 12-Nov-2026.)'},
-        {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)', body:'The stock’s Stage 2 status: rating, two gates and seven tests. Shown for context, not scored here.'}
+        {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)', body:'The stock’s Stage 2 status: rating, two gates and seven tests (scored in four groups). Shown for context, not scored here.'}
       ],
       colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:64px"><col style="width:50px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
       ghrHtml:'<th class="gh-inputs gs-inputs" colspan="3">Inputs</th>'
@@ -12945,16 +12975,16 @@ function SUM_renderQualifiedStocks() {
     // Group 1: Stage 2 quality (g1=S2-start, g2=MA sub-group, g3=context sub-group, persist)
     cols.push({ id:'s2_rat',   label:'Rating', sortKey:'s2_rating_rank', cls:'grp-start-g1', kind:'s2_pill' });
     cols.push({ id:'s2_scr',   label:'Score',  sortKey:'s2_count',       cls:'',             kind:'s2_score' });
-    cols.push({ id:'s2_gp200', label:'1. 200D MA flat or rising (gate)',       sortKey:'s2_gp200',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g1_200D_flat_or_rising' });  /* MD-S2-T1-200D-FLAT-2026-11-11 */
-    cols.push({ id:'s2_g1502', label:'2. 150D MA above 200D MA (gate)',        sortKey:'s2_g1502',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g3_150D_above_200D' });
+    cols.push({ id:'s2_gp200', label:'1. 200D flat or rising (gate)',       sortKey:'s2_gp200',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g1_200D_flat_or_rising' });  /* MD-S2-T1-200D-FLAT-2026-11-11 */
+    cols.push({ id:'s2_g1502', label:'2. 150D > 200D (gate)',        sortKey:'s2_g1502',  cls:'', kind:'s2_test', testGroup:'_gates', testKey:'g3_150D_above_200D' });
     // g2: the seven Stage 2 tests  /* MD-DEFS-2026-11-13 */
-    cols.push({ id:'s2_gp150', label:'3. Price above 150D MA',               sortKey:'s2_gp150', cls:'grp-start-g2', kind:'s2_test', testGroup:'g1_price', testKey:'P150' });
-    cols.push({ id:'s2_g52wh', label:'4. Within 25% of 52w high',            sortKey:'s2_g52wh', cls:'',             kind:'s2_test', testGroup:'g1_price', testKey:'W25' });
-    cols.push({ id:'s2_gp50',  label:'5. Price above 50D MA',                sortKey:'s2_gp50',  cls:'',             kind:'s2_test', testGroup:'g1_price', testKey:'P50' });
-    cols.push({ id:'s2_gl30',  label:'6. 30% above 52w low',                 sortKey:'s2_gl30',  cls:'',             kind:'s2_test', testGroup:'g1_price', testKey:'L30' });
-    cols.push({ id:'s2_srs',   label:'7. Stock RS ≥70',                      sortKey:'s2_srs',   cls:'',             kind:'s2_test', testGroup:'g3_rs', testKey:'SRS70' });
-    cols.push({ id:'s2_t5',    label:'8. 50D MA above 150D MA',              sortKey:'s2_t5',    cls:'',             kind:'s2_test', testGroup:'g2_trend', testKey:'T50_150' });
-    cols.push({ id:'s2_t6',    label:'9. 50D MA above 200D MA',              sortKey:'s2_t6',    cls:'',             kind:'s2_test', testGroup:'g2_trend', testKey:'T50_200' });
+    cols.push({ id:'s2_gp150', label:'3. Price > 150D',               sortKey:'s2_gp150', cls:'grp-start-g2', kind:'s2_test', testGroup:'g1_price', testKey:'P150' });  /* MD-S2-GROUPS-2026-11-14: same order and numbers as the Stage 2 page (the four groups) */
+    cols.push({ id:'s2_gp50',  label:'4. Price > 50D',                sortKey:'s2_gp50',  cls:'',             kind:'s2_test', testGroup:'g1_price', testKey:'P50' });
+    cols.push({ id:'s2_g52wh', label:'5. Within 25% of high',            sortKey:'s2_g52wh', cls:'',             kind:'s2_test', testGroup:'g1_price', testKey:'W25' });
+    cols.push({ id:'s2_gl30',  label:'6. 30%+ above low',                 sortKey:'s2_gl30',  cls:'',             kind:'s2_test', testGroup:'g1_price', testKey:'L30' });
+    cols.push({ id:'s2_t5',    label:'7. 50D > 150D',              sortKey:'s2_t5',    cls:'',             kind:'s2_test', testGroup:'g2_trend', testKey:'T50_150' });
+    cols.push({ id:'s2_t6',    label:'8. 50D > 200D',              sortKey:'s2_t6',    cls:'',             kind:'s2_test', testGroup:'g2_trend', testKey:'T50_200' });
+    cols.push({ id:'s2_srs',   label:'9. Stock RS ≥70',                      sortKey:'s2_srs',   cls:'',             kind:'s2_test', testGroup:'g3_rs', testKey:'SRS70' });
     // g3: S2 context counts (2 cols)
     cols.push({ id:'s2_sii', label:'# sectors in industry', sortKey:'sectors_in_industry', cls:'grp-start-g3', kind:'s2_count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 });
     cols.push({ id:'s2_cis', label:'# companies in sector', sortKey:'companies_in_sector',  cls:'',            kind:'s2_count', countKey:'companies_in_sector',  countRedAt:2, countAmberAt:5 });

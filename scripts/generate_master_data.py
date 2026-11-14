@@ -22,6 +22,10 @@ from pathlib import Path
 from datetime import datetime, timedelta, date
 from collections import defaultdict
 import argparse
+# MD-DEFS-2026-11-13: the one computation of the Position Entry and Exit Rules (version of 13-Nov-2026); the Stage 2
+# (advancing) rating below calls it, so the Master Dashboard and the daily script share one rule.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+import position_rules as _PR  # noqa: E402
 
 # UNIT-CLEAN (session 26 of the Stage 2 backtest project, 1-Oct-2026; Richard, Message 99:
 # "clean the prices once at the source, in the nightly price job"). price_units.py, beside
@@ -252,7 +256,9 @@ S2_G1_MIN_CHANGE_21D = -S2_G1_FLAT_BAND_PA * S2_G1_LOOKBACK_DAYS / 252.0
 # MD-S2-T2-GATES-SWAP-2026-11-11 (Richard, 11-Nov-2026 15:51; variant A): the two 50D tests are gates 3 and 4;
 # "price above the 150D" is a scored test; "within 25% of the 52-week high" is a scored test.
 S2_W25_IS_GATE = False
-S2_RATING_AT = {"Probable": 4, "Plausible": 3, "Possible": 2}
+# MD-DEFS-2026-11-13 (Richard, 13-Nov-2026 18:50 UK: "Change the 3x. 50D MA gates to "tests" not gates"): two gates and
+# seven scored tests, the ladder in position_rules.py (S2_PROBABLE, S2_PLAUSIBLE, S2_POSSIBLE_MIN). Kept for readers.
+S2_RATING_AT = {"Probable": _PR.S2_PROBABLE, "Plausible": _PR.S2_PLAUSIBLE, "Possible": _PR.S2_POSSIBLE_MIN}
 # MD-BASING-6M-HIGH-2026-11-12 (Richard, 12-Nov-2026: "It needs to be from a more recent high, e.g. L3-6M. Your prior
 # option B is most sensible"): the Basing in uptrend page measures from the highest intraday high of the last
 # BASE_HIGH_LOOKBACK_DAYS trading days. It replaced the most recent local peak, whose day count ran back past the peak.
@@ -3066,6 +3072,7 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
             for rank, (s, _) in enumerate(valid):
                 sec_pct_in_ind[s] = int(round(rank / max(nn - 1, 1) * 99))
 
+        _me_rs_pct = {}
         if _rsa is not None:
             try:
                 _cmp = {}
@@ -3073,6 +3080,7 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
                     _c = _rsa["BPE"].composite_upto(_ds, _cs, date_str, _rsa["bd"], _rsa["bc"])
                     if _c is not None:
                         _cmp[_t] = _c
+                _me_rs_pct = compute_rs_percentiles(_cmp)  # MD-DEFS-2026-11-13: Stock RS at the month-end
                 _, _srs, _irs = _rsa["BPE"].group_ranks(_cmp, _rsa["sec"], _rsa["ind"])
                 if _irs and _srs:
                     ind_pct_rank, sec_pct_in_ind = _irs, _srs
@@ -3108,42 +3116,19 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
             if any(v is None for v in [price, ma50, ma150, ma200]):
                 continue
 
-            # 52-week high: max daily high over last 252 rows ending at idx
+            # 52-week high and low: max daily high and min daily low over last 252 rows ending at idx
             lookback = rows[max(0, idx - 251) : idx + 1]
             h52 = max(r['high'] for r in lookback) if lookback else None
+            l52 = min(r['low'] for r in lookback if r.get('low') is not None) if lookback else None
             if not h52 or h52 <= 0:
                 continue
 
-            # 4 hard gates. MD-S2-T1-200D-FLAT-2026-11-11: gate 1 is the 200D MA flat or rising over 21 trading days
+            # MD-DEFS-2026-11-13: two gates and seven scored tests, the same as the live rating (position_rules.stage2);
+            # Stock RS at the month-end = the percentile of the Pool's Composite on that day (as prices.json's rs_percentile).
             ma200_21 = rows[idx - S2_G1_LOOKBACK_DAYS].get('sma_200') if idx >= S2_G1_LOOKBACK_DAYS else None
-            g1 = bool(ma200_21) and (ma200 / ma200_21 - 1.0) >= S2_G1_MIN_CHANGE_21D
-            # MD-S2-T2-GATES-SWAP-2026-11-11: gates 2 to 4 are 150D > 200D, 50D > 150D, 50D > 200D (+ within 25% of
-            # the 52-week high when S2_W25_IS_GATE); price above the 150D is a scored test.
-            g2 = ma150 > ma200
-            g3 = ma50 > ma150
-            g4 = ma50 > ma200
-            w25 = price >= h52 * 0.75
-            p150 = price > ma150
-            if not (g1 and g2 and g3 and g4 and (w25 or not S2_W25_IS_GATE)):
-                result[ticker][mi] = 'None'
-                continue
-
-            # 5 tests (T5-T9 matching compute_master_dashboard_screens)
-            ind = stock_meta[ticker]['industry']
-            sec = stock_meta[ticker]['sector']
-            t7 = ind_pct_rank.get(ind, 0) >= 70
-            t8 = sec_pct_in_ind.get(sec, 0) >= 50  # RS-ALIGN Q1 (1-Oct-2026): the Pool's Sector RS pass mark
-            t9 = rs_vs_ind_pct.get(ticker, 0) >= 70
-
-            count = sum([p150, t7, t8, t9] + ([] if S2_W25_IS_GATE else [w25]))
-            if count >= S2_RATING_AT['Probable']:
-                result[ticker][mi] = 'Probable'
-            elif count >= S2_RATING_AT['Plausible']:
-                result[ticker][mi] = 'Plausible'
-            elif count >= S2_RATING_AT['Possible']:
-                result[ticker][mi] = 'Possible'
-            else:
-                result[ticker][mi] = 'None'
+            _me_mas = {"50D": ma50, "150D": ma150, "200D": ma200, "200D_21d_ago": ma200_21}
+            _r = _PR.stage2(price, _me_mas, h52, l52, _me_rs_pct.get(ticker))
+            result[ticker][mi] = _r["rating"] if _r["rating"] in ("Probable", "Plausible", "Possible") else 'None'
 
     return result
 
@@ -3615,63 +3600,58 @@ def compute_master_dashboard_screens(prices, filter_results):
         # Sector RS >= 50; Stock RS vs industry >= 70. The gate key g3_150D_above_200D keeps its old name because the
         # change log's 150D-above-200D record (the Stage 2 qualification SOP's cross trigger) reads it.
         # ──────────────────────────────────────────────────────────────
+        # MD-DEFS-2026-11-13: Stage 2 (advancing) = position_rules.stage2 (two gates: the 200-day line flat or rising;
+        # the 150-day line above the 200-day line; seven scored tests). Industry RS, Sector RS and Stock RS against its
+        # industry are shown, not scored (s2["info"]). Key names kept for readers; the two 50-day conditions moved from
+        # "gates" to "tests" (T_50D_above_150D, T_50D_above_200D).
         s2 = {"tests": {}, "groups": {}, "count": 0, "rating": "None"}
         ma200_21d_ago = mas.get("200D_21d_ago")
         s2_g1_change = (ma200 / ma200_21d_ago - 1.0) if (ma200 is not None and ma200_21d_ago) else None
-        s2_gate1 = (s2_g1_change is not None and s2_g1_change >= S2_G1_MIN_CHANGE_21D)
-        s2_g150_200 = (ma150 is not None and ma200 is not None and ma150 > ma200)
-        s2_g50_150 = (ma50 is not None and ma150 is not None and ma50 > ma150)
-        s2_g50_200 = (ma50 is not None and ma200 is not None and ma50 > ma200)
-        s2_p150 = (price is not None and ma150 is not None and price > ma150)
-        s2_w25 = (price is not None and h52 is not None and h52 > 0 and price >= h52 * 0.75)
+        _s2r = _PR.stage2(price, mas, h52, l52, rs_pct)
+        _s2g = _s2r.get("gates") or {}
+        _s2t = _s2r.get("tests") or {}
         s2["gates"] = {
-            "g1_200D_flat_or_rising": s2_gate1,
-            "g3_150D_above_200D": s2_g150_200,
-            "g_50D_above_150D": s2_g50_150,
-            "g_50D_above_200D": s2_g50_200,
+            "g1_200D_flat_or_rising": bool(_s2g.get("200D flat or rising")),
+            "g3_150D_above_200D": bool(_s2g.get("150D above 200D")),
         }
-        if S2_W25_IS_GATE:
-            s2["gates"]["g4_within_25pct_52WH"] = s2_w25
-        s2_gates_pass = all(s2["gates"].values())
-        # Always populate test_values — RS data shown even for gate-failing stocks
+        s2_gates_pass = bool(_s2g) and all(s2["gates"].values())
         s2["test_values"] = {
             "G1_200D_change_21d": _md_v2_round(s2_g1_change),
             "T5_50D_vs_150D": _md_v2_pct_gap(ma50, ma150),
             "T6_50D_vs_200D": _md_v2_pct_gap(ma50, ma200),
             "P_vs_150D": _md_v2_pct_gap(price, ma150),
             "P_vs_52WH": _md_v2_pct_gap(price, h52),
+            "P_vs_50D": _md_v2_pct_gap(price, ma50),
+            "P_vs_52WL": _md_v2_pct_gap(price, l52),
+            "Stock_RS_pct": rs_pct,
             "T7_industry_RS_pct": _ind_pct_rank.get(_stock_industry, 0),
             "T8_sector_RS_pct_in_industry": _sec_pct_in_ind.get(_stock_sector, 0),
             "T9_rs_vs_industry": rs_vs_ind,
         }
+        s2["info"] = {
+            "T7_industry_RS_pct_ge70": (_ind_pct_rank.get(_stock_industry, 0) >= 70),
+            "T8_sector_RS_pct_ge70": (_sec_pct_in_ind.get(_stock_sector, 0) >= 50),
+            "T9_stock_RS_vs_industry_ge70": (rs_vs_ind is not None and rs_vs_ind >= 70),
+        }
+        s2["groups"]["g_info"] = {"T7": s2["info"]["T7_industry_RS_pct_ge70"], "T8": s2["info"]["T8_sector_RS_pct_ge70"],
+                                  "T9": s2["info"]["T9_stock_RS_vs_industry_ge70"]}
         if s2_gates_pass:
-            # T7: industry RS percentile rank >= 70 (avg rs_excess_market per industry, ranked vs all industries)
-            s2_t7 = (_ind_pct_rank.get(_stock_industry, 0) >= 70)
-            # T8: RS-ALIGN Q1 (1-Oct-2026): Sector RS 50 or above, the Pool's pass mark. Key name kept for readers.
-            s2_t8 = (_sec_pct_in_ind.get(_stock_sector, 0) >= 50)
-            # T9: stock's rs_vs_industry percentile >= 70
-            s2_t9 = (rs_vs_ind is not None and rs_vs_ind >= 70)
-            s2["tests"]["T_P_above_150D"] = s2_p150
-            if not S2_W25_IS_GATE:
-                s2["tests"]["T_within_25pct_52WH"] = s2_w25
-            s2["tests"]["T7_industry_RS_pct_ge70"] = s2_t7
-            s2["tests"]["T8_sector_RS_pct_ge70"] = s2_t8
-            s2["tests"]["T9_stock_RS_vs_industry_ge70"] = s2_t9
-            s2["groups"]["g1_price"] = {"P150": s2_p150}
-            if not S2_W25_IS_GATE:
-                s2["groups"]["g1_price"]["W25"] = s2_w25
-            s2["groups"]["g2_rs"] = {"T7": s2_t7, "T8": s2_t8, "T9": s2_t9}
-            s2_count = sum(1 for _v in s2["tests"].values() if _v)
-            s2["count"] = s2_count
+            s2["tests"] = {
+                "T_P_above_150D": bool(_s2t.get("price above 150D")),
+                "T_within_25pct_52WH": bool(_s2t.get("within 25% of 52-week high")),
+                "T_P_above_50D": bool(_s2t.get("price above 50D")),
+                "T_30pct_above_52WL": bool(_s2t.get("30% above 52-week low")),
+                "T_stock_RS_ge70": bool(_s2t.get("Stock RS 70 or more")),
+                "T_50D_above_150D": bool(_s2t.get("50D above 150D")),
+                "T_50D_above_200D": bool(_s2t.get("50D above 200D")),
+            }
+            s2["groups"]["g1_price"] = {"P150": s2["tests"]["T_P_above_150D"], "W25": s2["tests"]["T_within_25pct_52WH"],
+                                        "P50": s2["tests"]["T_P_above_50D"], "L30": s2["tests"]["T_30pct_above_52WL"]}
+            s2["groups"]["g2_trend"] = {"T50_150": s2["tests"]["T_50D_above_150D"], "T50_200": s2["tests"]["T_50D_above_200D"]}
+            s2["groups"]["g3_rs"] = {"SRS70": s2["tests"]["T_stock_RS_ge70"]}
+            s2["count"] = sum(1 for _v in s2["tests"].values() if _v)
             s2["total"] = len(s2["tests"])
-            if s2_count >= S2_RATING_AT["Probable"]:
-                s2["rating"] = "Probable"
-            elif s2_count >= S2_RATING_AT["Plausible"]:
-                s2["rating"] = "Plausible"
-            elif s2_count >= S2_RATING_AT["Possible"]:
-                s2["rating"] = "Possible"
-            else:
-                s2["rating"] = "None"
+            s2["rating"] = _s2r["rating"]
         else:
             s2["rating"] = "None"
         md["stage_2"] = s2
@@ -3689,11 +3669,17 @@ def compute_master_dashboard_screens(prices, filter_results):
         # ──────────────────────────────────────────────────────────────
         s3 = {"tests": {}, "groups": {}, "count": 0, "rating": "None"}
         rs_3m = rs_returns.get("3M")  # used by downstream code; keep accessible
-        s3_gate1 = (ma200 is not None and ma200_80d_ago is not None and ma200 > ma200_80d_ago)
+        # MD-DEFS-2026-11-13 (Richard, 11-Nov-2026: "S3 should not be contingent on the price > 200D MA ... The slope of
+        # the 200D MA is very important as a delineator"; "Q2 = One month"): one gate, the 200-day line higher than 21
+        # trading days ago. gate_200D_still_rising_vs_80d keeps its name for readers and now carries the 21-day gate;
+        # gate_price_above_200D is information only.
+        _ma200_21_s3 = mas.get("200D_21d_ago")
+        s3_gate1 = (ma200 is not None and _ma200_21_s3 is not None and ma200 > _ma200_21_s3)
         s3_gate2 = (price is not None and ma200 is not None and price > ma200)
         s3["gate_200D_still_rising_vs_80d"] = s3_gate1
+        s3["gate_200D_rising_vs_21d"] = s3_gate1
         s3["gate_price_above_200D"] = s3_gate2
-        if s3_gate1 and s3_gate2:
+        if s3_gate1:
             # T3 (crosswalk item 6c, ruled 11-Sep-2026): base 4 or later on Minervini's count (his late-stage
             # line, canon MM-BC-03), replacing "base_count_504d >= 2" (the page) / ">= 3" (this file), which
             # disagreed with each other. The Stage 3 rating series steps on 11-Sep-2026 (Q6d, accepted).
@@ -3753,8 +3739,13 @@ def compute_master_dashboard_screens(prices, filter_results):
         # ──────────────────────────────────────────────────────────────
         _ensure_stage3_snapshots()
         s4 = {"tests": {}, "groups": {}, "count": 0, "rating": "None"}
-        s4_gate = (price is not None and ma200 is not None and price < ma200)
+        # MD-DEFS-2026-11-13 (Richard, 11-Nov-2026, "Q1 A"): price below the 200-day line AND the 200-day line lower
+        # than 21 trading days ago.
+        _ma200_21_s4 = mas.get("200D_21d_ago")
+        s4_gate = (price is not None and ma200 is not None and price < ma200
+                   and _ma200_21_s4 is not None and ma200 < _ma200_21_s4)
         s4["gate_price_below_200D"] = s4_gate
+        s4["gate_200D_falling_vs_21d"] = bool(ma200 is not None and _ma200_21_s4 is not None and ma200 < _ma200_21_s4)
         if s4_gate:
             s4_t2 = (ma100 is not None and ma100_20d_ago is not None and ma100 < ma100_20d_ago)
             s4_t3 = (ma200 is not None and ma200_20d_ago is not None and ma200 < ma200_20d_ago)
@@ -3849,7 +3840,9 @@ def compute_master_dashboard_screens(prices, filter_results):
         max_pullback_bh = p.get("max_pullback_since_base_high")
         days_since_bh = p.get("days_since_base_high")
         ma200_21d_basing = mas.get("200D_21d_ago")
-        ba_t1_pullback = bool(max_pullback_bh is not None and max_pullback_bh >= 0.15)
+        # MD-DEFS-2026-11-13 (Richard, 13-Nov-2026: "Set the criteria for Basing to require a fall of at least 10%, not 15%").
+        # The key t1_price_pullback_ge15 keeps its name for readers.
+        ba_t1_pullback = bool(max_pullback_bh is not None and max_pullback_bh >= _PR.BASING_MIN_FALL)
         ba_t2_time = bool(days_since_bh is not None and days_since_bh >= 20)
         ba_t3_above_200d = bool(price is not None and ma200 is not None and price > ma200)
         ba_t4_200d_rising = bool(ma200 is not None and ma200_21d_basing is not None and ma200 > ma200_21d_basing)
@@ -3896,7 +3889,8 @@ def compute_master_dashboard_screens(prices, filter_results):
             # function (which still governs the other eight pre-indicators).
             "pulling_back_uptrend": {
                 "tests": pb_tests, "count": pb_count, "total": 4,
-                "rating": ("Probable" if pb_count >= 4 else "Plausible" if pb_count >= 3 else "Possible" if pb_count >= 2 else "None"),
+                # MD-DEFS-2026-11-13 (Richard, 13-Nov-2026: "Do similarly to the Basing adaptations"): Y or N.
+                "rating": ("Probable" if pb_count >= 4 else "None"),
                 "qualifies": ind["pulling_back_uptrend"],
                 # MD-PB-RETEST-2026-11-12: depth band and the information columns
                 "info_depth_band": pb_band,
@@ -3912,7 +3906,11 @@ def compute_master_dashboard_screens(prices, filter_results):
             },
             "basing": {
                 "tests": ba_tests, "count": ba_count, "total": 4,
-                "rating": _pre_rating(ba_count, 4), "qualifies": ind["basing"],
+                # MD-DEFS-2026-11-13 (Richard, 13-Nov-2026: "I want Y/N, and instead of those ratings for it, show deep,
+                # medium, shallow"): Y = all four tests = "Probable" (kept so the Technical Momentum Rating reads it
+                # unchanged); N = "None". The page shows Y or N and the depth label.
+                "rating": ("Probable" if ba_count == 4 else "None"), "qualifies": ind["basing"],
+                "info_depth_band": _PR.depth_label(max_pullback_bh),
                 "test_values": {
                     "t1_price_pullback_ge15": _md_v2_round(max_pullback_bh),  # MD-BASING-6M-HIGH-2026-11-12
                     "t2_time_below_high_ge20d": days_since_bh,

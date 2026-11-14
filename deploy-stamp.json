@@ -1,13 +1,13 @@
 {
   "stamp_version": 1,
-  "data_generated": "2026-11-13 22:15",
+  "data_generated": "2026-11-14 08:07",
   "data_generated_read_from": "index.html",
   "price_source": "yfinance",
-  "filters_generated": "2026-11-13 22:16",
-  "universe_updated": "2026-11-13 22:15",
+  "filters_generated": "2026-11-14 08:08",
+  "universe_updated": "2026-11-14 08:02",
   "chart_reference_date": "2026-11-13",
-  "index_bytes": 39657516,
-  "index_mtime_local": "2026-11-13 23:35",
-  "stamped_utc": "2026-11-13 23:36:02Z",
-  "stamped_local": "2026-11-13 23:36:02"
+  "index_bytes": 40114176,
+  "index_mtime_local": "2026-11-14 08:32",
+  "stamped_utc": "2026-11-14 08:35:43Z",
+  "stamped_local": "2026-11-14 08:35:43"
 }

@@ -480,6 +480,12 @@ def load_data():
     else:
         data_js += "var SSP_COHORTS = null;\n"
     data_js += "var PB_STAGEINFO_COUNT = 0;\n"  # referenced by SB and HVCP modules  # global so lazy-loaded chart files can register into it
+    try:  # MD-FLOW-2026-11-14: the Key Drivers stocks for "Select by list" (scripts/key_drivers_stock_list.py)
+        _kd = json.load(open(os.path.join(DATA_DIR, "key-drivers-stocks.json"), encoding="utf-8"))
+        data_js += "var MD_KD_LIST = " + json.dumps({"tickers": _kd.get("tickers", []), "built": (_kd.get("_meta") or {}).get("built")}) + ";\n"
+    except Exception as _ex:
+        print("[build] key-drivers-stocks.json not read: %s" % _ex)
+        data_js += "var MD_KD_LIST = null;\n"
     # S59: RDS_INDEX — most recent Developments Summariser date per ticker (embedded at patch time)
     data_js += 'var RDS_INDEX = {"AAF-GB":"2026-05-16","AKTR-GR":"2026-05-16","ALC":"2026-05-15","ALFEN-NL":"2026-05-16","ANOD.B":"2026-05-15","BARC-GB":"2026-05-16","BBY-GB":"2026-05-16","BG-AT":"2026-05-16","BRKN-CH":"2026-05-16","BUFAB-SE":"2026-05-16","CAF-ES":"2026-05-16","CEVI":"2026-05-15","CKN-GB":"2026-05-16","DANSKE-DK":"2026-05-16","DEC-FR":"2026-05-16","DHER":"2026-05-15","DHL-DE":"2026-05-16","DPLM-GB":"2026-05-16","EDP-PT":"2026-05-16","EDPR-PT":"2026-05-16","ELI-BE":"2026-05-16","EMSN-CH":"2026-05-16","ENEL-IT":"2026-05-16","ENG-PL":"2026-05-16","ENX-FR":"2026-05-16","EVN-AT":"2026-05-16","FORTUM-FI":"2026-05-16","FQT-AT":"2026-05-16","GALD-CH":"2026-05-16","GAW-GB":"2026-05-16","GEST-ES":"2026-05-16","GET-FR":"2026-05-16","HILS-GB":"2026-05-16","HOC-GB":"2026-05-16","HOLN-CH":"2026-05-16","HSX-GB":"2026-05-15","IBE-ES":"2026-05-16","III-GB":"2026-05-15","INCH-GB":"2026-05-16","INDT":"2026-05-15","IPN-FR":"2026-05-16","ITV-GB":"2026-05-16","KAMBI-SE":"2026-05-16","KWS-DE":"2026-05-16","LI-FR":"2026-05-16","MAIRE-IT":"2026-05-16","MOL-HU":"2026-05-16","MRL-ES":"2026-05-16","MVC-ES":"2026-05-16","NETC-DK":"2026-05-16","OHB-DE":"2026-05-15","ORSTED-DK":"2026-05-17","RHM":"2026-05-15","ROSE-GB":"2026-05-17","ROVI-ES":"2026-05-15","RUI-FR":"2026-05-17","RWE-DE":"2026-05-16","SAVE-SE":"2026-05-17","SCYR-ES":"2026-05-17","SEE-GB":"2026-05-16","SEM-PT":"2026-05-17","SFER-IT":"2026-05-17","SLR-ES":"2026-05-17","SMWH-GB":"2026-05-15","SOLB-BE":"2026-05-17","SSE-GB":"2026-05-16","SU-FR":"2026-05-16","SWED-SE":"2026-05-16","TATE-GB":"2026-05-16","TEMN-CH":"2026-05-17","TEP":"2026-05-15","TPRO-IT":"2026-05-15","TRE-ES":"2026-05-16","TRST-GB":"2026-05-17","UIE-DK":"2026-05-17","UNI-IT":"2026-05-17","VIE-FR":"2026-05-16","VIMIAN-SE":"2026-05-17","VIO-BE":"2026-05-15","VIRP-FR":"2026-05-17","VWS-DK":"2026-05-16","WOSG-GB":"2026-05-15","ZEG-GB":"2026-05-17"};\n'
 
@@ -544,6 +550,14 @@ TABS = [
     {"id": "lifecycle_phases", "label": "Phases of a Stock Lifecycle", "accent": "#1b3d5c"},  # MD-LIFECYCLE-PHASES-2026-10-10
     {"id": "ig_turning", "label": "IG - Turning/Inflecting", "accent": "#2f5d3a"},  # MD-IG-TURNING-2026-11-06
     {"id": "capital_deploy", "label": "Capital Deployment In Range", "accent": "#0d366b"},  # MD-CAPITAL-DEPLOY-2026-11-11
+    # MD-FLOW-2026-11-14: the seven Investment Classification pages (Trade Mapping workbook A19 to A56), framed from flow/index.html
+    {"id": "flow_hc", "label": "Healthy Confirmation?", "accent": "#1d4f3a"},
+    {"id": "flow_proven", "label": "Reinforcing / Proven S2 Core Investment?", "accent": "#1d4f3a"},
+    {"id": "flow_early", "label": "Broadening / Early S2 Core Investment?", "accent": "#1d4f3a"},
+    {"id": "flow_inflecting", "label": "Inflecting / S1→S2 Probing Bet?", "accent": "#1d4f3a"},
+    {"id": "flow_s1", "label": "Bottoming / S1 Speculative Bet?", "accent": "#1d4f3a"},
+    {"id": "flow_s3", "label": "Restarting Reinforcing / S3 Speculative Bet?", "accent": "#1d4f3a"},
+    {"id": "flow_s4", "label": "Collapsing / S4 Speculative Bet?", "accent": "#1d4f3a"},
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -577,6 +591,7 @@ IMPLEMENTED_TABS = [
     "lifecycle_phases",  # MD-LIFECYCLE-PHASES-2026-10-10
     "ig_turning",  # MD-IG-TURNING-2026-11-06
     "capital_deploy",  # MD-CAPITAL-DEPLOY-2026-11-11
+    "flow_hc", "flow_proven", "flow_early", "flow_inflecting", "flow_s1", "flow_s3", "flow_s4",  # MD-FLOW-2026-11-14
 ]
 
 
@@ -721,7 +736,7 @@ MD_FIT_JS = r"""/* MD-FIT-2026-11-11 (SA, Richard 11-Nov-26: "Get the page looki
     var gs=n.querySelectorAll('.v2-nav-group'),cs=getComputedStyle(n),need=0;
     for(var i=0;i<gs.length;i++)need+=gs[i].getBoundingClientRect().width;
     need+=(parseFloat(cs.columnGap)||0)*Math.max(0,gs.length-1)+(parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0);
-    var compact=need>document.documentElement.clientWidth-1;
+    var compact=true;  /* MD-FLOW-2026-11-14 (Richard, 13-Nov-2026: "The drop downs ... worked very well as a navigation method for the MD. Lets do it for the MD at all times, even my desktop PC"); was need>document.documentElement.clientWidth-1 */
     root.classList.toggle('md-navc',compact);
     if(!compact)closeAll(null);
     if(compact){  /* a drop-down that would run off the right edge opens leftwards */
@@ -1141,6 +1156,18 @@ body[data-active-tab="capital_deploy"]{--header-height:70px}
 .v2-nav .v2-grp-summary .v2-nav-btn[data-v2-tab="ideas_lists"]{width:80px}
 #tab-capital_deploy{padding:0 !important}
 #tab-capital_deploy iframe.cdir-frame{display:block;width:100%;border:0;background:#f9f9f7}
+/* MD-FLOW-2026-11-14: the Investment Classification pages (flow/index.html, build_flow_pages.py), framed like Capital Deployment In Range */
+body[data-active-tab^="flow_"] .header-tabs-row{display:none !important}
+body[data-active-tab^="flow_"] .v2-nav{display:flex}
+body[data-active-tab^="flow_"] .header-controls-row{display:none !important}
+body[data-active-tab^="flow_"] .header{height:auto !important;padding-bottom:0 !important}
+body[data-active-tab^="flow_"]{--header-height:70px}
+.tab-content[id^="tab-flow_"]{padding:0 !important}
+.tab-content[id^="tab-flow_"] iframe.flow-frame{display:block;width:100%;border:0;background:#f9f9f7}
+.v2-nav .md-old{display:block;font-size:9px;font-weight:400;opacity:.75;line-height:1.1}
+.v2-nav .v2-grp-flow{border-color:#1d4f3a}
+#hdr-list-sel{font:inherit;font-size:11px;padding:3px 4px;border:1px solid var(--border,#d8d3c4);border-radius:4px;background:#fff;max-width:190px}
+#hdr-list-sel.on{border-color:#0d366b;box-shadow:inset 0 0 0 1px #0d366b;font-weight:600}
 #tab-ig_turning{--igt-card:#fffdf8;--igt-ink:#23241f;--igt-mute:#6d6b62;--igt-line:#e6e2d6;--igt-rule:#d6d1c1;--igt-accent:#2f5d3a;
  --igt-p0:#e7e4da;--igt-p1:#cfe3c6;--igt-p2:#8cbf86;--igt-p3:#2f7d3a;--igt-up:#2a6a34;--igt-dn:#9e3b30;--igt-hd:#efece2;--igt-hd2:#f6f3ea;
  color:var(--igt-ink);font:12.5px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:6px 8px 0}
@@ -6137,7 +6164,7 @@ function RDF_syncStatCount(){
 function RDF_syncBtn(){
   var b=document.getElementById("hdr-rdf-btn");
   if(!b) return;
-  b.textContent = "Ratings filter (" + (RDF.set ? RDF.count : "none") + ")";
+  b.textContent = (RDF.src && RDF.on) ? "List: " + RDF.src + " (" + RDF.count + ")" : "Ratings filter (" + (RDF.set ? RDF.count : "none") + ")";  /* MD-FLOW-2026-11-14 */
   if(RDF_isOn()) b.classList.add("rdf-on"); else b.classList.remove("rdf-on");
   var t = "Narrow every stock table, count and rating tile to the list saved from the IC Ratings Dashboard. ";
   if(RDF.set) t += "Saved list: " + RDF.count + " stocks" + (RDF.savedAt ? ", saved " + RDF.savedAt : "") + ". " +
@@ -6159,6 +6186,7 @@ function RDF_rerender(){
   catch(e){ console.error("RDF_rerender failed", e); }
 }
 function RDF_toggle(){
+  if(typeof MDL!=='undefined'&&MDL.cur){MDL.cur='';try{MDL_fill();}catch(e){}RDF.on=false;}  /* MD-FLOW-2026-11-14: the button switches a picked list off */
   var wasOn = RDF.on;
   RDF_load();
   if(!RDF.set){ RDF.on=false; RDF_syncBtn(); RDF_flash(RDF.bad ? "Saved list unreadable" : "No saved list"); return; }
@@ -6167,6 +6195,23 @@ function RDF_toggle(){
   RDF_rerender();
 }
 window.RDF_toggle=RDF_toggle; window.RDF_syncBtn=RDF_syncBtn; window.RDF_load=RDF_load;
+/* MD-FLOW-2026-11-14 -- Select by list (Richard, 13-Nov-2026: "Turn all stocks mentioned in the Industry/Sectors Key Drivers project
+   into a list ... Have that list one of the "Filter/Select By" lists in the MD"). One list at a time narrows every page through the
+   Ratings filter's own set of tickers (RDF.set), so it reaches every page that honours that filter; picking a list switches the
+   saved Ratings Dashboard list off, and the Ratings filter button switches a picked list off. The lists: MD_KD_LIST (embedded at
+   build from data/key-drivers-stocks.json) and the Multi-stock Dashboard's own lists (multichart/populations.json, read when
+   the page opens). */
+var MDL={lists:{},order:[],cur:''};
+function MDL_fill(){var s=document.getElementById('hdr-list-sel');if(!s)return;var h='<option value="">Select by list: all stocks</option>';
+  MDL.order.forEach(function(k){var L=MDL.lists[k];h+='<option value="'+k+'"'+(MDL.cur===k?' selected':'')+'>'+L.label+' ('+L.t.length+')</option>';});s.innerHTML=h;s.classList.toggle('on',!!MDL.cur);}
+function MDL_add(k,label,t){if(!t||!t.length)return;if(!MDL.lists[k])MDL.order.push(k);MDL.lists[k]={label:label,t:t};}
+function MDL_init(){try{if(window.MD_KD_LIST&&MD_KD_LIST.tickers)MDL_add('kd','Key Drivers stocks',MD_KD_LIST.tickers);}catch(e){}MDL_fill();
+  try{fetch('multichart/populations.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(P){if(!P)return;var want={live_all:'Live stocks',i_A:'RB Interest List A',i_B:'RB Interest List B',i_C:'RB Interest List C',i_AB:'RB Interest Lists A and B',w_bench:'Ideas Bench',w_short:'Ideas Shortlist',w_long:'Ideas Longlist',w_pool:'Pool of Middle Innings Eligible Stocks'};
+    (P.dropdowns||[]).forEach(function(g){(g.options||[]).forEach(function(o){if(want[o.id])MDL_add(o.id,want[o.id],o.tickers);});});MDL_fill();}).catch(function(){});}catch(e){}}
+function MDL_pick(k){MDL.cur=k||'';if(!k){RDF.on=false;RDF.set=null;RDF.src=null;}else{var s={},t=MDL.lists[k].t;for(var i=0;i<t.length;i++)s[t[i]]=1;RDF.set=s;RDF.count=t.length;RDF.savedAt=null;RDF.on=true;RDF.src=MDL.lists[k].label;}
+  MDL_fill();RDF_syncBtn();RDF_rerender();}
+window.MDL_pick=MDL_pick;
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',MDL_init);else setTimeout(MDL_init,0);
 window.RDF_apply=RDF_apply; window.RDF_pick=RDF_pick; window.RDF_ok=RDF_ok; window.RDF_isOn=RDF_isOn; window.RDF=RDF;
 RDF_load();
 if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded", RDF_syncBtn); }
@@ -10839,7 +10884,7 @@ function SUM_renderQualifiedStocks() {
     if (!host) return false;
     if (host.querySelector('#s2-main-table')) return true;
     var html = '' +
-      '<div class="s1-intro">Stage 2 (advancing) looks for stocks already in a clear uptrend: two gates, both required (the 200-day MA flat or rising; the 150-day MA above the 200-day MA), then seven scored tests on price, the 50-day MA and Stock RS. All seven = Probable, six = Plausible, 5 Possible; fewer, no rating. Industry RS, Sector RS and Stock RS against its industry are shown for information, not scored. Position Entry and Exit Rules, version of 13-Nov-2026.</div>' +  /* MD-DEFS-2026-11-13 */
+      '<div class="s1-intro">Stage 2 (advancing) looks for stocks already in a clear uptrend: two gates, both required (the 200-day MA flat or rising; the 150-day MA above the 200-day MA), then seven scored tests on price, the 50-day MA and Stock RS. All seven = Probable, six = Plausible, five = Possible; fewer, no rating. Industry RS, Sector RS and Stock RS against its industry are shown for information, not scored. Position Entry and Exit Rules, version of 13-Nov-2026.</div>' +  /* MD-DEFS-2026-11-13 */
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-s2-grp="inputs" data-s2-val="pct" onclick="s2SetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -12039,7 +12084,7 @@ function SUM_renderQualifiedStocks() {
               /* MD-POOL-ELIG-2026-09-28: pages that use the V2 header chrome must be measured too. Without this, opening
                  the dashboard straight onto them (a bookmark or a reload with #pool_elig or #combos) left .main at the
                  70px fallback under a ~245px header, hiding the top of the page (found on the live site, 28-Sep-26). */
-              active === 'combos' || active === 'pool_elig' || active === 'ideas_lists' || active === 'lifecycle_phases' || active === 'ig_turning' || active === 'capital_deploy');  /* MD-LIFECYCLE-PHASES-2026-10-10; MD-IG-TURNING-2026-11-06 */
+              active === 'combos' || active === 'pool_elig' || active === 'ideas_lists' || active === 'lifecycle_phases' || active === 'ig_turning' || active === 'capital_deploy' || active.indexOf('flow_') === 0);  /* MD-FLOW-2026-11-14 */  /* MD-LIFECYCLE-PHASES-2026-10-10; MD-IG-TURNING-2026-11-06 */
     if (!v2) return;
     /* S66b: measure the actual rendered header height (header-top + nav groups) and
        publish as --header-height so .main margin-top and all frozen top: offsets are correct */
@@ -12080,6 +12125,19 @@ function SUM_renderQualifiedStocks() {
     // internal tab keys unchanged (display-only rename).
     /* S66b: group-structured nav — labels above buttons, coloured group borders */
     nav.innerHTML = ''
+      /* MD-FLOW-2026-11-14: Group 0, the Investment Classification pages (Trade Mapping workbook A19 to A56) */
+      + '<div class="v2-nav-group v2-grp-flow">'
+      +   '<div class="v2-nav-group-label">Investment Classification</div>'
+      +   '<div class="v2-nav-group-btns">'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_hc" onclick="switchTab(\'flow_hc\')">Healthy Confirmation?</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_proven" onclick="switchTab(\'flow_proven\')">Reinforcing / Proven S2 Core Investment?</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_early" onclick="switchTab(\'flow_early\')">Broadening / Early S2 Core Investment?</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_inflecting" onclick="switchTab(\'flow_inflecting\')">Inflecting / S1&rarr;S2 Probing Bet?</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_s1" onclick="switchTab(\'flow_s1\')">Bottoming / S1 Speculative Bet?</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_s3" onclick="switchTab(\'flow_s3\')">Restarting Reinforcing / S3 Speculative Bet?</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_s4" onclick="switchTab(\'flow_s4\')">Collapsing / S4 Speculative Bet?</button>'
+      +   '</div>'
+      + '</div>'
       /* Group 1: Stages */
       + '<div class="v2-nav-group v2-grp-stages">'
       +   '<div class="v2-nav-group-label">Stages</div>'
@@ -12096,19 +12154,19 @@ function SUM_renderQualifiedStocks() {
       +   '<div class="v2-nav-group-btns">'
       +     '<button class="v2-nav-btn" data-v2-tab="pos_pre_indicators" onclick="switchTab(\'pos_pre_indicators\')">Basing in uptrend</button>'  /* MD-V2-PULLING-BACK-BASING-SPLIT-V1 */
       +     '<button class="v2-nav-btn" data-v2-tab="pulling_back" onclick="switchTab(\'pulling_back\')">Pulling Back in Uptrend</button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="neg_pre_indicators" onclick="switchTab(\'neg_pre_indicators\')">Negative (&ldquo;Collapsing&rdquo; share price)</button>'
+      /* MD-FLOW-2026-11-14 (Richard, 13-Nov-2026: remove the negative "Collapsing" share price page): its button is gone; the page is still reachable by its address */
       +   '</div>'
       + '</div>'
       /* Group 3: Late-stage capital qualification setups and tests */
       + '<div class="v2-nav-group v2-grp-setups">'
       +   '<div class="v2-nav-group-label">Late-stage capital qualification setups and tests</div>'
       +   '<div class="v2-nav-group-btns">'
-      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">Stage 1 &mdash; Speculative bet</button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">Stage 2 &mdash; Probing bet</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">Stage 1 &mdash; Speculative bet<span class="md-old">older tests, being replaced</span></button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">Stage 2 &mdash; Probing bet<span class="md-old">older tests, being replaced</span></button>'
       +     '<button class="v2-nav-btn" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">Retest</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
       +     '<button class="v2-nav-btn" data-v2-tab="tests_healthy_vcp" onclick="switchTab(\'tests_healthy_vcp\')">S2 &mdash; &ldquo;VCP&rdquo; and &ldquo;breakout&rdquo; of upwards MA</button>'  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
-      +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s3" onclick="switchTab(\'tests_speculative_bet_s3\')">Stage 3 &mdash; Speculative bet</button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s4" onclick="switchTab(\'tests_speculative_bet_s4\')">Stage 4 &mdash; Speculative bet</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s3" onclick="switchTab(\'tests_speculative_bet_s3\')">Stage 3 &mdash; Speculative bet<span class="md-old">older tests, being replaced</span></button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s4" onclick="switchTab(\'tests_speculative_bet_s4\')">Stage 4 &mdash; Speculative bet<span class="md-old">older tests, being replaced</span></button>'
       +   '</div>'
       + '</div>'
       /* Group 4: Bullish post-setup/tests technical behaviour */
@@ -12137,7 +12195,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Pool of Middle Innings Eligible Stocks</button>'  /* MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02 */
       +     '<button class="v2-nav-btn" data-v2-tab="lifecycle_phases" onclick="switchTab(\'lifecycle_phases\')">Phases of a Stock Lifecycle</button>'  /* MD-LIFECYCLE-PHASES-2026-10-10 */
       +     '<button class="v2-nav-btn" data-v2-tab="ig_turning" onclick="switchTab(\'ig_turning\')">IG - Turning/<wbr>Inflecting</button>'  /* MD-IG-TURNING-2026-11-06 */
-      +     '<button class="v2-nav-btn" data-v2-tab="capital_deploy" onclick="switchTab(\'capital_deploy\')">Capital Deployment In Range</button>'  /* MD-CAPITAL-DEPLOY-2026-11-11 */
+      +     '<button class="v2-nav-btn" data-v2-tab="capital_deploy" onclick="switchTab(\'capital_deploy\')">Capital Deployment In Range<span class="md-old">older tests, being replaced</span></button>'  /* MD-CAPITAL-DEPLOY-2026-11-11 */
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -20896,6 +20954,26 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   };
 })();
 
+/* MD-FLOW-2026-11-14: the seven Investment Classification pages. One page, flow/index.html (built nightly by build_flow_pages.py
+   from the daily classification file), framed per tab with its ?page=, sized to the window like Capital Deployment In Range. */
+(function(){
+  var PG={flow_hc:"hc",flow_proven:"proven",flow_early:"early",flow_inflecting:"inflecting",flow_s1:"s1",flow_s3:"s3",flow_s4:"s4"};
+  function act(){var a=document.body.getAttribute('data-active-tab')||'';return a.indexOf('flow_')===0?a:null;}
+  function size(){var a=act();if(!a)return;var f=document.querySelector('#tab-'+a+' iframe.flow-frame');if(!f)return;
+    try{if(typeof window.measureV2Ribbon==='function')window.measureV2Ribbon();}catch(e){}
+    var h=Math.floor(window.innerHeight-f.getBoundingClientRect().top-2);h=(h>=300?h:Math.floor(window.innerHeight*0.8));f.style.height=h+'px';
+    var ex=document.documentElement.scrollHeight-window.innerHeight;if(ex>0&&h-ex>=300)f.style.height=(h-ex)+'px';}
+  if(!window._flowResizeWired){window._flowResizeWired=true;window.addEventListener('resize',function(){if(act())size();});}
+  window.renderFlow=function(id){
+    try{buildHeaderControls(id);}catch(e){}
+    var c=document.getElementById('tab-'+id);if(!c)return;
+    if(!c.querySelector('iframe.flow-frame')){
+      c.innerHTML='<iframe class="flow-frame" title="'+(document.querySelector('.v2-nav-btn[data-v2-tab="'+id+'"]')||{}).textContent+'" src="flow/index.html?page='+PG[id]+'&v='+Math.floor(Date.now()/600000)+'"></iframe>';
+    }
+    size();setTimeout(size,150);setTimeout(size,600);
+  };
+})();
+
 /* ============================================================================
    POOL OF MIDDLE INNINGS ELIGIBLE STOCKS  (tab id ideas_lists; MD-IDEAS-LISTS-2026-09-28, rebuilt MD-POOL-MI-2026-10-02)
    Richard's page, renamed 2-Oct-26 from "Ideas Lists (Bench, LL, SL)" (SA - Master Dashboard D-MD-POOL-44 onwards).
@@ -21406,6 +21484,7 @@ function renderTab(id){
   else if(id==="lifecycle_phases")renderLifecyclePhases();  /* MD-LIFECYCLE-PHASES-2026-10-10 */
   else if(id==="ig_turning")renderIgTurning();  /* MD-IG-TURNING-2026-11-06 */
   else if(id==="capital_deploy")renderCapitalDeploy();  /* MD-CAPITAL-DEPLOY-2026-11-11 */
+  else if(id.indexOf("flow_")===0)renderFlow(id);  /* MD-FLOW-2026-11-14 */
   else if(id==="changes")renderChanges();
   else if(id==="positions")renderPositions();
   else if(id==="ssem")renderSSEM();
@@ -22381,7 +22460,8 @@ document.addEventListener('click', function(e){
         # MD-V2-S41-REMOVE-KEY-BUTTON-MARKER -- "Key" button removed per S41 brief (16-May-26)
         '      <button class="ctrl-btn" id="hdr-copy-btn" onclick="copyVisibleStocks()">Copy</button>\n'
         '      <button class="ctrl-btn" id="hdr-rdf-btn" onclick="RDF_toggle()">Ratings filter</button>\n'
-        '      <button class="ctrl-btn" id="hdr-chart-btn" onclick="openChart(\'Overview\')">Chart</button>\n'
+        # MD-FLOW-2026-11-14 (Richard, 13-Nov-2026: remove the "chart", "home" and "repository" buttons): the Chart button removed
+        '      <select id="hdr-list-sel" title="Select by list: narrow every page to one list of stocks (as the Ratings filter does). Live Investments is never filtered." onchange="MDL_pick(this.value)"><option value="">Select by list: all stocks</option></select>\n'
         # 'SOI List' button removed 6-Oct-26: the Standardised Stocks of Interest list was retired (SA - Stock Universe Canonical Source D79, D81 b)
         '      <button class="ctrl-btn ssp-btn" onclick="openStockView()" title="Single stock view — all ratings at a glance">Per-stock Chart</button>\n'
         # MD-PSD-2026-10-28: Richard, 28-Oct-26: "a button at the top, next to STOCK VIEW; call the button Per-stock Dashboard. (Rename "Stock View" to "Per-stock Chart")"
@@ -22395,8 +22475,7 @@ document.addEventListener('click', function(e){
         # vfhqi.github.io/landing-page.html and 404'd. Verified live, not assumed:
         # both returned HTTP 404 while the sibling Pages sites they should point at
         # returned 200. Absolute URLs to those sites work from every context.
-        '      <a class="ctrl-btn" href="https://vfhqi.github.io/landing/" title="Operating system landing page">Home</a>\n'
-        '      <a class="ctrl-btn" href="https://vfhqi.github.io/repository/" title="Research repository">Repository</a>\n'
+        # MD-FLOW-2026-11-14: the Home and Repository buttons removed
         '    </div>\n'
         '  </div>\n'
         '  <!-- Row 2: #1 TABS (left) + #2 JUMP TO (right) -->\n'

@@ -98,8 +98,15 @@
   }
 
   /* ---------- the population: every choice made narrows it ---------- */
+  /* LIST-LINK-2026-11-14 (SA - Master Dashboard, D-MD-TM-68): a list of stocks given in the address
+     (?list=TICKER,TICKER,...&title=...) opens the page on exactly those stocks, so a report section or an Investment
+     Classification tab can hand its stocks over in one click. The dropdowns still narrow it; Clear removes it. */
+  var LINK = (function () { try { var q = new URLSearchParams(location.search), l = q.get('list'); if (!l) return null;
+    var ts = l.split(',').map(function (x) { return x.trim(); }).filter(Boolean); return ts.length ? { tickers: ts, title: q.get('title') || 'the link' } : null; } catch (e) { return null; } })();
   function population() {
     var sets = [], notes = [];
+    if (LINK) { var known = LINK.tickers.filter(function (t) { return S[t]; }); sets.push(known);
+      notes.push('<b>From the link:</b> ' + esc(LINK.title) + ' <span class="mut">(' + known.length + ' of ' + LINK.tickers.length + ' stocks' + (known.length < LINK.tickers.length ? '; the others are not in the populations file' : '') + ')</span>'); }
     document.querySelectorAll('select.f[data-g]').forEach(function (s) {
       if (!s.value) return; var o = DD[s.dataset.g].options.filter(function (x) { return x.id === s.value; })[0]; if (!o) return;
       sets.push(o.tickers); notes.push('<b>' + esc(DD[s.dataset.g].label) + ':</b> ' + esc(o.label) + (o.note ? ' <span class="mut">(' + esc(o.note) + ')</span>' : ''));
@@ -330,7 +337,7 @@
     $('f-new').addEventListener('change', refresh);
     $('f-sort').addEventListener('change', refresh);
     if ($('f-grp')) $('f-grp').addEventListener('change', refresh);
-    $('clear').onclick = function () { document.querySelectorAll('select.f').forEach(function (s) { if (s.id !== 'f-grade') s.value = ''; }); $('f-new').checked = false; fillGroupValues(); refresh(); };
+    $('clear').onclick = function () { if (LINK) { LINK = null; try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {} } document.querySelectorAll('select.f').forEach(function (s) { if (s.id !== 'f-grade') s.value = ''; }); $('f-new').checked = false; fillGroupValues(); refresh(); };
     $('prev').onclick = function () { go(at - 2); }; $('next').onclick = function () { go(at + 2); };
     $('lst').onclick = function (e) { var it = e.target.closest('.it'); if (it) go(parseInt(it.dataset.i, 10)); };
     document.addEventListener('keydown', function (e) {
@@ -340,7 +347,8 @@
     });
     /* a kept choice wins; otherwise it opens on the Ideas Bench, closest to its target moving average first */
     var kept = st.sel && Object.keys(st.sel).some(function (k) { return k !== 'fnew' && k !== 'f-grade' && st.sel[k]; });
-    if (kept) {
+    if (LINK) { /* LIST-LINK-2026-11-14: the linked list alone, no kept choice and no default */ }
+    else if (kept) {
       document.querySelectorAll('select.f').forEach(function (s) { var k = s.id || ('g:' + s.dataset.g); if (st.sel[k] == null) return; if (s.id === 'f-gv') fillGroupValues(); s.value = st.sel[k]; if (s.value !== st.sel[k]) s.value = ''; });
       $('f-new').checked = !!st.sel.fnew;
     } else { var w = document.querySelector('select.f[data-g="watch"]'); if (w) w.value = 'w_bench'; }

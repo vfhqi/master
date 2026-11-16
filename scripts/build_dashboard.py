@@ -598,6 +598,337 @@ IMPLEMENTED_TABS = [
 # MD-FIT-2026-11-11 (SA - Master Dashboard, 11-Nov-2026; Richard: "Get the page looking clean on various screen sizes,
 # including my laptop, office PC, ipad mini, ipad (old, larger one), tablet (lenovo android)"). Display only.
 # Source files and patcher: scripts/patch_md_fit_2026_11_11/. Decisions D-MD-FIT-1 onwards in the project.
+# MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard): the shared filter row on the monitoring pages, and the retired
+# pages' redirects (MD-RETIRE-2026-11-16). Display only; one self-contained script and style, loaded after the page script.
+MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richard, 13-Nov-2026 Message 6 note: "the
+   https://vfhqi.github.io/master/#ig_turning drop down approach for filters etc. is great. Where that is useful for any
+   other pages in the MD to improve their functionality, do it"). One shared helper for the monitoring pages: a row of
+   drop-downs under the column headings, a search box, Clear filters and Download CSV, in the style of IG - Turning/Inflecting.
+   It decorates each page's own table and changes nothing the page computes: it hides rows with its own class (mdf-hide),
+   so the page's own scope buttons, sorting and grouping keep working, and it re-applies itself whenever the page redraws.
+   A column earns a drop-down when its cells take 2 to 10 values that are not plain numbers (ratings, groups passed, test
+   ticks, depth, moving average); a test tick is read from the cell's pass or fail class, so the filter survives the
+   page's "show test values" switch. Also here: the retired pages (D-MD-TM-92) open their replacement. */
+(function () {
+  'use strict';
+  /* ---------------------------------------------------------------- the retired pages (Richard, 15-Nov-2026, "Q1 = A") */
+  var RETIRED = {
+    tests_probing_bet_s1: 'flow_s1', pb: 'flow_s1', tests_probing_bet_s2: 'flow_inflecting',
+    tests_speculative_bet: 'flow_s3', tests_speculative_bet_s3: 'flow_s3', tests_speculative_bet_s4: 'flow_s4',
+    capital_deploy: 'master_overview', collapse: 'stage_4', s4_declining: 'stage_4', s3_topping: 'stage_3'
+  };
+  window.MD_RETIRED_TABS = RETIRED;
+  function redirectHash() {
+    try {
+      var h = (location.hash || '').slice(1).split('/')[0];
+      if (h && RETIRED[h] && typeof window.switchTab === 'function') {
+        history.replaceState(null, '', '#' + RETIRED[h]);
+        window.switchTab(RETIRED[h]);
+      }
+    } catch (e) {}
+  }
+  window.addEventListener('hashchange', redirectHash);
+
+  /* ---------------------------------------------------------------- the filter row */
+  var PAGES = ['stage_1', 'stage_2', 'stage_3', 'stage_4', 'pos_pre_indicators', 'pulling_back', 'setups_healthy_retest'];
+  var NAMES = { stage_1: 'Stage 1', stage_2: 'Stage 2', stage_3: 'Stage 3', stage_4: 'Stage 4',
+    pos_pre_indicators: 'Basing in uptrend', pulling_back: 'Pulling Back in Uptrend', setups_healthy_retest: 'Retest' };
+  var RANK = { 'Probable': 1, 'Plausible': 2, 'Possible': 3, 'None': 4, '✓': 1, '✗': 2 };
+  var ST = {}, BUSY = {}, OBS = {};
+
+  function txt(el) { return el ? String(el.textContent || '').replace(/\s+/g, ' ').trim() : ''; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function headKey(th) { return txt(th).replace(/[▲▼]/g, '').trim(); }
+  function cellVal(td) {
+    var c = ' ' + td.className + ' ';
+    if (/[ -]pass[ -]|\btpass\b/.test(c) || / [a-z0-9-]*-pass /.test(c)) return '✓';
+    if (/[ -]fail[ -]|\btfail\b/.test(c) || / [a-z0-9-]*-fail /.test(c)) return '✗';
+    var v = txt(td);
+    if (v === '·' || v === '.' || v === '✗') return '✗';
+    return v;
+  }
+  function isNum(v) { return /^[(+\-]?[\d.,]+\)?\s*(%|×|x)?$/.test(v); }
+  function optLabel(v) { return v === '✓' ? '✓' : v === '✗' ? '✗' : (v === '' || v === '—') ? '— (blank)' : v; }
+  function sortVals(a, b) {
+    var ra = RANK[a], rb = RANK[b];
+    if (ra && rb) return ra - rb;
+    if (ra) return -1; if (rb) return 1;
+    var fa = /^(\d+)\/(\d+)$/.exec(a), fb = /^(\d+)\/(\d+)$/.exec(b);
+    if (fa && fb) return (+fb[1]) - (+fa[1]);
+    var na = parseFloat(a), nb = parseFloat(b);
+    if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+  function mainTable(id) { var p = document.getElementById('tab-' + id); return p ? p.querySelector('table.data-table') : null; }
+  function headRow(t) {
+    var rs = t.tHead ? [].filter.call(t.tHead.rows, function (r) { return !r.classList.contains('mdf-row'); }) : [];
+    return rs.length ? rs[rs.length - 1] : null;
+  }
+  function dataRows(t, n) { return t.tBodies[0] ? [].filter.call(t.tBodies[0].rows, function (r) { return r.cells.length === n; }) : []; }
+
+  function measure(t, hr, rows) {
+    var n = hr.cells.length, cols = [];
+    for (var j = 0; j < n; j++) {
+      var th = hr.cells[j], key = headKey(th), td0 = rows.length ? rows[0].cells[j] : null;
+      if (td0 && td0.classList.contains('name-cell')) { cols.push({ j: j, key: key, kind: 'search' }); continue; }
+      if (td0 && td0.classList.contains('taxon')) { cols.push({ j: j, key: key, kind: 'tax' }); continue; }
+      var seen = {}, d = 0, allNum = true;
+      for (var i = 0; i < rows.length && d <= 10; i++) {
+        var v = cellVal(rows[i].cells[j]);
+        if (!(v in seen)) { seen[v] = 1; d++; if (v !== '' && v !== '—' && !isNum(v)) allNum = false; }
+      }
+      if (d >= 2 && d <= 10 && !allNum) cols.push({ j: j, key: key, kind: 'sel', vals: Object.keys(seen).sort(sortVals) });
+      else cols.push({ j: j, key: key, kind: 'none' });
+    }
+    return cols;
+  }
+
+  function selHTML(key, opts, cur, aria) {
+    var h = '<select class="mdf-sel' + (cur ? ' mdf-on' : '') + '" data-k="' + esc(key) + '" aria-label="' + esc('Filter: ' + aria) + '" title="' + esc('Filter: ' + aria) + '">';
+    h += '<option value="">All</option>';
+    opts.forEach(function (o) { h += '<option value="' + esc(o[0]) + '"' + (o[0] === cur ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; });
+    return h + '</select>';
+  }
+  function taxLists(rows, j, ind) {
+    var I = {}, S = {};
+    rows.forEach(function (r) {
+      var c = r.cells[j], a = txt(c.querySelector('.ind')), b = txt(c.querySelector('.sec'));
+      if (a) I[a] = 1;
+      if (b && (!ind || a === ind)) S[b] = 1;
+    });
+    return { ind: Object.keys(I).sort(), sec: Object.keys(S).sort(function (x, y) { return x.localeCompare(y, undefined, { numeric: true }); }) };
+  }
+
+  function buildRow(id, t, hr, rows, cols) {
+    var st = ST[id], tr = document.createElement('tr');
+    tr.className = 'mdf-row';
+    cols.forEach(function (c) {
+      var src = hr.cells[c.j], th = document.createElement('th');
+      th.className = (src.className || '') + ' mdf-th';
+      if (src.colSpan > 1) th.colSpan = src.colSpan;
+      if (c.kind === 'search') {
+        th.innerHTML = '<input class="mdf-q' + (st.q ? ' mdf-on' : '') + '" type="search" placeholder="Search name, ticker, industry, sector" aria-label="Search name, ticker, industry or sector" value="' + esc(st.q || '') + '">';
+      } else if (c.kind === 'tax') {
+        var L = taxLists(rows, c.j, st.ind);
+        if (st.sec && L.sec.indexOf(st.sec) < 0) st.sec = '';
+        th.innerHTML = selHTML('__ind', L.ind.map(function (v) { return [v, v]; }), st.ind, 'Industry')
+          + selHTML('__sec', L.sec.map(function (v) { return [v, v]; }), st.sec, 'Sector');
+      } else if (c.kind === 'sel') {
+        var cur = st.f[c.key] || '';
+        if (cur && c.vals.indexOf(cur) < 0) cur = st.f[c.key] = '';
+        th.innerHTML = selHTML(c.key, c.vals.map(function (v) { return [v, optLabel(v)]; }), cur, c.key);
+      }
+      tr.appendChild(th);
+    });
+    return tr;
+  }
+
+  function stickRow(t, hr, tr) {
+    var last = hr.cells[0]; if (!last) return;
+    var cs = getComputedStyle(last);
+    if (cs.position !== 'sticky') { tr.classList.remove('mdf-stick'); return; }
+    var top = (parseFloat(cs.top) || 0) + last.getBoundingClientRect().height;
+    var z = parseInt(cs.zIndex, 10); z = isNaN(z) ? 5 : z;
+    for (var i = 0; i < tr.cells.length; i++) { tr.cells[i].style.top = top + 'px'; tr.cells[i].style.zIndex = String(z); }
+    tr.classList.add('mdf-stick');
+  }
+
+  function apply(id, t, cols, rows) {
+    var st = ST[id], q = (st.q || '').toLowerCase(), nf = 0, n = cols.length;
+    var sels = cols.filter(function (c) { return c.kind === 'sel' && st.f[c.key]; });
+    var tax = cols.filter(function (c) { return c.kind === 'tax'; })[0];
+    var srch = cols.filter(function (c) { return c.kind === 'search'; })[0];
+    nf = sels.length + (q ? 1 : 0) + (st.ind ? 1 : 0) + (st.sec ? 1 : 0);
+    /* a tick filter is kept, not applied, while the page shows test values instead of ticks */
+    var paused = Object.keys(st.f).filter(function (k) { return st.f[k] && cols.some(function (c) { return c.key === k && c.kind !== 'sel'; }); }).length;
+    var shown = 0, total = 0;
+    rows.forEach(function (r) {
+      var ok = true;
+      if (q) {
+        var s = (srch ? txt(r.cells[srch.j]) : '') + ' ' + (tax ? txt(r.cells[tax.j]) : '');
+        ok = s.toLowerCase().indexOf(q) >= 0;
+      }
+      if (ok && tax && (st.ind || st.sec)) {
+        var c = r.cells[tax.j];
+        if (st.ind && txt(c.querySelector('.ind')) !== st.ind) ok = false;
+        if (ok && st.sec && txt(c.querySelector('.sec')) !== st.sec) ok = false;
+      }
+      for (var k = 0; ok && k < sels.length; k++) if (cellVal(r.cells[sels[k].j]) !== st.f[sels[k].key]) ok = false;
+      r.classList.toggle('mdf-hide', !ok);
+      if (r.style.display !== 'none') { total++; if (ok) shown++; }
+    });
+    /* group heading rows (the page's Industry or Sector grouping): hidden when every stock under them is */
+    var body = t.tBodies[0], cur = null, any = false;
+    if (body) {
+      [].forEach.call(body.rows, function (r) {
+        if (r.cells.length !== n) { if (cur) cur.classList.toggle('mdf-hide', nf > 0 && !any); cur = r; any = false; }
+        else if (!r.classList.contains('mdf-hide') && r.style.display !== 'none') any = true;
+      });
+      if (cur) cur.classList.toggle('mdf-hide', nf > 0 && !any);
+    }
+    var bar = t.__mdfBar;
+    if (bar) bar.querySelector('.mdf-stats').innerHTML = 'Showing <b>' + shown + '</b> of ' + total + ' stocks'
+      + (nf ? '; <b>' + nf + '</b> filter' + (nf > 1 ? 's' : '') + ' on' : '')
+      + (paused ? '; ' + paused + ' test filter' + (paused > 1 ? 's' : '') + ' set aside while test values are shown (back on with \u201cshow ticks\u201d)' : '')
+      + '. Use the row under the headings to filter.';
+  }
+
+  function csv(id, t) {
+    var hr = headRow(t); if (!hr) return;
+    var n = hr.cells.length, rows = dataRows(t, n).filter(function (r) { return !r.classList.contains('mdf-hide') && r.style.display !== 'none'; });
+    var vis = [], head = [];
+    for (var j = 0; j < n; j++) {
+      if (getComputedStyle(hr.cells[j]).display === 'none') continue;
+      var td0 = rows.length ? rows[0].cells[j] : null, key = headKey(hr.cells[j]);
+      if (td0 && td0.classList.contains('name-cell')) { vis.push([j, 'name']); head.push('Company', 'Ticker'); }
+      else if (td0 && td0.classList.contains('taxon')) { vis.push([j, 'tax']); head.push('Industry', 'Sector'); }
+      else { vis.push([j, '']); head.push(key); }
+    }
+    function q(v) { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+    var lines = [head.map(q).join(',')];
+    rows.forEach(function (r) {
+      var out = [];
+      vis.forEach(function (x) {
+        var c = r.cells[x[0]];
+        if (x[1] === 'name') { out.push(txt(c.querySelector('.co')).replace(/^●/, ''), txt(c.querySelector('.tk'))); }
+        else if (x[1] === 'tax') { out.push(txt(c.querySelector('.ind')), txt(c.querySelector('.sec'))); }
+        else { var v = txt(c); if (v === '✓') v = 'Yes'; else if (v === '·' || v === '.') v = 'No'; out.push(v); }
+      });
+      lines.push(out.map(q).join(','));
+    });
+    var b = new Blob([lines.join('\n')], { type: 'text/csv' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'master-dashboard-' + id.replace(/_/g, '-') + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function ensure(id) {
+    var t = mainTable(id); if (!t || !t.tHead) return;
+    var hr = headRow(t); if (!hr) return;
+    var n = hr.cells.length, rows = dataRows(t, n);
+    if (!rows.length) return;
+    ST[id] = ST[id] || { f: {}, q: '', ind: '', sec: '' };
+    var cols = measure(t, hr, rows);
+    var sig = cols.map(function (c) { return c.key + ':' + c.kind + ':' + (c.vals || []).join('|'); }).join('~') + '~' + (ST[id].ind || '');
+    var old = t.tHead.querySelector('tr.mdf-row');
+    if (!old || t.__mdfSig !== sig) {
+      var tr = buildRow(id, t, hr, rows, cols);
+      var foc = old && old.contains(document.activeElement) ? (document.activeElement.getAttribute('data-k') || (document.activeElement.classList.contains('mdf-q') ? '__q' : '')) : '';
+      if (old) old.parentNode.replaceChild(tr, old); else t.tHead.appendChild(tr);
+      t.__mdfSig = sig;
+      if (foc) { var el = foc === '__q' ? tr.querySelector('.mdf-q') : tr.querySelector('[data-k="' + foc.replace(/"/g, '\\"') + '"]'); if (el) { el.focus(); if (el.setSelectionRange && el.value) try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} } }
+      wire(id, t, tr);
+    }
+    if (!t.__mdfBar || !t.__mdfBar.isConnected) {
+      var bar = document.createElement('div');
+      bar.className = 'mdf-bar';
+      bar.innerHTML = '<span class="mdf-stats"></span><span class="mdf-btns"><button class="mdf-btn" type="button" data-a="clear">Clear filters</button><button class="mdf-btn" type="button" data-a="csv">Download CSV</button></span>';
+      var anchor = t.closest('.v2-hscroll') || t;
+      anchor.parentNode.insertBefore(bar, anchor);
+      bar.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        if (b.getAttribute('data-a') === 'clear') { ST[id] = { f: {}, q: '', ind: '', sec: '' }; t.__mdfSig = ''; schedule(id); }
+        else csv(id, t);
+      });
+      t.__mdfBar = bar;
+    }
+    if (t.offsetParent !== null) stickRow(t, hr, t.tHead.querySelector('tr.mdf-row'));
+    apply(id, t, cols, rows);
+  }
+  /* the sticky offset depends on the header's measured height, which the page sets after a tab switch or resize */
+  function restick() {
+    var id = document.body.getAttribute('data-active-tab');
+    if (PAGES.indexOf(id) < 0) return;
+    var t = mainTable(id); if (!t || !t.tHead || t.offsetParent === null) return;
+    var tr = t.tHead.querySelector('tr.mdf-row'), hr = headRow(t);
+    if (tr && hr) stickRow(t, hr, tr);
+  }
+  var RS = false;
+  window.addEventListener('scroll', function () { if (RS) return; RS = true; requestAnimationFrame(function () { RS = false; restick(); }); }, { passive: true });
+
+  function wire(id, t, tr) {
+    var tq = null;
+    function upd(e) {
+      var el = e.target, st = ST[id];
+      if (el.classList.contains('mdf-q')) {
+        st.q = el.value; el.classList.toggle('mdf-on', !!el.value);
+        clearTimeout(tq); tq = setTimeout(function () { schedule(id); }, 120); return;
+      }
+      var k = el.getAttribute('data-k'); if (!k) return;
+      if (k === '__ind') { st.ind = el.value; st.sec = ''; }
+      else if (k === '__sec') st.sec = el.value;
+      else st.f[k] = el.value;
+      el.classList.toggle('mdf-on', !!el.value);
+      schedule(id);
+    }
+    tr.addEventListener('input', upd); tr.addEventListener('change', upd);
+    /* a click inside the filter row must not reach the heading's sort handler */
+    tr.addEventListener('click', function (e) { e.stopPropagation(); });
+  }
+
+  function run(id) {
+    if (BUSY[id]) return;
+    BUSY[id] = true;
+    try { ensure(id); } catch (e) { try { console.warn('[md-filter-row] ' + id + ': ' + e); } catch (e2) {} }
+    finally { if (OBS[id]) OBS[id].takeRecords(); BUSY[id] = false; }
+  }
+  var PEND = {};
+  function schedule(id) {
+    if (PEND[id]) return;
+    PEND[id] = true;
+    /* a timer, not an animation frame: a page opened in a background tab has no animation frames until it is shown */
+    setTimeout(function () { PEND[id] = false; run(id); }, 30);
+  }
+  function watch() {
+    PAGES.forEach(function (id) {
+      var p = document.getElementById('tab-' + id);
+      if (!p || OBS[id]) return;
+      OBS[id] = new MutationObserver(function () { if (!BUSY[id]) schedule(id); });
+      OBS[id].observe(p, { childList: true, subtree: true });
+      schedule(id);
+    });
+  }
+  window.addEventListener('resize', function () {
+    PAGES.forEach(function (id) { var t = mainTable(id); if (t && t.tHead && t.tHead.querySelector('tr.mdf-row')) schedule(id); });
+  });
+  function start() {
+    watch(); redirectHash();
+    var orig = window.switchTab;
+    if (typeof orig === 'function' && !orig.__mdf) {
+      var w = function (id) {
+        if (RETIRED[id]) { id = RETIRED[id]; try { history.replaceState(null, '', '#' + id); } catch (e) {} }
+        var r = orig.apply(this, [id].concat([].slice.call(arguments, 1)));
+        if (PAGES.indexOf(id) >= 0) { schedule(id); setTimeout(restick, 250); setTimeout(restick, 800); }
+        return r;
+      };
+      w.__mdf = true;
+      window.switchTab = w;
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(start, 0); });
+  else setTimeout(start, 0);
+  window.mdFilterRow = { ensure: run, state: ST, pages: PAGES, names: NAMES };
+})();
+"""
+MD_FILTER_ROW_CSS = r"""/* MD-FILTER-ROW-2026-11-16: the shared filter row on the monitoring pages (style of IG - Turning/Inflecting) */
+tr.mdf-hide{display:none !important}
+tr.mdf-row th.mdf-th{background:#f6f3ea;padding:2px 2px 3px !important;border-bottom:1px solid #d6d1c1;vertical-align:top;white-space:normal;overflow:visible}
+tr.mdf-row.mdf-stick th.mdf-th{position:sticky}
+tr.mdf-row select.mdf-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;
+  font:inherit;font-size:10.5px;line-height:1.25;padding:1px 2px;margin:0;border:1px solid #cfc8b4;border-radius:3px;background:#fff;color:#3a3a33;cursor:pointer;text-align:center;text-align-last:center;text-overflow:ellipsis}
+tr.mdf-row select.mdf-sel + select.mdf-sel{margin-top:2px}
+tr.mdf-row input.mdf-q{display:block;width:100%;min-width:0;box-sizing:border-box;font:inherit;font-size:11px;padding:2px 4px;border:1px solid #cfc8b4;border-radius:3px;background:#fff}
+tr.mdf-row .mdf-on{background:#fff3c4 !important;border-color:#b08a1e !important;font-weight:600}
+.mdf-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 4px;font-size:12px;color:#55534b}
+.mdf-bar .mdf-btns{display:flex;gap:6px}
+.mdf-bar .mdf-btn{font:inherit;font-size:11.5px;padding:3px 10px;border:1px solid #cfc8b4;border-radius:4px;background:#fffdf8;color:#2f2f2a;cursor:pointer}
+.mdf-bar .mdf-btn:hover{background:#f0ede3;border-color:#b9b19a}
+"""
+# MD-RETIRE-2026-11-16 (Richard, 15-Nov-2026, "Q1 = A"; D-MD-TM-92): pages taken off the navigation. Their old
+# addresses open the replacement (MD_FILTER_ROW_JS, RETIRED). The tab containers stay so old code paths still run.
+MD_RETIRED_TAB_IDS = {"pb", "s3_topping", "s4_declining", "collapse", "tests_probing_bet_s1", "tests_probing_bet_s2",
+                      "tests_speculative_bet", "tests_speculative_bet_s3", "tests_speculative_bet_s4", "capital_deploy"}
+
 MD_FIT_HEAD_JS = r"""/* MD-FIT-2026-11-11 (SA, Richard 11-Nov-26: "Get the page looking clean on various screen sizes, including my laptop,
    office PC, ipad mini, ipad (old, larger one), tablet (lenovo android)"). Touch tablets lay the page out at the
    laptop's width (1500 browser pixels) and the tablet scales it to fit; pinch to zoom. Computers are untouched.
@@ -880,6 +1211,8 @@ def build_html(data_js):
     current_stage = None
     in_filter_section = True
     for t in TABS:
+        if t["id"] in MD_RETIRED_TAB_IDS:  # MD-RETIRE-2026-11-16
+            continue
         stage = t.get("stage")
         is_filter_tab = stage is not None
         if is_filter_tab:
@@ -2016,6 +2349,7 @@ th.gh-inputs .inputs-count { font-weight: 500; color: #888; margin-left: 4px; fo
 #s2-main-table col.c-persist { width: 200px; }
 #s2-main-table .pill { display: inline-block; padding: 3px 9px; border-radius: 11px; font-weight: 700; font-size: 10px; color: white; letter-spacing: 0.3px; white-space: nowrap; }
 #s2-main-table .pill-prob-7  { background: #2e7d32; color: #fff; }
+#s2-main-table .s2-s4block { font-size: 9.5px; color: #991b1b; margin-top: 1px; }  /* S2-NOT-S4-2026-11-16 */
 #s2-main-table .pill-prob-8  { background: #1e6a25; color: #fff; }
 #s2-main-table .pill-prob-9  { background: #145718; color: #fff; }
 #s2-main-table .pill-prob-10 { background: #08400d; color: #fff; }
@@ -10535,7 +10869,7 @@ function SUM_renderQualifiedStocks() {
         sector: p.sector || '', industry: p.industry || '',
         price: p.price, high_52w: p.high_52w, low_52w: p.low_52w,
         ma_50: mas['50D'], ma_150: mas['150D'], ma_200: mas['200D'],
-        rating: s2.rating, count: s2.count,
+        rating: s2.rating, count: s2.count, s4block: !!s2.stage4_block,  /* S2-NOT-S4-2026-11-16 */
         gp: (s2.groups_passed != null ? s2.groups_passed : null), gpass: s2.group_pass || {},  /* MD-S2-GROUPS-2026-11-14 */
         gsort: (S2_RATING_RANK[s2.rating] || 0) * 100 + (s2.groups_passed || 0) * 10 + (s2.count || 0),
         tests: s2.tests || {}, groups: s2grps, persistence: pers,
@@ -10795,7 +11129,7 @@ function SUM_renderQualifiedStocks() {
       'Probable':  'all 4 groups · both gates pass',  /* MD-S2-GROUPS-2026-11-14 */
       'Plausible': '3 of 4 groups · both gates pass',
       'Possible':  'both gates pass · 2 or fewer groups',
-      'None':      'a gate fails'
+      'None':      'a gate fails, or Stage 4 Plausible+'  /* S2-NOT-S4-2026-11-16 */
     }; /* MD-V2-S49-PER-TILE-CRITERIA-s2 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
@@ -10860,7 +11194,7 @@ function SUM_renderQualifiedStocks() {
         '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
         s2InputCell(s, 'price') + s2InputCell(s, 'high_52w') + s2InputCell(s, 'low_52w') +
         s2InputCell(s, 'ma_150') + s2InputCell(s, 'ma_200') +
-        '<td class="grp-start-rating">' + s2PillFor(s.rating, s.count) + '</td>' +
+        '<td class="grp-start-rating"' + (s.s4block ? ' title="No Stage 2 rating: rated Stage 4 (declining) Plausible or Probable, although both gates pass (Richard, 15-Nov-2026)"' : '') + '>' + s2PillFor(s.rating, s.count) + (s.s4block ? '<div class="s2-s4block">Stage 4</div>' : '') + '</td>' +  /* S2-NOT-S4-2026-11-16 */
         '<td>' + s2ScorePips(s) + '</td>';
       for (var j = 9; j < S2_COLS.length - 1; j++) html += s2TestCell(s, S2_COLS[j]); // MD-V2-S54; MD-S2-GROUPS-2026-11-14: every column between the score and the 12-month column (was a fixed 9 to 19, three short after 14-Nov)
       html += '<td class="grp-start-persist">' + s2PersistCells(s.persistence, s.rating) + '</td>' +
@@ -10910,7 +11244,7 @@ function SUM_renderQualifiedStocks() {
     if (!host) return false;
     if (host.querySelector('#s2-main-table')) return true;
     var html = '' +
-      '<div class="s1-intro">Stage 2 (advancing) looks for stocks already in a clear uptrend: two gates, both required (the 200-day MA flat or rising; the 150-day MA above the 200-day MA), then seven tests scored in four groups: Price trend (price above the 150-day and the 50-day MA, both needed); Position in the 52-week range (within 25% of the high and at least 30% above the low, both needed); Moving-average stack (the 50-day MA above the 150-day or the 200-day, either one); Relative strength (Stock RS 70 or more). All four groups = Probable, three = Plausible; both gates passing with two or fewer groups = Possible; a gate failing, no rating. Industry RS, Sector RS and Stock RS against its industry are shown for information, not scored. Position Entry and Exit Rules, version of 13-Nov-2026, with the four-group ladder of 14-Nov-2026.</div>' +  /* MD-DEFS-2026-11-13; MD-S2-GROUPS-2026-11-14 */
+      '<div class="s1-intro">Stage 2 (advancing) looks for stocks already in a clear uptrend: two gates, both required (the 200-day MA flat or rising; the 150-day MA above the 200-day MA), then seven tests scored in four groups: Price trend (price above the 150-day and the 50-day MA, both needed); Position in the 52-week range (within 25% of the high and at least 30% above the low, both needed); Moving-average stack (the 50-day MA above the 150-day or the 200-day, either one); Relative strength (Stock RS 70 or more). All four groups = Probable, three = Plausible; both gates passing with two or fewer groups = Possible; a gate failing, no rating; a stock rated Stage 4 (declining) Plausible or Probable gets no Stage 2 rating (Richard, 15-Nov-2026), so it shows None with its gates ticked. Industry RS, Sector RS and Stock RS against its industry are shown for information, not scored. Position Entry and Exit Rules, version of 13-Nov-2026, with the four-group ladder of 14-Nov-2026.</div>' +  /* MD-DEFS-2026-11-13; MD-S2-GROUPS-2026-11-14 */
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-s2-grp="inputs" data-s2-val="pct" onclick="s2SetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -12191,12 +12525,12 @@ function SUM_renderQualifiedStocks() {
       + '<div class="v2-nav-group v2-grp-setups">'
       +   '<div class="v2-nav-group-label">Late-stage capital qualification setups and tests</div>'
       +   '<div class="v2-nav-group-btns">'
-      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s1" onclick="switchTab(\'tests_probing_bet_s1\')">Stage 1 &mdash; Speculative bet<span class="md-old">older tests, being replaced</span></button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="tests_probing_bet_s2" onclick="switchTab(\'tests_probing_bet_s2\')">Stage 2 &mdash; Probing bet<span class="md-old">older tests, being replaced</span></button>'
+      /* MD-RETIRE-2026-11-16: the tests_probing_bet_s1 button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
+      /* MD-RETIRE-2026-11-16: the tests_probing_bet_s2 button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
       +     '<button class="v2-nav-btn" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">Retest</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
       +     '<button class="v2-nav-btn" data-v2-tab="tests_healthy_vcp" onclick="switchTab(\'tests_healthy_vcp\')">S2 &mdash; &ldquo;VCP&rdquo; and &ldquo;breakout&rdquo; of upwards MA</button>'  /* MD-V2-S48-TAB-HEALTHY-VCP-MARKER */
-      +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s3" onclick="switchTab(\'tests_speculative_bet_s3\')">Stage 3 &mdash; Speculative bet<span class="md-old">older tests, being replaced</span></button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="tests_speculative_bet_s4" onclick="switchTab(\'tests_speculative_bet_s4\')">Stage 4 &mdash; Speculative bet<span class="md-old">older tests, being replaced</span></button>'
+      /* MD-RETIRE-2026-11-16: the tests_speculative_bet_s3 button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
+      /* MD-RETIRE-2026-11-16: the tests_speculative_bet_s4 button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
       +   '</div>'
       + '</div>'
       /* Group 4: Bullish post-setup/tests technical behaviour */
@@ -12225,7 +12559,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Pool of Middle Innings Eligible Stocks</button>'  /* MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02 */
       +     '<button class="v2-nav-btn" data-v2-tab="lifecycle_phases" onclick="switchTab(\'lifecycle_phases\')">Phases of a Stock Lifecycle</button>'  /* MD-LIFECYCLE-PHASES-2026-10-10 */
       +     '<button class="v2-nav-btn" data-v2-tab="ig_turning" onclick="switchTab(\'ig_turning\')">IG - Turning/<wbr>Inflecting</button>'  /* MD-IG-TURNING-2026-11-06 */
-      +     '<button class="v2-nav-btn" data-v2-tab="capital_deploy" onclick="switchTab(\'capital_deploy\')">Capital Deployment In Range<span class="md-old">older tests, being replaced</span></button>'  /* MD-CAPITAL-DEPLOY-2026-11-11 */
+      /* MD-RETIRE-2026-11-16: the capital_deploy button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -22472,6 +22806,7 @@ document.addEventListener('click', function(e){
         + css +
         '\n</style>\n'
         '<style>' + MD_FIT_CSS + _md_fit_post_css(css) + '</style>\n'  # MD-FIT-2026-11-11
+        '<style>' + MD_FILTER_ROW_CSS + '</style>\n'  # MD-FILTER-ROW-2026-11-16
         '</head>\n'
         '<body>\n'
         '<div class="header">\n'
@@ -22623,6 +22958,7 @@ document.addEventListener('click', function(e){
         + js +
         '\n</script>\n'
         '<script>' + MD_FIT_JS + '</script>\n'  # MD-FIT-2026-11-11
+        '<script>' + MD_FILTER_ROW_JS + '</script>\n'  # MD-FILTER-ROW-2026-11-16
         '</body>\n'
         '</html>'
     )

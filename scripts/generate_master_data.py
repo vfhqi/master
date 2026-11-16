@@ -3128,6 +3128,12 @@ def compute_s2_monthly_persistence(universe, raw_data, benchmark_rows):
             # Stock RS at the month-end = the percentile of the Pool's Composite on that day (as prices.json's rs_percentile).
             ma200_21 = rows[idx - S2_G1_LOOKBACK_DAYS].get('sma_200') if idx >= S2_G1_LOOKBACK_DAYS else None
             _me_mas = {"50D": ma50, "150D": ma150, "200D": ma200, "200D_21d_ago": ma200_21}
+            # S2-NOT-S4-2026-11-16 (D-MD-TM-94): the Stage 4 readings, so the month-end rating applies the same rule
+            # (a stock rated Stage 4 Plausible or Probable gets no Stage 2 rating) as the live rating.
+            if idx >= 20:
+                _me_mas["100D"] = row.get('sma_100')
+                _me_mas["100D_20d_ago"] = rows[idx - 20].get('sma_100')
+                _me_mas["200D_20d_ago"] = rows[idx - 20].get('sma_200')
             _r = _PR.stage2(price, _me_mas, h52, l52, _me_rs_pct.get(ticker))
             result[ticker][mi] = _r["rating"] if _r["rating"] in ("Probable", "Plausible", "Possible") else 'None'
 
@@ -3662,6 +3668,9 @@ def compute_master_dashboard_screens(prices, filter_results):
             s2["count"] = sum(1 for _v in s2["tests"].values() if _v)
             s2["total"] = len(s2["tests"])
             s2["rating"] = _s2r["rating"]
+            # S2-NOT-S4-2026-11-16 (Richard, 15-Nov-2026, "Option B"; D-MD-TM-94): rated Stage 4 Plausible or Probable,
+            # so no Stage 2 rating although both gates pass (position_rules.stage2 decides; the page says why).
+            s2["stage4_block"] = bool(_s2r.get("stage4_block"))
         else:
             s2["rating"] = "None"
         md["stage_2"] = s2

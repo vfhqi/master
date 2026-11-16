@@ -727,7 +727,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
     var last = hr.cells[0]; if (!last) return;
     var cs = getComputedStyle(last);
     if (cs.position !== 'sticky') { tr.classList.remove('mdf-stick'); return; }
-    var top = (parseFloat(cs.top) || 0) + last.getBoundingClientRect().height;
+    var top = (parseFloat(cs.top) || 0) + last.offsetHeight;   /* layout pixels, the unit of style.top (a scaled view would make a rectangle's height smaller) */
     var z = parseInt(cs.zIndex, 10); z = isNaN(z) ? 5 : z;
     for (var i = 0; i < tr.cells.length; i++) { tr.cells[i].style.top = top + 'px'; tr.cells[i].style.zIndex = String(z); }
     tr.classList.add('mdf-stick');
@@ -844,7 +844,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
     if (tr && hr) stickRow(t, hr, tr);
   }
   var RS = false;
-  window.addEventListener('scroll', function () { if (RS) return; RS = true; requestAnimationFrame(function () { RS = false; restick(); }); }, { passive: true });
+  window.addEventListener('scroll', function () { if (RS) return; RS = true; setTimeout(function () { RS = false; restick(); }, 40); }, { passive: true });
 
   function wire(id, t, tr) {
     var tq = null;

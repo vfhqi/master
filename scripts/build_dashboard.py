@@ -2761,7 +2761,7 @@ body[data-active-tab="master_overview"] .v2-nav,body[data-active-tab="ssem"] .v2
 /* Extend chrome suppression: also hide .header-controls-row (the #3 Toggles / #4 Filters row)
    on every V2 tab. The initial patch missed this row. */
 body[data-active-tab^="stage_"] .header-controls-row,
-body[data-active-tab="pos_pre_indicators"] .header-controls-row,body[data-active-tab="neg_pre_indicators"] .header-controls-row,
+body[data-active-tab="pos_pre_indicators"] .header-controls-row,body[data-active-tab="pulling_back"] .header-controls-row,body[data-active-tab="neg_pre_indicators"] .header-controls-row,
 body[data-active-tab="post_indicators"] .header-controls-row,
 body[data-active-tab^="setups"] .header-controls-row,
 body[data-active-tab="tests"] .header-controls-row,
@@ -2785,7 +2785,7 @@ body[data-active-tab="val"] .ind-sec-wrap { align-items: flex-start; }
    Shrink the fixed header + override --header-height so the table does not
    float up under it, and tighten the v2-nav padding. CSS-only, no HTML change. */
 body[data-active-tab^="stage_"] .header,
-body[data-active-tab="pos_pre_indicators"] .header,body[data-active-tab="neg_pre_indicators"] .header,
+body[data-active-tab="pos_pre_indicators"] .header,body[data-active-tab="pulling_back"] .header,body[data-active-tab="neg_pre_indicators"] .header,
 body[data-active-tab="post_indicators"] .header,
 body[data-active-tab^="setups"] .header,
 body[data-active-tab="tests"] .header,
@@ -2798,7 +2798,7 @@ body[data-active-tab="tests_probing_bet_s2"] .header,
 body[data-active-tab="setups_healthy_retest"] .header,
 body[data-active-tab="master_overview"] .header,body[data-active-tab="combos"] .header { height: auto !important; padding-bottom: 0 !important; }
 body[data-active-tab^="stage_"],
-body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
+body[data-active-tab="pos_pre_indicators"],body[data-active-tab="pulling_back"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
@@ -3624,7 +3624,7 @@ body[data-active-tab="master_overview"],body[data-active-tab="combos"] { --heade
    time by the JS helper below (the ribbon wraps at narrow widths so a
    fixed guess is fragile); it falls back to 46px before first measure. */
 body[data-active-tab^="stage_"],
-body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
+body[data-active-tab="pos_pre_indicators"],body[data-active-tab="pulling_back"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
@@ -3639,7 +3639,7 @@ body[data-active-tab="master_overview"] { --v2-ribbon-h: 46px; }
 
 /* The ribbon: sticky directly under the fixed MD V2 nav header. */
 body[data-active-tab^="stage_"] .controls.s1-controls,
-body[data-active-tab="pos_pre_indicators"] .controls.s1-controls,body[data-active-tab="neg_pre_indicators"] .controls.s1-controls,
+body[data-active-tab="pos_pre_indicators"] .controls.s1-controls,body[data-active-tab="pulling_back"] .controls.s1-controls,body[data-active-tab="neg_pre_indicators"] .controls.s1-controls,
 body[data-active-tab="post_indicators"] .controls.s1-controls,
 body[data-active-tab^="setups"] .controls.s1-controls,
 body[data-active-tab="tests"] .controls.s1-controls,
@@ -3744,6 +3744,8 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
   top: calc(var(--header-height) + var(--v2-ribbon-h) + 46px);
   z-index: 70;
 }
+/* MD-PB-STICKY-PARITY-2026-11-16: pulling_back added to the V2 chrome lists (it was missed in the Pulling Back/Basing split, so its
+   #3 Toggles row showed, the ribbon did not stick and the headings hid under the header); #pb-, #basing-, #rt-main-table added below. */
 /* MD-V2-S74-STICKY-FIX-MARKER: S74 (22-May-26) extend Wave 1 position:static
    neutralise+override to five remaining tables still using position:sticky;top:0
    on thead: pb-s1, pb-s2, sb-main, hr-main, hvcp-main.
@@ -3754,7 +3756,8 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
 #pb-s1-table thead, #pb-s2-table thead,
 #sb-main-table thead,
 #hr-main-table thead,
-#hvcp-main-table thead {
+#hvcp-main-table thead,
+#pb-main-table thead, #basing-main-table thead, #rt-main-table thead {
   position: static !important;
   z-index: auto !important;
   box-shadow: none !important;
@@ -3762,7 +3765,8 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
 #pb-s1-table thead tr.group-header-row th, #pb-s2-table thead tr.group-header-row th,
 #sb-main-table thead tr.group-header-row th,
 #hr-main-table thead tr.group-header-row th,
-#hvcp-main-table thead tr.group-header-row th {
+#hvcp-main-table thead tr.group-header-row th,
+#pb-main-table thead tr.group-header-row th, #basing-main-table thead tr.group-header-row th, #rt-main-table thead tr.group-header-row th {
   position: sticky;
   top: calc(var(--header-height) + var(--v2-ribbon-h)) !important;
   z-index: 70;
@@ -3770,7 +3774,8 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
 #pb-s1-table thead tr.sub-group-row th, #pb-s2-table thead tr.sub-group-row th,
 #sb-main-table thead tr.sub-group-row th,
 #hr-main-table thead tr.sub-group-row th,
-#hvcp-main-table thead tr.sub-group-row th {
+#hvcp-main-table thead tr.sub-group-row th,
+#pb-main-table thead tr.sub-group-row th, #basing-main-table thead tr.sub-group-row th, #rt-main-table thead tr.sub-group-row th {
   position: sticky;
   top: calc(var(--header-height) + var(--v2-ribbon-h) + 24px) !important;
   z-index: 70;
@@ -3778,7 +3783,8 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
 #pb-s1-table thead tr.col-header-row th, #pb-s2-table thead tr.col-header-row th,
 #sb-main-table thead tr.col-header-row th,
 #hr-main-table thead tr.col-header-row th,
-#hvcp-main-table thead tr.col-header-row th {
+#hvcp-main-table thead tr.col-header-row th,
+#pb-main-table thead tr.col-header-row th, #basing-main-table thead tr.col-header-row th, #rt-main-table thead tr.col-header-row th {
   position: sticky;
   top: calc(var(--header-height) + var(--v2-ribbon-h) + 44px) !important;
   z-index: 70;
@@ -3799,7 +3805,7 @@ body[data-active-tab="master_overview"] .controls.s1-controls {
    not become the containing block for VERTICAL sticky positioning, so
    the frozen headers keep working AND wide tables still scroll sideways. */
 body[data-active-tab^="stage_"] .table-wrap,
-body[data-active-tab="pos_pre_indicators"] .table-wrap,body[data-active-tab="neg_pre_indicators"] .table-wrap,
+body[data-active-tab="pos_pre_indicators"] .table-wrap,body[data-active-tab="pulling_back"] .table-wrap,body[data-active-tab="neg_pre_indicators"] .table-wrap,
 body[data-active-tab="post_indicators"] .table-wrap,
 body[data-active-tab^="setups"] .table-wrap,
 body[data-active-tab="tests"] .table-wrap,
@@ -3821,7 +3827,7 @@ body[data-active-tab="master_overview"] .table-wrap {
    the only non-trapping option, since any intermediate overflow-x:auto
    ancestor also gets overflow-y:auto and steals the sticky anchor. */
 body[data-active-tab^="stage_"] .v2-hscroll,
-body[data-active-tab="pos_pre_indicators"] .v2-hscroll,body[data-active-tab="neg_pre_indicators"] .v2-hscroll,
+body[data-active-tab="pos_pre_indicators"] .v2-hscroll,body[data-active-tab="pulling_back"] .v2-hscroll,body[data-active-tab="neg_pre_indicators"] .v2-hscroll,
 body[data-active-tab="post_indicators"] .v2-hscroll,
 body[data-active-tab^="setups"] .v2-hscroll,
 body[data-active-tab="tests"] .v2-hscroll,
@@ -3838,7 +3844,7 @@ body[data-active-tab="master_overview"] .v2-hscroll {
 /* MD-V2-WAVE3C-REAL-STICKY-FIX-MARKER: the page itself is the horizontal scroller on V2 tabs.
    Scoped to the 6 V2 tab-states so legacy tabs keep body overflow-x:hidden. */
 body[data-active-tab^="stage_"],
-body[data-active-tab="pos_pre_indicators"],body[data-active-tab="neg_pre_indicators"],
+body[data-active-tab="pos_pre_indicators"],body[data-active-tab="pulling_back"],body[data-active-tab="neg_pre_indicators"],
 body[data-active-tab="post_indicators"],
 body[data-active-tab^="setups"],
 body[data-active-tab="tests"],
@@ -12442,7 +12448,7 @@ function SUM_renderQualifiedStocks() {
   // offsets are exact even when the ribbon wraps at narrow widths.
   function measureV2Ribbon() {
     var active = document.body.getAttribute('data-active-tab') || '';
-    var v2 = (active.indexOf('stage_') === 0 || active === 'pos_pre_indicators' || active === 'neg_pre_indicators' ||
+    var v2 = (active.indexOf('stage_') === 0 || active === 'pos_pre_indicators' || active === 'pulling_back' /* MD-PB-STICKY-PARITY-2026-11-16 */ || active === 'neg_pre_indicators' ||
               active.indexOf('post_indicators') === 0 || active.indexOf('setups') === 0 || active.indexOf('tests_') === 0 ||
               active === 'tests' || active === 'master_overview' ||
               /* MD-POOL-ELIG-2026-09-28: pages that use the V2 header chrome must be measured too. Without this, opening

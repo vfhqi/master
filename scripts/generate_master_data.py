@@ -3861,7 +3861,10 @@ def compute_master_dashboard_screens(prices, filter_results):
         ma200_21d_basing = mas.get("200D_21d_ago")
         # MD-DEFS-2026-11-13 (Richard, 13-Nov-2026: "Set the criteria for Basing to require a fall of at least 10%, not 15%").
         # The key t1_price_pullback_ge15 keeps its name for readers.
-        ba_t1_pullback = bool(max_pullback_bh is not None and max_pullback_bh >= _PR.BASING_MIN_FALL)
+        # S2-BASE-2026-11-17 (Richard, 17-Nov-2026, "Q2 = A"): an S2 Base is every S2 Pullback test plus 20 trading days since
+        # the six-month high. So the depth test is the S2 Pullback's own (more than 10%) and the 150-day rising test is added.
+        ba_t1_pullback = pb_t4_depth
+        ba_t5_150d_rising = pb_t3_150d_rising
         ba_t2_time = bool(days_since_bh is not None and days_since_bh >= 20)
         ba_t3_above_200d = bool(price is not None and ma200 is not None and price > ma200)
         ba_t4_200d_rising = bool(ma200 is not None and ma200_21d_basing is not None and ma200 > ma200_21d_basing)
@@ -3870,9 +3873,10 @@ def compute_master_dashboard_screens(prices, filter_results):
             "t2_time_below_high_ge20d": ba_t2_time,
             "t3_price_above_200d": ba_t3_above_200d,
             "t4_200d_rising": ba_t4_200d_rising,
+            "t5_150d_rising": ba_t5_150d_rising,
         }
         ba_count = sum(1 for v in ba_tests.values() if v)
-        ind["basing"] = bool(ba_count == 4)
+        ind["basing"] = bool(ba_count == 5)
         # Back-compat alias - some downstream code still references basing_below_high
         ind["basing_below_high"] = ind["basing"]
 
@@ -3924,17 +3928,18 @@ def compute_master_dashboard_screens(prices, filter_results):
                 },
             },
             "basing": {
-                "tests": ba_tests, "count": ba_count, "total": 4,
+                "tests": ba_tests, "count": ba_count, "total": 5,
                 # MD-DEFS-2026-11-13 (Richard, 13-Nov-2026: "I want Y/N, and instead of those ratings for it, show deep,
                 # medium, shallow"): Y = all four tests = "Probable" (kept so the Technical Momentum Rating reads it
                 # unchanged); N = "None". The page shows Y or N and the depth label.
-                "rating": ("Probable" if ba_count == 4 else "None"), "qualifies": ind["basing"],
+                "rating": ("Probable" if ba_count == 5 else "None"), "qualifies": ind["basing"],
                 "info_depth_band": _PR.depth_label(max_pullback_bh),
                 "test_values": {
                     "t1_price_pullback_ge15": _md_v2_round(max_pullback_bh),  # MD-BASING-6M-HIGH-2026-11-12
                     "t2_time_below_high_ge20d": days_since_bh,
                     "t3_price_above_200d": _md_v2_pct_gap(price, ma200),
                     "t4_200d_rising": _md_v2_pct_gap(ma200, ma200_21d_basing),
+                    "t5_150d_rising": _md_v2_pct_gap(ma150, ma150_21d_pb),
                 },
             },
             "collapsing": {

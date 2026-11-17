@@ -527,7 +527,7 @@ TABS = [
     {"id": "post_indicators_bull", "label": "Post — Bullish", "accent": "#0F6E56"},  # MD-V2-POST-INDICATORS-BULL-MARKER
     {"id": "post_indicators_bear", "label": "Post — Negative", "accent": "#A32D2D"},  # MD-V2-POST-INDICATORS-BEAR-MARKER
     # MD-V2-SETUPS-MARKER - Setups (4 capital-deployment-eligibility patterns)
-    {"id": "setups_s1pb", "label": "S1 Basing Setups", "accent": "#BA7517"},
+    {"id": "setups_s1pb", "label": "S1 Bottoming Setups", "accent": "#BA7517"},
     {"id": "setups_s2vcp", "label": "S2 VCP Setups", "accent": "#BA7517"},
     # MD-V2-TESTS-MARKER - Capital qualification tests (3 tests)
     {"id": "tests", "label": "Capital Tests", "accent": "#0F6E56"},
@@ -624,13 +624,17 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
      shows the descriptive form, and a descriptive address opens its page. */
   var ADDR = { flow_hc: 'healthy-confirmation', flow_proven: 'reinforcing-proven-s2-core-investment', flow_early: 'broadening-early-s2-core-investment',
     flow_inflecting: 'inflecting-s1-to-s2-probing-bet', flow_s1: 'bottoming-s1-speculative-bet', flow_s3: 'restarting-reinforcing-s3-speculative-bet',
-    flow_s4: 'collapsing-s4-speculative-bet', stage_1: 'stage-1-basing', stage_2: 'stage-2-advancing', stage_3: 'stage-3-topping', stage_4: 'stage-4-declining',
+    flow_s4: 'collapsing-s4-speculative-bet', stage_1: 'stage-1-bottoming', stage_2: 'stage-2-advancing', stage_3: 'stage-3-topping', stage_4: 'stage-4-declining',
     pulling_back: 's2-pullback', pos_pre_indicators: 's2-base', setups_healthy_retest: 'retest-of-a-moving-average' };
   var FROM_ADDR = {}; Object.keys(ADDR).forEach(function (k) { FROM_ADDR[ADDR[k]] = k; });
+  FROM_ADDR['stage-1-basing'] = 'stage_1';  /* the address of 17-Nov morning still opens the page */
   function hashId() { return (location.hash || '').slice(1).split('/')[0]; }
   var pendingAddr = FROM_ADDR[hashId()] || null;
   function showAddr(id) { try { if (ADDR[id] && hashId() !== ADDR[id]) history.replaceState(null, '', location.pathname + location.search + '#' + ADDR[id]); } catch (e) {} }
   window.addEventListener('hashchange', function () { var t = FROM_ADDR[hashId()]; if (t && typeof window.switchTab === 'function') window.switchTab(t); });
+  /* MD-TITLE-2026-11-17 (Richard, 17-Nov-2026, Message 62): the browser tab reads "MD - " and the page's name */
+  var TITLE = { stage_1: 'Stage 1 (bottoming)', stage_2: 'Stage 2 (advancing)', stage_3: 'Stage 3 (topping)', stage_4: 'Stage 4 (declining)' };
+  function setTitle(id) { try { var b = document.querySelector('[data-tab="' + id + '"]'), n = TITLE[id] || (b ? String(b.textContent || '').replace(/\s+/g, ' ').trim() : ''); document.title = n ? 'MD - ' + n : 'Master Dashboard'; } catch (e) {} }
   window.MD_PAGE_ADDR = ADDR;
   window.MD_RETIRED_TABS = RETIRED;
   function redirectHash() {
@@ -915,12 +919,12 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
         var r = orig.apply(this, [id].concat([].slice.call(arguments, 1)));
         if (PAGES.indexOf(id) >= 0) { schedule(id); setTimeout(restick, 250); setTimeout(restick, 800); }
         if (pendingAddr) { var t0 = pendingAddr; pendingAddr = null; if (t0 !== id) return w(t0); }  /* MD-ADDR-2026-11-17: the page opened on a descriptive address */
-        showAddr(id);
+        showAddr(id); setTitle(id);
         return r;
       };
       w.__mdf = true;
       window.switchTab = w;
-      if (window.__chgBootstrapDone) { if (pendingAddr) w(pendingAddr); else if (window.currentTab) showAddr(window.currentTab); }  /* MD-ADDR-2026-11-17 */
+      if (window.__chgBootstrapDone) { if (pendingAddr) w(pendingAddr); else if (window.currentTab) { showAddr(window.currentTab); setTitle(window.currentTab); } }  /* MD-ADDR-2026-11-17; MD-TITLE-2026-11-17 */
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(start, 0); });
@@ -5007,8 +5011,8 @@ function drawMasterChart(ticker,_sspo){
     for(j=0;j<chart.length;j++){var x2=xPos(j);var barBottom=pad.t+plotH;
       var pct50v=volMA50[j]>0?Math.round((chart[j].v/volMA50[j]-1)*100):0;
       var pct20v=volMA20[j]>0?Math.round((chart[j].v/volMA20[j]-1)*100):0;
-      ctx.fillStyle="#9a6700";ctx.font="9px monospace";ctx.fillText((pct50v>=0?"+":"")+pct50v+"%",x2,barBottom-20);
-      ctx.fillStyle="#0969da";ctx.fillText((pct20v>=0?"+":"")+pct20v+"%",x2,barBottom-10);
+      ctx.fillStyle="#9a6700";ctx.font="9px monospace";ctx.fillText((pct50v<0?"("+(-pct50v)+")%":"+"+pct50v+"%"),x2,barBottom-20);
+      ctx.fillStyle="#0969da";ctx.fillText((pct20v<0?"("+(-pct20v)+")%":"+"+pct20v+"%"),x2,barBottom-10);
     }
   }
 
@@ -7305,8 +7309,8 @@ function renderUTR(){
     r.candle=t.c5_candle;
     r.dist_d=stg==="Capital"?t.c6_dist:stg==="Late"?t.l6_dist:t.e4_dist;
     // Raw numeric values for toggle display
-    r.t_depth_v=r.depth_pct!=null?r.depth_pct.toFixed(1)+"%":null;
-    r.t_ma_v=r.test_ma_dist!=null?r.test_ma_dist.toFixed(1)+"%":null;
+    r.t_depth_v=r.depth_pct!=null?(r.depth_pct<0?"("+(-r.depth_pct).toFixed(1)+")%":r.depth_pct.toFixed(1)+"%"):null;
+    r.t_ma_v=r.test_ma_dist!=null?(r.test_ma_dist<0?"("+(-r.test_ma_dist).toFixed(1)+")%":r.test_ma_dist.toFixed(1)+"%"):null;
     r.st_roll_v=(md["5d_declining"]?"5D\u2193":"5D\u2192")+" "+(md["10d_declining"]?"10D\u2193":"10D\u2192");
     r.it_intact_v=(md["50d_rising"]?"50D\u2191":"50D\u2193")+" "+(md["150d_rising"]?"150D\u2191":"150D\u2193");
     r.vol_q_v=mx.vol_trend!=null?mx.vol_trend.toFixed(2):null;
@@ -7386,16 +7390,16 @@ function renderUTR(){
   h+=utrCommonCols()
     +th("Test MA","test_ma","col-txt col-filter","Which moving average the stock is pulling back towards. Scans 50D, 100D, 150D, 200D in order and picks the first one price is approaching from above. 50D retest in a strong uptrend is the bread-and-butter Minervini entry. 200D retest is last line of defence.")
     +th("Retest #","retest_num","col-num col-filter","How many completed retest cycles of this MA since the uptrend began. A completed retest = price came within 2% of the MA then moved 5%+ above it. 1st retest is highest conviction (Minervini). 2nd is acceptable. 3rd+ is a warning \u2014 the setup is getting stale.")
-    +th("Depth %","depth_pct","col-num","Percentage below the swing high. Measures how deep the pullback has gone. Early: 3\u201310% (just started). Late: 8\u201320% (Minervini guideline for buyable pullbacks). Capital: must stay under 25%. Deeper than 25% = invalidated, trend probably broken.")
+    +th("Depth %","depth_pct","col-num","Percentage below the swing high. Measures how deep the pullback has gone. Early Stage: 3\u201310% (just started). Late Stage: 8\u201320% (Minervini guideline for buyable pullbacks). Capital: must stay under 25%. Deeper than 25% = invalidated, trend probably broken.")
     +th("MA Dist %","test_ma_dist","col-num","Distance from the test MA as a percentage. Positive = still above the MA. Late stage: within 5% and approaching. Capital stage: within 2% (at the MA or slight undercut). Negative = price has broken below \u2014 if beyond -5%, pattern is invalidated.")
-    +th("Depth","depth_pct","col-filter utr-e-first","Is the pullback depth within healthy range for the current stage? Early: 3\u201310% from high. Late: 8\u201320%. Capital: under 25%. Pass means the pullback is sized correctly \u2014 not so shallow it is noise, not so deep the trend is breaking.")
-    +th("MA Prox","test_ma_dist","col-filter","Is price approaching or sitting at the support MA? Late: within 5% and closing in. Capital: within 2% (touching or slight undercut). Minervini\u2019s undercut-and-rally is acceptable; a decisive break below is not.")
+    +th("Depth","depth_pct","col-filter utr-e-first","Is the pullback depth within healthy range for the current stage? Early Stage: 3\u201310% from high. Late Stage: 8\u201320%. Capital: under 25%. Pass means the pullback is sized correctly \u2014 not so shallow it is noise, not so deep the trend is breaking.")
+    +th("MA Prox","test_ma_dist","col-filter","Is price approaching or sitting at the support MA? Late Stage: within 5% and closing in. Capital: within 2% (touching or slight undercut). Minervini\u2019s undercut-and-rally is acceptable; a decisive break below is not.")
     +th("ST Roll","sort_st","col-filter","Are the short-term MAs (5-day and 10-day) rolling over? This confirms the pullback is real and short-term in nature. Both declining = clear pullback signal. If short-term MAs are still rising, the stock hasn\u2019t actually started pulling back yet.")
     +th("IT Intact","sort_it","col-filter utr-e-last","Are the intermediate MAs (50-day and 150-day) still rising? This is the Minervini Stage 2 requirement: the long-term trend must remain intact even as price pulls back. Both rising = pass. If 150D is declining, the broader uptrend may be over.")
-    +th("Vol Dry","sort_vol","col-filter utr-l-first","Has selling volume dried up? Measured as 10-day average volume divided by 50-day average. Lower = sellers exhausted (constructive). Late: below 0.85. Capital: below 0.80. Minervini: best setups show volume dropping 40\u201360% below average during the pullback.")
+    +th("Vol Dry","sort_vol","col-filter utr-l-first","Has selling volume dried up? Measured as 10-day average volume divided by 50-day average. Lower = sellers exhausted (constructive). Late Stage: below 0.85. Capital: below 0.80. Minervini: best setups show volume dropping 40\u201360% below average during the pullback.")
     +th("Up/Dn","sort_updn","col-filter","Ratio of average up-day volume to average down-day volume. Above 1.0 = more volume on up days than down days (quiet accumulation). Capital: needs above 1.1. Below 0.8 = distribution, institutions selling \u2014 the pullback is not constructive.")
-    +th("Contract","sort_contr","col-filter","Volatility contraction: ATR(10) divided by ATR(20). Below 1.0 means the daily range is narrowing \u2014 the stock is coiling. Late: below 0.90. Capital: below 0.85. One of the strongest pre-breakout signals (Minervini + Weinstein). Tight coil = energy stored for next leg.")
-    +th("Dist Days","sort_dist","col-filter utr-l-last","Distribution days in the last 25 sessions. A distribution day = close below prior close on volume 25%+ above the 50-day average. Institutional selling footprint. Early: 0\u20131 expected. Late: 0\u20133 acceptable. Capital: 0\u20132 required. 6+ = invalidation.")
+    +th("Contract","sort_contr","col-filter","Volatility contraction: ATR(10) divided by ATR(20). Below 1.0 means the daily range is narrowing \u2014 the stock is coiling. Late Stage: below 0.90. Capital: below 0.85. One of the strongest pre-breakout signals (Minervini + Weinstein). Tight coil = energy stored for next leg.")
+    +th("Dist Days","sort_dist","col-filter utr-l-last","Distribution days in the last 25 sessions. A distribution day = close below prior close on volume 25%+ above the 50-day average. Institutional selling footprint. Early Stage: 0\u20131 expected. Late Stage: 0\u20133 acceptable. Capital: 0\u20132 required. 6+ = invalidation.")
     +th("Candle","sort_candle","col-filter utr-c-first","Candle quality: percentage of the last 10 closes in the upper 40% of the daily range. Measures whether buyers are stepping in at the MA. Capital gate: needs 50%+. High candle quality at a support MA = accumulation pattern, buyers defending the level.")
     +th("RS Hold","sort_rs","col-filter utr-c-last","Relative strength percentile vs the market. Must hold above 70 for Capital qualification \u2014 the market still rates this stock highly despite the pullback. Below 50 = invalidation. If RS collapses during a pullback, it signals stock-specific weakness, not healthy rest.")
     +th("C#","cap_count","col-num","Count of Capital-grade quality signals currently passing (out of C1\u2013C8). All 8 must pass for Capital stage. Useful as a quick read on how close a Late-stage stock is to becoming actionable \u2014 higher count = closer to a buy signal.")
@@ -8264,7 +8268,7 @@ function buildSsemIndSecTables(rows) {
         var avgL3M = ssemMean(m[dk + "_l3m"]);
         var avgL6M = ssemMean(m[dk + "_l6m"]);
         var stdevL3M = ssemStdev(m[dk + "_l3m"]);
-        var avgStr = (avgL3M == null) ? "&mdash;" : (avgL3M >= 0 ? "+" : "") + avgL3M.toFixed(1) + "%";
+        var avgStr = (avgL3M == null) ? "&mdash;" : (avgL3M < 0 ? "(" + (-avgL3M).toFixed(1) + ")%" : "+" + avgL3M.toFixed(1) + "%");
         h += '<td class="ssem-tile-cell ' + ssemHeatClass(avgL3M) + '">' + avgStr + '</td>';
         h += '<td class="ssem-tile-glyph">' + ssemTrendArrow(avgL1M, avgL6M) + " " + ssemSkewGlyph(stdevL3M) + '</td>';
       }
@@ -9757,13 +9761,13 @@ function SUM_excessBucketStyle(v) {
 function SUM_fmtSignedPct(v) {
   if (v == null) return "&mdash;";
   var pct = Math.round(v * 100);
-  return (pct >= 0 ? "+" : "") + pct + "%";
+  return pct < 0 ? "(" + (-pct) + ")%" : "+" + pct + "%";
 }
 
 // Format a signed integer score
 function SUM_fmtSignedInt(v) {
   if (v == null) return "&mdash;";
-  return (v > 0 ? "+" : "") + v;
+  return v < 0 ? "(" + (-v) + ")" : (v > 0 ? "+" : "") + v;
 }
 
 
@@ -12738,7 +12742,7 @@ function SUM_renderQualifiedStocks() {
     pos_pre_indicators: {
       hostId:'tab-pos_pre_indicators', tableId:'basing-main-table', tbodyId:'basing-tbody',
       patternKey:'basing', depthFilter:true, yn:true,  /* MD-DEFS-2026-11-13 */
-      intro:'<b>S2 Base</b> &mdash; an S2 Pullback that has lasted: a stock in a Stage 2 uptrend that fell more than 10% from its six-month high at least 20 trading days ago and has not made a new six-month high since, so the price has had time to move sideways and build a base. <b>How it is measured:</b> the same four tests as S2 Pullback (price above the 200-day MA; the 200-day MA higher than 21 trading days ago; the 150-day MA higher than 21 trading days ago; a fall of more than 10% from the six-month high, the highest price of the last 126 trading days, to the lowest price since), plus a fifth: at least 20 trading days since that high. <b>How it differs from an S2 Pullback:</b> only the time. Every S2 Base is also an S2 Pullback; a pullback younger than 20 trading days is not yet a base. <b>Depth</b> of the fall: <b>Shallow</b> 10% to 15%; <b>Medium</b> 15% to 20%; <b>Deep</b> over 20%. This is a base inside an uptrend, not the Stage 1 (basing) page, which is a base after a downtrend. The page lists the Qualified stocks; the Show buttons bring up the others. Counts start on stocks rated Stage 2 (advancing) Plausible or Probable; widen with the S2 gate buttons. (Richard, 17-Nov-2026: an S2 Base is an S2 Pullback plus 20 trading days.)',
+      intro:'<b>S2 Base</b> &mdash; an S2 Pullback that has lasted: a stock in a Stage 2 uptrend that fell more than 10% from its six-month high at least 20 trading days ago and has not made a new six-month high since, so the price has had time to move sideways and build a base. <b>How it is measured:</b> the same four tests as S2 Pullback (price above the 200-day MA; the 200-day MA higher than 21 trading days ago; the 150-day MA higher than 21 trading days ago; a fall of more than 10% from the six-month high, the highest price of the last 126 trading days, to the lowest price since), plus a fifth: at least 20 trading days since that high. <b>How it differs from an S2 Pullback:</b> only the time. Every S2 Base is also an S2 Pullback; a pullback younger than 20 trading days is not yet a base. <b>Depth</b> of the fall: <b>Shallow</b> 10% to 15%; <b>Medium</b> 15% to 20%; <b>Deep</b> over 20%. This is a base inside an uptrend, not the Stage 1 (bottoming) page, which is a bottom after a downtrend. The page lists the Qualified stocks; the Show buttons bring up the others. Counts start on stocks rated Stage 2 (advancing) Plausible or Probable; widen with the S2 gate buttons. (Richard, 17-Nov-2026: an S2 Base is an S2 Pullback plus 20 trading days.)',
       numCaps:2,
       caps:[
         {cls:'gcap-base',   title:'S2 Base: the five tests and the measures', body:'Tests: (1) price above the 200-day MA; (2) 200-day MA higher than 21 trading days ago; (3) 150-day MA higher than 21 trading days ago; (4) depth more than 10%; (5) at least 20 trading days since the six-month high. <span style="font-weight:700;color:#333">% from High</span>: the close today against the six-month high. <span style="font-weight:700;color:#333">Max Pullback Depth from High</span>: the deepest fall since that high (Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%). <span style="font-weight:700;color:#333">% from Post-Pullback Low</span>: the close today against the lowest price since the high. <span style="font-weight:700;color:#333">Days since High</span>: trading days since the six-month high.'},
@@ -12986,7 +12990,7 @@ function SUM_renderQualifiedStocks() {
   /* MD-BATCH1-2026-11-17: background-tinted cells; the five measures from the six-month high; the depth lozenge; every line on the Retest page */
   function tintCell(txt,k,cls){var bg=k==='g'?'#dff3e4':k==='a'?'#fff1cf':k==='r'?'#fde3e4':'';return '<td class="num '+(cls||'')+'"'+(bg?' style="background:'+bg+'"':'')+'>'+txt+'</td>';}
   function depthK(v){return v==null||v<=0.10?'':v<=0.15?'g':v<=0.20?'a':'r';}
-  function sgnPct(v){var p=Math.round(v*1000)/10;return (p>0?'+':'')+p+'%';}
+  function sgnPct(v){var p=Math.round(v*1000)/10;return p<0?'('+(-p)+')%':(p>0?'+':'')+p+'%';}  /* MD-BATCH2-2026-11-17: negatives in brackets */
   function pbInfoCells(row){
     var a=row.recent_pullback,b=row.max_pb,c=row.from_low,d=row.days_since_bh;
     return tintCell(a==null?'&mdash;':sgnPct(-a),depthK(a),'sg-edge')+tintCell(b==null?'&mdash;':sgnPct(-b),depthK(b),'')
@@ -13011,7 +13015,7 @@ function SUM_renderQualifiedStocks() {
   function bandCell(row,cls){var b=row.depth_band;var c=b==='Deep Pullback'?'#A32D2D':b==='Medium Pullback'?'#b45309':b==='Shallow Pullback'?'#2E7D32':'#888';return '<td class="'+(cls||'')+'" style="color:'+c+';font-size:10px;white-space:normal;line-height:1.2">'+(b||'—')+'</td>';}
   function dateCell(d,cls){var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return '<td class="num '+(cls||'')+'">'+(d?(+d.slice(8,10))+' '+m[+d.slice(5,7)-1]+' '+d.slice(2,4):'—')+'</td>';}
   function intCell(v,cls){return '<td class="num '+(cls||'')+'">'+(v==null?'—':v)+'</td>';}
-  function signPctCell(v,cls){if(v==null||isNaN(v))return '<td class="num '+(cls||'')+'">—</td>';var p=Math.round(v*1000)/10;return '<td class="num '+(cls||'')+'">'+(p>0?'+':'')+p+'%</td>';}
+  function signPctCell(v,cls){if(v==null||isNaN(v))return '<td class="num '+(cls||'')+'">—</td>';var p=Math.round(v*1000)/10;return '<td class="num '+(cls||'')+'">'+(p<0?'('+(-p)+')%':(p>0?'+':'')+p+'%')+'</td>';}
   function ratioCell(v,lowGood,cls){if(v==null||isNaN(v))return '<td class="num '+(cls||'')+'">—</td>';var good=lowGood?v<1:v>1;return '<td class="num '+(cls||'')+'" style="color:'+(v===1?'#888':good?'#2E7D32':'#A32D2D')+'">'+v.toFixed(2)+'×</td>';}
   function shareCell(v,cls){if(v==null||isNaN(v))return '<td class="num '+(cls||'')+'">—</td>';return '<td class="num '+(cls||'')+'" style="color:'+(v>=0.5?'#2E7D32':'#A32D2D')+'">'+Math.round(v*100)+'%</td>';}
   function pullbackCell(row,cls){
@@ -13041,7 +13045,7 @@ function SUM_renderQualifiedStocks() {
       else if(typeof tv==='string'){d=tv;}
       else if(typeof tv==='number'){
         if(isNaN(tv)){d='—';}
-        else if(Math.abs(tv)<=1.5&&tv!==Math.round(tv)){d=Math.round(tv*100)+'%';}
+        else if(Math.abs(tv)<=1.5&&tv!==Math.round(tv)){var _tp=Math.round(tv*100);d=_tp<0?'('+(-_tp)+')%':_tp+'%';}
         else{d=fmtNum(tv);}
       } else{d=String(tv);}
       return '<td class="'+(pass?'pi-pass':'pi-fail')+' '+cls+'"><span class="tval">'+d+'</span></td>';
@@ -17745,7 +17749,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var pct=(row.price-v)/v*100;
     var i=(key==='high_52w')?Math.max(-1,Math.min(1,(pct+20)/20)):Math.max(-1,Math.min(1,(pct-20)/30));
     var _r=Math.round(pct); if(Object.is(_r,-0))_r=0;   /* S81b: -0.4% was rendering as a bare "0%" */
-    var txt=(_r>0?'+':'')+_r+'%';
+    var txt=_r<0?'('+(-_r)+')%':(_r>0?'+':'')+_r+'%';
     var ttl='Price '+txt+' vs the 52-week '+(key==='high_52w'?'high':'low')+' of '+fmtNum(v);
     var mark='';
     if(row.unit_break_kind==='excursion'){
@@ -17961,7 +17965,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<tr class="sub-group-row">'+subRow+'</tr>'
       +'<tr class="col-header-row" id="pbs1-col-header"></tr>';
     host.innerHTML=
-      '<div class="s1-intro">Stage 1 Speculative Bet — a small starter position in a Stage 1 (troughing or basing) stock that is breaking out positively. It probes whether the downtrend is turning, before committing a full position, so size small and keep the stop tight. Seven criteria: the stock must qualify as Stage 1, the 5D and 10D moving averages must be rising, price must be back above the 20D moving average, EITHER the 20D or the 50D moving average must have freshly turned up, and the move must be confirmed by a close at least 2% above yesterday. The Stage 1 qualifying group to the left is context on the underlying trend, not part of the seven.</div>'
+      '<div class="s1-intro">Stage 1 Speculative Bet — a small starter position in a Stage 1 (troughing or bottoming) stock that is breaking out positively. It probes whether the downtrend is turning, before committing a full position, so size small and keep the stop tight. Seven criteria: the stock must qualify as Stage 1, the 5D and 10D moving averages must be rising, price must be back above the 20D moving average, EITHER the 20D or the 50D moving average must have freshly turned up, and the move must be confirmed by a close at least 2% above yesterday. The Stage 1 qualifying group to the left is context on the underlying trend, not part of the seven.</div>'
       +'<div class="controls s1-controls">'
         +'<div class="ctrl-grp"><span class="ctrl-label">Scope</span>'
           +'<button class="toggle-btn active" data-pbs1-scope="all" onclick="pbs1SetScope(\'all\')">All <span id="pbs1-cnt-all"></span></button>'
@@ -18860,7 +18864,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   }
   function onSort(key){if(st.sort.col===key)st.sort.dir=st.sort.dir==='desc'?'asc':'desc';else st.sort={col:key,dir:key==='company'?'asc':'desc'};buildHeader();renderRows();}
 
-  function vs20dCell(row,cls){var v=row.vs20d;if(v==null||isNaN(v))return'<td class="num '+(cls||'')+'">-</td>';var pv=v*100;var col=pv>=0?'#2e7d32':'#A32D2D';var txt=(st.mode.inputs==='raw'&&row.price!=null&&(1+v)!==0)?fmtNum(row.price/(1+v)):((pv>=0?'+':'')+pv.toFixed(1)+'%');return'<td class="num '+(cls||'')+'" style="color:'+col+'">'+txt+'</td>';}
+  function vs20dCell(row,cls){var v=row.vs20d;if(v==null||isNaN(v))return'<td class="num '+(cls||'')+'">-</td>';var pv=v*100;var col=pv>=0?'#2e7d32':'#A32D2D';var txt=(st.mode.inputs==='raw'&&row.price!=null&&(1+v)!==0)?fmtNum(row.price/(1+v)):(pv<0?'('+(-pv).toFixed(1)+')%':'+'+pv.toFixed(1)+'%');return'<td class="num '+(cls||'')+'" style="color:'+col+'">'+txt+'</td>';}
   function ratingCell(row,cls){var r=row.rating;var rc=TIER_CLS[r]||'tint-none';return'<td class="'+(cls||'')+' pi-rating-cell '+rc+'"><span class="pi-pill pi-pill-'+rc+'">'+r+'</span></td>';}
   function scoreCell(row,cls){var cnt=row.count||0,tot=row.total||6;var s='';for(var i=0;i<tot;i++)s+='<span class="pip '+(i<cnt?'on':'')+'"></span>';return'<td class="'+(cls||'')+' pi-score-cell"><div class="pi-pip-row">'+s+'<span class="pi-score-num">'+cnt+'/'+tot+'</span></div></td>';}
   function s3RatingCell(row,cls){var r=row.s3rating||'None';return'<td class="'+(cls||'')+'"><span class="sbs3-spill '+(SPILL[r]||'sbs3-spill-none')+'">'+r+'</span></td>';}
@@ -19093,7 +19097,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   }
   function onSort(key){if(st.sort.col===key)st.sort.dir=st.sort.dir==='desc'?'asc':'desc';else st.sort={col:key,dir:key==='company'?'asc':'desc'};buildHeader();renderRows();}
 
-  function vs20dCell(row,cls){var v=row.vs20d;if(v==null||isNaN(v))return'<td class="num '+(cls||'')+'">-</td>';var pv=v*100;var col=pv>=0?'#2e7d32':'#A32D2D';var txt=(st.mode.inputs==='raw'&&row.price!=null&&(1+v)!==0)?fmtNum(row.price/(1+v)):((pv>=0?'+':'')+pv.toFixed(1)+'%');return'<td class="num '+(cls||'')+'" style="color:'+col+'">'+txt+'</td>';}
+  function vs20dCell(row,cls){var v=row.vs20d;if(v==null||isNaN(v))return'<td class="num '+(cls||'')+'">-</td>';var pv=v*100;var col=pv>=0?'#2e7d32':'#A32D2D';var txt=(st.mode.inputs==='raw'&&row.price!=null&&(1+v)!==0)?fmtNum(row.price/(1+v)):(pv<0?'('+(-pv).toFixed(1)+')%':'+'+pv.toFixed(1)+'%');return'<td class="num '+(cls||'')+'" style="color:'+col+'">'+txt+'</td>';}
   function ratingCell(row,cls){var r=row.rating;var rc=TIER_CLS[r]||'tint-none';return'<td class="'+(cls||'')+' pi-rating-cell '+rc+'"><span class="pi-pill pi-pill-'+rc+'">'+r+'</span></td>';}
   function scoreCell(row,cls){var cnt=row.count||0,tot=row.total||6;var s='';for(var i=0;i<tot;i++)s+='<span class="pip '+(i<cnt?'on':'')+'"></span>';return'<td class="'+(cls||'')+' pi-score-cell"><div class="pi-pip-row">'+s+'<span class="pi-score-num">'+cnt+'/'+tot+'</span></div></td>';}
   function s4RatingCell(row,cls){var r=row.s4rating||'None';return'<td class="'+(cls||'')+'"><span class="sbs4-spill '+(SPILL[r]||'sbs4-spill-none')+'">'+r+'</span></td>';}
@@ -19726,7 +19730,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   /* S66c: MO_ROWS aligned with nav groups (5 groups = 5 sections; section names match nav labels exactly) */
   var MO_ROWS = [
     // -- Group 1: Stages --
-    { section:'Stages', key:'stage_1', label:'Stage 1 — Basing', short:'S1 Basing', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
+    { section:'Stages', key:'stage_1', label:'Stage 1 — Bottoming', short:'S1 Bottoming', ratingPath:'stage:stage_1', tabId:'stage_1', patternKey:null },
     { section:'Stages', key:'stage_2', label:'Stage 2 — Uptrend', short:'S2 Uptrend', ratingPath:'stage:stage_2', tabId:'stage_2', patternKey:null },
     { section:'Stages', key:'stage_3', label:'Stage 3 — Topping', short:'S3 Topping', ratingPath:'stage:stage_3', tabId:'stage_3', patternKey:null },
     { section:'Stages', key:'stage_4', label:'Stage 4 — Decline', short:'S4 Decline', ratingPath:'stage:stage_4', tabId:'stage_4', patternKey:null },
@@ -20609,11 +20613,11 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   }
   function thrText(rule,v){
     if(!rule.pct)return String(v);
-    return (v>0?"+":"")+v+"%";
+    return v<0?"("+(-v)+")%":(v>0?"+":"")+v+"%";
   }
   function condText(rule){
     var t=st.thr[rule.k];
-    if(rule.pct)return rule.label+" "+(t>0?"+":"")+t+"% or more";
+    if(rule.pct)return rule.label+" "+(t<0?"("+(-t)+")%":(t>0?"+":"")+t+"%")+" or more";
     return rule.label+" "+t+" or more";
   }
 
@@ -20629,7 +20633,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   /* Share price to about four significant figures (Message 6): 1,000 and above no decimals, 100 to 999 one, 1 to 99 two, below 1 three significant figures. */
   function fPx(v){if(v==null)return null;var a=Math.abs(v);return a>=1000?v.toLocaleString("en-GB",{maximumFractionDigits:0}):(a>=100?v.toFixed(1):(a>=1?v.toFixed(2):v.toPrecision(3)));}
   /* MD-POOL-MI-2026-10-02: a true minus sign (the same width as "+" in tabular figures) and never "-0%" */
-  function fPct(v,d){if(v==null||isNaN(v))return null;var x=v*100,s=x.toFixed(d.dp),z=(+s===0);if(z)s=(0).toFixed(d.dp);return (!z&&x>0&&d.sign?"+":"")+s.replace("-","\u2212")+"%";}
+  function fPct(v,d){if(v==null||isNaN(v))return null;var x=v*100,s=x.toFixed(d.dp),z=(+s===0);if(z)s=(0).toFixed(d.dp);return x<0&&!z?"("+s.replace("-","")+")%":(!z&&x>0&&d.sign?"+":"")+s+"%";}
 
   /* Column definitions. g: I = Information, M = Metrics, F = Filter Tests. label = the full name (small text in the
      heading); sh = the short name (normal text; Richard's example: "SS Sales Breadth"). w names the CSS width class of
@@ -20957,7 +20961,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 
   function live(){var o={},inv=((window.MASTER_DATA||{}).positions||{}).investments||[];for(var i=0;i<inv.length;i++)if(inv[i].ticker)o[inv[i].ticker]=true;return o;}
   function fmtDate(s){if(!s)return "unknown";var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];var p=String(s).split("-");return p.length===3?(+p[2])+"-"+m[+p[1]-1]+"-"+p[0]:s;}
-  function fPct(v,dp,sign){if(v==null||isNaN(v))return null;var x=v*100,s=x.toFixed(dp),z=(+s===0);if(z)s=(0).toFixed(dp);return (!z&&x>0&&sign?"+":"")+s.replace("-","−")+"%";}
+  function fPct(v,dp,sign){if(v==null||isNaN(v))return null;var x=v*100,s=x.toFixed(dp),z=(+s===0);if(z)s=(0).toFixed(dp);return x<0&&!z?"("+s.replace("-","")+")%":(!z&&x>0&&sign?"+":"")+s+"%";}
   function fX(v){return v==null||isNaN(v)?null:(v>=100?v.toFixed(0):v.toFixed(1))+"x";}
   function scaleBg(v,red,green){
     if(v==null||isNaN(v))return "";
@@ -21578,7 +21582,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function match(r,q){if(!q)return true;return (r.n+" "+r.t+" "+(r.ind||"")+" "+(r.sec||"")).toLowerCase().indexOf(q)>=0;}
 
   function fd(s){return PE().fmtDate(s);}
-  function pct(v,dp){var x=v*100;return sgn(Math.round(x*Math.pow(10,dp))/Math.pow(10,dp))+Math.abs(x).toFixed(dp)+"%";}
+  function pct(v,dp){var x=v*100,r=Math.round(x*Math.pow(10,dp))/Math.pow(10,dp),a=Math.abs(x).toFixed(dp);return r<0?"("+a+")%":(r>0?"+":"")+a+"%";}
   /* Month-end reading of the four Pool rules, for the Company cell's tooltip. */
   function meWords(r){
     var x=SR(r.t),m=SD()&&SD()._meta,rec=meRec(),o="";if(!m)return "";
@@ -22341,7 +22345,7 @@ function sspRenderTable(ticker, p, md2){
   /* Column header row — sub-group labels */
   var ch = '<tr>';
   ch += '<th class="ssp-ch" colspan="3"></th>';
-  ch += '<th class="ssp-ch ssp-gs-stages" colspan="2">Stage 1 — Basing</th>';
+  ch += '<th class="ssp-ch ssp-gs-stages" colspan="2">Stage 1 — Bottoming</th>';
   ch += '<th class="ssp-ch ssp-pair-div" colspan="2">Stage 2 — Uptrend</th>';
   ch += '<th class="ssp-ch ssp-pair-div" colspan="2">Stage 3 — Topping</th>';
   ch += '<th class="ssp-ch ssp-pair-div" colspan="2">Stage 4 — Decline</th>';

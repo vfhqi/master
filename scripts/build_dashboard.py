@@ -497,7 +497,7 @@ def load_data():
 TABS = [
     # STAGE-REFACTOR-V3-MARKER — 8 filter tabs grouped by Minervini-style stage
     # Stage 1 — Basing/bottoming
-    {"id": "bp",        "label": "Basing Plateau",   "accent": "#276749", "stage": 1},
+    {"id": "bp",        "label": "Bottoming Plateau",   "accent": "#276749", "stage": 1},
     {"id": "pb",        "label": "Probing Bet",      "accent": "#6b46c1", "stage": 1},
     # Stage 2 — Markup/breakout
     {"id": "vcp",       "label": "VCP",              "accent": "#9c4221", "stage": 2},
@@ -602,8 +602,8 @@ IMPLEMENTED_TABS = [
 # pages' redirects (MD-RETIRE-2026-11-16). Display only; one self-contained script and style, loaded after the page script.
 MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richard, 13-Nov-2026 Message 6 note: "the
    https://vfhqi.github.io/master/#ig_turning drop down approach for filters etc. is great. Where that is useful for any
-   other pages in the MD to improve their functionality, do it"). One shared helper for the monitoring pages: a row of
-   drop-downs under the column headings, a search box, Clear filters and Download CSV, in the style of IG - Turning/Inflecting.
+   other pages in the MD to improve their functionality, do it"). One shared helper for the monitoring pages: a filter in
+   each column heading that earns one (MD-FILTER-HEAD-2026-11-17), a search box, Clear filters and Download CSV.
    It decorates each page's own table and changes nothing the page computes: it hides rows with its own class (mdf-hide),
    so the page's own scope buttons, sorting and grouping keep working, and it re-applies itself whenever the page redraws.
    A column earns a drop-down when its cells take 2 to 10 values that are not plain numbers (ratings, groups passed, test
@@ -667,7 +667,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
     return v;
   }
   function isNum(v) { return /^[(+\-]?[\d.,]+\)?\s*(%|×|x)?$/.test(v); }
-  function optLabel(v) { return v === '✓' ? '✓' : v === '✗' ? '✗' : (v === '' || v === '—') ? '— (blank)' : v; }
+  function optLabel(v) { return v === '✓' ? '✓' : v === '✗' ? '✗' : (v === '' || v === '—') ? '— (blank)' : v === 'NoneStage 4' ? 'None (rated Stage 4)' : v; }
   function sortVals(a, b) {
     var ra = RANK[a], rb = RANK[b];
     if (ra && rb) return ra - rb;
@@ -702,64 +702,101 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
     return cols;
   }
 
-  function selHTML(key, opts, cur, aria) {
-    var h = '<select class="mdf-sel' + (cur ? ' mdf-on' : '') + '" data-k="' + esc(key) + '" aria-label="' + esc('Filter: ' + aria) + '" title="' + esc('Filter: ' + aria) + '">';
-    h += '<option value="">All</option>';
-    opts.forEach(function (o) { h += '<option value="' + esc(o[0]) + '"' + (o[0] === cur ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; });
-    return h + '</select>';
-  }
-  function taxLists(rows, j, ind) {
-    var I = {}, S = {};
+  /* MD-FILTER-HEAD-2026-11-17 (Richard, 17-Nov-2026, Message 61: 'The "drop downs" ... need to be part of the headers above
+     columns, rather than taking up valuable page space in this manner'; Message 53: several choices at once). A filter is a
+     small arrow in its column's heading; it opens a list in which one choice or several can be ticked. The search box is in
+     the bar above the table. */
+  function isOn(o) { if (o) for (var k in o) if (o[k]) return true; return false; }
+  function shownRows(rows) { return rows.filter(function (r) { return r.style.display !== 'none'; }); }
+  function taxLists(rows, j, inds) {
+    var I = {}, S = {}, any = isOn(inds);
     rows.forEach(function (r) {
       var c = r.cells[j], a = txt(c.querySelector('.ind')), b = txt(c.querySelector('.sec'));
-      if (a) I[a] = 1;
-      if (b && (!ind || a === ind)) S[b] = 1;
+      if (a) I[a] = (I[a] || 0) + 1;
+      if (b && (!any || inds[a])) S[b] = (S[b] || 0) + 1;
     });
-    return { ind: Object.keys(I).sort(), sec: Object.keys(S).sort(function (x, y) { return x.localeCompare(y, undefined, { numeric: true }); }) };
+    return { ind: Object.keys(I).sort(), sec: Object.keys(S).sort(function (x, y) { return x.localeCompare(y, undefined, { numeric: true }); }), nI: I, nS: S };
   }
-
-  function buildRow(id, t, hr, rows, cols) {
-    var st = ST[id], tr = document.createElement('tr');
-    tr.className = 'mdf-row';
+  function colOn(st, c) { return c.kind === 'tax' ? (isOn(st.ind) || isOn(st.sec)) : c.kind === 'sel' ? isOn(st.f[c.key]) : false; }
+  function buttons(id, hr, cols) {
+    var st = ST[id];
     cols.forEach(function (c) {
-      var src = hr.cells[c.j], th = document.createElement('th');
-      th.className = (src.className || '') + ' mdf-th';
-      if (src.colSpan > 1) th.colSpan = src.colSpan;
-      if (c.kind === 'search') {
-        th.innerHTML = '<input class="mdf-q' + (st.q ? ' mdf-on' : '') + '" type="search" placeholder="Search name, ticker, industry, sector" aria-label="Search name, ticker, industry or sector" value="' + esc(st.q || '') + '">';
-      } else if (c.kind === 'tax') {
-        var L = taxLists(rows, c.j, st.ind);
-        if (st.sec && L.sec.indexOf(st.sec) < 0) st.sec = '';
-        th.innerHTML = selHTML('__ind', L.ind.map(function (v) { return [v, v]; }), st.ind, 'Industry')
-          + selHTML('__sec', L.sec.map(function (v) { return [v, v]; }), st.sec, 'Sector');
-      } else if (c.kind === 'sel') {
-        var cur = st.f[c.key] || '';
-        if (cur && c.vals.indexOf(cur) < 0) cur = st.f[c.key] = '';
-        th.innerHTML = selHTML(c.key, c.vals.map(function (v) { return [v, optLabel(v)]; }), cur, c.key);
+      if (c.kind !== 'sel' && c.kind !== 'tax') return;
+      var th = hr.cells[c.j], b = th.querySelector('.mdf-b');
+      if (!b) {
+        b = document.createElement('span'); b.className = 'mdf-b'; b.textContent = '▼'; b.setAttribute('role', 'button');
+        b.title = 'Filter: tick one choice or several; none ticked shows all'; var host = th.querySelector('.hd');   /* the Stage pages keep each heading in a label box: the arrow goes on its own line under the label, so the label keeps its width */
+        if (host) { host.classList.add('mdf-h'); var br = document.createElement('span'); br.className = 'mdf-br'; host.appendChild(br); host.appendChild(b); } else th.appendChild(b);
       }
-      tr.appendChild(th);
+      b.setAttribute('data-j', c.j);
+      b.classList.toggle('mdf-on', colOn(st, c));
     });
-    return tr;
   }
-
-  function stickRow(t, hr, tr) {
-    var last = hr.cells[0]; if (!last) return;
-    var cs = getComputedStyle(last);
-    if (cs.position !== 'sticky') { tr.classList.remove('mdf-stick'); return; }
-    var top = (parseFloat(cs.top) || 0) + last.offsetHeight;   /* layout pixels, the unit of style.top (a scaled view would make a rectangle's height smaller) */
-    var z = parseInt(cs.zIndex, 10); z = isNaN(z) ? 5 : z;
-    for (var i = 0; i < tr.cells.length; i++) { tr.cells[i].style.top = top + 'px'; tr.cells[i].style.zIndex = String(z); }
-    tr.classList.add('mdf-stick');
+  var POP = null;
+  function closePop() { var p = document.getElementById('mdf-pop'); if (p) p.parentNode.removeChild(p); POP = null; }
+  function popHTML(id, c, rows) {
+    var st = ST[id];
+    function sec(k, title, vals, counts, set) {
+      var o = '<div class="mdf-pt"><span>' + esc(title) + '</span><a data-clear="' + esc(k) + '">Clear</a></div>';
+      vals.forEach(function (v) {
+        o += '<label class="mdf-po"><input type="checkbox" data-k="' + esc(k) + '" value="' + esc(v) + '"' + (set[v] ? ' checked' : '') + '>'
+          + esc(optLabel(v)) + ' <i>(' + (counts[v] || 0) + ')</i></label>';
+      });
+      return o;
+    }
+    if (c.kind === 'tax') {
+      var L = taxLists(rows, c.j, st.ind);
+      Object.keys(st.sec).forEach(function (x) { if (L.sec.indexOf(x) < 0) delete st.sec[x]; });
+      return sec('__ind', 'Industry', L.ind, L.nI, st.ind) + sec('__sec', 'Sector', L.sec, L.nS, st.sec);
+    }
+    var n = {}; rows.forEach(function (r) { var v = cellVal(r.cells[c.j]); n[v] = (n[v] || 0) + 1; });
+    return sec(c.key, c.key, c.vals, n, st.f[c.key] || {});
   }
+  function openPop(id, j) {
+    var t = mainTable(id), hr = t && headRow(t); if (!hr) return;
+    var rows = shownRows(dataRows(t, hr.cells.length)), c = measure(t, hr, dataRows(t, hr.cells.length))[j];
+    closePop();
+    if (!c || (c.kind !== 'sel' && c.kind !== 'tax')) return;
+    var p = document.createElement('div'); p.id = 'mdf-pop'; p.className = 'mdf-pop'; p.innerHTML = popHTML(id, c, rows);
+    document.body.appendChild(p);
+    var r = hr.cells[j].getBoundingClientRect(), x = Math.min(r.left, document.documentElement.clientWidth - p.offsetWidth - 8);
+    p.style.left = (Math.max(4, x) + window.pageXOffset) + 'px'; p.style.top = (r.bottom + window.pageYOffset + 2) + 'px';
+    POP = { id: id, j: j };
+    if (p.scrollIntoView) p.scrollIntoView({ block: 'nearest' });   /* a heading near the foot of the window: bring its list into view */
+    p.addEventListener('change', function (e) {
+      var el = e.target, k = el.getAttribute('data-k'), st = ST[id]; if (!k) return;
+      var set = k === '__ind' ? st.ind : k === '__sec' ? st.sec : (st.f[k] = st.f[k] || {});
+      if (el.checked) set[el.value] = 1; else delete set[el.value];
+      if (k === '__ind') { st.sec = {}; p.innerHTML = popHTML(id, c, rows); }   /* the Sector list follows the Industries ticked */
+      schedule(id);
+    });
+    p.addEventListener('click', function (e) {
+      var a = e.target.closest ? e.target.closest('a[data-clear]') : null; if (!a) return;
+      var k = a.getAttribute('data-clear'), st = ST[id];
+      if (k === '__ind') { st.ind = {}; st.sec = {}; } else if (k === '__sec') st.sec = {}; else st.f[k] = {};
+      p.innerHTML = popHTML(id, c, rows); schedule(id);
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('.mdf-b') : null;
+    if (b) {   /* the arrow opens its list and never reaches the heading's own sort */
+      e.stopPropagation(); e.preventDefault();
+      var t = b.closest('table'), id = PAGES.filter(function (x) { return mainTable(x) === t; })[0], j = +b.getAttribute('data-j');
+      if (!id) return;
+      if (POP && POP.id === id && POP.j === j) closePop(); else openPop(id, j);
+      return;
+    }
+    if (POP && !(e.target.closest && e.target.closest('#mdf-pop'))) closePop();
+  }, true);
 
   function apply(id, t, cols, rows) {
     var st = ST[id], q = (st.q || '').toLowerCase(), nf = 0, n = cols.length;
-    var sels = cols.filter(function (c) { return c.kind === 'sel' && st.f[c.key]; });
+    var sels = cols.filter(function (c) { return c.kind === 'sel' && isOn(st.f[c.key]); });
     var tax = cols.filter(function (c) { return c.kind === 'tax'; })[0];
     var srch = cols.filter(function (c) { return c.kind === 'search'; })[0];
-    nf = sels.length + (q ? 1 : 0) + (st.ind ? 1 : 0) + (st.sec ? 1 : 0);
+    nf = sels.length + (q ? 1 : 0) + (isOn(st.ind) ? 1 : 0) + (isOn(st.sec) ? 1 : 0);
     /* a tick filter is kept, not applied, while the page shows test values instead of ticks */
-    var paused = Object.keys(st.f).filter(function (k) { return st.f[k] && cols.some(function (c) { return c.key === k && c.kind !== 'sel'; }); }).length;
+    var paused = Object.keys(st.f).filter(function (k) { return isOn(st.f[k]) && cols.some(function (c) { return c.key === k && c.kind !== 'sel'; }); }).length;
     var shown = 0, total = 0;
     rows.forEach(function (r) {
       var ok = true;
@@ -767,12 +804,12 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
         var s = (srch ? txt(r.cells[srch.j]) : '') + ' ' + (tax ? txt(r.cells[tax.j]) : '');
         ok = s.toLowerCase().indexOf(q) >= 0;
       }
-      if (ok && tax && (st.ind || st.sec)) {
+      if (ok && tax && (isOn(st.ind) || isOn(st.sec))) {
         var c = r.cells[tax.j];
-        if (st.ind && txt(c.querySelector('.ind')) !== st.ind) ok = false;
-        if (ok && st.sec && txt(c.querySelector('.sec')) !== st.sec) ok = false;
+        if (isOn(st.ind) && !st.ind[txt(c.querySelector('.ind'))]) ok = false;
+        if (ok && isOn(st.sec) && !st.sec[txt(c.querySelector('.sec'))]) ok = false;
       }
-      for (var k = 0; ok && k < sels.length; k++) if (cellVal(r.cells[sels[k].j]) !== st.f[sels[k].key]) ok = false;
+      for (var k = 0; ok && k < sels.length; k++) if (!st.f[sels[k].key][cellVal(r.cells[sels[k].j])]) ok = false;
       r.classList.toggle('mdf-hide', !ok);
       if (r.style.display !== 'none') { total++; if (ok) shown++; }
     });
@@ -789,7 +826,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
     if (bar) bar.querySelector('.mdf-stats').innerHTML = 'Showing <b>' + shown + '</b> of ' + total + ' stocks'
       + (nf ? '; <b>' + nf + '</b> filter' + (nf > 1 ? 's' : '') + ' on' : '')
       + (paused ? '; ' + paused + ' test filter' + (paused > 1 ? 's' : '') + ' set aside while test values are shown (back on with \u201cshow ticks\u201d)' : '')
-      + '. Use the row under the headings to filter.';
+      + '.';
   }
 
   function csv(id, t) {
@@ -826,63 +863,30 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
     var hr = headRow(t); if (!hr) return;
     var n = hr.cells.length, rows = dataRows(t, n);
     if (!rows.length) return;
-    ST[id] = ST[id] || { f: {}, q: '', ind: '', sec: '' };
+    var st = ST[id] = ST[id] || { f: {}, q: '', ind: {}, sec: {} };
     var cols = measure(t, hr, rows);
-    var sig = cols.map(function (c) { return c.key + ':' + c.kind + ':' + (c.vals || []).join('|'); }).join('~') + '~' + (ST[id].ind || '');
-    var old = t.tHead.querySelector('tr.mdf-row');
-    if (!old || t.__mdfSig !== sig) {
-      var tr = buildRow(id, t, hr, rows, cols);
-      var foc = old && old.contains(document.activeElement) ? (document.activeElement.getAttribute('data-k') || (document.activeElement.classList.contains('mdf-q') ? '__q' : '')) : '';
-      if (old) old.parentNode.replaceChild(tr, old); else t.tHead.appendChild(tr);
-      t.__mdfSig = sig;
-      if (foc) { var el = foc === '__q' ? tr.querySelector('.mdf-q') : tr.querySelector('[data-k="' + foc.replace(/"/g, '\\"') + '"]'); if (el) { el.focus(); if (el.setSelectionRange && el.value) try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} } }
-      wire(id, t, tr);
-    }
+    /* a ticked choice that the page no longer shows (another scope, test values in place of ticks) is dropped */
+    cols.forEach(function (c) { if (c.kind === 'sel' && st.f[c.key]) Object.keys(st.f[c.key]).forEach(function (v) { if (c.vals.indexOf(v) < 0) delete st.f[c.key][v]; }); });
+    buttons(id, hr, cols);
     if (!t.__mdfBar || !t.__mdfBar.isConnected) {
       var bar = document.createElement('div');
       bar.className = 'mdf-bar';
-      bar.innerHTML = '<span class="mdf-stats"></span><span class="mdf-btns"><button class="mdf-btn" type="button" data-a="clear">Clear filters</button><button class="mdf-btn" type="button" data-a="csv">Download CSV</button></span>';
+      bar.innerHTML = '<span class="mdf-stats"></span><input class="mdf-q" type="search" placeholder="Find a name, ticker, industry or sector" aria-label="Find a name, ticker, industry or sector">'
+        + '<span class="mdf-hint">Click a heading to sort. Use <span class="mdf-b">▼</span> in a heading to filter.</span>'
+        + '<span class="mdf-btns"><button class="mdf-btn" type="button" data-a="clear">Clear filters</button><button class="mdf-btn" type="button" data-a="csv">Download CSV</button></span>';
       var anchor = t.closest('.v2-hscroll') || t;
       anchor.parentNode.insertBefore(bar, anchor);
+      var qi = bar.querySelector('.mdf-q'), tq = null;
+      qi.value = st.q || '';
+      qi.addEventListener('input', function () { ST[id].q = qi.value; qi.classList.toggle('mdf-on', !!qi.value); clearTimeout(tq); tq = setTimeout(function () { schedule(id); }, 120); });
       bar.addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b) return;
-        if (b.getAttribute('data-a') === 'clear') { ST[id] = { f: {}, q: '', ind: '', sec: '' }; t.__mdfSig = ''; schedule(id); }
+        if (b.getAttribute('data-a') === 'clear') { ST[id] = { f: {}, q: '', ind: {}, sec: {} }; qi.value = ''; qi.classList.remove('mdf-on'); closePop(); schedule(id); }
         else csv(id, t);
       });
       t.__mdfBar = bar;
     }
-    if (t.offsetParent !== null) stickRow(t, hr, t.tHead.querySelector('tr.mdf-row'));
     apply(id, t, cols, rows);
-  }
-  /* the sticky offset depends on the header's measured height, which the page sets after a tab switch or resize */
-  function restick() {
-    var id = document.body.getAttribute('data-active-tab');
-    if (PAGES.indexOf(id) < 0) return;
-    var t = mainTable(id); if (!t || !t.tHead || t.offsetParent === null) return;
-    var tr = t.tHead.querySelector('tr.mdf-row'), hr = headRow(t);
-    if (tr && hr) stickRow(t, hr, tr);
-  }
-  var RS = false;
-  window.addEventListener('scroll', function () { if (RS) return; RS = true; setTimeout(function () { RS = false; restick(); }, 40); }, { passive: true });
-
-  function wire(id, t, tr) {
-    var tq = null;
-    function upd(e) {
-      var el = e.target, st = ST[id];
-      if (el.classList.contains('mdf-q')) {
-        st.q = el.value; el.classList.toggle('mdf-on', !!el.value);
-        clearTimeout(tq); tq = setTimeout(function () { schedule(id); }, 120); return;
-      }
-      var k = el.getAttribute('data-k'); if (!k) return;
-      if (k === '__ind') { st.ind = el.value; st.sec = ''; }
-      else if (k === '__sec') st.sec = el.value;
-      else st.f[k] = el.value;
-      el.classList.toggle('mdf-on', !!el.value);
-      schedule(id);
-    }
-    tr.addEventListener('input', upd); tr.addEventListener('change', upd);
-    /* a click inside the filter row must not reach the heading's sort handler */
-    tr.addEventListener('click', function (e) { e.stopPropagation(); });
   }
 
   function run(id) {
@@ -907,9 +911,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
       schedule(id);
     });
   }
-  window.addEventListener('resize', function () {
-    PAGES.forEach(function (id) { var t = mainTable(id); if (t && t.tHead && t.tHead.querySelector('tr.mdf-row')) schedule(id); });
-  });
+  window.addEventListener('resize', function () { if (POP) closePop(); });
   function start() {
     watch(); redirectHash();
     var orig = window.switchTab;
@@ -917,7 +919,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
       var w = function (id) {
         if (RETIRED[id]) { id = RETIRED[id]; try { history.replaceState(null, '', '#' + id); } catch (e) {} }
         var r = orig.apply(this, [id].concat([].slice.call(arguments, 1)));
-        if (PAGES.indexOf(id) >= 0) { schedule(id); setTimeout(restick, 250); setTimeout(restick, 800); }
+        closePop(); if (PAGES.indexOf(id) >= 0) schedule(id);
         if (pendingAddr) { var t0 = pendingAddr; pendingAddr = null; if (t0 !== id) return w(t0); }  /* MD-ADDR-2026-11-17: the page opened on a descriptive address */
         showAddr(id); setTitle(id);
         return r;
@@ -932,17 +934,28 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
   window.mdFilterRow = { ensure: run, state: ST, pages: PAGES, names: NAMES };
 })();
 """
-MD_FILTER_ROW_CSS = r"""/* MD-FILTER-ROW-2026-11-16: the shared filter row on the monitoring pages (style of IG - Turning/Inflecting) */
+MD_FILTER_ROW_CSS = r"""/* MD-FILTER-HEAD-2026-11-17: the filters in the column headings of the monitoring pages (the look of the Investment Classification pages) */
 tr.mdf-hide{display:none !important}
-tr.mdf-row th.mdf-th{background:#f6f3ea;padding:2px 2px 3px !important;border-bottom:1px solid #d6d1c1;vertical-align:top;white-space:normal;overflow:visible}
-tr.mdf-row.mdf-stick th.mdf-th{position:sticky}
-tr.mdf-row select.mdf-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;
-  font:inherit;font-size:10.5px;line-height:1.25;padding:1px 2px;margin:0;border:1px solid #cfc8b4;border-radius:3px;background:#fff;color:#3a3a33;cursor:pointer;text-align:center;text-align-last:center;text-overflow:ellipsis}
-tr.mdf-row select.mdf-sel + select.mdf-sel{margin-top:2px}
-tr.mdf-row input.mdf-q{display:block;width:100%;min-width:0;box-sizing:border-box;font:inherit;font-size:11px;padding:2px 4px;border:1px solid #cfc8b4;border-radius:3px;background:#fff}
-tr.mdf-row .mdf-on{background:#fff3c4 !important;border-color:#b08a1e !important;font-weight:600}
-.mdf-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 4px;font-size:12px;color:#55534b}
-.mdf-bar .mdf-btns{display:flex;gap:6px}
+.mdf-b{display:inline-block;margin-left:3px;padding:0 4px;border:1px solid #cfc8b4;border-radius:3px;background:#fff;color:#6b6b6b;font-size:8px;line-height:13px;font-weight:400;letter-spacing:0;cursor:pointer;vertical-align:1px;-webkit-user-select:none;user-select:none}
+th .mdf-b:hover{border-color:#8a8676;color:#1a1a1a}
+.mdf-b.mdf-on{background:#1b5e20;border-color:#1b5e20;color:#fff}
+.hd.mdf-h{flex-wrap:wrap}
+.mdf-br{flex:0 0 100%;height:0}
+.hd.mdf-h .mdf-b{margin:2px 0 0}
+.mdf-pop{position:absolute;z-index:3000;background:#fff;border:1px solid #d5cfbd;border-radius:4px;box-shadow:0 6px 18px rgba(0,0,0,.16);padding:6px 4px;max-height:340px;overflow:auto;min-width:190px;max-width:460px;font-size:12px;line-height:1.35;color:#333;text-align:left}
+.mdf-pt{display:flex;justify-content:space-between;gap:16px;padding:2px 8px 4px;font-size:10.5px;font-weight:700;color:#6b6b6b;border-bottom:1px solid #eeeadc;margin:0 0 3px}
+.mdf-po + .mdf-pt{margin-top:8px}
+.mdf-pt a{color:#1565c0;cursor:pointer;font-weight:400}
+.mdf-po{display:block;padding:3px 8px;cursor:pointer;border-radius:3px;white-space:nowrap}
+.mdf-po:hover{background:#f3efe2}
+.mdf-po input{margin:0 6px 0 0;vertical-align:-2px}
+.mdf-po i{font-style:normal;color:#a39f90}
+.mdf-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 4px;font-size:12px;color:#55534b}
+.mdf-bar input.mdf-q{font:inherit;font-size:12px;padding:3px 7px;border:1px solid #cfc8b4;border-radius:3px;background:#fff;width:250px}
+.mdf-bar input.mdf-q.mdf-on{background:#fff3c4;border-color:#b08a1e}
+.mdf-bar .mdf-hint{color:#a39f90;font-size:11px}
+.mdf-bar .mdf-hint .mdf-b{cursor:default;margin:0 1px}
+.mdf-bar .mdf-btns{display:flex;gap:6px;margin-left:auto}
 .mdf-bar .mdf-btn{font:inherit;font-size:11.5px;padding:3px 10px;border:1px solid #cfc8b4;border-radius:4px;background:#fffdf8;color:#2f2f2a;cursor:pointer}
 .mdf-bar .mdf-btn:hover{background:#f0ede3;border-color:#b9b19a}
 """
@@ -4381,7 +4394,7 @@ var KEY_DEFS={
   ],
   bp:[
     ["Ticker","Stock ticker symbol"],["Sector","Industry sector classification"],["Price","Current stock price"],
-    ["Stage","Basing Plateau stage: Tight=Capital, Medium=Late, Loose=Early"],
+    ["Stage","Bottoming Plateau stage: Tight=Capital, Medium=Late, Loose=Early"],
     ["MA Map","Visual position of Price, 200D, 150D, 50D MAs"],
     ["T1-T2","Loose tests: Price and 50D within 15% of 200D"],
     ["T3-T5","Medium tests: Price, 50D, 150D within 10% of 200D"],
@@ -6009,7 +6022,7 @@ function buildPortfolioTile(tabId){
     h+=commonCols()
       +'<th class="col-txt col-filter">Technical Momentum</th>'
       +'<th class="col-txt col-filter combo-col-pending">Collapse</th>'
-      +'<th class="col-txt col-filter">Basing Plateau</th>'
+      +'<th class="col-txt col-filter">Bottoming Plateau</th>'
       +'<th class="col-txt col-filter">Probing Bet</th>'
       +'<th class="col-txt col-filter">VCP</th>'
       +'<th class="col-txt col-filter combo-col-pending">S3 Topping</th>'
@@ -6851,7 +6864,7 @@ function renderMM99(){
       +th("50>150","t5_pct","col-filter grp-st-first","50-day MA above 150-day MA")+th("P>50D","t6_pct","col-filter grp-st-last","Price above 50-day MA")
       +th("P>25%L","t7_pct","col-filter grp-lead-first","Price at least 25% above 52-week low (Minervini 2017; was 20% until 11-Sep-2026)")+th("P<25%H","t8_pct","col-filter grp-lead-last","Price within 25% of 52-week high")
       +th("Sector","t9_pct","col-filter grp-rs-first","Relative strength vs sector")+th("Industry","t10_pct","col-filter","Relative strength vs industry")+th("Market","t11_pct","col-filter grp-rs-last","Relative strength vs market")
-      +th("Probing","pb_stage","col-txt col-ref","Probing Bet filter stage")+th("Basing","bp_stage","col-txt col-ref","Basing Plateau filter stage")
+      +th("Probing","pb_stage","col-txt col-ref","Probing Bet filter stage")+th("Bottoming","bp_stage","col-txt col-ref","Bottoming Plateau filter stage")
       +ratingsColHeaders();
     hdr+='</tr>';
     return hdr;
@@ -6999,10 +7012,10 @@ function renderBP(){
     if(scj===4)gold++;else if(scj===3)silver++;else if(scj===2)bronze++;else if(scj===1)baseOnly++;else nada++;
     if(rj.gc)deep++;
   }
-  var h='<div class="summary-tile" id="section-summary"><h3>Basing Plateau &mdash; Stage 1 Detection Screen</h3>'
-    +'<div class="sub">Composite of 4 orthogonal tests: Basing (\u00b115% MA convergence + 3mo duration) + Flat MAs + Volume Contraction + Time-in-Base. 4=GOLD, 3=SILVER, 2=BRONZE.</div>'
+  var h='<div class="summary-tile" id="section-summary"><h3>Bottoming Plateau &mdash; Stage 1 Detection Screen</h3>'
+    +'<div class="sub">Composite of 4 orthogonal tests: Bottoming (\u00b115% MA convergence + 3mo duration) + Flat MAs + Volume Contraction + Time-in-Base. 4=GOLD, 3=SILVER, 2=BRONZE.</div>'
     +'<div class="summary-stats">'+sumStat("GOLD (4/4)",xyFmt(gold,rows.length),"green")+sumStat("SILVER (3/4)",xyFmt(silver,rows.length),"amber")+sumStat("BRONZE (2/4)",bronze)+sumStat("Base Only (1/4)",baseOnly)+sumStat("Deep Base (Tight)",deep)+sumStat("Shown",xyFmt(rows.length,totalCount))+'</div></div>';
-  var bpGroupDefs=[{key:"ga",label:"Basing (\u00b115%)"},{key:"gc",label:"Deep Base \u2014 Tight (\u00b15%)"}];
+  var bpGroupDefs=[{key:"ga",label:"Bottoming (\u00b115%)"},{key:"gc",label:"Deep Base \u2014 Tight (\u00b15%)"}];
   h+=buildIndSecTables(applyIndSecFilter(allRows),bpGroupDefs);
 
   function bpHeaders(){
@@ -7012,19 +7025,19 @@ function renderBP(){
     var hdr='<tr class="group-header-row"><th colspan="3"></th><th></th>';
     hdr+='<th></th>';  // BP Score column
     hdr+='<th colspan="4" style="background:rgba(50,150,50,0.08)">Stage 1 tests (4 orthogonal)</th>';
-    hdr+='<th colspan="3" style="background:rgba(50,100,200,0.06)">Basing duration (last 63 trading days)</th>';
+    hdr+='<th colspan="3" style="background:rgba(50,100,200,0.06)">Bottoming duration (last 63 trading days)</th>';
     hdr+='<th colspan="6" style="background:rgba(120,80,160,0.06)">Cross-filter stage</th>';
     hdr+=ratingsColHeaders().length>0?ratingsGroupTh():"";
     hdr+='</tr><tr class="col-header-row">';
     hdr+=bpCommonCols()
       +th("MA Range","ma_map_price","col-filter","Visual: relative positions of Price, 200D, 150D, 50D MAs","width:480px")
-      +th("BP Score","bp_score","col-filter","Composite 0-4: Basing + Flat MAs + Vol Contraction + Time-in-Base. 4=Capital, 3=Late, 2=Early. Default sort key.","width:80px")
-      +th("Basing","bp_basing_pass","col-filter","Test 1: \u00b115% MA convergence + 3-month duration","width:50px")
+      +th("BP Score","bp_score","col-filter","Composite 0-4: Bottoming + Flat MAs + Vol Contraction + Time-in-Base. 4=Capital, 3=Late, 2=Early. Default sort key.","width:80px")
+      +th("Bottoming","bp_basing_pass","col-filter","Test 1: \u00b115% MA convergence + 3-month duration","width:50px")
       +th("Flat MAs","bp_flat_pass","col-filter","Test 2: 200D slope \u2264\u00b12% AND 150D slope \u2264\u00b14% (annualised). Rules out stocks coasting through MAs in transit.","width:50px")
       +th("Vol Contr","bp_vol_pass","col-filter","Test 3: avg L3M volume / avg L12M volume < 0.90. Minervini accumulation marker.","width:50px")
       +th("Time-in","bp_time_pass","col-filter","Test 4: \u226560 trading days since last 20% drop AND no recent MM99 Capital. Genuine new base.","width:50px")
-      +th("Streak","bp_loose_streak","col-filter","Consecutive trading days currently meeting the Basing test. Higher = more mature base.","width:60px")
-      +th("%/63d","bp_loose_pct","col-filter","Fraction of last 63 trading days the Basing test passed (95% gate = qualifies).","width:60px")
+      +th("Streak","bp_loose_streak","col-filter","Consecutive trading days currently meeting the Bottoming test. Higher = more mature base.","width:60px")
+      +th("%/63d","bp_loose_pct","col-filter","Fraction of last 63 trading days the Bottoming test passed (95% gate = qualifies).","width:60px")
       +th("Duration","bp_loose_streak","col-filter","Per-day pass/fail visual: 63 bars, oldest left, latest right. Green = test passed that day. Major ticks = months (22d), minor = weeks (5d).","width:140px")
       +th("MM 99","mm_stage","col-txt col-ref","MM99 filter stage","width:48px")
       +th("PB","pb_stage2","col-txt col-ref","Probing Bet filter stage","width:48px")
@@ -7124,7 +7137,7 @@ function renderBP(){
     {key:"_gold",label:"GOLD (4/4) \u2014 all 4 Stage 1 tests pass"},
     {key:"_silver",label:"SILVER (3/4) \u2014 3 of 4 tests pass"},
     {key:"_bronze",label:"BRONZE (2/4) \u2014 2 of 4 tests pass"},
-    {key:"_baseonly",label:"Base Only (1/4) \u2014 Basing test only, reference"},
+    {key:"_baseonly",label:"Base Only (1/4) \u2014 Bottoming test only, reference"},
     {key:"gc",label:"Deep Base (\u00b15%) \u2014 Tight, long-horizon monitor"}
   ],totalCount,bpHeaders,bpRow);
   document.getElementById("tab-bp").innerHTML=h;
@@ -7231,7 +7244,7 @@ function renderPB(){
       +th("Dead Cat","dead_cat","col-filter","Price 30%+ below 52W high")+th("%<52WH","pct_below","col-num col-filter","% below 52-week high")
       +th("P>20D","t9","col-filter","Price above 20D MA (PB1 capital)")+th("20D Up","t10","col-filter","20D MA rising (PB1 capital)")+th("PB1","gd","col-green","PB1 capital qualification")
       +th("P>50D","t11","col-filter","Price above 50D MA (PB2 capital)")+th("50D Up","t12","col-filter","50D MA rising (PB2 capital)")+th("PB2","ge","col-green","PB2 capital qualification")
-      +th("MM 99","mm_stage","col-txt col-ref","MM99 filter stage")+th("Basing","bp_stage2","col-txt col-ref","Basing Plateau filter stage")
+      +th("MM 99","mm_stage","col-txt col-ref","MM99 filter stage")+th("Bottoming","bp_stage2","col-txt col-ref","Bottoming Plateau filter stage")
       +ratingsColHeaders();
     hdr+='</tr>';return hdr;
   }
@@ -8780,7 +8793,7 @@ function renderChanges(){
 
   // Shared filter definitions for both tiles and table
   var FILTER_ORDER=["basing_plateau","probing_bet","vcp","mm99","uptrend_retest","s3_topping","s4_declining","collapse"]; /* STAGE-REFACTOR-V3-MARKER */
-  var FILTER_COLS={"collapse":"Collapse","basing_plateau":"Basing Plateau","probing_bet":"Probing Bet","mm99":"MM 99","vcp":"VCP","uptrend_retest":"Uptrend Retest","s3_topping":"Topping","s4_declining":"Declining"}; /* Q1Q2-CLEANUP-V1 */
+  var FILTER_COLS={"collapse":"Collapse","basing_plateau":"Bottoming Plateau","probing_bet":"Probing Bet","mm99":"MM 99","vcp":"VCP","uptrend_retest":"Uptrend Retest","s3_topping":"Topping","s4_declining":"Declining"}; /* Q1Q2-CLEANUP-V1 */
   var TILE_BORDER={"collapse":"rgba(180,30,30,0.35)","basing_plateau":"rgba(39,103,73,0.35)","probing_bet":"rgba(107,70,193,0.35)","mm99":"rgba(27,61,92,0.35)","vcp":"rgba(156,66,33,0.35)","uptrend_retest":"rgba(116,66,16,0.35)","s3_topping":"rgba(200,100,0,0.35)","s4_declining":"rgba(150,20,20,0.35)"};
   var GRP_KEY={"collapse":"col","basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr","s3_topping":"s3","s4_declining":"s4"};
   function stRank(s){return s==="Capital"?3:s==="Late"?2:s==="Early"?1:0}
@@ -9163,7 +9176,7 @@ function renderChanges(){
 
   var FILT_TAB={"basing_plateau":"bp","probing_bet":"pb","mm99":"mm99","vcp":"vcp","uptrend_retest":"utr"};
   var STAGE_OF={"basing_plateau":1,"probing_bet":1,"vcp":2,"mm99":2,"uptrend_retest":2,"s3_topping":3,"s4_declining":4,"collapse":4};
-  var STAGE_LABEL={1:"STAGE 1 - Basing/bottoming",2:"STAGE 2 - Markup/breakout",3:"STAGE 3 - Topping",4:"STAGE 4 - Decline"};
+  var STAGE_LABEL={1:"STAGE 1 - Bottoming",2:"STAGE 2 - Markup/breakout",3:"STAGE 3 - Topping",4:"STAGE 4 - Decline"};
   var STAGE_COLOR={1:"rgba(39,103,73,0.5)",2:"rgba(27,61,92,0.5)",3:"rgba(180,83,9,0.5)",4:"rgba(153,27,27,0.5)"};
 
   // Classify each ticker per filter into a band.
@@ -9456,7 +9469,7 @@ function renderChanges(){
   var STAGE_HDR_BORDER = {1:"rgba(39,103,73,0.55)",2:"rgba(27,61,92,0.55)",3:"rgba(180,83,9,0.55)",4:"rgba(153,27,27,0.55)"};
   h+='<tr class="group-header-row">';
   h+='<th colspan="3" style="background:rgba(100,100,100,0.04);border-bottom:1px solid var(--border)"></th>';
-  h+='<th colspan="8" style="background:'+STAGE_HDR_BG[1]+';border:2px solid '+STAGE_HDR_BORDER[1]+';border-bottom:none;font-weight:800;font-size:10px;letter-spacing:.5px;color:#1a1a1a">STAGE 1 - Basing</th>';
+  h+='<th colspan="8" style="background:'+STAGE_HDR_BG[1]+';border:2px solid '+STAGE_HDR_BORDER[1]+';border-bottom:none;font-weight:800;font-size:10px;letter-spacing:.5px;color:#1a1a1a">STAGE 1 - Bottoming</th>';
   h+='<th colspan="12" style="background:'+STAGE_HDR_BG[2]+';border:2px solid '+STAGE_HDR_BORDER[2]+';border-bottom:none;font-weight:800;font-size:10px;letter-spacing:.5px;color:#1a1a1a">STAGE 2 - Markup</th>';
   h+='<th colspan="4" style="background:'+STAGE_HDR_BG[3]+';border:2px solid '+STAGE_HDR_BORDER[3]+';border-bottom:none;font-weight:800;font-size:10px;letter-spacing:.5px;color:#1a1a1a">STAGE 3 - Topping</th>';
   h+='<th colspan="8" style="background:'+STAGE_HDR_BG[4]+';border:2px solid '+STAGE_HDR_BORDER[4]+';border-bottom:none;font-weight:800;font-size:10px;letter-spacing:.5px;color:#1a1a1a">STAGE 4 - Decline</th>';
@@ -22232,7 +22245,7 @@ function sspRenderTable(ticker, p, md2){
   var prices  = _sspPrices();
   var H = '<table style="border-collapse:collapse;width:100%;font-size:11px;white-space:nowrap"><thead><tr>';
   /* S-SSV-04 Part A: per-column accent border-top */
-  var SSV_TH_DEFS04=[['Ticker',''],['Company',''],['S1<br><small style="font-weight:400;opacity:0.75">Basing</small>','#1b5e20'],['S2<br><small style="font-weight:400;opacity:0.75">Uptrend</small>','#2e7d32'],['S3<br><small style="font-weight:400;opacity:0.75">Topping</small>','#b45309'],['S4<br><small style="font-weight:400;opacity:0.75">Decline</small>','#991b1b'],['Pos.<br><small style="font-weight:400;opacity:0.75">Pre-Ind.</small>','#0F6E56'],['Neg.<br><small style="font-weight:400;opacity:0.75">Pre-Ind.</small>','#A32D2D'],['Price',''],['PB%',''],['Setup<br><small style="font-weight:400;opacity:0.75">HR retest</small>','#2E7D32'],['Minervini base<br><small style="font-weight:400;opacity:0.75">his count, v3</small>','#6d28d9']];
+  var SSV_TH_DEFS04=[['Ticker',''],['Company',''],['S1<br><small style="font-weight:400;opacity:0.75">Bottoming</small>','#1b5e20'],['S2<br><small style="font-weight:400;opacity:0.75">Uptrend</small>','#2e7d32'],['S3<br><small style="font-weight:400;opacity:0.75">Topping</small>','#b45309'],['S4<br><small style="font-weight:400;opacity:0.75">Decline</small>','#991b1b'],['Pos.<br><small style="font-weight:400;opacity:0.75">Pre-Ind.</small>','#0F6E56'],['Neg.<br><small style="font-weight:400;opacity:0.75">Pre-Ind.</small>','#A32D2D'],['Price',''],['PB%',''],['Setup<br><small style="font-weight:400;opacity:0.75">HR retest</small>','#2E7D32'],['Minervini base<br><small style="font-weight:400;opacity:0.75">his count, v3</small>','#6d28d9']];
   SSV_TH_DEFS04.forEach(function(ca){
     var c=ca[0],a=ca[1];
     var bTop=a?'border-top:2px solid '+a+';':'';

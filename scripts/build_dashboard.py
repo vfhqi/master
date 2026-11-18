@@ -558,6 +558,8 @@ TABS = [
     {"id": "flow_s1", "label": "Bottoming / S1 Speculative Bet?", "accent": "#1d4f3a"},
     {"id": "flow_s3", "label": "Restarting Reinforcing / S3 Speculative Bet?", "accent": "#1d4f3a"},
     {"id": "flow_s4", "label": "Collapsing / S4 Speculative Bet?", "accent": "#1d4f3a"},
+    {"id": "flow_vcp", "label": "VCP page", "accent": "#1d4f3a"},  # MD-CONDITIONS-2026-11-18
+    {"id": "flow_base", "label": "Base Pivot Point page", "accent": "#1d4f3a"},  # MD-CONDITIONS-2026-11-18
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -592,6 +594,7 @@ IMPLEMENTED_TABS = [
     "ig_turning",  # MD-IG-TURNING-2026-11-06
     "capital_deploy",  # MD-CAPITAL-DEPLOY-2026-11-11
     "flow_hc", "flow_proven", "flow_early", "flow_inflecting", "flow_s1", "flow_s3", "flow_s4",  # MD-FLOW-2026-11-14
+    "flow_vcp", "flow_base",  # MD-CONDITIONS-2026-11-18
 ]
 
 
@@ -617,23 +620,23 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
     tests_speculative_bet: 'flow_s3', tests_speculative_bet_s3: 'flow_s3', tests_speculative_bet_s4: 'flow_s4',
     capital_deploy: 'master_overview', collapse: 'stage_4', s4_declining: 'stage_4', s3_topping: 'stage_3',
     /* MD-BATCH1-2026-11-17 (Richard, 17-Nov-2026, Q3 b = Yes): Healthy VCP, Bullish post-test indicators, Breaking MAs */
-    tests_healthy_vcp: 'flow_proven', post_indicators_bull: 'flow_hc', post_indicators_bear: 'stage_4'
+    tests_healthy_vcp: 'flow_vcp', post_indicators_bull: 'flow_hc', post_indicators_bear: 'stage_4'
   };
   /* MD-ADDR-2026-11-17 (Richard, 17-Nov-2026: "#flow_early << Very confusing name"; "#pos_pre_indicators <<< The URL is confusing"):
      a descriptive address for each of these pages. The page's own id keeps working (old links, the scripts); the address bar
      shows the descriptive form, and a descriptive address opens its page. */
   var ADDR = { flow_hc: 'healthy-confirmation', flow_proven: 'reinforcing-proven-s2-core-investment', flow_early: 'broadening-early-s2-core-investment',
     flow_inflecting: 'inflecting-s1-to-s2-probing-bet', flow_s1: 'bottoming-s1-speculative-bet', flow_s3: 'restarting-reinforcing-s3-speculative-bet',
-    flow_s4: 'collapsing-s4-speculative-bet', stage_1: 'stage-1-bottoming', stage_2: 'stage-2-advancing', stage_3: 'stage-3-topping', stage_4: 'stage-4-declining',
+    flow_s4: 'collapsing-s4-speculative-bet', flow_vcp: 'vcp-page', flow_base: 'base-pivot-point-page', stage_1: 'stage-1', stage_2: 'stage-2', stage_3: 'stage-3', stage_4: 'stage-4',
     pulling_back: 's2-pullback', pos_pre_indicators: 's2-base', setups_healthy_retest: 'retest-of-a-moving-average' };
   var FROM_ADDR = {}; Object.keys(ADDR).forEach(function (k) { FROM_ADDR[ADDR[k]] = k; });
-  FROM_ADDR['stage-1-basing'] = 'stage_1';  /* the address of 17-Nov morning still opens the page */
+  FROM_ADDR['stage-1-basing'] = 'stage_1'; FROM_ADDR['stage-1-bottoming'] = 'stage_1'; FROM_ADDR['stage-2-advancing'] = 'stage_2'; FROM_ADDR['stage-3-topping'] = 'stage_3'; FROM_ADDR['stage-4-declining'] = 'stage_4';  /* the address of 17-Nov morning still opens the page */
   function hashId() { return (location.hash || '').slice(1).split('/')[0]; }
   var pendingAddr = FROM_ADDR[hashId()] || null;
   function showAddr(id) { try { if (ADDR[id] && hashId() !== ADDR[id]) history.replaceState(null, '', location.pathname + location.search + '#' + ADDR[id]); } catch (e) {} }
   window.addEventListener('hashchange', function () { var t = FROM_ADDR[hashId()]; if (t && typeof window.switchTab === 'function') window.switchTab(t); });
   /* MD-TITLE-2026-11-17 (Richard, 17-Nov-2026, Message 62): the browser tab reads "MD - " and the page's name */
-  var TITLE = { stage_1: 'Stage 1 (bottoming)', stage_2: 'Stage 2 (advancing)', stage_3: 'Stage 3 (topping)', stage_4: 'Stage 4 (declining)' };
+  var TITLE = { stage_1: 'Stage 1', stage_2: 'Stage 2', stage_3: 'Stage 3', stage_4: 'Stage 4' };
   function setTitle(id) { try { var b = document.querySelector('[data-tab="' + id + '"]'), n = TITLE[id] || (b ? String(b.textContent || '').replace(/\s+/g, ' ').trim() : ''); document.title = n ? 'MD - ' + n : 'Master Dashboard'; } catch (e) {} }
   window.MD_PAGE_ADDR = ADDR;
   window.MD_RETIRED_TABS = RETIRED;
@@ -10283,11 +10286,11 @@ function SUM_renderQualifiedStocks() {
     // Group 1 — Longer-term trend downwards?
     { id:'t1_gate',     label:'#1 — 200D MA is lower than it was 150D ago',           sortKey:'t1_gate',              cls:'grp-start-g1 grp-end-g1', colType:'gate',         gateField:'gate_200D_150d' },
     // Group 2 — Early-stage bottoming?
-    { id:'t2_short_1m', label:'#2 — 20D ≥ 97% of 50D ≥ 97% of 100D MA for 1M',   sortKey:'t2_short_1m',   cls:'grp-start-g2',            colType:'streak_thresh', streakField:'short_streak', threshold:20 },
-    { id:'t3_short_3m', label:'#3 — 20D ≥ 97% of 50D ≥ 97% of 100D MA for 3M+',  sortKey:'t3_short_3m',   cls:'grp-end-g2',              colType:'streak_thresh', streakField:'short_streak', threshold:63 },
+    { id:'t2_short_1m', label:'#2 — 20D, 50D and 100D MAs relatively flat (each no more than 3% below and 6% above the next longer one) for 1M',   sortKey:'t2_short_1m',   cls:'grp-start-g2',            colType:'streak_thresh', streakField:'short_streak', threshold:20 },
+    { id:'t3_short_3m', label:'#3 — 20D, 50D and 100D MAs relatively flat (each no more than 3% below and 6% above the next longer one) for 3M+',  sortKey:'t3_short_3m',   cls:'grp-end-g2',              colType:'streak_thresh', streakField:'short_streak', threshold:63 },
     // Group 3 — Protracted bottoming?
-    { id:'t4_long_1m',  label:'#4 — 100D ≥ 97% of 150D ≥ 97% of 200D MA for 1M', sortKey:'t4_long_1m',    cls:'grp-start-g3',            colType:'streak_thresh', streakField:'long_streak',  threshold:20 },
-    { id:'t5_long_3m',  label:'#5 — 100D ≥ 97% of 150D ≥ 97% of 200D MA for 3M+',sortKey:'t5_long_3m',   cls:'grp-end-g3',              colType:'streak_thresh', streakField:'long_streak',  threshold:63 },
+    { id:'t4_long_1m',  label:'#4 — 100D, 150D and 200D MAs relatively flat (each no more than 3% below and 6% above the next longer one) for 1M', sortKey:'t4_long_1m',    cls:'grp-start-g3',            colType:'streak_thresh', streakField:'long_streak',  threshold:20 },
+    { id:'t5_long_3m',  label:'#5 — 100D, 150D and 200D MAs relatively flat (each no more than 3% below and 6% above the next longer one) for 3M+',sortKey:'t5_long_3m',   cls:'grp-end-g3',              colType:'streak_thresh', streakField:'long_streak',  threshold:63 },
     // Context
     { id:'sec_in_ind',  label:'# sectors in industry',                                     sortKey:'sectors_in_industry',  cls:'grp-start-ctx',           colType:'count',         countKey:'sectors_in_industry',  countRedAt:2, countAmberAt:4 },
     { id:'co_in_sec',   label:'# companies in sector',                                     sortKey:'companies_in_sector',  cls:'grp-end-ctx',             colType:'count',         countKey:'companies_in_sector',  countRedAt:2, countAmberAt:5 },
@@ -10739,11 +10742,11 @@ function SUM_renderQualifiedStocks() {
         '<div class="gcap gcap-g1"><b>Group 1 — Longer-term trend downwards?</b>' +
           '<span class="tline"><span class="tnum">(1)</span> 200D MA is lower than it was 150D ago</span></div>' +
         '<div class="gcap gcap-g2"><b>Group 2 — Early-stage bottoming?</b>' +
-          '<span class="tline"><span class="tnum">(2)</span> 20D ≥ 97% of 50D ≥ 97% of 100D MA for 1M</span>' +
-          '<span class="tline"><span class="tnum">(3)</span> 20D ≥ 97% of 50D ≥ 97% of 100D MA for 3M+</span></div>' +
+          '<span class="tline"><span class="tnum">(2)</span> 20D, 50D and 100D MAs relatively flat (each no more than 3% below and 6% above the next longer one) for 1M</span>' +
+          '<span class="tline"><span class="tnum">(3)</span> 20D, 50D and 100D MAs relatively flat (each no more than 3% below and 6% above the next longer one) for 3M+</span></div>' +
         '<div class="gcap gcap-g3"><b>Group 3 — Protracted bottoming?</b>' +
-          '<span class="tline"><span class="tnum">(4)</span> 100D ≥ 97% of 150D ≥ 97% of 200D MA for 1M</span>' +
-          '<span class="tline"><span class="tnum">(5)</span> 100D ≥ 97% of 150D ≥ 97% of 200D MA for 3M+</span></div>' +
+          '<span class="tline"><span class="tnum">(4)</span> 100D, 150D and 200D MAs relatively flat (each no more than 3% below and 6% above the next longer one) for 1M</span>' +
+          '<span class="tline"><span class="tnum">(5)</span> 100D, 150D and 200D MAs relatively flat (each no more than 3% below and 6% above the next longer one) for 3M+</span></div>' +
       '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +
         '<table class="data-table" id="s1-main-table">' +
@@ -11235,7 +11238,7 @@ function SUM_renderQualifiedStocks() {
         '<td class="taxon"><div class="ind">' + (s.industry || '') + '</div><div class="sec">' + (s.sector || '') + '</div></td>' +
         s2InputCell(s, 'price') + s2InputCell(s, 'high_52w') + s2InputCell(s, 'low_52w') +
         s2InputCell(s, 'ma_150') + s2InputCell(s, 'ma_200') +
-        '<td class="grp-start-rating"' + (s.s4block ? ' title="No Stage 2 rating: rated Stage 4 (declining) Plausible or Probable, although both gates pass (Richard, 15-Nov-2026)"' : '') + '>' + s2PillFor(s.rating, s.count) + (s.s4block ? '<div class="s2-s4block">Stage 4</div>' : '') + '</td>' +  /* S2-NOT-S4-2026-11-16 */
+        '<td class="grp-start-rating"' + (s.s4block ? ' title="No Stage 2 rating: rated Stage 4 Plausible or Probable, although both gates pass (Richard, 15-Nov-2026)"' : '') + '>' + s2PillFor(s.rating, s.count) + (s.s4block ? '<div class="s2-s4block">Stage 4</div>' : '') + '</td>' +  /* S2-NOT-S4-2026-11-16 */
         '<td>' + s2ScorePips(s) + '</td>';
       for (var j = 9; j < S2_COLS.length - 1; j++) html += s2TestCell(s, S2_COLS[j]); // MD-V2-S54; MD-S2-GROUPS-2026-11-14: every column between the score and the 12-month column (was a fixed 9 to 19, three short after 14-Nov)
       html += '<td class="grp-start-persist">' + s2PersistCells(s.persistence, s.rating) + '</td>' +
@@ -11285,7 +11288,7 @@ function SUM_renderQualifiedStocks() {
     if (!host) return false;
     if (host.querySelector('#s2-main-table')) return true;
     var html = '' +
-      '<div class="s1-intro">Stage 2 (advancing) looks for stocks already in a clear uptrend: two gates, both required (the 200-day MA flat or rising; the 150-day MA above the 200-day MA), then seven tests scored in four groups: Price trend (price above the 150-day and the 50-day MA, both needed); Position in the 52-week range (within 25% of the high and at least 30% above the low, both needed); Moving-average stack (the 50-day MA above the 150-day or the 200-day, either one); Relative strength (Stock RS 70 or more). All four groups = Probable, three = Plausible; both gates passing with two or fewer groups = Possible; a gate failing, no rating; a stock rated Stage 4 (declining) Plausible or Probable gets no Stage 2 rating (Richard, 15-Nov-2026), so it shows None with its gates ticked. Industry RS, Sector RS and Stock RS against its industry are shown for information, not scored. Position Entry and Exit Rules, version of 13-Nov-2026, with the four-group ladder of 14-Nov-2026.</div>' +  /* MD-DEFS-2026-11-13; MD-S2-GROUPS-2026-11-14 */
+      '<div class="s1-intro">Stage 2 looks for stocks already in a clear uptrend: two gates, both required (the 200-day MA flat or rising; the 150-day MA above the 200-day MA), then seven tests scored in four groups: Price trend (price above the 150-day and the 50-day MA, both needed); Position in the 52-week range (within 25% of the high and at least 30% above the low, both needed); Moving-average stack (the 50-day MA above the 150-day or the 200-day, either one); Relative strength (Stock RS 70 or more). All four groups = Probable, three = Plausible; both gates passing with two or fewer groups = Possible; a gate failing, no rating; a stock rated Stage 4 Plausible or Probable gets no Stage 2 rating (Richard, 15-Nov-2026), so it shows None with its gates ticked. Industry RS, Sector RS and Stock RS against its industry are shown for information, not scored. Position Entry and Exit Rules, version of 13-Nov-2026, with the four-group ladder of 14-Nov-2026.</div>' +  /* MD-DEFS-2026-11-13; MD-S2-GROUPS-2026-11-14 */
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-s2-grp="inputs" data-s2-val="pct" onclick="s2SetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -11886,7 +11889,7 @@ function SUM_renderQualifiedStocks() {
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="s3-rating-tiles" style="grid-template-columns: repeat(4, 1fr);"></div>' +
       '<div class="group-captions" style="grid-template-columns: repeat(4, 1fr);">' +
-        '<div class="gcap gcap-g1"><b>Gate · 200-day MA still rising?</b>Stage 3 (topping) applies while the <span class="db">200-day MA is higher than 21 trading days ago</span>, wherever the price is (Richard, 11-Nov-2026: "The slope of the 200D MA is very important as a delineator").</div>' +  /* MD-DEFS-2026-11-13 */
+        '<div class="gcap gcap-g1"><b>Gate · 200-day MA still rising?</b>Stage 3 applies while the <span class="db">200-day MA is higher than 21 trading days ago</span>, wherever the price is (Richard, 11-Nov-2026: "The slope of the 200D MA is very important as a delineator").</div>' +  /* MD-DEFS-2026-11-13 */
         '<div class="gcap gcap-g2"><b>Information · Price above the 200-day MA?</b>Shown, no longer a gate: a stock below a still-rising 200-day MA can be topping.</div>' +
         '<div class="gcap gcap-g3"><b>Group 3 · Mid-term trend extended?</b><span class="db">How mature is the run?</span> Each successive base built since the 52-week low raises the odds the trend is getting late.<span class="intro">One maturity test:</span><span class="tline"><span class="tnum">(3)</span> Has the stock built <u>2 or more bases</u> since its 52-week low (504-day window)?</span></div>' +
         '<div class="gcap gcap-g4"><b>Group 4 · Short-term trend breaking down?</b>Even with the long-term still up, the <span class="db">short term is now showing distribution</span> &mdash; MA stack tightening, volume rotating down, volatility expanding, swing lows printing lower, RS slipping.<span class="intro">Five breakdown tests:</span><span class="tline"><span class="tnum">(4)</span> Is the <u>50D MA at or below 150D MA</u> (i.e. within 3% below — stack tightening toward a cross)?</span><span class="tline"><span class="tnum">(5)</span> Is down-day volume <u>at least 10% above up-day volume</u> over the last ~20 days?</span><span class="tline"><span class="tnum">(6)</span> Is last-month volatility <u>above the prior 4-month average</u> (L1M ATR vs P4M average ATR)?</span><span class="tline"><span class="tnum">(7)</span> Are there <u>2 or more lower lows</u> in the last 2 months?</span><span class="tline"><span class="tnum">(8)</span> Has Sector RS (the Composite, ranked across all sectors) <u>dropped more than 10 points</u> versus 3 months ago?</span></div>' +
@@ -11995,10 +11998,9 @@ function SUM_renderQualifiedStocks() {
     { id:'ma_200',    label:'200D MA',        sortKey:'ma_200', cls:'num' },
     { id:'rating',    label:'Rating',                        sortKey:'rating_rank', cls:'grp-start-rating' },
     { id:'count',     label:'Score',                         sortKey:'count', cls:'' },
-    { id:'gp200_s4',  label:'1. Price below a falling 200D MA (gate)',    sortKey:'gate_gp200_s4', cls:'grp-start-g1 grp-end-g1', testGroup:'_gates4', testKey:'gate_price_below_200D' },
-    { id:'t2',        label:'2. 100D MA MoM declining',         sortKey:'t2_s4', cls:'grp-start-g2', testGroup:'g1_ma_decline', testKey:'T2' },
-    { id:'t3',        label:'3. 200D MA MoM declining',         sortKey:'t3_s4', cls:'grp-end-g2', testGroup:'g1_ma_decline', testKey:'T3' },
-    { id:'t4',        label:'4. Full bearish stack (P<50<150<200)', sortKey:'t4_s4', cls:'grp-start-g3 grp-end-g3', testGroup:'g2_ma_stack', testKey:'T4' },
+    { id:'gp200_s4',  label:'1. Close below a 200-day moving average that is lower than 21 sessions ago (the gate)',    sortKey:'gate_gp200_s4', cls:'grp-start-g1 grp-end-g1', testGroup:'_gates4', testKey:'gate_price_below_200D' },
+    { id:'t2',        label:'2. 100-day moving average lower than 20 sessions ago',         sortKey:'t2_s4', cls:'grp-start-g2 grp-end-g2', testGroup:'g1_ma_decline', testKey:'T2' },
+    { id:'t4',        label:'3. Close below the 50-day, 50-day below the 150-day, 150-day below the 200-day', sortKey:'t4_s4', cls:'grp-start-g3 grp-end-g3', testGroup:'g2_ma_stack', testKey:'T4' },
     { id:'sec_in_ind',label:'# sectors in industry',        sortKey:'sectors_in_industry', cls:'grp-start-g4', colType:'count', countKey:'sectors_in_industry', countRedAt:2, countAmberAt:4 },
     { id:'co_in_sec', label:'# companies in sector',        sortKey:'companies_in_sector', cls:'grp-end-g4', colType:'count', countKey:'companies_in_sector', countRedAt:2, countAmberAt:5 },
     { id:'persist',   label:'Last 12 months',               sortKey:'persistence_count', cls:'grp-start-persist' }
@@ -12169,18 +12171,18 @@ function SUM_renderQualifiedStocks() {
   function s4ScorePips(row) {
     var t = row.tests;
     var passed = [
-      !!t.T2_100D_MoM_declining, !!t.T3_200D_MoM_declining, !!t.T4_bearish_MA_stack
+      !!t.T2_100D_MoM_declining, !!t.T4_bearish_MA_stack
     ];
     var count = passed.filter(Boolean).length;
     var g4 = (row.groups && row.groups._gates4) || {};
     var s = '<span class="pip pip-bear ' + (g4.gate_price_below_200D ? 'gate-ok' : 'gate-x') + '"></span>' +
             '<span class="pip-div"></span>';
-    var s4DivAfter = {1:true};
-    for (var i = 0; i < 3; i++) {
+    var s4DivAfter = {0:true};
+    for (var i = 0; i < 2; i++) {
       s += '<span class="pip pip-bear ' + (passed[i] ? 'on' : '') + '"></span>';
       if (s4DivAfter[i]) s += '<span class="pip-div"></span>';
     }
-    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/3</span></div>';
+    return '<div class="score-pip-row">' + s + '<span class="score-num">' + count + '/2</span></div>';
   }
   function s4PersistCells(arr, rating) {
     var h = '';
@@ -12259,10 +12261,10 @@ function SUM_renderQualifiedStocks() {
     var order = ['None','Possible','Plausible','Probable'];
     var strip = {'Probable':'prob','Plausible':'pla','Possible':'pos','None':'none'};
     var S4_THRESH = {
-      'Probable':  'Gate pass \u00b7 100D + 200D both declining MoM \u00b7 full bearish stack',
-      'Plausible': 'Gate pass \u00b7 100D + 200D both declining MoM \u00b7 stack not yet inverted',
-      'Possible':  'Gate pass \u00b7 100-day declining MoM only \u00b7 early decline signal',
-      'None':      'Gate fail (price not yet below 200-day) \u00b7 no confirmed decline'
+      'Probable':  'The gate \u00b7 the 100-day moving average lower than 20 sessions ago \u00b7 the close below the 50-day, the 50-day below the 150-day, the 150-day below the 200-day',
+      'Plausible': 'The gate \u00b7 the 100-day moving average lower than 20 sessions ago',
+      'Possible':  'The gate only: the close below a 200-day moving average that is lower than 21 sessions ago',
+      'None':      'The gate is not met'
     }; /* MD-V2-S55-PER-TILE-CRITERIA-s4 */
     var h = '';
     for (var i = 0; i < order.length; i++) {
@@ -12329,7 +12331,7 @@ function SUM_renderQualifiedStocks() {
         s4InputCell(s, 'ma_150') + s4InputCell(s, 'ma_200') +
         '<td class="grp-start-rating">' + s4PillFor(s.rating, s.count) + '</td>' +
         '<td>' + s4ScorePips(s) + '</td>';
-      for (var j = 9; j <= 14; j++) html += s4TestCell(s, S4_COLS[j]); // MD-V2-S54
+      for (var j = 9; j <= 13; j++) html += s4TestCell(s, S4_COLS[j]); // MD-V2-S54; one fewer since 18-Nov-2026
       html += '<td class="grp-start-persist">' + s4PersistCells(s.persistence, s.rating) + '</td>' +
         '</tr>';
     }
@@ -12376,7 +12378,7 @@ function SUM_renderQualifiedStocks() {
     if (!host) return false;
     if (host.querySelector('#s4-main-table')) return true;
     var html = '' +
-      '<div class="s1-intro">Stage 4 looks for stocks in <b>confirmed decline</b>: price below a falling 200-day MA (gate, from 13-Nov-2026), and the trend pointing down across both the long-term and mid-term horizons. The aim is to flag positions that should be exited if held, and to identify capitulation candidates eligible for the pullback-tranche playbook on rebound. Four tests across three groups (long-term, mid-term, near-term): more tests passing means the decline is more entrenched.</div>' +
+      '<div class="s1-intro">Stage 4 looks for stocks in <b>confirmed decline</b>. The gate, which every Stage 4 stock passes: the close below a 200-day moving average that is lower than 21 sessions ago. <b>Possible</b> = the gate alone. <b>Plausible</b> = the gate, and the 100-day moving average lower than 20 sessions ago. <b>Probable</b> = those, and the close below the 50-day, the 50-day below the 150-day and the 150-day below the 200-day moving average. A test that only repeated the gate (the 200-day moving average falling) was removed on 18-Nov-2026.</div>' +
       '<div class="controls s1-controls">' +
         '<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>' +
           '<button class="toggle-btn active" data-s4-grp="inputs" data-s4-val="pct" onclick="s4SetMode(\'inputs\',\'pct\')">show as %</button>' +
@@ -12406,9 +12408,9 @@ function SUM_renderQualifiedStocks() {
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="s4-rating-tiles" style="grid-template-columns: repeat(4, 1fr);"></div>' +
       '<div class="group-captions" style="grid-template-columns: repeat(3, 1fr);">' +
-        '<div class="gcap gcap-g1"><b>Group 1 · Long-term trend</b>Is the <span class="db">long-term trend confirmed down</span>? The gate: price below the 200-day MA <i>and</i> the 200-day MA lower than 21 trading days ago (Richard, 11-Nov-2026). A stock below a still-rising 200-day MA is Stage 3 (topping), not Stage 4.</div>' +  /* MD-DEFS-2026-11-13 */
-        '<div class="gcap gcap-g2"><b>Group 2 · Mid-term trend</b>The mid-term moving averages should also be <span class="db">pointing down</span> &mdash; both the 100-day and the 200-day falling month-on-month.<span class="intro">Two mid-term decline tests:</span><span class="tline"><span class="tnum">(2)</span> Is the <u>100-day MA lower month-on-month</u>?</span><span class="tline"><span class="tnum">(3)</span> Is the <u>200-day MA lower month-on-month</u>?</span></div>' +
-        '<div class="gcap gcap-g3"><b>Group 3 · Near-term trend</b>The <span class="db">full moving-average stack should be inverted</span> &mdash; price stacked below every MA, in order. The clearest near-term confirmation that the decline is fully under way.<span class="intro">One near-term test:</span><span class="tline"><span class="tnum">(4)</span> Is the stack <u>fully inverted</u> &mdash; price below the 50-day, below the 150-day, below the 200-day?</span></div>' +
+        '<div class="gcap gcap-g1"><b>Group 1 · Long-term trend</b>Is the <span class="db">long-term trend confirmed down</span>? The gate: price below the 200-day MA <i>and</i> the 200-day MA lower than 21 trading days ago (Richard, 11-Nov-2026). A stock below a still-rising 200-day MA is Stage 3, not Stage 4.</div>' +  /* MD-DEFS-2026-11-13 */
+        '<div class="gcap gcap-g2"><b>Group 2 · Mid-term trend</b>The mid-term moving average should also be <span class="db">pointing down</span>.<span class="intro">One mid-term test:</span><span class="tline"><span class="tnum">(2)</span> Is the <u>100-day moving average lower than 20 sessions ago</u>?</span></div>' +
+        '<div class="gcap gcap-g3"><b>Group 3 · Near-term trend</b>The <span class="db">full moving-average stack should be inverted</span> &mdash; price stacked below every MA, in order. The clearest near-term confirmation that the decline is fully under way.<span class="intro">One near-term test:</span><span class="tline"><span class="tnum">(3)</span> Is the close below the 50-day, the 50-day below the 150-day, and the 150-day below the 200-day moving average?</span></div>' +
       '</div>' +
       '<div class="table-wrap"><div class="v2-hscroll">' +  /* MD-V2-WAVE3B-STICKY-SCROLL-CONTAINER-MARKER */
         '<table class="data-table" id="s4-main-table">' +
@@ -12418,7 +12420,7 @@ function SUM_renderQualifiedStocks() {
             '<col class="c-ma150"><col class="c-ma200">' +
             '<col class="c-rating"><col class="c-score">' +
             '<col class="c-test">' +
-            '<col class="c-test"><col class="c-test">' +
+            '<col class="c-test">' +
             '<col class="c-test">' +
             '<col class="c-test"><col class="c-test">' +
             '<col class="c-persist">' +
@@ -12428,7 +12430,7 @@ function SUM_renderQualifiedStocks() {
               '<th class="gh-inputs" colspan="7">Inputs</th>' +
               '<th class="gh-rating grp-start-rating" colspan="2">Stage 4 rating</th>' /* MD-V2-S55-gh-s4 */ +
               '<th class="gh-g1 grp-start-g1 grp-end-g1" colspan="1">Group 1 — Long-term trend declining?</th>' +
-              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="2">Group 2 — Mid-term trend declining?</th>' +
+              '<th class="gh-g2 grp-start-g2 grp-end-g2" colspan="1">Group 2 — Mid-term trend declining?</th>' +
               '<th class="gh-g3 grp-start-g3 grp-end-g3" colspan="1">Group 3 — Near-term trend declining?</th>' +
               '<th class="gh-g4 grp-start-g4 grp-end-g4" colspan="2">Group 4 — Taxonomy context?</th>' +
               '<th class="gh-persist grp-start-persist" colspan="1">Stage Qualification persistence</th>' +
@@ -12541,6 +12543,8 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="flow_s1" onclick="switchTab(\'flow_s1\')">Bottoming / S1 Speculative Bet?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_s3" onclick="switchTab(\'flow_s3\')">Restarting Reinforcing / S3 Speculative Bet?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_s4" onclick="switchTab(\'flow_s4\')">Collapsing / S4 Speculative Bet?</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_vcp" onclick="switchTab(\'flow_vcp\')">VCP page</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_base" onclick="switchTab(\'flow_base\')">Base Pivot Point page</button>'
       +   '</div>'
       + '</div>'
       /* Group 1: Stages */
@@ -12708,10 +12712,10 @@ function SUM_renderQualifiedStocks() {
     pulling_back: {  /* MD-PB-RETEST-2026-11-12: S2 Pullback (Richard, 12-Nov-2026) */
       hostId:'tab-pulling_back', tableId:'pb-main-table', tbodyId:'pb-tbody',
       patternKey:'pulling_back_uptrend', depthFilter:true, yn:true,  /* MD-DEFS-2026-11-13 */
-      intro:'<b>S2 Pullback</b> &mdash; a stock in a Stage 2 uptrend whose share price has fallen more than 10% from its six-month high. <b>Qualified</b> when all four tests pass: (1) price above the 200-day MA; (2) the 200-day MA higher than 21 trading days ago; (3) the 150-day MA higher than 21 trading days ago; (4) a fall of more than 10% has happened since the six-month high (the highest price of the last 126 trading days), measured to the lowest price since. A stock stays Qualified after its price recovers, until a new six-month high resets the measure. <b>Depth</b> of that fall: <b>Shallow</b> 10% to 15%; <b>Medium</b> 15% to 20%; <b>Deep</b> over 20%. An S2 Pullback that has lasted 20 or more trading days is an <b>S2 Base</b> (the next page). The page lists the Qualified stocks; the Show buttons bring up the others. Counts start on stocks rated Stage 2 (advancing) Plausible or Probable; widen with the S2 gate buttons.',
+      intro:'<b>S2 Pullback</b> &mdash; a stock in a Stage 2 uptrend whose share price has fallen more than 10% from its six-month high. <b>Measured on closing prices.</b> The six-month high is the Pivot Point: it is fixed on the day the fall first exceeds 10% and held until the first close above it, which completes the pullback or base; for a stock in Stage 2 the measure starts on the first session of Stage 2. <b>Qualified</b> when all four tests pass: (1) price above the 200-day MA; (2) the 200-day MA higher than 21 trading days ago; (3) the 150-day MA higher than 21 trading days ago; (4) a fall of more than 10% has happened since the six-month high (the highest close of the last 126 trading days), measured to the lowest close since. A stock stays Qualified after its price recovers, until a new six-month high resets the measure. <b>Depth</b> of that fall: <b>Shallow</b> 10% to 15%; <b>Medium</b> 15% to 20%; <b>Deep</b> over 20%. An S2 Pullback that has lasted 20 or more trading days is an <b>S2 Base</b> (the next page). The page lists the Qualified stocks; the Show buttons bring up the others. Counts start on stocks rated Stage 2 Plausible or Probable; widen with the S2 gate buttons.',
       numCaps:2,
       caps:[
-        {cls:'gcap-base',   title:'S2 Pullback: the four tests and the measures', body:'Tests: (1) price above the 200-day MA; (2) 200-day MA higher than 21 trading days ago; (3) 150-day MA higher than 21 trading days ago; (4) depth more than 10%. <span style="font-weight:700;color:#333">% from High</span>: the close today against the six-month high. <span style="font-weight:700;color:#333">Max Pullback Depth from High</span>: the deepest fall since that high, to the lowest price since it (Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%). <span style="font-weight:700;color:#333">% from Post-Pullback Low</span>: the close today against that lowest price. <span style="font-weight:700;color:#333">Days since High</span>: trading days since the six-month high; 20 or more makes it an S2 Base.'},
+        {cls:'gcap-base',   title:'S2 Pullback: the four tests and the measures', body:'Tests: (1) price above the 200-day MA; (2) 200-day MA higher than 21 trading days ago; (3) 150-day MA higher than 21 trading days ago; (4) depth more than 10%. <span style="font-weight:700;color:#333">% from High</span>: the close today against the six-month high. <span style="font-weight:700;color:#333">Max Pullback Depth from High</span>: the deepest fall since that high, to the lowest close since it (Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%). <span style="font-weight:700;color:#333">% from Post-Pullback Low</span>: the close today against that lowest price. <span style="font-weight:700;color:#333">Days since High</span>: trading days since the six-month high; 20 or more makes it an S2 Base.'},
         {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)', body:'The stock’s Stage 2 status: rating, two gates and seven tests (scored in four groups). Shown for context, not scored here.'}
       ],
       colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:92px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:62px"><col style="width:80px"><col style="width:80px"><col style="width:58px"><col style="width:64px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
@@ -12732,10 +12736,10 @@ function SUM_renderQualifiedStocks() {
         {sk:'t1',       html:'1. Above 200D',            tip:'Price above the 200-day MA', cls:'gs-base', wrap:true},
         {sk:'t2',       html:'2. 200D rising',           tip:'200-day MA higher than 21 trading days ago', cls:'', wrap:true},
         {sk:'t3',       html:'3. 150D rising',           tip:'150-day MA higher than 21 trading days ago', cls:'', wrap:true},
-        {sk:'t4',       html:'4. Depth >10%',            tip:'Depth of pullback more than 10%: the deepest fall from the 6-month high (highest high of the last 126 trading days) to the lowest price since', cls:'', wrap:true},
-        {sk:'pbdepth',  html:'% from High',                  tip:'The close today against the 6-month high (the highest price of the last 126 trading days)', cls:'sg-edge', wrap:true},
-        {sk:'pbmax',    html:'Max Pullback Depth from High', tip:'The deepest fall since the 6-month high, measured to the lowest price since it. Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%', cls:'', wrap:true},
-        {sk:'pblow',    html:'% from Post-Pullback Low',     tip:'The close today against the lowest price since the 6-month high', cls:'', wrap:true},
+        {sk:'t4',       html:'4. Depth >10%',            tip:'Depth of pullback more than 10%: the deepest fall from the 6-month high (highest close of the last 126 trading days) to the lowest close since', cls:'', wrap:true},
+        {sk:'pbdepth',  html:'% from High',                  tip:'The close today against the 6-month high (the highest close of the last 126 trading days)', cls:'sg-edge', wrap:true},
+        {sk:'pbmax',    html:'Max Pullback Depth from High', tip:'The deepest fall since the 6-month high, measured to the lowest close since it. Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%', cls:'', wrap:true},
+        {sk:'pblow',    html:'% from Post-Pullback Low',     tip:'The close today against the lowest close since the 6-month high', cls:'', wrap:true},
         {sk:'bhdays',   html:'Days since High',              tip:'Trading days since the 6-month high. 20 or more makes an S2 Pullback an S2 Base', cls:'', wrap:true},
         {sk:'bhdate',   html:'6M high date',             tip:'Date of the 6-month high', cls:'', wrap:true},
         {sk:'s2r',      html:'S2 Rating',                tip:'Stage 2 rating (for reference)',cls:'gs-forref s2col'},
@@ -12755,7 +12759,7 @@ function SUM_renderQualifiedStocks() {
     pos_pre_indicators: {
       hostId:'tab-pos_pre_indicators', tableId:'basing-main-table', tbodyId:'basing-tbody',
       patternKey:'basing', depthFilter:true, yn:true,  /* MD-DEFS-2026-11-13 */
-      intro:'<b>S2 Base</b> &mdash; an S2 Pullback that has lasted: a stock in a Stage 2 uptrend that fell more than 10% from its six-month high at least 20 trading days ago and has not made a new six-month high since, so the price has had time to move sideways and build a base. <b>How it is measured:</b> the same four tests as S2 Pullback (price above the 200-day MA; the 200-day MA higher than 21 trading days ago; the 150-day MA higher than 21 trading days ago; a fall of more than 10% from the six-month high, the highest price of the last 126 trading days, to the lowest price since), plus a fifth: at least 20 trading days since that high. <b>How it differs from an S2 Pullback:</b> only the time. Every S2 Base is also an S2 Pullback; a pullback younger than 20 trading days is not yet a base. <b>Depth</b> of the fall: <b>Shallow</b> 10% to 15%; <b>Medium</b> 15% to 20%; <b>Deep</b> over 20%. This is a base inside an uptrend, not the Stage 1 (bottoming) page, which is a bottom after a downtrend. The page lists the Qualified stocks; the Show buttons bring up the others. Counts start on stocks rated Stage 2 (advancing) Plausible or Probable; widen with the S2 gate buttons. (Richard, 17-Nov-2026: an S2 Base is an S2 Pullback plus 20 trading days.)',
+      intro:'<b>S2 Base</b> &mdash; an S2 Pullback that has lasted: a stock in a Stage 2 uptrend that fell more than 10% from its six-month high at least 20 trading days ago and has not made a new six-month high since, so the price has had time to move sideways and build a base. <b>Measured on closing prices.</b> The six-month high is the Pivot Point: it is fixed on the day the fall first exceeds 10% and held until the first close above it, which completes the pullback or base; for a stock in Stage 2 the measure starts on the first session of Stage 2. <b>How it is measured:</b> the same four tests as S2 Pullback (price above the 200-day MA; the 200-day MA higher than 21 trading days ago; the 150-day MA higher than 21 trading days ago; a fall of more than 10% from the six-month high, the highest close of the last 126 trading days, to the lowest close since), plus a fifth: at least 20 trading days since that high. <b>How it differs from an S2 Pullback:</b> only the time. Every S2 Base is also an S2 Pullback; a pullback younger than 20 trading days is not yet a base. <b>Depth</b> of the fall: <b>Shallow</b> 10% to 15%; <b>Medium</b> 15% to 20%; <b>Deep</b> over 20%. This is a base inside an uptrend, not the Stage 1 page, which is a bottom after a downtrend. The page lists the Qualified stocks; the Show buttons bring up the others. Counts start on stocks rated Stage 2 Plausible or Probable; widen with the S2 gate buttons. (Richard, 17-Nov-2026: an S2 Base is an S2 Pullback plus 20 trading days.)',
       numCaps:2,
       caps:[
         {cls:'gcap-base',   title:'S2 Base: the five tests and the measures', body:'Tests: (1) price above the 200-day MA; (2) 200-day MA higher than 21 trading days ago; (3) 150-day MA higher than 21 trading days ago; (4) depth more than 10%; (5) at least 20 trading days since the six-month high. <span style="font-weight:700;color:#333">% from High</span>: the close today against the six-month high. <span style="font-weight:700;color:#333">Max Pullback Depth from High</span>: the deepest fall since that high (Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%). <span style="font-weight:700;color:#333">% from Post-Pullback Low</span>: the close today against the lowest price since the high. <span style="font-weight:700;color:#333">Days since High</span>: trading days since the six-month high.'},
@@ -12779,11 +12783,11 @@ function SUM_renderQualifiedStocks() {
         {sk:'t1',       html:'1. Above 200D',            tip:'Price above the 200-day MA', cls:'gs-base', wrap:true},
         {sk:'t2',       html:'2. 200D rising',           tip:'200-day MA higher than 21 trading days ago', cls:'', wrap:true},
         {sk:'t3',       html:'3. 150D rising',           tip:'150-day MA higher than 21 trading days ago (added 17-Nov-2026: an S2 Base is an S2 Pullback plus 20 trading days)', cls:'', wrap:true},
-        {sk:'t4',       html:'4. Depth >10%',            tip:'Depth more than 10%: the deepest fall from the 6-month high (highest high of the last 126 trading days) to the lowest price since', cls:'', wrap:true},
+        {sk:'t4',       html:'4. Depth >10%',            tip:'Depth more than 10%: the deepest fall from the 6-month high (highest close of the last 126 trading days) to the lowest close since', cls:'', wrap:true},
         {sk:'t5',       html:'5. 20+ days since High',   tip:'At least 20 trading days since the 6-month high', cls:'', wrap:true},
-        {sk:'pbdepth',  html:'% from High',                  tip:'The close today against the 6-month high (the highest price of the last 126 trading days)', cls:'sg-edge', wrap:true},
-        {sk:'pbmax',    html:'Max Pullback Depth from High', tip:'The deepest fall since the 6-month high, measured to the lowest price since it. Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%', cls:'', wrap:true},
-        {sk:'pblow',    html:'% from Post-Pullback Low',     tip:'The close today against the lowest price since the 6-month high', cls:'', wrap:true},
+        {sk:'pbdepth',  html:'% from High',                  tip:'The close today against the 6-month high (the highest close of the last 126 trading days)', cls:'sg-edge', wrap:true},
+        {sk:'pbmax',    html:'Max Pullback Depth from High', tip:'The deepest fall since the 6-month high, measured to the lowest close since it. Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%', cls:'', wrap:true},
+        {sk:'pblow',    html:'% from Post-Pullback Low',     tip:'The close today against the lowest close since the 6-month high', cls:'', wrap:true},
         {sk:'bhdays',   html:'Days since High',              tip:'Trading days since the 6-month high. 20 or more makes an S2 Pullback an S2 Base', cls:'', wrap:true},
         {sk:'bhdate',   html:'6M high date',                 tip:'Date of the 6-month high', cls:'', wrap:true},
         {sk:'s2r',      html:'S2 Rating',                tip:'Stage 2 rating (for reference)',  cls:'gs-forref s2col'},
@@ -12802,26 +12806,26 @@ function SUM_renderQualifiedStocks() {
     setups_healthy_retest: {  /* MD-PB-RETEST-2026-11-12: Retest (Richard, 12-Nov-2026); replaced Healthy Retest */
       hostId:'tab-setups_healthy_retest', tableId:'rt-main-table', tbodyId:'rt-tbody',
       patternKey:'healthy_retest', isRetest:true, maFilter:true, depthFilter:true, s2HiddenDefault:true, tiers:['Plausible','Probable'],
-      intro:'<b>Retest</b> &mdash; stocks that are Qualified on S2 Pullback (all four tests pass) whose close today is within 6% of a moving average (50, 100, 150 or 200-day), above or below. <b>One row per stock.</b> The row shows the moving average being retested: the line with the best rating, then the most days near it, a tie going to the longer line (the same line the Investment Classification pages use). The four columns after Price vs MA show every line: the close against it and the days near it. <b>Plausible</b>: the close within 6% of the moving average on 3 or more of the last 10 trading days and today; <b>Probable</b>: 5 or more. The MA buttons show the stocks retesting one chosen line, with that line as the row. Stage 2 columns hidden by default (S2 cols: Show). (One row per stock from 17-Nov-2026; before, one row for each line.)',
+      intro:'<b>Retest</b> &mdash; stocks that are Qualified on S2 Pullback (all four tests pass) and are in a Retest of a rising moving average (20, 50, 100, 150 or 200-day). <b>The test is the count:</b> the longest run of sessions ending today in which at least 80% of the closes are within 6% of the moving average, with never more than 3 closes in a row outside 6%. <b>Probable</b>: a count of 5 sessions or more; <b>Plausible</b>: 3 or 4. Rising: the moving average is higher than 21 trading days ago. <b>One row per stock.</b> The row shows the moving average in the Retest; when several qualify, the one nearest the close (the same one the Investment Classification pages show). The five columns after Price vs MA show every moving average: the close against it and its count. The MA buttons show the stocks retesting one chosen moving average, with that one as the row. Stage 2 columns hidden by default (S2 cols: Show).',
       numCaps:3,
       caps:[
         {cls:'gcap-base',   title:'S2 Pullback (the gate)', body:'Qualified when all four tests pass: price above the 200-day MA; 200-day MA rising; 150-day MA rising; depth of pullback more than 10% from the 6-month high. Depth shown as Shallow, Medium or Deep Pullback.'},
-        {cls:'gcap-base',   title:'Retest of the moving average?', body:'Today’s close must be within 6% of the moving average, above or below. Days (L10D): days of the last 10 with the close within 6% of it; 3+ Plausible, 5+ Probable. Length of Retest: days within 6% since the price first came within 6% of it after the 6-month high (days outside do not break the count). Price vs MA: today.'},
+        {cls:'gcap-base',   title:'Retest of the moving average?', body:'Count of sessions in the Retest: the longest run of sessions ending today in which at least 80% of the closes are within 6% of the moving average, with never more than 3 closes in a row outside 6%. 5+ Probable, 3 or 4 Plausible, on a moving average higher than 21 trading days ago. Price vs MA: today.'},
         {cls:'gcap-forref', title:'For information', body:'Size of Pullback: today’s close against the 6-month high. Volatility = the day’s high-to-low range as a % of the close. Near the MA = the days within 6% of it since the 6-month high. Ratios: green = the favourable direction.'}
       ],
-      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:52px"><col style="width:44px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:76px"><col style="width:56px"><col style="width:56px"><col style="width:98px"><col style="width:98px"><col style="width:98px"><col style="width:98px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
+      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:52px"><col style="width:44px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:76px"><col style="width:56px"><col style="width:86px"><col style="width:86px"><col style="width:86px"><col style="width:86px"><col style="width:86px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
       ghrHtml:'<th class="gh-inputs gs-inputs" colspan="3">Inputs</th>'
              +'<th class="gh-rating gs-rating" colspan="3">Rating</th>'
              +'<th class="gh-base gs-base" colspan="5">S2 Pullback</th>'
-             +'<th class="gh-base gs-base" colspan="2">Retest</th>'
-             +'<th class="gh-base gs-base" colspan="4">Every line: close against it &middot; days near it (of 10)</th>'
+             +'<th class="gh-base gs-base" colspan="1">Retest</th>'
+             +'<th class="gh-base gs-base" colspan="5">Every moving average: the close against it &middot; its count of sessions</th>'
              +'<th class="gh-base gs-base" colspan="8">For information</th>'
              +'<th class="gh-forref gs-forref s2col" colspan="10">For reference — Stage 2 quality</th>',
       sgrHtml:'<th colspan="3"></th>'
              +'<th class="gs-rating" colspan="3">Rating</th>'
              +'<th class="gs-base" colspan="4">Tests</th><th class="sg-edge" colspan="1">Depth</th>'
-             +'<th class="sg-edge" colspan="2">Retest</th>'
-             +'<th class="sg-edge" colspan="4">Every line</th>'
+             +'<th class="sg-edge" colspan="1">Retest</th>'
+             +'<th class="sg-edge" colspan="5">Every moving average</th>'
              +'<th class="sg-edge" colspan="8">Info</th>'
              +'<th class="gs-forref s2col" colspan="1">Rating</th><th class="sg-edge s2col" colspan="2">Gates</th><th class="sg-edge s2col" colspan="7">Tests</th>',
       chrDefs:[
@@ -12829,19 +12833,19 @@ function SUM_renderQualifiedStocks() {
         {wrap:true, sk:'taxon',       html:'Industry · Sector',    tip:'Industry and sector',           cls:''},
         {sk:'price',    html:'Price',                    tip:'Last price',                    cls:''},
         {sk:'rate',     html:'Rating',                   tip:'Retest rating on the moving average shown in this row', cls:'gs-rating'},
-        {sk:'score',    html:'Days (L10D)',              tip:'Days of the last 10 with the close within 6% of this moving average', cls:'', wrap:true},
+        {sk:'score',    html:'Count of sessions in the Retest', tip:'The longest run of sessions ending today in which at least 80% of the closes are within 6% of this moving average, with never more than 3 closes in a row outside 6%. A low count is a young Retest', cls:'', wrap:true},
         {sk:'ma',       html:'MA',                       tip:'The moving average being retested', cls:''},
         {sk:'t1',       html:'1. Above 200D',            tip:'Price above the 200-day MA', cls:'gs-base', wrap:true},
         {sk:'t2',       html:'2. 200D rising',           tip:'200-day MA higher than 21 trading days ago', cls:'', wrap:true},
         {sk:'t3',       html:'3. 150D rising',           tip:'150-day MA higher than 21 trading days ago', cls:'', wrap:true},
-        {sk:'t4',       html:'4. Depth >10%',            tip:'Depth of pullback more than 10%: the deepest fall from the 6-month high (highest high of the last 126 trading days) to the lowest price since', cls:'', wrap:true},
+        {sk:'t4',       html:'4. Depth >10%',            tip:'Depth of pullback more than 10%: the deepest fall from the 6-month high (highest close of the last 126 trading days) to the lowest close since', cls:'', wrap:true},
         {sk:'pbband',   html:'Depth',                    tip:'Depth of pullback: Shallow Pullback 10-15%, Medium Pullback 15-20%, Deep Pullback over 20%', cls:'sg-edge'},
-        {sk:'rtlen',    html:'Length of Retest',         tip:'Days with the close within 6% of this moving average since the price first came within 6% of it after the 6-month high', cls:'sg-edge', wrap:true},
-        {sk:'rtvsma',   html:'Price vs MA',              tip:'Today’s close against this moving average', cls:'', wrap:true},
-        {sk:'m50', html:'50D', tip:'The close today against the 50-day moving average, and the days of the last 10 with the close within 6% of it. Green: Probable on this line; amber: Plausible', cls:'sg-edge'},
-        {sk:'m100', html:'100D', tip:'The close today against the 100-day moving average, and the days of the last 10 with the close within 6% of it. Green: Probable on this line; amber: Plausible', cls:''},
-        {sk:'m150', html:'150D', tip:'The close today against the 150-day moving average, and the days of the last 10 with the close within 6% of it. Green: Probable on this line; amber: Plausible', cls:''},
-        {sk:'m200', html:'200D', tip:'The close today against the 200-day moving average, and the days of the last 10 with the close within 6% of it. Green: Probable on this line; amber: Plausible', cls:''},
+        {sk:'rtvsma',   html:'Price vs MA',              tip:'Today’s close against this moving average', cls:'sg-edge', wrap:true},
+        {sk:'m20', html:'20D', tip:'The close today against the 20-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:'sg-edge'},
+        {sk:'m50', html:'50D', tip:'The close today against the 50-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:''},
+        {sk:'m100', html:'100D', tip:'The close today against the 100-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:''},
+        {sk:'m150', html:'150D', tip:'The close today against the 150-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:''},
+        {sk:'m200', html:'200D', tip:'The close today against the 200-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:''},
         {sk:'pbdepth', html:'Size of Pullback', tip:'Distance of price vs. the recent high: today\u2019s close against the 6-month high', cls:'sg-edge', wrap:true},
         {sk:'i2', html:'Daily Volatility Reducing Near the MA? (Vs. L1M)', tip:'Average daily range (high to low, % of close) on the days within 6% of the MA since the 6-month high, divided by the last-20-day average. Below 1 = reducing', cls:'', wrap:true},
         {sk:'i3', html:'Daily Volatility Reducing Sequentially? (L1W/L2W)', tip:'Average daily range of the last 5 days divided by the last 10 days. Below 1 = reducing', cls:'', wrap:true},
@@ -12861,7 +12865,7 @@ function SUM_renderQualifiedStocks() {
         {wrap:true, sk:'sx6',       html:'50D &gt; 150D',            tip:'Test: 50-day MA above the 150-day MA',      cls:'s2col'},
         {wrap:true, sk:'sx7',       html:'50D &gt; 200D',            tip:'Test: 50-day MA above the 200-day MA',      cls:'s2col'}
       ],
-      tileThresh:{ Plausible:'within 6% of the MA today, and 3+ of the last 10 days', Probable:'within 6% of the MA today, and 5+ of the last 10 days' }
+      tileThresh:{ Plausible:'a rising moving average with a count of 3 or 4 sessions', Probable:'a rising moving average with a count of 5 sessions or more' }
     }
   };
 
@@ -12974,7 +12978,7 @@ function SUM_renderQualifiedStocks() {
       else if(S2SORT[sk]){var _sf=S2SORT[sk];va=((_sf[0]==='g'?a.s2gates:a.s2tests)||{})[_sf[1]]?1:0;vb=((_sf[0]==='g'?b.s2gates:b.s2tests)||{})[_sf[1]]?1:0;}
       else if(sk==='pbmax'){va=a.max_pb==null?-1e9:a.max_pb;vb=b.max_pb==null?-1e9:b.max_pb;}
       else if(sk==='pblow'){va=a.from_low==null?-1e9:a.from_low;vb=b.from_low==null?-1e9:b.from_low;}
-      else if(/^m(50|100|150|200)$/.test(sk)){var _mk=sk.slice(1)+'D',_mx=((a.per||{})[_mk]||{}).days_within_l10d,_my=((b.per||{})[_mk]||{}).days_within_l10d;va=_mx==null?-1:_mx;vb=_my==null?-1:_my;}
+      else if(/^m(20|50|100|150|200)$/.test(sk)){var _mk=sk.slice(1)+'D',_mx=((a.per||{})[_mk]||{}).days_within_l10d,_my=((b.per||{})[_mk]||{}).days_within_l10d;va=_mx==null?-1:_mx;vb=_my==null?-1:_my;}
       else if(/^t[1-5]$/.test(sk)){var _tk=(TESTKEYS[tabId]||[])[+sk.charAt(1)-1];va=a.pat_tests[_tk]?1:0;vb=b.pat_tests[_tk]?1:0;}  /* MD-PB-RETEST-2026-11-12 */
       else if(sk==='pbband'){va=a.depth==null?-1e9:a.depth;vb=b.depth==null?-1e9:b.depth;}
       else if(sk==='ma'){va=parseInt(a.ma,10)||0;vb=parseInt(b.ma,10)||0;}
@@ -13014,9 +13018,9 @@ function SUM_renderQualifiedStocks() {
     return '<span class="pi-pill" style="'+c+'">'+w+'</span>';
   }
   function maCells(row){
-    var o='',M=['50D','100D','150D','200D'];
+    var o='',M=['20D','50D','100D','150D','200D'];
     for(var i=0;i<M.length;i++){var x=(row.per||{})[M[i]]||{},m=(row.rbm||{})[M[i]]||{},d=m.dist_from_ma;
-      o+=tintCell((d==null?'&mdash;':sgnPct(d))+' <span style="font-size:10px;color:#666">'+(x.days_within_l10d==null?'':x.days_within_l10d+'/10')+'</span>',x.rating==='Probable'?'g':x.rating==='Plausible'?'a':'',i===0?'sg-edge':'');}
+      o+=tintCell((d==null?'&mdash;':sgnPct(d))+' <span style="font-size:10px;color:#666">'+(x.days_within_l10d==null?'':x.days_within_l10d)+'</span>',x.rating==='Probable'?'g':x.rating==='Plausible'?'a':'',i===0?'sg-edge':'');}
     return o;
   }
   function pipsN(n,tot){
@@ -13097,7 +13101,7 @@ function SUM_renderQualifiedStocks() {
     h+='<td class="num">'+fmtNum(row.price)+'</td>';
     h+='<td class="gs-rating pi-rating-cell">'+((CFG[tabId]&&CFG[tabId].yn)?(row.pat_rating==='Probable'?depthPill(row.depth_band):'<span class="pi-pill pi-pill-none">Not Qualified</span>'):ratePill(row.pat_rating))+'</td>';  /* MD-DEFS-2026-11-13 */
     if(tabId==='setups_healthy_retest'){  /* MD-PB-RETEST-2026-11-12 */
-      h+='<td class="pi-score-cell"><span class="pi-score-num">'+(row.pat_count==null?'—':row.pat_count)+'/10</span></td>';
+      h+='<td class="pi-score-cell"><span class="pi-score-num">'+(row.pat_count==null?'—':row.pat_count)+'</span></td>';
       h+='<td class="num"><b>'+row.ma+'</b></td>';
     } else {
       h+='<td class="pi-score-cell">'+pipsN(row.pat_count,tabId==='pos_pre_indicators'?5:4)+'</td>';
@@ -13112,7 +13116,7 @@ function SUM_renderQualifiedStocks() {
       } else {
         h+=bandCell(row,'sg-edge');
         var m=row.rt||{};
-        h+=intCell(m.length_of_retest,'sg-edge')+signPctCell(m.dist_from_ma,'');
+        h+=signPctCell(m.dist_from_ma,'sg-edge');
         h+=maCells(row);
         h+=pullbackCell(row,'sg-edge');
         h+=ratioCell(m.vol_near_vs_l20d,true,'')+ratioCell(m.vol_l5d_vs_l10d,true,'')+ratioCell(m.volume_near_vs_l20d,true,'')+ratioCell(m.volume_l5d_vs_l10d,true,'')+ratioCell(m.volume_l5d_vs_l3m,true,'');
@@ -13183,7 +13187,7 @@ function SUM_renderQualifiedStocks() {
     var _cfgc=CFG[tabId];  /* MD-PB-RETEST-2026-11-12: Depth and MA filters */
     if(_cfgc&&_cfgc.yn) h+='<div class="ctrl-grp"><span class="ctrl-label">Show</span>'+[['Y','Qualified'],['N','Not Qualified'],['all','Both']].map(function(d){return '<button class="toggle-btn'+(st.yn===d[0]?' active':'')+'" data-yn="'+d[0]+'">'+d[1]+'</button>';}).join('')+'</div>';  /* MD-DEFS-2026-11-13 */
     if(_cfgc&&_cfgc.depthFilter) h+='<div class="ctrl-grp"><span class="ctrl-label">Depth</span>'+[['all','All'],['Shallow Pullback','Shallow'],['Medium Pullback','Medium'],['Deep Pullback','Deep']].map(function(d){return '<button class="toggle-btn'+(st.depth===d[0]?' active':'')+'" data-depth="'+d[0]+'">'+d[1]+'</button>';}).join('')+'</div>';
-    if(_cfgc&&_cfgc.maFilter) h+='<div class="ctrl-grp"><span class="ctrl-label">MA</span>'+['all','50D','100D','150D','200D'].map(function(m){return '<button class="toggle-btn'+(st.ma===m?' active':'')+'" data-ma="'+m+'">'+(m==='all'?'All':m)+'</button>';}).join('')+'</div>';
+    if(_cfgc&&_cfgc.maFilter) h+='<div class="ctrl-grp"><span class="ctrl-label">MA</span>'+['all','20D','50D','100D','150D','200D'].map(function(m){return '<button class="toggle-btn'+(st.ma===m?' active':'')+'" data-ma="'+m+'">'+(m==='all'?'All':m)+'</button>';}).join('')+'</div>';
     h+='<div class="ctrl-grp"><span class="ctrl-label">Tests</span>'
       +'<button class="toggle-btn'+(st.testsMode==='tick'?' active':'')+'" data-tm="tick">Ticks</button>'
       +'<button class="toggle-btn'+(st.testsMode==='val'?' active':'')+'" data-tm="val">Values</button>'
@@ -15702,7 +15706,7 @@ function SUM_renderQualifiedStocks() {
       "tooltip": "A Retest rated Probable, then the price closes back above that moving average with a confirming up-day (rebuilt 12-Nov-2026).",
       "caption": "<span class='db'>The trigger that pairs with the Retest page</span> &mdash; the price closing back above the moving average it has been retesting (rebuilt on the new Retest, 12-Nov-2026).<span class='intro'>One gate + two trigger columns. Possible = gate; Plausible = + reclaim; Probable = + confirmation:</span><span class='tline'><span class='tnum'>(1)</span> Is the stock <u>Probable on Retest</u> (on its best moving average)?</span><span class='tline'><span class='tnum'>(2)</span> Has today&rsquo;s close <u>reclaimed that moving average</u>?</span><span class='tline'><span class='tnum'>(3)</span> Is it <u>confirmed by a close at least 2% above yesterday</u>?</span>",
       "tests": [
-        { "key": "g1_retest_probable",         "label": "Retest = Probable",         "group": "gate",    "tooltip": "Probable on the Retest page: the close within 6% of a moving average today and on 5+ of the last 10 days, inside a S2 Pullback rated Probable" },
+        { "key": "g1_retest_probable",         "label": "Retest = Probable",         "group": "gate",    "tooltip": "Probable on the Retest page: a count of 5 sessions or more near a rising moving average, inside an S2 Pullback" },
         { "key": "x1_reclaim_close_above_ma",  "label": "Reclaimed the MA",           "group": "trigger", "tooltip": "Today's close is above the moving average being retested" },
         { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
       ]
@@ -18896,7 +18900,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {label:'vs 20D',key:'vs20d',tip:'Price vs 20-day MA (% above or below)'},
     {label:'Rating',key:'spec__rating',grp:'grp-start-rating',tip:'Speculative bet overall rating'},
     {label:'Score',key:'spec__score',tip:'Tests passed out of 7'},
-    {label:'S3 Rating',key:'s3__rating',grp:'grp-start-g1',tip:'Stage 3 (topping) screen rating - the risk backdrop'},
+    {label:'S3 Rating',key:'s3__rating',grp:'grp-start-g1',tip:'Stage 3 screen rating - the risk backdrop'},
     {label:'1. Stage qualifies',key:'spec__g1_stage_qualifies',tip:'Stock genuinely in Stage 3'},
     {label:'2. 5D rising',key:'spec__g2_5d_rising',grp:'grp-start-g2',tip:'5-day MA rising'},
     {label:'3. 10D rising',key:'spec__g3_10d_rising',tip:'10-day MA rising'},
@@ -19000,7 +19004,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<th colspan="1">RDS</th>';
     var thead='<tr class="group-header-row">'+grpRow+'</tr><tr class="sub-group-row">'+subRow+'</tr><tr class="col-header-row" id="sbs3-col-header"></tr>';
     host.innerHTML=
-      '<div class="s1-intro">Stage 3 Speculative bet &mdash; a small, deliberately-sized starter position in a stock that is breaking out positively while still in Stage 3 (topping). It is a capital-deployment opportunity you take with eyes open and tight risk control: a single small position with a tight stop. This is the highest-risk entry, because the primary long-term trend is likely against you, so size small and treat each as a single probe. The seven-criterion test mirrors the Stage 1 speculative bet: stage gate, 5D and 10D MAs rising, price above the 20D, EITHER the 20D or the 50D freshly turned up, and a 2%+ confirmation close.</div>'
+      '<div class="s1-intro">Stage 3 Speculative bet &mdash; a small, deliberately-sized starter position in a stock that is breaking out positively while still in Stage 3. It is a capital-deployment opportunity you take with eyes open and tight risk control: a single small position with a tight stop. This is the highest-risk entry, because the primary long-term trend is likely against you, so size small and treat each as a single probe. The seven-criterion test mirrors the Stage 1 speculative bet: stage gate, 5D and 10D MAs rising, price above the 20D, EITHER the 20D or the 50D freshly turned up, and a 2%+ confirmation close.</div>'
       +'<div class="controls s1-controls">'
         +'<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>'
           +'<button class="toggle-btn active" data-sbs3-grp="inputs" data-sbs3-val="pct" onclick="sbs3SetMode(\'inputs\',\'pct\')">show as %</button>'
@@ -19028,7 +19032,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'</div>'
       +'<div class="s1-rating-tiles" id="sbs3-tile" style="grid-template-columns: repeat(4, 1fr);"></div>'
       +'<div class="group-captions">'
-        +'<div class="gcap gcap-g1"><b>Group 1 &mdash; Stage 3 qualifying?</b>Confirms the stock is genuinely in Stage 3 (topping). The S3 rating shows how advanced the top is: the more advanced, the more speculative the bet. This is the risk context, not a reason to avoid - it is exactly where a small, tightly-stopped probe can pay.</div>'
+        +'<div class="gcap gcap-g1"><b>Group 1 &mdash; Stage 3 qualifying?</b>Confirms the stock is genuinely in Stage 3. The S3 rating shows how advanced the top is: the more advanced, the more speculative the bet. This is the risk context, not a reason to avoid - it is exactly where a small, tightly-stopped probe can pay.</div>'
         +'<div class="gcap gcap-g2"><b>Group 2 &mdash; Entry setup?</b>Three tests that the breakout setup is in place: the 5-day MA rising, the 10-day MA rising, and price back above the 20-day MA.</div>'
         +'<div class="gcap gcap-g3"><b>Group 3 &mdash; Trigger?</b>Two tests, and EITHER one satisfies the trigger: the 20-day MA has freshly turned up, or the slower 50-day MA has. Freshly turned up means rising today and still falling five days ago. Either way, the short-term trend is reasserting against the Stage 3 backdrop.</div>'
         +'<div class="gcap gcap-g4"><b>Group 4 &mdash; Confirmation?</b>One test: price has closed more than 2% above the trigger level, confirming the move has conviction rather than a failed bounce.</div>'
@@ -19129,7 +19133,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {label:'vs 20D',key:'vs20d',tip:'Price vs 20-day MA (% above or below)'},
     {label:'Rating',key:'spec__rating',grp:'grp-start-rating',tip:'Speculative bet overall rating'},
     {label:'Score',key:'spec__score',tip:'Tests passed out of 7'},
-    {label:'S4 Rating',key:'s4__rating',grp:'grp-start-g1',tip:'Stage 4 (declining) screen rating - the risk backdrop'},
+    {label:'S4 Rating',key:'s4__rating',grp:'grp-start-g1',tip:'Stage 4 screen rating - the risk backdrop'},
     {label:'1. Stage qualifies',key:'spec__g1_stage_qualifies',tip:'Stock genuinely in Stage 4'},
     {label:'2. 5D rising',key:'spec__g2_5d_rising',grp:'grp-start-g2',tip:'5-day MA rising'},
     {label:'3. 10D rising',key:'spec__g3_10d_rising',tip:'10-day MA rising'},
@@ -19233,7 +19237,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'<th colspan="1">RDS</th>';
     var thead='<tr class="group-header-row">'+grpRow+'</tr><tr class="sub-group-row">'+subRow+'</tr><tr class="col-header-row" id="sbs4-col-header"></tr>';
     host.innerHTML=
-      '<div class="s1-intro">Stage 4 Speculative bet &mdash; a small, deliberately-sized starter position in a stock that is showing the first signs of turning up while still in Stage 4 (declining). It is a capital-deployment opportunity you take with eyes open and tight risk control: a single small position with a tight stop. This is the highest-risk entry of all, because the stock is in a confirmed downtrend and most attempts to call a bottom fail, so size small, demand the confirmation close, and treat each as a single probe. The seven-criterion test mirrors the Stage 1 speculative bet: stage gate, 5D and 10D MAs rising, price reclaiming the 20D, EITHER the 20D or the 50D freshly turned up, and a 2%+ confirmation close.</div>'
+      '<div class="s1-intro">Stage 4 Speculative bet &mdash; a small, deliberately-sized starter position in a stock that is showing the first signs of turning up while still in Stage 4. It is a capital-deployment opportunity you take with eyes open and tight risk control: a single small position with a tight stop. This is the highest-risk entry of all, because the stock is in a confirmed downtrend and most attempts to call a bottom fail, so size small, demand the confirmation close, and treat each as a single probe. The seven-criterion test mirrors the Stage 1 speculative bet: stage gate, 5D and 10D MAs rising, price reclaiming the 20D, EITHER the 20D or the 50D freshly turned up, and a 2%+ confirmation close.</div>'
       +'<div class="controls s1-controls">'
         +'<div class="ctrl-grp"><span class="ctrl-label">Inputs</span>'
           +'<button class="toggle-btn active" data-sbs4-grp="inputs" data-sbs4-val="pct" onclick="sbs4SetMode(\'inputs\',\'pct\')">show as %</button>'
@@ -19261,7 +19265,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       +'</div>'
       +'<div class="s1-rating-tiles" id="sbs4-tile" style="grid-template-columns: repeat(4, 1fr);"></div>'
       +'<div class="group-captions">'
-        +'<div class="gcap gcap-g1"><b>Group 1 &mdash; Stage 4 qualifying?</b>Confirms the stock is genuinely in Stage 4 (declining). The S4 rating shows how advanced the downtrend is: the deeper the decline, the more speculative the bet that it is turning. This is the risk context, not a reason to avoid - it is exactly where a small, tightly-stopped probe can pay.</div>'
+        +'<div class="gcap gcap-g1"><b>Group 1 &mdash; Stage 4 qualifying?</b>Confirms the stock is genuinely in Stage 4. The S4 rating shows how advanced the downtrend is: the deeper the decline, the more speculative the bet that it is turning. This is the risk context, not a reason to avoid - it is exactly where a small, tightly-stopped probe can pay.</div>'
         +'<div class="gcap gcap-g2"><b>Group 2 &mdash; Entry setup?</b>Three tests that the breakout setup is in place: the 5-day MA rising, the 10-day MA rising, and price back above the 20-day MA.</div>'
         +'<div class="gcap gcap-g3"><b>Group 3 &mdash; Trigger?</b>Two tests, and EITHER one satisfies the trigger: the 20-day MA has freshly turned up, or the slower 50-day MA has. Freshly turned up means rising today and still falling five days ago. Either way, the short-term trend is reasserting against the Stage 4 downtrend.</div>'
         +'<div class="gcap gcap-g4"><b>Group 4 &mdash; Confirmation?</b>One test: price has closed more than 2% above the trigger level, confirming the move has conviction rather than a failed bounce.</div>'
@@ -21395,7 +21399,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 /* MD-FLOW-2026-11-14: the seven Investment Classification pages. One page, flow/index.html (built nightly by build_flow_pages.py
    from the daily classification file), framed per tab with its ?page=, sized to the window like Capital Deployment In Range. */
 (function(){
-  var PG={flow_hc:"hc",flow_proven:"proven",flow_early:"early",flow_inflecting:"inflecting",flow_s1:"s1",flow_s3:"s3",flow_s4:"s4"};
+  var PG={flow_hc:"hc",flow_proven:"proven",flow_early:"early",flow_inflecting:"inflecting",flow_s1:"s1",flow_s3:"s3",flow_s4:"s4",flow_vcp:"vcp",flow_base:"base"};
   function act(){var a=document.body.getAttribute('data-active-tab')||'';return a.indexOf('flow_')===0?a:null;}
   function size(){var a=act();if(!a)return;var f=document.querySelector('#tab-'+a+' iframe.flow-frame');if(!f)return;
     try{if(typeof window.measureV2Ribbon==='function')window.measureV2Ribbon();}catch(e){}

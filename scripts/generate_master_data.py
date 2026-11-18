@@ -268,7 +268,7 @@ BASE_HIGH_LOOKBACK_DAYS = 126
 # Pulling Back in Uptrend and Retest. One 6% band throughout, as the stop-loss rule (the line less 6%).
 PULLBACK_MIN_DEPTH = 0.10          # test 4: deepest fall from the six-month high more than 10%
 PULLBACK_BANDS = ((0.15, "Shallow Pullback"), (0.20, "Medium Pullback"), (9.99, "Deep Pullback"))
-RETEST_MAS = (50, 100, 150, 200)   # the 20-day was removed (Richard, 12-Nov-2026 20:33: "Do not do it for the 20D")
+RETEST_MAS = (20, 50, 100, 150, 200)   # MD-CONDITIONS-2026-11-18: the 20-day added back (Richard, 18-Nov-2026, Message 95: "lets include it")
 RETEST_BAND = 0.06                 # close within 6% of that day's moving average
 RETEST_PLAUSIBLE_DAYS = 3          # of the last 10 trading days, not necessarily consecutive
 RETEST_PROBABLE_DAYS = 5
@@ -1480,6 +1480,24 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
                     if isinstance(latest.get("close"), (int, float)):
                         pullback_from_base_high = round((_bh - latest["close"]) / _bh, 4)
 
+        # MD-CONDITIONS-2026-11-18 (Richard, 17 and 18-Nov-2026; decisions D-MD-TM-146, 173 and 175): one measure of a pullback
+        # or base for every page, on closing prices ("Yes, measure on closing prices. Not intra-day"), computed by
+        # scripts/conditions.py, the function the daily classification file also calls. The high is the Pivot Point: fixed when
+        # the fall first exceeds 10% and held until the first close above it. The block above stays as the fallback.
+        _pb_state = None
+        try:
+            _pb_state = _PR.K.state(_PR.K.rows_to_cols(rows_with_sma))
+            if high_52w is None or not _lb52 or _unit_break_52w:
+                raise ValueError("no clean 52-week range (a rebased or broken price series)")
+            base_high = _pb_state["pivot"]
+            base_high_date = _pb_state["pivot_date"]
+            days_since_base_high = _pb_state["days"]
+            max_pullback_since_base_high = _pb_state["max_fall"]
+            pullback_from_base_high = _pb_state["from_high"]
+        except Exception as _pb_err:
+            _pb_state = None
+            print("  CONDITIONS %-12s the pullback measure fell back to the older calculation: %s" % (ticker, _pb_err))
+
         # MD-PB-RETEST-2026-11-12: Retest measures per moving average (50, 100, 150, 200-day). "Near" = the close
         # within RETEST_BAND of that day's moving average. Length of Retest = near days since the six-month high (the
         # count starts the first day the price came within the band; days outside do not break it; Richard's Q5 = A).
@@ -1514,7 +1532,10 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             _topn = _rt_mean([_rt_top(r) for r in _nears])
             _top5 = _rt_mean([_rt_top(r) for r in _rt_l5])
             _vol5 = _rt_mean([r.get("volume") for r in _rt_l5])
+            _cnt = ((_pb_state or {}).get("counts") or {}).get("%dD" % _m) or {}
             retest_by_ma["%dD" % _m] = {
+                "count": _cnt.get("count"),        # MD-CONDITIONS-2026-11-18: the count of sessions near the moving average (Message 108)
+                "rising": _cnt.get("rising"),      # the moving average higher than 21 sessions ago
                 "days_within_l10d": len(_near10),
                 "near_today": _near(latest),   # today's close within 6% of today's moving average, above or below
                 "length_of_retest": (len(_nears) if base_high_date else None),
@@ -2291,6 +2312,7 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
                         _vols = [r["volume"] for r in _seg if r.get("volume") is not None]
                         _avg_vol = (sum(_vols) / len(_vols)) if _vols else 0
                         vcp_contractions.append({
+                            "high": round(_cur_high, 4),   # MD-CONDITIONS-2026-11-18: the VCP page's Trigger day closes above this
                             "depth": round(_depth, 4),
                             "avg_vol": round(_avg_vol),
                             "low": round(_low_val, 4),
@@ -2326,7 +2348,8 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             _s100 = _sr.get("sma_100")
             if _s20 is None or _s50 is None or _s100 is None:
                 break
-            if _s20 >= 0.97 * _s50 and _s50 >= 0.97 * _s100:
+            # MD-CONDITIONS-2026-11-18 (Richard, 18-Nov-2026, Message 114): no more than 3% below and no more than 6% above
+            if (1 - _PR.S1_LOW) * _s50 <= _s20 <= (1 + _PR.S1_BAND) * _s50 and (1 - _PR.S1_LOW) * _s100 <= _s50 <= (1 + _PR.S1_BAND) * _s100:
                 short_soft_stack_streak += 1
             else:
                 break
@@ -2338,7 +2361,7 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             _s200 = _sr.get("sma_200")
             if _s100 is None or _s150 is None or _s200 is None:
                 break
-            if _s100 >= 0.97 * _s150 and _s150 >= 0.97 * _s200:
+            if (1 - _PR.S1_LOW) * _s150 <= _s100 <= (1 + _PR.S1_BAND) * _s150 and (1 - _PR.S1_LOW) * _s200 <= _s150 <= (1 + _PR.S1_BAND) * _s200:
                 long_soft_stack_streak += 1
             else:
                 break
@@ -2429,6 +2452,7 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             "max_pullback_since_base_high": max_pullback_since_base_high,
             "pullback_from_base_high": pullback_from_base_high,
             "retest_by_ma": retest_by_ma,  # MD-PB-RETEST-2026-11-12
+            "pb_state": _pb_state,  # MD-CONDITIONS-2026-11-18: conditions.state(), read by scripts/position_rules.py so that both use one reading
             "utr_candle_quality_10d": utr_candle_quality_10d,
             "utr_candle_quality_3d": utr_candle_quality_3d,
             "utr_updown_ratio_5d": utr_updown_ratio_5d,
@@ -3784,16 +3808,17 @@ def compute_master_dashboard_screens(prices, filter_results):
                     if all(v is not None for v in [price, ma50, ma150, ma200]) else "data missing"
                 ),
             }
-            s4_count = sum([s4_t2, s4_t3, s4_t4])
+            s4_count = sum([s4_t2, s4_t4])   # MD-CONDITIONS-2026-11-18: the test that repeated the gate no longer scores
             s4["count"] = s4_count
-            if s4_t2 and s4_t3 and s4_t4:
+            # MD-CONDITIONS-2026-11-18 (Richard, 18-Nov-2026, Message 103, "Yes, remove de facto duplication"): T3 repeats the
+            # gate (the 200-day lower than 21 sessions ago), so it no longer scores. Possible = the gate alone; Plausible = the
+            # gate and the 100-day falling; Probable = those and the bearish stack (as position_rules.stage4).
+            if s4_t2 and s4_t4:
                 s4["rating"] = "Probable"
-            elif s4_t2 and s4_t3:
-                s4["rating"] = "Plausible"
             elif s4_t2:
-                s4["rating"] = "Possible"
+                s4["rating"] = "Plausible"
             else:
-                s4["rating"] = "None"
+                s4["rating"] = "Possible"
         else:
             s4["rating"] = "None"
             s4_count = 0
@@ -4151,21 +4176,27 @@ def compute_master_dashboard_screens(prices, filter_results):
         rt_per_ma = {}
         for _lab in rt_labels:
             _rt_x = rt_by_ma.get(_lab) or {}
-            _n = _rt_x.get("days_within_l10d")
+            # MD-CONDITIONS-2026-11-18 (Richard, 18-Nov-2026, Messages 108 and 113): the Retest test is the count of sessions near
+            # a rising moving average at 5 or more; "5 or more of the last 10 closes" is retired. The key days_within_l10d now
+            # carries the count, so that every reader shows one number.
+            _n = _rt_x.get("count")
             _t = bool(_rt_x.get("near_today"))
             _r = "None"
-            if rt_gate and _n is not None and _t:
+            if rt_gate and _n is not None and _t and _rt_x.get("rising"):
                 _r = ("Probable" if _n >= RETEST_PROBABLE_DAYS else
                       "Plausible" if _n >= RETEST_PLAUSIBLE_DAYS else "None")
-            rt_per_ma[_lab] = {"rating": _r, "days_within_l10d": _n, "near_today": _t}
+            rt_per_ma[_lab] = {"rating": _r, "days_within_l10d": _n, "near_today": _t, "rising": _rt_x.get("rising")}
         _rt_rank = {"Probable": 2, "Plausible": 1, "None": 0}
         rt_best = None
-        for _lab in reversed(rt_labels):  # longest first, so a tie keeps the longer moving average
+        def _rt_gap(_l):   # MD-CONDITIONS-2026-11-18: when several moving averages qualify, the one nearest the close is shown
+            _d = (rt_by_ma.get(_l) or {}).get("dist_from_ma")
+            return abs(_d) if _d is not None else 9.0
+        for _lab in reversed(rt_labels):
             _x = rt_per_ma[_lab]
             if not _rt_rank[_x["rating"]]:
                 continue
-            if rt_best is None or (_rt_rank[_x["rating"]], _x["days_within_l10d"] or 0) > \
-                    (_rt_rank[rt_per_ma[rt_best]["rating"]], rt_per_ma[rt_best]["days_within_l10d"] or 0):
+            if rt_best is None or (_rt_rank[_x["rating"]], -_rt_gap(_lab)) > \
+                    (_rt_rank[rt_per_ma[rt_best]["rating"]], -_rt_gap(rt_best)):
                 rt_best = _lab
         rt_rating = rt_per_ma[rt_best]["rating"] if rt_best else "None"
         rt_tests = {"g1_pulling_back_probable": rt_gate}

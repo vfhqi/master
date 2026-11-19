@@ -269,7 +269,7 @@ BASE_HIGH_LOOKBACK_DAYS = 126
 PULLBACK_MIN_DEPTH = 0.10          # test 4: deepest fall from the six-month high more than 10%
 PULLBACK_BANDS = ((0.15, "Shallow Pullback"), (0.20, "Medium Pullback"), (9.99, "Deep Pullback"))
 RETEST_MAS = (20, 50, 100, 150, 200)   # MD-CONDITIONS-2026-11-18: the 20-day added back (Richard, 18-Nov-2026, Message 95: "lets include it")
-RETEST_BAND = 0.06                 # close within 6% of that day's moving average
+RETEST_BAND = 0.06                 # retired 19-Nov-2026 for the Retest: the bands are _PR.K.RETEST_BANDS (4% for the 20 and 50-day, 5% for the 100, 150 and 200-day; Message 127)
 RETEST_PLAUSIBLE_DAYS = 3          # of the last 10 trading days, not necessarily consecutive
 RETEST_PROBABLE_DAYS = 5
 # A moving average qualifies for Retest only if TODAY's close is within RETEST_BAND of it, above or below (Richard,
@@ -1523,9 +1523,10 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
                      if base_high_date else [])
         for _m in RETEST_MAS:
             _k = "sma_%d" % _m
-            def _near(r, _k=_k):
+            _band = _PR.K.RETEST_BANDS["%dD" % _m]   # MD-RETEST-1119: the band of this moving average (Message 127)
+            def _near(r, _k=_k, _band=_band):
                 v, c = r.get(_k), r.get("close")
-                return bool(_rt_num(v) and v > 0 and _rt_num(c) and abs(c / v - 1.0) <= RETEST_BAND)
+                return bool(_rt_num(v) and v > 0 and _rt_num(c) and abs(c / v - 1.0) <= _band)
             _near10 = [r for r in _rt_l10 if _near(r)]
             _nears = [r for r in _rt_since if _near(r)]
             _man = latest.get(_k)
@@ -1534,7 +1535,9 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
             _vol5 = _rt_mean([r.get("volume") for r in _rt_l5])
             _cnt = ((_pb_state or {}).get("counts") or {}).get("%dD" % _m) or {}
             retest_by_ma["%dD" % _m] = {
-                "count": _cnt.get("count"),        # MD-CONDITIONS-2026-11-18: the count of sessions near the moving average (Message 108)
+                "band": _band,                     # MD-RETEST-1119
+                "length": _cnt.get("length"),      # MD-RETEST-1119: LESS THAN A WEEK, A WEEK or A FORTNIGHT+ (Message 127)
+                "count": _cnt.get("count"),        # MD-CONDITIONS-2026-11-18: the count of sessions near the moving average (Message 108); from 19-Nov counted from the last close above the band
                 "rising": _cnt.get("rising"),      # the moving average higher than 21 sessions ago
                 "days_within_l10d": len(_near10),
                 "near_today": _near(latest),   # today's close within 6% of today's moving average, above or below
@@ -1548,6 +1551,7 @@ def build_prices_json(universe, raw_data, benchmark_rows, dropped=None):
                 "closes_top_half_near": (round(_topn, 3) if _topn is not None else None),
                 "closes_top_half_l5d_vs_near": _rt_ratio(_top5, _topn),
             }
+            retest_by_ma["%dD" % _m]["health"] = _PR.K.retest_health(retest_by_ma["%dD" % _m])   # MD-RETEST-1119: the Retest Healthiness Indicators
 
         # Volume averages
         recent_20 = rows_with_sma[-20:] if len(rows_with_sma) >= 20 else rows_with_sma
@@ -4166,56 +4170,65 @@ def compute_master_dashboard_screens(prices, filter_results):
         # ---- Setup 3: Retest (MD-PB-RETEST-2026-11-12; Richard, 12-Nov-2026) ----
         # Gate: Pulling Back in Uptrend = Probable. Per moving average (50, 100, 150, 200-day), only if today's close is
         # within 6% of it, above or below (Richard, 12-Nov-2026 21:22/21:27): Plausible when the
-        # close was within 6% of that day's moving average on 3 or more of the last 10 trading days, Probable on 5 or
+        # close was within the band (6% until 19-Nov-2026) of that day's moving average on 3 or more of the last 10 trading days, Probable on 5 or
         # more (not necessarily consecutive). The stock's rating is its best moving average's (ties go to the longer
         # moving average). setups.healthy_retest and tests.healthy_retest carry this one definition; it replaced the
         # 6-test healthy retest setup (D-MD-V2-51) and the 13-criterion healthy retest test (D-MD-V2-108).
-        rt_gate = bool(ind["pulling_back_uptrend"])
+        # MD-RETEST-1119 (Richard, 19-Nov-2026, Messages 127 and 130): the gate adds "the close today more than 10% below the
+        # six-month high" (conditions.fall_ok, carried as pb_state.retest_fall_ok); the rating is the length of the Retest on
+        # the moving average, LESS THAN A WEEK (1-4 sessions), A WEEK (5-10) or A FORTNIGHT+ (11 or more), in place of Plausible
+        # and Probable; "qualifies" stays a count of 5 or more (A WEEK or longer), the reading the Investment Classification
+        # pages and the add trigger use (Message 113). The count is conditions.retest_counts (bands 4%/5%, counted from the last
+        # close above the band since the Pivot Point).
+        _pbs = p.get("pb_state") or {}
+        rt_gate = bool(ind["pulling_back_uptrend"]) and bool(_pbs.get("retest_fall_ok"))
         rt_by_ma = p.get("retest_by_ma") or {}
         rt_labels = ["%dD" % _m for _m in RETEST_MAS]
         rt_per_ma = {}
         for _lab in rt_labels:
             _rt_x = rt_by_ma.get(_lab) or {}
-            # MD-CONDITIONS-2026-11-18 (Richard, 18-Nov-2026, Messages 108 and 113): the Retest test is the count of sessions near
-            # a rising moving average at 5 or more; "5 or more of the last 10 closes" is retired. The key days_within_l10d now
-            # carries the count, so that every reader shows one number.
             _n = _rt_x.get("count")
-            _t = bool(_rt_x.get("near_today"))
+            _t = bool(_n)                     # a count of 1 or more = today's close inside this line's band
             _r = "None"
-            if rt_gate and _n is not None and _t and _rt_x.get("rising"):
-                _r = ("Probable" if _n >= RETEST_PROBABLE_DAYS else
-                      "Plausible" if _n >= RETEST_PLAUSIBLE_DAYS else "None")
-            rt_per_ma[_lab] = {"rating": _r, "days_within_l10d": _n, "near_today": _t, "rising": _rt_x.get("rising")}
-        _rt_rank = {"Probable": 2, "Plausible": 1, "None": 0}
+            if rt_gate and _n and _rt_x.get("rising"):
+                _r = _PR.K.retest_length(_n) or "None"
+            rt_per_ma[_lab] = {"rating": _r, "days_within_l10d": _n, "near_today": _t, "rising": _rt_x.get("rising"),
+                               "band": _rt_x.get("band"), "health": (_rt_x.get("health") or {}).get("level")}
+        _rt_rank = {"A FORTNIGHT+": 3, "A WEEK": 2, "LESS THAN A WEEK": 1, "None": 0}
         rt_best = None
-        def _rt_gap(_l):   # MD-CONDITIONS-2026-11-18: when several moving averages qualify, the one nearest the close is shown
+        def _rt_gap(_l):   # the moving average nearest the close is shown (WATSON, 18-Nov), among those in a Retest
             _d = (rt_by_ma.get(_l) or {}).get("dist_from_ma")
             return abs(_d) if _d is not None else 9.0
+        # Re-check 19-Nov-2026 15:50 UK: a line with a count of 5 or more comes first (then the one nearest the close), so the row,
+        # "qualifies" and the Investment Classification pages name the same line; before this, 25 stocks showed a young Retest on
+        # the nearest line while the classification read a longer one on another line (ACP-PL: 100D 2 sessions against 50D 11)
+        def _rt_key(_l):
+            return (0 if (rt_per_ma[_l]["days_within_l10d"] or 0) >= _PR.K.RETEST_MIN else 1, _rt_gap(_l))
         for _lab in reversed(rt_labels):
-            _x = rt_per_ma[_lab]
-            if not _rt_rank[_x["rating"]]:
+            if rt_per_ma[_lab]["rating"] == "None":
                 continue
-            if rt_best is None or (_rt_rank[_x["rating"]], -_rt_gap(_lab)) > \
-                    (_rt_rank[rt_per_ma[rt_best]["rating"]], -_rt_gap(rt_best)):
+            if rt_best is None or _rt_key(_lab) < _rt_key(rt_best):
                 rt_best = _lab
         rt_rating = rt_per_ma[rt_best]["rating"] if rt_best else "None"
-        rt_tests = {"g1_pulling_back_probable": rt_gate}
+        rt_tests = {"g1_pulling_back_probable": bool(ind["pulling_back_uptrend"]), "g2_fall_gt10_today": bool(_pbs.get("retest_fall_ok"))}
         for _lab in rt_labels:
-            rt_tests["r_%s_probable" % _lab] = bool(rt_per_ma[_lab]["rating"] == "Probable")
+            rt_tests["r_%s_probable" % _lab] = bool((rt_per_ma[_lab]["days_within_l10d"] or 0) >= _PR.K.RETEST_MIN and rt_per_ma[_lab]["rating"] != "None")
         _rt_best_d = (rt_by_ma.get(rt_best) or {}) if rt_best else {}
         retest = {
             "tests": rt_tests,
-            "count": sum(1 for _lab in rt_labels if rt_per_ma[_lab]["rating"] == "Probable"),
+            "count": sum(1 for _lab in rt_labels if rt_per_ma[_lab]["rating"] != "None"),
             "total": len(rt_labels),
             "rating": rt_rating,
-            "qualifies": bool(rt_rating == "Probable"),
+            "qualifies": bool(rt_best and (rt_per_ma[rt_best]["days_within_l10d"] or 0) >= _PR.K.RETEST_MIN),
             "per_ma": rt_per_ma,
             "info_ma_retested": rt_best,
             "info_ma_dist_pct": (round(_rt_best_d["dist_from_ma"] * 100, 2)
                                  if _rt_best_d.get("dist_from_ma") is not None else None),
             "info_retest_count": (rt_per_ma[rt_best]["days_within_l10d"] if rt_best else None),
             "info_size_of_pullback": p.get("pullback_from_base_high"),
-            "test_values": dict([("g1_pulling_back_probable", ("Probable" if rt_gate else "not Probable"))] +
+            "info_health": (_rt_best_d.get("health") or {}).get("level"),
+            "test_values": dict([("g1_pulling_back_probable", ("Probable" if ind["pulling_back_uptrend"] else "not Probable")),
+                                 ("g2_fall_gt10_today", p.get("pullback_from_base_high"))] +
                                 [("r_%s_probable" % _lab, rt_per_ma[_lab]["days_within_l10d"]) for _lab in rt_labels]),
         }
         setups["healthy_retest"] = retest
@@ -4299,10 +4312,12 @@ def compute_master_dashboard_screens(prices, filter_results):
         )
         # MD-PB-RETEST-2026-11-12 (Richard, 12-Nov-2026, Q7 = A): this capital deployment test keeps its trigger (a
         # close back above the moving average; a close at least 2% above yesterday's) and is rebuilt on the new Retest:
-        # its gate is Retest = Probable, on the Retest's best moving average. Possible = gate only; Plausible = gate +
+        # its gate was Retest = Probable (from 19-Nov-2026: a Retest of A WEEK or longer), on the Retest's best moving average. Possible = gate only; Plausible = gate +
         # close above that moving average; Probable (qualifies) = + the 2% confirmation. mr_qualifies above is kept
         # only for the legacy Uptrend Retest filter (tests["uptrend_retest"]).
-        _rt_ma = retest["info_ma_retested"] if retest["rating"] == "Probable" else None
+        # MD-RETEST-1119: the gate is a Retest of A WEEK or longer (count 5+), the reading "qualifies" carries; the Retest's
+        # rating is now its length, so "Probable" no longer names it (Richard, 19-Nov-2026, Message 127)
+        _rt_ma = retest["info_ma_retested"] if retest["qualifies"] else None
         _rt_ma_val = mas.get(_rt_ma) if _rt_ma else None
         mrn_g1 = bool(_rt_ma)
         mrn_x1 = bool(mrn_g1 and price is not None and _rt_ma_val is not None and price > _rt_ma_val)

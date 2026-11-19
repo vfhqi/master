@@ -373,7 +373,8 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     $('name').innerHTML = REC.name + ' <small>' + REC.t + '</small>';
     $('meta1').innerHTML = '<b>' + REC.ind + '</b> · ' + REC.sec + ' · cohort ' + REC.coh + (REC.coh_name ? ' (' + REC.coh_name + ')' : '');
     var stale = REC.stale && REC.stale[f];
-    $('meta2').innerHTML = 'FactSet data to <b>' + (REC.data_to || '–') + '</b> · ' + REC.n[f] + ' monthly points' +
+    /* 19-Nov-2026 (tracker item 11): the date written as the dashboards write dates, 31-Oct-26 */ var _fd = function (s) { if (!s || !/^\d{4}-\d\d-\d\d/.test(s)) return s || '–'; var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return (+s.slice(8,10)) + '-' + M[+s.slice(5,7) - 1] + '-' + s.slice(2,4); };
+    $('meta2').innerHTML = 'FactSet data to <b>' + _fd(REC.data_to) + '</b> · ' + REC.n[f] + ' monthly points' +
       (stale ? ' · <span style="color:var(--amber)">' + (f==='pe'?'P/E':'EV/Sales') + ' held from the last good parse (' + stale + ')</span>' : '') +
       ' · generated ' + REC.generated;
     var cur = REC.current && REC.current[f];

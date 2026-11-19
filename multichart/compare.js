@@ -71,7 +71,7 @@
   }
 
   /* ---------- the dropdowns ---------- */
-  var ORDER = ['live', 'watch', 'interest', 'range', 'exit', 'events', 'ig'];
+  var ORDER = ['live', 'watch', 'interest', 'priority', 'range', 'exit', 'events', 'ig'];   /* 'priority': Capital Deployment Priority (Richard, 19-Nov-2026, Message 135) */
   function selectHTML(g) {
     return '<select class="f" data-g="' + g.id + '" title="' + esc(g.label) + '"><option value="">' + esc(g.label) + '</option>' +
       g.options.map(function (o) { return '<option value="' + o.id + '">' + esc(o.label) + ' (' + o.tickers.length + ')</option>'; }).join('') + '</select>';

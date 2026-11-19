@@ -554,7 +554,8 @@ TABS = [
     {"id": "flow_hc", "label": "Healthy Confirmation?", "accent": "#1d4f3a"},
     {"id": "flow_proven", "label": "Reinforcing / Proven S2 Core Investment?", "accent": "#1d4f3a"},
     {"id": "flow_early", "label": "Broadening / Early S2 Core Investment?", "accent": "#1d4f3a"},
-    {"id": "flow_inflecting", "label": "Inflecting / S1→S2 Probing Bet?", "accent": "#1d4f3a"},
+    {"id": "flow_inflecting", "label": "Inflecting / S1→S2 Probing Bet? — Turn Up and Cross", "accent": "#1d4f3a"},  # MD-RETEST-1119: split in two (Message 129)
+    {"id": "flow_inflecting2", "label": "Inflecting / S1→S2 Probing Bet? — 5D and 10D", "accent": "#1d4f3a"},  # MD-RETEST-1119
     {"id": "flow_s1", "label": "Bottoming / S1 Speculative Bet?", "accent": "#1d4f3a"},
     {"id": "flow_s3", "label": "Restarting Reinforcing / S3 Speculative Bet?", "accent": "#1d4f3a"},
     {"id": "flow_s4", "label": "Collapsing / S4 Speculative Bet?", "accent": "#1d4f3a"},
@@ -593,7 +594,7 @@ IMPLEMENTED_TABS = [
     "lifecycle_phases",  # MD-LIFECYCLE-PHASES-2026-10-10
     "ig_turning",  # MD-IG-TURNING-2026-11-06
     "capital_deploy",  # MD-CAPITAL-DEPLOY-2026-11-11
-    "flow_hc", "flow_proven", "flow_early", "flow_inflecting", "flow_s1", "flow_s3", "flow_s4",  # MD-FLOW-2026-11-14
+    "flow_hc", "flow_proven", "flow_early", "flow_inflecting", "flow_inflecting2", "flow_s1", "flow_s3", "flow_s4",  # MD-FLOW-2026-11-14; flow_inflecting2 MD-RETEST-1119
     "flow_vcp", "flow_base",  # MD-CONDITIONS-2026-11-18
 ]
 
@@ -626,7 +627,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
      a descriptive address for each of these pages. The page's own id keeps working (old links, the scripts); the address bar
      shows the descriptive form, and a descriptive address opens its page. */
   var ADDR = { flow_hc: 'healthy-confirmation', flow_proven: 'reinforcing-proven-s2-core-investment', flow_early: 'broadening-early-s2-core-investment',
-    flow_inflecting: 'inflecting-s1-to-s2-probing-bet', flow_s1: 'bottoming-s1-speculative-bet', flow_s3: 'restarting-reinforcing-s3-speculative-bet',
+    flow_inflecting: 'inflecting-s1-to-s2-probing-bet', flow_inflecting2: 'inflecting-s1-to-s2-probing-bet-5d-and-10d', flow_s1: 'bottoming-s1-speculative-bet', flow_s3: 'restarting-reinforcing-s3-speculative-bet',
     flow_s4: 'collapsing-s4-speculative-bet', flow_vcp: 'vcp-page', flow_base: 'base-pivot-point-page', stage_1: 'stage-1', stage_2: 'stage-2', stage_3: 'stage-3', stage_4: 'stage-4',
     pulling_back: 's2-pullback', pos_pre_indicators: 's2-base', setups_healthy_retest: 'retest-of-a-moving-average' };
   var FROM_ADDR = {}; Object.keys(ADDR).forEach(function (k) { FROM_ADDR[ADDR[k]] = k; });
@@ -3207,6 +3208,30 @@ body[data-active-tab="master_overview"],body[data-active-tab="combos"] { --heade
 #tab-setups_healthy_retest .gcap-forref b,#tab-setups_healthy_retest .gcap-forref b { color:#777; }
 #tab-setups_healthy_retest .gcap-base { border-left-color:#1D7A4E; } #tab-setups_healthy_retest .gcap-base b { color:#1D7A4E; }
 #tab-setups_healthy_retest .s1-rating-tiles { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:13px; }
+/* MD-RETEST-1119: lengths, health, the filter line, type no smaller than 11px (Message 127/129) */
+#tab-setups_healthy_retest .gcap-health { border-left-color:#3d7a5a; } #tab-setups_healthy_retest .gcap-health b { color:#3d7a5a; }
+#rt-main-table thead .gh-health { background:#e9f2ea!important;color:#2f5d3a; }
+#rt-main-table .pi-pill-len1 { background:#e3ecf7;color:#2b4a72; } #rt-main-table .pi-pill-len2 { background:#a9c7ec;color:#13325a; } #rt-main-table .pi-pill-len3 { background:#2e5f9e;color:#fff; }
+#rt-main-table .pi-pill-hl1 { background:#2e7d4a;color:#fff; } #rt-main-table .pi-pill-hl2 { background:#f3e3b0;color:#5c4400; } #rt-main-table .pi-pill-hl3 { background:#f2c4bf;color:#7d1410; }
+#rt-main-table .rt-cnt { font-size:11px;color:#3a3a3a;font-weight:700;margin-left:2px; }
+#tab-setups_healthy_retest .rt-hfilters { display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;width:100%;margin-top:6px; }
+#tab-setups_healthy_retest .rt-hf { display:inline-flex;align-items:center;gap:3px;white-space:nowrap; }
+#tab-setups_healthy_retest .rt-hfn { font-size:11px;color:#555;margin-right:2px; }
+#tab-setups_healthy_retest .rt-hf .toggle-btn { padding:2px 6px;font-size:11px; }
+#tab-setups_healthy_retest .rt-hf .toggle-btn.hf-good.active { background:#2e7d4a!important;border-color:#2e7d4a!important;color:#fff!important; }
+#tab-setups_healthy_retest .rt-hf .toggle-btn.hf-okay.active { background:#c9a227!important;border-color:#c9a227!important;color:#fff!important; }
+#tab-setups_healthy_retest .rt-hf .toggle-btn.hf-poor.active { background:#b3392f!important;border-color:#b3392f!important;color:#fff!important; }
+#rt-main-table,#pb-main-table,#basing-main-table { font-size:12px!important; }
+#rt-main-table thead th,#pb-main-table thead th,#basing-main-table thead th { font-size:11px!important; }
+#rt-main-table thead .group-header-row th,#pb-main-table thead .group-header-row th,#basing-main-table thead .group-header-row th,#rt-main-table thead .sub-group-row th,#pb-main-table thead .sub-group-row th,#basing-main-table thead .sub-group-row th { font-size:11px!important; }
+#rt-main-table .pi-pill,#pb-main-table .pi-pill,#basing-main-table .pi-pill,#rt-main-table .s2-pill,#pb-main-table .s2-pill,#basing-main-table .s2-pill { font-size:11px!important; }
+#rt-main-table td.name-cell .tk,#pb-main-table td.name-cell .tk,#basing-main-table td.name-cell .tk,#rt-main-table td.taxon,#pb-main-table td.taxon,#basing-main-table td.taxon,#rt-main-table .tval,#pb-main-table .tval,#basing-main-table .tval,#rt-main-table .pi-score-num,#pb-main-table .pi-score-num,#basing-main-table .pi-score-num { font-size:11px!important; }
+#rt-main-table td.name-cell .co,#pb-main-table td.name-cell .co,#basing-main-table td.name-cell .co { font-size:12px!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.25; }  /* long names wrap, never cut (tracker item 7) */
+#rt-main-table .sort-arrow,#pb-main-table .sort-arrow,#basing-main-table .sort-arrow { font-size:10px!important; }
+#tab-setups_healthy_retest .group-captions,#tab-pulling_back .group-captions,#tab-pos_pre_indicators .group-captions { font-size:12px; }
+#tab-setups_healthy_retest .s1-intro,#tab-pulling_back .s1-intro,#tab-pos_pre_indicators .s1-intro { font-size:12px!important;line-height:1.5; }
+#tab-setups_healthy_retest .rt-sub,#tab-setups_healthy_retest .rt-thresh,#tab-pulling_back .rt-sub,#tab-pulling_back .rt-thresh,#tab-pos_pre_indicators .rt-sub,#tab-pos_pre_indicators .rt-thresh { font-size:11px!important; }
+#tab-setups_healthy_retest .ctrl-label,#tab-pulling_back .ctrl-label,#tab-pos_pre_indicators .ctrl-label,#tab-setups_healthy_retest .toggle-btn,#tab-pulling_back .toggle-btn,#tab-pos_pre_indicators .toggle-btn { font-size:11px!important; }
 #rt-main-table,#rt-main-table { width:100%;border-collapse:separate;border-spacing:0;font-size:11px;table-layout:fixed;background:#fbfaf5;border:1px solid #e0dcc8;border-radius:4px; }
 #rt-main-table thead,#rt-main-table thead { position:sticky;top:0;z-index:50;background:#fbfaf5;box-shadow:0 2px 4px rgba(0,0,0,0.06); }
 #rt-main-table thead th,#rt-main-table thead th { background:#fbfaf5!important;border-bottom:1px solid #e0dcc8;padding:7px 3px;text-align:center;font-weight:600;font-size:10px;color:#666;cursor:pointer;user-select:none;line-height:1.25;vertical-align:middle;overflow:hidden; }
@@ -3292,6 +3317,13 @@ body[data-active-tab="master_overview"],body[data-active-tab="combos"] { --heade
 }
 /* ===== end compact control bar ===== */
 /* MD-V2-PRE-INDICATORS-MARKER-CSS-END */
+/* MD-RETEST-1119: the control bars of S2 Pullback, S2 Base and Retest wrap onto more lines instead of cutting groups off,
+   and no type is smaller than 11px (Message 127/129) */
+#tab-setups_healthy_retest .s1-controls,#tab-pulling_back .s1-controls,#tab-pos_pre_indicators .s1-controls { flex-wrap:wrap!important;overflow:visible!important;row-gap:6px!important;align-items:center!important;height:auto!important;min-height:0!important; }
+#tab-setups_healthy_retest .s1-controls .ctrl-label,#tab-pulling_back .s1-controls .ctrl-label,#tab-pos_pre_indicators .s1-controls .ctrl-label { font-size:11px!important; }
+#tab-setups_healthy_retest .s1-controls .toggle-btn,#tab-pulling_back .s1-controls .toggle-btn,#tab-pos_pre_indicators .s1-controls .toggle-btn { font-size:11px!important;padding:2px 6px!important; }
+#tab-setups_healthy_retest .group-captions .gcap .k { font-weight:700;color:#333; }
+
 /* MD-V2-POST-INDICATORS-MARKER-CSS-START */
 /* Session 26 - generated from PI v3 CSS template, namespaced to #tab-post_indicators */
 /* Session 25 rebuild (D-MD-V2-49,-50,-55,-56,-57,-58) */
@@ -6597,7 +6629,7 @@ function MDL_fill(){var s=document.getElementById('hdr-list-sel');if(!s)return;v
   MDL.order.forEach(function(k){var L=MDL.lists[k];h+='<option value="'+k+'"'+(MDL.cur===k?' selected':'')+'>'+L.label+' ('+L.t.length+')</option>';});s.innerHTML=h;s.classList.toggle('on',!!MDL.cur);}
 function MDL_add(k,label,t){if(!t||!t.length)return;if(!MDL.lists[k])MDL.order.push(k);MDL.lists[k]={label:label,t:t};}
 function MDL_init(){try{if(window.MD_KD_LIST&&MD_KD_LIST.tickers)MDL_add('kd','Key Drivers stocks',MD_KD_LIST.tickers);}catch(e){}MDL_fill();
-  try{fetch('multichart/populations.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(P){if(!P)return;var want={live_all:'Live stocks',i_A:'RB Interest List A',i_B:'RB Interest List B',i_C:'RB Interest List C',i_AB:'RB Interest Lists A and B',w_bench:'Ideas Bench',w_short:'Ideas Shortlist',w_long:'Ideas Longlist',w_pool:'Pool of Middle Innings Eligible Stocks'};
+  try{fetch('multichart/populations.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(P){if(!P)return;var want={live_all:'Live stocks',i_A:'RB Interest List A',i_B:'RB Interest List B',i_C:'RB Interest List C',i_AB:'RB Interest Lists A and B',p_h:'Capital Deployment Priority: High',p_m:'Capital Deployment Priority: Medium',p_l:'Capital Deployment Priority: Low',p_hm:'Capital Deployment Priority: High and Medium',w_bench:'Ideas Bench',w_short:'Ideas Shortlist',w_long:'Ideas Longlist',w_pool:'Pool of Middle Innings Eligible Stocks'};
     (P.dropdowns||[]).forEach(function(g){(g.options||[]).forEach(function(o){if(want[o.id])MDL_add(o.id,want[o.id],o.tickers);});});MDL_fill();}).catch(function(){});}catch(e){}}
 function MDL_pick(k){MDL.cur=k||'';if(!k){RDF.on=false;RDF.set=null;RDF.src=null;}else{var s={},t=MDL.lists[k].t;for(var i=0;i<t.length;i++)s[t[i]]=1;RDF.set=s;RDF.count=t.length;RDF.savedAt=null;RDF.on=true;RDF.src=MDL.lists[k].label;}
   MDL_fill();RDF_syncBtn();RDF_rerender();}
@@ -7552,7 +7584,7 @@ function renderCombos(){
   // of the route that earned the grade (D.tm_rating, computed in Python by databases/scripts/technical_momentum_rating.py).
   // The row text describes the rule; the rule itself is written only in that file.
   var TL_ROWS = [
-    {id:"retest",      label:"Retest",                                      stageNum:2, group:1, cells:{A:["Plausible or Probable on any moving average"]}},  /* MD-PB-RETEST-2026-11-12 */
+    {id:"retest",      label:"Retest",                                      stageNum:2, group:1, cells:{A:["A WEEK or longer (5 sessions or more) on any rising moving average"]}},  /* MD-PB-RETEST-2026-11-12; MD-RETEST-1119 */
     {id:"vcp_s2",      label:"VCP after a Stage 2 base",                    stageNum:2, group:1, cells:{A:["Plausible or better, with its Stage gate met"]}},
     {id:"vcp_s1",      label:"VCP after a Stage 1 to Stage 2 transition",   stageNum:2, group:1, cells:{A:["Plausible or better, with its Stage gate met"]}},
     {id:"pull_back",   label:"S2 Pullback",           stageNum:2, group:1, cells:{A:["all four tests, Stage 2 Plausible or Probable"]}},
@@ -10732,7 +10764,7 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn"        data-s1-tint="industry" onclick="s1SetTint(\'industry\')">Industry</button>' +
           '<button class="toggle-btn"        data-s1-tint="sector"   onclick="s1SetTint(\'sector\')">Sector</button>' +
         '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>' +
           '<button class="toggle-btn active" data-s1-port="off" onclick="s1SetPort(\'off\')">Off</button>' +
           '<button class="toggle-btn"        data-s1-port="on"  onclick="s1SetPort(\'on\')">On</button>' +
         '</div>' +
@@ -10989,7 +11021,7 @@ function SUM_renderQualifiedStocks() {
 
   function s2TestValueFor(row, col) {
     var k = col.testKey;
-    if (k === 'g1_200D_flat_or_rising') return row.g1_val != null ? (row.g1_val < 0 ? '(' + Math.abs(row.g1_val).toFixed(1) + ')%' : row.g1_val.toFixed(1) + '%') : '—';  /* MD-S2-T1-200D-FLAT-2026-11-11: the 200D MA's change over 21 trading days */
+    if (k === 'g1_200D_flat_or_rising') return row.g1_val != null ? (row.g1_val < 0 ? '(' + Math.abs(row.g1_val).toFixed(0) + ')%' : row.g1_val.toFixed(0) + '%') : '—';  /* MD-RETEST-1119: 0 dp */  /* MD-S2-T1-200D-FLAT-2026-11-11: the 200D MA's change over 21 trading days */
     if (k === 'g3_150D_above_200D') return row.ma_150 != null && row.ma_200 != null ? s2FmtPct((row.ma_150 - row.ma_200) / row.ma_200 * 100) : '—';
     if (k === 'P150') return row.price != null && row.ma_150 != null ? s2FmtPct((row.price - row.ma_150) / row.ma_150 * 100) : '—';  /* MD-S2-T2-GATES-SWAP-2026-11-11 */
     if (k === 'W25' || k === 'g4_within_25pct_52WH') return row.price != null && row.high_52w != null ? s2FmtPct((row.price - row.high_52w) / row.high_52w * 100) : '—';
@@ -11311,7 +11343,7 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn" data-s2-tint="industry" onclick="s2SetTint(\'industry\')">Industry</button>' +
           '<button class="toggle-btn" data-s2-tint="sector" onclick="s2SetTint(\'sector\')">Sector</button>' +
         '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>' +
           '<button class="toggle-btn active" data-s2-port="off" onclick="s2SetPort(\'off\')">Off</button>' +
           '<button class="toggle-btn" data-s2-port="on" onclick="s2SetPort(\'on\')">On</button>' +
         '</div>' +
@@ -11882,7 +11914,7 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn" data-s3-tint="industry" onclick="s3SetTint(\'industry\')">Industry</button>' +
           '<button class="toggle-btn" data-s3-tint="sector" onclick="s3SetTint(\'sector\')">Sector</button>' +
         '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>' +
           '<button class="toggle-btn active" data-s3-port="off" onclick="s3SetPort(\'off\')">Off</button>' +
           '<button class="toggle-btn" data-s3-port="on" onclick="s3SetPort(\'on\')">On</button>' +
         '</div>' +
@@ -12401,7 +12433,7 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn" data-s4-tint="industry" onclick="s4SetTint(\'industry\')">Industry</button>' +
           '<button class="toggle-btn" data-s4-tint="sector" onclick="s4SetTint(\'sector\')">Sector</button>' +
         '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>' +
           '<button class="toggle-btn active" data-s4-port="off" onclick="s4SetPort(\'off\')">Off</button>' +
           '<button class="toggle-btn" data-s4-port="on" onclick="s4SetPort(\'on\')">On</button>' +
         '</div>' +
@@ -12539,12 +12571,12 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="flow_hc" onclick="switchTab(\'flow_hc\')">Healthy Confirmation?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_proven" onclick="switchTab(\'flow_proven\')">Reinforcing / Proven S2 Core Investment?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_early" onclick="switchTab(\'flow_early\')">Broadening / Early S2 Core Investment?</button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="flow_inflecting" onclick="switchTab(\'flow_inflecting\')">Inflecting / S1&rarr;S2 Probing Bet?</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_inflecting" onclick="switchTab(\'flow_inflecting\')">Inflecting / S1&rarr;S2 Probing Bet? &mdash; Turn Up and Cross</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_inflecting2" onclick="switchTab(\'flow_inflecting2\')">Inflecting / S1&rarr;S2 Probing Bet? &mdash; 5D and 10D</button>'  /* MD-RETEST-1119: split in two (Message 129) */
       +     '<button class="v2-nav-btn" data-v2-tab="flow_s1" onclick="switchTab(\'flow_s1\')">Bottoming / S1 Speculative Bet?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_s3" onclick="switchTab(\'flow_s3\')">Restarting Reinforcing / S3 Speculative Bet?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_s4" onclick="switchTab(\'flow_s4\')">Collapsing / S4 Speculative Bet?</button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="flow_vcp" onclick="switchTab(\'flow_vcp\')">VCP page</button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="flow_base" onclick="switchTab(\'flow_base\')">Base Pivot Point page</button>'
+      /* MD-RETEST-1119 (Message 127): the VCP page and the Base Pivot Point page moved to the drop-down beside Retest */
       +   '</div>'
       + '</div>'
       /* Group 1: Stages */
@@ -12573,6 +12605,8 @@ function SUM_renderQualifiedStocks() {
       /* MD-RETIRE-2026-11-16: the tests_probing_bet_s1 button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
       /* MD-RETIRE-2026-11-16: the tests_probing_bet_s2 button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
       +     '<button class="v2-nav-btn" data-v2-tab="setups_healthy_retest" onclick="switchTab(\'setups_healthy_retest\')">Retest</button>'  /* MD-V2-S47-TAB-HEALTHY-RETEST-MARKER */
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_vcp" onclick="switchTab(\'flow_vcp\')">VCP page</button>'  /* MD-RETEST-1119: moved here (Message 127) */
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_base" onclick="switchTab(\'flow_base\')">Base Pivot Point page</button>'
       /* MD-BATCH1-2026-11-17: the Healthy VCP button is retired (Richard, 17-Nov-2026, Q3 b = Yes); its address opens the Reinforcing page */
       /* MD-RETIRE-2026-11-16: the tests_speculative_bet_s3 button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
       /* MD-RETIRE-2026-11-16: the tests_speculative_bet_s4 button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
@@ -12706,6 +12740,13 @@ function SUM_renderQualifiedStocks() {
   window.isS2PP = isS2PP;
 
   var RANK = { Probable:4, Plausible:3, Possible:2, None:1 };
+  var LRANK = { 'A FORTNIGHT+':4, 'A WEEK':3, 'LESS THAN A WEEK':2 };  /* MD-RETEST-1119 */
+  var HEALTH = __RETEST_HEALTH_JSON__;  /* MD-RETEST-1119: scripts/conditions.py RETEST_HEALTH, injected at build: [key, field, lowerIsBetter, good, poor] */
+  var HLEV = ['Very Healthy','Middling Health','Questionable Health'];
+  /* MD-RETEST-1119 (Message 127, "Conditional formatting should be a spectrum"): t from -1 (poor) to +1 (good) -> a background on a continuous scale */
+  function spec(t){if(t==null||isNaN(t))return '';t=Math.max(-1,Math.min(1,t));var a=Math.abs(t);if(a<0.05)return 'background:#f5f3ec';return 'background:hsl('+(t>0?136:3)+','+Math.round(34+36*a)+'%,'+Math.round(95-21*a)+'%)';}
+  function specSeq(t){if(t==null||isNaN(t)||t<=0)return '';t=Math.min(1,t);return 'background:hsl(212,'+Math.round(40+35*t)+'%,'+Math.round(95-22*t)+'%)';}
+  function hT(h,v){if(v==null||isNaN(v))return null;var mid=(h[3]+h[4])/2,w=Math.abs(h[4]-h[3])||0.1;return h[2]?(mid-v)/w:(v-mid)/w;}
 
   // ---- PER-PAGE CONFIG ----
   var CFG = {
@@ -12718,7 +12759,7 @@ function SUM_renderQualifiedStocks() {
         {cls:'gcap-base',   title:'S2 Pullback: the four tests and the measures', body:'Tests: (1) price above the 200-day MA; (2) 200-day MA higher than 21 trading days ago; (3) 150-day MA higher than 21 trading days ago; (4) depth more than 10%. <span style="font-weight:700;color:#333">% from High</span>: the close today against the six-month high. <span style="font-weight:700;color:#333">Max Pullback Depth from High</span>: the deepest fall since that high, to the lowest close since it (Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%). <span style="font-weight:700;color:#333">% from Post-Pullback Low</span>: the close today against that lowest price. <span style="font-weight:700;color:#333">Days since High</span>: trading days since the six-month high; 20 or more makes it an S2 Base.'},
         {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)', body:'The stock’s Stage 2 status: rating, two gates and seven tests (scored in four groups). Shown for context, not scored here.'}
       ],
-      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:92px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:62px"><col style="width:80px"><col style="width:80px"><col style="width:58px"><col style="width:64px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
+      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:92px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:62px"><col style="width:80px"><col style="width:80px"><col style="width:58px"><col style="width:78px"><col class="s2col" style="width:80px"><col class="s2col" style="width:62px"><col class="s2col" style="width:56px"><col class="s2col" style="width:52px"><col class="s2col" style="width:56px"><col class="s2col" style="width:52px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px">',
       ghrHtml:'<th class="gh-inputs gs-inputs" colspan="3">Inputs</th>'
              +'<th class="gh-rating gs-rating" colspan="2">Rating</th>'
              +'<th class="gh-base gs-base" colspan="9">S2 Pullback</th>'
@@ -12765,7 +12806,7 @@ function SUM_renderQualifiedStocks() {
         {cls:'gcap-base',   title:'S2 Base: the five tests and the measures', body:'Tests: (1) price above the 200-day MA; (2) 200-day MA higher than 21 trading days ago; (3) 150-day MA higher than 21 trading days ago; (4) depth more than 10%; (5) at least 20 trading days since the six-month high. <span style="font-weight:700;color:#333">% from High</span>: the close today against the six-month high. <span style="font-weight:700;color:#333">Max Pullback Depth from High</span>: the deepest fall since that high (Shallow 10% to 15%, Medium 15% to 20%, Deep over 20%). <span style="font-weight:700;color:#333">% from Post-Pullback Low</span>: the close today against the lowest price since the high. <span style="font-weight:700;color:#333">Days since High</span>: trading days since the six-month high.'},
         {cls:'gcap-forref', title:'For reference — Stage 2 (far right, collapsible)', body:'The stock’s Stage 2 status: rating, two gates and seven tests (scored in four groups). Shown for context, not scored here.'}
       ],
-      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:92px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:62px"><col style="width:62px"><col style="width:80px"><col style="width:80px"><col style="width:58px"><col style="width:64px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
+      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:92px"><col style="width:72px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:54px"><col style="width:62px"><col style="width:62px"><col style="width:80px"><col style="width:80px"><col style="width:58px"><col style="width:78px"><col class="s2col" style="width:80px"><col class="s2col" style="width:62px"><col class="s2col" style="width:56px"><col class="s2col" style="width:52px"><col class="s2col" style="width:56px"><col class="s2col" style="width:52px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px">',
       ghrHtml:'<th class="gh-inputs gs-inputs" colspan="3">Inputs</th>'
              +'<th class="gh-rating gs-rating" colspan="2">Rating</th>'
              +'<th class="gh-base gs-base" colspan="10">S2 Base</th>'
@@ -12803,61 +12844,65 @@ function SUM_renderQualifiedStocks() {
       ],
       tileThresh:{ 'Shallow Pullback':'Qualified, fall 10% to 15%', 'Medium Pullback':'Qualified, fall 15% to 20%', 'Deep Pullback':'Qualified, fall over 20%', N:'not every test passes' }
     },
-    setups_healthy_retest: {  /* MD-PB-RETEST-2026-11-12: Retest (Richard, 12-Nov-2026); replaced Healthy Retest */
+    setups_healthy_retest: {  /* MD-PB-RETEST-2026-11-12; MD-RETEST-1119 (Richard, 19-Nov-2026, Messages 127 to 130) */
       hostId:'tab-setups_healthy_retest', tableId:'rt-main-table', tbodyId:'rt-tbody',
-      patternKey:'healthy_retest', isRetest:true, maFilter:true, depthFilter:true, s2HiddenDefault:true, tiers:['Plausible','Probable'],
-      intro:'<b>Retest</b> &mdash; stocks that are Qualified on S2 Pullback (all four tests pass) and are in a Retest of a rising moving average (20, 50, 100, 150 or 200-day). <b>The test is the count:</b> the longest run of sessions ending today in which at least 80% of the closes are within 6% of the moving average, with never more than 3 closes in a row outside 6%. <b>Probable</b>: a count of 5 sessions or more; <b>Plausible</b>: 3 or 4. Rising: the moving average is higher than 21 trading days ago. <b>One row per stock.</b> The row shows the moving average in the Retest; when several qualify, the one nearest the close (the same one the Investment Classification pages show). The five columns after Price vs MA show every moving average: the close against it and its count. The MA buttons show the stocks retesting one chosen moving average, with that one as the row. Stage 2 columns hidden by default (S2 cols: Show).',
-      numCaps:3,
+      patternKey:'healthy_retest', isRetest:true, maFilter:true, depthFilter:true, healthFilter:true, s2HiddenDefault:true, tiers:['LESS THAN A WEEK','A WEEK','A FORTNIGHT+'],
+      intro:'<b>Retest</b> &mdash; stocks that are Qualified on S2 Pullback (all four tests pass), whose close today is <b>more than 10% below the six-month high</b>, and whose close is in a Retest of a rising moving average (20, 50, 100, 150 or 200-day). <b>The band:</b> within 4% of the 20-day and 50-day, within 5% of the 100, 150 and 200-day, above or below. <b>The count of sessions in the Retest</b> starts on the first close inside the band after the last close above it, so the price has come down to the line (or at the six-month high when it never closed above the band since); it is the longest run ending today in which at least 80% of the closes are inside the band, with never more than 3 closes in a row outside. <b>Length of Retest:</b> LESS THAN A WEEK (1 to 4 sessions), A WEEK (5 to 10), A FORTNIGHT+ (11 or more). The Investment Classification pages and the Healthy Retest add trigger need A WEEK or longer. Rising: the moving average is higher than 21 trading days ago. <b>One row per stock:</b> the moving average in the Retest nearest the close; the MA buttons choose one or several lines. Every tile and button group takes several choices (any of them). Stage 2 columns hidden by default (S2 cols: Show).',
+      numCaps:4,
       caps:[
-        {cls:'gcap-base',   title:'S2 Pullback (the gate)', body:'Qualified when all four tests pass: price above the 200-day MA; 200-day MA rising; 150-day MA rising; depth of pullback more than 10% from the 6-month high. Depth shown as Shallow, Medium or Deep Pullback.'},
-        {cls:'gcap-base',   title:'Retest of the moving average?', body:'Count of sessions in the Retest: the longest run of sessions ending today in which at least 80% of the closes are within 6% of the moving average, with never more than 3 closes in a row outside 6%. 5+ Probable, 3 or 4 Plausible, on a moving average higher than 21 trading days ago. Price vs MA: today.'},
-        {cls:'gcap-forref', title:'For information', body:'Size of Pullback: today’s close against the 6-month high. Volatility = the day’s high-to-low range as a % of the close. Near the MA = the days within 6% of it since the 6-month high. Ratios: green = the favourable direction.'}
+        {cls:'gcap-base',   title:'S2 Pullback (the gate)', body:'Qualified when all four tests pass: price above the 200-day MA; 200-day MA rising; 150-day MA rising; depth of pullback more than 10% from the 6-month high. Then the close today must still be more than 10% below that high. Depth shown as Shallow, Medium or Deep Pullback.'},
+        {cls:'gcap-base',   title:'Length of Retest', body:'The count of sessions in the Retest of a rising moving average: LESS THAN A WEEK 1 to 4, A WEEK 5 to 10, A FORTNIGHT+ 11 or more. Band: 4% for the 20-day and 50-day, 5% for the 100, 150 and 200-day. Price vs MA: today, to one decimal place because it is read against the band.'},
+        {cls:'gcap-health', title:'Retest Healthiness Indicators', body:'Seven readings, each Good, Okay or Poor (the cut-offs are in each heading\u2019s hover text). Two points for Good, one for Okay: <span class="k">Very Healthy</span> 70% or more of the points possible (10 to 14 of 14), <span class="k">Middling Health</span> 40% or more (6 to 9), <span class="k">Questionable Health</span> less (0 to 5). Information: they decide no rule and no trigger. Colours run from deep red (Poor) through pale (between) to deep green (Good).'},
+        {cls:'gcap-forref', title:'For information', body:'Size of Pullback: today\u2019s close against the 6-month high. Every stock listed is more than 10% below it.'}
       ],
-      colgroup:'<col style="width:126px"><col style="width:150px"><col style="width:44px"><col style="width:64px"><col style="width:52px"><col style="width:44px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:76px"><col style="width:56px"><col style="width:86px"><col style="width:86px"><col style="width:86px"><col style="width:86px"><col style="width:86px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col style="width:78px"><col class="s2col" style="width:64px"><col class="s2col" style="width:42px"><col class="s2col" style="width:42px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:44px"><col class="s2col" style="width:44px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px"><col class="s2col" style="width:46px">',
+      colgroup:'<col style="width:150px"><col style="width:150px"><col style="width:58px"><col style="width:118px"><col style="width:58px"><col style="width:52px"><col style="width:56px"><col style="width:56px"><col style="width:56px"><col style="width:56px"><col style="width:84px"><col style="width:64px"><col style="width:84px"><col style="width:84px"><col style="width:84px"><col style="width:84px"><col style="width:84px"><col style="width:128px"><col style="width:90px"><col style="width:90px"><col style="width:90px"><col style="width:90px"><col style="width:90px"><col style="width:90px"><col style="width:90px"><col style="width:108px"><col class="s2col" style="width:72px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px"><col class="s2col" style="width:56px">',
       ghrHtml:'<th class="gh-inputs gs-inputs" colspan="3">Inputs</th>'
-             +'<th class="gh-rating gs-rating" colspan="3">Rating</th>'
+             +'<th class="gh-rating gs-rating" colspan="3">Length of Retest</th>'
              +'<th class="gh-base gs-base" colspan="5">S2 Pullback</th>'
              +'<th class="gh-base gs-base" colspan="1">Retest</th>'
-             +'<th class="gh-base gs-base" colspan="5">Every moving average: the close against it &middot; its count of sessions</th>'
-             +'<th class="gh-base gs-base" colspan="8">For information</th>'
+             +'<th class="gh-base gs-base" colspan="5">Every moving average: close against it &middot; count</th>'
+             +'<th class="gh-health gs-health" colspan="8">Retest Healthiness Indicators</th>'
+             +'<th class="gh-forref gs-forref" colspan="1">For Information</th>'
              +'<th class="gh-forref gs-forref s2col" colspan="10">For reference — Stage 2 quality</th>',
       sgrHtml:'<th colspan="3"></th>'
-             +'<th class="gs-rating" colspan="3">Rating</th>'
+             +'<th class="gs-rating" colspan="3">Length</th>'
              +'<th class="gs-base" colspan="4">Tests</th><th class="sg-edge" colspan="1">Depth</th>'
-             +'<th class="sg-edge" colspan="1">Retest</th>'
+             +'<th class="sg-edge" colspan="1">Today</th>'
              +'<th class="sg-edge" colspan="5">Every moving average</th>'
-             +'<th class="sg-edge" colspan="8">Info</th>'
+             +'<th class="sg-edge" colspan="1">Overall</th><th colspan="7">The seven indicators</th>'
+             +'<th class="sg-edge" colspan="1">Info</th>'
              +'<th class="gs-forref s2col" colspan="1">Rating</th><th class="sg-edge s2col" colspan="2">Gates</th><th class="sg-edge s2col" colspan="7">Tests</th>',
       chrDefs:[
         {sk:'company',  html:'Company · Ticker',     tip:'Company and ticker',           cls:''},
         {wrap:true, sk:'taxon',       html:'Industry · Sector',    tip:'Industry and sector',           cls:''},
         {sk:'price',    html:'Price',                    tip:'Last price',                    cls:''},
-        {sk:'rate',     html:'Rating',                   tip:'Retest rating on the moving average shown in this row', cls:'gs-rating'},
-        {sk:'score',    html:'Count of sessions in the Retest', tip:'The longest run of sessions ending today in which at least 80% of the closes are within 6% of this moving average, with never more than 3 closes in a row outside 6%. A low count is a young Retest', cls:'', wrap:true},
+        {sk:'rate',     html:'Length of Retest',         tip:'LESS THAN A WEEK (1 to 4 sessions), A WEEK (5 to 10), A FORTNIGHT+ (11 or more), on the moving average shown in this row', cls:'gs-rating', wrap:true},
+        {sk:'score',    html:'Count of sessions', tip:'The count of sessions in the Retest of this moving average, counted from the first close inside the band after the last close above it', cls:'', wrap:true},
         {sk:'ma',       html:'MA',                       tip:'The moving average being retested', cls:''},
         {sk:'t1',       html:'1. Above 200D',            tip:'Price above the 200-day MA', cls:'gs-base', wrap:true},
         {sk:'t2',       html:'2. 200D rising',           tip:'200-day MA higher than 21 trading days ago', cls:'', wrap:true},
         {sk:'t3',       html:'3. 150D rising',           tip:'150-day MA higher than 21 trading days ago', cls:'', wrap:true},
         {sk:'t4',       html:'4. Depth >10%',            tip:'Depth of pullback more than 10%: the deepest fall from the 6-month high (highest close of the last 126 trading days) to the lowest close since', cls:'', wrap:true},
         {sk:'pbband',   html:'Depth',                    tip:'Depth of pullback: Shallow Pullback 10-15%, Medium Pullback 15-20%, Deep Pullback over 20%', cls:'sg-edge'},
-        {sk:'rtvsma',   html:'Price vs MA',              tip:'Today’s close against this moving average', cls:'sg-edge', wrap:true},
-        {sk:'m20', html:'20D', tip:'The close today against the 20-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:'sg-edge'},
-        {sk:'m50', html:'50D', tip:'The close today against the 50-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:''},
-        {sk:'m100', html:'100D', tip:'The close today against the 100-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:''},
-        {sk:'m150', html:'150D', tip:'The close today against the 150-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:''},
-        {sk:'m200', html:'200D', tip:'The close today against the 200-day moving average, and the count of sessions in its Retest. Green: Probable on this moving average; amber: Plausible', cls:''},
+        {sk:'rtvsma',   html:'Price vs MA',              tip:'Today\u2019s close against this moving average, to one decimal place (read against the band: 4% for the 20 and 50-day, 5% for the 100, 150 and 200-day)', cls:'sg-edge', wrap:true},
+        {sk:'m20', html:'20D', tip:'The close today against the 20-day moving average (band 4%), and the count of sessions in its Retest. Deeper blue: a longer Retest', cls:'sg-edge'},
+        {sk:'m50', html:'50D', tip:'The close today against the 50-day moving average (band 4%), and the count of sessions in its Retest. Deeper blue: a longer Retest', cls:''},
+        {sk:'m100', html:'100D', tip:'The close today against the 100-day moving average (band 5%), and the count of sessions in its Retest. Deeper blue: a longer Retest', cls:''},
+        {sk:'m150', html:'150D', tip:'The close today against the 150-day moving average (band 5%), and the count of sessions in its Retest. Deeper blue: a longer Retest', cls:''},
+        {sk:'m200', html:'200D', tip:'The close today against the 200-day moving average (band 5%), and the count of sessions in its Retest. Deeper blue: a longer Retest', cls:''},
+        {sk:'health', html:'Retest health', tip:'Very Healthy: 70% or more of the points possible (two for each Good, one for each Okay); Middling Health: 40% or more; Questionable Health: less', cls:'sg-edge', wrap:true},
+        {sk:'i2', html:'Daily Volatility Reducing Near the MA? (Vs. L1M)', tip:'Average daily range (high to low, % of close) on the days inside the band since the 6-month high, divided by the last-20-day average. Good below 0.85; Poor above 1.00', cls:'', wrap:true},
+        {sk:'i3', html:'Daily Volatility Reducing Sequentially? (L1W/L2W)', tip:'Average daily range of the last 5 days divided by the last 10 days. Good below 0.90; Poor above 1.10', cls:'', wrap:true},
+        {sk:'i4', html:'Selling Pressure (Volume) Reducing Near the MA? (Vs. L1M)', tip:'Average volume on the days inside the band since the 6-month high, divided by the last-20-day average. Good below 0.85; Poor above 1.00', cls:'', wrap:true},
+        {sk:'i5', html:'Recent Selling Pressure (Volume) Reducing Sequentially? (L1W/L2W)', tip:'Average volume of the last 5 days divided by the last 10 days. Good below 0.90; Poor above 1.10', cls:'', wrap:true},
+        {sk:'i6', html:'Volume vs. Average (L1W/L3M)', tip:'Average volume of the last 5 days divided by the last 63 days (3 months). Good below 0.80; Poor above 1.20', cls:'', wrap:true},
+        {sk:'i7', html:'Closes in Top Half of Intra-day Range, Near MA', tip:'Share of the days inside the band (since the 6-month high) that closed in the top half of the day\u2019s range. Good 60% or more; Poor below 40%', cls:'', wrap:true},
+        {sk:'i8', html:'Recent Closes in Top Half of Intra-day Range (L1W/Near MA)', tip:'Share of the last 5 days closing in the top half of the day\u2019s range, divided by the same share for the days near the MA. Good above 1.10; Poor below 0.90', cls:'', wrap:true},
         {sk:'pbdepth', html:'Size of Pullback', tip:'Distance of price vs. the recent high: today\u2019s close against the 6-month high', cls:'sg-edge', wrap:true},
-        {sk:'i2', html:'Daily Volatility Reducing Near the MA? (Vs. L1M)', tip:'Average daily range (high to low, % of close) on the days within 6% of the MA since the 6-month high, divided by the last-20-day average. Below 1 = reducing', cls:'', wrap:true},
-        {sk:'i3', html:'Daily Volatility Reducing Sequentially? (L1W/L2W)', tip:'Average daily range of the last 5 days divided by the last 10 days. Below 1 = reducing', cls:'', wrap:true},
-        {sk:'i4', html:'Selling Pressure (Volume) Reducing Near the MA? (Vs. L1M)', tip:'Average volume on the days within 6% of the MA since the 6-month high, divided by the last-20-day average. Below 1 = reducing', cls:'', wrap:true},
-        {sk:'i5', html:'Recent Selling Pressure (Volume) Reducing Sequentially? (L1W/L2W)', tip:'Average volume of the last 5 days divided by the last 10 days. Below 1 = reducing', cls:'', wrap:true},
-        {sk:'i6', html:'Volume vs. Average (L1W/L3M)', tip:'Average volume of the last 5 days divided by the last 63 days (3 months)', cls:'', wrap:true},
-        {sk:'i7', html:'Closes in Top Half of Intra-day Range, Near MA', tip:'Share of the days within 6% of the MA (since the 6-month high) that closed in the top half of the day\u2019s range', cls:'', wrap:true},
-        {sk:'i8', html:'Recent Closes in Top Half of Intra-day Range (L1W/Near MA)', tip:'Share of the last 5 days closing in the top half of the day\u2019s range, divided by the same share for the days near the MA. Above 1 = improving', cls:'', wrap:true},
         {sk:'s2r',      html:'S2 Rating',                tip:'Stage 2 rating (for reference)',cls:'gs-forref s2col'},
-        {wrap:true, sk:'sg1',       html:'200D flat/rising',         tip:'200-day MA flat or rising: no more than 5% a year below its level 21 trading days earlier (Stage 2 gate 1 from 11-Nov-2026)', cls:'sg-edge s2col'},  /* MD-S2-T1-200D-FLAT-2026-11-11 */
-        {wrap:true, sk:'sg2',       html:'150D &gt; 200D',           tip:'Gate 2: 150-day MA above 200-day MA',   cls:'s2col'},  /* MD-S2-T2-GATES-SWAP-2026-11-11 */
-        {wrap:true, sk:'sx1',       html:'P &gt; 150D',              tip:'Test: price above the 150-day MA',          cls:'sg-edge s2col'},  /* MD-DEFS-2026-11-13 */
+        {wrap:true, sk:'sg1',       html:'200D flat/rising',         tip:'200-day MA flat or rising: no more than 5% a year below its level 21 trading days earlier (Stage 2 gate 1 from 11-Nov-2026)', cls:'sg-edge s2col'},
+        {wrap:true, sk:'sg2',       html:'150D &gt; 200D',           tip:'Gate 2: 150-day MA above 200-day MA',   cls:'s2col'},
+        {wrap:true, sk:'sx1',       html:'P &gt; 150D',              tip:'Test: price above the 150-day MA',          cls:'sg-edge s2col'},
         {wrap:true, sk:'sx2',       html:'Within 25% 52WH',          tip:'Test: within 25% of the 52-week high',      cls:'s2col'},
         {wrap:true, sk:'sx3',       html:'P &gt; 50D',               tip:'Test: price above the 50-day MA',           cls:'s2col'},
         {wrap:true, sk:'sx4',       html:'30% above 52WL',           tip:'Test: at least 30% above the 52-week low',  cls:'s2col'},
@@ -12865,7 +12910,7 @@ function SUM_renderQualifiedStocks() {
         {wrap:true, sk:'sx6',       html:'50D &gt; 150D',            tip:'Test: 50-day MA above the 150-day MA',      cls:'s2col'},
         {wrap:true, sk:'sx7',       html:'50D &gt; 200D',            tip:'Test: 50-day MA above the 200-day MA',      cls:'s2col'}
       ],
-      tileThresh:{ Plausible:'a rising moving average with a count of 3 or 4 sessions', Probable:'a rising moving average with a count of 5 sessions or more' }
+      tileThresh:{ 'LESS THAN A WEEK':'a count of 1 to 4 sessions', 'A WEEK':'a count of 5 to 10 sessions', 'A FORTNIGHT+':'a count of 11 sessions or more' }
     }
   };
 
@@ -12876,6 +12921,7 @@ function SUM_renderQualifiedStocks() {
       s2gate:{None:false,Possible:false,Plausible:true,Probable:true},
       s2shown:!(CFG[tabId]&&CFG[tabId].s2HiddenDefault), testsMode:'tick', scope:'all',
       tierFilter:[], tint:'none', port:'off', depth:'all', ma:'all', yn:'Y',  /* MD-PB-RETEST-2026-11-12; yn: MD-DEFS-2026-11-13 */
+      depths:[], mas:[], ysel:[], hlev:[], hind:{},  /* MD-RETEST-1119: several choices in every group (any of them), Message 127 */
       sort:{col:'rate',dir:'desc'}
     };
   }
@@ -12897,11 +12943,12 @@ function SUM_renderQualifiedStocks() {
      ONE per stock. The row's moving average is the one the rules use (info_ma_retested: best rating, then most days near it, a tie
      to the longer line); "per" and "rbm" carry every line for the four columns and for the MA buttons. */
   function pbMeasures(p){var bh=p.base_high,mx=p.max_pullback_since_base_high;return {max_pb:mx,from_low:(bh&&mx!=null&&p.price)?(p.price/(bh*(1-mx))-1):null};}
-  function rtPoint(r,ma){var x=r.per[ma]||{};r.ma=ma;r.rt=r.rbm[ma]||{};r.pat_rating=x.rating||'None';r.pat_count=x.days_within_l10d;return r;}
-  function rtQual(r,ma){var x=r.per[ma];return !!(x&&(x.rating==='Plausible'||x.rating==='Probable'));}
+  function rtPoint(r,ma){var x=r.per[ma]||{};r.ma=ma;r.rt=r.rbm[ma]||{};r.pat_rating=x.rating||'None';r.pat_count=x.days_within_l10d;r.hl=(r.rt.health||{});return r;}
+  function rtQual(r,ma){var x=r.per[ma];return !!(x&&x.rating&&x.rating!=='None');}  /* MD-RETEST-1119: any length of Retest */
+  function rtNear(r,list){var b=null,bd=9;for(var i=0;i<list.length;i++){if(!rtQual(r,list[i]))continue;var d=((r.rbm||{})[list[i]]||{}).dist_from_ma;d=d==null?9:Math.abs(d);if(b===null||d<bd){b=list[i];bd=d;}}return b;}
   function getRetestRows(){
     var raw=(window.MASTER_DATA&&MASTER_DATA.filters)||[];
-    var pr=pricesLookup(),lv=liveTickers(),lS=liveSectors(),lI=liveInds(),rows=[],MAS=['200D','150D','100D','50D'];
+    var pr=pricesLookup(),lv=liveTickers(),lS=liveSectors(),lI=liveInds(),rows=[];
     for(var i=0;i<raw.length;i++){
       var s=raw[i]; if(!s||!s.md_v2||!s.md_v2.tests) continue;
       var rt=s.md_v2.tests.healthy_retest; if(!rt||!rt.per_ma) continue;
@@ -12913,8 +12960,7 @@ function SUM_renderQualifiedStocks() {
         pat_tests:pb.tests||{}, pat_tv:pb.test_values||{}, depth_band:pb.info_depth_band||null, depth:(pb.test_values||{}).t4_pullback_gt10,
         s2r:s2.rating||'None', s2gates:s2.gates||{}, s2tests:s2.tests||{},
         is_live:!!lv[s.ticker], sect_port:!!lS[p.sector], ind_port:!!lI[p.industry]};
-      var best=(rt.info_ma_retested&&rtQual(r,rt.info_ma_retested))?rt.info_ma_retested:null;
-      if(!best){for(var j=0;j<MAS.length;j++){if(rtQual(r,MAS[j])&&(!best||(r.per[MAS[j]].rating==='Probable'&&r.per[best].rating!=='Probable'))){best=MAS[j];}}}
+      var best=(rt.info_ma_retested&&rtQual(r,rt.info_ma_retested))?rt.info_ma_retested:rtNear(r,['20D','50D','100D','150D','200D']);
       if(!best) continue;
       r.best=best; rows.push(rtPoint(r,best));
     }
@@ -12946,11 +12992,12 @@ function SUM_renderQualifiedStocks() {
   function filterRows(rows,tabId){
     var st=STATE[tabId];
     return rows.filter(function(r){
-      if(r.per){ if(st.ma&&st.ma!=='all'){ if(!rtQual(r,st.ma)) return false; rtPoint(r,st.ma); } else rtPoint(r,r.best); }  /* MD-BATCH1-2026-11-17: one row per stock; an MA button shows that line */
+      if(r.per){ if(st.mas.length){ var _m=rtNear(r,st.mas); if(!_m) return false; rtPoint(r,_m); } else rtPoint(r,r.best); }  /* MD-RETEST-1119: several MA buttons, any of them; the row shows the chosen line nearest the close */
       if(!st.s2gate[r.s2r]) return false;
-      if(CFG[tabId]&&CFG[tabId].yn){ if(st.yn==='Y'&&r.pat_rating!=='Probable') return false; if(st.yn==='N'&&r.pat_rating==='Probable') return false; }  /* MD-DEFS-2026-11-13 */
+      if(CFG[tabId]&&CFG[tabId].yn){ var _q=r.pat_rating==='Probable'; if(!st.ysel.length){ if(!_q) return false; } else if(_q?st.ysel.indexOf(r.depth_band)<0:st.ysel.indexOf('N')<0) return false; }  /* MD-RETEST-1119: Not Qualified and the three depths, any of them */
       else if(st.tierFilter.length>0&&st.tierFilter.indexOf(r.pat_rating)<0) return false;
-      if(st.depth&&st.depth!=='all'&&r.depth_band!==st.depth) return false;  /* MD-PB-RETEST-2026-11-12 */
+      if(!(CFG[tabId]&&CFG[tabId].yn)&&st.depths.length&&st.depths.indexOf(r.depth_band)<0) return false;  /* MD-RETEST-1119: several depths */
+      if(r.per){ if(st.hlev.length&&st.hlev.indexOf((r.hl||{}).level||'')<0) return false; for(var _hk in st.hind){var _hv=st.hind[_hk];if(_hv&&_hv.length&&_hv.indexOf(((r.hl||{}).levels||{})[_hk]||'')<0) return false;} }  /* MD-RETEST-1119: the Healthiness filters */
       if(st.scope==='live'&&!r.is_live) return false;
       if(st.scope==='sector'&&!r.sect_port) return false;
       if(st.scope==='industry'&&!r.ind_port) return false;
@@ -12968,7 +13015,8 @@ function SUM_renderQualifiedStocks() {
     rows.sort(function(a,b){
       var va,vb;
       if(sk==='company'){va=a.company;vb=b.company;}
-      else if(sk==='rate'){va=(RANK[a.pat_rating]||0)*10+(RANK[a.s2r]||0);vb=(RANK[b.pat_rating]||0)*10+(RANK[b.s2r]||0);}
+      else if(sk==='rate'){va=((LRANK[a.pat_rating]||RANK[a.pat_rating]||0)*10+(RANK[a.s2r]||0))*1000+(a.pat_count||0);vb=((LRANK[b.pat_rating]||RANK[b.pat_rating]||0)*10+(RANK[b.s2r]||0))*1000+(b.pat_count||0);}
+      else if(sk==='health'){var _ha=a.hl||{},_hb=b.hl||{};va=_ha.of?_ha.points/_ha.of:-1;vb=_hb.of?_hb.points/_hb.of:-1;}
       else if(sk==='score'){va=a.pat_count;vb=b.pat_count;}
       else if(sk==='s2r'){va=RANK[a.s2r]||0;vb=RANK[b.s2r]||0;}
       else if(sk==='pbdepth'){va=a.recent_pullback==null?-1e9:a.recent_pullback;vb=b.recent_pullback==null?-1e9:b.recent_pullback;}
@@ -13006,12 +13054,15 @@ function SUM_renderQualifiedStocks() {
   }
   /* MD-BATCH1-2026-11-17: background-tinted cells; the five measures from the six-month high; the depth lozenge; every line on the Retest page */
   function tintCell(txt,k,cls){var bg=k==='g'?'#dff3e4':k==='a'?'#fff1cf':k==='r'?'#fde3e4':'';return '<td class="num '+(cls||'')+'"'+(bg?' style="background:'+bg+'"':'')+'>'+txt+'</td>';}
+  function specCell(txt,style,cls,title){return '<td class="num '+(cls||'')+'"'+(style?' style="'+style+'"':'')+(title?' title="'+title+'"':'')+'>'+txt+'</td>';}
+  function sgnPct0(v){var p=Math.round(v*100);return p<0?'('+(-p)+')%':(p>0?'+':'')+p+'%';}  /* MD-RETEST-1119: 0 decimal places (Message 127) */
+  function depthT(v){return v==null?null:(0.15-v)/0.10;}  /* shallow green, deep red, on a continuous scale */
   function depthK(v){return v==null||v<=0.10?'':v<=0.15?'g':v<=0.20?'a':'r';}
   function sgnPct(v){var p=Math.round(v*1000)/10;return p<0?'('+(-p)+')%':(p>0?'+':'')+p+'%';}  /* MD-BATCH2-2026-11-17: negatives in brackets */
   function pbInfoCells(row){
     var a=row.recent_pullback,b=row.max_pb,c=row.from_low,d=row.days_since_bh;
-    return tintCell(a==null?'&mdash;':sgnPct(-a),depthK(a),'sg-edge')+tintCell(b==null?'&mdash;':sgnPct(-b),depthK(b),'')
-      +tintCell(c==null?'&mdash;':sgnPct(c),c==null?'':c>=0.10?'g':c>=0.05?'a':'','')+tintCell(d==null?'&mdash;':d,(d!=null&&d>=20)?'g':'','')+dateCell(row.base_high_date,'');
+    return specCell(a==null?'&mdash;':sgnPct0(-a),spec(depthT(a)),'sg-edge')+specCell(b==null?'&mdash;':sgnPct0(-b),spec(depthT(b)),'')  /* MD-RETEST-1119: 0 dp, spectrum */
+      +specCell(c==null?'&mdash;':sgnPct0(c),spec(c==null?null:(c-0.05)/0.10),'')+specCell(d==null?'&mdash;':d,specSeq(d==null?null:(d>=20?0.25+(d-20)/80:0)),'')+dateCell(row.base_high_date,'');
   }
   function depthPill(b){
     var w=(b||'Qualified').replace(' Pullback',''),c=w==='Deep'?'background:#f7c6c4;color:#7d1410':w==='Medium'?'background:#ffe6b3;color:#7a5500':'background:#c9efd2;color:#0c5a24';
@@ -13020,7 +13071,8 @@ function SUM_renderQualifiedStocks() {
   function maCells(row){
     var o='',M=['20D','50D','100D','150D','200D'];
     for(var i=0;i<M.length;i++){var x=(row.per||{})[M[i]]||{},m=(row.rbm||{})[M[i]]||{},d=m.dist_from_ma;
-      o+=tintCell((d==null?'&mdash;':sgnPct(d))+' <span style="font-size:10px;color:#666">'+(x.days_within_l10d==null?'':x.days_within_l10d)+'</span>',x.rating==='Probable'?'g':x.rating==='Plausible'?'a':'',i===0?'sg-edge':'');}
+      var _n=x.days_within_l10d,_on=x.rating&&x.rating!=='None';
+      o+=specCell((d==null?'&mdash;':sgnPct(d))+' <span class="rt-cnt">'+(_n==null||!_n?'':_n)+'</span>',_on?specSeq(0.2+Math.min(1,_n/15)*0.8):'',i===0?'sg-edge':'',_on?x.rating+' ('+_n+' sessions)':(_n?'In the band but not a Retest: the line is not rising':''));}  /* MD-RETEST-1119 */
     return o;
   }
   function pipsN(n,tot){
@@ -13029,7 +13081,7 @@ function SUM_renderQualifiedStocks() {
     return s+'<span class="pi-score-num">'+n+'/'+tot+'</span></div>';
   }
   /* MD-PB-RETEST-2026-11-12: cells for S2 Pullback and Retest */
-  function bandCell(row,cls){var b=row.depth_band;var c=b==='Deep Pullback'?'#A32D2D':b==='Medium Pullback'?'#b45309':b==='Shallow Pullback'?'#2E7D32':'#888';return '<td class="'+(cls||'')+'" style="color:'+c+';font-size:10px;white-space:normal;line-height:1.2">'+(b||'—')+'</td>';}
+  function bandCell(row,cls){var b=row.depth_band;var c=b==='Deep Pullback'?'#A32D2D':b==='Medium Pullback'?'#b45309':b==='Shallow Pullback'?'#2E7D32':'#888';return '<td class="'+(cls||'')+'" style="color:'+c+';font-size:11px;white-space:normal;line-height:1.2">'+(b||'—')+'</td>';}
   function dateCell(d,cls){var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return '<td class="num '+(cls||'')+'">'+(d?(+d.slice(8,10))+' '+m[+d.slice(5,7)-1]+' '+d.slice(2,4):'—')+'</td>';}
   function intCell(v,cls){return '<td class="num '+(cls||'')+'">'+(v==null?'—':v)+'</td>';}
   function signPctCell(v,cls){if(v==null||isNaN(v))return '<td class="num '+(cls||'')+'">—</td>';var p=Math.round(v*1000)/10;return '<td class="num '+(cls||'')+'">'+(p<0?'('+(-p)+')%':(p>0?'+':'')+p+'%')+'</td>';}
@@ -13041,6 +13093,11 @@ function SUM_renderQualifiedStocks() {
     var pv=v*100,intensity=Math.max(-1,Math.min(1,(pv-5)/20));
     return '<td class="num '+(cls||'')+'" style="color:'+colG(-intensity)+'">'+Math.round(pv)+'%</td>';
   }
+  function lenPill(r){var c=r==='A FORTNIGHT+'?'len3':r==='A WEEK'?'len2':r==='LESS THAN A WEEK'?'len1':'none';return '<span class="pi-pill pi-pill-'+c+'">'+r+'</span>';}  /* MD-RETEST-1119 */
+  function healthPill(h){if(!h||!h.level)return '<span class="pi-pill pi-pill-none">&mdash;</span>';var c=h.level===HLEV[0]?'hl1':h.level===HLEV[1]?'hl2':'hl3';return '<span class="pi-pill pi-pill-'+c+'" title="'+h.points+' of '+h.of+' points">'+h.level+'</span>';}
+  function hCell(m,k,fmt,cls){var h=null;for(var i=0;i<HEALTH.length;i++)if(HEALTH[i][0]===k)h=HEALTH[i];var v=m[h[1]];var L=((m.health||{}).levels||{})[k];
+    var txt=v==null||isNaN(v)?'&mdash;':(fmt==='share'?Math.round(v*100)+'%':v.toFixed(2)+'\u00d7');
+    return specCell(txt,spec(hT(h,v)),cls,L?(L.charAt(0).toUpperCase()+L.slice(1)):'');}
   function ratePill(r){
     var c=r==='Probable'?'prob':r==='Plausible'?'pla':r==='Possible'?'pos':'none';
     return '<span class="pi-pill pi-pill-'+c+'">'+r+'</span>';
@@ -13099,7 +13156,7 @@ function SUM_renderQualifiedStocks() {
     h+='<td class="name-cell"><span class="co">'+(row.is_live?'<span class="live-dot">●</span>':'')+row.company+'</span><span class="tk">'+row.ticker+'</span></td>';
     h+='<td class="taxon"><div class="ind">'+row.industry+'</div><div class="sec">'+row.sector+'</div></td>';
     h+='<td class="num">'+fmtNum(row.price)+'</td>';
-    h+='<td class="gs-rating pi-rating-cell">'+((CFG[tabId]&&CFG[tabId].yn)?(row.pat_rating==='Probable'?depthPill(row.depth_band):'<span class="pi-pill pi-pill-none">Not Qualified</span>'):ratePill(row.pat_rating))+'</td>';  /* MD-DEFS-2026-11-13 */
+    h+='<td class="gs-rating pi-rating-cell">'+((CFG[tabId]&&CFG[tabId].yn)?(row.pat_rating==='Probable'?depthPill(row.depth_band):'<span class="pi-pill pi-pill-none">Not Qualified</span>'):(row.per?lenPill(row.pat_rating):ratePill(row.pat_rating)))+'</td>';  /* MD-DEFS-2026-11-13; MD-RETEST-1119 */
     if(tabId==='setups_healthy_retest'){  /* MD-PB-RETEST-2026-11-12 */
       h+='<td class="pi-score-cell"><span class="pi-score-num">'+(row.pat_count==null?'—':row.pat_count)+'</span></td>';
       h+='<td class="num"><b>'+row.ma+'</b></td>';
@@ -13118,9 +13175,9 @@ function SUM_renderQualifiedStocks() {
         var m=row.rt||{};
         h+=signPctCell(m.dist_from_ma,'sg-edge');
         h+=maCells(row);
-        h+=pullbackCell(row,'sg-edge');
-        h+=ratioCell(m.vol_near_vs_l20d,true,'')+ratioCell(m.vol_l5d_vs_l10d,true,'')+ratioCell(m.volume_near_vs_l20d,true,'')+ratioCell(m.volume_l5d_vs_l10d,true,'')+ratioCell(m.volume_l5d_vs_l3m,true,'');
-        h+=shareCell(m.closes_top_half_near,'')+ratioCell(m.closes_top_half_l5d_vs_near,false,'');
+        h+='<td class="sg-edge rt-hl">'+healthPill(m.health)+'</td>';  /* MD-RETEST-1119: the Retest Healthiness Indicators, then Size of Pullback alone */
+        h+=hCell(m,'i2','x','')+hCell(m,'i3','x','')+hCell(m,'i4','x','')+hCell(m,'i5','x','')+hCell(m,'i6','x','')+hCell(m,'i7','share','')+hCell(m,'i8','x','');
+        h+=specCell(row.recent_pullback==null?'&mdash;':sgnPct0(-row.recent_pullback),spec(depthT(row.recent_pullback)),'sg-edge');
       }
     } else {
       h+=testCell(t.t3_price_above_200d,tv.t3_price_above_200d,'gs-base',mode);
@@ -13145,9 +13202,9 @@ function SUM_renderQualifiedStocks() {
       ys.forEach(function(r){dc[r.depth_band]=(dc[r.depth_band]||0)+1;});
       var keys=['Shallow Pullback','Medium Pullback','Deep Pullback'],strip={'Deep Pullback':'rt-strip-prob','Medium Pullback':'rt-strip-pla','Shallow Pullback':'rt-strip-pos'};
       /* MD-BATCH1-2026-11-17 (Richard, 17-Nov-2026): "Not Qualified" (not N) on the left, Deep Pullback on the right */
-      el.innerHTML='<div class="rating-tile'+(st.yn==='N'?' active':'')+'" data-yn-n="1"><div class="rt-label">Not Qualified</div><div class="rt-count">'+nN+'</div><div class="rt-sub">of '+gy.length+' stocks</div><div class="rt-thresh">'+(cfg.tileThresh.N||'')+'</div><div class="rt-strip rt-strip-none"></div></div>'
+      el.innerHTML='<div class="rating-tile'+(st.ysel.indexOf('N')>-1?' active':'')+'" data-yn-n="1"><div class="rt-label">Not Qualified</div><div class="rt-count">'+nN+'</div><div class="rt-sub">of '+gy.length+' stocks</div><div class="rt-thresh">'+(cfg.tileThresh.N||'')+'</div><div class="rt-strip rt-strip-none"></div></div>'
       +keys.map(function(k){
-        var n=dc[k]||0,act=(st.yn!=='N'&&st.depth===k)?' active':'';
+        var n=dc[k]||0,act=(st.ysel.indexOf(k)>-1)?' active':'';  /* MD-RETEST-1119 */
         return '<div class="rating-tile'+act+'" data-ydepth="'+k+'"><div class="rt-label">'+k+'</div><div class="rt-count">'+n+'</div>'
           +'<div class="rt-sub">of '+ys.length+' Qualified &middot; '+(ys.length?Math.round(n/ys.length*100):0)+'%</div><div class="rt-thresh">'+(cfg.tileThresh[k]||'')+'</div><div class="rt-strip '+strip[k]+'"></div></div>';
       }).join('');
@@ -13158,15 +13215,15 @@ function SUM_renderQualifiedStocks() {
     tiers.forEach(function(t){g[t]=0;u[t]=0;});
     gated.forEach(function(r){if(g[r.pat_rating]!=null)g[r.pat_rating]++;});
     allRows.forEach(function(r){if(u[r.pat_rating]!=null)u[r.pat_rating]++;});
-    var total=(g.Possible||0)+(g.Plausible||0)+(g.Probable||0);
-    var stripCls={Possible:'rt-strip-pos',Plausible:'rt-strip-pla',Probable:'rt-strip-prob'};
+    var total=0;tiers.forEach(function(t){total+=g[t]||0;});  /* MD-RETEST-1119: any tiers */
+    var stripCls={Possible:'rt-strip-pos',Plausible:'rt-strip-pla',Probable:'rt-strip-prob','LESS THAN A WEEK':'rt-strip-pos','A WEEK':'rt-strip-pla','A FORTNIGHT+':'rt-strip-prob'};
     el.innerHTML=tiers.map(function(tier){
       var n=g[tier]||0,ug=u[tier]||0,pct=total?Math.round(n/total*100):0;
       var active=st.tierFilter.indexOf(tier)>-1?' active':'';
       return '<div class="rating-tile'+active+'" data-tier="'+tier+'">'
         +'<div class="rt-label">'+tier+'</div>'
         +'<div class="rt-count">'+n+'</div>'
-        +'<div class="rt-sub">of '+total+' gated · '+pct+'% · '+ug+' ungated</div>'
+        +'<div class="rt-sub">of '+total+' gated · '+pct+'%'+(ug>n?' · '+ug+' with every Stage 2 rating':'')+'</div>'
         +'<div class="rt-thresh">'+(cfg.tileThresh[tier]||'')+'</div>'
         +'<div class="rt-strip '+stripCls[tier]+'"></div>'
         +'</div>';
@@ -13185,9 +13242,11 @@ function SUM_renderQualifiedStocks() {
       +'<button class="toggle-btn'+(!st.s2shown?' active':'')+'" data-s2show="0">Hide</button>'
       +'</div>';
     var _cfgc=CFG[tabId];  /* MD-PB-RETEST-2026-11-12: Depth and MA filters */
-    if(_cfgc&&_cfgc.yn) h+='<div class="ctrl-grp"><span class="ctrl-label">Show</span>'+[['Y','Qualified'],['N','Not Qualified'],['all','Both']].map(function(d){return '<button class="toggle-btn'+(st.yn===d[0]?' active':'')+'" data-yn="'+d[0]+'">'+d[1]+'</button>';}).join('')+'</div>';  /* MD-DEFS-2026-11-13 */
-    if(_cfgc&&_cfgc.depthFilter) h+='<div class="ctrl-grp"><span class="ctrl-label">Depth</span>'+[['all','All'],['Shallow Pullback','Shallow'],['Medium Pullback','Medium'],['Deep Pullback','Deep']].map(function(d){return '<button class="toggle-btn'+(st.depth===d[0]?' active':'')+'" data-depth="'+d[0]+'">'+d[1]+'</button>';}).join('')+'</div>';
-    if(_cfgc&&_cfgc.maFilter) h+='<div class="ctrl-grp"><span class="ctrl-label">MA</span>'+['all','20D','50D','100D','150D','200D'].map(function(m){return '<button class="toggle-btn'+(st.ma===m?' active':'')+'" data-ma="'+m+'">'+(m==='all'?'All':m)+'</button>';}).join('')+'</div>';
+    /* MD-RETEST-1119 (Message 127, "enable multi-select"): every group takes several choices; All clears the group */
+    if(_cfgc&&_cfgc.yn) h+='<div class="ctrl-grp"><span class="ctrl-label">Show</span>'+[['all','Qualified (all depths)'],['N','Not Qualified'],['Shallow Pullback','Shallow'],['Medium Pullback','Medium'],['Deep Pullback','Deep']].map(function(d){var on=d[0]==='all'?!st.ysel.length:st.ysel.indexOf(d[0])>-1;return '<button class="toggle-btn'+(on?' active':'')+'" data-ysel="'+d[0]+'">'+d[1]+'</button>';}).join('')+'</div>';
+    if(_cfgc&&_cfgc.depthFilter&&!_cfgc.yn) h+='<div class="ctrl-grp"><span class="ctrl-label">Depth</span>'+[['all','All'],['Shallow Pullback','Shallow'],['Medium Pullback','Medium'],['Deep Pullback','Deep']].map(function(d){var on=d[0]==='all'?!st.depths.length:st.depths.indexOf(d[0])>-1;return '<button class="toggle-btn'+(on?' active':'')+'" data-depth="'+d[0]+'">'+d[1]+'</button>';}).join('')+'</div>';
+    if(_cfgc&&_cfgc.maFilter) h+='<div class="ctrl-grp"><span class="ctrl-label">MA</span>'+['all','20D','50D','100D','150D','200D'].map(function(m){var on=m==='all'?!st.mas.length:st.mas.indexOf(m)>-1;return '<button class="toggle-btn'+(on?' active':'')+'" data-ma="'+m+'">'+(m==='all'?'All':m)+'</button>';}).join('')+'</div>';
+    if(_cfgc&&_cfgc.healthFilter) h+='<div class="ctrl-grp"><span class="ctrl-label">Retest health</span>'+['all'].concat(HLEV).map(function(m){var on=m==='all'?!st.hlev.length:st.hlev.indexOf(m)>-1;return '<button class="toggle-btn'+(on?' active':'')+'" data-hlev="'+m+'">'+(m==='all'?'All':m)+'</button>';}).join('')+'</div>';
     h+='<div class="ctrl-grp"><span class="ctrl-label">Tests</span>'
       +'<button class="toggle-btn'+(st.testsMode==='tick'?' active':'')+'" data-tm="tick">Ticks</button>'
       +'<button class="toggle-btn'+(st.testsMode==='val'?' active':'')+'" data-tm="val">Values</button>'
@@ -13202,10 +13261,17 @@ function SUM_renderQualifiedStocks() {
       +'<button class="toggle-btn'+(st.tint==='industry'?' active':'')+'" data-tint="industry">Industry</button>'
       +'<button class="toggle-btn'+(st.tint==='sector'?' active':'')+'" data-tint="sector">Sector</button>'
       +'</div>';
-    h+='<div class="ctrl-grp"><span class="ctrl-label">Tint</span>'
+    h+='<div class="ctrl-grp" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry"><span class="ctrl-label">Live stocks shaded</span>'  /* MD-RETEST-1119: was Tint (Message 127) */
       +'<button class="toggle-btn'+(st.port==='off'?' active':'')+'" data-port="off">Off</button>'
       +'<button class="toggle-btn'+(st.port==='on'?' active':'')+'" data-port="on">On</button>'
       +'</div>';
+    /* MD-RETEST-1119: one filter line for the seven Retest Healthiness Indicators: Good, Okay, Poor, several at once */
+    if(_cfgc&&_cfgc.healthFilter){
+      var HN={i2:'Volatility near MA',i3:'Volatility L1W/L2W',i4:'Volume near MA',i5:'Volume L1W/L2W',i6:'Volume L1W/L3M',i7:'Top-half closes near MA',i8:'Top-half closes L1W'};
+      h+='<div class="rt-hfilters"><span class="ctrl-label">Healthiness Indicators</span>'+HEALTH.map(function(x){var k=x[0],sel=st.hind[k]||[];
+        return '<span class="rt-hf"><span class="rt-hfn">'+HN[k]+'</span>'+['good','okay','poor'].map(function(L){return '<button class="toggle-btn hf-'+L+(sel.indexOf(L)>-1?' active':'')+'" data-hind="'+k+':'+L+'">'+L.charAt(0).toUpperCase()+L.slice(1)+'</button>';}).join('')+'</span>';}).join('')
+        +(Object.keys(st.hind).some(function(k){return (st.hind[k]||[]).length;})?'<button class="toggle-btn" data-hind="clear">Clear</button>':'')+'</div>';
+    }
     el.innerHTML=h;
   }
 
@@ -13264,15 +13330,19 @@ function SUM_renderQualifiedStocks() {
       var pt=btn.getAttribute('data-port');
       var dp=btn.getAttribute('data-depth'),mf=btn.getAttribute('data-ma');  /* MD-PB-RETEST-2026-11-12 */
       var yn=btn.getAttribute('data-yn');  /* MD-DEFS-2026-11-13 */
-      if(yn!==null){st.yn=yn;}
+      var ys=btn.getAttribute('data-ysel'),hl=btn.getAttribute('data-hlev'),hi=btn.getAttribute('data-hind');  /* MD-RETEST-1119 */
+      if(ys!==null){if(ys==='all')st.ysel=[];else tgl(st.ysel,ys);}
+      else if(hl!==null){if(hl==='all')st.hlev=[];else tgl(st.hlev,hl);}
+      else if(hi!==null){if(hi==='clear')st.hind={};else{var _p=hi.split(':');st.hind[_p[0]]=st.hind[_p[0]]||[];tgl(st.hind[_p[0]],_p[1]);}}
+      else if(yn!==null){st.yn=yn;}
       else if(s2k!==null){st.s2gate[s2k]=!st.s2gate[s2k];}
       else if(s2show!==null){st.s2shown=s2show==='1';}
       else if(tm!==null){st.testsMode=tm;}
       else if(sc!==null){st.scope=sc;}
       else if(tn!==null){st.tint=tn;}
       else if(pt!==null){st.port=pt;}
-      else if(dp!==null){st.depth=dp;}
-      else if(mf!==null){st.ma=mf;}
+      else if(dp!==null){if(dp==='all')st.depths=[];else tgl(st.depths,dp);}  /* MD-RETEST-1119 */
+      else if(mf!==null){if(mf==='all')st.mas=[];else tgl(st.mas,mf);}
       reRender(tabId);
     });
 
@@ -13282,8 +13352,8 @@ function SUM_renderQualifiedStocks() {
       var tile=e.target.closest('.rating-tile');
       if(!tile) return;
       var yd=tile.getAttribute('data-ydepth');  /* MD-DEFS-2026-11-13 */
-      if(yd){var sy=STATE[tabId];sy.yn='Y';sy.depth=(sy.depth===yd?'all':yd);reRender(tabId);return;}
-      if(tile.getAttribute('data-yn-n')){var sn=STATE[tabId];sn.yn=(sn.yn==='N'?'Y':'N');sn.depth='all';reRender(tabId);return;}
+      if(yd){tgl(STATE[tabId].ysel,yd);reRender(tabId);return;}  /* MD-RETEST-1119: several tiles, any of them */
+      if(tile.getAttribute('data-yn-n')){tgl(STATE[tabId].ysel,'N');reRender(tabId);return;}
       var tier=tile.getAttribute('data-tier'); if(!tier) return;
       var st=STATE[tabId],idx=st.tierFilter.indexOf(tier);
       if(idx>-1) st.tierFilter.splice(idx,1); else st.tierFilter.push(tier);
@@ -13340,6 +13410,7 @@ function SUM_renderQualifiedStocks() {
     if(window.measureV2Ribbon) measureV2Ribbon();
   }
 
+  function tgl(a,v){var i=a.indexOf(v);if(i>-1)a.splice(i,1);else a.push(v);}  /* MD-RETEST-1119 */
   // ---- PUBLIC ----
   function renderPage(tabId){ initState(tabId); buildScaffold(tabId); reRender(tabId); }
   window.renderPullingBack      = function(){ renderPage('pulling_back'); };
@@ -13850,7 +13921,7 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn" data-npi-tint="industry" onclick="npiSetTint(\'industry\')">Industry</button>' +
           '<button class="toggle-btn" data-npi-tint="sector" onclick="npiSetTint(\'sector\')">Sector</button>' +
         '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>' +
           '<button class="toggle-btn active" data-npi-port="off" onclick="npiSetPort(\'off\')">Off</button>' +
           '<button class="toggle-btn" data-npi-port="on" onclick="npiSetPort(\'on\')">On</button>' +
         '</div>' +
@@ -14703,7 +14774,7 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn" data-po-tint="industry" onclick="poSetTint(\'industry\')">Industry</button>' +
           '<button class="toggle-btn" data-po-tint="sector" onclick="poSetTint(\'sector\')">Sector</button>' +
         '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>' +
           '<button class="toggle-btn active" data-po-port="off" onclick="poSetPort(\'off\')">Off</button>' +
           '<button class="toggle-btn" data-po-port="on" onclick="poSetPort(\'on\')">On</button>' +
         '</div>' +
@@ -15545,7 +15616,7 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn" data-st-tint="industry" onclick="stSetTint(\'industry\')">Industry</button>' +
           '<button class="toggle-btn" data-st-tint="sector" onclick="stSetTint(\'sector\')">Sector</button>' +
         '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>' +
           '<button class="toggle-btn active" data-st-port="off" onclick="stSetPort(\'off\')">Off</button>' +
           '<button class="toggle-btn" data-st-port="on" onclick="stSetPort(\'on\')">On</button>' +
         '</div>' +
@@ -15703,10 +15774,10 @@ function SUM_renderQualifiedStocks() {
       "tone": "teal",
       "tierLadder": ["Possible", "Plausible", "Probable"],
       "total": 3,
-      "tooltip": "A Retest rated Probable, then the price closes back above that moving average with a confirming up-day (rebuilt 12-Nov-2026).",
-      "caption": "<span class='db'>The trigger that pairs with the Retest page</span> &mdash; the price closing back above the moving average it has been retesting (rebuilt on the new Retest, 12-Nov-2026).<span class='intro'>One gate + two trigger columns. Possible = gate; Plausible = + reclaim; Probable = + confirmation:</span><span class='tline'><span class='tnum'>(1)</span> Is the stock <u>Probable on Retest</u> (on its best moving average)?</span><span class='tline'><span class='tnum'>(2)</span> Has today&rsquo;s close <u>reclaimed that moving average</u>?</span><span class='tline'><span class='tnum'>(3)</span> Is it <u>confirmed by a close at least 2% above yesterday</u>?</span>",
+      "tooltip": "A Retest of A WEEK or longer (5 sessions or more), then the price closes back above that moving average with a confirming up-day (rebuilt 12-Nov-2026; lengths from 19-Nov-2026).",
+      "caption": "<span class='db'>The trigger that pairs with the Retest page</span> &mdash; the price closing back above the moving average it has been retesting (rebuilt on the new Retest, 12-Nov-2026).<span class='intro'>One gate + two trigger columns. Possible = gate; Plausible = + reclaim; Probable = + confirmation:</span><span class='tline'><span class='tnum'>(1)</span> Is the stock in a <u>Retest of A WEEK or longer</u> (on its moving average nearest the close)?</span><span class='tline'><span class='tnum'>(2)</span> Has today&rsquo;s close <u>reclaimed that moving average</u>?</span><span class='tline'><span class='tnum'>(3)</span> Is it <u>confirmed by a close at least 2% above yesterday</u>?</span>",
       "tests": [
-        { "key": "g1_retest_probable",         "label": "Retest = Probable",         "group": "gate",    "tooltip": "Probable on the Retest page: a count of 5 sessions or more near a rising moving average, inside an S2 Pullback" },
+        { "key": "g1_retest_probable",         "label": "Retest A WEEK+",            "group": "gate",    "tooltip": "A WEEK or longer on the Retest page: a count of 5 sessions or more near a rising moving average, inside an S2 Pullback, with the close more than 10% below the six-month high" },
         { "key": "x1_reclaim_close_above_ma",  "label": "Reclaimed the MA",           "group": "trigger", "tooltip": "Today's close is above the moving average being retested" },
         { "key": "x2_confirmation_close_ge2pct","label": "Confirmation: close 2%+ up","group": "trigger", "tooltip": "Today's close is at least 2% above yesterday's - the confirmation test that avoids false starts" }
       ]
@@ -16424,7 +16495,7 @@ function SUM_renderQualifiedStocks() {
           '<button class="toggle-btn" data-ct-tint="industry" onclick="ctSetTint(\'industry\')">Industry</button>' +
           '<button class="toggle-btn" data-ct-tint="sector" onclick="ctSetTint(\'sector\')">Sector</button>' +
         '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>' +
           '<button class="toggle-btn active" data-ct-port="off" onclick="ctSetPort(\'off\')">Off</button>' +
           '<button class="toggle-btn" data-ct-port="on" onclick="ctSetPort(\'on\')">On</button>' +
         '</div>' +
@@ -17283,7 +17354,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
           '<button class="toggle-btn" data-hr-tint="industry" onclick="hrSetTint(\'industry\')">Industry</button>' +
           '<button class="toggle-btn" data-hr-tint="sector" onclick="hrSetTint(\'sector\')">Sector</button>' +
         '</div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>' +
           '<button class="toggle-btn active" data-hr-port="off" onclick="hrSetPort(\'off\')">Off</button>' +
           '<button class="toggle-btn" data-hr-port="on" onclick="hrSetPort(\'on\')">On</button>' +
         '</div>' +
@@ -17995,7 +18066,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
           +'<button class="toggle-btn" data-pbs1-tint="industry" onclick="pbs1SetTint(\'industry\')">Industry</button>'
           +'<button class="toggle-btn" data-pbs1-tint="sector" onclick="pbs1SetTint(\'sector\')">Sector</button>'
         +'</div>'
-        +'<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>'
+        +'<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>'
           +'<button class="toggle-btn active" data-pbs1-port="off" onclick="pbs1SetPort(\'off\')">Off</button>'
           +'<button class="toggle-btn" data-pbs1-port="on" onclick="pbs1SetPort(\'on\')">On</button>'
         +'</div>'
@@ -18287,7 +18358,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
           +'<button class="toggle-btn" data-pbs2-tint="industry" onclick="pbs2SetTint(\'industry\')">Industry</button>'
           +'<button class="toggle-btn" data-pbs2-tint="sector" onclick="pbs2SetTint(\'sector\')">Sector</button>'
         +'</div>'
-        +'<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>'
+        +'<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>'
           +'<button class="toggle-btn active" data-pbs2-port="off" onclick="pbs2SetPort(\'off\')">Off</button>'
           +'<button class="toggle-btn" data-pbs2-port="on" onclick="pbs2SetPort(\'on\')">On</button>'
         +'</div>'
@@ -18778,7 +18849,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         '<div class="ctrl-grp"><span class="ctrl-label">Tests</span><button class="toggle-btn active" data-sb2-grp="tests" data-sb2-val="tick" onclick="sb2SetMode(\'tests\',\'tick\')">show ticks</button><button class="toggle-btn" data-sb2-grp="tests" data-sb2-val="val" onclick="sb2SetMode(\'tests\',\'val\')">show test values</button></div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Scope</span><button class="toggle-btn active" data-sb2-scope="all" onclick="sb2SetScope(\'all\')">All <span id="sb2-cnt-all"></span></button><button class="toggle-btn" data-sb2-scope="live" onclick="sb2SetScope(\'live\')">Live <span id="sb2-cnt-live"></span></button><button class="toggle-btn" data-sb2-scope="sector" onclick="sb2SetScope(\'sector\')">Sectors <span id="sb2-cnt-sector"></span></button><button class="toggle-btn" data-sb2-scope="industry" onclick="sb2SetScope(\'industry\')">Industries <span id="sb2-cnt-industry"></span></button></div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span><button class="toggle-btn active" data-sb2-tint="none" onclick="sb2SetTint(\'none\')">Off</button><button class="toggle-btn" data-sb2-tint="industry" onclick="sb2SetTint(\'industry\')">Industry</button><button class="toggle-btn" data-sb2-tint="sector" onclick="sb2SetTint(\'sector\')">Sector</button></div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span><button class="toggle-btn active" data-sb2-port="off" onclick="sb2SetPort(\'off\')">Off</button><button class="toggle-btn" data-sb2-port="on" onclick="sb2SetPort(\'on\')">On</button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span><button class="toggle-btn active" data-sb2-port="off" onclick="sb2SetPort(\'off\')">Off</button><button class="toggle-btn" data-sb2-port="on" onclick="sb2SetPort(\'on\')">On</button></div>' +
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="sb-pattern-tiles"></div>' +
       '<div class="group-captions">' + captionsHtml + '</div>' +
@@ -19025,7 +19096,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
           +'<button class="toggle-btn" data-sbs3-tint="industry" onclick="sbs3SetTint(\'industry\')">Industry</button>'
           +'<button class="toggle-btn" data-sbs3-tint="sector" onclick="sbs3SetTint(\'sector\')">Sector</button>'
         +'</div>'
-        +'<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>'
+        +'<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>'
           +'<button class="toggle-btn active" data-sbs3-port="off" onclick="sbs3SetPort(\'off\')">Off</button>'
           +'<button class="toggle-btn" data-sbs3-port="on" onclick="sbs3SetPort(\'on\')">On</button>'
         +'</div>'
@@ -19258,7 +19329,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
           +'<button class="toggle-btn" data-sbs4-tint="industry" onclick="sbs4SetTint(\'industry\')">Industry</button>'
           +'<button class="toggle-btn" data-sbs4-tint="sector" onclick="sbs4SetTint(\'sector\')">Sector</button>'
         +'</div>'
-        +'<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span>'
+        +'<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span>'
           +'<button class="toggle-btn active" data-sbs4-port="off" onclick="sbs4SetPort(\'off\')">Off</button>'
           +'<button class="toggle-btn" data-sbs4-port="on" onclick="sbs4SetPort(\'on\')">On</button>'
         +'</div>'
@@ -19690,7 +19761,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         '<div class="ctrl-grp"><span class="ctrl-label">Tests</span><button class="toggle-btn active" data-hvcp-grp="tests" data-hvcp-val="tick" onclick="hvcpSetMode(\'tests\',\'tick\')">show ticks</button><button class="toggle-btn" data-hvcp-grp="tests" data-hvcp-val="val" onclick="hvcpSetMode(\'tests\',\'val\')">show test values</button></div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Scope</span><button class="toggle-btn active" data-hvcp-scope="all" onclick="hvcpSetScope(\'all\')">All <span id="hvcp-cnt-all"></span></button><button class="toggle-btn" data-hvcp-scope="live" onclick="hvcpSetScope(\'live\')">Live <span id="hvcp-cnt-live"></span></button><button class="toggle-btn" data-hvcp-scope="sector" onclick="hvcpSetScope(\'sector\')">Sectors <span id="hvcp-cnt-sector"></span></button><button class="toggle-btn" data-hvcp-scope="industry" onclick="hvcpSetScope(\'industry\')">Industries <span id="hvcp-cnt-industry"></span></button></div>' +
         '<div class="ctrl-grp"><span class="ctrl-label">Colour by</span><button class="toggle-btn active" data-hvcp-tint="none" onclick="hvcpSetTint(\'none\')">Off</button><button class="toggle-btn" data-hvcp-tint="industry" onclick="hvcpSetTint(\'industry\')">Industry</button><button class="toggle-btn" data-hvcp-tint="sector" onclick="hvcpSetTint(\'sector\')">Sector</button></div>' +
-        '<div class="ctrl-grp"><span class="ctrl-label">Portfolio tint</span><button class="toggle-btn active" data-hvcp-port="off" onclick="hvcpSetPort(\'off\')">Off</button><button class="toggle-btn" data-hvcp-port="on" onclick="hvcpSetPort(\'on\')">On</button></div>' +
+        '<div class="ctrl-grp"><span class="ctrl-label" title="Shades the rows of live stocks (darkest), then more lightly the stocks in the same sector as a live stock, then the same industry">Live stocks shaded</span><button class="toggle-btn active" data-hvcp-port="off" onclick="hvcpSetPort(\'off\')">Off</button><button class="toggle-btn" data-hvcp-port="on" onclick="hvcpSetPort(\'on\')">On</button></div>' +
       '</div>' +
       '<div class="rating-tiles s1-rating-tiles" id="hvcp-pattern-tiles"></div>' +
       '<div class="group-captions">' + captionsHtml + '</div>' +
@@ -21399,7 +21470,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 /* MD-FLOW-2026-11-14: the seven Investment Classification pages. One page, flow/index.html (built nightly by build_flow_pages.py
    from the daily classification file), framed per tab with its ?page=, sized to the window like Capital Deployment In Range. */
 (function(){
-  var PG={flow_hc:"hc",flow_proven:"proven",flow_early:"early",flow_inflecting:"inflecting",flow_s1:"s1",flow_s3:"s3",flow_s4:"s4",flow_vcp:"vcp",flow_base:"base"};
+  var PG={flow_hc:"hc",flow_proven:"proven",flow_early:"early",flow_inflecting:"inflecting",flow_inflecting2:"inflecting2",flow_s1:"s1",flow_s3:"s3",flow_s4:"s4",flow_vcp:"vcp",flow_base:"base"};
   function act(){var a=document.body.getAttribute('data-active-tab')||'';return a.indexOf('flow_')===0?a:null;}
   function size(){var a=act();if(!a)return;var f=document.querySelector('#tab-'+a+' iframe.flow-frame');if(!f)return;
     try{if(typeof window.measureV2Ribbon==='function')window.measureV2Ribbon();}catch(e){}
@@ -23169,6 +23240,15 @@ def _check_disk_space():
         print("  [disk-guard] Disk OK: {:.2f} GB free.".format(free_gb))
 
 
+def _inject_retest_health(html):
+    """MD-RETEST-1119: the Retest Healthiness Indicators' cut-offs come from scripts/conditions.py (RETEST_HEALTH), the
+    same table the data uses, so the page's colours and the data's Good/Okay/Poor never disagree."""
+    import sys as _sys
+    _sys.path.insert(0, str(COWORK_ROOT / "scripts"))
+    import conditions as _K
+    return html.replace("__RETEST_HEALTH_JSON__", json.dumps([list(x) for x in _K.RETEST_HEALTH]))
+
+
 def main():
     _check_disk_space()
     print("Loading data...")
@@ -23186,7 +23266,7 @@ def main():
         _prune_backups(backup_dir, keep=10)
 
     print("Building HTML...")
-    html = build_html(data_js)
+    html = _inject_retest_health(build_html(data_js))   # MD-RETEST-1119
     html = html.replace("/* DATA_INJECTION_POINT */", data_js)
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)

@@ -551,11 +551,11 @@ TABS = [
     {"id": "ig_turning", "label": "IG - Turning/Inflecting", "accent": "#2f5d3a"},  # MD-IG-TURNING-2026-11-06
     {"id": "capital_deploy", "label": "Capital Deployment In Range", "accent": "#0d366b"},  # MD-CAPITAL-DEPLOY-2026-11-11
     # MD-FLOW-2026-11-14: the seven Investment Classification pages (Trade Mapping workbook A19 to A56), framed from flow/index.html
-    {"id": "flow_hc", "label": "Healthy Confirmation?", "accent": "#1d4f3a"},
+    {"id": "flow_hc", "label": "Post-Trigger Healthiness Confirmation?", "accent": "#1d4f3a"},
     {"id": "flow_proven", "label": "Reinforcing / Proven S2 Core Investment?", "accent": "#1d4f3a"},
     {"id": "flow_early", "label": "Broadening / Early S2 Core Investment?", "accent": "#1d4f3a"},
     {"id": "flow_inflecting", "label": "Inflecting / S1→S2 Probing Bet? — Turn Up and Cross", "accent": "#1d4f3a"},  # MD-RETEST-1119: split in two (Message 129)
-    {"id": "flow_inflecting2", "label": "Inflecting / S1→S2 Probing Bet? — 5D and 10D", "accent": "#1d4f3a"},  # MD-RETEST-1119
+    {"id": "flow_inflecting2", "label": "Inflecting / S1→S2 Probing Bet? — 5D, 10D and 20D", "accent": "#1d4f3a"},  # MD-RETEST-1119
     {"id": "flow_s1", "label": "Bottoming / S1 Speculative Bet?", "accent": "#1d4f3a"},
     {"id": "flow_s3", "label": "Restarting Reinforcing / S3 Speculative Bet?", "accent": "#1d4f3a"},
     {"id": "flow_s4", "label": "Collapsing / S4 Speculative Bet?", "accent": "#1d4f3a"},
@@ -12568,11 +12568,11 @@ function SUM_renderQualifiedStocks() {
       + '<div class="v2-nav-group v2-grp-flow">'
       +   '<div class="v2-nav-group-label">Investment Classification</div>'
       +   '<div class="v2-nav-group-btns">'
-      +     '<button class="v2-nav-btn" data-v2-tab="flow_hc" onclick="switchTab(\'flow_hc\')">Healthy Confirmation?</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_hc" onclick="switchTab(\'flow_hc\')">Post-Trigger Healthiness Confirmation?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_proven" onclick="switchTab(\'flow_proven\')">Reinforcing / Proven S2 Core Investment?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_early" onclick="switchTab(\'flow_early\')">Broadening / Early S2 Core Investment?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_inflecting" onclick="switchTab(\'flow_inflecting\')">Inflecting / S1&rarr;S2 Probing Bet? &mdash; Turn Up and Cross</button>'
-      +     '<button class="v2-nav-btn" data-v2-tab="flow_inflecting2" onclick="switchTab(\'flow_inflecting2\')">Inflecting / S1&rarr;S2 Probing Bet? &mdash; 5D and 10D</button>'  /* MD-RETEST-1119: split in two (Message 129) */
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_inflecting2" onclick="switchTab(\'flow_inflecting2\')">Inflecting / S1&rarr;S2 Probing Bet? &mdash; 5D, 10D and 20D</button>'  /* MD-RETEST-1119: split in two (Message 129) */
       +     '<button class="v2-nav-btn" data-v2-tab="flow_s1" onclick="switchTab(\'flow_s1\')">Bottoming / S1 Speculative Bet?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_s3" onclick="switchTab(\'flow_s3\')">Restarting Reinforcing / S3 Speculative Bet?</button>'
       +     '<button class="v2-nav-btn" data-v2-tab="flow_s4" onclick="switchTab(\'flow_s4\')">Collapsing / S4 Speculative Bet?</button>'
@@ -12612,7 +12612,7 @@ function SUM_renderQualifiedStocks() {
       /* MD-RETIRE-2026-11-16: the tests_speculative_bet_s4 button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
       +   '</div>'
       + '</div>'
-      /* MD-BATCH1-2026-11-17: the Bullish post-set. and Breaking MAs groups are retired (Richard, 17-Nov-2026, Q3 b = Yes); their addresses open the Healthy Confirmation? and Stage 4 pages */
+      /* MD-BATCH1-2026-11-17: the Bullish post-set. and Breaking MAs groups are retired (Richard, 17-Nov-2026, Q3 b = Yes); their addresses open the Post-Trigger Healthiness Confirmation? and Stage 4 pages */
       /* Group 6: Summary */
       + '<div class="v2-nav-group v2-grp-summary">'
       +   '<div class="v2-nav-group-label">Summary</div>'

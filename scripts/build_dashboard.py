@@ -561,6 +561,8 @@ TABS = [
     {"id": "flow_s4", "label": "Collapsing / S4 Speculative Bet?", "accent": "#1d4f3a"},
     {"id": "flow_vcp", "label": "VCP page", "accent": "#1d4f3a"},  # MD-CONDITIONS-2026-11-18
     {"id": "flow_base", "label": "Base Pivot Point page", "accent": "#1d4f3a"},  # MD-CONDITIONS-2026-11-18
+    {"id": "flow_s3rf", "label": "RB Stage 3 Red Flags Topping Indicator", "accent": "#6b2c5c"},  # MD-S3RF-2026-11-23
+    {"id": "flow_igd", "label": "IG - Inflection/Broadening Details", "accent": "#2f5d3a"},  # MD-IGD-2026-11-23
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -596,6 +598,8 @@ IMPLEMENTED_TABS = [
     "capital_deploy",  # MD-CAPITAL-DEPLOY-2026-11-11
     "flow_hc", "flow_proven", "flow_early", "flow_inflecting", "flow_inflecting2", "flow_s1", "flow_s3", "flow_s4",  # MD-FLOW-2026-11-14; flow_inflecting2 MD-RETEST-1119
     "flow_vcp", "flow_base",  # MD-CONDITIONS-2026-11-18
+    "flow_s3rf",  # MD-S3RF-2026-11-23
+    "flow_igd",  # MD-IGD-2026-11-23
 ]
 
 
@@ -628,7 +632,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
      shows the descriptive form, and a descriptive address opens its page. */
   var ADDR = { flow_hc: 'healthy-confirmation', flow_proven: 'reinforcing-proven-s2-core-investment', flow_early: 'broadening-early-s2-core-investment',
     flow_inflecting: 'inflecting-s1-to-s2-probing-bet', flow_inflecting2: 'inflecting-s1-to-s2-probing-bet-5d-and-10d', flow_s1: 'bottoming-s1-speculative-bet', flow_s3: 'restarting-reinforcing-s3-speculative-bet',
-    flow_s4: 'collapsing-s4-speculative-bet', flow_vcp: 'vcp-page', flow_base: 'base-pivot-point-page', stage_1: 'stage-1', stage_2: 'stage-2', stage_3: 'stage-3', stage_4: 'stage-4',
+    flow_s4: 'collapsing-s4-speculative-bet', flow_vcp: 'vcp-page', flow_base: 'base-pivot-point-page', flow_s3rf: 'rb-stage-3-red-flags-topping-indicator', flow_igd: 'ig-inflection-broadening-details', stage_1: 'stage-1', stage_2: 'stage-2', stage_3: 'stage-3', stage_4: 'stage-4',
     pulling_back: 's2-pullback', pos_pre_indicators: 's2-base', setups_healthy_retest: 'retest-of-a-moving-average' };
   var FROM_ADDR = {}; Object.keys(ADDR).forEach(function (k) { FROM_ADDR[ADDR[k]] = k; });
   FROM_ADDR['stage-1-basing'] = 'stage_1'; FROM_ADDR['stage-1-bottoming'] = 'stage_1'; FROM_ADDR['stage-2-advancing'] = 'stage_2'; FROM_ADDR['stage-3-topping'] = 'stage_3'; FROM_ADDR['stage-4-declining'] = 'stage_4';  /* the address of 17-Nov morning still opens the page */
@@ -877,7 +881,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
       bar.className = 'mdf-bar';
       bar.innerHTML = '<span class="mdf-stats"></span><input class="mdf-q" type="search" placeholder="Find a name, ticker, industry or sector" aria-label="Find a name, ticker, industry or sector">'
         + '<span class="mdf-hint">Click a heading to sort. Use <span class="mdf-b">▼</span> in a heading to filter.</span>'
-        + '<span class="mdf-btns"><button class="mdf-btn" type="button" data-a="clear">Clear filters</button><button class="mdf-btn" type="button" data-a="csv">Download CSV</button></span>';
+        + '<span class="mdf-btns"><button class="mdf-btn" type="button" data-a="clear">Clear filters</button></span>';
       var anchor = t.closest('.v2-hscroll') || t;
       anchor.parentNode.insertBefore(bar, anchor);
       var qi = bar.querySelector('.mdf-q'), tq = null;
@@ -1513,7 +1517,7 @@ body[data-active-tab="ig_turning"] .v2-nav{display:flex}
 body[data-active-tab="ig_turning"] .header-controls-row{display:none !important}
 body[data-active-tab="ig_turning"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="ig_turning"]{--header-height:70px}
-.v2-nav-btn[data-v2-tab="ig_turning"]{width:84px}
+.v2-nav-btn[data-v2-tab="ig_turning"]{width:84px}.v2-nav-btn[data-v2-tab="flow_igd"]{width:96px}/* MD-IGD-2026-11-23 */
 /* MD-CAPITAL-DEPLOY-2026-11-11 -- Capital Deployment In Range (tab capital_deploy; Richard, 11-Nov-2026: "Create a new page and put it in the SUMMARY group and call it \"Capital Deployment In Range\"").
    The page itself is master-dashboard/capital-deployment/index.html (build_capital_deployment.py), shown here in a frame so it also works on its own. */
 body[data-active-tab="capital_deploy"] .header-tabs-row{display:none !important}
@@ -1525,6 +1529,7 @@ body[data-active-tab="capital_deploy"]{--header-height:70px}
    610px free with the page scrollbar). To keep every group on one line (MD-NAV-ONE-LINE-28Sep26), the Summary buttons are 70px and the
    Pool button 80px; every label was measured to fit (no overflow) at those widths. */
 .v2-nav .v2-grp-summary .v2-nav-btn{width:70px}
+/* MD-S3RF-2026-11-23 */.v2-nav-group.v2-grp-s3rf{border:1px solid rgba(107,44,92,0.35)}.v2-nav-group.v2-grp-s3rf .v2-nav-group-label{color:#6b2c5c}.v2-nav .v2-grp-s3rf .v2-nav-btn{width:120px;color:#6b2c5c}
 .v2-nav .v2-grp-summary .v2-nav-btn[data-v2-tab="ideas_lists"]{width:80px}
 #tab-capital_deploy{padding:0 !important}
 #tab-capital_deploy iframe.cdir-frame{display:block;width:100%;border:0;background:#f9f9f7}
@@ -1538,8 +1543,8 @@ body[data-active-tab^="flow_"]{--header-height:70px}
 .tab-content[id^="tab-flow_"] iframe.flow-frame{display:block;width:100%;border:0;background:#f9f9f7}
 .v2-nav .md-old{display:block;font-size:9px;font-weight:400;opacity:.75;line-height:1.1}
 .v2-nav .v2-grp-flow{border-color:#1d4f3a}
-#hdr-list-sel{font:inherit;font-size:11px;padding:3px 4px;border:1px solid var(--border,#d8d3c4);border-radius:4px;background:#fff;max-width:190px}
-#hdr-list-sel.on{border-color:#0d366b;box-shadow:inset 0 0 0 1px #0d366b;font-weight:600}
+/* MD-FILTER-LAYER-2026-11-23 */.mdl-wrap{position:relative;display:inline-block}#hdr-mdl-btn.on{border-color:#0d366b;box-shadow:inset 0 0 0 1px #0d366b;font-weight:600;color:#0d366b;background:#eef3fa}.mdl-panel,.bl-panel{display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:4000;background:#fff;border:1px solid #c9c2ad;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);font-size:12px;color:#24292f;text-align:left}.mdl-panel{width:540px;max-height:72vh;overflow-y:auto;padding:10px 12px}.bl-panel{width:380px;padding:12px}.mdl-top{display:flex;gap:6px;align-items:center;margin-bottom:6px}.mdl-top input{flex:1;font:inherit;font-size:12px;padding:4px 6px;border:1px solid #cfc8b4;border-radius:4px}.mdl-b{font:inherit;font-size:12px;padding:3px 10px;border:1px solid #cfc8b4;border-radius:4px;background:#fffdf8;color:#2f2f2a;cursor:pointer;white-space:nowrap}.mdl-b:hover{background:#f0ede3}.mdl-b:disabled{opacity:.5;cursor:default}.mdl-rule{color:#57606a;font-size:11.5px;line-height:1.45;margin:2px 0 8px;padding:6px 8px;background:#f6f8fa;border-radius:4px}.mdl-g{border-top:1px solid #eee;padding:4px 0}.mdl-g summary{cursor:pointer;font-weight:600;font-size:12px;padding:2px 0}.mdl-n{font-weight:400;color:#57606a;font-size:11px;margin-left:4px}.mdl-o{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;padding:2px 0 2px 4px;cursor:pointer;font-size:12px;line-height:1.35}.mdl-o:hover{background:#f6f8fa}.mdl-l{flex:1;min-width:0}.mdl-c{color:#57606a;font-size:11px}.mdl-note{flex-basis:100%;color:#8b949e;font-size:11px;padding-left:22px}.mdl-empty{color:#57606a;font-size:11.5px;padding:3px 4px}.bl-h{font-weight:700;font-size:13px;margin-bottom:6px}.bl-s{font-size:12px;color:#24292f;margin-bottom:8px}#bl-name{width:100%;box-sizing:border-box;font:inherit;font-size:12px;padding:5px 7px;border:1px solid #cfc8b4;border-radius:4px}.bl-row{display:flex;gap:6px;margin-top:8px}.bl-msg{margin-top:8px;font-size:12px;color:#0d366b;line-height:1.4}
+
 #tab-ig_turning{--igt-card:#fffdf8;--igt-ink:#23241f;--igt-mute:#6d6b62;--igt-line:#e6e2d6;--igt-rule:#d6d1c1;--igt-accent:#2f5d3a;
  --igt-p0:#e7e4da;--igt-p1:#cfe3c6;--igt-p2:#8cbf86;--igt-p3:#2f7d3a;--igt-up:#2a6a34;--igt-dn:#9e3b30;--igt-hd:#efece2;--igt-hd2:#f6f3ea;
  color:var(--igt-ink);font:12.5px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:6px 8px 0}
@@ -4657,10 +4662,14 @@ var chartTicker="";
 var chartWidth=50;
 // Default: 5D+10D off (except on PB tab where short MAs matter)
 var chartVis={ma5:false,ma10:false,ma20:true,ma50:true,ma100:true,ma150:true,ma200:true,obv:true,vol:true,vol20:true,vol50:true};
+// MD-MA-BAND-2026-11-23 (Richard, 23-Nov-2026: "Add a visual band around the moving averages with a toggle for 4% 5% 6% for all price/MA
+// charts"; his approval of a fourth choice, "Retest band": 4% around the 20-day and 50-day, 5% around the 100, 150 and 200-day, the band his
+// Retest rule counts in). 'off', '0.04', '0.05', '0.06' or 'retest'. Drawn around each moving average shown, in its colour.
+var chartBand='off';
 // MD-S76-CHART-PERSIST: localStorage helpers. Key shared across sessions and browser windows.
 var _CHART_PREFS_KEY='vf_chart_prefs_v1';
 function saveChartPrefs(){
-  try{localStorage.setItem(_CHART_PREFS_KEY,JSON.stringify({zoom:chartZoom,scale:chartScaleMode,width:chartWidth,vis:chartVis}));}catch(e){}
+  try{localStorage.setItem(_CHART_PREFS_KEY,JSON.stringify({zoom:chartZoom,scale:chartScaleMode,width:chartWidth,vis:chartVis,band:chartBand}));}catch(e){}
 }
 function loadChartPrefs(){
   try{
@@ -4668,6 +4677,7 @@ function loadChartPrefs(){
     if(!_p)return;
     if(_p.zoom)chartZoom=_p.zoom;
     if(_p.scale)chartScaleMode=_p.scale;
+    if(typeof _p.band==='string')chartBand=_p.band;   // MD-MA-BAND-2026-11-23
     if(typeof _p.width==='number')chartWidth=_p.width;
     if(_p.vis&&typeof _p.vis==='object'){var _vk=Object.keys(_p.vis);for(var _vi=0;_vi<_vk.length;_vi++){if(typeof chartVis[_vk[_vi]]==='boolean')chartVis[_vk[_vi]]=!!_p.vis[_vk[_vi]];}}
   }catch(e){}
@@ -5075,6 +5085,23 @@ function drawMasterChart(ticker,_sspo){
   if(vis.obv){ctx.strokeStyle="rgba(188,140,255,0.5)";ctx.lineWidth=1.2;ctx.beginPath();
     for(j=0;j<obv.length;j++){var ox=xPos(j),oy=obvY(obv[j]);if(j===0)ctx.moveTo(ox,oy);else ctx.lineTo(ox,oy)}ctx.stroke()}
 
+  // MD-MA-BAND-2026-11-23: the band around each moving average shown (behind the candles), clipped to the price area
+  if(typeof chartBand!=='undefined'&&chartBand&&chartBand!=='off'){
+    ctx.save();ctx.beginPath();ctx.rect(pad.l,pad.t,plotW,plotH);ctx.clip();
+    var _bN=0;for(var _bi=0;_bi<maPeriods.length;_bi++)if(vis['ma'+maPeriods[_bi]])_bN++;var _bAlpha=_bN<=1?0.14:(_bN===2?0.10:(_bN===3?0.07:0.05));   // fainter when bands overlap
+    for(var bp=0;bp<maPeriods.length;bp++){var bper=maPeriods[bp];if(!vis['ma'+bper])continue;
+      var bf=chartBand==='retest'?((bper===20||bper===50)?0.04:(bper>=100?0.05:0)):parseFloat(chartBand);if(!bf||!isFinite(bf))continue;
+      var bk='ma'+bper,bup=[],bdn=[];
+      for(var bj=0;bj<chart.length;bj++){var bv=chart[bj][bk];if(bv){bup.push([xPos(bj),priceY(bv*(1+bf))]);bdn.push([xPos(bj),priceY(bv*(1-bf))]);}}
+      if(bup.length<2)continue;
+      ctx.beginPath();ctx.moveTo(bup[0][0],bup[0][1]);for(var bq=1;bq<bup.length;bq++)ctx.lineTo(bup[bq][0],bup[bq][1]);
+      for(bq=bdn.length-1;bq>=0;bq--)ctx.lineTo(bdn[bq][0],bdn[bq][1]);ctx.closePath();
+      ctx.globalAlpha=_bAlpha;ctx.fillStyle=maColors[bper];ctx.fill();
+      ctx.globalAlpha=0.5;ctx.strokeStyle=maColors[bper];ctx.lineWidth=0.8;ctx.setLineDash([2,3]);
+      [bup,bdn].forEach(function(L){ctx.beginPath();for(var q=0;q<L.length;q++){if(q)ctx.lineTo(L[q][0],L[q][1]);else ctx.moveTo(L[q][0],L[q][1]);}ctx.stroke();});
+      ctx.setLineDash([]);ctx.globalAlpha=1;}
+    ctx.restore();}
+
   // Candlesticks (thicker wicks + bodies)
   for(j=0;j<chart.length;j++){
     var cx2=xPos(j);var upD=chart[j].c>=chart[j].o;
@@ -5235,7 +5262,13 @@ window.openChart=function(t){
   h+='<button class="close-btn" onclick="closeChart()" style="margin-left:4px">&times;</button>';
   h+='</div>';
   // Row 2: compact legend (smaller text, single row)
-  h+='<div style="display:flex;flex-wrap:wrap;gap:1px;margin-bottom:4px;line-height:1.4">'+chartLegendHTML()+'</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:1px;margin-bottom:4px;line-height:1.4;align-items:center">'+chartLegendHTML();
+  // MD-MA-BAND-2026-11-23: the band around the moving averages
+  h+='<span style="display:flex;gap:2px;margin-left:auto;align-items:center" title="A light band around each moving average shown: 4%, 5% or 6% above and below it, or the Retest band (4% around the 20-day and 50-day, 5% around the 100, 150 and 200-day, the band the Retest rule counts in)"><span style="font-size:11px;color:var(--text-dim);margin-right:3px">Band</span>';
+  var bands=[['off','Off'],['0.04','4%'],['0.05','5%'],['0.06','6%'],['retest','Retest band']];
+  for(var bbi=0;bbi<bands.length;bbi++){h+='<button class="chart-width-btn chart-band-btn'+(bands[bbi][0]===chartBand?' active':'')+'" data-b="'+bands[bbi][0]+'" onclick="setChartBand(\''+bands[bbi][0]+'\')">'+bands[bbi][1]+'</button>';}
+  h+='</span>';
+  h+='</div>';
   // Canvas (fills remaining space)
   h+='<div id="chart-canvas-wrap" style="width:100%;position:relative"><canvas id="chart-canvas" style="width:100%;display:block"></canvas></div>';
   cont.innerHTML=h;
@@ -5290,6 +5323,17 @@ window.setChartZoom=function(z){
   }
 };
 // PHASE-4C 2026-05-04: set price-axis scale mode and re-render.
+function _syncBandBtns(){var b=chartBand,_bb=document.querySelectorAll('.chart-band-btn');for(var i=0;i<_bb.length;i++)_bb[i].classList.toggle('active',_bb[i].getAttribute('data-b')===b);
+  _bb=document.querySelectorAll('.ssp-band-btn');for(i=0;i<_bb.length;i++)_bb[i].classList.toggle('on',_bb[i].getAttribute('data-b')===b);}
+window._syncBandBtns=_syncBandBtns;
+// MD-MA-BAND-2026-11-23: choose the band; redraw in place and mark the button chosen (the chart panel and the Per-stock Chart)
+window.setChartBand=function(b){
+  if(['off','0.04','0.05','0.06','retest'].indexOf(b)<0)return;
+  chartBand=b;saveChartPrefs();
+  _syncBandBtns();
+  if(window._sspOpen&&window._sspTicker){drawMasterChart(window._sspTicker,{canvasId:'ssp-chart-canvas',containerId:'ssp-chart-body'});}
+  else if(chartTicker){drawMasterChart(chartTicker);}
+};
 window.setChartScaleMode=function(m){
   if(m!=="lin"&&m!=="log")return;
   chartScaleMode=m;
@@ -6587,8 +6631,9 @@ function RDF_syncStatCount(){
 function RDF_syncBtn(){
   var b=document.getElementById("hdr-rdf-btn");
   if(!b) return;
-  b.textContent = (RDF.src && RDF.on) ? "List: " + RDF.src + " (" + RDF.count + ")" : "Ratings filter (" + (RDF.set ? RDF.count : "none") + ")";  /* MD-FLOW-2026-11-14 */
-  if(RDF_isOn()) b.classList.add("rdf-on"); else b.classList.remove("rdf-on");
+  var _lay=(RDF.src==="Filter layer");  /* MD-FILTER-LAYER-2026-11-23: the layer has its own button; this one does not repeat it */
+  b.textContent = (RDF.src && RDF.on && !_lay) ? "List: " + RDF.src + " (" + RDF.count + ")" : "Ratings filter (" + (RDF.set && !_lay ? RDF.count : "none") + ")";  /* MD-FLOW-2026-11-14 */
+  if(RDF_isOn() && !_lay) b.classList.add("rdf-on"); else b.classList.remove("rdf-on");
   var t = "Narrow every stock table, count and rating tile to the list saved from the IC Ratings Dashboard. ";
   if(RDF.set) t += "Saved list: " + RDF.count + " stocks" + (RDF.savedAt ? ", saved " + RDF.savedAt : "") + ". " +
     RDF_matchCount() + " of them are priced in this dashboard's universe.";  /* MD-S82B-STATCOUNT */
@@ -6609,7 +6654,7 @@ function RDF_rerender(){
   catch(e){ console.error("RDF_rerender failed", e); }
 }
 function RDF_toggle(){
-  if(typeof MDL!=='undefined'&&MDL.cur){MDL.cur='';try{MDL_fill();}catch(e){}RDF.on=false;}  /* MD-FLOW-2026-11-14: the button switches a picked list off */
+  if(typeof MDL!=='undefined'&&MDL.cur){MDL.cur='';MDL.sel={};try{MDL_fill();}catch(e){}RDF.on=false;}  /* MD-FLOW-2026-11-14: the button switches a picked list off */
   var wasOn = RDF.on;
   RDF_load();
   if(!RDF.set){ RDF.on=false; RDF_syncBtn(); RDF_flash(RDF.bad ? "Saved list unreadable" : "No saved list"); return; }
@@ -6624,16 +6669,128 @@ window.RDF_toggle=RDF_toggle; window.RDF_syncBtn=RDF_syncBtn; window.RDF_load=RD
    saved Ratings Dashboard list off, and the Ratings filter button switches a picked list off. The lists: MD_KD_LIST (embedded at
    build from data/key-drivers-stocks.json) and the Multi-stock Dashboard's own lists (multichart/populations.json, read when
    the page opens). */
-var MDL={lists:{},order:[],cur:''};
-function MDL_fill(){var s=document.getElementById('hdr-list-sel');if(!s)return;var h='<option value="">Select by list: all stocks</option>';
-  MDL.order.forEach(function(k){var L=MDL.lists[k];h+='<option value="'+k+'"'+(MDL.cur===k?' selected':'')+'>'+L.label+' ('+L.t.length+')</option>';});s.innerHTML=h;s.classList.toggle('on',!!MDL.cur);}
-function MDL_add(k,label,t){if(!t||!t.length)return;if(!MDL.lists[k])MDL.order.push(k);MDL.lists[k]={label:label,t:t};}
-function MDL_init(){try{if(window.MD_KD_LIST&&MD_KD_LIST.tickers)MDL_add('kd','Key Drivers stocks',MD_KD_LIST.tickers);}catch(e){}MDL_fill();
-  try{fetch('multichart/populations.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(P){if(!P)return;var want={live_all:'Live stocks',i_A:'RB Interest List A',i_B:'RB Interest List B',i_C:'RB Interest List C',i_AB:'RB Interest Lists A and B',p_h:'Capital Deployment Priority: High',p_m:'Capital Deployment Priority: Medium',p_l:'Capital Deployment Priority: Low',p_hm:'Capital Deployment Priority: High and Medium',w_bench:'Ideas Bench',w_short:'Ideas Shortlist',w_long:'Ideas Longlist',w_pool:'Pool of Middle Innings Eligible Stocks'};
-    (P.dropdowns||[]).forEach(function(g){(g.options||[]).forEach(function(o){if(want[o.id])MDL_add(o.id,want[o.id],o.tickers);});});MDL_fill();}).catch(function(){});}catch(e){}}
-function MDL_pick(k){MDL.cur=k||'';if(!k){RDF.on=false;RDF.set=null;RDF.src=null;}else{var s={},t=MDL.lists[k].t;for(var i=0;i<t.length;i++)s[t[i]]=1;RDF.set=s;RDF.count=t.length;RDF.savedAt=null;RDF.on=true;RDF.src=MDL.lists[k].label;}
+/* MD-FILTER-LAYER-2026-11-23 (SA - Master Dashboard part 19). Richard, 23-Nov-2026: "Add the list of filters and criteria
+   drop-down selector on every page of the master dashboard ... They would work by adding an additional "filter layer" on top
+   of whatever was going on in the given page"; and the Bespoke Lists ("Save displayed stocks to new Bespoke list"; his
+   answers Q1 = A, the Notion Stocks database, and Q3 = A, saving works in Chrome on his PC).
+   Replaces the one-list "Select by list" drop-down of MD-FLOW-2026-11-14. Every list the Multi-stock Dashboard offers
+   (multichart/populations.json, the Groupings included), the Key Drivers stocks and the Bespoke Lists. Several choices
+   together (his principle 22): a stock shows if it is in ANY choice within one group and in EVERY group chosen. The layer
+   works through the Ratings filter's own set (RDF.set), so it reaches every page that honours that filter; the Investment
+   Classification pages read it from their frame (build_flow_pages.py). Live Investments is never filtered. Not kept between
+   visits: every new window starts with the layer off, as the Ratings filter's design rule says. */
+var MDL={groups:[],sel:{},cur:'',q:'',open:false,pend:{},timer:null};
+var MDL_PEND_KEY='md-bespoke-pending-v1';
+function mdlEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function MDL_group(id,label){for(var i=0;i<MDL.groups.length;i++)if(MDL.groups[i].id===id)return MDL.groups[i];var g={id:id,label:label,opts:[]};MDL.groups.push(g);return g;}
+function MDL_add(gid,glabel,id,label,t,note){if(!t)return;var g=MDL_group(gid,glabel);for(var i=0;i<g.opts.length;i++)if(g.opts[i].id===id){g.opts[i].t=t;return;}g.opts.push({id:id,label:label,t:t,note:note||''});}
+function MDL_pendLoad(){try{MDL.pend=JSON.parse(localStorage.getItem(MDL_PEND_KEY)||'{}')||{};}catch(e){MDL.pend={};}}
+function MDL_pendSave(){try{localStorage.setItem(MDL_PEND_KEY,JSON.stringify(MDL.pend));}catch(e){}}
+function MDL_bespokeMerge(){
+  var g=MDL_group('bespoke','Bespoke Lists'),have={};g.opts.forEach(function(o){have[o.label]=o;});
+  var now=Date.now();
+  Object.keys(MDL.pend).forEach(function(n){var p=MDL.pend[n];if(!p||!p.t){delete MDL.pend[n];return;}
+    if(have[n]&&p.t.every(function(t){return have[n].t.indexOf(t)>=0;})&&have[n].id.indexOf('blp_')!==0){delete MDL.pend[n];return;}
+    if(now-(p.at||0)>7*86400000){delete MDL.pend[n];return;}
+    var d=new Date(p.at||now),ds=d.getDate()+'-'+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+'-'+d.getFullYear();
+    if(have[n]){p.t.forEach(function(t){if(have[n].t.indexOf(t)<0)have[n].t.push(t);});have[n].note='saved here '+ds+'; being added to Notion';}
+    else{var o={id:'blp_'+n,label:n,t:p.t.slice(),note:'saved here '+ds+'; being added to Notion'};g.opts.push(o);have[n]=o;}});
+  g.opts.sort(function(a,b){return a.label.toLowerCase()<b.label.toLowerCase()?-1:1;});
+  MDL_pendSave();}
+function MDL_set(){var set=null,parts=[];
+  MDL.groups.forEach(function(g){var sel=MDL.sel[g.id];if(!sel)return;var u={},labs=[];
+    g.opts.forEach(function(o){if(sel[o.id]){labs.push(o.label);o.t.forEach(function(t){u[t]=1;});}});
+    if(!labs.length)return;parts.push(g.label+': '+labs.join(' or '));
+    if(set===null)set=u;else{var x={};for(var k in set)if(u[k])x[k]=1;set=x;}});
+  return {set:set,parts:parts};}
+function MDL_count(s){var n=0;for(var k in s)n++;return n;}
+function MDL_apply(){var r=MDL_set();
+  if(!r.set){if(MDL.cur){MDL.cur='';RDF.on=false;RDF.set=null;RDF.src=null;RDF.count=0;}}
+  else{RDF.set=r.set;RDF.count=MDL_count(r.set);RDF.savedAt=null;RDF.on=true;RDF.src='Filter layer';MDL.cur=r.parts.join('; ');}
   MDL_fill();RDF_syncBtn();RDF_rerender();}
-window.MDL_pick=MDL_pick;
+function MDL_applySoon(){clearTimeout(MDL.timer);MDL.timer=setTimeout(MDL_apply,350);}
+function MDL_fill(){
+  var b=document.getElementById('hdr-mdl-btn');
+  if(b){b.textContent=MDL.cur?('Filter layer: '+RDF.count+' stocks'):'Filter layer: off';b.classList.toggle('on',!!MDL.cur);
+    b.title=MDL.cur?('Filter layer on: '+MDL.cur+'. A stock shows if it is in any choice within a group and in every group chosen. Live Investments is never filtered.'):'Add a filter layer on top of whatever this page shows: any of the Multi-stock Dashboard\'s lists, the Groupings, the Key Drivers stocks and your Bespoke Lists. Several can be chosen.';}
+  var p=document.getElementById('mdl-panel');if(!p||!MDL.open)return;
+  var q=(MDL.q||'').toLowerCase(),r=MDL_set(),n=r.set?MDL_count(r.set):null;
+  var h='<div class="mdl-top"><input id="mdl-q" placeholder="Search the lists" value="'+mdlEsc(MDL.q)+'">'
+    +'<button type="button" class="mdl-b" data-a="clear">Clear the layer</button><button type="button" class="mdl-b" data-a="close">Close</button></div>'
+    +'<div class="mdl-rule">'+(n==null?'No list chosen: the layer is off.':('<b>'+n+'</b> stocks pass: '+mdlEsc(r.parts.join('; '))))
+    +'<br>A stock shows if it is in <b>any</b> choice within a group and in <b>every</b> group chosen. Live Investments is never filtered.</div>';
+  MDL.groups.forEach(function(g){var sel=MDL.sel[g.id]||{},k=0;g.opts.forEach(function(o){if(sel[o.id])k++;});
+    var opts=g.opts.filter(function(o){return !q||o.label.toLowerCase().indexOf(q)>=0||g.label.toLowerCase().indexOf(q)>=0;});
+    if(q&&!opts.length)return;
+    h+='<details class="mdl-g"'+(k||q||g.id==='bespoke'?' open':'')+'><summary>'+mdlEsc(g.label)+' <span class="mdl-n">'+(k?k+' chosen':g.opts.length+(g.opts.length===1?' list':' lists'))+'</span></summary>';
+    if(!g.opts.length)h+='<div class="mdl-empty">'+(g.id==='bespoke'?'No Bespoke List yet. Make one in Notion (the field "Bespoke Lists [BL]" in the Stocks database) or with the button "Save displayed stocks to new Bespoke list".':'None today.')+'</div>';
+    opts.slice(0,q?400:(g.opts.length>60?60:g.opts.length)).forEach(function(o){
+      h+='<label class="mdl-o"><input type="checkbox" data-g="'+mdlEsc(g.id)+'" data-o="'+mdlEsc(o.id)+'"'+(sel[o.id]?' checked':'')+'><span class="mdl-l">'+mdlEsc(o.label)+'</span><span class="mdl-c">'+o.t.length+'</span>'+(o.note?'<span class="mdl-note">'+mdlEsc(o.note)+'</span>':'')+'</label>';});
+    if(!q&&g.opts.length>60)h+='<div class="mdl-empty">Showing 60 of '+g.opts.length+': search above to find the rest.</div>';
+    h+='</details>';});
+  p.innerHTML=h;
+  var qi=document.getElementById('mdl-q');if(qi){qi.oninput=function(){MDL.q=this.value;var pos=this.selectionStart;MDL_fill();var z=document.getElementById('mdl-q');if(z){z.focus();try{z.setSelectionRange(pos,pos);}catch(e){}}};}}
+function MDL_toggle(){MDL.open=!MDL.open;var p=document.getElementById('mdl-panel');if(p)p.style.display=MDL.open?'block':'none';MDL_fill();}
+function MDL_clear(){MDL.sel={};MDL_apply();}
+document.addEventListener('change',function(e){var t=e.target;if(!t||!t.getAttribute||t.getAttribute('data-o')==null)return;var g=t.getAttribute('data-g'),o=t.getAttribute('data-o');
+  MDL.sel[g]=MDL.sel[g]||{};if(t.checked)MDL.sel[g][o]=1;else delete MDL.sel[g][o];MDL_fill();MDL_applySoon();});
+document.addEventListener('click',function(e){var t=e.target;
+  var a=t&&t.closest?t.closest('.mdl-b'):null;if(a){var k=a.getAttribute('data-a');if(k==='clear')MDL_clear();if(k==='close')MDL_toggle();return;}
+  if(MDL.open&&t&&t.closest&&!t.closest('#mdl-panel')&&!t.closest('#hdr-mdl-btn')){MDL.open=false;var p=document.getElementById('mdl-panel');if(p)p.style.display='none';}
+  var sp=document.getElementById('bl-panel');if(sp&&sp.style.display==='block'&&t&&t.closest&&!t.closest('#bl-panel')&&!t.closest('#hdr-bl-btn'))sp.style.display='none';});
+function MDL_init(){MDL_pendLoad();
+  try{fetch('multichart/populations.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(P){if(!P)return;
+    (P.dropdowns||[]).forEach(function(g){
+      if(g.options){(g.options||[]).forEach(function(o){MDL_add(g.id,g.label,o.id,o.label,o.tickers||[],o.note);});if(!g.options.length)MDL_group(g.id,g.label);}
+      else if(g.kinds){Object.keys(g.kinds).forEach(function(kind){(g.kinds[kind]||[]).forEach(function(o){var L=String(o.label||''),i=L.indexOf('|');MDL_add('k_'+kind,kind,o.id,i>0?(L.slice(i+1)+' ('+L.slice(0,i)+')'):L,o.tickers||[]);});});}});
+    try{if(window.MD_KD_LIST&&MD_KD_LIST.tickers)MDL_add('kd','Key Drivers','kd','Key Drivers stocks',MD_KD_LIST.tickers);}catch(e){}
+    MDL_group('bespoke','Bespoke Lists');MDL_bespokeMerge();MDL_fill();}).catch(function(){});}catch(e){}
+  MDL_fill();}
+function MDL_pick(k){if(!k){MDL_clear();return;}}   /* kept for any old caller */
+window.MDL_pick=MDL_pick;window.MDL_toggle=MDL_toggle;window.MDL_clear=MDL_clear;window.MDL=MDL;window.MDL_fill=MDL_fill;window.MDL_visible=MDL_visible;window.MDL_set=MDL_set;
+/* "Save displayed stocks to new Bespoke list": the stocks the page shows now (its rows after every filter and the layer),
+   written as one small file into COWORK\bespoke-list-requests, which the build-trigger poller on the PC turns into the Notion
+   tag within about two minutes (scripts/bespoke_lists.py). The folder is granted once in Chrome and remembered. */
+function MDL_visible(){var act=document.querySelector('.tab-content[style*="display: block"]'),seen={},out=[];
+  function add(t){t=(t||'').trim();if(t&&!seen[t]){seen[t]=1;out.push(t);}}
+  if(act){Array.prototype.forEach.call(act.querySelectorAll('td.name-cell .tk'),function(x){var tr=x.closest('tr');if(tr&&tr.offsetHeight>0)add(x.textContent);});
+    Array.prototype.forEach.call(act.querySelectorAll('tr[data-ticker]'),function(tr){if(tr.offsetHeight>0)add(tr.getAttribute('data-ticker'));});
+    Array.prototype.forEach.call(act.querySelectorAll('iframe'),function(f){try{var w=f.contentWindow;if(w&&w.FLOW_SHOWN)w.FLOW_SHOWN.forEach(add);}catch(e){}});}
+  return out;}
+function MDL_tabName(){try{var b=document.querySelector('.tab-btn.tab-active');return b?b.textContent.trim():'';}catch(e){return '';}}
+function MDL_saveOpen(){var p=document.getElementById('bl-panel');if(!p)return;if(p.style.display==='block'){p.style.display='none';return;}
+  var ts=MDL_visible();p.style.display='block';
+  p.innerHTML='<div class="bl-h">Save displayed stocks to new Bespoke list</div>'
+    +(ts.length?('<div class="bl-s"><b>'+ts.length+'</b> stocks shown on the page "'+mdlEsc(MDL_tabName())+'"'+(MDL.cur?' (filter layer on)':'')+'.</div>'
+      +'<input id="bl-name" maxlength="100" placeholder="Name of the new list, e.g. Telecoms of interest"><div class="bl-row"><button type="button" class="mdl-b" id="bl-go">Save the list</button><button type="button" class="mdl-b" id="bl-x">Cancel</button></div>')
+      :'<div class="bl-s">This page shows no stocks to save.</div><div class="bl-row"><button type="button" class="mdl-b" id="bl-x">Close</button></div>')
+    +'<div class="bl-msg" id="bl-msg"></div>';
+  var x=document.getElementById('bl-x');if(x)x.onclick=function(){p.style.display='none';};
+  var go=document.getElementById('bl-go');if(go)go.onclick=function(){MDL_save(ts);};
+  var nm=document.getElementById('bl-name');if(nm){nm.focus();nm.onkeydown=function(e){if(e.key==='Enter')MDL_save(ts);};}}
+function mdlIdb(){return new Promise(function(res,rej){var r=indexedDB.open('md-bespoke-lists',1);r.onupgradeneeded=function(){r.result.createObjectStore('h');};r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});}
+function mdlIdbGet(k){return mdlIdb().then(function(db){return new Promise(function(res){var t=db.transaction('h').objectStore('h').get(k);t.onsuccess=function(){res(t.result);};t.onerror=function(){res(null);};});});}
+function mdlIdbPut(k,v){return mdlIdb().then(function(db){return new Promise(function(res){var t=db.transaction('h','readwrite').objectStore('h').put(v,k);t.onsuccess=function(){res(true);};t.onerror=function(){res(false);};});});}
+async function MDL_dir(){var h=null;try{h=await mdlIdbGet('dir');}catch(e){h=null;}
+  if(h){var p=await h.queryPermission({mode:'readwrite'});if(p!=='granted')p=await h.requestPermission({mode:'readwrite'});if(p==='granted')return h;}
+  h=await window.showDirectoryPicker({id:'md-bespoke-lists',mode:'readwrite'});
+  if(h.name!=='bespoke-list-requests'){try{h=await h.getDirectoryHandle('bespoke-list-requests');}catch(e){throw new Error('Please choose the folder COWORK\\bespoke-list-requests (or COWORK itself).');}}
+  try{await mdlIdbPut('dir',h);}catch(e){}
+  return h;}
+async function MDL_save(ts){var m=document.getElementById('bl-msg'),nm=document.getElementById('bl-name');
+  var name=(nm&&nm.value||'').replace(/,/g,' -').replace(/\s+/g,' ').trim().slice(0,100);
+  if(!name){m.textContent='Type a name for the list first.';return;}
+  if(!window.showDirectoryPicker){m.innerHTML='Saving a list works in Chrome on your PC (your answer of 23-Nov-2026). Open the Master Dashboard there and press the button again.';return;}
+  var go=document.getElementById('bl-go');if(go)go.disabled=true;m.textContent='Saving...';
+  try{var d=await MDL_dir();var now=new Date(),pad=function(x){return (x<10?'0':'')+x;};
+    var stamp=now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+'T'+pad(now.getHours())+pad(now.getMinutes())+pad(now.getSeconds());
+    var fn=stamp+'-'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)+'.json';
+    var f=await d.getFileHandle(fn,{create:true});var w=await f.createWritable();
+    await w.write(JSON.stringify({name:name,tickers:ts,count:ts.length,page:MDL_tabName(),layer:MDL.cur||'',at:now.toISOString()},null,1));await w.close();
+    MDL.pend[name]={t:ts,at:Date.now()};MDL_bespokeMerge();MDL_fill();
+    m.innerHTML='Saved: <b>'+mdlEsc(name)+'</b>, '+ts.length+' stocks. It is in the group Bespoke Lists now; Notion is updated within about two minutes.';
+  }catch(e){m.textContent=(e&&e.name==='AbortError')?'No folder chosen: nothing saved.':('Not saved: '+(e&&e.message?e.message:e));if(go)go.disabled=false;}}
+window.MDL_saveOpen=MDL_saveOpen;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',MDL_init);else setTimeout(MDL_init,0);
 window.RDF_apply=RDF_apply; window.RDF_pick=RDF_pick; window.RDF_ok=RDF_ok; window.RDF_isOn=RDF_isOn; window.RDF=RDF;
 RDF_load();
@@ -12625,7 +12782,15 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="ideas_lists" onclick="switchTab(\'ideas_lists\')">Pool of Middle Innings Eligible Stocks</button>'  /* MD-IDEAS-LISTS-2026-09-28; renamed MD-POOL-MI-2026-10-02 */
       +     '<button class="v2-nav-btn" data-v2-tab="lifecycle_phases" onclick="switchTab(\'lifecycle_phases\')">Phases of a Stock Lifecycle</button>'  /* MD-LIFECYCLE-PHASES-2026-10-10 */
       +     '<button class="v2-nav-btn" data-v2-tab="ig_turning" onclick="switchTab(\'ig_turning\')">IG - Turning/<wbr>Inflecting</button>'  /* MD-IG-TURNING-2026-11-06 */
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_igd" onclick="switchTab(\'flow_igd\')" title="Your workflow page: inflecting, then sell-side momentum, then Industry and Sector RS, then distance from the 52-week high and low and valuation in band">IG - Inflection/<wbr>Broadening Details</button>'  /* MD-IGD-2026-11-23 */
       /* MD-RETIRE-2026-11-16: the capital_deploy button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
+      +   '</div>'
+      + '</div>'
+      /* MD-S3RF-2026-11-23 (Richard, 23-Nov-2026): his 20 Stage 3 red flags, in a group of their own, apart from the Stage 3 page */
+      + '<div class="v2-nav-group v2-grp-s3rf">'
+      +   '<div class="v2-nav-group-label">RB Stage 3 Red Flags</div>'
+      +   '<div class="v2-nav-group-btns">'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_s3rf" onclick="switchTab(\'flow_s3rf\')" title="Your 20 Stage 3 (topping) red flags, framework version 2 of 10-Nov-2026; separate from the Stage 3 page">RB Stage 3 Red Flags Topping Indicator</button>'
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -21425,12 +21590,12 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
    c.innerHTML='<div class="igt-head"><h2 class="igt-title">IG - Turning/Inflecting: Stage 2 Possible or higher, ranked by Stage Qualification Persistence</h2>'
     +'<span class="igt-sub">Prices, Stage 2 ratings and RS at the close of '+fd(M.price_date)+'; sell-side estimates (FactSet) as of '+fd(M.ssem_as_of)+'; valuation '+fd(M.valuation_generated)+'. Click a heading to sort; use the row under the headings to filter.</span></div>'
     +'<details class="igt-defs"><summary>How to read this table, definitions and data dates</summary>'+defsHTML()+'</details>'
-    +'<div class="igt-bar"><div class="igt-stats" id="igt-stats"></div><div class="igt-btns"><button class="igt-btn" id="igt-reset" type="button">Clear filters</button><button class="igt-btn" id="igt-csv" type="button">Download CSV</button></div></div>'
+    +'<div class="igt-bar"><div class="igt-stats" id="igt-stats"></div><div class="igt-btns"><button class="igt-btn" id="igt-reset" type="button">Clear filters</button></div></div>'
     +'<div class="igt-wrap"><table class="igt-table">'+headHTML()+'<tbody id="igt-tb"></tbody></table></div>';
    function upd(e){var k=e.target.getAttribute&&e.target.getAttribute('data-f');if(k){state.f[k]=e.target.value;e.target.classList.toggle('igt-on',!!e.target.value);render();}}
    var fr=document.getElementById('igt-frow');fr.addEventListener('input',upd);fr.addEventListener('change',upd);
    document.getElementById('igt-reset').addEventListener('click',function(){state.f={};fr.querySelectorAll('select,input').forEach(function(s){s.value='';s.classList.remove('igt-on');});render();});
-   document.getElementById('igt-csv').addEventListener('click',csv);
+   var _igtCsv=document.getElementById('igt-csv');if(_igtCsv)_igtCsv.addEventListener('click',csv);   /* MD-FILTER-LAYER-2026-11-23: the CSV button removed */
    var H=document.getElementById('igt-hdr');
    H.addEventListener('click',function(e){var th=e.target.closest('th');if(th)sortBy(th.getAttribute('data-id'));});
    H.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){var th=e.target.closest('th');if(th){e.preventDefault();sortBy(th.getAttribute('data-id'));}}});
@@ -21470,7 +21635,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 /* MD-FLOW-2026-11-14: the seven Investment Classification pages. One page, flow/index.html (built nightly by build_flow_pages.py
    from the daily classification file), framed per tab with its ?page=, sized to the window like Capital Deployment In Range. */
 (function(){
-  var PG={flow_hc:"hc",flow_proven:"proven",flow_early:"early",flow_inflecting:"inflecting",flow_inflecting2:"inflecting2",flow_s1:"s1",flow_s3:"s3",flow_s4:"s4",flow_vcp:"vcp",flow_base:"base"};
+  var PG={flow_hc:"hc",flow_proven:"proven",flow_early:"early",flow_inflecting:"inflecting",flow_inflecting2:"inflecting2",flow_s1:"s1",flow_s3:"s3",flow_s4:"s4",flow_vcp:"vcp",flow_base:"base",flow_s3rf:"s3rf",flow_igd:"igd"};
   function act(){var a=document.body.getAttribute('data-active-tab')||'';return a.indexOf('flow_')===0?a:null;}
   function size(){var a=act();if(!a)return;var f=document.querySelector('#tab-'+a+' iframe.flow-frame');if(!f)return;
     try{if(typeof window.measureV2Ribbon==='function')window.measureV2Ribbon();}catch(e){}
@@ -22730,6 +22895,7 @@ function sspRenderChart(ticker, company){
   if(_lr&&typeof window.chartLegendHTML==='function') _lr.innerHTML=window.chartLegendHTML();  /* MD-SSP-LEGEND-2026-09-16 */
   /* sync LIN/LOG buttons */
   _sspSyncScaleBtns();
+  try{if(window._syncBandBtns)window._syncBandBtns();}catch(e){}   /* MD-MA-BAND-2026-11-23 */
 
   var body = document.getElementById('ssp-chart-body');
   var loading = document.getElementById('ssp-chart-loading');
@@ -22975,7 +23141,9 @@ document.addEventListener('click', function(e){
         '      <button class="ctrl-btn" id="hdr-copy-btn" onclick="copyVisibleStocks()">Copy</button>\n'
         '      <button class="ctrl-btn" id="hdr-rdf-btn" onclick="RDF_toggle()">Ratings filter</button>\n'
         # MD-FLOW-2026-11-14 (Richard, 13-Nov-2026: remove the "chart", "home" and "repository" buttons): the Chart button removed
-        '      <select id="hdr-list-sel" title="Select by list: narrow every page to one list of stocks (as the Ratings filter does). Live Investments is never filtered." onchange="MDL_pick(this.value)"><option value="">Select by list: all stocks</option></select>\n'
+        # MD-FILTER-LAYER-2026-11-23: the filter layer (every list, several at once) and the Bespoke Lists save button (Richard, 23-Nov-2026)
+        '      <span class="mdl-wrap"><button class="ctrl-btn" id="hdr-mdl-btn" type="button" onclick="MDL_toggle()">Filter layer: off</button><div id="mdl-panel" class="mdl-panel"></div></span>\n'
+        '      <span class="mdl-wrap"><button class="ctrl-btn" id="hdr-bl-btn" type="button" onclick="MDL_saveOpen()" title="Save the stocks this page shows now as a new list in the group Bespoke Lists (Notion field Bespoke Lists [BL]). Works in Chrome on your PC.">Save displayed stocks to new Bespoke list</button><div id="bl-panel" class="bl-panel"></div></span>\n'
         # 'SOI List' button removed 6-Oct-26: the Standardised Stocks of Interest list was retired (SA - Stock Universe Canonical Source D79, D81 b)
         '      <button class="ctrl-btn ssp-btn" onclick="openStockView()" title="Single stock view — all ratings at a glance">Per-stock Chart</button>\n'
         # MD-PSD-2026-10-28: Richard, 28-Oct-26: "a button at the top, next to STOCK VIEW; call the button Per-stock Dashboard. (Rename "Stock View" to "Per-stock Chart")"
@@ -23067,6 +23235,9 @@ document.addEventListener('click', function(e){
         '          <span class="ssp-csep"></span>\n'
         '          <button class="ssp-czb on" id="ssp-scale-lin" onclick="_sspSetScale(\'lin\')">LIN</button>\n'
         '          <button class="ssp-czb" id="ssp-scale-log" onclick="_sspSetScale(\'log\')">LOG</button>\n'
+        # MD-MA-BAND-2026-11-23: the band around the moving averages
+        '          <span class="ssp-csep"></span><span style="font-size:11px;color:#57606a;margin:0 3px" title="A light band around each moving average shown; the Retest band is 4% around the 20-day and 50-day and 5% around the 100, 150 and 200-day">Band</span>\n'
+        '          <button class="ssp-czb ssp-band-btn" data-b="off" onclick="setChartBand(\'off\')">Off</button><button class="ssp-czb ssp-band-btn" data-b="0.04" onclick="setChartBand(\'0.04\')">4%</button><button class="ssp-czb ssp-band-btn" data-b="0.05" onclick="setChartBand(\'0.05\')">5%</button><button class="ssp-czb ssp-band-btn" data-b="0.06" onclick="setChartBand(\'0.06\')">6%</button><button class="ssp-czb ssp-band-btn" data-b="retest" onclick="setChartBand(\'retest\')">Retest band</button>\n'
         '        </div>\n'
         '      </div>\n'
         '      <div class="ssp-chart-body" id="ssp-chart-body">\n'

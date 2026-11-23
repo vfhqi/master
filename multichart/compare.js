@@ -23,10 +23,10 @@
   if (typeof _slice === 'function') window.getChartSlice = function (chart, zoom) { return zoom === '1W' ? chart.slice(Math.max(0, chart.length - 5)) : _slice(chart, zoom); };
 
   /* ---------- settings kept in this browser ---------- */
-  var KEY = 'mcSettings', st = { rel: true, grp: '', sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', mas: null, sel: {} };
+  var KEY = 'mcSettings', st = { rel: true, grp: '', sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', band: 'off', mas: null, sel: {} };
   try { var o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o) for (var k in st) if (o[k] != null) st[k] = o[k]; } catch (e) { /* not kept */ }
-  function save() { try { st.zoom = chartZoom; st.scale = chartScaleMode; st.mas = {}; ['ma5','ma10','ma20','ma50','ma100','ma150','ma200'].forEach(function (k) { st.mas[k] = !!chartVis[k]; }); localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* not kept */ } }
-  chartZoom = st.zoom; chartScaleMode = st.scale;
+  function save() { try { st.zoom = chartZoom; st.scale = chartScaleMode; if (typeof chartBand !== 'undefined') st.band = chartBand; st.mas = {}; ['ma5','ma10','ma20','ma50','ma100','ma150','ma200'].forEach(function (k) { st.mas[k] = !!chartVis[k]; }); localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* not kept */ } }
+  chartZoom = st.zoom; chartScaleMode = st.scale; if (typeof chartBand !== 'undefined') chartBand = st.band || 'off';   /* MD-MA-BAND-2026-11-23 */
   ['obv', 'vol', 'vol20', 'vol50'].forEach(function (k) { chartVis[k] = false; });
   if (st.mas) for (var mk in st.mas) chartVis[mk] = !!st.mas[mk];
   /* the volume window: the price chart's at 1W, 1M and 3M; for longer zooms the volume default (L3M unless changed) */
@@ -71,7 +71,7 @@
   }
 
   /* ---------- the dropdowns ---------- */
-  var ORDER = ['live', 'watch', 'interest', 'priority', 'range', 'exit', 'events', 'ig'];   /* 'priority': Capital Deployment Priority (Richard, 19-Nov-2026, Message 135) */
+  var ORDER = ['live', 'watch', 'interest', 'priority', 'bespoke', 'range', 'exit', 'events', 'ig'];   /* 'bespoke': Bespoke Lists (Richard, 23-Nov-2026, SA - Master Dashboard part 19) */   /* 'priority': Capital Deployment Priority (Richard, 19-Nov-2026, Message 135) */
   function selectHTML(g) {
     return '<select class="f" data-g="' + g.id + '" title="' + esc(g.label) + '"><option value="">' + esc(g.label) + '</option>' +
       g.options.map(function (o) { return '<option value="' + o.id + '">' + esc(o.label) + ' (' + o.tickers.length + ')</option>'; }).join('') + '</select>';
@@ -315,6 +315,7 @@
   function controls() {
     btns($('zoom'), ['1W', '1M', '3M', '6M', '12M', '2Y', '3Y', '5Y'].map(function (k) { return [k, k]; }), chartZoom, function (k) { chartZoom = k; save(); controls(); redraw(); });
     btns($('scale'), [['lin', 'LIN'], ['log', 'LOG']], chartScaleMode, function (k) { chartScaleMode = k; save(); controls(); redraw(); });
+    if ($('band') && typeof chartBand !== 'undefined') btns($('band'), [['off', 'Off'], ['0.04', '4%'], ['0.05', '5%'], ['0.06', '6%'], ['retest', 'Retest band']], chartBand, function (k) { chartBand = k; save(); controls(); redraw(); });   /* MD-MA-BAND-2026-11-23 */
     $('mas').innerHTML = MAS.map(function (a) { var on = chartVis[a[0]]; return '<button class="ma' + (on ? ' on' : '') + '" data-k="' + a[0] + '" style="color:' + a[2] + ';border-color:' + (on ? a[2] : 'transparent') + '">' + a[1] + '</button>'; }).join('');
     $('mas').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; chartVis[b.dataset.k] = !chartVis[b.dataset.k]; save(); controls(); redraw(); };
     var f = FOLLOW[chartZoom];
@@ -330,7 +331,7 @@
     P = pop; S = P.stocks; META = P.meta; GK = null;
     P.dropdowns.forEach(function (g) { DD[g.id] = g; if (g.kinds) GK = g.kinds; });
     P.designations.forEach(function (d) { DES[d.id] = d; });
-    $('dds').innerHTML = ORDER.filter(function (id) { return DD[id]; }).map(function (id) { return selectHTML(DD[id]); }).join('') + desHTML() + grpHTML();
+    $('dds').innerHTML = ORDER.filter(function (id) { return DD[id] && (id !== 'bespoke' || (DD[id].options || []).length); }).map(function (id) { return selectHTML(DD[id]); }).join('') + desHTML() + grpHTML();
     $('asof').textContent = 'readings at the ' + dmy(META.asof) + ' close';
     $('asof').title = 'Populations built ' + META.built.replace('T', ' ').slice(0, 16) + ' from the Master Dashboard (' + META.universe + ' stocks), the Per-stock Dashboard files and the weekly lists. The % beside each name is the price against its target moving average (the 50-day where none is set in Notion).';
     document.querySelectorAll('select.f').forEach(function (s) { s.addEventListener('change', function () { LASTSEL = s; if (s.id === 'f-gk') fillGroupValues(); refresh(); }); });

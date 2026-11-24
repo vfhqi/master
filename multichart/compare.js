@@ -23,10 +23,10 @@
   if (typeof _slice === 'function') window.getChartSlice = function (chart, zoom) { return zoom === '1W' ? chart.slice(Math.max(0, chart.length - 5)) : _slice(chart, zoom); };
 
   /* ---------- settings kept in this browser ---------- */
-  var KEY = 'mcSettings', st = { rel: true, grp: '', sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', band: 'off', mas: null, sel: {} };
+  var KEY = 'mcSettings', st = { rel: true, grp: '', sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', band: 'off', bandSide: 'below', mas: null, sel: {} };
   try { var o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o) for (var k in st) if (o[k] != null) st[k] = o[k]; } catch (e) { /* not kept */ }
-  function save() { try { st.zoom = chartZoom; st.scale = chartScaleMode; if (typeof chartBand !== 'undefined') st.band = chartBand; st.mas = {}; ['ma5','ma10','ma20','ma50','ma100','ma150','ma200'].forEach(function (k) { st.mas[k] = !!chartVis[k]; }); localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* not kept */ } }
-  chartZoom = st.zoom; chartScaleMode = st.scale; if (typeof chartBand !== 'undefined') chartBand = st.band || 'off';   /* MD-MA-BAND-2026-11-23 */
+  function save() { try { st.zoom = chartZoom; st.scale = chartScaleMode; if (typeof chartBand !== 'undefined') st.band = chartBand; if (typeof chartBandSide !== 'undefined') st.bandSide = chartBandSide; st.mas = {}; ['ma5','ma10','ma20','ma50','ma100','ma150','ma200'].forEach(function (k) { st.mas[k] = !!chartVis[k]; }); localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* not kept */ } }
+  chartZoom = st.zoom; chartScaleMode = st.scale; if (typeof chartBand !== 'undefined') chartBand = st.band || 'off';   /* MD-MA-BAND-2026-11-23 */ if (typeof chartBandSide !== 'undefined') chartBandSide = st.bandSide === 'both' ? 'both' : 'below';   /* MD-MA-BAND-SIDE-2026-11-24 */
   ['obv', 'vol', 'vol20', 'vol50'].forEach(function (k) { chartVis[k] = false; });
   if (st.mas) for (var mk in st.mas) chartVis[mk] = !!st.mas[mk];
   /* the volume window: the price chart's at 1W, 1M and 3M; for longer zooms the volume default (L3M unless changed) */
@@ -316,6 +316,7 @@
     btns($('zoom'), ['1W', '1M', '3M', '6M', '12M', '2Y', '3Y', '5Y'].map(function (k) { return [k, k]; }), chartZoom, function (k) { chartZoom = k; save(); controls(); redraw(); });
     btns($('scale'), [['lin', 'LIN'], ['log', 'LOG']], chartScaleMode, function (k) { chartScaleMode = k; save(); controls(); redraw(); });
     if ($('band') && typeof chartBand !== 'undefined') btns($('band'), [['off', 'Off'], ['0.04', '4%'], ['0.05', '5%'], ['0.06', '6%'], ['retest', 'Retest band']], chartBand, function (k) { chartBand = k; save(); controls(); redraw(); });   /* MD-MA-BAND-2026-11-23 */
+    if ($('bside') && typeof chartBandSide !== 'undefined') btns($('bside'), [['below','Below only'],['both','Above and below']], chartBandSide, function (k) { chartBandSide = k; save(); controls(); redraw(); });   /* MD-MA-BAND-SIDE-2026-11-24 */
     $('mas').innerHTML = MAS.map(function (a) { var on = chartVis[a[0]]; return '<button class="ma' + (on ? ' on' : '') + '" data-k="' + a[0] + '" style="color:' + a[2] + ';border-color:' + (on ? a[2] : 'transparent') + '">' + a[1] + '</button>'; }).join('');
     $('mas').onclick = function (e) { var b = e.target.closest('button'); if (!b) return; chartVis[b.dataset.k] = !chartVis[b.dataset.k]; save(); controls(); redraw(); };
     var f = FOLLOW[chartZoom];

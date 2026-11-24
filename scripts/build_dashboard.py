@@ -4666,10 +4666,14 @@ var chartVis={ma5:false,ma10:false,ma20:true,ma50:true,ma100:true,ma150:true,ma2
 // charts"; his approval of a fourth choice, "Retest band": 4% around the 20-day and 50-day, 5% around the 100, 150 and 200-day, the band his
 // Retest rule counts in). 'off', '0.04', '0.05', '0.06' or 'retest'. Drawn around each moving average shown, in its colour.
 var chartBand='off';
+// MD-MA-BAND-SIDE-2026-11-24 (Richard, 24-Nov-2026, Message 6: "Change the Moving-average bands to have a toggle that shows only below the MA,
+// or above and below the MA"; Message 7: "Q1 = Drawing only", "Q2 = Fine": opens on "Below only"). 'below' or 'both'. Drawing only: the Retest
+// rule still counts closes inside the band on either side of the line.
+var chartBandSide='below';
 // MD-S76-CHART-PERSIST: localStorage helpers. Key shared across sessions and browser windows.
 var _CHART_PREFS_KEY='vf_chart_prefs_v1';
 function saveChartPrefs(){
-  try{localStorage.setItem(_CHART_PREFS_KEY,JSON.stringify({zoom:chartZoom,scale:chartScaleMode,width:chartWidth,vis:chartVis,band:chartBand}));}catch(e){}
+  try{localStorage.setItem(_CHART_PREFS_KEY,JSON.stringify({zoom:chartZoom,scale:chartScaleMode,width:chartWidth,vis:chartVis,band:chartBand,bandSide:chartBandSide}));}catch(e){}
 }
 function loadChartPrefs(){
   try{
@@ -4678,6 +4682,7 @@ function loadChartPrefs(){
     if(_p.zoom)chartZoom=_p.zoom;
     if(_p.scale)chartScaleMode=_p.scale;
     if(typeof _p.band==='string')chartBand=_p.band;   // MD-MA-BAND-2026-11-23
+    if(_p.bandSide==='both'||_p.bandSide==='below')chartBandSide=_p.bandSide;   // MD-MA-BAND-SIDE-2026-11-24
     if(typeof _p.width==='number')chartWidth=_p.width;
     if(_p.vis&&typeof _p.vis==='object'){var _vk=Object.keys(_p.vis);for(var _vi=0;_vi<_vk.length;_vi++){if(typeof chartVis[_vk[_vi]]==='boolean')chartVis[_vk[_vi]]=!!_p.vis[_vk[_vi]];}}
   }catch(e){}
@@ -5092,13 +5097,14 @@ function drawMasterChart(ticker,_sspo){
     for(var bp=0;bp<maPeriods.length;bp++){var bper=maPeriods[bp];if(!vis['ma'+bper])continue;
       var bf=chartBand==='retest'?((bper===20||bper===50)?0.04:(bper>=100?0.05:0)):parseFloat(chartBand);if(!bf||!isFinite(bf))continue;
       var bk='ma'+bper,bup=[],bdn=[];
-      for(var bj=0;bj<chart.length;bj++){var bv=chart[bj][bk];if(bv){bup.push([xPos(bj),priceY(bv*(1+bf))]);bdn.push([xPos(bj),priceY(bv*(1-bf))]);}}
+      var _bBoth=(typeof chartBandSide!=='undefined'&&chartBandSide==='both');   // MD-MA-BAND-SIDE-2026-11-24: 'below' fills from the line down only
+      for(var bj=0;bj<chart.length;bj++){var bv=chart[bj][bk];if(bv){bup.push([xPos(bj),priceY(_bBoth?bv*(1+bf):bv)]);bdn.push([xPos(bj),priceY(bv*(1-bf))]);}}
       if(bup.length<2)continue;
       ctx.beginPath();ctx.moveTo(bup[0][0],bup[0][1]);for(var bq=1;bq<bup.length;bq++)ctx.lineTo(bup[bq][0],bup[bq][1]);
       for(bq=bdn.length-1;bq>=0;bq--)ctx.lineTo(bdn[bq][0],bdn[bq][1]);ctx.closePath();
       ctx.globalAlpha=_bAlpha;ctx.fillStyle=maColors[bper];ctx.fill();
       ctx.globalAlpha=0.5;ctx.strokeStyle=maColors[bper];ctx.lineWidth=0.8;ctx.setLineDash([2,3]);
-      [bup,bdn].forEach(function(L){ctx.beginPath();for(var q=0;q<L.length;q++){if(q)ctx.lineTo(L[q][0],L[q][1]);else ctx.moveTo(L[q][0],L[q][1]);}ctx.stroke();});
+      (_bBoth?[bup,bdn]:[bdn]).forEach(function(L){ctx.beginPath();for(var q=0;q<L.length;q++){if(q)ctx.lineTo(L[q][0],L[q][1]);else ctx.moveTo(L[q][0],L[q][1]);}ctx.stroke();});
       ctx.setLineDash([]);ctx.globalAlpha=1;}
     ctx.restore();}
 
@@ -5267,6 +5273,8 @@ window.openChart=function(t){
   h+='<span style="display:flex;gap:2px;margin-left:auto;align-items:center" title="A light band around each moving average shown: 4%, 5% or 6% above and below it, or the Retest band (4% around the 20-day and 50-day, 5% around the 100, 150 and 200-day, the band the Retest rule counts in)"><span style="font-size:11px;color:var(--text-dim);margin-right:3px">Band</span>';
   var bands=[['off','Off'],['0.04','4%'],['0.05','5%'],['0.06','6%'],['retest','Retest band']];
   for(var bbi=0;bbi<bands.length;bbi++){h+='<button class="chart-width-btn chart-band-btn'+(bands[bbi][0]===chartBand?' active':'')+'" data-b="'+bands[bbi][0]+'" onclick="setChartBand(\''+bands[bbi][0]+'\')">'+bands[bbi][1]+'</button>';}
+  h+='<span style="width:6px"></span>';var bsides=[['below','Below only'],['both','Above and below']];   // MD-MA-BAND-SIDE-2026-11-24
+  for(bbi=0;bbi<bsides.length;bbi++){h+='<button class="chart-width-btn chart-bside-btn'+(bsides[bbi][0]===chartBandSide?' active':'')+'" data-s="'+bsides[bbi][0]+'" title="Draw the band below each moving average only, or above and below it (drawing only: the Retest rule counts closes on either side)" onclick="setChartBandSide(\''+bsides[bbi][0]+'\')">'+bsides[bbi][1]+'</button>';}
   h+='</span>';
   h+='</div>';
   // Canvas (fills remaining space)
@@ -5325,7 +5333,13 @@ window.setChartZoom=function(z){
 // PHASE-4C 2026-05-04: set price-axis scale mode and re-render.
 function _syncBandBtns(){var b=chartBand,_bb=document.querySelectorAll('.chart-band-btn');for(var i=0;i<_bb.length;i++)_bb[i].classList.toggle('active',_bb[i].getAttribute('data-b')===b);
   _bb=document.querySelectorAll('.ssp-band-btn');for(i=0;i<_bb.length;i++)_bb[i].classList.toggle('on',_bb[i].getAttribute('data-b')===b);}
-window._syncBandBtns=_syncBandBtns;
+window._syncBandBtns=_syncBandBtns;window._syncBandSideBtns=function(){_syncBandSideBtns();};
+// MD-MA-BAND-SIDE-2026-11-24: the band below the line only, or above and below it
+function _syncBandSideBtns(){var b=chartBandSide,_bb=document.querySelectorAll('.chart-bside-btn');for(var i=0;i<_bb.length;i++)_bb[i].classList.toggle('active',_bb[i].getAttribute('data-s')===b);
+  _bb=document.querySelectorAll('.ssp-bside-btn');for(i=0;i<_bb.length;i++)_bb[i].classList.toggle('on',_bb[i].getAttribute('data-s')===b);}
+window.setChartBandSide=function(b){if(b!=='below'&&b!=='both')return;chartBandSide=b;saveChartPrefs();_syncBandSideBtns();
+  if(window._sspOpen&&window._sspTicker){drawMasterChart(window._sspTicker,{canvasId:'ssp-chart-canvas',containerId:'ssp-chart-body'});}
+  else if(chartTicker){drawMasterChart(chartTicker);}};
 // MD-MA-BAND-2026-11-23: choose the band; redraw in place and mark the button chosen (the chart panel and the Per-stock Chart)
 window.setChartBand=function(b){
   if(['off','0.04','0.05','0.06','retest'].indexOf(b)<0)return;
@@ -12790,7 +12804,7 @@ function SUM_renderQualifiedStocks() {
       + '<div class="v2-nav-group v2-grp-s3rf">'
       +   '<div class="v2-nav-group-label">RB Stage 3 Red Flags</div>'
       +   '<div class="v2-nav-group-btns">'
-      +     '<button class="v2-nav-btn" data-v2-tab="flow_s3rf" onclick="switchTab(\'flow_s3rf\')" title="Your 20 Stage 3 (topping) red flags, framework version 2 of 10-Nov-2026; separate from the Stage 3 page">RB Stage 3 Red Flags Topping Indicator</button>'
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_s3rf" onclick="switchTab(\'flow_s3rf\')" title="Your 20 Stage 3 red flags (framework version 2 of 10-Nov-2026), read as an early warning while a stock is still near its 52-week high; a different page from the Stage 3 page">RB Stage 3 Red Flags Topping Indicator</button>'
       +   '</div>'
       + '</div>';
     hdr.appendChild(nav);
@@ -22896,6 +22910,7 @@ function sspRenderChart(ticker, company){
   /* sync LIN/LOG buttons */
   _sspSyncScaleBtns();
   try{if(window._syncBandBtns)window._syncBandBtns();}catch(e){}   /* MD-MA-BAND-2026-11-23 */
+  try{if(window._syncBandSideBtns)window._syncBandSideBtns();}catch(e){}   /* MD-MA-BAND-SIDE-2026-11-24 */
 
   var body = document.getElementById('ssp-chart-body');
   var loading = document.getElementById('ssp-chart-loading');
@@ -23237,7 +23252,7 @@ document.addEventListener('click', function(e){
         '          <button class="ssp-czb" id="ssp-scale-log" onclick="_sspSetScale(\'log\')">LOG</button>\n'
         # MD-MA-BAND-2026-11-23: the band around the moving averages
         '          <span class="ssp-csep"></span><span style="font-size:11px;color:#57606a;margin:0 3px" title="A light band around each moving average shown; the Retest band is 4% around the 20-day and 50-day and 5% around the 100, 150 and 200-day">Band</span>\n'
-        '          <button class="ssp-czb ssp-band-btn" data-b="off" onclick="setChartBand(\'off\')">Off</button><button class="ssp-czb ssp-band-btn" data-b="0.04" onclick="setChartBand(\'0.04\')">4%</button><button class="ssp-czb ssp-band-btn" data-b="0.05" onclick="setChartBand(\'0.05\')">5%</button><button class="ssp-czb ssp-band-btn" data-b="0.06" onclick="setChartBand(\'0.06\')">6%</button><button class="ssp-czb ssp-band-btn" data-b="retest" onclick="setChartBand(\'retest\')">Retest band</button>\n'
+        '          <button class="ssp-czb ssp-band-btn" data-b="off" onclick="setChartBand(\'off\')">Off</button><button class="ssp-czb ssp-band-btn" data-b="0.04" onclick="setChartBand(\'0.04\')">4%</button><button class="ssp-czb ssp-band-btn" data-b="0.05" onclick="setChartBand(\'0.05\')">5%</button><button class="ssp-czb ssp-band-btn" data-b="0.06" onclick="setChartBand(\'0.06\')">6%</button><button class="ssp-czb ssp-band-btn" data-b="retest" onclick="setChartBand(\'retest\')">Retest band</button><button class="ssp-czb ssp-bside-btn" data-s="below" style="margin-left:6px" title="Draw the band below each moving average only" onclick="setChartBandSide(\'below\')">Below only</button><button class="ssp-czb ssp-bside-btn" data-s="both" title="Draw the band above and below each moving average" onclick="setChartBandSide(\'both\')">Above and below</button>\n'
         '        </div>\n'
         '      </div>\n'
         '      <div class="ssp-chart-body" id="ssp-chart-body">\n'

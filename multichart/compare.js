@@ -23,7 +23,7 @@
   if (typeof _slice === 'function') window.getChartSlice = function (chart, zoom) { return zoom === '1W' ? chart.slice(Math.max(0, chart.length - 5)) : _slice(chart, zoom); };
 
   /* ---------- settings kept in this browser ---------- */
-  var KEY = 'mcSettings', st = { rel: true, grp: '', sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', band: 'off', bandSide: 'below', mas: null, sel: {} };
+  var KEY = 'mcSettings', st = { rel: true, grp: '', sort: 'tma', vol: 'L3M', zoom: '12M', scale: 'lin', band: 'off', bandSide: 'below', mas: null, sel: {}, mode: 'and' };   /* mode: AND or OR across the lists chosen (MC-ANDOR-IPAD-2026-11-26) */
   try { var o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o) for (var k in st) if (o[k] != null) st[k] = o[k]; } catch (e) { /* not kept */ }
   function save() { try { st.zoom = chartZoom; st.scale = chartScaleMode; if (typeof chartBand !== 'undefined') st.band = chartBand; if (typeof chartBandSide !== 'undefined') st.bandSide = chartBandSide; st.mas = {}; ['ma5','ma10','ma20','ma50','ma100','ma150','ma200'].forEach(function (k) { st.mas[k] = !!chartVis[k]; }); localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* not kept */ } }
   chartZoom = st.zoom; chartScaleMode = st.scale; if (typeof chartBand !== 'undefined') chartBand = st.band || 'off';   /* MD-MA-BAND-2026-11-23 */ if (typeof chartBandSide !== 'undefined') chartBandSide = st.bandSide === 'both' ? 'both' : 'below';   /* MD-MA-BAND-SIDE-2026-11-24 */
@@ -71,7 +71,7 @@
   }
 
   /* ---------- the dropdowns ---------- */
-  var ORDER = ['live', 'watch', 'interest', 'priority', 'bespoke', 'range', 'exit', 'events', 'ig'];   /* 'bespoke': Bespoke Lists (Richard, 23-Nov-2026, SA - Master Dashboard part 19) */   /* 'priority': Capital Deployment Priority (Richard, 19-Nov-2026, Message 135) */
+  var ORDER = ['live', 'watch', 'interest', 'priority', 'bespoke', 'range', 'pullback_retest', 'exit', 'events', 'ig'];   /* 'pullback_retest': S2 Pullback and Retest (Richard, 12-Nov-2026, D-MD-PBRT-1: in populations.json since then, shown from 26-Nov-2026) */   /* 'bespoke': Bespoke Lists (Richard, 23-Nov-2026, SA - Master Dashboard part 19) */   /* 'priority': Capital Deployment Priority (Richard, 19-Nov-2026, Message 135) */
   function selectHTML(g) {
     return '<select class="f" data-g="' + g.id + '" title="' + esc(g.label) + '"><option value="">' + esc(g.label) + '</option>' +
       g.options.map(function (o) { return '<option value="' + o.id + '">' + esc(o.label) + ' (' + o.tickers.length + ')</option>'; }).join('') + '</select>';
@@ -103,26 +103,38 @@
      Classification tab can hand its stocks over in one click. The dropdowns still narrow it; Clear removes it. */
   var LINK = (function () { try { var q = new URLSearchParams(location.search), l = q.get('list'); if (!l) return null;
     var ts = l.split(',').map(function (x) { return x.trim(); }).filter(Boolean); return ts.length ? { tickers: ts, title: q.get('title') || 'the link' } : null; } catch (e) { return null; } })();
+  /* MC-ANDOR-IPAD-2026-11-26 (Richard, 26-Nov-2026: "an AND / OR toggle, such that if I select ... RB IL A and HIGH PRIORITY, with AND it
+     shows only stocks on both lists, and OR shows stocks on either list"). The lists are the list drop-downs and the Master Dashboard designation.
+     AND: a stock must be on every list chosen (as before). OR: on any list chosen. A Grouping (Cohort, Sector or Industry) and a list opened
+     from a link narrow the result under both. Under OR each stock's line in the right-hand list names, on hover, the chosen lists it is on. */
+  var MEMB = {};
   function population() {
-    var sets = [], notes = [];
-    if (LINK) { var known = LINK.tickers.filter(function (t) { return S[t]; }); sets.push(known);
-      notes.push('<b>From the link:</b> ' + esc(LINK.title) + ' <span class="mut">(' + known.length + ' of ' + LINK.tickers.length + ' stocks' + (known.length < LINK.tickers.length ? '; the others are not in the populations file' : '') + ')</span>'); }
+    var lists = [], narrow = [];
+    if (LINK) { var known = LINK.tickers.filter(function (t) { return S[t]; });
+      narrow.push({ ts: known, note: '<b>From the link:</b> ' + esc(LINK.title) + ' <span class="mut">(' + known.length + ' of ' + LINK.tickers.length + ' stocks' + (known.length < LINK.tickers.length ? '; the others are not in the populations file' : '') + ')</span>' }); }
     document.querySelectorAll('select.f[data-g]').forEach(function (s) {
       if (!s.value) return; var o = DD[s.dataset.g].options.filter(function (x) { return x.id === s.value; })[0]; if (!o) return;
-      sets.push(o.tickers); notes.push('<b>' + esc(DD[s.dataset.g].label) + ':</b> ' + esc(o.label) + (o.note ? ' <span class="mut">(' + esc(o.note) + ')</span>' : ''));
+      lists.push({ ts: o.tickers, name: DD[s.dataset.g].label + ': ' + o.label, note: '<b>' + esc(DD[s.dataset.g].label) + ':</b> ' + esc(o.label) + (o.note ? ' <span class="mut">(' + esc(o.note) + ')</span>' : '') });
     });
     var di = $('f-des').value;
     if (di && DES[di]) {
       var d = DES[di], g = $('f-grade').value, lo = parseInt(g, 10), plus = /\+$/.test(g), nw = $('f-new').checked;
       var ok = function (r) { return r != null && (plus ? r >= lo : r === lo); };   /* a stock absent from 'now' holds no grade (None) */
-      sets.push(Object.keys(d.now).filter(function (t) { return ok(d.now[t]) && (!nw || !ok(d.ago5[t] || 0)); }));
-      notes.push('<b>' + esc(LBL[di]) + ':</b> ' + esc($('f-grade').selectedOptions[0].textContent) + (nw ? ', risen into it since ' + dmy(META.ago5) : ''));
+      var gtxt = $('f-grade').selectedOptions[0].textContent;
+      lists.push({ ts: Object.keys(d.now).filter(function (t) { return ok(d.now[t]) && (!nw || !ok(d.ago5[t] || 0)); }), name: LBL[di] + ': ' + gtxt,
+        note: '<b>' + esc(LBL[di]) + ':</b> ' + esc(gtxt) + (nw ? ', risen into it since ' + dmy(META.ago5) : '') });
     }
     var gv = $('f-gv').value;
-    if (gv) { var gk = $('f-gk').value, go = GK[gk].filter(function (x) { return x.id === gv; })[0]; if (go) { sets.push(go.tickers); notes.push('<b>' + gk + ':</b> ' + esc(go.label.replace('|', ': '))); } }
-    var pop = null;
-    sets.forEach(function (ts) { var set = {}; ts.forEach(function (t) { set[t] = 1; }); pop = pop === null ? ts.slice() : pop.filter(function (t) { return set[t]; }); });
-    return { list: (pop || []).filter(function (t) { return S[t]; }), notes: notes, any: sets.length > 0 };
+    if (gv) { var gk = $('f-gk').value, go = GK[gk].filter(function (x) { return x.id === gv; })[0]; if (go) narrow.push({ ts: go.tickers, note: '<b>' + gk + ':</b> ' + esc(go.label.replace('|', ': ')) }); }
+    var or = st.mode === 'or', pop = null, inter = function (ts) { var set = {}; ts.forEach(function (t) { set[t] = 1; }); pop = pop === null ? ts.slice() : pop.filter(function (t) { return set[t]; }); };
+    MEMB = {};
+    if (or && lists.length) { var seen = {}; pop = []; lists.forEach(function (l) { l.ts.forEach(function (t) { (MEMB[t] = MEMB[t] || []).push(l.name); if (!seen[t]) { seen[t] = 1; pop.push(t); } }); }); }
+    else lists.forEach(function (l) { inter(l.ts); });
+    narrow.forEach(function (l) { inter(l.ts); });
+    var ln = lists.map(function (l) { return l.note; }), nn = narrow.map(function (l) { return l.note; }), notes;
+    if (or && lists.length > 1) notes = (nn.length ? ['(' + ln.join(' <span class="or">or</span> ') + ')'] : [ln.join(' <span class="or">or</span> ')]).concat(nn);
+    else notes = nn.slice(0, LINK ? 1 : 0).concat(ln, nn.slice(LINK ? 1 : 0));   /* the order shown before: the link, the lists, the Grouping */
+    return { list: (pop || []).filter(function (t) { return S[t]; }), notes: notes, any: lists.length + narrow.length > 0, nLists: lists.length };
   }
   var SORTS = {
     tma: function (a, b) { var x = S[a].dist, y = S[b].dist; return (x == null ? 9 : Math.abs(x)) - (y == null ? 9 : Math.abs(y)); },
@@ -132,7 +144,7 @@
   };
 
   /* ---------- state ---------- */
-  var POP = [], at = 0, LASTSEL = null;
+  var POP = [], at = 0, LASTSEL = null;   /* MC-ANDOR-IPAD-2026-11-26: see population() */
   /* ---------- grouping the list (Richard, 11-Nov-2026 08:40, his answers to the 17:45 questions on "add option on RHS to list the stocks so they
      are grouped by their cohorts": Q1 = A, also Sector and Industry; Q2 = Concur, groups in Sector order then cohort number; Q3 = A, a cohort with one
      stock in the list is its own small group; Q4 = A, paging unchanged, two stocks at a time down the grouped list). Within a group the chosen order
@@ -161,7 +173,8 @@
     var p = population();
     POP = grpSort(p.list.slice().sort(SORTS[$('f-sort').value] || SORTS.tma));
     at = 0;
-    $('notes').innerHTML = p.any ? p.notes.join(' <span class="and">and</span> ') : '<span class="mut">Choose a population from any dropdown; choices in different dropdowns narrow each other.</span>';
+    $('notes').innerHTML = p.any ? p.notes.join(' <span class="and">and</span> ') : '<span class="mut">Choose a population from any dropdown; AND shows stocks on every list chosen, OR on any of them.</span>';
+    $('notes').title = $('notes').textContent;   /* the whole line on hover when it is cut short */
     st.sel = {}; document.querySelectorAll('select.f').forEach(function (s) { st.sel[s.id || ('g:' + s.dataset.g)] = s.value; }); st.sel.fnew = $('f-new').checked; st.sort = $('f-sort').value; st.grp = $('f-grp') ? $('f-grp').value : ''; if ($('f-grp')) $('f-grp').classList.toggle('on', !!st.grp); save();
     document.querySelectorAll('select.f').forEach(function (s) { s.classList.toggle('on', !!s.value && s.id !== 'f-grade'); });
     fitAll(); show();
@@ -176,8 +189,8 @@
       return '<div class="gs" title="' + esc(g) + '"><span class="gt">' + esc(g || 'none') + '</span><span class="gn">' + cnt[g] + '</span></div>'; }
     $('lst').innerHTML = POP.map(function (t, i) {
       var s = S[t], d = s.dist, dc = d == null ? '' : (d >= -0.01 && d <= 0.03) ? 'nr' : d < 0 ? 'neg' : '', mk = mark(t);
-      return head(t) + '<div class="it' + (i === at || i === at + 1 ? ' cur' : '') + '" data-i="' + i + '" title="' + esc(s.n + ' (' + t + '), ' + s.sec + (d == null ? '' : '. Price ' + (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '% against its target moving average (' + (s.tma || '50D') + (s.tma_assumed ? ', assumed: none set' : '') + ')')) + '"><span class="no">' + (i + 1) + '</span><span class="mk ' + mk + '"></span><span class="nm">' + esc(s.n) + (s.held ? ' <span class="hd">held</span>' : '') + '</span><span class="dv ' + dc + '">' + (d == null ? '' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</span></div>';
-    }).join('') || (LASTSEL && document.querySelectorAll('select.f.on').length > 1
+      return head(t) + '<div class="it' + (i === at || i === at + 1 ? ' cur' : '') + '" data-i="' + i + '" title="' + esc(s.n + ' (' + t + '), ' + s.sec + (d == null ? '' : '. Price ' + (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '% against its target moving average (' + (s.tma || '50D') + (s.tma_assumed ? ', assumed: none set' : '') + ')') + (MEMB[t] ? '. On: ' + MEMB[t].join('; ') : '')) + '"><span class="no">' + (i + 1) + '</span><span class="mk ' + mk + '"></span><span class="nm">' + esc(s.n) + (s.held ? ' <span class="hd">held</span>' : '') + '</span><span class="dv ' + dc + '">' + (d == null ? '' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</span></div>';
+    }).join('') || (st.mode === 'or' && document.querySelectorAll('select.f.on').length ? '<div class="empty">No stock is on any of the lists chosen' + ($('f-gv').value || LINK ? ' within the Grouping or the link' : '') + '.</div>' : '') || (LASTSEL && document.querySelectorAll('select.f.on').length > 1
       ? '<div class="empty">No stock meets every choice. Choices in different dropdowns narrow each other.<br><button class="nb" id="keep1">Keep only the last choice</button></div>'
       : '<div class="empty">' + (document.querySelectorAll('select.f.on').length ? 'No stock in this list this week.' : 'Choose a population from any dropdown above.') + '</div>');
     var k1 = $('keep1'); if (k1) k1.onclick = keepLast;
@@ -313,6 +326,7 @@
   var MAS = [['ma5', '5D', '#8b0000'], ['ma10', '10D', '#e88a9a'], ['ma20', '20D', '#e74c3c'], ['ma50', '50D', '#ff8c00'], ['ma100', '100D', '#2ca02c'], ['ma150', '150D', '#1a5276'], ['ma200', '200D', '#4a3d9e']];
   function redraw() { [0, 1].forEach(function (k) { var t = POP[at + k]; if (t && MODELS[t]) drawRow(k, t, MODELS[t]); }); }
   function controls() {
+    btns($('andor'), [['and', 'AND'], ['or', 'OR']], st.mode === 'or' ? 'or' : 'and', function (k) { st.mode = k; controls(); refresh(); });   /* MC-ANDOR-IPAD-2026-11-26 */
     btns($('zoom'), ['1W', '1M', '3M', '6M', '12M', '2Y', '3Y', '5Y'].map(function (k) { return [k, k]; }), chartZoom, function (k) { chartZoom = k; save(); controls(); redraw(); });
     btns($('scale'), [['lin', 'LIN'], ['log', 'LOG']], chartScaleMode, function (k) { chartScaleMode = k; save(); controls(); redraw(); });
     if ($('band') && typeof chartBand !== 'undefined') btns($('band'), [['off', 'Off'], ['0.04', '4%'], ['0.05', '5%'], ['0.06', '6%'], ['retest', 'Retest band']], chartBand, function (k) { chartBand = k; save(); controls(); redraw(); });   /* MD-MA-BAND-2026-11-23 */

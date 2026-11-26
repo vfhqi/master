@@ -8,8 +8,11 @@
 <link rel="stylesheet" href="/ratings/pms/onescreen.css">
 <style>
   /* the Multi-stock Dashboard: a frozen header, two stock rows, the population's list on the right; sized to the window, no scrolling */
-  html, body { height:100%; margin:0; overflow:hidden; background:#f6f8fa; }
-  #os.mc { display:flex !important; height:100vh; flex-direction:column; gap:5px; padding:5px 6px 6px; }
+  html, body { height:100%; margin:0; overflow:hidden; background:#f6f8fa; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  /* MC-ANDOR-IPAD-2026-11-26: the page is as tall as the part of the window that can be seen. 100vh on iPad Safari is the height with the
+     address bar hidden, and the page cannot scroll, so the bottom was cut off. 100dvh is the visible height; a script in the page's foot
+     also sets it from window.innerHeight on every resize and turn of the tablet, for older Safari versions. */
+  #os.mc { display:flex !important; height:100vh; height:100dvh; flex-direction:column; gap:5px; padding:5px 6px 6px; }
   #os.mc .hd1 { flex:0 0 auto; display:flex; flex-wrap:wrap; align-items:center; gap:4px 5px; background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:4px 8px; font-size:12px; }
   #os.mc .brand { font-weight:700; font-size:12.5px; color:#1f2328; margin-right:4px; white-space:nowrap; }
   #os.mc .brand .v { font-weight:400; color:#8b949e; font-size:11px; }
@@ -31,11 +34,20 @@
   #os.mc button.nb { font:inherit; font-size:11.5px; height:22px; padding:0 8px; border:1px solid #d0d7de; border-radius:5px; background:#fff; cursor:pointer; }
   #os.mc button.nb:disabled { opacity:0.35; cursor:default; }
   #os.mc #pg { font-size:11px; color:#1f2328; font-weight:600; white-space:nowrap; text-align:center; }
-  #os.mc .hd2 { flex:0 0 auto; display:flex; align-items:center; gap:8px; font-size:11px; color:#424a53; padding:0 4px; white-space:nowrap; overflow:hidden; }
+  #os.mc .hd2 { flex:0 0 auto; display:flex; align-items:center; gap:3px 8px; font-size:11px; color:#424a53; padding:0 4px; white-space:nowrap; overflow:hidden; }
+  #os.mc .hd2 .grp { display:inline-flex; align-items:center; flex:0 0 auto; }   /* a label and its buttons wrap as one */
+  /* MC-ANDOR-IPAD-2026-11-26: on a narrower window (the iPad mini is 1,133 wide) the line naming the lists chosen takes a line of its own and
+     the chart settings wrap onto the next lines, so none is hidden off the right edge (before, the lists line was 0 wide there). */
+  @media (max-width:1400px) { #os.mc div.hd2 { flex-wrap:wrap; } #os.mc div.hd2 #notes { flex:1 1 100%; }
+    /* and the header's drop-downs that hold short words are a little narrower, so the header takes two lines, not three, at 1,133 */
+    #os.mc select#f-gv { width:96px; } #os.mc select.g { width:84px; } #os.mc select.f[data-g="events"] { width:80px; } }
   #os.mc .hd2 > * { flex:0 0 auto; }
   #os.mc .hd2 .tg .lb { display:inline !important; }
   #os.mc .hd2 #notes { overflow:hidden; text-overflow:ellipsis; min-width:0; flex:1 1 auto; }
   #os.mc .hd2 .and { color:#8b949e; font-style:italic; }
+  #os.mc .hd2 .or { color:#0969da; font-style:italic; font-weight:600; }
+  #os.mc .tg#andor button { font-weight:600; padding:0 6px; height:22px; font-size:11px; }
+  #os.mc select.f[data-g="pullback_retest"] { width:150px; }
   #os.mc .mut { color:#8b949e; }
   #os.mc .tg { display:inline-flex; gap:2px; align-items:center; }
   #os.mc .tg button { padding:0 4px; font-size:10.5px; }
@@ -101,13 +113,14 @@
   <div class="hd1">
     <a class="brand" href="../" title="Back to the Master Dashboard">Multi-stock Dashboard</a>
     <span id="dds"></span>
+    <span class="tg" id="andor" title="AND: only stocks on every list chosen. OR: stocks on any list chosen. A Grouping (Cohort, Sector or Industry) and a list opened from a link always narrow the result."></span>
     <button class="nb" id="clear" title="Clear every choice">Clear</button>
   </div>
   <div class="hd2">
     <span id="notes"></span>
-    <span class="tg" id="zoom"></span><span class="tg"><span class="lb"></span></span><span class="tg" id="scale"></span><span class="tg" id="band" title="A light band around each moving average shown: 4%, 5% or 6% above and below it, or the Retest band (4% around the 20-day and 50-day, 5% around the 100, 150 and 200-day)"></span><span class="tg" id="bside" title="Draw the band below each moving average only, or above and below it (drawing only)"></span>
-    <span class="tg"><span class="lb">MAs</span></span><span class="lay1" id="mas"></span>
-    <span class="tg"><span class="lb">Volume</span></span><span class="tg" id="volw"></span><span class="tg" id="relb" title="The relative price band in the bottom quarter of each price chart: show or hide"></span>
+    <span class="tg" id="zoom"></span><span class="tg" id="scale"></span><span class="tg" id="band" title="A light band around each moving average shown: 4%, 5% or 6% above and below it, or the Retest band (4% around the 20-day and 50-day, 5% around the 100, 150 and 200-day)"></span><span class="tg" id="bside" title="Draw the band below each moving average only, or above and below it (drawing only)"></span>
+    <span class="grp"><span class="tg"><span class="lb">MAs</span></span><span class="lay1" id="mas"></span></span>
+    <span class="grp"><span class="tg"><span class="lb">Volume</span></span><span class="tg" id="volw"></span></span><span class="tg" id="relb" title="The relative price band in the bottom quarter of each price chart: show or hide"></span>
     <span class="asof mut" id="asof"></span>
   </div>
   <div class="body">
@@ -128,4 +141,8 @@
 <script src="/ratings/pms/dashboard.js"></script>
 <script src="compare-vol.js"></script>
 <script src="compare.js"></script>
+<script>/* MC-ANDOR-IPAD-2026-11-26: the page's height is the visible window's, read again whenever the window changes (Safari's bars, turning the tablet) */
+(function () { var os = document.getElementById('os'); function fit() { var h = window.innerHeight; if (h > 0) os.style.height = h + 'px'; }
+  fit(); window.addEventListener('resize', fit); window.addEventListener('orientationchange', function () { setTimeout(fit, 250); });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', fit); })();</script>
 </body></html>

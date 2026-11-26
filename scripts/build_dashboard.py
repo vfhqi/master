@@ -4509,24 +4509,34 @@ window.switchTab=function(id){
     for(var ki=0;ki<kt.length;ki++)_buildKeyRow(kt[ki]);
   }
 };
+/* MD-COPY-2026-11-26 (Richard, 26-Nov-2026: "The "copy" button ... it should copy the names + Tickers to the clipboard please ... For all MD
+   pages"): the stocks the page shows now, after every filter, in the page's order, as "Name (TICKER)"; read from every kind of
+   table and list on the dashboard's pages and from the framed pages (their FLOW_SHOWN and FLOW_SHOWN_NAMES). */
+window.MD_shownStocks=function(){
+  var act=document.querySelector('.tab-content[style*="display: block"]'),seen={},out=[];
+  function vis(el){return !!(el&&(el.offsetWidth||el.offsetHeight||el.getClientRects().length));}
+  function nm(t){var p=(typeof priceMap!=='undefined'&&priceMap[t])||null;return (p&&p.company_name&&p.company_name!==t)?p.company_name:'';}
+  function add(t,n){t=(t||'').trim();if(!t||seen[t])return;seen[t]=1;out.push({t:t,n:(n||'').trim()||nm(t)||t});}
+  if(!act)return out;
+  var nodes=act.querySelectorAll('td.name-cell,td.pe-name,td.mo-mx-name-cell,.igt-nm[data-igt-open],tr[data-ticker],tr[data-il-t],.tl-name[data-ticker]');
+  Array.prototype.forEach.call(nodes,function(el){
+    var row=el.closest('tr')||el;if(!vis(row))return;
+    if(el.matches('tr[data-ticker],tr[data-il-t]')){var t0=el.getAttribute('data-ticker')||el.getAttribute('data-il-t');var c0=el.querySelector('.co');add(t0,c0?c0.textContent:'');return;}
+    if(el.matches('.tl-name')){add(el.getAttribute('data-ticker'),el.textContent);return;}
+    if(el.matches('.igt-nm')){add(el.getAttribute('data-igt-open'),el.textContent);return;}
+    var tk=el.querySelector('.tk,.mo-mx-tk'),co=el.querySelector('.co,.mo-mx-co');
+    if(tk)add(tk.textContent,co?co.textContent.replace(/^●\s*/,''):'');});
+  Array.prototype.forEach.call(act.querySelectorAll('iframe'),function(f){try{var w=f.contentWindow;if(w&&w.FLOW_SHOWN){var N=w.FLOW_SHOWN_NAMES||{};w.FLOW_SHOWN.forEach(function(t){add(t,N[t]);});}}catch(e){}});
+  return out;};
 window.copyVisibleStocks=function(){
-  var active=document.querySelector('.tab-content[style*="display: block"]');
-  var scope=active||document;
-  var nameCells=scope.querySelectorAll('td.name-cell');
-  var entries=[];
-  for(var i=0;i<nameCells.length;i++){
-    var tr=nameCells[i].parentElement;
-    if(tr.offsetHeight===0)continue;
-    var co=tr.querySelector('.name-cell .co');
-    var tk=tr.querySelector('.name-cell .tk');
-    if(co&&tk)entries.push(co.textContent.trim()+' ('+tk.textContent.trim()+')');
-  }
-  if(!entries.length){alert('No visible stocks to copy.');return;}
+  var entries=MD_shownStocks().map(function(x){return x.n+' ('+x.t+')';});
+  if(!entries.length){alert('No stocks shown on this page to copy.');return;}
   var text=entries.join('; ');
-  navigator.clipboard.writeText(text).then(function(){
-    var btn=document.getElementById('hdr-copy-btn');
-    if(btn){var orig=btn.textContent;btn.textContent='Copied! ('+entries.length+')';btn.style.color='#1b5e20';btn.style.borderColor='#1b5e20';setTimeout(function(){btn.textContent=orig;btn.style.color='';btn.style.borderColor='';},2000);}
-  }).catch(function(){alert('Copy failed — try again.');});
+  function done(){var btn=document.getElementById('hdr-copy-btn');
+    if(btn){var orig='Copy';btn.textContent='Copied! ('+entries.length+')';btn.style.color='#1b5e20';btn.style.borderColor='#1b5e20';setTimeout(function(){btn.textContent=orig;btn.style.color='';btn.style.borderColor='';},2000);}}
+  function fallback(){var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    var ok=false;try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(ta);if(ok)done();else alert('Copy failed — try again.');}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done).catch(fallback);else fallback();
 };
 window.closeChart=function(){
   document.getElementById("chart-panel").classList.remove("open");
@@ -5615,6 +5625,8 @@ function fpcRaw(v){
 }
 function pf(v){if(v==null)return"&mdash;";return fpc(v)}
 function nf(v,d){if(v==null)return"&mdash;";return addCommas(Number(v).toFixed(d||0))}
+/* MD-ORDINALS-2026-11-26 (Richard, 26-Nov-2026: "For percentile, write as X"th", e.g. 92nd, 5th, 51st ... For all pages in MD"): a percentile as an ordinal */
+function mdOrd(v){if(v==null||isNaN(v))return"&mdash;";var n=Math.round(Number(v)),m=Math.abs(n)%100;return n+((m>=11&&m<=13)?"th":({1:"st",2:"nd",3:"rd"}[m%10]||"th"));}
 // FIX-3b: P/E format -- positive: 14.2x  negative: (72.8)x
 function fpe(v){if(v==null)return"&mdash;";var n=Number(v);if(n<0)return"("+addCommas(Math.abs(n).toFixed(0))+")x";return addCommas(n.toFixed(0))+"x";}/* FIX-3-PE-0DP */
 // FIX-3c: currency symbol from ticker exchange suffix
@@ -5968,10 +5980,10 @@ function buildValIndSecTables(rows){
   function statCells(entry){
     var ps=vStats(entry.pctiles); var rs=vStats(entry.ratings);
     var ap=clampPctile(ps.avg),mp=clampPctile(ps.med),pp=clampPctile(ps.p1sd),lp=clampPctile(ps.m1sd);
-    return "<td class=\"col-num "+pctileClass(ap)+"\">"+(ap!=null?nf(ap,0):"&mdash;")+"</td>"
-      +"<td class=\"col-num "+pctileClass(mp)+"\">"+(mp!=null?nf(mp,0):"&mdash;")+"</td>"
-      +"<td class=\"col-num "+pctileClass(pp)+"\">"+(pp!=null?nf(pp,0):"&mdash;")+"</td>"
-      +"<td class=\"col-num "+pctileClass(lp)+"\">"+(lp!=null?nf(lp,0):"&mdash;")+"</td>"
+    return "<td class=\"col-num "+pctileClass(ap)+"\">"+(ap!=null?mdOrd(ap):"&mdash;")+"</td>"
+      +"<td class=\"col-num "+pctileClass(mp)+"\">"+(mp!=null?mdOrd(mp):"&mdash;")+"</td>"
+      +"<td class=\"col-num "+pctileClass(pp)+"\">"+(pp!=null?mdOrd(pp):"&mdash;")+"</td>"
+      +"<td class=\"col-num "+pctileClass(lp)+"\">"+(lp!=null?mdOrd(lp):"&mdash;")+"</td>"
       +"<td class=\"col-num\">"+rToLtr(rs.avg)+"</td>"
       +"<td class=\"col-num\">"+rToLtr(rs.med)+"</td>"
       +"<td class=\"col-num\">"+rToLtr(rs.p1sd)+"</td>"
@@ -6213,7 +6225,7 @@ function buildPortfolioTile(tabId){
       h+='<td class="col-num col-price">'+fpCurr(r.price,r.ticker)+'</td>';
       h+='<td style="text-align:center"><span class="rating-pill pill-'+pillKey+'">'+pillLabel+'</span></td>';
       h+='<td class="col-num col-filter grp-pe-first" style="font-weight:600">'+fpe(r.pe_cur)+'</td>';
-      h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+nf(r.pe_pctile)+'</td>';
+      h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+(r.pe_pctile==null?nf(null):mdOrd(r.pe_pctile))+'</td>';
       h+='<td class="col-num col-filter grp-pe-last">'+fpCurr(r.eps_24mf,r.ticker)+'</td>';
       h+='<td style="text-align:center"><a class="val-chart-link" href="valuation.html?t='+encodeURIComponent(r.ticker)+'" onclick="return valLinkClick(event,\''+r.ticker+'\')" title="Valuation range chart for '+r.ticker+' (opens in the side panel; ctrl-click for a new tab)">range</a></td>';  /* MD-VAL-PANEL-2026-09-16 */  /* MD-VAL-LINK-VALTAB-2026-09-11 */
       h+='</tr>';
@@ -6767,7 +6779,8 @@ window.MDL_pick=MDL_pick;window.MDL_toggle=MDL_toggle;window.MDL_clear=MDL_clear
 /* "Save displayed stocks to new Bespoke list": the stocks the page shows now (its rows after every filter and the layer),
    written as one small file into COWORK\bespoke-list-requests, which the build-trigger poller on the PC turns into the Notion
    tag within about two minutes (scripts/bespoke_lists.py). The folder is granted once in Chrome and remembered. */
-function MDL_visible(){var act=document.querySelector('.tab-content[style*="display: block"]'),seen={},out=[];
+function MDL_visible(){if(window.MD_shownStocks)return window.MD_shownStocks().map(function(x){return x.t;});   /* MD-COPY-2026-11-26: one reading of the stocks shown, shared with Copy */
+  var act=document.querySelector('.tab-content[style*="display: block"]'),seen={},out=[];
   function add(t){t=(t||'').trim();if(t&&!seen[t]){seen[t]=1;out.push(t);}}
   if(act){Array.prototype.forEach.call(act.querySelectorAll('td.name-cell .tk'),function(x){var tr=x.closest('tr');if(tr&&tr.offsetHeight>0)add(x.textContent);});
     Array.prototype.forEach.call(act.querySelectorAll('tr[data-ticker]'),function(tr){if(tr.offsetHeight>0)add(tr.getAttribute('data-ticker'));});
@@ -8951,7 +8964,7 @@ function renderVal(){
     h+='<td class="col-num col-price">'+fpCurr(r.price,r.ticker)+'</td>';
     h+='<td style="text-align:center"><span class="rating-pill pill-'+pillKey+'">'+pillLabel+'</span></td>';
     h+='<td class="col-num col-filter grp-pe-first" style="font-weight:600">'+fpe(r.pe_cur)+'</td>';
-    h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+nf(r.pe_pctile)+'</td>';
+    h+='<td class="col-num col-filter '+pctileClass(r.pe_pctile)+'" style="font-weight:600">'+(r.pe_pctile==null?nf(null):mdOrd(r.pe_pctile))+'</td>';
     h+='<td class="col-num col-filter grp-pe-last">'+fpCurr(r.eps_24mf,r.ticker)+'</td>';
     /* MD-VAL-LINK-VALTAB-2026-09-11: the row click opens the price chart, so the link stops propagation */
     h+='<td style="text-align:center"><a class="val-chart-link" href="valuation.html?t='+encodeURIComponent(r.ticker)+'" onclick="return valLinkClick(event,\''+r.ticker+'\')" title="Valuation range chart for '+r.ticker+' (opens in the side panel; ctrl-click for a new tab)">range</a></td>';  /* MD-VAL-PANEL-2026-09-16 */
@@ -20971,8 +20984,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     }
     if(c.type==="px")txt=fPx(v);
     else if(c.type==="pct")txt=fPct(c.neg?-v:v,{dp:c.dp,sign:c.sign});  /* neg: "P vs. 52W High" holds the distance below the high; shown as a negative */
-    else if(c.type==="int")txt=String(Math.round(v));
-    else if(c.type==="dec1")txt=String(Math.floor(v+1e-9));  /* Stock RS L18M is a percentile with decimals (the backtest's rowpct). MD-POOL-MI-2026-10-02: a whole number ROUNDED DOWN, like the other ranks, so 79.9 shows "79" and never reads as a passing "80" (it was one decimal) */
+    else if(c.type==="int")txt=mdOrd(v);   /* MD-ORDINALS-2026-11-26: every "int" column here is an RS percentile */
+    else if(c.type==="dec1")txt=mdOrd(Math.floor(v+1e-9));  /* Stock RS L18M is a percentile with decimals (the backtest's rowpct). MD-POOL-MI-2026-10-02: a whole number ROUNDED DOWN, like the other ranks, so 79.9 shows "79" and never reads as a passing "80" (it was one decimal) */
     else if(c.type==="mon"){txt=String(v)+(r[c.cap]?"+":"");if(r[c.cap])title="The run reaches the start of the price history, so it may be longer";}
     if(c.red!=null)sty=scaleBg(v,c.red,c.green);
     var fail=false;
@@ -21472,7 +21485,9 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
    var d=(then==null)?null:now-then,cl='igt-s',ch='▬';
    if(d!=null&&d>=RSBAND){cl='igt-u';ch='▲';}else if(d!=null&&d<=-RSBAND){cl='igt-d';ch='▼';}
    var tip=what+' now '+now+(then==null?'; no reading 3 months ago':'; 3 months ago ('+fd(M.rs_day_m3)+') '+then+'; change '+accT(d,0,' points'));
-   return '<td class="'+cls+'" style="'+tint((now-50)/50)+'" title="'+esc(tip)+'">'+now+(d==null?'<span class="igt-ra igt-s"> </span>':'<span class="igt-ra '+cl+'">'+ch+'</span>')+'</td>';}
+   /* MD-RSSIGN-2026-11-26 (Richard, 26-Nov-2026: "+" or brackets around the figure by whether it is above or below 3 months ago, a move of 5 points or more; not combined with the ordinal) */
+   var shown=(cl==='igt-u')?'+'+now:(cl==='igt-d')?'('+now+')':String(now);
+   return '<td class="'+cls+'" style="'+tint((now-50)/50)+'" title="'+esc(tip+'. + before the figure: 5 points or more higher than 3 months ago; in brackets: 5 points or more lower (not a negative number)')+'">'+shown+'</td>';}
   /* w = column width in % of the table (sums to 100) */
   var COLS=null;
   function cols(){return [
@@ -21494,13 +21509,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
    {id:'stk',w:4.4,label:'Stock RS',num:1,tip:'Stock RS (Composite), 0 to 99, ranked across the universe (the Pool’s Stock RS). Arrow: up or down 5 points or more against 3 months ago (63 trading days).',v:function(r){return r.stk;}}
   ];}
   var POSF=[['','All','Any value'],['pos','> 0','Positive over L3M or L1M (either)'],['nonpos','≤ 0','Not positive over either L3M or L1M']];
-  var RSF=[['','All','Any value'],['50','≥ 50','50 or above'],['70','≥ 70','70 or above'],['80','≥ 80','80 or above'],['up','▲','Rising over L3M (up 5 points or more)'],['up50','▲ & ≥ 50','Rising over L3M (up 5 points or more) and 50 or above']];
+  var RSF=[['','All','Any value'],['50','≥ 50','50 or above'],['70','≥ 70','70 or above'],['80','≥ 80','80 or above'],['up','+ (up 5+)','Rising over L3M (up 5 points or more)'],['up50','+ & ≥ 50','Rising over L3M (up 5 points or more) and 50 or above']];
   var FMAP={
    n:{id:'q',text:1},
    dh:{id:'dh',opts:[['','All','Any value'],['m20','≤ (20%)','At least 20% below'],['m35','≤ (35%)','At least 35% below'],['m50','≤ (50%)','At least 50% below']]},
    pers:{id:'ptot',opts:[['','All','Any number of months'],['le2','≤ 2 months','2 months or fewer'],['le3','≤ 3 months','3 months or fewer'],['le6','≤ 6 months','6 months or fewer'],['ge7','≥ 7 months','7 months or more']]},
    eu:{id:'eu',opts:POSF},su:{id:'su',opts:POSF},tu:{id:'tu',opts:POSF},eb:{id:'eb',opts:POSF},sb:{id:'sb',opts:POSF},tb:{id:'tb',opts:POSF},
-   pe:{id:'pe',opts:[['','All','Any value'],['le25','≤ 25','25th percentile or below'],['le50','≤ 50','50th or below (at or below 10Y median)'],['le75','≤ 75','75th or below'],['gt50','> 50','Above the 50th']]},
+   pe:{id:'pe',opts:[['','All','Any value'],['le25','≤ 25th','25th percentile or below'],['le50','≤ 50th','50th or below (at or below 10Y median)'],['le75','≤ 75th','75th or below'],['gt50','> 50th','Above the 50th']]},
    irs:{id:'irs',opts:RSF},srs:{id:'srs',opts:RSF},stk:{id:'stk',opts:RSF}
   };
   function initState(){state={sort:'pers',dir:1,f:{}};}
@@ -21545,7 +21560,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
      var extra=c.id==='sb'?'. L1M stand-in (45-day count): '+accT(r.sb1==null?null:r.sb1*100,0,'%'):c.id==='eb'?'. The same 45-day count serves as L1M':'. No shorter-window count exists for price targets, so the filter uses this 100-day reading only';
      return '<td class="igt-num'+g+' '+(v==null?'':sc(v*100))+'" style="'+(v==null?'':tint(v/CAP[c.id]))+'" title="'+esc(brTip(tr,win)+extra)+'">'+(v==null?NA:acc(v*100,0,'%'))+'</td>';}
    case 'pe':{if(r.pe==null)return '<td class="igt-num'+g+'">'+NA+'</td>';var pc=Math.max(0,Math.min(100,r.pe));
-     return '<td class="igt-num'+g+'" style="'+tint((50-r.pe)/50*0.6)+'" title="'+esc('Percentile '+r.pe+'; P/E on 24-month-forward EPS '+(r.pec==null?'n/a':r.pec+'x')+'; method: '+(r.pem||''))+'"><div class="igt-pew"><span class="igt-pev">'+r.pe+'</span><span class="igt-pebar"><i style="left:'+pc+'%"></i></span></div></td>';}
+     return '<td class="igt-num'+g+'" style="'+tint((50-r.pe)/50*0.6)+'" title="'+esc('Percentile '+mdOrd(r.pe)+'; P/E on 24-month-forward EPS '+(r.pec==null?'n/a':r.pec+'x')+'; method: '+(r.pem||''))+'"><div class="igt-pew"><span class="igt-pev">'+mdOrd(r.pe)+'</span><span class="igt-pebar"><i style="left:'+pc+'%"></i></span></div></td>';}
    case 'irs':return rsCell(r.irs,r.irs3,'Industry RS',1);
    case 'srs':return rsCell(r.srs,r.srs3,'Sector RS',0);
    case 'stk':return rsCell(r.stk,r.stk3,'Stock RS',0);}
@@ -21570,7 +21585,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
    var nf=0;for(var k in state.f)if(state.f[k])nf++;
    document.getElementById('igt-stats').innerHTML='<span>Showing <b>'+shown.length+'</b> of '+ROWS.length+' stocks rated Stage 2 Possible or higher (universe '+M.universe+')'+(nf?'; <b>'+nf+'</b> filter'+(nf>1?'s':'')+' on':'')+'. Sorted by <b>'+esc(colById(state.sort).label)+'</b>, '+(state.dir>0?'lowest first':'highest first')+'.</span>'+
     '<span class="igt-legend">Persistence: <span><span class="igt-pip"></span>None</span><span><span class="igt-pip igt-r1"></span>Possible</span><span><span class="igt-pip igt-r2"></span>Plausible</span><span><span class="igt-pip igt-r3"></span>Probable</span></span>'+
-    '<span class="igt-legend">RS vs 3 months ago: <span><span class="igt-ra igt-u">▲</span>up 5+ points</span><span><span class="igt-ra igt-d">▼</span>down 5+</span><span><span class="igt-ra igt-s">▬</span>within 4</span></span>';
+    '<span class="igt-legend">RS against 3 months ago: <span>+53 up 5 points or more</span><span>(53) down 5 or more</span><span>53 within 4</span></span>';
    hdr();}
   function defsHTML(){var d=[
    'The list: every stock in the universe rated <b>Stage 2 Possible, Plausible or Probable</b> today ('+ROWS.length+' of '+M.universe+'). Default order: <b>Stage Qualification Persistence, lowest first</b>, so the stocks that qualified most recently come first.',
@@ -21579,7 +21594,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
    '<b>Upgrades L3M</b> are the % change in the consensus number over three months; calendar '+M.estimate_year+' for EPS and sales. <b>Upgrade breadth</b> is (raised minus cut) ÷ number of estimates. <b>EPS breadth is a 45-day count</b>, because the system does not yet pull FactSet’s 100-day count for EPS; sales and price-target breadth are the 100-day counts (about 3.3 months), as the Pool and the Phases page use.',
    '<b>Filters marked “> 0”</b> pass a stock if the number is positive over L3M <i>or</i> over L1M. Upgrades use FactSet’s one-month change. Breadth has no exact one-month count: Sales breadth uses the 45-day count as its L1M stand-in; EPS breadth is already a 45-day count; price-target breadth has only the 100-day count, so its filter reads L3M alone. Hover a cell to see both readings.',
    '<b>2YF P/E percentile</b> is the Valuation tab’s figure: P/E on 24-month-forward EPS against its own 10-year monthly range with extreme outlier months removed; 0 is the cheapest of the decade. The small bar marks where it sits between cheap (green end) and dear (red end).',
-   '<b>Relative strength</b>: Industry RS, Sector RS and Stock RS (Composite), each 0 to 99, computed by the same code as the Stage 2 tests and the Pool. The arrow compares today with '+fd(M.rs_day_m3)+', 63 trading days earlier: \u25b2 up 5 points or more, \u25bc down 5 points or more, \u25ac a smaller move; the \u201cRising over L3M\u201d filter uses the same 5-point rule. Hover for both readings.',
+   '<b>Relative strength</b>: Industry RS, Sector RS and Stock RS (Composite), each 0 to 99, computed by the same code as the Stage 2 tests and the Pool. The sign compares today with '+fd(M.rs_day_m3)+', 63 trading days earlier: "+53" up 5 points or more, "(53)" down 5 points or more (brackets here do not mean a negative number), no sign for a smaller move; the \u201cRising over L3M\u201d filter uses the same 5-point rule. Hover for both readings.',
    '<b>Shading</b> is deliberately light. Green is better and red worse, stronger with size: upgrades (full strength at ±10% for EPS and sales, ±20% for price targets), breadth (±50%), P/E percentile (green below the 50th), RS (green above 50). The two 104-week columns use a neutral blue that deepens with distance, as neither direction is good or bad on its own. Negative numbers are shown in brackets.',
    '<b>Blanks (–)</b>: about 36 stocks, mainly banks, insurers and holding companies, plus a few with a known ticker-mapping gap (for example Roche), have no FactSet estimates on file. A filter on those columns drops them.'];
    return '<ul>'+d.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>';}
@@ -21895,7 +21910,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     var met=(x.f||[]).indexOf(sc.c)>=0,txt="",tip="",na=false,sty="",cls="",html=null;
     if(sc.c==="C1"){
       if(x.c1==null){na=true;tip="No Industry RS (the stock has no Industry)";}
-      else{txt=String(x.c1);sty=sellBg(x.c1,30,70);tip="Industry RS (the average Stock RS of the Industry's companies, ranked 0 to 99 across the 16 Industries) on "+dayW+": "+x.c1+(x.c1t!=null?"; today "+x.c1t:"")+". Met below 30.";}
+      else{txt=mdOrd(x.c1);sty=sellBg(x.c1,30,70);tip="Industry RS (the average Stock RS of the Industry's companies, ranked 0 to 99 across the 16 Industries) on "+dayW+": "+x.c1+(x.c1t!=null?"; today "+x.c1t:"")+". Met below 30.";}
     } else if(sc.c==="C2"){
       if(x.c2==null){na=true;tip="Not enough relative price history";}
       else{txt=pct(x.c2,2);sty=sellBg(x.c2,0,0.03);tip="The 200-day average of the relative price against its level 21 trading days earlier, on "+dayW+": "+pct(x.c2,2)+(x.c2t!=null?"; today "+pct(x.c2t,2):"")+". Relative price = the price against an equal-weighted index of the other European companies of EUR 500m or more. Met at 0% or below.";}
@@ -21906,13 +21921,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
         /* met only when BOTH legs are below; the fill follows the leg furthest from its threshold, and a leg that is
            already below its threshold is marked in dark red */
         sty=sellBg(Math.max(a[0]-50,a[1]-70),0,25);
-        html='<span class="'+(a[0]<50?"sc-low":"")+'">'+a[0]+'</span><span class="sc-sep"> / </span><span class="'+(a[1]<70?"sc-low":"")+'">'+a[1]+'</span>';
+        html='<span class="'+(a[0]<50?"sc-low":"")+'">'+mdOrd(a[0])+'</span><span class="sc-sep"> / </span><span class="'+(a[1]<70?"sc-low":"")+'">'+mdOrd(a[1])+'</span>';
         tip="Sector RS / Stock RS on "+dayW+": "+a[0]+" / "+a[1]+(b[0]!=null?"; today "+b[0]+" / "+b[1]:"")+". Met when Sector RS is below 50 AND Stock RS is below 70.";}
     } else if(sc.c==="C4"){
       var d=x.c4||[];
       if(d[0]==null){na=true;tip="No Stock RS reading";}
       else{
-        txt=String(d[0]);sty=sellBg(d[0],50,85);
+        txt=mdOrd(d[0]);sty=sellBg(d[0],50,85);
         var an=d[3]?("SS Sales Net Upgrade Breadth "+(d[1]==null?"none":pct(d[1],0))+", SS PT Net Upgrade Breadth "+(d[2]==null?"none":pct(d[2],0))+" (100-day counts)"):"no analysts' 100-day counts for this stock at the month-end (no estimates; no analyst data never meets this criterion)";
         tip="Stock RS on "+dayW+": "+d[0]+"; "+an+". Met when Stock RS is below 50 AND either breadth is below 0."+(d[0]>=50?" Stock RS is 50 or more, so it cannot be met.":"");
         if(d[0]<50&&!d[3]){sty="";cls=" sc-unk";tip="CANNOT BE READ: "+tip;}

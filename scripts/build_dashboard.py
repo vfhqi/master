@@ -5626,7 +5626,7 @@ function fpcRaw(v){
 function pf(v){if(v==null)return"&mdash;";return fpc(v)}
 function nf(v,d){if(v==null)return"&mdash;";return addCommas(Number(v).toFixed(d||0))}
 /* MD-ORDINALS-2026-11-26 (Richard, 26-Nov-2026: "For percentile, write as X"th", e.g. 92nd, 5th, 51st ... For all pages in MD"): a percentile as an ordinal */
-function mdOrd(v){if(v==null||isNaN(v))return"&mdash;";var n=Math.round(Number(v)),m=Math.abs(n)%100;return n+((m>=11&&m<=13)?"th":({1:"st",2:"nd",3:"rd"}[m%10]||"th"));}
+var mdOrd=window.mdOrd=function(v){if(v==null||isNaN(v))return"&mdash;";var n=Math.round(Number(v)),m=Math.abs(n)%100;return n+((m>=11&&m<=13)?"th":({1:"st",2:"nd",3:"rd"}[m%10]||"th"));};   /* global: the Pool and IG - Turning/Inflecting scripts sit outside this closure */
 // FIX-3b: P/E format -- positive: 14.2x  negative: (72.8)x
 function fpe(v){if(v==null)return"&mdash;";var n=Number(v);if(n<0)return"("+addCommas(Math.abs(n).toFixed(0))+")x";return addCommas(n.toFixed(0))+"x";}/* FIX-3-PE-0DP */
 // FIX-3c: currency symbol from ticker exchange suffix

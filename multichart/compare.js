@@ -265,7 +265,7 @@
     var k0 = -1; for (i = 0; i < n; i++) if (rel[i] != null) { k0 = i; break; }
     var k2 = -1; for (i = n - 1; i >= 0; i--) if (rel[i] != null && rma[i] != null) { k2 = i; break; }
     if (k2 >= 0) {
-      var fv = function (v) { return v >= 100 ? String(Math.round(v)) : v.toFixed(1); }, sv = slo[k2], sTxt = sv == null ? '' : (sv > 0 ? '+' + (sv * 100).toFixed(1) + '%' : '(' + Math.abs(sv * 100).toFixed(1) + '%)');
+      var fv = function (v) { return v >= 100 ? String(Math.round(v)) : v.toFixed(1); }, sv = slo[k2], sTxt = sv == null ? '' : (sv > 0 ? '+' + (sv * 100).toFixed(1) + '%' : '(' + Math.abs(sv * 100).toFixed(1) + ')%'   /* MC-ANDOR-IPAD-v3: his form (6.9)%, not (6.9%) */);
       var lagD = rows[k2] && L.dates[n - 1] && rows[k2].d < L.dates[n - 1] ? ' (' + dmy(rows[k2].d) + ')' : '', parts = [['Relative price' + lagD + ' ' + fv(rel[k2]), 'rgb(87,96,106)'], ['  ·  its 200D MA ' + fv(rma[k2]) + (sTxt ? ', ' + sTxt + ' over the month' : ''), 'rgb(' + (sv != null && sv <= 0 ? RD : GR) + ')']];
       ctx.font = '10px "Segoe UI",system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.lineJoin = 'round'; var xx = pad.l + 4, yy = top - 3;
       var tw = parts.reduce(function (a, p) { return a + ctx.measureText(p[0]).width; }, 0); if (k0 > 0) xx = Math.max(pad.l + 4, Math.min(x(k0) + 4, pad.l + pw - 6 - tw));   /* the band starts where the stored history starts (about 13 months): the label sits at its start */

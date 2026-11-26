@@ -212,6 +212,22 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
   // ── helpers ──────────────────────────────────────────────────────────────────────────
   function fmtX(v, f){ if (v == null) return '–'; return (f === 'evs' || v < 10 ? v.toFixed(2) : v.toFixed(1)) + 'x'; }
   function fmtPx(v){ if (v == null) return '–'; return v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2); }
+  /* VAL-NOW-2026-11-26 (Richard, 26-Nov-2026, Oxford Nanopore: "The SP has fallen a lot in the SP chart, but the valuation doesnt reflect it"):
+     the monthly history stops at the last month-end (FactSet's data_to), so a move since then never showed on the chart, though the header gave
+     today's multiple. The chart now ends on a last point: the latest close (latest_px) with FactSet's current multiple (the Current sheet of the
+     same workbook, refreshed each morning), marked with a dot; the bands and percentiles are unchanged (they read the month-ends only). */
+  function fdNow(d){ var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return (+d.slice(8,10)) + '-' + M[+d.slice(5,7)-1] + '-' + d.slice(0,4); }
+  function addNow(R){
+    if (!R || R._now || !R.latest_px || !R.latest_px.date || R.latest_px.close == null || !R.current || !R.months || !R.months.length) return;
+    var ym = R.latest_px.date.slice(0,7), last = R.months[R.months.length - 1];
+    if (!(ym > last)) return;
+    var pe = R.current.pe, evs = R.current.evs;
+    R.months = R.months.concat([ym]);
+    R.pe = (R.pe || []).concat([pe != null && pe > 0 && pe <= 100 ? pe : null]);
+    R.evs = (R.evs || []).concat([evs != null && evs > 0 ? evs : null]);
+    R.px = (R.px || []).concat([R.latest_px.close]);
+    R._now = {ym: ym, date: R.latest_px.date};
+  }
   function monthLabel(ym){ var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return M[+ym.slice(5,7)-1] + '-' + ym.slice(2,4); }
   function groupKey(kind, code){ var b = {coh:'cohorts', sec:'sectors', ind:'industries'}[kind]; var e = IDX && IDX[b] && IDX[b][code]; return e ? e.key : null; }
   function members(kind){ var k = groupKey(kind, REC[kind]); var g = k && VAL_GROUPS[k]; return g ? g.members.filter(function(m){ return m !== S.t; }) : []; }
@@ -327,6 +343,8 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
         s.vals.forEach(function(v, i){ if (v == null){ pen = false; return; } var py = s.axis === 'px' ? yp(v) : y(v); if (pen) ctx.lineTo(x(i), py); else ctx.moveTo(x(i), py); pen = true; });
       }
       ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      if (REC && REC._now && (s.kind === 'subject' || s.kind === 'px') && s.vals && s.vals.length && win[s.vals.length - 1] === REC._now.ym){ var li = s.vals.length - 1, lv = s.vals[li];   /* VAL-NOW-2026-11-26: the latest close */
+        if (lv != null){ ctx.fillStyle = s.colour; ctx.beginPath(); ctx.arc(x(li), s.axis === 'px' ? yp(lv) : y(lv), s.kind === 'subject' ? 3.6 : 2.6, 0, Math.PI*2); ctx.fill(); } }
     });
     ctx.restore();
     // axes
@@ -374,7 +392,7 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     $('meta1').innerHTML = '<b>' + REC.ind + '</b> · ' + REC.sec + ' · cohort ' + REC.coh + (REC.coh_name ? ' (' + REC.coh_name + ')' : '');
     var stale = REC.stale && REC.stale[f];
     /* 19-Nov-2026 (tracker item 11): the date written as the dashboards write dates, 31-Oct-26 */ var _fd = function (s) { if (!s || !/^\d{4}-\d\d-\d\d/.test(s)) return s || '–'; var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return (+s.slice(8,10)) + '-' + M[+s.slice(5,7) - 1] + '-' + s.slice(2,4); };
-    $('meta2').innerHTML = 'FactSet data to <b>' + _fd(REC.data_to) + '</b> · ' + REC.n[f] + ' monthly points' +
+    $('meta2').innerHTML = 'FactSet data to <b>' + _fd(REC.data_to) + '</b> · ' + REC.n[f] + ' monthly points' + (REC._now ? ' · the last point (dot) is the latest close, ' + fdNow(REC._now.date) + ', with FactSet\'s current multiple' : '') +
       (stale ? ' · <span style="color:var(--amber)">' + (f==='pe'?'P/E':'EV/Sales') + ' held from the last good parse (' + stale + ')</span>' : '') +
       ' · generated ' + REC.generated;
     var cur = REC.current && REC.current[f];
@@ -480,7 +498,7 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
     var rows = [], f = S.field;
     series.forEach(function(s){ if (s.daily) return; if (s.kind === 'line' && s.key !== best) return; var v = s.vals[i]; if (v == null && s.kind === 'line') return;
       rows.push('<div class="r"><span><i style="background:' + (s.kind==='line' ? '#1565c0' : s.colour) + '"></i>' + (s.kind === 'line' ? s.label + ' (' + s.ticker + ')' : s.label.replace(/ \(.*$/, '')) + '</span><b>' + (s.axis === 'px' ? fmtPx(v) : fmtX(v, f)) + (s.counts ? ' <span style="color:#6b6b6b;font-weight:400">n=' + s.counts[i] + '</span>' : '') + '</b></div>'); });
-    var tip = $('tip'); tip.innerHTML = '<div class="d">' + monthLabel(series.win[i]) + ' (' + series.win[i] + ')</div>' + rows.join('');
+    var tip = $('tip'); tip.innerHTML = '<div class="d">' + (REC && REC._now && series.win[i] === REC._now.ym ? 'Latest close, ' + fdNow(REC._now.date) + ' (FactSet current multiple)' : monthLabel(series.win[i]) + ' (' + series.win[i] + ')') + '</div>' + rows.join('');
     tip.style.display = 'block';
     var tw = tip.offsetWidth, left = mx + 14; if (left + tw > r.width - 4) left = mx - tw - 14;
     tip.style.left = left + 'px'; tip.style.top = Math.max(4, Math.min(my - 10, r.height - tip.offsetHeight - 4)) + 'px';
@@ -502,7 +520,7 @@ var CHART_REGISTRY = CHART_REGISTRY || {};
         $('err').style.display = 'block';
         $('err').textContent = nodata ? 'No valuation data yet for ' + t + ': FactSet returned nothing for this identifier, or the stock has no row in the valuation workbook. It is picked up automatically once the identifier resolves (next FactSet refresh is Sunday).' : 'No valuation file for ' + t + '. Check the ticker (Viewforth form, e.g. ART-ES).';
         return; }
-      REC = VAL_REGISTRY[t];
+      REC = VAL_REGISTRY[t]; addNow(REC);   /* VAL-NOW-2026-11-26 */
       if (REC.n.evs === 0 && S.field === 'evs') S.field = 'pe';
       // pre-load the position manager's curated peers for holdings (once per stock)
       if (REC.pms_peers && !S.peersSeeded){ S.peersSeeded = t; S.peerLines = false; var list = (REC.pms_peers.sector || []).concat(REC.pms_peers.cohort || []); S.peers = []; list.forEach(function(p){ if (S.peers.length < MAX_PEERS && p !== t && IDX && IDX.stocks[p] && S.peers.indexOf(p) < 0) S.peers.push(p); }); }

@@ -38,7 +38,9 @@
   #os.mc .hd2 .grp { display:inline-flex; align-items:center; flex:0 0 auto; }   /* a label and its buttons wrap as one */
   /* MC-ANDOR-IPAD-2026-11-26: on a narrower window (the iPad mini is 1,133 wide) the line naming the lists chosen takes a line of its own and
      the chart settings wrap onto the next lines, so none is hidden off the right edge (before, the lists line was 0 wide there). */
-  @media (max-width:1400px) { #os.mc div.hd2 { flex-wrap:wrap; } #os.mc div.hd2 #notes { flex:1 1 100%; }
+  /* MC-ANDOR-IPAD-v2: up to 1,600 wide (the laptop's 1,504 included) the chosen lists' line has a line of its own, so the AND / OR logic can be read */
+  @media (max-width:1600px) { #os.mc div.hd2 { flex-wrap:wrap; } #os.mc div.hd2 #notes { flex:1 1 100%; } }
+  @media (max-width:1400px) {
     /* and the header's drop-downs that hold short words are a little narrower, so the header takes two lines, not three, at 1,133 */
     #os.mc select#f-gv { width:96px; } #os.mc select.g { width:84px; } #os.mc select.f[data-g="events"] { width:80px; } }
   #os.mc .hd2 > * { flex:0 0 auto; }
@@ -142,7 +144,7 @@
 <script src="compare-vol.js"></script>
 <script src="compare.js"></script>
 <script>/* MC-ANDOR-IPAD-2026-11-26: the page's height is the visible window's, read again whenever the window changes (Safari's bars, turning the tablet) */
-(function () { var os = document.getElementById('os'); function fit() { var h = window.innerHeight; if (h > 0) os.style.height = h + 'px'; }
-  fit(); window.addEventListener('resize', fit); window.addEventListener('orientationchange', function () { setTimeout(fit, 250); });
-  if (window.visualViewport) window.visualViewport.addEventListener('resize', fit); })();</script>
+(function () { var os = document.getElementById('os');   /* MC-ANDOR-IPAD-v2: a pinch-zoomed window is left alone (its innerHeight is the zoomed-in part only) */
+  function fit() { if (window.visualViewport && window.visualViewport.scale > 1.01) return; var h = window.innerHeight; if (h > 0) os.style.height = h + 'px'; }
+  fit(); window.addEventListener('resize', fit); window.addEventListener('orientationchange', function () { setTimeout(fit, 250); }); })();</script>
 </body></html>

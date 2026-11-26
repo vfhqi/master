@@ -6397,7 +6397,9 @@ window.EMR = (function(){
      {lab, ltip, tip}: the note's text, the note's hover, and what is added to the pill's hover. Absent keys = no note. */
   function tsrNote(e){
     var o={lab:"",ltip:"",tip:""};if(!e)return o;
-    var note=e.n||"",pr=(e.pr!=null&&!isNaN(e.pr))?(+e.pr).toFixed(1)+"% a year":"",pn=e.pn?String(e.pn):"";
+    /* MD-NEG-2026-11-26: negatives in brackets in these notes (Richard's rule; the notes come from the ratings scripts with a minus sign) */
+    var nb=function(s){return String(s).replace(/(^|[^\w.)])-(\d+(?:\.\d+)?)(%|x)/g,"$1($2)$3").replace(/\((0(?:\.0+)?)\)(%|x)/g,"$1$2");};
+    var note=nb(e.n||""),pr=(e.pr!=null&&!isNaN(e.pr))?nb((+e.pr).toFixed(1)+"%")+" a year":"",pn=e.pn?nb(String(e.pn)):"";
     if((e.s==="MR"||e.s==="TSR")&&e.vo){
       o.lab="valuation only "+e.vo;o.ltip="valuation only (not TSR): "+e.vo;
       if(note.indexOf(o.ltip)<0)o.tip+=" · "+o.ltip;
@@ -7625,7 +7627,7 @@ function renderUTR(){
     +th("Test MA","test_ma","col-txt col-filter","Which moving average the stock is pulling back towards. Scans 50D, 100D, 150D, 200D in order and picks the first one price is approaching from above. 50D retest in a strong uptrend is the bread-and-butter Minervini entry. 200D retest is last line of defence.")
     +th("Retest #","retest_num","col-num col-filter","How many completed retest cycles of this MA since the uptrend began. A completed retest = price came within 2% of the MA then moved 5%+ above it. 1st retest is highest conviction (Minervini). 2nd is acceptable. 3rd+ is a warning \u2014 the setup is getting stale.")
     +th("Depth %","depth_pct","col-num","Percentage below the swing high. Measures how deep the pullback has gone. Early Stage: 3\u201310% (just started). Late Stage: 8\u201320% (Minervini guideline for buyable pullbacks). Capital: must stay under 25%. Deeper than 25% = invalidated, trend probably broken.")
-    +th("MA Dist %","test_ma_dist","col-num","Distance from the test MA as a percentage. Positive = still above the MA. Late stage: within 5% and approaching. Capital stage: within 2% (at the MA or slight undercut). Negative = price has broken below \u2014 if beyond -5%, pattern is invalidated.")
+    +th("MA Dist %","test_ma_dist","col-num","Distance from the test MA as a percentage. Positive = still above the MA. Late stage: within 5% and approaching. Capital stage: within 2% (at the MA or slight undercut). Negative = price has broken below \u2014 if beyond (5)%, pattern is invalidated.")
     +th("Depth","depth_pct","col-filter utr-e-first","Is the pullback depth within healthy range for the current stage? Early Stage: 3\u201310% from high. Late Stage: 8\u201320%. Capital: under 25%. Pass means the pullback is sized correctly \u2014 not so shallow it is noise, not so deep the trend is breaking.")
     +th("MA Prox","test_ma_dist","col-filter","Is price approaching or sitting at the support MA? Late Stage: within 5% and closing in. Capital: within 2% (touching or slight undercut). Minervini\u2019s undercut-and-rally is acceptable; a decisive break below is not.")
     +th("ST Roll","sort_st","col-filter","Are the short-term MAs (5-day and 10-day) rolling over? This confirms the pullback is real and short-term in nature. Both declining = clear pullback signal. If short-term MAs are still rising, the stock hasn\u2019t actually started pulling back yet.")
@@ -11820,7 +11822,7 @@ function SUM_renderQualifiedStocks() {
     if (k === 'T8') return t.T8_lower_lows_1m ? '≥2' : '—';
     if (k === 'T9') return t.T9_lower_lows_3m ? '≥3' : '—';
     // G5 T10: RS trend weakening
-    if (k === 'T10') return t.T10_RS_trend_weakening ? '< -5%' : '—';
+    if (k === 'T10') return t.T10_RS_trend_weakening ? '< (5)%' : '—';
     return '—';
   }
   function s3TestCell(row, col) {
@@ -12351,7 +12353,7 @@ function SUM_renderQualifiedStocks() {
       if (row.rs_sector  != null) bits.push('sec ' + Math.round(row.rs_sector));
       return bits.length ? bits.join(' · ') : '—';
     }
-    if (k === 'T7') return t.T7_RS_trend_weak ? '< -5%' : '—';
+    if (k === 'T7') return t.T7_RS_trend_weak ? '< (5)%' : '—';
     return '—';
   }
   function s4TestCell(row, col) {
@@ -17313,7 +17315,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       else if (c.kind === 'hrgate')  { label = c.label; title = c.tooltip; }
       else if (c.kind === 'hrtest')  { label = c.label; title = c.tooltip; }
       else if (c.kind === 'pb_info') { label = '% from swing high'; title = 'Current distance below the recent swing high (a 6-month local peak, or the 52-week high if none found)'; }
-      else if (c.kind === 'ma_name') { label = 'MA being tested'; title = 'Which moving average price is testing: scans 50D, then 100D, 150D, 200D, and takes the first one price sits within -2% to +10% of'; }
+      else if (c.kind === 'ma_name') { label = 'MA being tested'; title = 'Which moving average price is testing: scans 50D, then 100D, 150D, 200D, and takes the first one price sits within (2)% to +10% of'; }
       else if (c.kind === 'ma_pct')  { label = '9. Distance from MA'; title = 'Criterion 9: % distance from price to the MA being tested'; }
       else if (c.kind === 'window')  { label = c.windowKey === 'l5d' ? 'Fired 5d' : 'Fired 20d'; title = label; }
       else { label = '?'; title = ''; }
@@ -20879,7 +20881,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   var SB100=false;
   try{SB100=(((((window.MASTER_DATA||{}).pool||{})._meta||{}).ss||{}).sales_definition==="L100D");}catch(e){}
   if(SB100){RMAP.sb.label="SS Sales Net Upgrade Breadth L100D";
-    RMAP.sb.tip="(Sales estimates raised minus cut over the last 100 days) divided by the number of estimates, calendar year + 1; FactSet's 100-day counts, as signed off on 29-Sep-26 (version 2 of the Pool statement). Between \u2212100% and +100%. No estimates: no reading, which fails";}
+    RMAP.sb.tip="(Sales estimates raised minus cut over the last 100 days) divided by the number of estimates, calendar year + 1; FactSet's 100-day counts, as signed off on 29-Sep-26 (version 2 of the Pool statement). Between (100)% and +100%. No estimates: no reading, which fails";}
   var POOL_TARGET=[80,125];
 
   var st=null;
@@ -20932,7 +20934,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"m2",  g:"M",label:"> 2% 200D Trend",sh:">2% Trend",key:"m2",type:"mon",cap:"m2c",red:1,green:6,tip:"Consecutive months in which the 200D Slope was above 2% on every trading day of the month"},
     {id:"m4",  g:"M",label:"> 4% 200D Trend",sh:">4% Trend",key:"m4",type:"mon",cap:"m4c",red:0,green:3,tip:"Consecutive months in which the 200D Slope was above 4% on every trading day of the month"},
     {id:"mlen",g:"M",label:"> 200D Length",sh:">200D Len",key:"mlen",type:"mon",cap:"mlenc",red:1,green:9,tip:"Consecutive months in which the share price closed above its 200D on every trading day of the month"},
-    {id:"hi",  g:"M",label:"P vs. 52W High",sh:"P vs. 52W High",key:"hi",type:"pct",dp:0,neg:true,sign:true,red:0.50,green:0,tip:"Share price against its 52-week high: 0% at the high, -16% = 16% below it (Message 6: renamed and shown with a sign)"},
+    {id:"hi",  g:"M",label:"P vs. 52W High",sh:"P vs. 52W High",key:"hi",type:"pct",dp:0,neg:true,sign:true,red:0.50,green:0,tip:"Share price against its 52-week high: 0% at the high, (16)% = 16% below it (Message 6: renamed and shown with a sign)"},
     {id:"lo",  g:"M",label:"P vs. 52W Low",sh:"P vs. 52W Low",key:"lo",type:"pct",dp:0,sign:true,red:0,green:0.30,tip:"Share price against its 52-week low: +30% = 30% above it (Message 6: renamed and shown with a sign)"},
     /* Strike-through in Metrics only on the columns that are also Filter Tests (Richard, Message 3; D-MD-POOL-18),
        at the rule's Default Standard Setting. */
@@ -21260,7 +21262,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"ind",g:"I",label:"Industry",sh:"Industry",key:"ind",type:"txt",w:"ind"},
     {id:"sec",g:"I",label:"Sector",sh:"Sector",key:"sec",type:"txt",w:"sec"},
     {id:"ph",g:"P",label:"Starting Phase, by your rule",sh:"Phase",key:"_rk",type:"phase",w:"lpph",gs:true,tip:"The Phase of a Stock Lifecycle that the rule gives. A starting Phase: the Investment Analyst's judged Phase, where a memo records one, sits beside it and may differ"},
-    {id:"sl",g:"N",label:"150D Slope (22 trading days)",sh:"150D Slope",key:"sl",type:"pct",dp:1,sign:true,red:-0.03,green:0.03,gs:true,tip:"The 150-day moving average today against its level 22 trading days earlier. Flat = between −1% and +1%"},
+    {id:"sl",g:"N",label:"150D Slope (22 trading days)",sh:"150D Slope",key:"sl",type:"pct",dp:1,sign:true,red:-0.03,green:0.03,gs:true,tip:"The 150-day moving average today against its level 22 trading days earlier. Flat = between (1)% and +1%"},
     {id:"sb",g:"N",label:"SS Sales Net Upgrade Breadth L100D",sh:"Sales Breadth",key:"sb",type:"pct",dp:0,sign:true,red:-0.5,green:0.5,tip:"(Sales estimates raised minus cut over the last 100 days) divided by the number of estimates, calendar year + 1. Decides the Phase. Zero counts as not positive"},
     {id:"mp",g:"N",label:"Month-ends positive (sales breadth)",sh:"Months +",key:"mp",type:"int",tip:"Consecutive month-ends, counted back from the latest, at which the sales breadth was above zero. Five or more with the breadth positive today = Reinforcing rather than Broadening"},
     {id:"lo",g:"N",label:"P vs. 52W Low",sh:"P vs. 52W Low",key:"lo",type:"pct",dp:0,sign:true,red:0,green:0.30,tip:"Share price against its 52-week low. Decides a flat slope with positive breadth: within 30% = Bottoming, otherwise Stalling"},
@@ -21738,8 +21740,8 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"s2",c:"C2",sh:"Relative 200D Slope",small:"met at 0% or below",label:"200D MA of relative price, MoM slope ≤ 0",when:"F"},
     {id:"s3",c:"C3",sh:"Sector & Stock RS",small:"met below 50 and 70",label:"Sector RS < 50 and Stock RS < 70",when:"M"},
     {id:"s4",c:"C4",sh:"Stock RS & SS",small:"met below 50, analysts cutting",label:"Stock RS < 50 and (SS Sales Net Upgrade Breadth < 0 or SS PT Net Upgrade Breadth < 0)",when:"M"},
-    {id:"s5",c:"C5",sh:"Relative P vs. 52W High",small:"met below −25%",label:"Relative price > 25% below its 52W high",when:"M"},
-    {id:"s6",c:"C6",sh:"30% Fall",small:"holdings; met at −30%",label:"Price ≥ 30% below highest close since purchase and Stock RS < 70 (per tranche, holdings only)",when:"D"}
+    {id:"s5",c:"C5",sh:"Relative P vs. 52W High",small:"met below (25)%",label:"Relative price > 25% below its 52W high",when:"M"},
+    {id:"s6",c:"C6",sh:"30% Fall",small:"holdings; met at (30)%",label:"Price ≥ 30% below highest close since purchase and Stock RS < 70 (per tranche, holdings only)",when:"D"}
   ];
   /* The signed-off Pool tests: market value EUR 500m or more (shown here; the Pool page has no size column yet), then
      Stock RS, Sector RS and SS Sales Net Upgrade Breadth. Stock RS L18M is NOT a Pool test in the sign-off (D-100 uses it
@@ -21934,7 +21936,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
       }
     } else if(sc.c==="C5"){
       if(x.c5==null){na=true;tip="Not enough relative price history";}
-      else{txt=pct(x.c5,0);sty=sellBg(x.c5,-0.25,0);tip="The relative price against its 52-week high on "+dayW+": "+pct(x.c5,1)+(x.c5t!=null?"; today "+pct(x.c5t,1):"")+". Met below −25%.";}
+      else{txt=pct(x.c5,0);sty=sellBg(x.c5,-0.25,0);tip="The relative price against its 52-week high on "+dayW+": "+pct(x.c5,1)+(x.c5t!=null?"; today "+pct(x.c5t,1):"")+". Met below (25)%.";}
     } else if(sc.c==="C6"){
       var e=x.c6;
       if(!e){return '<td class="num sc-na'+gs+'" title="Applies only to a tranche you own: the price 30% or more below its highest close since that tranche\'s purchase, with Stock RS below 70">n/a</td>';}

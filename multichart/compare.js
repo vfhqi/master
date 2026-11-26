@@ -15,6 +15,8 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var dmy = function (s) { if (!s) return ''; var d = new Date(s + 'T00:00:00Z'); return d.getUTCDate() + '-' + MON[d.getUTCMonth()]; };
+  /* MC-ANDOR-IPAD-v2: a percentage to one decimal place, negatives in brackets (Richard's rule): +0.5%, (2.1)% */
+  var sp1 = function (d) { var a = Math.abs(d * 100).toFixed(1); return a === '0.0' ? '0.0%' : d > 0 ? '+' + a + '%' : '(' + a + ')%'; };   /* rounds exactly as the page did before (toFixed on the size), so only the sign's form changes */
   var fileOf = function (t) { return t.replace(/[.\/]/g, '_') + '.json'; };
   var P, S, META, DD = {}, DES = {}, LBL = {}, GK;
 
@@ -189,7 +191,7 @@
       return '<div class="gs" title="' + esc(g) + '"><span class="gt">' + esc(g || 'none') + '</span><span class="gn">' + cnt[g] + '</span></div>'; }
     $('lst').innerHTML = POP.map(function (t, i) {
       var s = S[t], d = s.dist, dc = d == null ? '' : (d >= -0.01 && d <= 0.03) ? 'nr' : d < 0 ? 'neg' : '', mk = mark(t);
-      return head(t) + '<div class="it' + (i === at || i === at + 1 ? ' cur' : '') + '" data-i="' + i + '" title="' + esc(s.n + ' (' + t + '), ' + s.sec + (d == null ? '' : '. Price ' + (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '% against its target moving average (' + (s.tma || '50D') + (s.tma_assumed ? ', assumed: none set' : '') + ')') + (MEMB[t] ? '. On: ' + MEMB[t].join('; ') : '')) + '"><span class="no">' + (i + 1) + '</span><span class="mk ' + mk + '"></span><span class="nm">' + esc(s.n) + (s.held ? ' <span class="hd">held</span>' : '') + '</span><span class="dv ' + dc + '">' + (d == null ? '' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</span></div>';
+      return head(t) + '<div class="it' + (i === at || i === at + 1 ? ' cur' : '') + '" data-i="' + i + '" title="' + esc(s.n + ' (' + t + '), ' + s.sec + (d == null ? '' : '. Price ' + sp1(d) + ' against its target moving average (' + (s.tma || '50D') + (s.tma_assumed ? ', assumed: none set' : '') + ')') + (MEMB[t] ? '. On: ' + MEMB[t].join('; ') : '')) + '"><span class="no">' + (i + 1) + '</span><span class="mk ' + mk + '"></span><span class="nm">' + esc(s.n) + (s.held ? ' <span class="hd">held</span>' : '') + '</span><span class="dv ' + dc + '">' + (d == null ? '' : sp1(d) + '') + '</span></div>';
     }).join('') || (st.mode === 'or' && document.querySelectorAll('select.f.on').length ? '<div class="empty">No stock is on any of the lists chosen' + ($('f-gv').value || LINK ? ' within the Grouping or the link' : '') + '.</div>' : '') || (LASTSEL && document.querySelectorAll('select.f.on').length > 1
       ? '<div class="empty">No stock meets every choice. Choices in different dropdowns narrow each other.<br><button class="nb" id="keep1">Keep only the last choice</button></div>'
       : '<div class="empty">' + (document.querySelectorAll('select.f.on').length ? 'No stock in this list this week.' : 'Choose a population from any dropdown above.') + '</div>');
@@ -227,7 +229,7 @@
       (s.held ? '<span class="pill held" title="' + esc((s.exit && s.exit.kind) || 'Held') + '">Held</span>' : '<span class="pill">Not held</span>') +
       (s.int ? '<span class="pill int">Interest ' + s.int + '</span>' : '') + stg +
       '<span class="kv">RS: stock <b>' + (s.rs == null ? 'n/a' : s.rs) + '</b>, sector ' + (s.srs == null ? 'n/a' : s.srs) + ', industry ' + (s.irs == null ? 'n/a' : s.irs) + '</span>' +
-      '<span class="kv">' + s.tma + ' target' + (s.tma_assumed ? ' <i>(50D assumed)</i>' : '') + ': <b class="' + (d == null ? '' : d >= -0.01 && d <= 0.03 ? 'nr' : d < 0 ? 'neg' : '') + '">' + (d == null ? 'n/a' : (d >= 0 ? '+' : '') + (d * 100).toFixed(1) + '%') + '</b></span>' +
+      '<span class="kv">' + s.tma + ' target' + (s.tma_assumed ? ' <i>(50D assumed)</i>' : '') + ': <b class="' + (d == null ? '' : d >= -0.01 && d <= 0.03 ? 'nr' : d < 0 ? 'neg' : '') + '">' + (d == null ? 'n/a' : sp1(d) + '') + '</b></span>' +
       (s.nr ? (s.nr <= META.asof ? '<span class="kv">Reported <b>' + dmy(s.nr) + '</b></span>' : '<span class="kv">Results <b>' + dmy(s.nr) + '</b> <span class="mut">' + esc((s.nrs || '').toLowerCase()) + '</span></span>') : '') +
       '<span class="mut secn">' + esc(s.sec) + '</span></span>';
   }

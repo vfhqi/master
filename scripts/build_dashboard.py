@@ -12799,7 +12799,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="lifecycle_phases" onclick="switchTab(\'lifecycle_phases\')">Phases of a Stock Lifecycle</button>'  /* MD-LIFECYCLE-PHASES-2026-10-10 */
       +     '<button class="v2-nav-btn" data-v2-tab="ig_turning" onclick="switchTab(\'ig_turning\')">IG - Turning/<wbr>Inflecting</button>'  /* MD-IG-TURNING-2026-11-06 */
       +     '<button class="v2-nav-btn" data-v2-tab="flow_igd" onclick="switchTab(\'flow_igd\')" title="Your workflow page: inflecting, then sell-side momentum, then Industry and Sector RS, then distance from the 52-week high and low and valuation in band">IG - Inflection/<wbr>Broadening Details</button>'  /* MD-IGD-2026-11-23 */
-      +     '<button class="v2-nav-btn" data-v2-tab="flow_igat" onclick="switchTab(\'flow_igat\')" title="Richard\'s five trades, every stock whatever its Stage: one line per trade, at the Early Stage Indicator, the Late Stage Indicator, a Trigger or a Post-Trigger Healthiness Confirmation?">IG - All Possible Triggers for <wbr>Capital Deployment</button>'  /* MD-IGAT-2026-11-26 */
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_igat" onclick="switchTab(\'flow_igat\')" title="Richard\'s six trades, every stock whatever its Stage: one line per trade, at the Early Stage Indicator, the Late Stage Indicator, a Trigger or a Post-Trigger Healthiness Confirmation?">IG - All Possible Triggers for <wbr>Capital Deployment</button>'  /* MD-IGAT-2026-11-26 */
       /* MD-RETIRE-2026-11-16: the capital_deploy button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
       +   '</div>'
       + '</div>'

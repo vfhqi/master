@@ -57,7 +57,7 @@
       F.svg.addEventListener('mouseleave', function () { tip.style.display = 'none'; cross.setAttribute('opacity', 0); }); }
     function endLab(F, list) { list.sort(function (a, b) { return a.y - b.y; }); for (var i = 1; i < list.length; i++) if (list[i].y - list[i - 1].y < 11) list[i].y = list[i - 1].y + 11; list.forEach(function (e) { txt(F.svg, F.W - F.pad.r + 4, e.y, e.t, { fill: e.c, 'font-size': 9.5, 'font-weight': 650 }); }); }
     /* pane A: daily volume */
-    var cA = cardH(hA, '<b>Daily volume</b> &#9660; distribution, &#9650; accumulation day', 34);
+    var cA = cardH(hA, '<b>Daily volume</b>; <span style="color:#a40e26">red line: distribution days, 25 sessions</span>', 34);
     var F = frame(hA, 30, true); el('defs', {}, F.svg).innerHTML = '<pattern id="vhatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="4" stroke="#57606a" stroke-width="1.5" opacity="0.75"/></pattern>'; var vmax = Math.max.apply(null, rows.map(function (q) { return q.v; }).concat([1])), v50m = Math.max.apply(null, rows.map(function (q) { return q.v50 || 0; }).concat([1]));
     var capRaw = Math.min(vmax, 3 * v50m) * 1.05, NT = niceTicks(0, capRaw, 3), cap = NT[NT.length - 1] >= capRaw ? NT[NT.length - 1] : capRaw, yA = function (v) { return F.top + F.ph - Math.min(v, cap) / cap * (F.ph - cA); };
     NT.forEach(function (v) { if (v > cap) return; el('line', { x1: F.pad.l, x2: F.W - F.pad.r, y1: yA(v), y2: yA(v), stroke: C.grid }, F.svg); txt(F.svg, F.pad.l - 4, yA(v) + 3.5, v ? fmtVol(v) : '0', { 'text-anchor': 'end', 'font-size': 9.5, fill: C.ink3 }); });
@@ -70,49 +70,42 @@
       if (mech) el('rect', { x: F.xi(i) - bwx / 2, y: F.top + F.ph - hgt, width: bwx, height: hgt, fill: 'url(#vhatch)' }, F.svg);
       if (dist || acc) txt(F.svg, F.xi(i), Math.max(F.top + 8, F.top + F.ph - hgt - 2), dist ? '▼' : '▲', { 'text-anchor': 'middle', 'font-size': F.bw >= 6 ? 9 : 7.5, fill: dist ? C.red : GREEN }); });
     var dp = ''; rows.forEach(function (q, i) { if (q.v50) dp += (dp ? 'L' : 'M') + F.xi(i).toFixed(1) + ',' + yA(q.v50 * 1.25).toFixed(1); }); if (dp) el('path', { d: dp, fill: 'none', stroke: C.red, 'stroke-width': 1.1, 'stroke-dasharray': '2 3', opacity: 0.75 }, F.svg);
-    dates(F); hover(hA, F, function (i) { var q = rows[i], rr = q.v50 > 0 ? q.v / q.v50 : null; return '<div>volume ' + fmtVol(q.v) + (rr != null ? ', ' + rr.toFixed(2) + ' times the 50D average' : '') + ' (' + (q.up ? 'an up day' : 'a down day') + ')</div>' + (MECHD[q.d] ? '<div>an index review or option expiry day</div>' : ''); });
-    /* pane B: average volume per day, up days against down days (the house convention: the last N rows, every day included) */
-    var VV = V.filter(function (q) { return q && q.v != null; }), UD = {};
-    for (var k = 0; k < VV.length; k++) { if (VV[k].d <= from) continue; var o = {}; [20, 50].forEach(function (N) { var su = 0, nu = 0, sd = 0, nd = 0; for (var j = Math.max(1, k - N + 2); j <= k; j++) { if (VV[j].up) { su += VV[j].v; nu++; } else { sd += VV[j].v; nd++; } } o['u' + N] = nu ? su / nu : null; o['d' + N] = nd ? sd / nd : null; }); UD[VV[k].d] = o; }
-    var ser = function (key) { return rows.map(function (q) { return UD[q.d] ? UD[q.d][key] : null; }); }, u20 = ser('u20'), d20 = ser('d20'), u50 = ser('u50'), d50 = ser('d50');
-    var cB = cardH(hB, '<b>Average volume, up against down days</b>; solid 20, dashed 50 sessions', 34);
-    F = frame(hB, 40); var bv = u20.concat(d20, u50, d50).filter(function (v) { return v != null; }), bLo = Math.min.apply(null, bv), bHi = Math.max.apply(null, bv), bp = (bHi - bLo) * 0.1 || bHi * 0.05; bLo = Math.max(0, bLo - bp); bHi += bp;
+    /* PMS-PANEL2-2026-11-27 (Richard, 27-Nov-2026 09:41: the distribution days overlaid on the daily volume "elegantly"): a thin red step line on its own scale,
+       0 to 8 over the plot's height, 6 (the warning level) dashed; today's count at its right end */
+    var dmx = Math.max(8, Math.max.apply(null, rows.map(function (q) { return q.dist25 || 0; }))), yDd = function (v) { return F.top + F.ph - v / dmx * (F.ph - cA); }, ddp = '';
+    rows.forEach(function (q, i) { if (q.dist25 == null) return; ddp += (ddp ? 'L' : 'M') + F.edge(i).toFixed(1) + ',' + yDd(q.dist25).toFixed(1) + 'L' + F.edge(i + 1).toFixed(1) + ',' + yDd(q.dist25).toFixed(1); });
+    if (ddp) { el('line', { x1: F.pad.l, x2: F.W - F.pad.r, y1: yDd(6), y2: yDd(6), stroke: C.red, 'stroke-width': 0.9, 'stroke-dasharray': '5 4', opacity: 0.55 }, F.svg);
+      txt(F.svg, F.pad.l + 2, yDd(6) - 2.5, '6: warning', { 'font-size': 8.5, fill: C.red, opacity: 0.85, halo: true });
+      el('path', { d: ddp, fill: 'none', stroke: '#fff', 'stroke-width': 2.4, opacity: 0.7, 'stroke-linejoin': 'round' }, F.svg); el('path', { d: ddp, fill: 'none', stroke: '#a40e26', 'stroke-width': 1.1, 'stroke-linejoin': 'round' }, F.svg);
+      if (q0.dist25 != null) txt(F.svg, F.W - F.pad.r - 2, yDd(q0.dist25) - 3.5, String(q0.dist25), { 'text-anchor': 'end', 'font-size': 9.5, 'font-weight': 700, fill: C.red, halo: true }); }
+    dates(F); hover(hA, F, function (i) { var q = rows[i], rr = q.v50 > 0 ? q.v / q.v50 : null; return '<div>volume ' + fmtVol(q.v) + (rr != null ? ', ' + rr.toFixed(2) + ' times the 50D average' : '') + ' (' + (q.up ? 'an up day' : 'a down day') + (!q.up && rr > 1.25 ? ', &#9660; a distribution day' : q.up && rr > 1.25 ? ', &#9650; an accumulation day' : '') + ')</div>' + (q.dist25 != null ? '<div>distribution days in the last 25 sessions: ' + q.dist25 + '</div>' : '') + (MECHD[q.d] ? '<div>an index review or option expiry day</div>' : ''); });
+    /* pane B (top right): average volume per day, up days against down days (the house convention: the last N rows, every day included). PMS-PANEL2-2026-11-27
+       (Richard, 27-Nov-2026: toggles for the trailing averages): L1W, L2W, L1M, L3M (5, 10, 21, 63 sessions), as on the full page, the choice shared with it;
+       the 50-session average stays on the daily volume chart only */
+    var VVv = V.filter(function (q) { return q && q.v != null; }), UD = {}, VAW = DASH.VAW, VAVIS = DASH.VAVIS;
+    for (var k = 0; k < VVv.length; k++) { if (VVv[k].d <= from) continue; var o = {}; VAW.forEach(function (a) { var N = a[2], su = 0, nu = 0, sd = 0, nd = 0; for (var j = Math.max(1, k - N + 2); j <= k; j++) { if (VVv[j].up) { su += VVv[j].v; nu++; } else { sd += VVv[j].v; nd++; } } o['u' + N] = nu ? su / nu : null; o['d' + N] = nd ? sd / nd : null; o['nu' + N] = nu; o['nd' + N] = nd; }); UD[VVv[k].d] = o; }
+    var ser = function (key) { return rows.map(function (q) { return UD[q.d] ? UD[q.d][key] : null; }); };
+    var VA = VAW.map(function (a) { return { k: a[0], lab: a[1], N: a[2], dash: a[3], w: a[4], u: ser('u' + a[2]), d: ser('d' + a[2]) }; }), VAS = VA.filter(function (a) { return VAVIS[a.k]; }), vM = VAVIS.m ? VA[2] : VAS[0];
+    var cB = cardH(hB, '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px"><span><b>Average volume, up against down days</b></span><span class="vab" style="margin-left:auto;display:flex;gap:3px;pointer-events:auto">' + VA.map(function (a) { var on = VAVIS[a.k]; return '<button type="button" data-k="' + a.k + '" title="' + (on ? 'Hide' : 'Show') + ' the ' + a.lab + ' lines (' + a.N + ' sessions)" style="cursor:pointer;font-size:9.5px;line-height:13px;padding:0 5px;border-radius:4px;border:1px solid #c9cfdc;background:' + (on ? '#1d2433' : '#fff') + ';color:' + (on ? '#fff' : '#57606a') + '">' + a.lab + '</button>'; }).join('') + '</span></div>', 34, true);
+    Array.prototype.forEach.call(hB.querySelectorAll('.vab button'), function (b) { b.addEventListener('click', function () { if (DASH.vaToggle(b.getAttribute('data-k'))) drawVolInto(host, m, win); }); });
+    F = frame(hB, 40); var bv = []; VAS.forEach(function (a) { bv = bv.concat(a.u, a.d); }); bv = bv.filter(function (v) { return v != null; });
+    var bLo = Math.min.apply(null, bv.concat([0])), bHi = Math.max.apply(null, bv.concat([1])), bp = (bHi - bLo) * 0.1 || bHi * 0.05; bLo = Math.max(0, bLo - bp); bHi += bp;
     var yB = function (v) { return F.top + F.ph - (v - bLo) / (bHi - bLo) * (F.ph - cB); };
     niceTicks(bLo, bHi, 3).forEach(function (v) { if (v < bLo) return; el('line', { x1: F.pad.l, x2: F.W - F.pad.r, y1: yB(v), y2: yB(v), stroke: C.grid }, F.svg); txt(F.svg, F.pad.l - 4, yB(v) + 3.5, fmtVol(v), { 'text-anchor': 'end', 'font-size': 9.5, fill: C.ink3 }); });
-    for (var i2 = 0; i2 < n; i2++) { if (u20[i2] == null || d20[i2] == null) continue; el('rect', { x: F.edge(i2), y: Math.min(yB(u20[i2]), yB(d20[i2])), width: F.bw + 0.4, height: Math.max(0.5, Math.abs(yB(u20[i2]) - yB(d20[i2]))), fill: u20[i2] >= d20[i2] ? 'rgba(26,127,55,0.16)' : 'rgba(207,34,46,0.16)' }, F.svg); }
+    for (var i2 = 0; i2 < n; i2++) { if (vM.u[i2] == null || vM.d[i2] == null) continue; el('rect', { x: F.edge(i2), y: Math.min(yB(vM.u[i2]), yB(vM.d[i2])), width: F.bw + 0.4, height: Math.max(0.5, Math.abs(yB(vM.u[i2]) - yB(vM.d[i2]))), fill: vM.u[i2] >= vM.d[i2] ? 'rgba(26,127,55,0.16)' : 'rgba(207,34,46,0.16)' }, F.svg); }
     var path = function (vals, col, w, dash) { var d = ''; vals.forEach(function (v, i) { if (v == null) return; d += (d ? 'L' : 'M') + F.xi(i).toFixed(1) + ',' + yB(v).toFixed(1); }); if (d) el('path', { d: d, fill: 'none', stroke: col, 'stroke-width': w, 'stroke-dasharray': dash || '', 'stroke-linejoin': 'round' }, F.svg); };
-    path(u50, GREEN, 1.4, '6 3'); path(d50, C.red, 1.4, '6 3'); path(u20, GREEN, 2); path(d20, C.red, 2);
-    endLab(F, [[u20, GREEN], [d20, C.red]].map(function (a) { return { y: yB(a[0][n - 1]) + 3.5, t: fmtVol(a[0][n - 1]), c: a[1] }; }));
-    dates(F); hover(hB, F, function (i) { return '<div>last 20 sessions: up days ' + fmtVol(u20[i]) + ', down days ' + fmtVol(d20[i]) + '</div><div>last 50 sessions: up days ' + fmtVol(u50[i]) + ', down days ' + fmtVol(d50[i]) + '</div>'; });
-    /* pane C: distribution days, and below them the up days less the down days over the same last 25 sessions (Richard, 10-Nov-2026: "add in a
-       visual communication of the # of up days vs. down days on a trailing 20-25D basis"; 25 so the pane reads as one window, and a distribution day is
-       one of the down days). An up day: close at or above the previous close, as the bars are coloured. */
-    var cC = cardH(hC, '<b>Distribution days, last 25 sessions</b>; warning at 6', 34);
-    F = frame(hC, 30); var sH = Math.max(30, Math.round((F.ph - cC) * 0.34)), baseC = F.top + F.ph - sH - 5;
-    var dmax = Math.max(8, Math.max.apply(null, rows.map(function (q) { return q.dist25 || 0; }))), yC = function (v) { return baseC - v / dmax * (baseC - F.top - cC); };
-    [0, 3, 6].forEach(function (v) { el('line', { x1: F.pad.l, x2: F.W - F.pad.r, y1: yC(v), y2: yC(v), stroke: v === 6 ? C.red : C.grid, 'stroke-dasharray': v === 6 ? '5 3' : '', opacity: v === 6 ? 0.7 : 1 }, F.svg); txt(F.svg, F.pad.l - 4, yC(v) + 3.5, String(v), { 'text-anchor': 'end', 'font-size': 9.5, fill: v === 6 ? C.red : C.ink3, 'font-weight': v === 6 ? 700 : 400 }); });
-    var dd = ''; rows.forEach(function (q, i) { if (q.dist25 == null) return; dd += (dd ? 'L' : 'M') + F.edge(i).toFixed(1) + ',' + yC(q.dist25).toFixed(1) + 'L' + F.edge(i + 1).toFixed(1) + ',' + yC(q.dist25).toFixed(1); });
-    if (dd) { el('path', { d: dd + 'L' + (F.W - F.pad.r) + ',' + baseC + 'L' + F.pad.l + ',' + baseC + 'Z', fill: 'rgba(207,34,46,0.10)' }, F.svg); el('path', { d: dd, fill: 'none', stroke: C.red, 'stroke-width': 1.7 }, F.svg); }
-    var udN = {}; for (var k2 = 0; k2 < VV.length; k2++) { if (VV[k2].d <= from || k2 < 24) continue; var nu2 = 0; for (var j2 = k2 - 24; j2 <= k2; j2++) if (VV[j2].up) nu2++; udN[VV[k2].d] = { u: nu2, n: 25 - nu2 }; }
-    var ud = rows.map(function (q) { return udN[q.d] || null; }), net = ud.map(function (o) { return o ? o.u - o.n : null; }), nv = net.filter(function (v) { return v != null; });
-    var sMax = Math.max(5, Math.ceil(Math.max.apply(null, nv.map(Math.abs).concat([0])) / 5) * 5), sMid = F.top + F.ph - sH / 2, yS = function (v) { return sMid - v / sMax * (sH / 2 - 2); };
-    el('line', { x1: F.pad.l, x2: F.W - F.pad.r, y1: F.top + F.ph - sH - 2.5, y2: F.top + F.ph - sH - 2.5, stroke: C.border }, F.svg);
-    el('line', { x1: F.pad.l, x2: F.W - F.pad.r, y1: sMid, y2: sMid, stroke: C.ink3, 'stroke-width': 0.8 }, F.svg);
-    txt(F.svg, F.pad.l - 4, sMid + 3.5, '0', { 'text-anchor': 'end', 'font-size': 9.5, fill: C.ink3 });
-    [sMax, -sMax].forEach(function (v) { txt(F.svg, F.pad.l - 4, yS(v) + (v > 0 ? 6 : 1), v > 0 ? '+' + v : '(' + (-v) + ')', { 'text-anchor': 'end', 'font-size': 8.5, fill: v > 0 ? GREEN : C.red }); });
-    for (var i3 = 0; i3 < n; i3++) { var v3 = net[i3]; if (v3 == null || v3 === 0) continue; el('rect', { x: F.edge(i3), y: Math.min(sMid, yS(v3)), width: F.bw + 0.4, height: Math.abs(yS(v3) - sMid), fill: v3 > 0 ? 'rgba(26,127,55,0.55)' : 'rgba(207,34,46,0.55)' }, F.svg); }
-    var uL = ud[n - 1];
-    /* QC 18-Nov-2026: the shortest wording is used where the full one would run past the pane (1366 pixels) */
-    if (uL) { var uOpts = ['up days less down days: ' + uL.u + ' up, ' + uL.n + ' down', 'up less down days: ' + uL.u + ' up, ' + uL.n + ' down', uL.u + ' up days, ' + uL.n + ' down'], uRoom = F.W - F.pad.r - F.pad.l - 30, uT = uOpts.filter(function (t) { return t.length * 9 * 0.56 <= uRoom; })[0] || uOpts[2];
-      txt(F.svg, F.pad.l + 3, F.top + F.ph - sH + 8, uT, { 'font-size': 9, fill: C.ink2, halo: true }); }
-    var ends = [{ y: yC(q0.dist25) + 3.5, t: String(q0.dist25), c: C.red }]; if (net[n - 1] != null) ends.push({ y: Math.max(yS(net[n - 1]), F.top + F.ph - sH + 8) + 3.5, t: net[n - 1] > 0 ? '+' + net[n - 1] : net[n - 1] < 0 ? '(' + (-net[n - 1]) + ')' : '0', c: net[n - 1] > 0 ? GREEN : net[n - 1] < 0 ? C.red : C.ink3 });
-    endLab(F, ends);
-    dates(F); hover(hC, F, function (i) { return '<div>distribution days in 25 sessions: ' + rows[i].dist25 + '</div>' + (ud[i] ? '<div>in the same 25 sessions: ' + ud[i].u + ' up days, ' + ud[i].n + ' down days</div>' : ''); });
-    /* pane D: daily volatility and closes in the top half of the day's range (Richard, 11-Nov-2026 17:56: "For the one-screen version, do replace the
-       relative price against 52W High chart"; D-PMS-V4-167). Drawn by the full page's own function (dashboard.js rangePane), so both views read alike.
-       Relative price against its 52W high (Sell Criterion 5) moved to the header line under the stock's name. */
-    var cD = cardH(hD, '<b>Daily volatility</b>', 34);
-    if (DASH.rangePane) DASH.rangePane(hD, m, rows.map(function (q) { return q.d; }), { compact: true, top: cD, padL: 34 });
+    VAS.slice().reverse().forEach(function (a) { path(a.u, GREEN, a.w * 0.9, a.dash); path(a.d, C.red, a.w * 0.9, a.dash); });
+    endLab(F, [[vM.u, GREEN], [vM.d, C.red]].map(function (a) { return { y: yB(a[0][n - 1]) + 3.5, t: fmtVol(a[0][n - 1]), c: a[1] }; }));
+    dates(F); hover(hB, F, function (i) { return VAS.map(function (a) { var o = UD[rows[i].d] || {}; return '<div>' + a.lab + ' (' + a.N + ' sessions): up days ' + fmtVol(a.u[i]) + (o['nu' + a.N] != null ? ' (' + o['nu' + a.N] + ')' : '') + ', down days ' + fmtVol(a.d[i]) + (o['nd' + a.N] != null ? ' (' + o['nd' + a.N] + ')' : '') + '</div>'; }).join('') + '<div class="mut">' + VAS.map(function (a) { return a.lab + (a.dash ? (a.k === 'w' ? ' dotted' : a.k === 'f' ? ' dot-dash' : ' dashed') : ' solid'); }).join(', ') + '</div>'; });
+    /* pane C (bottom left), PMS-PANEL2-2026-11-27 (Richard, 27-Nov-2026: "Combine the two up days vs. down days charts into one panel on bottom left"): the
+       closes in the top half of the day's range for up, down and all days, and beneath them up days less down days over 25 sessions; the full page's own
+       function (dashboard.js udPane), so both views read alike */
+    var cC = cardH(hC, '<b>Up days against down days</b>', 34);
+    if (DASH.udPane) DASH.udPane(hC, m, rows.map(function (q) { return q.d; }), { compact: true, top: cC, padL: 34 });
+    /* pane D (bottom right): "Volatility" (Richard, 27-Nov-2026: rename; daily lines solid, weekly dotted, as toggles; red/green for worsening/improving),
+       drawn by the full page's own function (dashboard.js rangePane, its volatility part) */
+    var cD = cardH(hD, '<b>Volatility</b>', 34);
+    if (DASH.rangePane) DASH.rangePane(hD, m, rows.map(function (q) { return q.d; }), { compact: true, part: 'vol', top: cD, padL: 34 });
   }
   window.MCVOL = { draw: drawVolInto, setMech: function (j) { MECHD = {}; ((j && j.dates) || []).forEach(function (q) { MECHD[q.date] = q.why; }); } };
 })();

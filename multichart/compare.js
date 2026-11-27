@@ -227,7 +227,9 @@
     return '<span class="nm">' + esc(s.n) + '</span><span class="tk">' + esc(t) + '</span>' + calloutHTML(t) +
       '<span class="more">' +
       (s.held ? '<span class="pill held" title="' + esc((s.exit && s.exit.kind) || 'Held') + '">Held</span>' : '<span class="pill">Not held</span>') +
-      (s.int ? '<span class="pill int">Interest ' + s.int + '</span>' : '') + stg +
+      (s.int ? '<span class="pill int">Interest ' + s.int + '</span>' : '') +
+      /* MD-PRIORITY-PILL-2026-11-27 (Richard, 27-Nov-2026 14:35: "if the stock has been given a "priority", would that appear next to not held, Interest A, etc.?"): Notion's Capital Deployment Priority */
+      (s.pri ? '<span class="pill pri p' + esc(String(s.pri).replace(/\s+/g, '').toLowerCase()) + '" title="Capital Deployment Priority, from Notion">Priority ' + esc(s.pri) + '</span>' : '') + stg +
       '<span class="kv">RS: stock <b>' + (s.rs == null ? 'n/a' : s.rs) + '</b>, sector ' + (s.srs == null ? 'n/a' : s.srs) + ', industry ' + (s.irs == null ? 'n/a' : s.irs) + '</span>' +
       '<span class="kv">' + s.tma + ' target' + (s.tma_assumed ? ' <i>(50D assumed)</i>' : '') + ': <b class="' + (d == null ? '' : d >= -0.01 && d <= 0.03 ? 'nr' : d < 0 ? 'neg' : '') + '">' + (d == null ? 'n/a' : sp1(d) + '') + '</b></span>' +
       (s.nr ? (s.nr <= META.asof ? '<span class="kv">Reported <b>' + dmy(s.nr) + '</b></span>' : '<span class="kv">Results <b>' + dmy(s.nr) + '</b> <span class="mut">' + esc((s.nrs || '').toLowerCase()) + '</span></span>') : '') +

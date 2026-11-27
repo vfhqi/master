@@ -602,6 +602,7 @@ TABS = [
     {"id": "flow_s3rf", "label": "RB Stage 3 Red Flags Topping Indicator", "accent": "#6b2c5c"},  # MD-S3RF-2026-11-23
     {"id": "flow_igd", "label": "IG - Inflection/Broadening Details", "accent": "#2f5d3a"},  # MD-IGD-2026-11-23
     {"id": "flow_igat", "label": "IG - All Possible Triggers for Capital Deployment", "accent": "#2f5d3a"},  # MD-IGAT-2026-11-26
+    {"id": "flow_mr", "label": "Master Ratings", "accent": "#633806"},  # MASTER-SET-2026-11-27
     {"id": "tech",      "label": "Technical Data",   "accent": "#2c5282"},
     {"id": "ssem",      "label": "SS Earnings Momentum", "accent": "#2b6cb0"},
     {"id": "val",       "label": "Valuation",        "accent": "#38a169"},
@@ -640,6 +641,7 @@ IMPLEMENTED_TABS = [
     "flow_s3rf",  # MD-S3RF-2026-11-23
     "flow_igd",  # MD-IGD-2026-11-23
     "flow_igat",  # MD-IGAT-2026-11-26
+    "flow_mr",  # MASTER-SET-2026-11-27
 ]
 
 
@@ -672,7 +674,7 @@ MD_FILTER_ROW_JS = r"""/* MD-FILTER-ROW-2026-11-16 (SA - Master Dashboard; Richa
      shows the descriptive form, and a descriptive address opens its page. */
   var ADDR = { flow_hc: 'healthy-confirmation', flow_proven: 'reinforcing-proven-s2-core-investment', flow_early: 'broadening-early-s2-core-investment',
     flow_inflecting: 'inflecting-s1-to-s2-probing-bet', flow_inflecting2: 'inflecting-s1-to-s2-probing-bet-5d-and-10d', flow_s1: 'bottoming-s1-speculative-bet', flow_s3: 'restarting-reinforcing-s3-speculative-bet',
-    flow_s4: 'collapsing-s4-speculative-bet', flow_vcp: 'vcp-page', flow_base: 'base-pivot-point-page', flow_s3rf: 'rb-stage-3-red-flags-topping-indicator', flow_igd: 'ig-inflection-broadening-details', flow_igat: 'ig-all-possible-triggers-for-capital-deployment', stage_1: 'stage-1', stage_2: 'stage-2', stage_3: 'stage-3', stage_4: 'stage-4',
+    flow_s4: 'collapsing-s4-speculative-bet', flow_vcp: 'vcp-page', flow_base: 'base-pivot-point-page', flow_s3rf: 'rb-stage-3-red-flags-topping-indicator', flow_igd: 'ig-inflection-broadening-details', flow_igat: 'ig-all-possible-triggers-for-capital-deployment', flow_mr: 'master-ratings', stage_1: 'stage-1', stage_2: 'stage-2', stage_3: 'stage-3', stage_4: 'stage-4',
     pulling_back: 's2-pullback', pos_pre_indicators: 's2-base', setups_healthy_retest: 'retest-of-a-moving-average' };
   var FROM_ADDR = {}; Object.keys(ADDR).forEach(function (k) { FROM_ADDR[ADDR[k]] = k; });
   FROM_ADDR['stage-1-basing'] = 'stage_1'; FROM_ADDR['stage-1-bottoming'] = 'stage_1'; FROM_ADDR['stage-2-advancing'] = 'stage_2'; FROM_ADDR['stage-3-topping'] = 'stage_3'; FROM_ADDR['stage-4-declining'] = 'stage_4';  /* the address of 17-Nov morning still opens the page */
@@ -1557,7 +1559,7 @@ body[data-active-tab="ig_turning"] .v2-nav{display:flex}
 body[data-active-tab="ig_turning"] .header-controls-row{display:none !important}
 body[data-active-tab="ig_turning"] .header{height:auto !important;padding-bottom:0 !important}
 body[data-active-tab="ig_turning"]{--header-height:70px}
-.v2-nav-btn[data-v2-tab="ig_turning"]{width:84px}.v2-nav-btn[data-v2-tab="flow_igd"]{width:96px}/* MD-IGD-2026-11-23 */.v2-nav-btn[data-v2-tab="flow_igat"]{width:118px}/* MD-IGAT-2026-11-26 */
+.v2-nav-btn[data-v2-tab="ig_turning"]{width:84px}.v2-nav-btn[data-v2-tab="flow_igd"]{width:96px}/* MD-IGD-2026-11-23 */.v2-nav-btn[data-v2-tab="flow_igat"]{width:118px}/* MD-IGAT-2026-11-26 */.v2-nav-btn[data-v2-tab="flow_mr"]{width:84px}/* MASTER-SET-2026-11-27 */
 /* MD-CAPITAL-DEPLOY-2026-11-11 -- Capital Deployment In Range (tab capital_deploy; Richard, 11-Nov-2026: "Create a new page and put it in the SUMMARY group and call it \"Capital Deployment In Range\"").
    The page itself is master-dashboard/capital-deployment/index.html (build_capital_deployment.py), shown here in a frame so it also works on its own. */
 body[data-active-tab="capital_deploy"] .header-tabs-row{display:none !important}
@@ -12893,6 +12895,7 @@ function SUM_renderQualifiedStocks() {
       +     '<button class="v2-nav-btn" data-v2-tab="ig_turning" onclick="switchTab(\'ig_turning\')">IG - Turning/<wbr>Inflecting</button>'  /* MD-IG-TURNING-2026-11-06 */
       +     '<button class="v2-nav-btn" data-v2-tab="flow_igd" onclick="switchTab(\'flow_igd\')" title="Your workflow page: inflecting, then sell-side momentum, then Industry and Sector RS, then distance from the 52-week high and low and valuation in band">IG - Inflection/<wbr>Broadening Details</button>'  /* MD-IGD-2026-11-23 */
       +     '<button class="v2-nav-btn" data-v2-tab="flow_igat" onclick="switchTab(\'flow_igat\')" title="Richard\'s six trades, every stock whatever its Stage: one line per trade, at the Early Stage Indicator, the Late Stage Indicator, a Trigger or a Post-Trigger Healthiness Confirmation?">IG - All Possible Triggers for <wbr>Capital Deployment</button>'  /* MD-IGAT-2026-11-26 */
+      +     '<button class="v2-nav-btn" data-v2-tab="flow_mr" onclick="switchTab(\'flow_mr\')" title="Every stock with a Master Rating, a Bottom-up/Stock-driven Rating or a Top Down/Exogenously-driven Rating: the eight ratings, each its letter, rating and percentile, and the four results; the tiles are the A, B and C lists of each result">Master Ratings</button>'  /* MASTER-SET-2026-11-27 */
       /* MD-RETIRE-2026-11-16: the capital_deploy button is retired (Richard, 15-Nov-2026, "Q1 = A"); its address opens its replacement */
       +   '</div>'
       + '</div>'
@@ -21747,7 +21750,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 /* MD-FLOW-2026-11-14: the seven Investment Classification pages. One page, flow/index.html (built nightly by build_flow_pages.py
    from the daily classification file), framed per tab with its ?page=, sized to the window like Capital Deployment In Range. */
 (function(){
-  var PG={flow_hc:"hc",flow_proven:"proven",flow_early:"early",flow_inflecting:"inflecting",flow_inflecting2:"inflecting2",flow_s1:"s1",flow_s3:"s3",flow_s4:"s4",flow_vcp:"vcp",flow_base:"base",flow_s3rf:"s3rf",flow_igd:"igd",flow_igat:"igat"};
+  var PG={flow_hc:"hc",flow_proven:"proven",flow_early:"early",flow_inflecting:"inflecting",flow_inflecting2:"inflecting2",flow_s1:"s1",flow_s3:"s3",flow_s4:"s4",flow_vcp:"vcp",flow_base:"base",flow_s3rf:"s3rf",flow_igd:"igd",flow_igat:"igat",flow_mr:"mr"};
   function act(){var a=document.body.getAttribute('data-active-tab')||'';return a.indexOf('flow_')===0?a:null;}
   function size(){var a=act();if(!a)return;var f=document.querySelector('#tab-'+a+' iframe.flow-frame');if(!f)return;
     try{if(typeof window.measureV2Ribbon==='function')window.measureV2Ribbon();}catch(e){}
@@ -21758,7 +21761,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     try{buildHeaderControls(id);}catch(e){}
     var c=document.getElementById('tab-'+id);if(!c)return;
     if(!c.querySelector('iframe.flow-frame')){
-      c.innerHTML='<iframe class="flow-frame" title="'+(document.querySelector('.v2-nav-btn[data-v2-tab="'+id+'"]')||{}).textContent+'" src="flow/'+(id==='flow_igat'?'all-triggers.html':id==='flow_s3rf'?'red-flags.html':'index.html')+'?page='+PG[id]+'&v='+Math.floor(Date.now()/600000)+'"></iframe>';
+      c.innerHTML='<iframe class="flow-frame" title="'+(document.querySelector('.v2-nav-btn[data-v2-tab="'+id+'"]')||{}).textContent+'" src="flow/'+(id==='flow_igat'?'all-triggers.html':id==='flow_s3rf'?'red-flags.html':id==='flow_mr'?'master-ratings.html':'index.html')+'?page='+PG[id]+'&v='+Math.floor(Date.now()/600000)+'"></iframe>';
     }
     size();setTimeout(size,150);setTimeout(size,600);
   };

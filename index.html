@@ -20774,7 +20774,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     try{buildHeaderControls(id);}catch(e){}
     var c=document.getElementById('tab-'+id);if(!c)return;
     if(!c.querySelector('iframe.flow-frame')){
-      c.innerHTML='<iframe class="flow-frame" title="'+(document.querySelector('.v2-nav-btn[data-v2-tab="'+id+'"]')||{}).textContent+'" src="flow/'+(id==='flow_igat'?'all-triggers.html':'index.html')+'?page='+PG[id]+'&v='+Math.floor(Date.now()/600000)+'"></iframe>';
+      c.innerHTML='<iframe class="flow-frame" title="'+(document.querySelector('.v2-nav-btn[data-v2-tab="'+id+'"]')||{}).textContent+'" src="flow/'+(id==='flow_igat'?'all-triggers.html':id==='flow_s3rf'?'red-flags.html':'index.html')+'?page='+PG[id]+'&v='+Math.floor(Date.now()/600000)+'"></iframe>';
     }
     size();setTimeout(size,150);setTimeout(size,600);
   };

@@ -230,7 +230,7 @@ def load_master_ratings():
                     e["w"] = v["why"]
                 e8[k] = e
             elif v.get("old"):
-                e8[k] = {"g": v["old"], "old": 1}
+                e8[k] = {"og": v["old"], "old": 1}   # shown outlined; never read as a letter by the filters or the sorting
         for k, kk in (("lo", "lo"), ("hi", "hi"), ("bu", "bur"), ("td", "tdr")):
             x = rs.get(k)
             if x:
@@ -6433,6 +6433,7 @@ window.EMR = (function(){
   /* MASTER-SET-2026-11-27: one rating as its letter, its rating (X/100) and its percentile (Xth), each coloured by its own value */
   function pill3(t,k){
     var x=row(t),e=x&&x.r?x.r[k]:null,nm=name(k,true);
+    if(e&&e.old)return '<span class="emr-p3" title="'+esc(nm+": "+e.og+" from a memo written before the Rater. It has no percentile and feeds no result.")+'"><span class="emr-g emr-hollow emr-g'+letter(e.og)+'">'+esc(e.og)+'</span><span class="emr-pc emr-old">older</span></span>';
     if(!e||!e.g)return '<span class="emr-p3" title="'+esc(nm+": no rating"+(k==="lo"||k==="hi"||k==="bur"?" (it needs a memo scored by the Rater)":""))+'"><span class="emr-g emr-gN">&ndash;</span></span>';
     if(e.old)return '<span class="emr-p3" title="'+esc(nm+": "+e.g+" from a memo written before the Rater. It has no percentile and feeds no result.")+'"><span class="emr-g emr-hollow emr-g'+letter(e.g)+'">'+esc(e.g)+'</span><span class="emr-pc emr-old">older</span></span>';
     var tt=nm+": "+e.g+(e.v!=null?", rating "+Math.round(+e.v)+"/100":"")+", "+ordn(e.pc)+" percentile";

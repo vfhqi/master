@@ -212,6 +212,44 @@ def load_master_ratings():
          "tilt": ins.get("tilt"), "pm_bu": hdr.get("pool_mean_bottom_up"), "pm_td": hdr.get("pool_mean_top_down")}
     print("  [eight] Eight Master Ratings read from the ratings store: {} stocks (schema {}, run of {})".format(
         len(out), h["schema"], h["run_date"]))
+    # MASTER-SET-2026-11-27 (Richard, 27-Nov-2026: "Whenever the "ratings" are displayed across the system, show all 3 (Letter, Numerical
+    # Rating, the Percentile)"): the pages draw the Master Ratings set (databases/scripts/master_ratings_set.py) in place of the eight and the
+    # composites. Each stock keeps its flags. A rating the set lacks is shown as missing, never filled.
+    msh = doc.get("master_set_header") or {}
+    out2 = {}
+    for r in rows:
+        if not isinstance(r, dict) or not r.get("ticker"):
+            continue
+        mset = r.get("master_set") or {}
+        rr, rs = mset.get("r") or {}, mset.get("res") or {}
+        e8 = {}
+        for k, v in rr.items():
+            if "p" in v:
+                e = {"g": v["l"], "v": v["n"], "pc": round(v["p"], 1)}
+                if v.get("why"):
+                    e["w"] = v["why"]
+                e8[k] = e
+            elif v.get("old"):
+                e8[k] = {"g": v["old"], "old": 1}
+        for k, kk in (("lo", "lo"), ("hi", "hi"), ("bu", "bur"), ("td", "tdr")):
+            x = rs.get(k)
+            if x:
+                on = rr.get(x["on"]) or {}
+                e8[kk] = {"g": x["l"], "v": on.get("p"), "pc": round(x["p"], 1), "on": x["on"], "as": x["aside"]}
+        f = (out.get(r["ticker"]) or {}).get("f") or {}
+        c = {k: (e8.get(kk) or {}).get("pc") for k, kk in (("bu", "bur"), ("td", "tdr"), ("bl", "lo"))}
+        if e8 or f:
+            out2[r["ticker"]] = {"r": e8, "c": {k: v for k, v in c.items() if v is not None}, "f": f}
+    if msh and not msh.get("failed") and out2:
+        hw = msh.get("how") or {}
+        lab = (("shown", "What each rating shows"), ("letters", "Letters"), ("populations", "Percentiles"), ("results", "The four results"),
+               ("tm", "Current SP Technical Momentum"), ("ss", "Current SS Earnings Momentum"), ("pm", "Current Peerset Momentum"),
+               ("tsr", "Upside / TSR"), ("older", "Older memos"))
+        h2 = {"how": {name: hw[k] for k, name in lab if hw.get(k)}, "gaps": [], "written_at": msh.get("written_at"),
+              "run_date": (doc.get("generated_at") or "")[:10], "schema": "master-set " + str(msh.get("version")), "set": 1}
+        print("  [master set] the Master Ratings set read from the ratings store: {} stocks, results {}".format(len(out2), msh.get("results")))
+        return {"h": {k: v for k, v in h2.items() if v is not None}, "s": out2}
+    print("  [master set] NOT in the ratings store ({}): the pages show the eight and the composites as before".format(msh.get("failed") or "absent"))
     return {"h": {k: v for k, v in h.items() if v is not None}, "s": out}
 
 
@@ -1897,6 +1935,14 @@ table.data-table td.col-identity{white-space:nowrap}
 .emr-fam{display:inline-flex;gap:2px;padding:1px 3px 1px 4px;border-radius:4px;white-space:nowrap;vertical-align:middle}
 .emr-fam-bu{background:rgba(91,63,143,0.09);box-shadow:inset 2px 0 0 #5b3f8f}
 .emr-fam-td{background:rgba(31,95,153,0.09);box-shadow:inset 2px 0 0 #1f5f99}
+/* MASTER-SET-2026-11-27 (Richard, 27-Nov-2026): each rating as its letter, its rating and its percentile, each coloured by its own value */
+.emr-fam-mr{background:rgba(99,56,6,0.07);box-shadow:inset 2px 0 0 #633806}
+.emr-p3{display:inline-flex;flex-direction:column;align-items:center;margin:0 1px;line-height:1.05;vertical-align:middle;cursor:help;min-width:38px}
+.emr-l1{display:inline-flex;align-items:center;white-space:nowrap}
+.emr-p3 .emr-n{margin-left:2px;font-size:10px;font-weight:700}
+.emr-pc{font-size:9px;font-style:italic;font-weight:600;font-variant-numeric:tabular-nums;margin-top:1px}
+.emr-tA{color:#0d3817}.emr-tB{color:#2e7d32}.emr-tC{color:#8d6e00}.emr-tD{color:#d35400}.emr-tF{color:#c62828}
+.emr-pc.emr-old{color:#8a8f96;font-weight:400}
 .emr-bl{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;cursor:help;vertical-align:middle}
 .emr-sc{font-size:10px;color:#444;font-variant-numeric:tabular-nums}
 .emr-flags{display:inline-flex;flex-wrap:wrap;gap:2px;cursor:help}
@@ -6356,6 +6402,19 @@ window.EMR = (function(){
     sellside_momentum:"Sell-side Momentum",thematic_fit_momentum:"Thematic Fit/Momentum",technical_momentum:"Technical Momentum",tsr_valuation:"TSR/Valuation"};
   var LEGEND="A = simple and low-risk";
   var BU=KEYS.slice(0,4),TD=KEYS.slice(4);
+  /* MASTER-SET-2026-11-27 (Richard, 27-Nov-2026): when the store carries the Master Ratings set (MASTER_DATA.emr.h.set), the eight ratings are
+     his new eight, each shown as its letter, its rating (X/100) and its percentile (Xth), and the four results are the Bottom-up/Stock-driven
+     Rating, the Top Down/Exogenously-driven Rating, the Lower-Quartile Master Rating and the Upper-Quartile Master Rating (information only). */
+  var SET=!!(window.MASTER_DATA&&window.MASTER_DATA.emr&&window.MASTER_DATA.emr.h&&window.MASTER_DATA.emr.h.set);
+  if(SET){
+    KEYS=["cf","up","rk","fit","tsr","tm","ss","pm","lo","hi","bur","tdr"];
+    NAMES={cf:"Investment Case - Degree of Change Forces",up:"Investment Case - Probability of Upgrades",rk:"Investment Case Riskiness",fit:"Case Profile Fit",tsr:"Upside / TSR",
+      tm:"Current SP Technical Momentum",ss:"Current SS Earnings Momentum",pm:"Current Peerset Momentum",
+      lo:"Lower-Quartile Master Rating",hi:"Upper-Quartile Master Rating (information only)",bur:"Bottom-up/Stock-driven Rating",tdr:"Top Down/Exogenously-driven Rating"};
+    LEGEND="a high rating = simple and low-risk";
+    BU=["cf","up","rk","fit","tsr"];TD=["tm","ss","pm"];
+    try{var mst=document.createElement("style");mst.textContent="col.pe-c-emrfam,table.pe-table.pe-emr-bn col.pe-c-emrfam{width:232px} col.pe-c-emrfamtd,table.pe-table.pe-emr-tn col.pe-c-emrfamtd{width:142px} col.pe-c-emrbl{width:96px} table.pe-table.pe-emr,table.pe-table.pe-emr.pe-emr-bn,table.pe-table.il-table.pe-emr{min-width:1840px}";document.head.appendChild(mst);}catch(e){}
+  }
   var FAM={bu:"Bottom-up/Stock-driven",td:"Top Down/Exogenously-driven"};
   var FLAGS=[["pool","In the Pool"],["worthy","Worthy of a new memo"],["merit","Ready to enter on merit"],["timing","Right time to enter"],["rare","Rare one"]];
   var RANK={A:5,B:4,C:3,D:2,F:1};
@@ -6367,7 +6426,19 @@ window.EMR = (function(){
   function fd(s){if(!s)return "";var p=String(s).slice(0,10).split("-");return p.length===3?(+p[2])+" "+MON[+p[1]-1]+" "+p[0]:String(s);}
   function fdt(s){if(!s)return "";var t=String(s);return fd(t)+(t.length>=16?" "+t.slice(11,16)+" UTC":"");}
   function num(v){return (v==null||isNaN(v))?"":(+v).toFixed(1);}
-  function name(k,withLegend){return (NAMES[k]||k)+(withLegend&&k==="case_riskiness"?" ("+LEGEND+")":"");}
+  function name(k,withLegend){return (NAMES[k]||k)+(withLegend&&(k==="case_riskiness"||k==="rk")?" ("+LEGEND+")":"");}
+  function band(x){x=+x;return x>90?"A":x>75?"B":x>50?"C":x>25?"D":"F";}   /* MASTER-SET-2026-11-27: one five-band colour scale for letter, rating and percentile */
+  /* MASTER-SET-2026-11-27: one rating as its letter, its rating (X/100) and its percentile (Xth), each coloured by its own value */
+  function pill3(t,k){
+    var x=row(t),e=x&&x.r?x.r[k]:null,nm=name(k,true);
+    if(!e||!e.g)return '<span class="emr-p3" title="'+esc(nm+": no rating"+(k==="lo"||k==="hi"||k==="bur"?" (it needs a memo scored by the Rater)":""))+'"><span class="emr-g emr-gN">&ndash;</span></span>';
+    if(e.old)return '<span class="emr-p3" title="'+esc(nm+": "+e.g+" from a memo written before the Rater. It has no percentile and feeds no result.")+'"><span class="emr-g emr-hollow emr-g'+letter(e.g)+'">'+esc(e.g)+'</span><span class="emr-pc emr-old">older</span></span>';
+    var tt=nm+": "+e.g+(e.v!=null?", rating "+Math.round(+e.v)+"/100":"")+", "+ordn(e.pc)+" percentile";
+    if(e.on)tt+=". Rests on "+name(e.on)+"; "+(k==="hi"?"the single highest set aside: ":"the single lowest set aside: ")+name(e.as)+". The rating is the percentile it rests on";
+    if(e.w)tt+=". "+e.w;
+    return '<span class="emr-p3" title="'+esc(tt)+'"><span class="emr-l1"><span class="emr-g emr-g'+letter(e.g)+'">'+esc(e.g)+'</span>'
+      +(e.v!=null?'<span class="emr-n emr-t'+band(e.v)+'">'+Math.round(+e.v)+'</span>':'')+'</span><span class="emr-pc emr-t'+band(e.pc)+'">'+ordn(e.pc)+'</span></span>';
+  }
   function famNames(fam){var ks=fam==="bu"?BU:TD,a=[];for(var i=0;i<ks.length;i++)a.push(name(ks[i],true));return a.join(", ");}
   function letter(g){var c=String(g||"").charAt(0);return RANK[c]?c:"N";}
   function ordn(n){n=Math.round(+n);var v=n%100;return n+((v>=11&&v<=13)?"th":(["th","st","nd","rd"][n%10]||"th"));}  /* MD-EMR-RANK-PROV-2026-11-05 */
@@ -6376,6 +6447,7 @@ window.EMR = (function(){
   function fourMeasures(t){var ss=(window.MASTER_DATA||{}).ssem,e=ss&&ss[t];if(!e||typeof e!=="object")return false;if(typeof ssemIsFinancial==="function"&&ssemIsFinancial(t))return "fin";var d=e.ebitda_rev||{};return d.L1M==null&&d.L3M==null&&d.L6M==null;}  /* 9-Oct-26: every Financial is graded on four measures */
   function memoWords(m){return m==="none"?"no memo yet":(m==="current"?"a current memo":(m?String(m):""));}
   function pill(t,k){
+    if(SET)return pill3(t,k);
     var x=row(t),e=x&&x.r?x.r[k]:null,nm=name(k,true);
     if(!e||!e.g){
       var why=(BU.indexOf(k)>=0&&x&&x.f&&x.f.memo==="none")?" · no memo yet":"";
@@ -6434,6 +6506,7 @@ window.EMR = (function(){
       +(H.tilt!=null?" · blended at this week's tilt, "+H.tilt+" on the "+FAM.td+" half":"");
   }
   function blend(t){
+    if(SET)return '<span class="emr-fam emr-fam-mr">'+pill3(t,"lo")+pill3(t,"hi")+'</span>';   /* MASTER-SET-2026-11-27: the two Master Ratings */
     var x=row(t),c=(x&&x.c)||{};
     if(c.bl==null||!c.blg)return '<span class="emr-g emr-gN" title="Blended: no score">&ndash;</span>';
     return '<span class="emr-bl" title="'+esc(blendTitle(c))+'"><span class="emr-g emr-g'+letter(c.blg)+'">'+esc(c.blg)+'</span><span class="emr-sc">'+num(c.bl)+'</span></span>';
@@ -6499,7 +6572,8 @@ window.EMR = (function(){
     var e=E();if(!e)return "";
     var H=e.h||{},w=H.how||{},seen={},i,k;
     var h='<details class="emr-how"><summary>How these flags and readings are set</summary><div class="emr-how-body">';
-    h+='<div class="emr-how-src">From the ratings store'+(H.written_at?', written '+esc(fdt(H.written_at)):'')+(H.run_date?' (the run of '+esc(fd(H.run_date))+')':'')+'. '
+    if(SET)h+='<div class="emr-how-src">The Master Ratings, from the ratings store'+(H.run_date?' (the run of '+esc(fd(H.run_date))+')':'')+'. '+FAM.bu+': '+esc(famNames("bu"))+'; from the Rater\'s scores of the memo. '+FAM.td+': '+esc(famNames("td"))+'; set by script every night.</div><dl>';
+    else h+='<div class="emr-how-src">From the ratings store'+(H.written_at?', written '+esc(fdt(H.written_at)):'')+(H.run_date?' (the run of '+esc(fd(H.run_date))+')':'')+'. '
       +FAM.bu+': '+esc(famNames("bu"))+'; set by the Investment Analyst when the Stock-specific Investment Case A&amp;J Memo is written. '
       +FAM.td+': '+esc(famNames("td"))+'; set by script every night or week and reassessed weekly by the Assistant Portfolio Manager, who overrides by exception.</div><dl>';
     for(i=0;i<HOW_ORDER.length;i++){k=HOW_ORDER[i][0];if(!w.hasOwnProperty(k))continue;seen[k]=1;h+='<dt>'+esc(HOW_ORDER[i][1])+'</dt><dd>'+howVal(w[k])+'</dd>';}
@@ -6512,7 +6586,7 @@ window.EMR = (function(){
   function techHeaders(){
     return '<th class="col-ratings col-txt emr-th-bu" title="'+esc(FAM.bu+": "+famNames("bu"))+'">'+FAM.bu+'</th>'
       +'<th class="col-ratings col-txt emr-th-td" title="'+esc(FAM.td+": "+famNames("td"))+'">'+FAM.td+'</th>'
-      +'<th class="col-ratings col-txt" title="Blended score and grade">Blended</th>'
+      +'<th class="col-ratings col-txt" title="'+(SET?esc(name("lo")+" and "+name("hi")):"Blended score and grade")+'">'+(SET?"Master Ratings":"Blended")+'</th>'
       +'<th class="col-ratings col-txt">Tags</th>'
       +'<th class="col-ratings col-txt">Stage</th>';
   }
@@ -6526,6 +6600,9 @@ window.EMR = (function(){
   /* Summary tab */
   function summaryNote(){
     var H=(E()||{}).h||{};
+    if(SET)return 'The Master Ratings, from the ratings store'+(H.run_date?' (the run of '+esc(fd(H.run_date))+')':'')+'. Each rating shows its letter, its rating (the small number) and its percentile (Xth). '
+      +FAM.bu+' ratings (1 to 5) come from the Rater\'s scores of the memo; '+FAM.td+' ratings (6 to 8) are set by script every night. The four results set aside the single lowest percentile and rest on the next one up '
+      +'(the Upper-Quartile Master Rating, information only, sets aside the single highest). An outlined letter marked older is from a memo written before the Rater.';
     return 'The Eight Master Ratings, from the ratings store'+(H.run_date?' (the run of '+esc(fd(H.run_date))+')':'')+'. '
       +FAM.bu+' ratings are set by the Investment Analyst when the memo is written; '+FAM.td+' ratings are set by script and reassessed weekly by the Assistant Portfolio Manager. '
       +'A solid pill is a current rating from its owner, an outlined pill is mapped from an old memo, not re-judged, and a dashed pill is no rating. Case Riskiness: '+LEGEND+'.';
@@ -6534,10 +6611,11 @@ window.EMR = (function(){
     var s='padding:6px 8px;text-align:center;font-weight:600;font-size:11px;letter-spacing:.3px;';
     return '<th colspan="1" style="'+s+'background:#efe9f8;color:#5b3f8f" title="'+esc(famNames("bu"))+'">'+FAM.bu+'</th>'
       +'<th colspan="1" style="'+s+'background:#e7f0f9;color:#1f5f99" title="'+esc(famNames("td"))+'">'+FAM.td+'</th>'
-      +'<th colspan="1" style="'+s+'background:#FAEEDA;color:#633806">Blended</th>';
+      +'<th colspan="1" style="'+s+'background:#FAEEDA;color:#633806">'+(SET?"Master Ratings":"Blended")+'</th>';
   }
   function sumColThs(){
     var s='padding:5px 4px;text-align:center;font-size:10px;font-weight:600';
+    if(SET)return '<th style="'+s+'" title="'+esc(famNames("bu"))+'">Ratings 1 to 5</th><th style="'+s+'" title="'+esc(famNames("td"))+'">Ratings 6 to 8</th><th style="'+s+'" title="'+esc(name("lo")+" and "+name("hi"))+'">Lower-Quartile and Upper-Quartile</th>';
     return '<th style="'+s+'" title="'+esc(famNames("bu"))+'">Ratings 1 to 4</th><th style="'+s+'" title="'+esc(famNames("td"))+'">Ratings 5 to 8</th><th style="'+s+'">Score and grade</th>';
   }
   function sumTds(t){return '<td style="padding:4px;text-align:center">'+family(t,"bu")+'</td><td style="padding:4px;text-align:center">'+family(t,"td")+'</td><td style="padding:4px;text-align:center">'+blend(t)+'</td>';}
@@ -6545,7 +6623,7 @@ window.EMR = (function(){
     attach:attach,peCell:peCell,gradeMap:gradeMap,how:how,techHeaders:techHeaders,techTds:techTds,summaryNote:summaryNote,sumGroupThs:sumGroupThs,sumColThs:sumColThs,sumTds:sumTds,tsrNote:tsrNote,tsrNotes:tsrNotes,tsrKey:tsrKey,buNums:buNums};  /* MD-TSR-NOTE-2026-10-01: the last three */
 })();
 function ratingsColCount(){return (window.EMR&&window.EMR.on())?5:8;}
-function ratingsGroupTh(){return (window.EMR&&window.EMR.on())?'<th colspan="5" class="col-ratings">Eight Master Ratings</th>':'<th colspan="8" class="col-ratings">Ratings</th>';}
+function ratingsGroupTh(){return (window.EMR&&window.EMR.on())?'<th colspan="5" class="col-ratings">'+((window.MASTER_DATA.emr.h||{}).set?'Master Ratings':'Eight Master Ratings')+'</th>':'<th colspan="8" class="col-ratings">Ratings</th>';}
 function ratingsBlankTds(){var h="";for(var i=0;i<ratingsColCount();i++)h+='<td class="col-ratings"></td>';return h;}
 /* ===== end MD-EMR-2026-09-30 helpers ===== */
 
@@ -9825,7 +9903,7 @@ function SUM_emrSwitch(container) {
   for (var ei = 0; ei < SUM_RATINGS.length; ei++) {
     var ek = SUM_RATINGS[ei];
     SUM_RATING_LABELS[ek] = window.EMR.name(ek, true);
-    SUM_RATING_SHORT[ek] = (ei + 1) + " " + window.EMR.name(ek, true);
+    SUM_RATING_SHORT[ek] = (ei < 8 ? (ei + 1) + " " : "") + window.EMR.name(ek, true);   /* MASTER-SET-2026-11-27: the four results are not numbered */
     summaryFilters[ek] = "";
   }
   masterRatingsMap = {};
@@ -21027,7 +21105,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
   function header(S0,C0){
     var S=S0||st,C=C0||cols();
     var h='<thead><tr class="pe-g">';
-    var groups=[["I","Information","pe-gi"],["M","Metrics","pe-gm"],["F","Filter Tests","pe-gf"],["R","Eight Master Ratings","pe-gr"],["T","Top Down/Exogenously-driven","pe-gt"],["W","Flag","pe-gw"]];
+    var groups=[["I","Information","pe-gi"],["M","Metrics","pe-gm"],["F","Filter Tests","pe-gf"],["R",((window.MASTER_DATA&&window.MASTER_DATA.emr&&window.MASTER_DATA.emr.h&&window.MASTER_DATA.emr.h.set)?"Master Ratings":"Eight Master Ratings"),"pe-gr"],["T","Top Down/Exogenously-driven","pe-gt"],["W","Flag","pe-gw"]];
     for(var g=0;g<groups.length;g++){
       var n=0;for(var i=0;i<C.length;i++)if(C[i].g===groups[g][0])n++;
       if(!n&&g>2)continue;  /* MD-EMR-2026-09-30: the new groups only when the eight are shown */
@@ -21723,7 +21801,7 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {k:"M",label:"Metrics"},
     {k:"F",label:"Filter Tests for Middle Innings Pool"},
     {k:"S",label:"Sell Criteria"},
-    {k:"R",label:"Eight Master Ratings"}
+    {k:"R",label:((window.MASTER_DATA&&window.MASTER_DATA.emr&&window.MASTER_DATA.emr.h&&window.MASTER_DATA.emr.h.set)?"Master Ratings":"Eight Master Ratings")}
   ];
   var CG_DEFAULT={is:true,M:false,F:true,S:true,R:true};
   /* Industry tint: a rainbow over the 16 Industries by their letter, violet for A through to red for P (Richard, 2-Oct-26).
@@ -21758,6 +21836,15 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
     {id:"e_bl",g:"R",label:"Blended score and grade",sh:"Blended",key:"_e_bl",type:"emrbl",w:"emrbl",tip:"The two composites blended at this week's tilt"},
     {id:"e_fl",g:"R",label:"In the Pool, Worthy of a new memo, Ready to enter on merit, Right time to enter, Rare one",sh:"Flags",key:"_e_fl",type:"emrfl",w:"ilfl",tip:"The flags that are on, each in its own colour; sorts on how many"}
   ];
+  /* MASTER-SET-2026-11-27: with the Master Ratings set, the same four columns carry the new names; sorting reads the results' percentiles */
+  if(window.EMR&&window.MASTER_DATA&&window.MASTER_DATA.emr&&window.MASTER_DATA.emr.h&&window.MASTER_DATA.emr.h.set){
+    IL_EMR_COLS[0].label="Investment Case - Degree of Change Forces, Investment Case - Probability of Upgrades, Investment Case Riskiness, Case Profile Fit, Upside / TSR";
+    IL_EMR_COLS[0].tip="The five Bottom-up/Stock-driven ratings, from the Rater's scores of the memo: each its letter, rating and percentile; sorts on the Bottom-up/Stock-driven Rating";
+    IL_EMR_COLS[1].label="Current SP Technical Momentum, Current SS Earnings Momentum, Current Peerset Momentum";
+    IL_EMR_COLS[1].tip="The three Top Down/Exogenously-driven ratings, set by script every night: each its letter, rating and percentile; sorts on the Top Down/Exogenously-driven Rating";
+    IL_EMR_COLS[2].label="Lower-Quartile Master Rating and Upper-Quartile Master Rating (information only)";IL_EMR_COLS[2].sh="Master Ratings";
+    IL_EMR_COLS[2].tip="Each sets aside one outlier: the Lower-Quartile Master Rating rests on the second-lowest of the eight percentiles, the Upper-Quartile Master Rating on the second-highest; sorts on the Lower-Quartile Master Rating";
+  }
   function emrOn(){return !!(window.EMR&&window.EMR.on());}
   /* The columns shown, in order, for the current column-group switches. Rules Passed is not on this page (Richard, 2-Oct-26). */
   function allCols(){
@@ -21951,13 +22038,13 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
 
   /* Header: group row (one cell per visible group; click a group's name to hide it) and the column headings. */
   function header(C,RS){
-    var GN={I:"Information",M:"Metrics",F:"Filter Tests for Middle Innings Pool",S:"Sell Criteria",R:"Eight Master Ratings"};
+    var GN={I:"Information",M:"Metrics",F:"Filter Tests for Middle Innings Pool",S:"Sell Criteria",R:((window.MASTER_DATA&&window.MASTER_DATA.emr&&window.MASTER_DATA.emr.h&&window.MASTER_DATA.emr.h.set)?"Master Ratings":"Eight Master Ratings")};
     var GC={I:"pe-gi",M:"pe-gm",F:"pe-gf",S:"il-gsell",R:"pe-gr"};
     var M=(SD()||{})._meta||{};
     var GT={M:"Today's readings. Click to hide the Metrics",
             F:"Today's readings against the Pool's four Filter Tests at their Default Standard Settings; struck through = fails today. Click to hide",
             S:"The six signed-off Sell Criteria (Framework 14), each read on its own day: Industry RS and the relative 200-day slope on Fridays (latest "+fd(M.last_friday)+"), the other three at month-ends (latest "+fd(M.last_month_end)+"), the 30% fall daily for holdings. Green = far from being met; pale red = nearing it; solid red = met. Click to hide",
-            R:"Click to hide the Eight Master Ratings"};
+            R:"Click to hide the "+((window.MASTER_DATA&&window.MASTER_DATA.emr&&window.MASTER_DATA.emr.h&&window.MASTER_DATA.emr.h.set)?"Master Ratings":"Eight Master Ratings")};
     var h='<thead><tr class="pe-g">',i=0;
     while(i<C.length){
       var g=C[i].g,n=0;while(i+n<C.length&&C[i+n].g===g)n++;
@@ -21990,10 +22077,11 @@ window._dashChartScaleMode = function(){ return chartScaleMode; };
      number is ever cut off; wider than the frame, it scrolls sideways inside it. */
   /* Widths in px (CSS col.pe-c-*: the three text columns 190 / 185 / 190 on this page); the numbers share the rest. */
   var FIXED={name:190,ind:185,sec:190,emrfam:104,emrfamtd:104,emrbl:66,ilfl:300};
+  if(window.MASTER_DATA&&window.MASTER_DATA.emr&&window.MASTER_DATA.emr.h&&window.MASTER_DATA.emr.h.set){FIXED.emrfam=232;FIXED.emrfamtd=142;FIXED.emrbl=96;}   /* MASTER-SET-2026-11-27: five, three and two pills of three parts */
   function minWidth(C){
     var fixed=0,nNum=0;
     for(var i=0;i<C.length;i++){var w=C[i].w;
-      if(w&&FIXED[w]!=null)fixed+=(w==="emrfamtd"&&window.EMR&&window.EMR.tsrNotes&&window.EMR.tsrNotes())?154:((w==="emrfam"&&window.EMR&&window.EMR.buNums&&window.EMR.buNums())?170:FIXED[w]);
+      if(w&&FIXED[w]!=null)fixed+=(w==="emrfamtd"&&window.EMR&&window.EMR.tsrNotes&&window.EMR.tsrNotes())?154:((w==="emrfam"&&window.EMR&&window.EMR.buNums&&window.EMR.buNums())?Math.max(170,FIXED[w]):FIXED[w]);
       else nNum++;}
     return Math.ceil(nNum*62+fixed);
   }

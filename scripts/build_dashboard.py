@@ -225,7 +225,7 @@ def load_master_ratings():
         e8 = {}
         for k, v in rr.items():
             if "p" in v:
-                e = {"g": v["l"], "v": v["n"], "pc": round(v["p"], 1)}
+                e = {"g": v["l"], "v": v["n"], "pc": v["p"]}   # 28-Nov-26: the stored percentile as is (one decimal could round 82.49 up to 82.5 and show 83rd where the memo page shows 82nd)
                 if v.get("why"):
                     e["w"] = v["why"]
                 e8[k] = e
@@ -235,7 +235,7 @@ def load_master_ratings():
             x = rs.get(k)
             if x:
                 on = rr.get(x["on"]) or {}
-                e8[kk] = {"g": x["l"], "v": on.get("p"), "pc": round(x["p"], 1), "on": x["on"], "as": x["aside"]}
+                e8[kk] = {"g": x["l"], "v": on.get("p"), "pc": x["p"], "on": x["on"], "as": x["aside"]}
         f = (out.get(r["ticker"]) or {}).get("f") or {}
         c = {k: (e8.get(kk) or {}).get("pc") for k, kk in (("bu", "bur"), ("td", "tdr"), ("bl", "lo"))}
         if e8 or f:
